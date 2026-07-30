@@ -25,11 +25,11 @@ export function BalanceWidget(props: { month: TISOMonth }) {
 
   const fundsEnd = toDisplay(totals.fundsEnd)
   const available = toDisplay(totals.available)
-  const budgetedInFuture = toDisplay(totals.budgetedInFuture)
-  const toBeBudgeted = toDisplay(totals.toBeBudgeted)
+  const assignedInFuture = toDisplay(totals.assignedInFuture)
+  const toBeAssigned = toDisplay(totals.toBeAssigned)
   const overspend = toDisplay(totals.overspend)
 
-  const smartBudgetedInFuture = toBeBudgeted < 0 ? 0 : budgetedInFuture
+  const smartAssignedInFuture = toBeAssigned < 0 ? 0 : assignedInFuture
 
   return (
     <Paper
@@ -60,18 +60,18 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         amount={available}
         currency={currency}
       />
-      {!!smartBudgetedInFuture && (
+      {!!smartAssignedInFuture && (
         <DataLine
-          name={t('budgetedInFuture')}
-          tooltip={t('budgetedInFutureTooltip')}
-          amount={smartBudgetedInFuture}
+          name={t('assignedInFuture')}
+          tooltip={t('assignedInFutureTooltip')}
+          amount={smartAssignedInFuture}
           currency={currency}
         />
       )}
       <DataLine
-        name={t('toBeBudgeted')}
-        tooltip={t('toBeBudgetedTooltip')}
-        amount={toBeBudgeted}
+        name={t('toBeAssigned')}
+        tooltip={t('toBeAssignedTooltip')}
+        amount={toBeAssigned}
         currency={currency}
       />
       <Divider />
@@ -80,28 +80,28 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         align="center"
         sx={{ color: 'text.secondary' }}
       >
-        <Balancer>{getExplaining(fundsEnd, toBeBudgeted, overspend)}</Balancer>
+        <Balancer>{getExplaining(fundsEnd, toBeAssigned, overspend)}</Balancer>
       </Typography>
     </Paper>
   )
 
   function getExplaining(
     balance: number,
-    toBeBudgeted: number,
+    toBeAssigned: number,
     overspend: number
   ) {
     if (overspend) {
       return t('explainer.overspend')
     }
-    if (toBeBudgeted > 0) {
+    if (toBeAssigned > 0) {
       return t('explainer.hasFreeMoney')
     }
     if (balance < 0) {
       return t('explainer.negativeBalance')
     }
-    if (toBeBudgeted === 0) {
-      return t('explainer.zeroToBeBudgeted')
+    if (toBeAssigned === 0) {
+      return t('explainer.zeroToBeAssigned')
     }
-    return t('explainer.budgetedMoreThanHave')
+    return t('explainer.assignedMoreThanHave')
   }
 }

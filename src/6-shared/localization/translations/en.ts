@@ -16,6 +16,7 @@ export const en: typeof ru = {
     outcome: 'Expense',
     debt: 'Debt',
     budget: 'Budget',
+    assigned: 'Assigned',
     available: 'Available',
     activity: 'Activity',
     transactions: 'Transactions',
@@ -214,7 +215,7 @@ export const en: typeof ru = {
 
   budgets: {
     pageTitle: 'Budget for {{month}}',
-    budgetedThisMonth: 'Budgeted This Month',
+    assignedThisMonth: 'Assigned This Month',
     leftoverFromLastMonth: 'Leftover from Last Month',
     leftoverFrom: 'Leftover from {{month}}',
     availableFor: 'Available for',
@@ -250,20 +251,20 @@ export const en: typeof ru = {
     inEnvelopesTooltip:
       "This amount is currently in categories (the 'Available' column)",
     inBalance: 'In Balance',
-    budgetedInFuture: 'Budgeted in Future',
-    budgetedInFutureTooltip: 'These funds are reserved for future budgets',
-    toBeBudgeted: 'To Be Budgeted',
+    assignedInFuture: 'Assigned in Future',
+    assignedInFutureTooltip: 'These funds are reserved for future months',
+    toBeAssigned: 'To Be Assigned',
     notAllocated: 'Not Allocated',
     allAllocated: 'Funds Allocated',
-    toBeBudgetedTooltip: 'Unallocated Funds',
+    toBeAssignedTooltip: 'Unallocated Funds',
     explainer: {
       overspend: 'Add funds to categories with overspending.',
       hasFreeMoney:
         'Looks great! Distribute the free funds to be perfectly fine.',
       negativeBalance:
         "Seems like you have a negative balance, so there's nothing to allocate. It's best to move debts out of balance.",
-      zeroToBeBudgeted: 'All funds are allocated, keep it up!',
-      budgetedMoreThanHave:
+      zeroToBeAssigned: 'All funds are allocated, keep it up!',
+      assignedMoreThanHave:
         "You've allocated more funds than you have. Something might fall short. To fix it, lay out the excess from categories.",
     },
     moveUp: 'Move Up',
@@ -295,7 +296,7 @@ export const en: typeof ru = {
     },
     statisticWidget: {
       average: 'Average',
-      avgBudgeted: 'budgeted',
+      avgAssigned: 'assigned',
       avgExpenses: 'expenses',
       over: 'over',
       months3: '3 months',
@@ -373,7 +374,7 @@ export const en: typeof ru = {
 
   goals: {
     goalType: 'Type of goal',
-    progressOnTagret: '{{budgeted}} out of {{target}}',
+    progressOnTagret: '{{assigned}} out of {{target}}',
     names: {
       monthly: 'Regular savings',
       monthlySpend: 'Monthly amount',

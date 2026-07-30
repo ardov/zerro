@@ -25,14 +25,14 @@ describe('copyPreviousBudget', () => {
         [foodId]: {
           id: foodId,
           currency: 'USD',
-          selfBudgeted: { USD: 100 },
+          selfAssigned: { USD: 100 },
         },
       },
       '2026-07': {
         [foodId]: {
           id: foodId,
           currency: 'USD',
-          selfBudgeted: { USD: 50 },
+          selfAssigned: { USD: 50 },
         },
       },
     } as unknown as ReturnType<typeof core.activity.selectEnvelopeMetrics>)

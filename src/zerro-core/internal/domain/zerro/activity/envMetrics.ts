@@ -19,20 +19,20 @@ export type TEnvMetrics = {
 
   selfTransactionCount: number
   selfLeftover: TFxAmount
-  selfBudgeted: TFxAmount
+  selfAssigned: TFxAmount
   selfActivity: TFxAmount
   selfAvailable: TFxAmount
 
   childrenTransactionCount: number
   childrenLeftover: TFxAmount
-  childrenBudgeted: TFxAmount
+  childrenAssigned: TFxAmount
   childrenActivity: TFxAmount
   childrenSurplus: TFxAmount
   childrenOverspend: TFxAmount
 
   totalTransactionCount: number
   totalLeftover: TFxAmount
-  totalBudgeted: TFxAmount
+  totalAssigned: TFxAmount
   totalActivity: TFxAmount
   totalAvailable: TFxAmount
 }
@@ -84,7 +84,7 @@ function calcEnv(
     input.envelopes[id]
 
   let childrenLeftover = {} as TFxAmount
-  let childrenBudgeted = {} as TFxAmount
+  let childrenAssigned = {} as TFxAmount
   let childrenActivity = {} as TFxAmount
   let childrenSurplus = {} as TFxAmount
   let childrenOverspend = {} as TFxAmount
@@ -93,7 +93,7 @@ function calcEnv(
   children.forEach(id => {
     const child = metrics[id]
     childrenLeftover = addFxAmount(childrenLeftover, child.selfLeftover)
-    childrenBudgeted = addFxAmount(childrenBudgeted, child.selfBudgeted)
+    childrenAssigned = addFxAmount(childrenAssigned, child.selfAssigned)
     childrenActivity = addFxAmount(childrenActivity, child.selfActivity)
     if (child.selfAvailable[child.currency] > 0) {
       childrenSurplus = addFxAmount(childrenSurplus, child.selfAvailable)
@@ -108,12 +108,12 @@ function calcEnv(
     currency,
     carryNegatives
   )
-  const selfBudgeted = { [currency]: input.budgets?.[month]?.[id] || 0 }
+  const selfAssigned = { [currency]: input.budgets?.[month]?.[id] || 0 }
   const envActivity = input.activity?.[month]?.envActivity?.byEnv?.[id]
   const selfActivity = envActivity?.total || {}
   const selfAvailableRaw = addFxAmount(
     selfLeftover,
-    selfBudgeted,
+    selfAssigned,
     selfActivity,
     childrenOverspend
   )
@@ -133,20 +133,20 @@ function calcEnv(
 
     selfTransactionCount,
     selfLeftover,
-    selfBudgeted,
+    selfAssigned,
     selfActivity,
     selfAvailable,
 
     childrenTransactionCount,
     childrenLeftover,
-    childrenBudgeted,
+    childrenAssigned,
     childrenActivity,
     childrenSurplus,
     childrenOverspend,
 
     totalTransactionCount: selfTransactionCount + childrenTransactionCount,
     totalLeftover: addFxAmount(selfLeftover, childrenLeftover),
-    totalBudgeted: addFxAmount(selfBudgeted, childrenBudgeted),
+    totalAssigned: addFxAmount(selfAssigned, childrenAssigned),
     totalActivity: addFxAmount(selfActivity, childrenActivity),
     totalAvailable: addFxAmount(selfAvailable, childrenSurplus),
   }

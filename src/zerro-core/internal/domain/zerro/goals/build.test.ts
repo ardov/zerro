@@ -21,13 +21,13 @@ describe('buildGoals', () => {
         '2026-01': {
           [envelopeId]: makeEnvMetrics({
             id: envelopeId,
-            totalBudgeted: { USD: 25 },
+            totalAssigned: { USD: 25 },
           }),
         },
         '2026-02': {
           [envelopeId]: makeEnvMetrics({
             id: envelopeId,
-            totalBudgeted: { USD: 50 },
+            totalAssigned: { USD: 50 },
           }),
         },
       },

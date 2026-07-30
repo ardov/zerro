@@ -35,15 +35,15 @@ export const useQuickActions = (
   return getQuickActions({
     t,
     hasChildren: envelope.children.length > 0,
-    budgeted: convert(envelope.selfBudgeted),
-    totalBudgeted: convert(envelope.totalBudgeted),
+    assigned: convert(envelope.selfAssigned),
+    totalAssigned: convert(envelope.totalAssigned),
     available: convert(envelope.selfAvailable),
     totalAvailable: convert(envelope.totalAvailable),
     hasGoal: !!goals[id],
     goalTarget: goals[id]?.targetBudget || 0,
     prevOutcomesLength: prevActivity.length,
     avgOutcome: getAverage(prevActivity),
-    prevBudgeted: convert(prevEnvelopeData?.totalBudgeted || {}),
+    prevAssigned: convert(prevEnvelopeData?.totalAssigned || {}),
     prevOutcome: convert(prevEnvelopeData?.totalActivity || {}),
   })
 }
@@ -51,44 +51,44 @@ export const useQuickActions = (
 function getQuickActions({
   t,
   hasChildren,
-  budgeted,
-  totalBudgeted,
+  assigned,
+  totalAssigned,
   available,
   totalAvailable,
   hasGoal,
   goalTarget,
   prevOutcomesLength,
   avgOutcome,
-  prevBudgeted,
+  prevAssigned,
   prevOutcome,
 }: {
   t: TFunction
   hasChildren: boolean
-  budgeted: number
-  totalBudgeted: number
+  assigned: number
+  totalAssigned: number
   available: number
   totalAvailable: number
   hasGoal: boolean
   goalTarget: number
   prevOutcomesLength: number
   avgOutcome: number
-  prevBudgeted: number
+  prevAssigned: number
   prevOutcome: number
 }) {
   return [
     {
       text: t('coverOverspend', { ns: 'quickBudgets' }),
-      amount: round(+totalBudgeted - available),
+      amount: round(+totalAssigned - available),
       condition: hasChildren && available < 0 && totalAvailable >= 0,
     },
     {
       text: t('coverOverspend', { ns: 'quickBudgets' }),
-      amount: round(+totalBudgeted - totalAvailable),
+      amount: round(+totalAssigned - totalAvailable),
       condition: totalAvailable < 0,
     },
     {
       text: t('dropLeftover', { ns: 'quickBudgets' }),
-      amount: round(+totalBudgeted - totalAvailable),
+      amount: round(+totalAssigned - totalAvailable),
       condition: totalAvailable > 0,
     },
     {
@@ -103,8 +103,8 @@ function getQuickActions({
     },
     {
       text: t('prevBudget', { ns: 'quickBudgets' }),
-      amount: prevBudgeted,
-      condition: !!prevBudgeted,
+      amount: prevAssigned,
+      condition: !!prevAssigned,
     },
     {
       text: t('prevOutcome', { ns: 'quickBudgets' }),
@@ -113,12 +113,12 @@ function getQuickActions({
     },
     {
       text: t('sumOfChildren', { ns: 'quickBudgets' }),
-      amount: round(totalBudgeted - budgeted),
+      amount: round(totalAssigned - assigned),
       condition:
         hasChildren &&
-        !!budgeted &&
-        !!totalBudgeted &&
-        budgeted !== totalBudgeted,
+        !!assigned &&
+        !!totalAssigned &&
+        assigned !== totalAssigned,
     },
   ].filter(action => action.condition)
 }

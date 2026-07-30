@@ -58,7 +58,7 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
     <Tooltip
       arrow
       title={t('progressOnTagret', {
-        budgeted: formatSum(targetValue - needValue),
+        assigned: formatSum(targetValue - needValue),
         target: formatSum(targetValue),
       })}
     >

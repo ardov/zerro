@@ -48,7 +48,7 @@ export const Footer: FC<FooterProps> = props => {
           </Typography>
         </div>
       }
-      budgeted={<Sum value={totals.budgeted} month={month} />}
+      assigned={<Sum value={totals.assigned} month={month} />}
       outcome={<Sum value={totals.envActivity} month={month} />}
       available={<Sum value={totals.available} month={month} />}
       goal={null}

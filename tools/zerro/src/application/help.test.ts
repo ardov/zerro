@@ -80,7 +80,7 @@ describe('local tool help manifest', () => {
   it('resolves field descriptions for a known shape via --shape', () => {
     const result = getHelpShape(sampleMeta, 'monthSummary')
     expect(result.data.shape).toBe('monthSummary')
-    expect(result.data.fields['totals.budgeted']).toEqual(expect.any(String))
+    expect(result.data.fields['totals.assigned']).toEqual(expect.any(String))
   })
 
   it('rejects an unknown --shape name', () => {

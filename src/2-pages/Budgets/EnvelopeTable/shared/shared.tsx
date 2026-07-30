@@ -26,17 +26,17 @@ export const TableRow: FC<
   BoxProps & {
     name: ReactNode
     available: ReactNode
-    budgeted: ReactNode
+    assigned: ReactNode
     outcome: ReactNode
     goal: ReactNode
   }
 > = props => {
-  const { name, available, budgeted, outcome, goal, sx, ...rest } = props
+  const { name, available, assigned, outcome, goal, sx, ...rest } = props
   const { columns } = useColumns()
   return (
     <Box sx={sx ? { ...rowStyle, ...sx } : rowStyle} {...rest}>
       {name}
-      {columns.includes(Metric.budgeted) && budgeted}
+      {columns.includes(Metric.assigned) && assigned}
       {columns.includes(Metric.outcome) && outcome}
       {columns.includes(Metric.available) && available}
       {goal}

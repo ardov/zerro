@@ -33,9 +33,9 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
     const toEnvelope = (a: TFxAmount) => convertFx(a, currency, month)
     let activity = toEnvelope(envelope.totalActivity)
     const leftover = toEnvelope(envelope.totalLeftover)
-    const budgeted = toEnvelope(envelope.totalBudgeted)
+    const assigned = toEnvelope(envelope.totalAssigned)
     const available = toEnvelope(envelope.totalAvailable)
-    let startingAmount = leftover + budgeted
+    let startingAmount = leftover + assigned
     if (activity > 0) {
       // Handle positive outcome. It's possible with income transfers
       activity = 0
@@ -49,7 +49,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
       date: month,
       activity: -activity,
       leftover,
-      budgeted,
+      assigned,
       available,
       startingAmount,
     }
@@ -94,8 +94,8 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
           tooltip={
             <Stack spacing={0.5}>
               <DataLine
-                name={t('budgetedThisMonth')}
-                amount={selectedData?.budgeted}
+                name={t('assignedThisMonth')}
+                amount={selectedData?.assigned}
                 currency={currency}
               />
               <DataLine

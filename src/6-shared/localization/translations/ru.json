@@ -14,6 +14,7 @@
     "outcome": "Расход",
     "debt": "Долг",
     "budget": "Бюджет",
+    "assigned": "Выделено",
     "available": "Доступно",
     "activity": "Операции",
     "transactions": "Операции",
@@ -205,7 +206,7 @@
 
   "budgets": {
     "pageTitle": "Бюджет на {{month}}",
-    "budgetedThisMonth": "Бюджет в этом месяце",
+    "assignedThisMonth": "Выделено в этом месяце",
     "leftoverFromLastMonth": "Остаток с прошлого месяца",
     "leftoverFrom": "Остаток с {{month}}",
     "availableFor": "Доступно на",
@@ -239,18 +240,18 @@
     "inEnvelopes": "В категориях",
     "inEnvelopesTooltip": "Эта сумма сейчас лежит в категориях (столбец «Доступно»)",
     "inBalance": "В балансе",
-    "budgetedInFuture": "Распределено в будущем",
-    "budgetedInFutureTooltip": "Эти деньги зарезервированы под будущие бюджеты",
-    "toBeBudgeted": "Свободно",
+    "assignedInFuture": "Выделено в будущем",
+    "assignedInFutureTooltip": "Эти деньги зарезервированы для будущих месяцев",
+    "toBeAssigned": "Свободно",
     "notAllocated": "Не распределено",
     "allAllocated": "Деньги распределены",
-    "toBeBudgetedTooltip": "Нераспределённые деньги",
+    "toBeAssignedTooltip": "Нераспределённые деньги",
     "explainer": {
       "overspend": "Добавьте денег в категории с перерасходом.",
       "hasFreeMoney": "Выглядит замечательно! Распределите свободные деньги, чтобы было совсем хорошо.",
       "negativeBalance": "Кажется, у вас отрицательный баланс, поэтому распределять нечего. Кредиты лучше всего унести за баланс.",
-      "zeroToBeBudgeted": "Все деньги распределены, так держать!",
-      "budgetedMoreThanHave": "Вы распределили больше денег, чем у вас есть. На что-то может не хватить. Чтобы исправить, выложите излишки из категорий."
+      "zeroToBeAssigned": "Все деньги распределены, так держать!",
+      "assignedMoreThanHave": "Вы распределили больше денег, чем у вас есть. На что-то может не хватить. Чтобы исправить, выложите излишки из категорий."
     },
     "moveUp": "Поднять выше",
     "moveDown": "Опустить ниже",
@@ -279,7 +280,7 @@
     },
     "statisticWidget": {
       "average": "Средний",
-      "avgBudgeted": "бюджет",
+      "avgAssigned": "выделено",
       "avgExpenses": "расход",
       "over": "за",
       "months3": "3 месяца",
@@ -354,7 +355,7 @@
 
   "goals": {
     "goalType": "Тип цели",
-    "progressOnTagret": "{{budgeted}} из {{target}}",
+    "progressOnTagret": "{{assigned}} из {{target}}",
     "names": {
       "monthly": "Регулярные сбережения",
       "monthlySpend": "Сумма на месяц",

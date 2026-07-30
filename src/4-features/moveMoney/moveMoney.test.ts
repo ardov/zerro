@@ -28,12 +28,12 @@ describe('moveMoney', () => {
         [source]: {
           id: source,
           currency: 'USD',
-          selfBudgeted: { USD: 100 },
+          selfAssigned: { USD: 100 },
         },
         [destination]: {
           id: destination,
           currency: 'EUR',
-          selfBudgeted: { EUR: 50 },
+          selfAssigned: { EUR: 50 },
         },
       },
     } as unknown as ReturnType<typeof core.activity.selectEnvelopeMetrics>)

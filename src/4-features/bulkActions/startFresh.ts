@@ -31,7 +31,7 @@ export const removeFutureBudgets =
       .filter(month => month > targetMonth)
       .reduce((updates, month) => {
         return Object.values(envData[month])
-          .filter(e => !isZero(e.selfBudgeted))
+          .filter(e => !isZero(e.selfAssigned))
           .map(e => ({ id: e.id, value: 0, month }))
           .concat(updates)
       }, [] as Array<core.budgets.TBudgetUpdate>)
@@ -65,7 +65,7 @@ export const resetMonthThunk =
       })
       .map(e => ({
         id: e.id,
-        value: e.totalBudgeted[e.currency] - e.selfAvailable[e.currency],
+        value: e.totalAssigned[e.currency] - e.selfAvailable[e.currency],
         month,
       }))
     dispatch(setTotalBudget(updates))
@@ -77,7 +77,7 @@ export const resetMonthThunk =
       .filter(e => !isZero(e.selfAvailable)) // with positive available
       .map(e => ({
         id: e.id,
-        value: e.totalBudgeted[e.currency] - e.selfAvailable[e.currency],
+        value: e.totalAssigned[e.currency] - e.selfAvailable[e.currency],
         month,
       }))
     dispatch(setTotalBudget(updates2))

@@ -7,7 +7,7 @@ import type { TISOMonth } from '6-shared/types'
 import { GoalsProgress } from '4-features/bulkActions/fillGoals'
 import { TableRow, useIsSmall } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
-import { ToBeBudgeted } from './ToBeBudgeted'
+import { ToBeAssigned } from './ToBeAssigned'
 import { useColumns } from '../models/useMetric'
 import { useTableMenu, TableMenu } from './TableMenu'
 
@@ -84,7 +84,7 @@ export const Header: FC<HeaderProps> = props => {
 
           <Box sx={{ display: 'flex', gap: 2 }}>
             {!isSmall && <GoalsProgress month={month} />}
-            <ToBeBudgeted onClick={onOpenOverview} />
+            <ToBeAssigned onClick={onOpenOverview} />
           </Box>
         </Box>
 
@@ -112,7 +112,7 @@ export const Header: FC<HeaderProps> = props => {
               </Button>
             </div>
           }
-          budgeted={<ColumnTitle name={t('budget')} onClick={nextColumn} />}
+          assigned={<ColumnTitle name={t('assigned')} onClick={nextColumn} />}
           outcome={<ColumnTitle name={t('activity')} onClick={nextColumn} />}
           available={<ColumnTitle name={t('available')} onClick={nextColumn} />}
           goal={null}

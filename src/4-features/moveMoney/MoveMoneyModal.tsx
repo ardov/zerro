@@ -16,8 +16,8 @@ export type MoveMoneyModalProps = Modify<
   DialogProps,
   {
     month: TISOMonth
-    source: core.envelopes.TEnvelopeId | 'toBeBudgeted'
-    destination: core.envelopes.TEnvelopeId | 'toBeBudgeted'
+    source: core.envelopes.TEnvelopeId | 'toBeAssigned'
+    destination: core.envelopes.TEnvelopeId | 'toBeAssigned'
     onClose: () => void
   }
 >
@@ -33,19 +33,19 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const toDisplay = core.currency.useToDisplay(month)
 
   const sourceName =
-    source === 'toBeBudgeted' ? 'To be budgeted' : envelopes[source].name
+    source === 'toBeAssigned' ? 'To be assigned' : envelopes[source].name
   const destinationName =
-    destination === 'toBeBudgeted'
-      ? 'To be budgeted'
+    destination === 'toBeAssigned'
+      ? 'To be assigned'
       : envelopes[destination].name
 
   const sourceValue =
-    source === 'toBeBudgeted'
-      ? toDisplay(totalMetrics.toBeBudgeted)
+    source === 'toBeAssigned'
+      ? toDisplay(totalMetrics.toBeAssigned)
       : toDisplay(metrics[source].selfAvailable)
   const destinationValue =
-    destination === 'toBeBudgeted'
-      ? toDisplay(totalMetrics.toBeBudgeted)
+    destination === 'toBeAssigned'
+      ? toDisplay(totalMetrics.toBeAssigned)
       : toDisplay(metrics[destination].selfAvailable)
 
   const suggested = suggestAmount(sourceValue, destinationValue)

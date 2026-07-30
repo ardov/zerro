@@ -55,10 +55,10 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
     env: (v: number) => formatMoney(v, currency.env),
     disp: (v: number) => formatMoney(v, currency.disp),
   }
-  /** Current budgeted */
-  const budgeted = {
-    env: convert.toEnv(envelope.totalBudgeted),
-    disp: convert.toDisp(envelope.totalBudgeted),
+  /** Current assigned */
+  const assigned = {
+    env: convert.toEnv(envelope.totalAssigned),
+    disp: convert.toDisp(envelope.totalAssigned),
   }
   /** Current available */
   const available = {
@@ -67,7 +67,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   }
 
   /** Input value sets in envelope currency */
-  const [inputValue, setInputValue] = useState<number>(budgeted.env)
+  const [inputValue, setInputValue] = useState<number>(assigned.env)
 
   /** Input value converted to envelope and display currencies */
   const value = {
@@ -76,14 +76,14 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   }
   /** Amount of money that will be available after changes applied */
   const availableAfter = {
-    env: value.env - budgeted.env + available.env,
-    disp: value.disp - budgeted.disp + available.disp,
+    env: value.env - assigned.env + available.env,
+    disp: value.disp - assigned.disp + available.disp,
   }
 
-  const [prevBudgeted, setPrevBudgeted] = useState(budgeted.env)
-  if (prevBudgeted !== budgeted.env) {
-    setPrevBudgeted(budgeted.env)
-    setInputValue(budgeted.env)
+  const [prevAssigned, setPrevAssigned] = useState(assigned.env)
+  if (prevAssigned !== assigned.env) {
+    setPrevAssigned(assigned.env)
+    setInputValue(assigned.env)
   }
 
   const onChange = (value: number) =>
@@ -91,7 +91,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
 
   const changeAndClose = (value: number) => {
     onClose?.()
-    if (value !== budgeted.env) onChange(value)
+    if (value !== assigned.env) onChange(value)
   }
 
   const helperText =

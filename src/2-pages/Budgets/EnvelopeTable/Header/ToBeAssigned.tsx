@@ -18,13 +18,14 @@ import { useIsSmall } from '../shared/shared'
 
 type TMsgType = 'error' | 'warning' | 'success'
 
-type ToBeBudgetedProps = ButtonBaseProps
+/** Shows funds that have not yet been assigned to a category. */
+type ToBeAssignedProps = ButtonBaseProps
 
-export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
+export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
   const { t } = useTranslation('budgets')
   const {
     currency,
-    toBeBudgeted,
+    toBeAssigned,
     hasFutureOverspend,
     msgType,
     TooltipContent,
@@ -53,10 +54,10 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
       >
         <Typography noWrap align="center" variant="body1">
           {!isSmall &&
-            (toBeBudgeted ? t('notAllocated') : t('allAllocated')) + ' '}
-          {toBeBudgeted ? (
+            (toBeAssigned ? t('notAllocated') : t('allAllocated')) + ' '}
+          {toBeAssigned ? (
             <Amount
-              value={toBeBudgeted}
+              value={toBeAssigned}
               currency={currency}
               decimals="ifOnly"
               noShade
@@ -86,30 +87,30 @@ function useTotalsModel() {
   const totals = useAppSelector(core.months.selectTotals)[month]
   const lastTotals = useAppSelector(core.months.selectTotals)[lastMonth]
 
-  const toBeBudgeted = toDisplay(totals.toBeBudgeted)
+  const toBeAssigned = toDisplay(totals.toBeAssigned)
   const overspend = toDisplay(totals.overspend)
   const hasFutureOverspend = toDisplay(lastTotals.overspend)
   const fundsEnd = toDisplay(totals.fundsEnd)
   const allocated = toDisplay(totals.available)
-  const budgetedInFuture = toDisplay(totals.budgetedInFuture)
+  const assignedInFuture = toDisplay(totals.assignedInFuture)
 
   const freeWithoutFuture = sub(fundsEnd, allocated)
-  const displayBudgetedInFuture =
+  const displayAssignedInFuture =
     freeWithoutFuture < 0
       ? 0
-      : budgetedInFuture >= freeWithoutFuture
+      : assignedInFuture >= freeWithoutFuture
         ? freeWithoutFuture
-        : budgetedInFuture
+        : assignedInFuture
 
   const msgType: TMsgType =
-    toBeBudgeted < 0 ? 'error' : overspend ? 'warning' : 'success'
+    toBeAssigned < 0 ? 'error' : overspend ? 'warning' : 'success'
 
   const messages = {
-    success: toBeBudgeted
+    success: toBeAssigned
       ? t('explainer.hasFreeMoney')
-      : t('explainer.zeroToBeBudgeted'),
+      : t('explainer.zeroToBeAssigned'),
     warning: t('explainer.overspend'),
-    error: t('explainer.budgetedMoreThanHave'),
+    error: t('explainer.assignedMoreThanHave'),
   }
 
   function TooltipContent() {
@@ -129,13 +130,13 @@ function useTotalsModel() {
           currency={currency}
         />
         <DataLine
-          name={t('budgetedInFuture')}
-          amount={displayBudgetedInFuture}
+          name={t('assignedInFuture')}
+          amount={displayAssignedInFuture}
           currency={currency}
         />
         <DataLine
-          name={t('toBeBudgeted')}
-          amount={toBeBudgeted}
+          name={t('toBeAssigned')}
+          amount={toBeAssigned}
           currency={currency}
         />
       </Stack>
@@ -144,7 +145,7 @@ function useTotalsModel() {
 
   return {
     currency,
-    toBeBudgeted,
+    toBeAssigned,
     overspend,
     hasFutureOverspend,
     month,

@@ -10,8 +10,8 @@ export const moveMoney =
   (
     amount: number,
     currency: TFxCode,
-    source: core.envelopes.TEnvelopeId | 'toBeBudgeted',
-    destination: core.envelopes.TEnvelopeId | 'toBeBudgeted',
+    source: core.envelopes.TEnvelopeId | 'toBeAssigned',
+    destination: core.envelopes.TEnvelopeId | 'toBeAssigned',
     month: TISOMonth
   ): AppThunk<void> =>
   (dispatch, getState) => {
@@ -22,25 +22,25 @@ export const moveMoney =
 
     const updates: core.budgets.TBudgetUpdate[] = []
 
-    if (source !== 'toBeBudgeted') {
+    if (source !== 'toBeAssigned') {
       const env = metrics[source]
-      const budgeted = env.selfBudgeted[env.currency]
+      const assigned = env.selfAssigned[env.currency]
       const change =
         env.currency === currency
           ? -amount
           : convertFx({ [currency]: -amount }, env.currency, month)
-      const newBudget = round(budgeted + change)
+      const newBudget = round(assigned + change)
       updates.push({ month, id: env.id, value: newBudget })
     }
 
-    if (destination !== 'toBeBudgeted') {
+    if (destination !== 'toBeAssigned') {
       const env = metrics[destination]
-      const budgeted = env.selfBudgeted[env.currency]
+      const assigned = env.selfAssigned[env.currency]
       const change =
         env.currency === currency
           ? amount
           : convertFx({ [currency]: amount }, env.currency, month)
-      const newBudget = round(budgeted + change)
+      const newBudget = round(assigned + change)
       updates.push({ month, id: env.id, value: newBudget })
     }
 

@@ -106,7 +106,7 @@ describe('buildEnvMetrics', () => {
 
     expect(result['2026-01'][nullTagId]).toMatchObject({
       name: uncategorizedEnvelopeName,
-      selfBudgeted: { USD: 50 },
+      selfAssigned: { USD: 50 },
       selfActivity: { USD: -15 },
       selfAvailable: { USD: 35 },
     })

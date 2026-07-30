@@ -13,18 +13,18 @@ type AvailableCellProps = {
   id: string
   hiddenOverspend?: number
   available: number
-  budgeted: number
+  assigned: number
   isChild?: boolean
   isSelf?: boolean
 }
 
 export const AvailableCell: FC<AvailableCellProps> = props => {
-  const { hiddenOverspend, id, available, isChild, budgeted, isSelf } = props
+  const { hiddenOverspend, id, available, isChild, assigned, isSelf } = props
   const { t } = useTranslation('budgets')
   const availableColor = getAvailableColor(
     available,
     isChild,
-    !!budgeted,
+    !!assigned,
     isSelf
   )
 
@@ -102,7 +102,7 @@ const DraggableAmount: FC<{
 export function getAvailableColor(
   available: number,
   isChild?: boolean,
-  hasBudget?: boolean,
+  hasAssigned?: boolean,
   isSelf?: boolean
 ) {
   const positive = 'success.main'
@@ -116,7 +116,7 @@ export function getAvailableColor(
 
   // available < 0
   // main tag or child with budget
-  if (!isChild || hasBudget) return negative
+  if (!isChild || hasAssigned) return negative
   // child tag without budget
   else return neutral
 }

@@ -50,7 +50,7 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
           const visibility = e.visibility
           const hasChildren = !!e.children.length
           const hasGoal = !!goalInfo[e.id]?.goal
-          const hasBudget = !isZero(metrics[e.id].selfBudgeted)
+          const hasAssigned = !isZero(metrics[e.id].selfAssigned)
           const hasActivity = !isZero(metrics[e.id].selfActivity)
           const hasAvailable = !isZero(metrics[e.id].selfAvailable)
           const hasVisibleChildren = e.children.some(
@@ -61,7 +61,7 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
               ? false
               : visibility === core.envelopes.envelopeVisibility.visible ||
                 hasGoal ||
-                hasBudget ||
+                hasAssigned ||
                 hasActivity ||
                 hasAvailable ||
                 hasVisibleChildren
@@ -69,7 +69,7 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
           const isDefaultExpanded =
             hasChildren &&
             (!isZero(metrics[e.id].childrenLeftover) ||
-              !isZero(metrics[e.id].childrenBudgeted) ||
+              !isZero(metrics[e.id].childrenAssigned) ||
               !isZero(metrics[e.id].childrenSurplus))
 
           result[e.id] = {

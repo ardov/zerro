@@ -42,7 +42,7 @@ type EnvelopeRowProps = {
 function useRevealItems(params: {
   id: core.envelopes.TEnvelopeId
   columns: Metric[]
-  budgeted: number
+  assigned: number
   activity: number
   available: number
   isChild: boolean
@@ -53,7 +53,7 @@ function useRevealItems(params: {
   const {
     id,
     columns,
-    budgeted,
+    assigned,
     activity,
     available,
     isChild,
@@ -67,12 +67,12 @@ function useRevealItems(params: {
 
   const allMetrics: MetricConfig[] = [
     {
-      metric: Metric.budgeted,
+      metric: Metric.assigned,
       item: {
-        key: Metric.budgeted,
-        label: t('budget', { ns: 'common' }),
-        value: budgeted,
-        color: isSelf || !budgeted ? 'text.disabled' : 'text.primary',
+        key: Metric.assigned,
+        label: t('assigned', { ns: 'common' }),
+        value: assigned,
+        color: isSelf || !assigned ? 'text.disabled' : 'text.primary',
         onClick: e => openBudgetPopover(id, e.currentTarget),
       },
     },
@@ -92,7 +92,7 @@ function useRevealItems(params: {
         key: Metric.available,
         label: t('available', { ns: 'common' }),
         value: available,
-        color: getAvailableColor(available, isChild, !!budgeted, isSelf),
+        color: getAvailableColor(available, isChild, !!assigned, isSelf),
         draggable: { type: DragTypes.amount, id, disabled: !!isSelf },
       },
     },
@@ -127,8 +127,8 @@ export const Row: FC<EnvelopeRowProps> = props => {
 
   const isChild = !!envelope.parent || !!isSelf
 
-  const budgeted = toDisplay(
-    isSelf ? envData.selfBudgeted : envData.totalBudgeted
+  const assigned = toDisplay(
+    isSelf ? envData.selfAssigned : envData.totalAssigned
   )
   const activity = toDisplay(
     isSelf ? envData.selfActivity : envData.totalActivity
@@ -157,7 +157,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const revealItems = useRevealItems({
     id,
     columns,
-    budgeted,
+    assigned,
     activity,
     available,
     isChild,
@@ -194,10 +194,10 @@ export const Row: FC<EnvelopeRowProps> = props => {
               isReordering={isReordering}
             />
           }
-          budgeted={
+          assigned={
             <BudgetCell
               isSelf={isSelf}
-              value={budgeted}
+              value={assigned}
               onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
             />
           }
@@ -213,7 +213,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
               id={id}
               available={available}
               isChild={isChild}
-              budgeted={budgeted}
+              assigned={assigned}
               isSelf={isSelf}
             />
           }

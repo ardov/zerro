@@ -278,12 +278,12 @@ function formatAffectedEnvelopes(
       envelopeName: beforeEnvelope.name,
       currency: update.currency,
       operation: update.operation,
-      before: budgetMetrics(
+      before: assignedMetrics(
         beforeSession.envelopes.getMetrics()[
           month as keyof ReturnType<typeof beforeSession.envelopes.getMetrics>
         ]?.[update.envelopeId as never]
       ),
-      after: budgetMetrics(
+      after: assignedMetrics(
         afterSession.envelopes.getMetrics()[
           month as keyof ReturnType<typeof afterSession.envelopes.getMetrics>
         ]?.[update.envelopeId as never]
@@ -292,18 +292,18 @@ function formatAffectedEnvelopes(
   })
 }
 
-function budgetMetrics(
+function assignedMetrics(
   metrics:
     | {
-        selfBudgeted: Record<string, number>
-        totalBudgeted: Record<string, number>
+        selfAssigned: Record<string, number>
+        totalAssigned: Record<string, number>
       }
     | undefined
 ) {
   if (!metrics) throw new Error('Envelope metrics are unavailable')
   return {
-    selfBudgetByCurrency: metrics.selfBudgeted,
-    withChildrenBudgetByCurrency: metrics.totalBudgeted,
+    selfAssignedByCurrency: metrics.selfAssigned,
+    withChildrenAssignedByCurrency: metrics.totalAssigned,
   }
 }
 

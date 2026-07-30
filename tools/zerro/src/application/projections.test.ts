@@ -94,13 +94,11 @@ describe('finance projection reads', () => {
     })
 
     const coreTotals = session.months.getTotals()[month]
-    // The tool renames core's fields for clarity: `budgeted` here is core's
-    // `positiveBudgeted` (gross allocations), and `budgetedNet` is core's
-    // `budgeted` (net of negative allocations on income envelopes).
+    // The tool exposes the positive and net allocation totals separately.
     expect(result.data.totals).toEqual({
       ...coreTotals,
-      budgeted: coreTotals.positiveBudgeted,
-      budgetedNet: coreTotals.budgeted,
+      assigned: coreTotals.positiveAssigned,
+      assignedNet: coreTotals.assigned,
       undistributedIncome: expect.any(Object),
     })
     expect(result.data.envelopes.envelopeCount).toBe(
@@ -110,7 +108,7 @@ describe('finance projection reads', () => {
     expectFiniteNumbers(result.data)
   })
 
-  it('reports undistributed income separately from budgeted allocations', async () => {
+  it('reports undistributed income separately from assigned allocations', async () => {
     const result = await getMonth(context, '2026-07')
     expect(result.data.totals.undistributedIncome).toEqual(expect.any(Object))
     // Every currency the user's income envelopes are still holding must be
@@ -129,7 +127,7 @@ describe('finance projection reads', () => {
     expect(result.data.displayCurrency).toBe('RUB')
     expect(result.data.totalsConverted).toMatchObject({
       fundsStart: expect.any(Number),
-      toBeBudgeted: expect.any(Number),
+      toBeAssigned: expect.any(Number),
     })
     // RUB is the base currency (rate 1), so a RUB-only vector converts to itself.
     expect(result.data.totalsConverted?.overspend).toBeCloseTo(
@@ -196,13 +194,13 @@ describe('finance projection reads', () => {
     expect(listed.data.items[0]).toMatchObject({
       id: expect.any(String),
       self: {
-        budgetByCurrency: expect.any(Object),
+        assignedByCurrency: expect.any(Object),
         activityByCurrency: expect.any(Object),
         availableByCurrency: expect.any(Object),
         transactionCount: expect.any(Number),
       },
       withChildren: {
-        budgetByCurrency: expect.any(Object),
+        assignedByCurrency: expect.any(Object),
         activityByCurrency: expect.any(Object),
         availableByCurrency: expect.any(Object),
         transactionCount: expect.any(Number),
@@ -240,12 +238,12 @@ describe('finance projection reads', () => {
     expect(listed.data.displayCurrency).toBe('RUB')
     for (const item of listed.data.items) {
       expect(item.self.converted).toMatchObject({
-        budget: expect.any(Number),
+        assigned: expect.any(Number),
         activity: expect.any(Number),
         available: expect.any(Number),
       })
       expect(item.withChildren.converted).toMatchObject({
-        budget: expect.any(Number),
+        assigned: expect.any(Number),
         activity: expect.any(Number),
         available: expect.any(Number),
       })

@@ -6,7 +6,7 @@ import type { TFxConverter } from '../fx-rates'
 import type { TActivityNode } from './activity'
 import type { TEnvMetrics } from './envMetrics'
 
-export type TToBeBudgetedState = 'positive' | 'allocated' | 'negative'
+export type TToBeAssignedState = 'positive' | 'allocated' | 'negative'
 
 export type TMonthTotals = {
   month: TISOMonth
@@ -16,13 +16,13 @@ export type TMonthTotals = {
   transferFees: TFxAmount
   generalIncome: TFxAmount
   envActivity: TFxAmount
-  budgeted: TFxAmount
-  positiveBudgeted: TFxAmount
+  assigned: TFxAmount
+  positiveAssigned: TFxAmount
   available: TFxAmount
-  budgetedInFuture: TFxAmount
+  assignedInFuture: TFxAmount
   freeFunds: TFxAmount
-  toBeBudgeted: TFxAmount
-  toBeBudgetedState: TToBeBudgetedState
+  toBeAssigned: TFxAmount
+  toBeAssignedState: TToBeAssignedState
   overspend: TFxAmount
 }
 
@@ -68,20 +68,20 @@ export function buildMonthTotals(
       'Total change is not equal to sum of transfers + income + env activity'
     )
 
-    let positiveBudgeted = {} as TFxAmount
-    let budgeted = {} as TFxAmount
+    let positiveAssigned = {} as TFxAmount
+    let assigned = {} as TFxAmount
     let available = {} as TFxAmount
     let overspend = {} as TFxAmount
 
     Object.values(input.envMetrics[month]).forEach(metrics => {
       if (metrics.parent) return
 
-      const { totalBudgeted, totalAvailable, selfAvailable } = metrics
-      budgeted = addFxAmount(budgeted, totalBudgeted)
+      const { totalAssigned, totalAvailable, selfAvailable } = metrics
+      assigned = addFxAmount(assigned, totalAssigned)
       available = addFxAmount(available, totalAvailable)
 
-      if (toValue(totalBudgeted) > 0) {
-        positiveBudgeted = addFxAmount(positiveBudgeted, totalBudgeted)
+      if (toValue(totalAssigned) > 0) {
+        positiveAssigned = addFxAmount(positiveAssigned, totalAssigned)
       }
 
       if (toValue(selfAvailable) < 0) {
@@ -89,14 +89,14 @@ export function buildMonthTotals(
       }
     })
 
-    const budgetedInFuture = addFxAmount(
-      prevMonth.positiveBudgeted || {},
-      prevMonth.budgetedInFuture || {}
+    const assignedInFuture = addFxAmount(
+      prevMonth.positiveAssigned || {},
+      prevMonth.assignedInFuture || {}
     )
     const freeFunds = subFxAmount(fundsEnd, available)
-    const toBeBudgetedInfo = calcToBeBudgeted(
+    const toBeAssignedInfo = calcToBeAssigned(
       freeFunds,
-      budgetedInFuture,
+      assignedInFuture,
       toValue
     )
 
@@ -108,13 +108,13 @@ export function buildMonthTotals(
       transferFees,
       generalIncome,
       envActivity,
-      budgeted,
-      positiveBudgeted,
+      assigned,
+      positiveAssigned,
       available,
-      budgetedInFuture,
+      assignedInFuture,
       freeFunds,
-      toBeBudgeted: toBeBudgetedInfo.value,
-      toBeBudgetedState: toBeBudgetedInfo.state,
+      toBeAssigned: toBeAssignedInfo.value,
+      toBeAssignedState: toBeAssignedInfo.state,
       overspend,
     }
     prev = month
@@ -123,11 +123,11 @@ export function buildMonthTotals(
   return result
 }
 
-function calcToBeBudgeted(
+function calcToBeAssigned(
   freeNow: TFxAmount,
   needForFuture: TFxAmount,
   toValue: (amount: TFxAmount) => number
-): { value: TFxAmount; state: TToBeBudgetedState } {
+): { value: TFxAmount; state: TToBeAssignedState } {
   if (toValue(freeNow) < 0) {
     return { value: freeNow, state: 'negative' }
   }

@@ -18,14 +18,14 @@ export const fixOverspends =
       const childrenUpdates: core.budgets.TBudgetUpdate[] = []
       Object.values(metrics).forEach(m => {
         if (!m.parent) return
-        const budgeted = m.selfBudgeted[m.currency] || 0
+        const assigned = m.selfAssigned[m.currency] || 0
         const available = m.selfAvailable[m.currency] || 0
         if (available > 0) return
-        if (!budgeted) return
+        if (!assigned) return
         childrenUpdates.push({
           month,
           id: m.id,
-          value: add(budgeted, -available),
+          value: add(assigned, -available),
         })
       })
       if (childrenUpdates.length) dispatch(setTotalBudget(childrenUpdates))
@@ -36,7 +36,7 @@ export const fixOverspends =
       const parentUpdates: core.budgets.TBudgetUpdate[] = []
       Object.values(metrics).forEach(m => {
         if (m.parent) return
-        const totalBudgeted = m.totalBudgeted[m.currency] || 0
+        const totalAssigned = m.totalAssigned[m.currency] || 0
         const totalAvailable = m.totalAvailable[m.currency] || 0
         const selfAvailable = m.selfAvailable[m.currency] || 0
 
@@ -47,7 +47,7 @@ export const fixOverspends =
         parentUpdates.push({
           month,
           id: m.id,
-          value: add(totalBudgeted, need),
+          value: add(totalAssigned, need),
         })
       })
       if (parentUpdates.length) dispatch(setTotalBudget(parentUpdates))

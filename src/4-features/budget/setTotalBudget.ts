@@ -19,8 +19,8 @@ export function setTotalBudget(
     function adjustValue(
       u: core.budgets.TBudgetUpdate
     ): core.budgets.TBudgetUpdate {
-      const { childrenBudgeted, currency } = envMetrics[u.month][u.id]
-      const childrenValue = convertFx(childrenBudgeted, currency, u.month)
+      const { childrenAssigned, currency } = envMetrics[u.month][u.id]
+      const childrenValue = convertFx(childrenAssigned, currency, u.month)
       return { ...u, value: round(u.value - childrenValue) }
     }
   }

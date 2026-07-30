@@ -45,11 +45,11 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   )
 
   const [moneySource, setMoneySource] = useState<
-    core.envelopes.TEnvelopeId | 'toBeBudgeted'
-  >('toBeBudgeted')
+    core.envelopes.TEnvelopeId | 'toBeAssigned'
+  >('toBeAssigned')
   const [moneyDestination, setMoneyDestination] = useState<
-    core.envelopes.TEnvelopeId | 'toBeBudgeted'
-  >('toBeBudgeted')
+    core.envelopes.TEnvelopeId | 'toBeAssigned'
+  >('toBeAssigned')
   const [isOpen, toggleOpen] = useToggle()
 
   const onDragEnd = useCallback(

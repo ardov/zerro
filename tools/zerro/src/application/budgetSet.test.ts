@@ -163,7 +163,7 @@ describe('envelope budget updates', () => {
       month: request.month,
     })
     expect(changedEnvelope.meta.pendingCommandCount).toBe(1)
-    expect(changedEnvelope.data.self.budgetByCurrency[envelope.currency]).toBe(
+    expect(changedEnvelope.data.self.assignedByCurrency[envelope.currency]).toBe(
       123
     )
 
@@ -311,7 +311,7 @@ describe('envelope budget updates', () => {
     const result = await getEnvelope(context, envelope.id, {
       month: request.month,
     })
-    expect(result.data.self.budgetByCurrency[envelope.currency] ?? 0).toBe(0)
+    expect(result.data.self.assignedByCurrency[envelope.currency] ?? 0).toBe(0)
   })
 })
 

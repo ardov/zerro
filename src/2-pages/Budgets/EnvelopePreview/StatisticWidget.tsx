@@ -27,11 +27,11 @@ type StatisticWidgetProps = BoxProps & { id: core.envelopes.TEnvelopeId }
 const WINDOW = 12 // Number of months to show in the chart
 
 enum statisticsValue {
-  avgBudgeted = 'avgBudgeted',
+  avgAssigned = 'avgAssigned',
   avgExpenses = 'avgExpenses',
 }
 const nextMetric = (current: statisticsValue): statisticsValue => {
-  const list = [statisticsValue.avgBudgeted, statisticsValue.avgExpenses]
+  const list = [statisticsValue.avgAssigned, statisticsValue.avgExpenses]
   const idx = list.indexOf(current)
   return list[(idx + 1) % list.length]
 }
@@ -61,7 +61,7 @@ const getPeriodLength = (period: aggregatePeriod): number => {
   }
 }
 
-/** Calculate average budgeted and expenses for the given envelope */
+/** Calculate average assigned and expenses for the given envelope */
 function useAggregatedStats(
   id: core.envelopes.TEnvelopeId,
   currency: TFxCode,
@@ -75,9 +75,9 @@ function useAggregatedStats(
       Math.max(0, idx - aggregationPeriod + 1), // start index
       idx + 1 // end index
     )
-    const avgBudgeted = getAverage(
+    const avgAssigned = getAverage(
       aggregatedMonths.map(date =>
-        convertFx(envData[date][id].totalBudgeted, currency, date)
+        convertFx(envData[date][id].totalAssigned, currency, date)
       )
     )
     const currentMonth = toISOMonth(new Date())
@@ -92,7 +92,7 @@ function useAggregatedStats(
       // Negative activity is expenses
       if (avgActivity < 0) avgExpenses = -avgActivity
     }
-    return { month, avgBudgeted, avgExpenses }
+    return { month, avgAssigned, avgExpenses }
   })
   return result
 }

@@ -93,10 +93,10 @@ function buildMonthSummary(
   const metricRows = Object.values(metrics)
   const rates = buildFullRates(workspace.current.instrument)
 
-  // `positiveBudgeted` is the sum of allocations to spending envelopes;
-  // `budgeted` (core's field) also nets in negative allocations on income
-  // envelopes, which makes it look near-zero even in a fully-budgeted month.
-  // Expose the useful one as `budgeted` and keep the net under its own name.
+  // `positiveAssigned` is the sum of allocations to spending envelopes;
+  // `assigned` (core's field) also nets in negative allocations on income
+  // envelopes, which makes it look near-zero even in a fully-assigned month.
+  // Expose the useful one as `assigned` and keep the net under its own name.
   const undistributedIncome = sumFxVectors(
     Object.values(envelopes)
       .filter(
@@ -107,8 +107,8 @@ function buildMonthSummary(
   )
   const totals = {
     ...monthTotals,
-    budgeted: monthTotals.positiveBudgeted,
-    budgetedNet: monthTotals.budgeted,
+    assigned: monthTotals.positiveAssigned,
+    assignedNet: monthTotals.assigned,
     undistributedIncome,
   }
 
@@ -126,12 +126,12 @@ function buildMonthSummary(
               transferFees: monthTotals.transferFees,
               generalIncome: monthTotals.generalIncome,
               envActivity: monthTotals.envActivity,
-              budgeted: monthTotals.positiveBudgeted,
-              budgetedNet: monthTotals.budgeted,
+              assigned: monthTotals.positiveAssigned,
+              assignedNet: monthTotals.assigned,
               available: monthTotals.available,
-              budgetedInFuture: monthTotals.budgetedInFuture,
+              assignedInFuture: monthTotals.assignedInFuture,
               freeFunds: monthTotals.freeFunds,
-              toBeBudgeted: monthTotals.toBeBudgeted,
+              toBeAssigned: monthTotals.toBeAssigned,
               overspend: monthTotals.overspend,
               undistributedIncome,
             },
@@ -145,14 +145,14 @@ function buildMonthSummary(
       rootEnvelopeCount: Object.values(envelopes).filter(
         envelope => envelope.parent === null
       ).length,
-      budgetedEnvelopeCount: metricRows.filter(
-        row => (row.selfBudgeted[row.currency] ?? 0) !== 0
+      assignedEnvelopeCount: metricRows.filter(
+        row => (row.selfAssigned[row.currency] ?? 0) !== 0
       ).length,
       transactionCount: metricRows.reduce(
         (sum, row) => sum + row.selfTransactionCount,
         0
       ),
-      budgeted: monthTotals.positiveBudgeted,
+      assigned: monthTotals.positiveAssigned,
       activity: monthTotals.envActivity,
       available: monthTotals.available,
     },
@@ -365,7 +365,7 @@ function presentEnvelope(
       ? {
           self: convertAmounts(
             {
-              budget: metrics.selfBudgeted,
+              assigned: metrics.selfAssigned,
               activity: metrics.selfActivity,
               available: metrics.selfAvailable,
             },
@@ -374,7 +374,7 @@ function presentEnvelope(
           ),
           withChildren: convertAmounts(
             {
-              budget: metrics.totalBudgeted,
+              assigned: metrics.totalAssigned,
               activity: metrics.totalActivity,
               available: metrics.totalAvailable,
             },
@@ -397,14 +397,14 @@ function presentEnvelope(
     visibility: envelope.visibility,
     keepIncome: envelope.keepIncome,
     self: {
-      budgetByCurrency: metrics.selfBudgeted,
+      assignedByCurrency: metrics.selfAssigned,
       activityByCurrency: metrics.selfActivity,
       availableByCurrency: metrics.selfAvailable,
       transactionCount: metrics.selfTransactionCount,
       ...(converted ? { converted: converted.self } : {}),
     },
     withChildren: {
-      budgetByCurrency: metrics.totalBudgeted,
+      assignedByCurrency: metrics.totalAssigned,
       activityByCurrency: metrics.totalActivity,
       availableByCurrency: metrics.totalAvailable,
       transactionCount: metrics.totalTransactionCount,

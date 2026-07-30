@@ -143,7 +143,7 @@ function useDataTrend(
 
   const startBalance = addFxAmount(
     envData?.totalLeftover || {},
-    envData?.totalBudgeted || {}
+    envData?.totalAssigned || {}
   )
 
   const startNode = {

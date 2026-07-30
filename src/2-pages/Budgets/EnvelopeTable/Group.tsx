@@ -51,7 +51,7 @@ export const Group: FC<TGroupProps> = ({
 }) => {
   const { t } = useTranslation('budgets')
   const dispatch = useAppDispatch()
-  const { budgeted, available, activity } = useGroupTotals(name)
+  const { assigned, available, activity } = useGroupTotals(name)
   const ref = useRef<HTMLDivElement>(null)
 
   const floating = useFloatingInput(ref, val =>
@@ -122,7 +122,7 @@ export const Group: FC<TGroupProps> = ({
           '&:last-child': { border: 0 },
         }}
         name={NameCell}
-        budgeted={<Sum value={budgeted} />}
+        assigned={<Sum value={assigned} />}
         outcome={<Sum value={activity} />}
         available={<Sum value={available} />}
         goal={null}
@@ -135,12 +135,12 @@ export const Group: FC<TGroupProps> = ({
 
 const useGroupTotals = (id: string) => {
   type TResultFx = {
-    budgeted: TFxAmount
+    assigned: TFxAmount
     activity: TFxAmount
     available: TFxAmount
   }
   type TResult = {
-    budgeted: number
+    assigned: number
     activity: number
     available: number
   }
@@ -149,20 +149,20 @@ const useGroupTotals = (id: string) => {
   const structure = useAppSelector(core.envelopes.selectStructure, deepEqual)
   const toDisplay = core.currency.useToDisplay(month)
   const group = structure.find(gr => gr.id === id)
-  if (!group || !data) return { budgeted: 0, activity: 0, available: 0 }
+  if (!group || !data) return { assigned: 0, activity: 0, available: 0 }
 
   const fxSum = group.children.reduce(
     (sum, node) => {
-      sum.budgeted = addFxAmount(sum.budgeted, data[node.id].totalBudgeted)
+      sum.assigned = addFxAmount(sum.assigned, data[node.id].totalAssigned)
       sum.activity = addFxAmount(sum.activity, data[node.id].totalActivity)
       sum.available = addFxAmount(sum.available, data[node.id].totalAvailable)
       return sum
     },
-    { budgeted: {}, activity: {}, available: {} } as TResultFx
+    { assigned: {}, activity: {}, available: {} } as TResultFx
   )
 
   return {
-    budgeted: toDisplay(fxSum.budgeted),
+    assigned: toDisplay(fxSum.assigned),
     activity: toDisplay(fxSum.activity),
     available: toDisplay(fxSum.available),
   } as TResult

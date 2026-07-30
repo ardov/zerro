@@ -14,16 +14,16 @@ type GoalProgress = {
 export type TGoalContext = {
   month: TISOMonth
   leftover: number
-  budgeted: number
+  assigned: number
   available: number
   generalIncome: number
 }
 
 export const calcGoals = {
   [goalType.MONTHLY]: (goal: TGoal, context: TGoalContext): GoalProgress => {
-    const { budgeted } = context
+    const { assigned } = context
     const needStart = goal.amount
-    const needNow = Math.max(round(needStart - budgeted), 0)
+    const needNow = Math.max(round(needStart - assigned), 0)
 
     return {
       needStart,
@@ -37,10 +37,10 @@ export const calcGoals = {
     goal: TGoal,
     context: TGoalContext
   ): GoalProgress => {
-    const { budgeted, leftover } = context
+    const { assigned, leftover } = context
     const { amount } = goal
     const needStart = Math.max(round(amount - leftover), 0)
-    const needNow = Math.max(round(amount - leftover - budgeted), 0)
+    const needNow = Math.max(round(amount - leftover - assigned), 0)
 
     return {
       needStart,
@@ -54,10 +54,10 @@ export const calcGoals = {
     goal: TGoal,
     context: TGoalContext
   ): GoalProgress => {
-    const { generalIncome, budgeted } = context
+    const { generalIncome, assigned } = context
     const percent = clamp(goal.amount, 0, 1)
     const needStart = Math.max(round(generalIncome * percent), 0)
-    const needNow = Math.max(round(needStart - budgeted), 0)
+    const needNow = Math.max(round(needStart - assigned), 0)
 
     return {
       needStart,
@@ -85,16 +85,16 @@ export const calcGoals = {
       }
     }
 
-    const { budgeted, leftover, month } = context
+    const { assigned, leftover, month } = context
     const endMonth = toISOMonth(end)
     if (month > endMonth) throw new Error('currentMonth > endMonth')
 
     const monthsLeft = differenceInCalendarMonths(endMonth, month) + 1
     const needStart = Math.max(round((amount - leftover) / monthsLeft), 0)
     const needNow =
-      round(leftover + budgeted) >= amount
+      round(leftover + assigned) >= amount
         ? 0
-        : Math.max(round(needStart - budgeted), 0)
+        : Math.max(round(needStart - assigned), 0)
 
     return {
       needStart,

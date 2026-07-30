@@ -49,7 +49,7 @@ export function buildGoals(input: TBuildGoalsInput): ByMonth<ById<TGoalInfo>> {
         amount ? input.convertFx(amount, env.currency, month) : 0
       const goalProgress = calcGoals[goal.type](goal, {
         leftover: toValue(env.totalLeftover),
-        budgeted: toValue(env.totalBudgeted),
+        assigned: toValue(env.totalAssigned),
         available: toValue(env.totalAvailable),
         generalIncome: toValue(totalIncome),
         month,

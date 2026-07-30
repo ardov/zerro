@@ -23,7 +23,7 @@ describe('setTotalBudget', () => {
     vi.mocked(core.activity.selectEnvelopeMetrics).mockReturnValue({
       '2026-07': {
         [foodId]: {
-          childrenBudgeted: { EUR: 10 },
+          childrenAssigned: { EUR: 10 },
           currency: 'USD',
         },
       },

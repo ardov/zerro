@@ -10,7 +10,7 @@ import { buildEnvMetrics } from './envMetrics'
 import { buildMonthTotals } from './monthTotals'
 
 describe('buildMonthTotals', () => {
-  it('calculates free funds and positive to-be-budgeted amount', () => {
+  it('calculates free funds and positive to-be-assigned amount', () => {
     const envelopeId = envId.get(EnvType.Tag, 'food')
     const activity = buildActivity({
       rawActivity: {
@@ -51,8 +51,8 @@ describe('buildMonthTotals', () => {
     expect(result['2026-01'].fundsChange).toEqual({ USD: 80 })
     expect(result['2026-01'].available).toEqual({ USD: 30 })
     expect(result['2026-01'].freeFunds).toEqual({ USD: 170 })
-    expect(result['2026-01'].toBeBudgeted).toEqual({ USD: 170 })
-    expect(result['2026-01'].toBeBudgetedState).toBe('positive')
+    expect(result['2026-01'].toBeAssigned).toEqual({ USD: 170 })
+    expect(result['2026-01'].toBeAssignedState).toBe('positive')
   })
 
   it('reserves positive budgets from future months', () => {
@@ -81,8 +81,8 @@ describe('buildMonthTotals', () => {
       currentMonth: '2026-01',
     })
 
-    expect(result['2026-02'].positiveBudgeted).toEqual({ USD: 40 })
-    expect(result['2026-01'].budgetedInFuture).toEqual({ USD: 40 })
-    expect(result['2026-01'].toBeBudgeted).toEqual({ USD: 60 })
+    expect(result['2026-02'].positiveAssigned).toEqual({ USD: 40 })
+    expect(result['2026-01'].assignedInFuture).toEqual({ USD: 40 })
+    expect(result['2026-01'].toBeAssigned).toEqual({ USD: 60 })
   })
 })

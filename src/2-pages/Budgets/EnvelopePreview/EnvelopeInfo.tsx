@@ -52,7 +52,7 @@ export function EnvelopeInfo(props: {
   const { currency } = envMetrics
   const toEnvelope = (a: TFxAmount) => convertFx(a, currency, month)
   const totalLeftover = toEnvelope(envMetrics.totalLeftover)
-  const totalBudgeted = toEnvelope(envMetrics.totalBudgeted)
+  const totalAssigned = toEnvelope(envMetrics.totalAssigned)
   const totalActivity = toEnvelope(envMetrics.totalActivity)
   const totalAvailable = toEnvelope(envMetrics.totalAvailable)
 
@@ -108,10 +108,10 @@ export function EnvelopeInfo(props: {
           onClick={e => openBudgetPopover(id, e.currentTarget)}
         >
           <OneLiner
-            left={t('budget', { ns: 'common' })}
+            left={t('assigned', { ns: 'common' })}
             right={
               <Amount
-                value={totalBudgeted}
+                value={totalAssigned}
                 currency={currency}
                 decimals="ifAny"
               />

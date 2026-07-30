@@ -4,12 +4,12 @@ import type { FC, ReactNode } from 'react'
 import React, { useContext, useState } from 'react'
 
 export enum Metric {
-  budgeted = 'budgeted',
+  assigned = 'assigned',
   outcome = 'outcome',
   available = 'available',
 }
 
-const allColumns: Metric[] = [Metric.available, Metric.budgeted, Metric.outcome]
+const allColumns: Metric[] = [Metric.available, Metric.assigned, Metric.outcome]
 
 export function useMetric() {
   const [metric, setMetric] = useState<Metric>(allColumns[0])

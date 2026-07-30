@@ -14,16 +14,19 @@ export const successShapes: Record<string, TShapeFields> = {
     'commands[].required':
       'Prerequisites for this command: either a plain string (an env var or positional argument, e.g. "ZM_TOKEN" or "month") or an option descriptor object (name/type/values/default/description) for a required flag.',
     'commands[].optional': 'Option descriptor objects for every optional flag.',
-    'commands[].optional[].name': 'Flag as typed on the command line, e.g. "--limit".',
-    'commands[].optional[].type':
-      '"string", "integer", "boolean", or "enum".',
-    'commands[].optional[].values': 'Allowed values. Present only when type is "enum".',
-    'commands[].optional[].default': 'Value used when the flag is omitted, if any.',
+    'commands[].optional[].name':
+      'Flag as typed on the command line, e.g. "--limit".',
+    'commands[].optional[].type': '"string", "integer", "boolean", or "enum".',
+    'commands[].optional[].values':
+      'Allowed values. Present only when type is "enum".',
+    'commands[].optional[].default':
+      'Value used when the flag is omitted, if any.',
     'commands[].optional[].description': 'What the flag does.',
     'commands[].example': 'A runnable example invocation.',
     'commands[].successShape':
-      'Name to pass to `help --shape` for this command\'s response field docs.',
-    'commands[].errors': 'Error codes this command can return in a failure response.',
+      "Name to pass to `help --shape` for this command's response field docs.",
+    'commands[].errors':
+      'Error codes this command can return in a failure response.',
     defaults: 'Server-wide defaults applied when a command omits an option.',
     'defaults.limit': 'Page size used when --limit is omitted.',
     'defaults.maximumLimit': 'Largest value --limit accepts.',
@@ -31,10 +34,14 @@ export const successShapes: Record<string, TShapeFields> = {
     'guide.fieldReference': 'How to look up field docs for any successShape.',
     'guide.successShapes': 'Every valid name for help --shape <name>.',
     'guide.tableOutput': 'How to get a table instead of JSON.',
-    'guide.quietOutput': 'How to get pure JSON on stdout, without the pnpm banner.',
-    'guide.multiCurrency': 'Why most amounts are {CURRENCY: amount} vectors, and how to collapse one to a number.',
-    'guide.warnings': 'What a top-level "warnings" array on a successful response means.',
-    'guide.shellGotcha': 'A zsh/bash pipe that corrupts JSON containing transaction comments with newlines, and the fix.',
+    'guide.quietOutput':
+      'How to get pure JSON on stdout, without the pnpm banner.',
+    'guide.multiCurrency':
+      'Why most amounts are {CURRENCY: amount} vectors, and how to collapse one to a number.',
+    'guide.warnings':
+      'What a top-level "warnings" array on a successful response means.',
+    'guide.shellGotcha':
+      'A zsh/bash pipe that corrupts JSON containing transaction comments with newlines, and the fix.',
   },
 
   versionInfo: {
@@ -171,18 +178,18 @@ export const successShapes: Record<string, TShapeFields> = {
       'Currency code passed via --display-currency, or null if not requested.',
     totals:
       'Whole-month totals, each an amount-by-currency vector unless noted.',
-    'totals.budgeted':
-      'Sum of positive allocations across all root envelopes this month (the useful "how much did I budget" figure).',
-    'totals.budgetedNet':
-      'Same allocations netted against negative budgets on income envelopes; stays near zero even in a fully-budgeted month, so prefer `budgeted` for reporting.',
+    'totals.assigned':
+      'Sum of positive allocations across all root envelopes this month.',
+    'totals.assignedNet':
+      'Same allocations netted against negative assignments on income envelopes; stays near zero even in a fully-assigned month, so prefer `assigned` for reporting.',
     'totals.undistributedIncome':
       'Balance still sitting in income envelopes (this month plus anything carried over) waiting to be allocated into spending envelopes.',
-    'totals.toBeBudgeted':
+    'totals.toBeAssigned':
       "Amount left to allocate after reserving next month's carryover need; negative means overallocated.",
-    'totals.toBeBudgetedState':
-      '"positive", "allocated", or "negative" — the sign of toBeBudgeted.',
+    'totals.toBeAssignedState':
+      '"positive", "allocated", or "negative" — the sign of toBeAssigned.',
     'totals.overspend':
-      'Sum of negative available balances across envelopes (spending beyond what was budgeted).',
+      'Sum of negative available balances across envelopes (spending beyond what was assigned).',
     'totals.fundsStart': 'Account balances at the start of the month.',
     'totals.fundsEnd': 'Account balances at the end of the month.',
     'totals.fundsChange': 'fundsEnd minus fundsStart.',
@@ -194,17 +201,17 @@ export const successShapes: Record<string, TShapeFields> = {
     'totals.available': 'Sum of available balances across all root envelopes.',
     'totals.freeFunds':
       "Account funds not currently claimed by any envelope's available balance.",
-    'totals.budgetedInFuture':
+    'totals.assignedInFuture':
       "Amount already committed to next month's carryover need.",
     totalsConverted:
       'Same fields as totals, each converted to one number in displayCurrency. Present only when --display-currency was given.',
     envelopes: 'Compact envelope-tree stats for the month.',
     'envelopes.envelopeCount': 'Total number of envelopes (including groups).',
     'envelopes.rootEnvelopeCount': 'Number of top-level envelopes.',
-    'envelopes.budgetedEnvelopeCount':
-      'Number of envelopes with a non-zero self budget this month.',
+    'envelopes.assignedEnvelopeCount':
+      'Number of envelopes with a non-zero self assignment this month.',
     'envelopes.transactionCount': 'Total transactions categorized this month.',
-    'envelopes.budgeted': 'Same as totals.budgeted.',
+    'envelopes.assigned': 'Same as totals.assigned.',
     'envelopes.activity': 'Same as totals.envActivity.',
     'envelopes.available': 'Same as totals.available.',
     goals:
@@ -242,10 +249,10 @@ export const successShapes: Record<string, TShapeFields> = {
     'items[].currency': "Envelope's currency.",
     'items[].visibility': 'Display visibility setting, e.g. "auto".',
     'items[].keepIncome':
-      'When true, income categorized on this envelope stays here (net against its spending) instead of flowing to the month\'s general income. `report activity --direction net` uses this exact flag to decide whether a refund offsets spending or counts as separate income.',
+      "When true, income categorized on this envelope stays here (net against its spending) instead of flowing to the month's general income. `report activity --direction net` uses this exact flag to decide whether a refund offsets spending or counts as separate income.",
     'items[].self': "This envelope's own metrics, excluding children.",
-    'items[].self.budgetByCurrency':
-      'Amount budgeted directly on this envelope.',
+    'items[].self.assignedByCurrency':
+      'Amount assigned directly on this envelope.',
     'items[].self.activityByCurrency':
       'Spending/income recorded directly on this envelope.',
     'items[].self.availableByCurrency':
@@ -253,11 +260,11 @@ export const successShapes: Record<string, TShapeFields> = {
     'items[].self.transactionCount':
       'Transactions categorized directly on this envelope.',
     'items[].self.converted':
-      'self.budgetByCurrency/activityByCurrency/availableByCurrency each converted to one number in displayCurrency. Present only when --display-currency was given.',
+      'self.assignedByCurrency/activityByCurrency/availableByCurrency each converted to one number in displayCurrency. Present only when --display-currency was given.',
     'items[].withChildren':
       'Rolled-up metrics including all descendant envelopes.',
-    'items[].withChildren.budgetByCurrency':
-      'Budget summed across this envelope and its children.',
+    'items[].withChildren.assignedByCurrency':
+      'Assignments summed across this envelope and its children.',
     'items[].withChildren.activityByCurrency':
       'Activity summed across this envelope and its children.',
     'items[].withChildren.availableByCurrency':
@@ -283,7 +290,7 @@ export const successShapes: Record<string, TShapeFields> = {
     currency: "Envelope's currency.",
     visibility: 'Display visibility setting, e.g. "auto".',
     keepIncome:
-      'When true, income categorized on this envelope stays here (net against its spending) instead of flowing to the month\'s general income. `report activity --direction net` uses this exact flag to decide whether a refund offsets spending or counts as separate income.',
+      "When true, income categorized on this envelope stays here (net against its spending) instead of flowing to the month's general income. `report activity --direction net` uses this exact flag to decide whether a refund offsets spending or counts as separate income.",
     self: "This envelope's own metrics, excluding children.",
     withChildren: 'Rolled-up metrics including all descendant envelopes.',
   },
@@ -352,7 +359,8 @@ export const successShapes: Record<string, TShapeFields> = {
     totalCount: 'Total number of groups matching the query, across all pages.',
     nextCursor: 'Opaque cursor for the next page, or null on the last page.',
     totals: 'Grand totals across every group, not just this page.',
-    'totals.total': 'Total across all groups, by currency, same sign rules as items[].total.',
+    'totals.total':
+      'Total across all groups, by currency, same sign rules as items[].total.',
     'totals.transactionCount': 'Total transactions counted across all groups.',
     'totals.totalConverted':
       'totals.total converted to one signed number in displayCurrency. Present only when --display-currency was given.',

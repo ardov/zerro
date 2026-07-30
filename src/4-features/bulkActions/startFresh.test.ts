@@ -35,7 +35,7 @@ describe('startFresh', () => {
       '2026-08': {
         [futureId]: {
           id: futureId,
-          selfBudgeted: { USD: 50 },
+          selfAssigned: { USD: 50 },
         },
       },
     } as unknown as ReturnType<typeof core.activity.selectEnvelopeMetrics>)
@@ -77,14 +77,14 @@ function makeMonth(
       parent: parentId,
       currency: 'USD',
       selfAvailable: { USD: 10 },
-      totalBudgeted: { USD: 100 },
+      totalAssigned: { USD: 100 },
     },
     [parentId]: {
       id: parentId,
       parent: null,
       currency: 'USD',
       selfAvailable: { USD: 20 },
-      totalBudgeted: { USD: 200 },
+      totalAssigned: { USD: 200 },
     },
   }
 }
