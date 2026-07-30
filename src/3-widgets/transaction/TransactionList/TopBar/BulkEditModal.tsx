@@ -39,23 +39,26 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   const types = getTypes(transactions)
   const tagType = types.income ? (types.outcome ? null : 'income') : 'outcome'
   const commonTags = sameTags ? transactions[0]?.tag || [] : ['mixed']
+  const commonComment = sameComments ? transactions[0]?.comment || '' : ''
 
   const [tags, setTags] = useState(commonTags)
-  const [comment, setComment] = useState(
-    sameComments ? transactions[0]?.comment || '' : ''
-  )
+  const [comment, setComment] = useState(commonComment)
 
   useEffect(() => {
-    if (open) setTags(commonTags)
+    if (open) {
+      setTags(commonTags)
+      setComment(commonComment)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setTags, ids, open])
+  }, [setTags, setComment, ids, open])
 
   const onSave = () => {
     const opts = {
       tags: equalArrays(commonTags, tags) ? undefined : tags,
-      comment,
+      // An empty comment is a valid change, so untouched means `undefined`
+      comment: comment === commonComment ? undefined : comment,
     }
-    if (opts.tags || opts.comment) {
+    if (opts.tags || opts.comment !== undefined) {
       dispatch(trModel.bulkEditTransactions(ids, opts))
     }
     onApply()
