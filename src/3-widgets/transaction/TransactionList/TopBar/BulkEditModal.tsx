@@ -15,6 +15,7 @@ import {
 } from '@mui/material'
 import { useAppDispatch } from 'store'
 import { trModel } from '5-entities/transaction'
+import { mixedTagId } from '5-entities/tag'
 import { TagList } from '5-entities/tag/ui/TagList'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
@@ -38,7 +39,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   const sameComments = isSameComments(transactions)
   const types = getTypes(transactions)
   const tagType = types.income ? (types.outcome ? null : 'income') : 'outcome'
-  const commonTags = sameTags ? transactions[0]?.tag || [] : ['mixed']
+  const commonTags = sameTags ? transactions[0]?.tag || [] : [mixedTagId]
 
   const [tags, setTags] = useState(commonTags)
   const [comment, setComment] = useState(

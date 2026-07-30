@@ -8,6 +8,7 @@ import {
   TTransactionId,
 } from '6-shared/types'
 import { applyClientPatch } from 'store/data'
+import { mixedTagId, nullTagId } from '5-entities/tag'
 import { getTransactionsById } from './model'
 import { isViewed } from './helpers'
 
@@ -136,10 +137,10 @@ const modifyTags = (prevTags: string[] | null, newTags?: string[]) => {
   if (!newTags) return prevTags
   let result: TTagId[] = []
   const addId = (id: string) =>
-    result.includes(id) || id === 'null' ? '' : result.push(id)
+    result.includes(id) || id === nullTagId ? '' : result.push(id)
   newTags?.forEach(id => {
-    // 'mixed' is a placeholder for the transaction's own tags, never a real id
-    if (id === 'mixed') prevTags?.forEach(addId)
+    // mixedTagId is a placeholder for the transaction's own tags, never a real id
+    if (id === mixedTagId) prevTags?.forEach(addId)
     else addId(id)
   })
   return result

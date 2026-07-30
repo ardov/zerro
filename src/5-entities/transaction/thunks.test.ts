@@ -2,6 +2,8 @@ import type { TTagId } from '6-shared/types'
 import { describe, expect, test } from 'vitest'
 import { store } from 'store'
 import { applyClientPatch } from 'store/data'
+import { mixedTagId } from '5-entities/tag'
+import { getMainTag } from './helpers'
 import { makeTransaction } from './makeTransaction'
 import { getTransactionsById } from './model'
 import { bulkEditTransactions } from './thunks'
@@ -28,7 +30,7 @@ describe('bulkEditTransactions', () => {
       })
     )
     store.dispatch(
-      bulkEditTransactions(['tr1', 'tr2'], { tags: ['mixed', 'tag3'] })
+      bulkEditTransactions(['tr1', 'tr2'], { tags: [mixedTagId, 'tag3'] })
     )
     const transactions = getTransactionsById(store.getState())
     expect(transactions.tr1.tag).toEqual(['tag1', 'tag3'])
@@ -42,10 +44,21 @@ describe('bulkEditTransactions', () => {
       })
     )
     store.dispatch(
-      bulkEditTransactions(['tr3', 'tr4'], { tags: ['mixed', 'tag3'] })
+      bulkEditTransactions(['tr3', 'tr4'], { tags: [mixedTagId, 'tag3'] })
     )
     const transactions = getTransactionsById(store.getState())
     expect(transactions.tr3.tag).toEqual(['tag1', 'tag3'])
     expect(transactions.tr4.tag).toEqual(['tag3'])
+  })
+})
+
+describe('getMainTag', () => {
+  test('returns null for transactions without tags', () => {
+    expect(getMainTag(makeTr('tr5', null))).toBe(null)
+    expect(getMainTag(makeTr('tr6', []))).toBe(null)
+  })
+
+  test('returns the first tag', () => {
+    expect(getMainTag(makeTr('tr7', ['tag1', 'tag2']))).toBe('tag1')
   })
 })
