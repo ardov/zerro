@@ -121,10 +121,6 @@ const Row = styled.div`
     mask-image: linear-gradient(to left, transparent, black 40px);
     -webkit-mask-image: linear-gradient(to left, transparent, black 40px);
   }
-
-  > *:empty + * {
-    margin-left: 0;
-  }
 `
 
 const SecondaryRow = styled(Row)`
