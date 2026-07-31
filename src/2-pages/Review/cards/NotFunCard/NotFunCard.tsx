@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Box,
   Checkbox,
@@ -37,6 +37,18 @@ export function NotFunCard(props: TCardProps) {
   const { income, outcome } = useIncomeOutcome(onlyRUB, props.year)
   const [checkedIncome, setCheckedIncome] = useState(income.map(t => t.id))
   const [checkedOutcome, setCheckedOutcome] = useState(outcome.map(t => t.id))
+
+  const incomeIdsKey = income.map(t => t.id).join(',')
+  const outcomeIdsKey = outcome.map(t => t.id).join(',')
+
+  useEffect(() => {
+    setCheckedIncome(income.map(t => t.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomeIdsKey])
+  useEffect(() => {
+    setCheckedOutcome(outcome.map(t => t.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outcomeIdsKey])
 
   const [displayCurr] = displayCurrency.useDisplayCurrency()
   if (displayCurr !== 'RUB') return null
