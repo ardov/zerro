@@ -1,6 +1,6 @@
 # Zerro Core working notes
 
-- Updated: 2026-07-31
+- Updated: 2026-08-01
 - Purpose: current position, remaining work, and deferred local smells.
   Implementation history stays in Git; contracts stay in
   [architecture.md](./architecture.md); settled decisions and risks stay in
@@ -30,7 +30,8 @@ preview/stage, outbox undo, and explicit sync. No MCP adapter ships with it;
 that surface belongs to the open desktop-host question.
 
 Remaining work is the change history and restore feature decided on 2026-07-31,
-payee-to-merchant promotion decided on 2026-07-30, and materializer cascades that
+whose store diff and backup import shipped on 2026-08-01, payee-to-merchant
+promotion decided on 2026-07-30, and materializer cascades that
 are not yet reachable. Questions still waiting on an
 answer live in [open-decisions.md](../../../../docs/open-decisions.md).
 
@@ -82,16 +83,22 @@ it. Compare resulting state, not patch shape.
 
 Decided 2026-07-31 (see
 [design-ledger.md](./design-ledger.md#change-history-and-restore)). Balance
-prediction landed first, so this is now the current work. The shape decisions
-are settled there;
+prediction landed first, then the store diff of step 1; the log itself is next
+and is gated by measurement. The shape decisions are settled there;
 what remains is ordering, because each step has standalone value and the later
 ones are gated by measurement.
 
-1. `diffStores(current, desired, scope) -> TIntentPatch` plus backup import.
-   `exportJSON` already writes a full `TDataStore`, so import needs no new
-   format, and this step proves the function produces sane patches on real data
-   before anything depends on it. Restore of a history point is the same call
-   with a replayed snapshot instead of a parsed file.
+1. ~~`diffStores(current, desired, scope) -> TIntentPatch` plus backup
+   import.~~ Shipped 2026-08-01. `internal/operations/restore/diffStores.ts`
+   holds the diff and `summarizeStoreDiff`; `core.restore` exposes both plus
+   `apply`, which recomputes the diff at dispatch time rather than trusting the
+   caller's preview. The app reads a backup file through the existing export
+   format and confirms the counts before issuing anything. Restore of a history
+   point is the same call with a replayed snapshot instead of a parsed file.
+   What the diff can and cannot remove is settled in
+   [design-ledger.md](./design-ledger.md#change-history-and-restore); the gap
+   worth revisiting is account, tag, and merchant removal, which stays blocked
+   on the same deletion commands as the materializer cascades.
 2. Measure a genesis snapshot and a realistic diff run on a real account. This
    gates step 3 and is the maintainer's to run —
    [open-decisions.md](../../../../docs/open-decisions.md#6-retention-budget-for-the-change-log).

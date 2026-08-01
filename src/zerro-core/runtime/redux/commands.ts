@@ -27,6 +27,11 @@ import {
   type TReminderPatch,
 } from '../../internal/domain/zenmoney/entities/reminders'
 import type { TISOMonth } from '../../internal/domain/foundation/primitives'
+import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
+import {
+  diffStores,
+  type TStoreDiffScope,
+} from '../../internal/operations/restore/diffStores'
 import type { TTagId } from '../../internal/domain/zenmoney/entities/tags'
 import { selectData } from './state'
 import {
@@ -340,6 +345,20 @@ export function mergeTransactionsAsTransfer(ids: TTransactionId[]): AppThunk {
   return executeCommand(state =>
     compileMergeTransactionsAsTransfer(selectData(state).transaction, ids)
   )
+}
+
+/**
+ * Writes whatever moves the store toward `desired` inside `scope`.
+ *
+ * The diff is recomputed at dispatch time rather than taken from the caller's
+ * preview: a background pull may have landed since, and the restore is defined
+ * against the store it is applied to.
+ */
+export function restoreDataStore(
+  desired: TDataStore,
+  scope?: TStoreDiffScope
+): AppThunk {
+  return executeCommand(state => diffStores(selectData(state), desired, scope))
 }
 
 function normalizeEnvelopeSettings(

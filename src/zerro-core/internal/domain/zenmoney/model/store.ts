@@ -105,6 +105,8 @@ export const intentEntityKeys = [
   'transaction',
 ] as const satisfies readonly Exclude<keyof TIntentPatch, 'deletion'>[]
 
+export type TIntentEntityKey = (typeof intentEntityKeys)[number]
+
 export const intentPatchKeys = [
   'deletion',
   ...intentEntityKeys,

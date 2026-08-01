@@ -44,6 +44,7 @@ import { useRegularSync } from '3-widgets/RegularSyncHandler'
 import { logOut } from '4-features/authorization'
 import { exportCSV } from '4-features/export/exportCSV'
 import { exportJSON } from '4-features/export/exportJSON'
+import { ImportBackupItem } from '4-features/import/ImportBackupItem'
 import { clearLocalData } from '4-features/localData'
 import { convertZmBudgetsToZerro } from '4-features/budget/convertZmBudgetsToZerro'
 import { registerPopover } from '6-shared/historyPopovers'
@@ -100,9 +101,10 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
         </MenuItem>
       )}
       <Divider sx={{ opacity: '0.6' }} />
-      <ListSubheader>{t('export')}</ListSubheader>
+      <ListSubheader>{t('data')}</ListSubheader>
       <ExportCsvItem />
       <ExportJsonItem />
+      <ImportBackupItem />
       <Divider sx={{ opacity: '0.6' }} />
       <LangItem onClose={props.onClose} />
       <LogOutItem onClose={props.onClose} />

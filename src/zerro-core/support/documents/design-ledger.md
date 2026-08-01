@@ -1,6 +1,6 @@
 # Zerro Core design ledger
 
-- Updated: 2026-07-31
+- Updated: 2026-08-01
 - Purpose: settled decisions, accepted risks, active bridges, and unresolved
   architectural questions. History stays in Git. Questions that need the
   maintainer rather than an implementer are listed for review in
@@ -151,6 +151,22 @@ any retained point. The implementation path is
   `diffStores(current, desired, scope) -> TIntentPatch`. It produces an ordinary
   command, so restore inherits materialization, transport, undo-before-push, and
   its own journal entry. There is no second write path into the store.
+  Implemented 2026-08-01 in `internal/operations/restore/diffStores.ts`, with
+  backup import as its first consumer.
+- A restore removes a row only where the domain already has a removal, and the
+  diff carries one row per entity type saying which: soft delete for
+  transactions, zeroing for budgets, a real `deletion` for reminders, and
+  nothing for accounts, tags, and merchants. Emitting a deletion for the last
+  three would leave transactions referencing a row that no longer exists
+  locally, because the server cascades of materialization.md rules 4-7 are not
+  predicted; they become expressible together, when the deletion commands ship.
+- The diff never resurrects. A transaction that is deleted on either side is
+  skipped entirely, which is the same ratchet the materializer applies, and it
+  is what makes restoring twice a no-op instead of a second round of writes.
+- `apply` recomputes the diff at dispatch time and never issues a patch built
+  for the preview. A background pull can land between the two, and a restore is
+  defined against the store it is applied to, not the one the user was shown.
+  The preview is therefore a count, not a promise.
 - Restore never truncates the timeline. It appends one more entry like any other
   change. Dropping later points would destroy both the record of what was
   overwritten and the ability to restore back.
@@ -163,7 +179,8 @@ any retained point. The implementation path is
   materialization or transport path may read one.
 
 Restore is not undo, and three consequences must be visible in the UI rather
-than only recorded here:
+than only recorded here. The backup-import confirmation states all three and
+shows the per-entity counts the restore would write:
 
 - it overwrites concurrent changes from other devices inside its scope — the
   motivating "my phone changed something" case is exactly when other real edits

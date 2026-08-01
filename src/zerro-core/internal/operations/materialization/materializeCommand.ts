@@ -7,6 +7,7 @@ import {
   getRootUserId,
   hasDeletableAmounts,
   intentPatchKeys,
+  isSameFieldValue,
   makeAccount,
   makeMerchant,
   makeReminder,
@@ -324,7 +325,7 @@ function compileEntityIntents(
     fields.forEach(field => {
       if (
         field in entity &&
-        (!current || !valuesEqual(field, current[field], entity[field]))
+        (!current || !isSameFieldValue(field, current[field], entity[field]))
       ) {
         intent[field] = entity[field]
       }
@@ -415,7 +416,7 @@ function omitFactoryDefaults(
       ([field, value]) =>
         field === 'id' ||
         required.has(field) ||
-        !valuesEqual(field, baseline[field], value)
+        !isSameFieldValue(field, baseline[field], value)
     )
   ) as TEntity
 }
@@ -460,21 +461,8 @@ function patchIsApplied(
   patch: Record<string, unknown>
 ): boolean {
   return Object.entries(patch).every(([key, value]) =>
-    valuesEqual(key, current[key], value)
+    isSameFieldValue(key, current[key], value)
   )
-}
-
-function valuesEqual(key: string, left: unknown, right: unknown): boolean {
-  // ZenMoney canonicalizes an empty transaction comment to null.
-  if (key === 'comment') return (left ?? '') === (right ?? '')
-
-  if (Array.isArray(left) && Array.isArray(right)) {
-    return (
-      left.length === right.length &&
-      left.every((value, index) => Object.is(value, right[index]))
-    )
-  }
-  return Object.is(left, right)
 }
 
 function nextChanged(changedAt: number, currentChanged = 0): number {

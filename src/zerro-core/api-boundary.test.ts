@@ -59,6 +59,7 @@ describe('zerro-core API boundary', () => {
         'merchants',
         'months',
         'reminders',
+        'restore',
         'settings',
         'tags',
         'transactions',

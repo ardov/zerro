@@ -13,6 +13,7 @@ export type AnalyticsEventMap = {
     goal_type?: 'incomePercent' | 'monthly' | 'monthlySpend' | 'targetBalance'
   }
   budget_quick_amount_selected: { preset_position: number }
+  data_backup_imported: Record<string, never>
   data_export_requested: { format: 'csv' | 'json' }
   envelope_color_changed: Record<string, never>
   external_link_opened: {
