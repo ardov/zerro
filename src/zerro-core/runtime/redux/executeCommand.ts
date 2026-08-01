@@ -19,6 +19,11 @@ export type TReduxCommandCompiler<TReceipt = unknown> = (
   ctx: TCoreContext
 ) => TIntentPatch | TCompiled<TReceipt>
 
+export type TCommandExecution<TReceipt> = {
+  applied: boolean
+  receipt: TReceipt | undefined
+}
+
 // Late-bound lookups so Date.now/uuid mocks installed after module load work.
 const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
 
@@ -30,16 +35,27 @@ const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
 export function executeReduxCommand<TReceipt = unknown>(
   compile: TReduxCommandCompiler<TReceipt>
 ): AppThunk<TReceipt | undefined> {
+  return (dispatch, getState, extra) => {
+    return executeReduxCommandWithStatus(compile)(dispatch, getState, extra)
+      .receipt
+  }
+}
+
+/** Like `executeReduxCommand`, but reports whether an outbox command was added. */
+export function executeReduxCommandWithStatus<TReceipt = unknown>(
+  compile: TReduxCommandCompiler<TReceipt>
+): AppThunk<TCommandExecution<TReceipt>> {
   return (dispatch, getState) => {
     const state = getState()
     const result = compile(state, defaultCtx)
     const patch = isCompiled(result) ? result.patch : result
+    const applied =
+      !isEmptyPatch(patch) && appendIntentPatch(dispatch, state, patch)
 
-    if (!isEmptyPatch(patch)) {
-      appendIntentPatch(dispatch, state, patch)
+    return {
+      applied,
+      receipt: isCompiled(result) ? result.receipt : undefined,
     }
-
-    return isCompiled(result) ? result.receipt : undefined
   }
 }
 
@@ -53,13 +69,14 @@ function appendIntentPatch(
   dispatch: AppDispatch,
   state: RootState,
   patch: TIntentPatch
-): void {
+): boolean {
   const data = selectData(state)
   const command = issuePatch(data, patch, defaultCtx.now())
   const materialized = materializeCommand(data, command)
-  if (isEmptyPatch(materialized)) return
+  if (isEmptyPatch(materialized)) return false
 
   dispatch(appendClientCommand(command))
+  return true
 }
 
 function isEmptyPatch(patch: TIntentPatch): boolean {

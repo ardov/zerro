@@ -179,15 +179,14 @@ never serializes `current` or the outbox.
 ### 3.1 Root user setting
 
 Add a `TUserPatch`, add `user` to `TIntentPatch`, and teach issue/materialization
-to handle an existing-only entity. Restore only `monthStartDay` on the root
-user.
+to handle an existing-only entity. Restore `currency` and `monthStartDay` on
+the root user.
 
 Do not restore:
 
 - `paidTill`;
 - `subscription` or `subscriptionRenewalDate`;
 - login or email;
-- currency;
 - `isForecastEnabled`;
 - `planBalanceMode` or `planSettings`.
 
@@ -521,7 +520,7 @@ the completion snackbar only if a command was actually appended.
 
 ### User and marker coverage
 
-- `monthStartDay` restored;
+- root-user `currency` and `monthStartDay` restored;
 - billing and unsupported user fields ignored;
 - users never created or deleted;
 - marker create, update, and delete;
@@ -588,7 +587,7 @@ the completion snackbar only if a command was actually appended.
 1. `test(import): define strict full-backup contract`
 2. `feat(import): validate complete backup and references`
 3. `feat(export): warn when pending changes are excluded`
-4. `feat(core): support monthStartDay restore`
+4. `feat(core): support root-user preference restore`
 5. `feat(core): add reminder marker intents and restore`
 6. `refactor(core): introduce restore reconciliation plan`
 7. `feat(core): restore entities with fresh ids and remap references`

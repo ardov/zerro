@@ -19,9 +19,11 @@ import {
   isSameFieldValue,
   merchantWritableFields,
   reminderWritableFields,
+  reminderMarkerWritableFields,
   tagWritableFields,
   transactionIntentFields,
   transactionWritableFields,
+  userWritableFields,
   type TDataStore,
   type TDeletionIntent,
   type TIntentEntityKey,
@@ -50,14 +52,27 @@ type TEntityRow = {
   writableFields: readonly string[]
   /** Fields a creation intent may carry. Defaults to the writable set. */
   creationFields?: readonly string[]
+  /** This entity can only update a live same-id row. */
+  existingOnly?: boolean
   removal: TRemoval
   /** Fields written by a `zero` removal. */
   zeroFields?: readonly string[]
   /** Rows the diff must not touch on either side. */
   skip?: (row: TRow) => boolean
+  /** A lifecycle representation that means the row is absent from the target. */
+  isAbsent?: (row: TRow) => boolean
 }
 
 const entityRows = [
+  {
+    key: 'user',
+    writableFields: userWritableFields,
+    removal: null,
+    existingOnly: true,
+    // The root user is an account identity, not a restorable record. Its only
+    // writable restore field is the root preference above.
+    skip: row => row.parent !== null,
+  },
   // Accounts, merchants, and tags have no deletion command, and the cascades a
   // deletion triggers server-side (materialization.md rules 4-7) are not
   // predicted yet. Emitting one would leave transactions pointing at a row that
@@ -75,6 +90,15 @@ const entityRows = [
     key: 'reminder',
     writableFields: reminderWritableFields,
     removal: 'deletion',
+  },
+  {
+    key: 'reminderMarker',
+    writableFields: reminderMarkerWritableFields,
+    removal: 'deletion',
+    // ZenMoney does not preserve `state: deleted` as an ordinary update. It
+    // is the wire representation of absence, so restore turns it into a
+    // deletion intent or ignores it when no live marker exists.
+    isAbsent: row => row.state === 'deleted',
   },
   {
     key: 'transaction',
@@ -119,10 +143,13 @@ export function diffStores(
     const intents: TRow[] = []
 
     unionIds(currentById, desiredById).forEach(id => {
-      const before = currentById[id]
-      const after = desiredById[id]
-      if (!inScope(scope, row.key, before, after)) return
-      if (isSkipped(row, before) || isSkipped(row, after)) return
+      const storedBefore = currentById[id]
+      const storedAfter = desiredById[id]
+      if (!inScope(scope, row.key, storedBefore, storedAfter)) return
+      if (isSkipped(row, storedBefore) || isSkipped(row, storedAfter)) return
+
+      const before = isAbsent(row, storedBefore) ? undefined : storedBefore
+      const after = isAbsent(row, storedAfter) ? undefined : storedAfter
 
       if (!after) {
         if (!before) return
@@ -133,7 +160,9 @@ export function diffStores(
 
       const intent = before
         ? updateIntent(row, before, after)
-        : creationIntent(row, after)
+        : 'existingOnly' in row && row.existingOnly
+          ? undefined
+          : creationIntent(row, after)
       if (intent) intents.push(intent)
     })
 
@@ -199,6 +228,10 @@ function removalIntent(
 
 function isSkipped(row: TEntityRow, entity: TRow | undefined): boolean {
   return entity ? (row.skip?.(entity) ?? false) : false
+}
+
+function isAbsent(row: TEntityRow, entity: TRow | undefined): boolean {
+  return entity ? (row.isAbsent?.(entity) ?? false) : false
 }
 
 function inScope(

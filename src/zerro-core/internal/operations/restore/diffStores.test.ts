@@ -5,6 +5,7 @@ import {
   makeBudget,
   makeMerchant,
   makeReminder,
+  makeReminderMarker,
   makeStore,
   makeTag,
   makeTransaction,
@@ -53,6 +54,44 @@ describe('diffStores', () => {
     })
   })
 
+  it('restores root-user currency and monthStartDay', () => {
+    const current = makeSnapshot({
+      user: {
+        1: makeUser({
+          id: 1,
+          parent: null,
+          currency: 2,
+          monthStartDay: 1,
+          paidTill: 100,
+        }),
+      },
+    })
+    const desired = makeSnapshot({
+      user: {
+        1: makeUser({
+          id: 1,
+          parent: null,
+          currency: 9,
+          monthStartDay: 15,
+          paidTill: 999,
+        }),
+      },
+    })
+
+    expect(diffStores(current, desired)).toEqual({
+      user: [{ id: 1, currency: 9, monthStartDay: 15 }],
+    })
+  })
+
+  it('never creates a user from a restore target', () => {
+    const current = makeSnapshot()
+    const desired = makeSnapshot({
+      user: { 2: makeUser({ id: 2, parent: null, currency: 2 }) },
+    })
+
+    expect(diffStores(current, desired)).toEqual({})
+  })
+
   it('ignores fields the server owns', () => {
     const current = makeSnapshot({
       account: {
@@ -75,6 +114,65 @@ describe('diffStores', () => {
       transaction: { tr: makeTransaction({ id: 'tr', comment: '' }) },
     })
     expect(diffStores(current, desired)).toEqual({})
+  })
+
+  it('creates and updates reminder markers', () => {
+    const current = makeSnapshot({
+      reminderMarker: {
+        existing: makeReminderMarker({ id: 'existing', comment: 'Before' }),
+      },
+    })
+    const desired = makeSnapshot({
+      reminderMarker: {
+        existing: makeReminderMarker({ id: 'existing', comment: 'After' }),
+        created: makeReminderMarker({ id: 'created', notify: true }),
+      },
+    })
+
+    expect(diffStores(current, desired)).toEqual({
+      reminderMarker: [
+        {
+          id: 'created',
+          incomeInstrument: 2,
+          incomeAccount: 'cash',
+          income: 0,
+          outcomeInstrument: 2,
+          outcomeAccount: 'card',
+          outcome: 0,
+          tag: null,
+          merchant: null,
+          payee: null,
+          comment: null,
+          date: '2026-01-01',
+          reminder: 'reminder',
+          state: 'planned',
+          notify: true,
+        },
+        { id: 'existing', comment: 'After' },
+      ],
+    })
+  })
+
+  it('normalizes a deleted reminder marker as absence', () => {
+    const current = makeSnapshot({
+      reminderMarker: {
+        marker: makeReminderMarker({ id: 'marker', state: 'planned' }),
+      },
+    })
+    const desired = makeSnapshot({
+      reminderMarker: {
+        marker: makeReminderMarker({ id: 'marker', state: 'deleted' }),
+        absent: makeReminderMarker({ id: 'absent', state: 'deleted' }),
+      },
+    })
+
+    const patch = diffStores(current, desired)
+    expect(patch).toEqual({
+      deletion: [{ id: 'marker', object: 'reminderMarker' }],
+    })
+    expect(summarizeStoreDiff(current, patch)).toEqual({
+      reminderMarker: { created: 0, updated: 0, removed: 1 },
+    })
   })
 
   it('recreates a missing row under its own id', () => {

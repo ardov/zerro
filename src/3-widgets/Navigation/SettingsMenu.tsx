@@ -35,7 +35,7 @@ import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
 import { appVersion } from '6-shared/config'
 
-import { useAppDispatch } from 'store'
+import { useAppDispatch, useAppSelector } from 'store'
 import { resetData } from 'store/data'
 
 import { core } from 'zerro-core/redux'
@@ -135,12 +135,24 @@ function ExportCsvItem() {
 function ExportJsonItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const handleExportCSV = () => {
+  const hasPendingOutbox = useAppSelector(state => state.data.outbox.length > 0)
+  const downloadBackup = () => {
     track('data_export_requested', { format: 'json' })
     dispatch(exportJSON)
   }
+  const confirmExport = useConfirm({
+    title: t('exportPendingTitle'),
+    description: t('exportPendingWarning'),
+    cancelText: t('exportPendingCancel'),
+    okText: t('exportPendingConfirm'),
+    onOk: downloadBackup,
+  })
+  const handleExportJson = () => {
+    if (hasPendingOutbox) confirmExport()
+    else downloadBackup()
+  }
   return (
-    <MenuItem onClick={handleExportCSV}>
+    <MenuItem onClick={handleExportJson}>
       <ListItemIcon>
         <SaveAltIcon />
       </ListItemIcon>

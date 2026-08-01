@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { convertDiff } from '6-shared/api/zm-adapter'
+import { convertDiff, parseFullBackup } from '6-shared/api/zm-adapter'
 import type { TDataStore, TNormalizedPatch } from '6-shared/types'
 import type { AppDispatch, AppThunk, RootState } from 'store'
 import { appendClientCommand } from 'store/data'
@@ -8,19 +8,47 @@ import { applyPatch } from 'zerro-core/internal/domain/zenmoney'
 import { materializeCommand } from 'zerro-core/internal/operations/materialization'
 import {
   makeAccount,
+  makeInstrument,
   makeStore,
   makeTransaction,
   makeUser,
 } from 'zerro-core/support/testing/zenmoneyTestData'
 
-import { importBackup, parseBackup, previewBackup } from './importBackup'
+import {
+  checkBackupCompatibility,
+  importBackup,
+  previewBackup,
+} from './importBackup'
 
 vi.mock('6-shared/analytics', () => ({ track: () => {} }))
 
 const rootUser = makeUser({ id: 1, parent: null, currency: 2 })
+const backupCollectionKeys = [
+  'instrument',
+  'country',
+  'company',
+  'user',
+  'merchant',
+  'account',
+  'tag',
+  'budget',
+  'reminder',
+  'reminderMarker',
+  'transaction',
+]
 
 function makeSnapshot(patch: Partial<TDataStore> = {}): TDataStore {
-  return makeStore({ user: { 1: rootUser }, ...patch })
+  return makeStore({
+    instrument: {
+      1: makeInstrument({ id: 1 }),
+      2: makeInstrument({ id: 2 }),
+    },
+    country: {
+      1: { id: 1, title: 'United States', currency: 1, domain: 'us' },
+    },
+    user: { 1: rootUser },
+    ...patch,
+  })
 }
 
 /** The same file `exportJSON` writes: a full store as a ZenMoney diff. */
@@ -66,18 +94,24 @@ function makeThunkRunner(initial: RootState) {
   }
 }
 
-describe('parseBackup', () => {
+describe('parseFullBackup', () => {
   it('reads an exported backup back into the store it described', () => {
     const store = makeSnapshot({
       account: {
         acc: makeAccount({ id: 'acc', title: 'Cash', changed: 5000 }),
       },
       transaction: {
-        tr: makeTransaction({ id: 'tr', outcome: 10, changed: 7000 }),
+        tr: makeTransaction({
+          id: 'tr',
+          incomeAccount: 'acc',
+          outcomeAccount: 'acc',
+          outcome: 10,
+          changed: 7000,
+        }),
       },
     })
 
-    const parsed = parseBackup(toBackupFile(store))
+    const parsed = parseFullBackup(toBackupFile(store))
     expect(parsed.ok).toBe(true)
     if (!parsed.ok) return
     expect(parsed.store.account.acc).toMatchObject({
@@ -89,21 +123,74 @@ describe('parseBackup', () => {
   })
 
   it('rejects a file that is not JSON', () => {
-    expect(parseBackup('not json at all')).toEqual({
+    expect(parseFullBackup('not json at all')).toEqual({
       ok: false,
       reason: 'unreadable',
     })
   })
 
   it('rejects JSON that carries no entities', () => {
-    expect(parseBackup('{"serverTimestamp":1}')).toEqual({
+    expect(parseFullBackup('{"serverTimestamp":1}')).toEqual({
       ok: false,
       reason: 'notABackup',
     })
-    expect(parseBackup('[1,2,3]')).toEqual({ ok: false, reason: 'notABackup' })
-    expect(parseBackup('{"account":"nope"}')).toEqual({
+    expect(parseFullBackup('[1,2,3]')).toEqual({
       ok: false,
       reason: 'notABackup',
+    })
+    expect(parseFullBackup('{"account":"nope"}')).toEqual({
+      ok: false,
+      reason: 'notABackup',
+    })
+  })
+
+  it('requires the complete exporter shape, including empty collections', () => {
+    const complete = JSON.parse(toBackupFile(makeSnapshot())) as Record<
+      string,
+      unknown
+    >
+
+    backupCollectionKeys.forEach(key => {
+      const incomplete = { ...complete }
+      delete incomplete[key]
+      expect(parseFullBackup(JSON.stringify(incomplete))).toEqual({
+        ok: false,
+        reason: 'notABackup',
+      })
+    })
+  })
+
+  it('rejects incremental diffs, deletions, malformed rows, and dangling references', () => {
+    const complete = JSON.parse(toBackupFile(makeSnapshot())) as Record<
+      string,
+      unknown
+    >
+    const instruments = complete.instrument as unknown[]
+    const invalidFiles = [
+      { ...complete, deletion: [] },
+      { ...complete, unsupportedCollection: [] },
+      { ...complete, serverTimestamp: -1 },
+      { ...complete, account: [{ id: 'only-an-id' }] },
+      {
+        ...complete,
+        instrument: [...instruments, instruments[0]],
+      },
+      {
+        ...complete,
+        user: [
+          {
+            ...(complete.user as Array<Record<string, unknown>>)[0],
+            currency: 999,
+          },
+        ],
+      },
+    ]
+
+    invalidFiles.forEach(file => {
+      expect(parseFullBackup(JSON.stringify(file))).toEqual({
+        ok: false,
+        reason: 'notABackup',
+      })
     })
   })
 })
@@ -150,7 +237,10 @@ describe('importBackup', () => {
 
   it('applies the backup as one undoable command', () => {
     const runner = makeThunkRunner(makeTestRootState(drifted))
-    runner.dispatch(importBackup(backup))
+    expect(runner.dispatch(importBackup(backup))).toEqual({
+      ok: true,
+      applied: true,
+    })
 
     expect(runner.commands()).toHaveLength(1)
     const restored = runner.state().data.current
@@ -161,7 +251,68 @@ describe('importBackup', () => {
 
   it('writes nothing when the backup matches the current data', () => {
     const runner = makeThunkRunner(makeTestRootState(backup))
-    runner.dispatch(importBackup(backup))
+    expect(runner.dispatch(importBackup(backup))).toEqual({
+      ok: true,
+      applied: false,
+    })
     expect(runner.commands()).toEqual([])
+  })
+
+  it('rejects a structurally valid backup from another account', () => {
+    const foreign = makeSnapshot({
+      user: {
+        2: makeUser({ id: 2, parent: null, currency: 2 }),
+      },
+    })
+    const runner = makeThunkRunner(makeTestRootState(drifted))
+
+    expect(runner.dispatch(checkBackupCompatibility(foreign))).toEqual({
+      ok: false,
+      reason: 'incompatibleBackup',
+    })
+    expect(runner.dispatch(importBackup(foreign))).toEqual({
+      ok: false,
+      reason: 'incompatibleBackup',
+    })
+    expect(runner.commands()).toEqual([])
+  })
+
+  it('restores root-user currency when its instrument is available locally', () => {
+    const currencyBackup = makeSnapshot({
+      user: {
+        1: makeUser({ id: 1, parent: null, currency: 1 }),
+      },
+    })
+    const runner = makeThunkRunner(makeTestRootState(makeSnapshot()))
+
+    expect(runner.dispatch(checkBackupCompatibility(currencyBackup))).toEqual({
+      ok: true,
+    })
+    expect(runner.dispatch(importBackup(currencyBackup))).toEqual({
+      ok: true,
+      applied: true,
+    })
+    expect(runner.state().data.current.user[1].currency).toBe(1)
+  })
+
+  it('rejects a backup that needs a missing read-only instrument', () => {
+    const dictionaryMismatch = makeSnapshot({
+      instrument: {
+        1: makeInstrument({ id: 1 }),
+        2: makeInstrument({ id: 2 }),
+        9: makeInstrument({ id: 9 }),
+      },
+      account: {
+        foreignInstrument: makeAccount({
+          id: 'foreignInstrument',
+          instrument: 9,
+        }),
+      },
+    })
+    const runner = makeThunkRunner(makeTestRootState(makeSnapshot()))
+
+    expect(
+      runner.dispatch(checkBackupCompatibility(dictionaryMismatch))
+    ).toEqual({ ok: false, reason: 'incompatibleBackup' })
   })
 })

@@ -6,13 +6,16 @@ import type { TMsTime, TUnixTime } from '../primitives'
 import type { TInstrument } from '../entities/instruments'
 import type { TCountry } from '../entities/countries'
 import type { TCompany } from '../entities/companies'
-import type { TUser, TUserId } from '../entities/users'
+import type { TUser, TUserId, TUserPatch } from '../entities/users'
 import type { TMerchant, TMerchantPatch } from '../entities/merchants'
 import type { TAccount, TAccountPatch } from '../entities/accounts'
 import type { TTag, TTagPatch } from '../entities/tags'
 import type { TBudget, TBudgetPatch } from '../entities/budgets'
 import type { TReminder, TReminderPatch } from '../entities/reminders'
-import type { TReminderMarker } from '../entities/reminderMarkers'
+import type {
+  TReminderMarker,
+  TReminderMarkerPatch,
+} from '../entities/reminderMarkers'
 import type {
   TTransaction,
   TTransactionPatch,
@@ -88,20 +91,24 @@ export type TDeletionIntent = Pick<TDeletionObject, 'id' | 'object'>
  */
 export type TIntentPatch = {
   deletion?: TDeletionIntent[]
+  user?: TUserPatch[]
   account?: TAccountPatch[]
   merchant?: TMerchantPatch[]
   tag?: TTagPatch[]
   budget?: TBudgetPatch[]
   reminder?: TReminderPatch[]
+  reminderMarker?: TReminderMarkerPatch[]
   transaction?: TTransactionPatch[]
 }
 
 export const intentEntityKeys = [
+  'user',
   'account',
   'merchant',
   'tag',
   'budget',
   'reminder',
+  'reminderMarker',
   'transaction',
 ] as const satisfies readonly Exclude<keyof TIntentPatch, 'deletion'>[]
 

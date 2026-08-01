@@ -65,6 +65,7 @@ import {
 import {
   executeReduxCommand,
   executeReduxPatch,
+  executeReduxCommandWithStatus,
   type TReduxCommandCompiler,
 } from './executeCommand'
 
@@ -357,8 +358,11 @@ export function mergeTransactionsAsTransfer(ids: TTransactionId[]): AppThunk {
 export function restoreDataStore(
   desired: TDataStore,
   scope?: TStoreDiffScope
-): AppThunk {
-  return executeCommand(state => diffStores(selectData(state), desired, scope))
+): AppThunk<boolean> {
+  return (dispatch, getState, extra) =>
+    executeReduxCommandWithStatus(state =>
+      diffStores(selectData(state), desired, scope)
+    )(dispatch, getState, extra).applied
 }
 
 function normalizeEnvelopeSettings(

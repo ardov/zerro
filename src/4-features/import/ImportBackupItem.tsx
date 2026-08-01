@@ -17,19 +17,26 @@ import {
 } from '@mui/material'
 import { UploadIcon } from '6-shared/ui/Icons'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
+import { parseFullBackup } from '6-shared/api/zm-adapter'
 import type { TDataStore } from '6-shared/types'
 import { useAppDispatch } from 'store'
 import type { core } from 'zerro-core/redux'
 
-import { importBackup, parseBackup, previewBackup } from './importBackup'
+import {
+  checkBackupCompatibility,
+  importBackup,
+  previewBackup,
+} from './importBackup'
 
 /** Display order of the summary, and the only entity types it can carry. */
 const entityLabels = [
+  ['user', 'entity_userSettings'],
   ['account', 'entity_account'],
   ['tag', 'entity_tag'],
   ['merchant', 'entity_merchant'],
   ['budget', 'entity_budget'],
   ['reminder', 'entity_reminder'],
+  ['reminderMarker', 'entity_reminderMarker'],
   ['transaction', 'entity_transaction'],
 ] as const
 
@@ -57,9 +64,23 @@ export function ImportBackupItem() {
       event.target.value = ''
       if (!file) return
 
-      const parsed = parseBackup(await file.text())
+      let text: string
+      try {
+        text = await file.text()
+      } catch {
+        snackbar({ message: t('importError_unreadable') })
+        return
+      }
+
+      const parsed = parseFullBackup(text)
       if (!parsed.ok) {
         snackbar({ message: t(`importError_${parsed.reason}`) })
+        return
+      }
+
+      const compatibility = dispatch(checkBackupCompatibility(parsed.store))
+      if (!compatibility.ok) {
+        snackbar({ message: t(`importError_${compatibility.reason}`) })
         return
       }
 
@@ -75,9 +96,15 @@ export function ImportBackupItem() {
 
   const handleConfirm = useCallback(() => {
     if (!pending) return
-    dispatch(importBackup(pending.store))
+    const result = dispatch(importBackup(pending.store))
     setPending(null)
-    snackbar({ message: t('importDone') })
+    if (!result.ok) {
+      snackbar({ message: t(`importError_${result.reason}`) })
+    } else {
+      snackbar({
+        message: t(result.applied ? 'importDone' : 'importNoChanges'),
+      })
+    }
   }, [dispatch, pending, snackbar, t])
 
   return (

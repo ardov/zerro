@@ -11,6 +11,7 @@ import {
   makeAccount,
   makeMerchant,
   makeReminder,
+  makeReminderMarker,
   makeTag,
   makeTagBudget,
   makeTransaction,
@@ -18,11 +19,14 @@ import {
   merchantWritableFields,
   reminderRequiredFields,
   reminderWritableFields,
+  reminderMarkerRequiredFields,
+  reminderMarkerWritableFields,
   tagRequiredFields,
   tagWritableFields,
   transactionIntentFields,
   transactionRequiredFields,
   transactionWritableFields,
+  userWritableFields,
   type TDataStore,
   type TIntentPatch,
   type TMsTime,
@@ -54,16 +58,24 @@ type TEntityRow = {
   writableFields: readonly string[]
   requiredFields: readonly string[]
   creationFields?: readonly string[]
-  make: (
+  make?: (
     draft: TEntity,
     ctx: ReturnType<typeof deterministicContext>
   ) => TEntity
+  /** This type may only modify a row that already exists. */
+  existingOnly?: boolean
   existingFields?: (fields: TEntity) => TEntity
   skipExisting?: (current: TEntity) => boolean
   validateCreation?: (entity: TEntity, intent: TEntity) => void
 }
 
 const entityRegistry = [
+  {
+    key: 'user',
+    writableFields: userWritableFields,
+    requiredFields: [],
+    existingOnly: true,
+  },
   {
     key: 'account',
     writableFields: accountWritableFields,
@@ -77,6 +89,16 @@ const entityRegistry = [
     requiredFields: reminderRequiredFields,
     make: (draft, ctx) =>
       makeReminder(draft as Parameters<typeof makeReminder>[0], ctx) as TEntity,
+  },
+  {
+    key: 'reminderMarker',
+    writableFields: reminderMarkerWritableFields,
+    requiredFields: reminderMarkerRequiredFields,
+    make: (draft, ctx) =>
+      makeReminderMarker(
+        draft as Parameters<typeof makeReminderMarker>[0],
+        ctx
+      ) as TEntity,
   },
   {
     key: 'merchant',
@@ -332,6 +354,9 @@ function compileEntityIntents(
     })
 
     if (!current) {
+      if (row.existingOnly) {
+        throw new Error(`Cannot create ${row.key}`)
+      }
       return [compactEntityCreation(snapshot, row, intent, issuedAt)]
     }
     return Object.keys(intent).length > 1 ? [intent] : []
@@ -391,6 +416,7 @@ function materializeEntityCreation(
   intent: TEntity,
   changedAt: TMsTime
 ): TEntity {
+  if (!row.make) throw new Error(`Cannot create ${row.key}`)
   const user = requireRootUser(snapshot, row.key)
   const entity = row.make({ ...intent, user }, deterministicContext(changedAt))
   row.validateCreation?.(entity, intent)

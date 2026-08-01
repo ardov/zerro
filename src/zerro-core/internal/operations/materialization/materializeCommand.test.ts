@@ -5,6 +5,7 @@ import {
   makeBudget,
   makeMerchant,
   makeReminder,
+  makeReminderMarker,
   makeStore,
   makeTag,
   makeTransaction,
@@ -23,6 +24,92 @@ import {
 } from './materializeCommand'
 
 describe('materializeCommand', () => {
+  it('merges root-user preferences into the existing full user', () => {
+    const user = makeUser({
+      id: 1,
+      parent: null,
+      currency: 2,
+      changed: 200,
+      monthStartDay: 1,
+      paidTill: 500,
+    })
+    const snapshot = makeStore({ user: { 1: user } })
+    const command = issuePatch(
+      snapshot,
+      { user: [{ id: 1, currency: 9, monthStartDay: 15 }] },
+      100
+    )
+
+    expect(command.patch).toEqual({
+      user: [{ id: 1, currency: 9, monthStartDay: 15 }],
+    })
+    expect(materializePrimaryCommand(snapshot, command)).toEqual({
+      user: [{ ...user, currency: 9, monthStartDay: 15, changed: 1200 }],
+    })
+  })
+
+  it('rejects creation of a user', () => {
+    expect(() =>
+      issuePatch(makeStore(), { user: [{ id: 1, monthStartDay: 15 }] }, 100)
+    ).toThrow('Cannot create user')
+  })
+
+  it('creates and updates reminder markers through ordinary commands', () => {
+    const user = makeUser({ id: 1, parent: null, currency: 2 })
+    const existing = makeReminderMarker({
+      id: 'existing',
+      changed: 200,
+      notify: false,
+    })
+    const snapshot = makeStore({
+      user: { 1: user },
+      reminderMarker: { existing },
+    })
+    const command = issuePatch(
+      snapshot,
+      {
+        reminderMarker: [
+          { id: 'existing', notify: true },
+          {
+            id: 'created',
+            incomeAccount: 'cash',
+            outcomeAccount: 'card',
+            date: '2026-02-01',
+            reminder: 'reminder',
+          },
+        ],
+      },
+      100
+    )
+
+    expect(command.patch).toEqual({
+      reminderMarker: [
+        { id: 'existing', notify: true },
+        {
+          id: 'created',
+          incomeAccount: 'cash',
+          outcomeAccount: 'card',
+          date: '2026-02-01',
+          reminder: 'reminder',
+        },
+      ],
+    })
+    expect(materializePrimaryCommand(snapshot, command).reminderMarker).toEqual(
+      [
+        { ...existing, notify: true, changed: 1200 },
+        makeReminderMarker({
+          id: 'created',
+          changed: 100,
+          user: 1,
+          incomeAccount: 'cash',
+          outcomeAccount: 'card',
+          date: '2026-02-01',
+          reminder: 'reminder',
+        }),
+      ]
+    )
+  })
+
   it('applies a sparse transaction patch over the latest full entity', () => {
     const current = makeTransaction({
       id: 'tr-1',

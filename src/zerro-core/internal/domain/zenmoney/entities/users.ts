@@ -1,7 +1,7 @@
 import type { TCountryId } from './countries'
 import { getInstCodeMap, type TFxCode, type TInstrumentId } from './instruments'
 import type { TMsTime, TUnixTime } from '../../foundation/primitives'
-import type { ById } from '../../foundation/types'
+import type { ById, EntityPatch } from '../../foundation/types'
 import type { TInstrument } from './instruments'
 
 export type TUserId = number
@@ -26,6 +26,16 @@ export type TZmUser = Omit<TUser, 'changed' | 'paidTill'> & {
   changed: TUnixTime
   paidTill: TUnixTime
 }
+
+/** Restore may only change these root-user preferences. */
+export const userWritableFields = [
+  'currency',
+  'monthStartDay',
+] as const satisfies readonly (keyof TUser)[]
+export type TUserWritableField = (typeof userWritableFields)[number]
+export type TUserPatch = EntityPatch<TUser, TUserWritableField>
+export type TUserIntent = { user: TUserPatch[] }
+
 export function getRootUser(users: ById<TUser>): TUser | null {
   return Object.values(users).find(user => !user.parent) || null
 }

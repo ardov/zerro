@@ -447,6 +447,11 @@ export const en: typeof ru = {
     data: 'Data',
     downloadCSV: 'Download CSV',
     fullBackup: 'Full backup',
+    exportPendingTitle: 'Unsynced changes will not be included',
+    exportPendingWarning:
+      'The file contains the last synchronized state. Local changes stay on this device but are not included in the backup.',
+    exportPendingCancel: 'Cancel',
+    exportPendingConfirm: 'Download anyway',
     restoreFromBackup: 'Restore from backup',
     importTitle: 'Restore from backup',
     importWarning:
@@ -460,11 +465,15 @@ export const en: typeof ru = {
     importNoChanges: 'The file matches your current data',
     importError_unreadable: 'Could not read the file',
     importError_notABackup: 'This does not look like a Zerro backup',
+    importError_incompatibleBackup:
+      'This backup belongs to a different account or needs unavailable reference data',
+    entity_userSettings: 'User settings',
     entity_account: 'Accounts',
     entity_merchant: 'Merchants',
     entity_tag: 'Categories',
     entity_budget: 'Budgets',
     entity_reminder: 'Reminders',
+    entity_reminderMarker: 'Reminder markers',
     entity_transaction: 'Transactions',
     darkMode: 'Dark Mode',
     lightMode: 'Light Mode',

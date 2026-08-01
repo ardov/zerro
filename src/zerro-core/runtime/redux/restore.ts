@@ -1,25 +1,16 @@
 import type { RootState } from 'store'
-import { applyPatch } from '../../internal/domain/zenmoney/model/applyPatch'
-import {
-  createEmptyDataStore,
-  type TDataStore,
-  type TNormalizedPatch,
-} from '../../internal/domain/zenmoney/model/store'
+import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
 import {
   diffStores,
   summarizeStoreDiff,
   type TStoreDiffScope,
   type TStoreDiffSummary,
 } from '../../internal/operations/restore/diffStores'
+import {
+  checkBackupCompatibility as checkStoreBackupCompatibility,
+  type TBackupCompatibilityResult,
+} from '../../internal/operations/restore/backupCompatibility'
 import { selectData } from './state'
-
-/**
- * Reads a full backup as the store it describes. The backup format is the
- * export format: a complete normalized patch over an empty store.
- */
-export function toStore(backup: TNormalizedPatch): TDataStore {
-  return applyPatch(createEmptyDataStore(), backup)
-}
 
 /**
  * What `apply` would write, counted per entity type. Restoring overwrites
@@ -35,9 +26,18 @@ export function preview(
   return summarizeStoreDiff(current, diffStores(current, desired, scope))
 }
 
+/** Validates a decoded backup against the currently signed-in account. */
+export function checkBackupCompatibility(
+  state: RootState,
+  backup: TDataStore
+): TBackupCompatibilityResult {
+  return checkStoreBackupCompatibility(selectData(state), backup)
+}
+
 export { restoreDataStore as apply } from './commands'
 export type {
   TStoreDiffCounts,
   TStoreDiffScope,
   TStoreDiffSummary,
 } from '../../internal/operations/restore/diffStores'
+export type { TBackupCompatibilityResult }

@@ -16,6 +16,8 @@ export {
   type TNormalizedPatch,
 } from './internal/domain/zenmoney/model/store'
 
+export { applyPatch } from './internal/domain/zenmoney/model/applyPatch'
+
 export {
   compileCreateTransaction,
   type TCreateTransactionData,

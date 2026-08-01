@@ -1,5 +1,9 @@
 import { toISODate } from '../../foundation/date'
-import type { Modify, OptionalExceptFor } from '../../foundation/types'
+import type {
+  EntityPatch,
+  Modify,
+  OptionalExceptFor,
+} from '../../foundation/types'
 import type { TCoreContext } from '../../../../types'
 import type { TAccountId } from './accounts'
 import type { TInstrumentId } from './instruments'
@@ -35,10 +39,42 @@ export type TReminderMarker = {
   reminder: TReminderId
   state: TReminderMarkerState
   notify: boolean
+  /** Observed in responses but not accepted for writes yet. */
+  isForecast?: boolean
 }
 export type TZmReminderMarker = Omit<TReminderMarker, 'changed'> & {
   changed: TUnixTime
 }
+/** Fields creation cannot infer from the local root user or factory defaults. */
+export const reminderMarkerRequiredFields = [
+  'incomeAccount',
+  'outcomeAccount',
+  'date',
+  'reminder',
+] as const satisfies readonly (keyof TReminderMarker)[]
+export const reminderMarkerWritableFields = [
+  'incomeInstrument',
+  'incomeAccount',
+  'income',
+  'outcomeInstrument',
+  'outcomeAccount',
+  'outcome',
+  'tag',
+  'merchant',
+  'payee',
+  'comment',
+  'date',
+  'reminder',
+  'state',
+  'notify',
+] as const satisfies readonly (keyof TReminderMarker)[]
+export type TReminderMarkerWritableField =
+  (typeof reminderMarkerWritableFields)[number]
+export type TReminderMarkerPatch = EntityPatch<
+  TReminderMarker,
+  TReminderMarkerWritableField
+>
+export type TReminderMarkerIntent = { reminderMarker: TReminderMarkerPatch[] }
 export type TReminderMarkerFactoryDraft = Modify<
   OptionalExceptFor<
     TReminderMarker,
