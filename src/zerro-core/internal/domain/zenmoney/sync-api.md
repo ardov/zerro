@@ -188,7 +188,9 @@ migration that needs canonical reminders re-read.
   and removes budget rows keyed to that tag. Round 6.1 (2026-08-02) confirmed
   the transaction half on a disposable single-tag income and outcome: both
   rows survived, their `tag` became `null`, and the account balance was
-  unchanged. It does not yet establish multi-tag or reminder/marker behavior.
+  unchanged. Round 6.2 independently confirmed that a matching full budget
+  row is removed, not zeroed. It does not yet establish multi-tag or
+  reminder/marker behavior.
   Deleting a merchant nulls `transaction.merchant`. One resumed probe pull,
   however, showed a deleted
   merchant alongside a surviving `payee`/merchant reference. Until that is

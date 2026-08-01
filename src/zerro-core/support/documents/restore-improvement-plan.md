@@ -457,11 +457,12 @@ Prediction must:
 
 Round 6.1 supplies the single-tag ordinary-income and ordinary-outcome fixture:
 deleting the tag preserves both rows, replaces their `tag` with `null`, and
-does not alter the account balance. Capture fixtures for a multi-tag
-transaction, budgets of the deleted tag, and reminder/marker references before
-shipping the complete cascade. Prediction must reproduce the server's exact
-transaction tag shape and locally remove affected budget rows without sending
-those cascade writes as client intent.
+does not alter the account balance. Round 6.2 confirms that the matching budget
+row is removed, rather than zeroed. Capture fixtures for a multi-tag
+transaction and reminder/marker references before shipping the complete
+cascade. Prediction must reproduce the server's exact transaction tag shape
+and locally remove affected budget rows without sending those cascade writes as
+client intent.
 
 ### 7.3 Merchant deletion
 

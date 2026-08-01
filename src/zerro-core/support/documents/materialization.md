@@ -173,8 +173,10 @@ Deleting a tag nulls `transaction.tag` on referencing transactions **and**
 removes the budget rows keyed to that tag. Round 6.1 confirmed the transaction
 effect on one single-tag income and one single-tag outcome: both rows survived,
 each `tag` became `null`, and their account balance stayed unchanged. The
-second half is easy to forget: ZenMoney budgets are identified by `(user, tag,
-date)` and have no id, so their removal is invisible in the deletion array.
+second half is easy to forget: Round 6.2 independently confirmed that the
+matching budget row is removed rather than zeroed. ZenMoney budgets are
+identified by `(user, tag, date)` and have no id, so their removal is invisible
+in the deletion array.
 
 Note also that budgets have no real delete of their own — a `deletion` entry
 no-ops and zeroing is the only removal.
