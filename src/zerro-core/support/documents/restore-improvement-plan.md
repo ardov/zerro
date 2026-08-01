@@ -1,6 +1,6 @@
 # Full backup restore improvement plan
 
-- Status: checkpoints 1–9 shipped; tag and merchant cascades remain
+- Status: checkpoints 1–10 shipped; merchant cascade remains
 - Updated: 2026-08-02
 - Scope: full-backup validation, semantic reconciliation, id remapping,
   writable entity coverage, deletion cascades, preview, and verification
@@ -458,11 +458,10 @@ Prediction must:
 Round 6.1 supplies the single-tag ordinary-income and ordinary-outcome fixture:
 deleting the tag preserves both rows, replaces their `tag` with `null`, and
 does not alter the account balance. Round 6.2 confirms that the matching budget
-row is removed, rather than zeroed. Capture fixtures for a multi-tag
-transaction and reminder/marker references before shipping the complete
-cascade. Prediction must reproduce the server's exact transaction tag shape
-and locally remove affected budget rows without sending those cascade writes as
-client intent.
+row is removed, rather than zeroed. Checkpoint 10 applies the settled category
+rule to every local tag reference: remove the deleted id, normalize an empty
+array to `null`, clear child-tag parents, and remove affected budget rows
+without sending those cascade writes as client intent.
 
 ### 7.3 Merchant deletion
 
@@ -605,7 +604,7 @@ the completion snackbar only if a command was actually appended.
 7. ~~`feat(core): restore entities with fresh ids and remap references`~~ Shipped 2026-08-01.
 8. ~~`fix(core): make entity factories restore-idempotent`~~ Shipped 2026-08-02.
 9. ~~`feat(core): predict account deletion cascades`~~ Shipped 2026-08-02.
-10. `feat(core): predict tag deletion cascades`
+10. ~~`feat(core): predict tag deletion cascades`~~ Shipped 2026-08-02.
 11. `feat(core): support merchant deletion after API verification`
 12. `feat(import): show complete restore preview and limitations`
 13. `docs(core): update restore and materialization contracts`

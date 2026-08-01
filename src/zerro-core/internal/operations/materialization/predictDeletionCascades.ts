@@ -5,6 +5,9 @@ import {
   type TDeletionObject,
   type TMsTime,
   type TNormalizedPatch,
+  type TReminder,
+  type TReminderMarker,
+  type TTagId,
   type TTransaction,
 } from '../../domain/zenmoney'
 
@@ -18,7 +21,11 @@ export function predictDeletionCascades(
   patch: TNormalizedPatch,
   changedAt: TMsTime
 ): TNormalizedPatch {
-  return predictAccountDeletion(snapshot, patch, changedAt)
+  return predictTagDeletion(
+    snapshot,
+    predictAccountDeletion(snapshot, patch, changedAt),
+    changedAt
+  )
 }
 
 /**
@@ -132,6 +139,179 @@ function getDeletedAccounts(
       )
       .map(item => item.id as TAccountId)
   )
+}
+
+/**
+ * A tag deletion removes its id from every category reference. Empty category
+ * arrays canonicalize to null; a budget is itself keyed by the tag and is
+ * therefore removed, not zeroed.
+ */
+function predictTagDeletion(
+  snapshot: TDataStore,
+  patch: TNormalizedPatch,
+  changedAt: TMsTime
+): TNormalizedPatch {
+  const deletedTags = getDeletedTags(snapshot, patch)
+  if (!deletedTags.size) return patch
+
+  const directlyDeleted = new Set(
+    patch.deletion?.map(item => `${item.object}:${item.id}`)
+  )
+  const tagUpdates = new Map((patch.tag ?? []).map(tag => [tag.id, tag]))
+  const transactionUpdates = new Map(
+    (patch.transaction ?? []).map(transaction => [transaction.id, transaction])
+  )
+  const reminderUpdates = new Map(
+    (patch.reminder ?? []).map(reminder => [reminder.id, reminder])
+  )
+  const markerUpdates = new Map(
+    (patch.reminderMarker ?? []).map(marker => [marker.id, marker])
+  )
+  const budgetUpdates = new Map(
+    (patch.budget ?? []).map(budget => [budget.id, budget])
+  )
+  const budgetDeletions: TDeletionObject[] = []
+  let predicted = false
+
+  const tags = overlay(snapshot.tag, tagUpdates)
+  tags.forEach(tag => {
+    if (directlyDeleted.has(`tag:${tag.id}`)) {
+      if (tagUpdates.delete(tag.id)) predicted = true
+      return
+    }
+    if (!tag.parent || !deletedTags.has(tag.parent)) return
+    tagUpdates.set(tag.id, {
+      ...tag,
+      parent: null,
+      changed: nextChanged(changedAt, tag.changed),
+    })
+    predicted = true
+  })
+
+  predicted =
+    rewriteTagReferences(
+      overlay(snapshot.transaction, transactionUpdates),
+      transactionUpdates,
+      directlyDeleted,
+      deletedTags,
+      changedAt,
+      'transaction'
+    ) || predicted
+  predicted =
+    rewriteTagReferences(
+      overlay(snapshot.reminder, reminderUpdates),
+      reminderUpdates,
+      directlyDeleted,
+      deletedTags,
+      changedAt,
+      'reminder'
+    ) || predicted
+  predicted =
+    rewriteTagReferences(
+      overlay(snapshot.reminderMarker, markerUpdates),
+      markerUpdates,
+      directlyDeleted,
+      deletedTags,
+      changedAt,
+      'reminderMarker'
+    ) || predicted
+
+  const budgets = overlay(snapshot.budget, budgetUpdates)
+  budgets.forEach(budget => {
+    if (!deletedTags.has(budget.tag as TTagId)) return
+    budgetUpdates.delete(budget.id)
+    budgetDeletions.push({
+      id: budget.id,
+      object: 'budget',
+      stamp: changedAt,
+      user: budget.user,
+    })
+    predicted = true
+  })
+
+  if (!predicted) return patch
+
+  const result: TNormalizedPatch = { ...patch }
+  if (tagUpdates.size) result.tag = [...tagUpdates.values()]
+  else delete result.tag
+  if (transactionUpdates.size)
+    result.transaction = [...transactionUpdates.values()]
+  else delete result.transaction
+  if (reminderUpdates.size) result.reminder = [...reminderUpdates.values()]
+  else delete result.reminder
+  if (markerUpdates.size) result.reminderMarker = [...markerUpdates.values()]
+  else delete result.reminderMarker
+  if (budgetUpdates.size) result.budget = [...budgetUpdates.values()]
+  else delete result.budget
+  if (budgetDeletions.length) {
+    result.deletion = appendUniqueDeletions(
+      patch.deletion ?? [],
+      budgetDeletions
+    )
+  }
+  return result
+}
+
+function getDeletedTags(
+  snapshot: TDataStore,
+  patch: TNormalizedPatch
+): Set<TTagId> {
+  const knownTags = new Set<TTagId>([
+    ...Object.keys(snapshot.tag),
+    ...(patch.tag ?? []).map(tag => tag.id),
+  ])
+  return new Set(
+    patch.deletion
+      ?.filter(
+        (item): item is TDeletionObject & { object: 'tag' } =>
+          item.object === 'tag' && knownTags.has(item.id as TTagId)
+      )
+      .map(item => item.id as TTagId)
+  )
+}
+
+function overlay<T extends { id: string }>(
+  current: Record<string, T>,
+  updates: Map<string, T>
+): Map<string, T> {
+  const result = new Map<string, T>(Object.entries(current))
+  updates.forEach((entity, id) => result.set(id, entity))
+  return result
+}
+
+function rewriteTagReferences<
+  T extends TTransaction | TReminder | TReminderMarker,
+>(
+  entities: Map<string, T>,
+  updates: Map<string, T>,
+  directlyDeleted: Set<string>,
+  deletedTags: Set<TTagId>,
+  changedAt: TMsTime,
+  object: 'transaction' | 'reminder' | 'reminderMarker'
+): boolean {
+  let rewritten = false
+  entities.forEach(entity => {
+    if (directlyDeleted.has(`${object}:${entity.id}`)) return
+    const tag = withoutDeletedTags(entity.tag, deletedTags)
+    if (tag === entity.tag) return
+    updates.set(entity.id, {
+      ...entity,
+      tag,
+      changed: nextChanged(changedAt, entity.changed),
+    })
+    rewritten = true
+  })
+  return rewritten
+}
+
+function withoutDeletedTags(
+  tags: TTagId[] | null,
+  deletedTags: Set<TTagId>
+): TTagId[] | null {
+  if (!tags) return tags
+  const remaining = tags.filter(tag => !deletedTags.has(tag))
+  if (remaining.length === tags.length) return tags
+  return remaining.length ? remaining : null
 }
 
 function transactionDeletion(

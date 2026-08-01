@@ -81,7 +81,7 @@ const entityRows: readonly TEntityRow[] = [
   {
     key: 'tag',
     writableFields: tagWritableFields,
-    removal: null,
+    removal: 'deletion',
     generatedId: true,
     references: [{ field: 'parent', key: 'tag' }],
   },

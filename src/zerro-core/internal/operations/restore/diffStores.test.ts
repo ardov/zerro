@@ -277,7 +277,7 @@ describe('diffStores removals', () => {
     )
   })
 
-  it('deletes an ordinary account but keeps the protected debt singleton', () => {
+  it('deletes ordinary accounts and tags but keeps protected or unsupported rows', () => {
     const current = makeSnapshot({
       account: {
         acc: makeAccount({ id: 'acc' }),
@@ -289,13 +289,17 @@ describe('diffStores removals', () => {
     const desired = makeSnapshot()
 
     expect(diffStores(current, desired)).toEqual({
-      deletion: [{ id: 'acc', object: 'account' }],
+      deletion: [
+        { id: 'acc', object: 'account' },
+        { id: 'food', object: 'tag' },
+      ],
     })
-    expect(applyDiff(current, desired).account).toEqual({
+    const restored = applyDiff(current, desired)
+    expect(restored.account).toEqual({
       debt: current.account.debt,
     })
-    expect(applyDiff(current, desired).tag).toEqual(current.tag)
-    expect(applyDiff(current, desired).merchant).toEqual(current.merchant)
+    expect(restored.tag).toEqual({})
+    expect(restored.merchant).toEqual(current.merchant)
   })
 })
 

@@ -36,13 +36,13 @@ record of what live probing established.
 | 3   | transaction or `startBalance` change | implemented (delta)   | recomputes affected `account.balance`          |
 | 4   | account deletion                     | implemented (purge)   | hard-purges contained transactions             |
 | 5   | transfer touching a deleted account  | implemented (rewrite) | converts to one-sided on the survivor          |
-| 6   | tag deletion                         | **planned**           | nulls `transaction.tag`, drops its budget rows |
+| 6   | tag deletion                         | implemented (rewrite) | nulls `transaction.tag`, drops its budget rows |
 | 7   | merchant deletion                    | **planned**           | nulls `transaction.merchant`                   |
 | 8   | merchant rename                      | **deliberately not**  | rewrites `payee` + `changed` on linked rows    |
 
-Rules 4 and 5 are reachable through restore: an ordinary missing account emits
-primary `deletion`, while the protected debt singleton remains untouched because
-the server ignores its deletion. Tag and merchant deletion still have no local
+Rules 4–6 are reachable through restore: an ordinary missing account or tag
+emits primary `deletion`, while the protected debt singleton remains untouched
+because the server ignores its deletion. Merchant deletion still has no local
 producer.
 
 ## 1. Deleted transactions are a ratchet
@@ -185,6 +185,11 @@ in the deletion array.
 
 Note also that budgets have no real delete of their own — a `deletion` entry
 no-ops and zeroing is the only removal.
+
+The local prediction removes a deleted tag from transaction, reminder, marker,
+and child-tag references, reducing an empty category array to `null`. It adds a
+local-only budget tombstone so `current` drops the keyed row immediately; only
+the primary tag deletion is transported.
 
 ## 7–8. Merchant: rename is soft, unlink is not
 

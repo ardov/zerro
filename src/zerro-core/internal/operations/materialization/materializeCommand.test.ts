@@ -626,6 +626,64 @@ describe('materializeCommand', () => {
     expect(applyPatch(snapshot, patch).account).toEqual({})
   })
 
+  it('predicts tag deletion across references and removes matching budgets', () => {
+    const deleted = makeTag({ id: 'deleted', title: 'Deleted' })
+    const other = makeTag({ id: 'other', title: 'Other' })
+    const child = makeTag({ id: 'child', title: 'Child', parent: deleted.id })
+    const onlyDeleted = makeTransaction({ id: 'only', tag: [deleted.id] })
+    const mixed = makeTransaction({ id: 'mixed', tag: [deleted.id, other.id] })
+    const reminder = makeReminder({ id: 'reminder', tag: [deleted.id] })
+    const marker = makeReminderMarker({ id: 'marker', tag: [deleted.id] })
+    const budget = makeBudget({
+      id: '2026-01-01#deleted',
+      tag: deleted.id,
+      date: '2026-01-01',
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      tag: { [deleted.id]: deleted, [other.id]: other, [child.id]: child },
+      transaction: { [onlyDeleted.id]: onlyDeleted, [mixed.id]: mixed },
+      reminder: { [reminder.id]: reminder },
+      reminderMarker: { [marker.id]: marker },
+      budget: { [budget.id]: budget },
+    })
+    const command = issuePatch(
+      snapshot,
+      { deletion: [{ id: deleted.id, object: 'tag' }] },
+      100
+    )
+
+    expect(materializePrimaryCommand(snapshot, command)).toEqual({
+      deletion: [{ id: deleted.id, object: 'tag', stamp: 100, user: 1 }],
+    })
+
+    const patch = materializeCommand(snapshot, command)
+    expect(patch.deletion).toEqual([
+      { id: deleted.id, object: 'tag', stamp: 100, user: 1 },
+      { id: budget.id, object: 'budget', stamp: 100, user: 1 },
+    ])
+    expect(patch.tag).toEqual([{ ...child, parent: null, changed: 1000 }])
+    expect(patch.transaction).toEqual([
+      { ...onlyDeleted, tag: null, changed: 1001 },
+      { ...mixed, tag: [other.id], changed: 1001 },
+    ])
+    expect(patch.reminder).toEqual([{ ...reminder, tag: null, changed: 1001 }])
+    expect(patch.reminderMarker).toEqual([
+      { ...marker, tag: null, changed: 1001 },
+    ])
+
+    const current = applyPatch(snapshot, patch)
+    expect(current.tag).toEqual({
+      [other.id]: other,
+      [child.id]: { ...child, parent: null, changed: 1000 },
+    })
+    expect(current.transaction[onlyDeleted.id].tag).toBeNull()
+    expect(current.transaction[mixed.id].tag).toEqual([other.id])
+    expect(current.reminder[reminder.id].tag).toBeNull()
+    expect(current.reminderMarker[marker.id].tag).toBeNull()
+    expect(current.budget).toEqual({})
+  })
+
   it('stores minimal account creation intent and materializes through factory', () => {
     const snapshot = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
