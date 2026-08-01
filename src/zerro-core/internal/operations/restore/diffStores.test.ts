@@ -277,7 +277,7 @@ describe('diffStores removals', () => {
     )
   })
 
-  it('deletes ordinary accounts and tags but keeps protected or unsupported rows', () => {
+  it('deletes ordinary accounts, merchants and tags but keeps protected rows', () => {
     const current = makeSnapshot({
       account: {
         acc: makeAccount({ id: 'acc' }),
@@ -291,6 +291,7 @@ describe('diffStores removals', () => {
     expect(diffStores(current, desired)).toEqual({
       deletion: [
         { id: 'acc', object: 'account' },
+        { id: 'shop', object: 'merchant' },
         { id: 'food', object: 'tag' },
       ],
     })
@@ -299,7 +300,30 @@ describe('diffStores removals', () => {
       debt: current.account.debt,
     })
     expect(restored.tag).toEqual({})
-    expect(restored.merchant).toEqual(current.merchant)
+    expect(restored.merchant).toEqual({})
+  })
+
+  it('keeps a merchant that an active debt transaction prevents the server deleting', () => {
+    const debt = makeAccount({ id: 'debt', type: AccountType.Debt })
+    const merchant = makeMerchant({ id: 'shop' })
+    const transaction = makeTransaction({
+      id: 'debt-transaction',
+      incomeAccount: debt.id,
+      outcomeAccount: 'cash',
+      income: 5,
+      outcome: 5,
+      merchant: merchant.id,
+      payee: 'Shop',
+    })
+    const current = makeSnapshot({
+      account: { debt, cash: makeAccount({ id: 'cash' }) },
+      merchant: { [merchant.id]: merchant },
+      transaction: { [transaction.id]: transaction },
+    })
+
+    expect(
+      diffStores(current, makeSnapshot(), { entities: ['merchant'] })
+    ).toEqual({})
   })
 })
 

@@ -29,21 +29,21 @@ record of what live probing established.
 
 ## Rule status
 
-| #   | Operation                            | Predicted locally     | Server also does                               |
-| --- | ------------------------------------ | --------------------- | ---------------------------------------------- |
-| 1   | patch on a `deleted` transaction     | implemented (ignore)  | ignores it too (one-way ratchet)               |
-| 2   | verified permanent-delete write      | implemented (purge)   | hard-purges the row, emits a real tombstone    |
-| 3   | transaction or `startBalance` change | implemented (delta)   | recomputes affected `account.balance`          |
-| 4   | account deletion                     | implemented (purge)   | hard-purges contained transactions             |
-| 5   | transfer touching a deleted account  | implemented (rewrite) | converts to one-sided on the survivor          |
-| 6   | tag deletion                         | implemented (rewrite) | nulls `transaction.tag`, drops its budget rows |
-| 7   | merchant deletion                    | **planned**           | nulls `transaction.merchant`                   |
-| 8   | merchant rename                      | **deliberately not**  | rewrites `payee` + `changed` on linked rows    |
+| #   | Operation                            | Predicted locally     | Server also does                                |
+| --- | ------------------------------------ | --------------------- | ----------------------------------------------- |
+| 1   | patch on a `deleted` transaction     | implemented (ignore)  | ignores it too (one-way ratchet)                |
+| 2   | verified permanent-delete write      | implemented (purge)   | hard-purges the row, emits a real tombstone     |
+| 3   | transaction or `startBalance` change | implemented (delta)   | recomputes affected `account.balance`           |
+| 4   | account deletion                     | implemented (purge)   | hard-purges contained transactions              |
+| 5   | transfer touching a deleted account  | implemented (rewrite) | converts to one-sided on the survivor           |
+| 6   | tag deletion                         | implemented (rewrite) | nulls `transaction.tag`, drops its budget rows  |
+| 7   | merchant deletion                    | implemented (rewrite) | clears merchant + payee on linked ordinary rows |
+| 8   | merchant rename                      | **deliberately not**  | rewrites `payee` + `changed` on linked rows     |
 
-Rules 4–6 are reachable through restore: an ordinary missing account or tag
-emits primary `deletion`, while the protected debt singleton remains untouched
-because the server ignores its deletion. Merchant deletion still has no local
-producer.
+Rules 4–7 are reachable through restore: an ordinary missing account, tag, or
+merchant emits primary `deletion`, while the protected debt singleton remains
+untouched because the server ignores its deletion. A merchant referenced by an
+active debt transaction also remains: the server silently rejects that removal.
 
 ## 1. Deleted transactions are a ratchet
 
@@ -213,17 +213,13 @@ transaction; `originalPayee` is left alone. Consequences to keep in mind:
   on the same transaction is rebased over them under the usual
   last-write-wins-in-command-order policy.
 
-**Unlink or delete.** The server nulls `transaction.merchant` on referencing
-rows. The ZenMoney client additionally clears `payee`/`lowerPayee` locally and,
-in transfer/debt-shaped cases, deletes referencing rows outright. Two things are
-still unresolved and must not be encoded as invariants yet:
-
-- one resumed probe pull showed a deleted merchant with a surviving
-  `payee`/merchant reference on the linked transaction, which contradicts the
-  clean-cascade reading and needs an isolated re-check;
-- whether `payee` should survive locally. Treat `payee` as a historical string
-  that a merchant deletion does not erase, and confirm against a real response
-  before shipping the deletion command.
+**Delete.** Round 6.3 settled the clean fixture: an ordinary transaction,
+reminder, and reminder marker survive with `merchant: null` and `payee: null`.
+For the transaction, `originalPayee` remains unchanged. A cash transfer stores
+neither merchant nor payee before deletion, so it needs no cascade rewrite.
+An active debt transaction is the explicit exception: the server silently
+keeps both it and its merchant. Core therefore neither plans that restore
+removal nor optimistically removes it from `current`.
 
 `originalPayee` is not a copy of the current name: the server fills it from
 `payee` at creation time and never updates it on rename.

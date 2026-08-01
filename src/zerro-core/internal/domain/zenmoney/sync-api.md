@@ -191,11 +191,11 @@ migration that needs canonical reminders re-read.
   unchanged. Round 6.2 independently confirmed that a matching full budget
   row is removed, not zeroed. It does not yet establish multi-tag or
   reminder/marker behavior.
-  Deleting a merchant nulls `transaction.merchant`. One resumed probe pull,
-  however, showed a deleted
-  merchant alongside a surviving `payee`/merchant reference. Until that is
-  re-checked in a clean fixture, "no dangling references are left behind" is
-  the expectation, not a proven invariant.
+  Round 6.3 (2026-08-02) re-checked merchant deletion in clean fixtures:
+  ordinary transactions, reminders, and markers survive with both `merchant`
+  and `payee` set to `null`; a transaction retains `originalPayee`. A cash
+  transfer stores neither merchant nor payee. An active debt transaction is
+  different: the merchant deletion is a silent no-op and both rows remain.
 - A direct `deletion` entry naming an existing transaction is converted to an
   ordinary soft-delete (or no-ops if already soft-deleted) and produces no
   `deletion`-array tombstone. `deleted: true` reached this way is a one-way
@@ -252,6 +252,10 @@ migration that needs canonical reminders re-read.
 - On create with a non-null `payee`, the server writes `originalPayee = payee`
   even when `originalPayee: null` was submitted; with a null payee it stays
   null.
+- Deleting a merchant clears `merchant` and `payee` on linked ordinary
+  transactions, reminders, and markers, while preserving transaction
+  `originalPayee`. It does not delete the merchant while an active debt
+  transaction references it; that request is a silent no-op.
 - `payee` is trimmed at the edges but keeps Unicode and embedded newlines;
   `comment: ""` and `payee: ""` are stored as `null`. Merchant `title` is not
   trimmed, not case-folded, and not unique — empty and duplicate titles are

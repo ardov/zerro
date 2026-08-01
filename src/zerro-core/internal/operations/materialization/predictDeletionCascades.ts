@@ -1,8 +1,10 @@
 import {
   isDeletedTransaction,
+  AccountType,
   type TAccountId,
   type TDataStore,
   type TDeletionObject,
+  type TMerchantId,
   type TMsTime,
   type TNormalizedPatch,
   type TReminder,
@@ -21,9 +23,13 @@ export function predictDeletionCascades(
   patch: TNormalizedPatch,
   changedAt: TMsTime
 ): TNormalizedPatch {
-  return predictTagDeletion(
+  return predictMerchantDeletion(
     snapshot,
-    predictAccountDeletion(snapshot, patch, changedAt),
+    predictTagDeletion(
+      snapshot,
+      predictAccountDeletion(snapshot, patch, changedAt),
+      changedAt
+    ),
     changedAt
   )
 }
@@ -270,6 +276,167 @@ function getDeletedTags(
   )
 }
 
+/**
+ * A merchant deletion preserves its linked rows but removes the derived
+ * display link and payee. `originalPayee` remains historical transaction
+ * data. The server never stores merchant/payee on a transfer, so there is no
+ * transfer-specific rewrite to predict.
+ */
+function predictMerchantDeletion(
+  snapshot: TDataStore,
+  patch: TNormalizedPatch,
+  changedAt: TMsTime
+): TNormalizedPatch {
+  const requestedMerchants = getDeletedMerchants(snapshot, patch)
+  if (!requestedMerchants.size) return patch
+
+  // ZenMoney silently leaves a merchant in place while an active debt row
+  // references it. Keep local current canonical by withholding only that
+  // predicted deletion; transport still receives the user's primary command.
+  const debtBlockedMerchants = getDebtBlockedMerchants(snapshot, patch)
+  const deletedMerchants = new Set(
+    [...requestedMerchants].filter(id => !debtBlockedMerchants.has(id))
+  )
+  const retainedDeletions = patch.deletion?.filter(
+    item =>
+      item.object !== 'merchant' ||
+      !debtBlockedMerchants.has(item.id as TMerchantId)
+  )
+  const withoutBlockedDeletions =
+    retainedDeletions?.length === patch.deletion?.length
+      ? patch
+      : withoutDeletions(patch, retainedDeletions)
+  if (!deletedMerchants.size) return withoutBlockedDeletions
+
+  const directlyDeleted = new Set(
+    patch.deletion?.map(item => `${item.object}:${item.id}`)
+  )
+  const merchantUpdates = new Map(
+    (patch.merchant ?? []).map(merchant => [merchant.id, merchant])
+  )
+  const transactionUpdates = new Map(
+    (patch.transaction ?? []).map(transaction => [transaction.id, transaction])
+  )
+  const reminderUpdates = new Map(
+    (patch.reminder ?? []).map(reminder => [reminder.id, reminder])
+  )
+  const markerUpdates = new Map(
+    (patch.reminderMarker ?? []).map(marker => [marker.id, marker])
+  )
+  let predicted = false
+
+  deletedMerchants.forEach(id => {
+    if (merchantUpdates.delete(id)) predicted = true
+  })
+  predicted =
+    rewriteMerchantReferences(
+      overlay(snapshot.transaction, transactionUpdates),
+      transactionUpdates,
+      directlyDeleted,
+      deletedMerchants,
+      changedAt,
+      'transaction'
+    ) || predicted
+  predicted =
+    rewriteMerchantReferences(
+      overlay(snapshot.reminder, reminderUpdates),
+      reminderUpdates,
+      directlyDeleted,
+      deletedMerchants,
+      changedAt,
+      'reminder'
+    ) || predicted
+  predicted =
+    rewriteMerchantReferences(
+      overlay(snapshot.reminderMarker, markerUpdates),
+      markerUpdates,
+      directlyDeleted,
+      deletedMerchants,
+      changedAt,
+      'reminderMarker'
+    ) || predicted
+
+  if (!predicted) return withoutBlockedDeletions
+
+  const result: TNormalizedPatch = { ...withoutBlockedDeletions }
+  if (merchantUpdates.size) result.merchant = [...merchantUpdates.values()]
+  else delete result.merchant
+  if (transactionUpdates.size)
+    result.transaction = [...transactionUpdates.values()]
+  else delete result.transaction
+  if (reminderUpdates.size) result.reminder = [...reminderUpdates.values()]
+  else delete result.reminder
+  if (markerUpdates.size) result.reminderMarker = [...markerUpdates.values()]
+  else delete result.reminderMarker
+  return result
+}
+
+function withoutDeletions(
+  patch: TNormalizedPatch,
+  deletion: TDeletionObject[] | undefined
+): TNormalizedPatch {
+  const result = { ...patch }
+  if (deletion?.length) result.deletion = deletion
+  else delete result.deletion
+  return result
+}
+
+function getDebtBlockedMerchants(
+  snapshot: TDataStore,
+  patch: TNormalizedPatch
+): Set<TMerchantId> {
+  const directlyDeleted = new Set(
+    patch.deletion
+      ?.filter(item => item.object === 'transaction')
+      .map(item => String(item.id))
+  )
+  const transactions = overlay(
+    snapshot.transaction,
+    new Map(
+      (patch.transaction ?? []).map(transaction => [
+        transaction.id,
+        transaction,
+      ])
+    )
+  )
+  const blocked = new Set<TMerchantId>()
+  transactions.forEach(transaction => {
+    if (
+      directlyDeleted.has(transaction.id) ||
+      isDeletedTransaction(transaction) ||
+      !transaction.merchant
+    ) {
+      return
+    }
+    if (
+      snapshot.account[transaction.incomeAccount]?.type === AccountType.Debt ||
+      snapshot.account[transaction.outcomeAccount]?.type === AccountType.Debt
+    ) {
+      blocked.add(transaction.merchant)
+    }
+  })
+  return blocked
+}
+
+function getDeletedMerchants(
+  snapshot: TDataStore,
+  patch: TNormalizedPatch
+): Set<TMerchantId> {
+  const knownMerchants = new Set<TMerchantId>([
+    ...Object.keys(snapshot.merchant),
+    ...(patch.merchant ?? []).map(merchant => merchant.id),
+  ])
+  return new Set(
+    patch.deletion
+      ?.filter(
+        (item): item is TDeletionObject & { object: 'merchant' } =>
+          item.object === 'merchant' &&
+          knownMerchants.has(item.id as TMerchantId)
+      )
+      .map(item => item.id as TMerchantId)
+  )
+}
+
 function overlay<T extends { id: string }>(
   current: Record<string, T>,
   updates: Map<string, T>
@@ -297,6 +464,36 @@ function rewriteTagReferences<
     updates.set(entity.id, {
       ...entity,
       tag,
+      changed: nextChanged(changedAt, entity.changed),
+    })
+    rewritten = true
+  })
+  return rewritten
+}
+
+function rewriteMerchantReferences<
+  T extends TTransaction | TReminder | TReminderMarker,
+>(
+  entities: Map<string, T>,
+  updates: Map<string, T>,
+  directlyDeleted: Set<string>,
+  deletedMerchants: Set<TMerchantId>,
+  changedAt: TMsTime,
+  object: 'transaction' | 'reminder' | 'reminderMarker'
+): boolean {
+  let rewritten = false
+  entities.forEach(entity => {
+    if (
+      directlyDeleted.has(`${object}:${entity.id}`) ||
+      !entity.merchant ||
+      !deletedMerchants.has(entity.merchant)
+    ) {
+      return
+    }
+    updates.set(entity.id, {
+      ...entity,
+      merchant: null,
+      payee: null,
       changed: nextChanged(changedAt, entity.changed),
     })
     rewritten = true

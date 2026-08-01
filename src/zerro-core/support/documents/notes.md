@@ -43,9 +43,8 @@ The rule set, its evidence, and the per-rule verification requirements live in
 [materialization.md](./materialization.md). Implement one rule per checkpoint.
 Rules 1 (deleted transactions ignore patches), 2 (the verified same-account
 permanent-delete write purges the row), and 3 (account balances follow
-transactions) are done. Account, tag, and merchant cascades become reachable
-when the matching deletion commands ship, so nothing here is currently
-schedulable.
+transactions) are done. Account, tag, and merchant cascades are now reachable
+through restore; an active debt reference deliberately blocks merchant removal.
 
 ### 2. Pull-only automatic sync — shipped, one part deferred
 
@@ -104,7 +103,8 @@ path while executing it.
    the preview. The app reads the existing export format and confirms the counts
    before issuing anything. Restore of a history point is the same call with a
    replayed snapshot instead of a parsed file. Account, tag, and merchant
-   removal remain blocked on their deletion commands and materializer cascades.
+   removal are available; merchant removal remains blocked only by an active
+   debt reference, matching the server's silent no-op.
 2. Measure a genesis snapshot and a realistic diff run on a real account. This
    gates step 3 and is the maintainer's to run —
    [open-decisions.md](../../../../docs/open-decisions.md#6-retention-budget-for-the-change-log).

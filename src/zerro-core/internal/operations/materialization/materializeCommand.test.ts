@@ -12,6 +12,7 @@ import {
   makeUser,
 } from '../../../support/testing/zenmoneyTestData'
 import { compileDeleteTransactions } from '../../domain/zenmoney/entities/transactions'
+import { AccountType } from '../../domain/zenmoney'
 import {
   compileSetSimpleHiddenData,
   HiddenDataType,
@@ -682,6 +683,110 @@ describe('materializeCommand', () => {
     expect(current.reminder[reminder.id].tag).toBeNull()
     expect(current.reminderMarker[marker.id].tag).toBeNull()
     expect(current.budget).toEqual({})
+  })
+
+  it('predicts merchant deletion across ordinary rows, reminders and markers', () => {
+    const deleted = makeMerchant({ id: 'deleted', title: 'Deleted' })
+    const transaction = makeTransaction({
+      id: 'transaction',
+      changed: 200,
+      merchant: deleted.id,
+      payee: 'Shop',
+      originalPayee: 'Original shop',
+    })
+    const reminder = makeReminder({
+      id: 'reminder',
+      changed: 200,
+      merchant: deleted.id,
+      payee: 'Shop',
+    })
+    const marker = makeReminderMarker({
+      id: 'marker',
+      changed: 200,
+      merchant: deleted.id,
+      payee: 'Shop',
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      merchant: { [deleted.id]: deleted },
+      transaction: { [transaction.id]: transaction },
+      reminder: { [reminder.id]: reminder },
+      reminderMarker: { [marker.id]: marker },
+    })
+    const command = issuePatch(
+      snapshot,
+      { deletion: [{ id: deleted.id, object: 'merchant' }] },
+      100
+    )
+
+    expect(materializePrimaryCommand(snapshot, command)).toEqual({
+      deletion: [{ id: deleted.id, object: 'merchant', stamp: 100, user: 1 }],
+    })
+
+    const patch = materializeCommand(snapshot, command)
+    expect(patch.deletion).toEqual([
+      { id: deleted.id, object: 'merchant', stamp: 100, user: 1 },
+    ])
+    expect(patch.transaction).toEqual([
+      {
+        ...transaction,
+        merchant: null,
+        payee: null,
+        changed: 1200,
+      },
+    ])
+    expect(patch.reminder).toEqual([
+      { ...reminder, merchant: null, payee: null, changed: 1200 },
+    ])
+    expect(patch.reminderMarker).toEqual([
+      { ...marker, merchant: null, payee: null, changed: 1200 },
+    ])
+
+    const current = applyPatch(snapshot, patch)
+    expect(current.merchant).toEqual({})
+    expect(current.transaction[transaction.id]).toMatchObject({
+      merchant: null,
+      payee: null,
+      originalPayee: 'Original shop',
+    })
+    expect(current.reminder[reminder.id]).toMatchObject({
+      merchant: null,
+      payee: null,
+    })
+    expect(current.reminderMarker[marker.id]).toMatchObject({
+      merchant: null,
+      payee: null,
+    })
+  })
+
+  it('does not optimistically remove a merchant blocked by an active debt transaction', () => {
+    const debt = makeAccount({ id: 'debt', type: AccountType.Debt })
+    const merchant = makeMerchant({ id: 'merchant' })
+    const transaction = makeTransaction({
+      id: 'debt-transaction',
+      incomeAccount: debt.id,
+      outcomeAccount: 'cash',
+      income: 5,
+      outcome: 5,
+      merchant: merchant.id,
+      payee: 'Shop',
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: { [debt.id]: debt, cash: makeAccount({ id: 'cash' }) },
+      merchant: { [merchant.id]: merchant },
+      transaction: { [transaction.id]: transaction },
+    })
+    const command = issuePatch(
+      snapshot,
+      { deletion: [{ id: merchant.id, object: 'merchant' }] },
+      100
+    )
+
+    expect(materializePrimaryCommand(snapshot, command)).toEqual({
+      deletion: [{ id: merchant.id, object: 'merchant', stamp: 100, user: 1 }],
+    })
+    expect(materializeCommand(snapshot, command)).toEqual({})
   })
 
   it('stores minimal account creation intent and materializes through factory', () => {

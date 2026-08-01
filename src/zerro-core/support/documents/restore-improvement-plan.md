@@ -1,6 +1,6 @@
 # Full backup restore improvement plan
 
-- Status: checkpoints 1–10 shipped; merchant cascade remains
+- Status: checkpoints 1–11 shipped; complete-preview UI remains
 - Updated: 2026-08-02
 - Scope: full-backup validation, semantic reconciliation, id remapping,
   writable entity coverage, deletion cascades, preview, and verification
@@ -392,7 +392,7 @@ restore from emitting a cleanup update.
 | ---------------------- | ---------------------------------------------- |
 | user                   | unsupported; never remove                      |
 | account                | server deletion, except protected debt account |
-| merchant               | server deletion after cascade evidence         |
+| merchant               | server deletion; blocked by active debt link   |
 | tag                    | server deletion after cascade evidence         |
 | budget                 | zero `income` and `outcome`                    |
 | reminder               | server deletion                                |
@@ -465,10 +465,12 @@ without sending those cascade writes as client intent.
 
 ### 7.3 Merchant deletion
 
-Re-probe the contradictory payee behavior before shipping deletion. Establish
-whether merchant is always nulled, whether payee survives, how reminders and
-markers behave, and whether debt/transfer shapes differ. Do not encode an
-unverified cascade as an invariant.
+Round 6.3 settled the clean merchant behavior: deleting it preserves ordinary
+transactions, reminders, and markers but nulls their `merchant` and `payee`;
+transaction `originalPayee` remains. A cash transfer never stores merchant or
+payee. An active debt transaction is the exception: the server silently keeps
+the merchant, so restore leaves it in place and local materialization withholds
+the otherwise predicted deletion.
 
 ### 7.4 Effective summary
 
@@ -567,7 +569,7 @@ the completion snackbar only if a command was actually appended.
 - transfer survivor conversion;
 - debt deletion unsupported;
 - tag transaction and budget cleanup;
-- merchant cleanup after evidence;
+- merchant cleanup, including the debt-reference blocker;
 - balances after every cascade;
 - predicted effects absent from transport.
 
@@ -605,7 +607,7 @@ the completion snackbar only if a command was actually appended.
 8. ~~`fix(core): make entity factories restore-idempotent`~~ Shipped 2026-08-02.
 9. ~~`feat(core): predict account deletion cascades`~~ Shipped 2026-08-02.
 10. ~~`feat(core): predict tag deletion cascades`~~ Shipped 2026-08-02.
-11. `feat(core): support merchant deletion after API verification`
+11. ~~`feat(core): support merchant deletion after API verification`~~ Shipped 2026-08-02.
 12. `feat(import): show complete restore preview and limitations`
 13. `docs(core): update restore and materialization contracts`
 

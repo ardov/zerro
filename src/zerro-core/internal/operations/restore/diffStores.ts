@@ -48,7 +48,7 @@ type TEntityRow = {
   skip?: (row: TRow) => boolean
   isAbsent?: (row: TRow) => boolean
   immutableFields?: readonly string[]
-  skipRemoval?: (row: TRow) => boolean
+  skipRemoval?: (row: TRow, current: TDataStore) => boolean
   references?: readonly TReference[]
   generatedId?: boolean
   remap?: (row: TRow, mappings: TRestoreIdMappings) => TRow
@@ -75,7 +75,20 @@ const entityRows: readonly TEntityRow[] = [
   {
     key: 'merchant',
     writableFields: merchantWritableFields,
-    removal: null,
+    removal: 'deletion',
+    // The server silently refuses merchant deletion while an active debt
+    // transaction references it. Keeping the merchant is the only local
+    // state that remains canonical without first reconciling that debt row.
+    skipRemoval: (merchant, current) =>
+      Object.values(current.transaction).some(
+        transaction =>
+          !transaction.deleted &&
+          transaction.merchant === merchant.id &&
+          (current.account[transaction.incomeAccount]?.type ===
+            AccountType.Debt ||
+            current.account[transaction.outcomeAccount]?.type ===
+              AccountType.Debt)
+      ),
     generatedId: true,
   },
   {
@@ -283,7 +296,7 @@ export function buildRestorePlan(
 
     activeCurrent.forEach(before => {
       if (consumedCurrent.has(String(before.id))) return
-      if (row.skipRemoval?.(before)) return
+      if (row.skipRemoval?.(before, current)) return
       const removal = removalIntent(row, before, deletion)
       if (removal) intents.push(removal)
     })
