@@ -97,16 +97,14 @@ cascades. Keep the public `core.restore` surface and the ordinary-command write
 path while executing it.
 
 1. ~~`diffStores(current, desired, scope) -> TIntentPatch` plus backup
-   import.~~ Shipped 2026-08-01. `internal/operations/restore/diffStores.ts`
-   holds the diff and `summarizeStoreDiff`; `core.restore` exposes both plus
-   `apply`, which recomputes the diff at dispatch time rather than trusting the
-   caller's preview. The app reads a backup file through the existing export
-   format and confirms the counts before issuing anything. Restore of a history
-   point is the same call with a replayed snapshot instead of a parsed file.
-   What the diff can and cannot remove is settled in
-   [design-ledger.md](./design-ledger.md#change-history-and-restore); the gap
-   worth revisiting is account, tag, and merchant removal, which stays blocked
-   on the same deletion commands as the materializer cascades.
+   import.~~ Shipped 2026-08-01. The internal `buildRestorePlan` first maps
+   desired IDs to live same-ID or semantically equal rows, then allocates fresh
+   IDs and rewrites dependent references. Preview uses deterministic temporary
+   IDs; apply recomputes with real UUIDs at dispatch time rather than trusting
+   the preview. The app reads the existing export format and confirms the counts
+   before issuing anything. Restore of a history point is the same call with a
+   replayed snapshot instead of a parsed file. Account, tag, and merchant
+   removal remain blocked on their deletion commands and materializer cascades.
 2. Measure a genesis snapshot and a realistic diff run on a real account. This
    gates step 3 and is the maintainer's to run —
    [open-decisions.md](../../../../docs/open-decisions.md#6-retention-budget-for-the-change-log).

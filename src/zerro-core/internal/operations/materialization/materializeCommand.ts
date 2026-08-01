@@ -7,7 +7,7 @@ import {
   getRootUserId,
   hasDeletableAmounts,
   intentPatchKeys,
-  isSameFieldValue,
+  isSameEntityFieldValue,
   makeAccount,
   makeMerchant,
   makeReminder,
@@ -347,7 +347,13 @@ function compileEntityIntents(
     fields.forEach(field => {
       if (
         field in entity &&
-        (!current || !isSameFieldValue(field, current[field], entity[field]))
+        (!current ||
+          !isSameEntityFieldValue(
+            row.key,
+            field,
+            current[field],
+            entity[field]
+          ))
       ) {
         intent[field] = entity[field]
       }
@@ -376,7 +382,7 @@ function compactEntityCreation(
     pickFields(intent, row.requiredFields),
     issuedAt
   )
-  return omitFactoryDefaults(intent, baseline, row.requiredFields)
+  return omitFactoryDefaults(intent, baseline, row.key, row.requiredFields)
 }
 
 function materializeEntityIntents(
@@ -394,7 +400,7 @@ function materializeEntityIntents(
     const fields = rawFields as TEntity
     if (current) {
       const applicableFields = row.existingFields?.(fields) ?? fields
-      if (patchIsApplied(current, applicableFields)) return []
+      if (patchIsApplied(row.key, current, applicableFields)) return []
       return [
         {
           ...current,
@@ -434,6 +440,7 @@ function pickFields(intent: TEntity, fields: readonly string[]): TEntity {
 function omitFactoryDefaults(
   intent: TEntity,
   baseline: TEntity,
+  entityKey: TEntityRow['key'],
   requiredFields: readonly string[]
 ): TEntity {
   const required = new Set(requiredFields)
@@ -442,7 +449,7 @@ function omitFactoryDefaults(
       ([field, value]) =>
         field === 'id' ||
         required.has(field) ||
-        !isSameFieldValue(field, baseline[field], value)
+        !isSameEntityFieldValue(entityKey, field, baseline[field], value)
     )
   ) as TEntity
 }
@@ -483,11 +490,12 @@ function pickTransactionPatch(
 }
 
 function patchIsApplied(
+  entityKey: TEntityRow['key'],
   current: Record<string, unknown>,
   patch: Record<string, unknown>
 ): boolean {
   return Object.entries(patch).every(([key, value]) =>
-    isSameFieldValue(key, current[key], value)
+    isSameEntityFieldValue(entityKey, key, current[key], value)
   )
 }
 

@@ -29,7 +29,7 @@ import {
 import type { TISOMonth } from '../../internal/domain/foundation/primitives'
 import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
 import {
-  diffStores,
+  buildRestorePlan,
   type TStoreDiffScope,
 } from '../../internal/operations/restore/diffStores'
 import type { TTagId } from '../../internal/domain/zenmoney/entities/tags'
@@ -360,8 +360,12 @@ export function restoreDataStore(
   scope?: TStoreDiffScope
 ): AppThunk<boolean> {
   return (dispatch, getState, extra) =>
-    executeReduxCommandWithStatus(state =>
-      diffStores(selectData(state), desired, scope)
+    executeReduxCommandWithStatus(
+      (state, ctx) =>
+        buildRestorePlan(selectData(state), desired, {
+          scope,
+          allocateId: (_key, _desiredId) => ctx.uuid(),
+        }).patch
     )(dispatch, getState, extra).applied
 }
 

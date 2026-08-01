@@ -12,7 +12,7 @@ Zerro syncs with your ZenMoney account and lets you plan every koruna, euro or d
 - 🎯 **Savings goals** for big purchases or rainy‑day funds
 - 💹 **Basic analytics** of income, expenses and net worth
 - ⚡️ **Bulk actions**: merge, change categories, delete, and restore deleted operations
-- 💾 **Full backup** of all data (no restoration yet)
+- 💾 **Full backup** export and guarded restoration
 - 📱 **Mobile-friendly** progressive web app (PWA) and works even offline
 
 ## Links

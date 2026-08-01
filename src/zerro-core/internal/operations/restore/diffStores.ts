@@ -1,26 +1,21 @@
 /**
- * Store-to-store diff: the single write path for restoring a point and for
- * importing a backup.
+ * Store-to-store reconciliation for restore and backup import.
  *
- * `diffStores` answers one question — what user intent moves `current` to
- * `desired` inside a scope — and answers it as an ordinary `TIntentPatch`. It
- * issues nothing: the caller passes the patch through the normal command path,
- * so a restore inherits materialization, transport, and undo like any other
- * change, and there is no second way into the store.
- *
- * The diff is deliberately narrower than "make the stores identical", because
- * only some removals exist as domain operations. Everything it cannot express
- * is listed in `entityRows` below with the reason.
+ * Restore cannot create under an absent backup id: ZenMoney hard-deletion
+ * tombstones are permanent and this replica does not retain enough history to
+ * prove an id is safe to reuse. The planner therefore reconciles desired rows
+ * to live current rows first, then allocates a new id only where necessary.
  */
 import {
   accountWritableFields,
   budgetWritableFields,
   intentEntityKeys,
-  isSameFieldValue,
+  isSameEntityFieldValue,
   merchantWritableFields,
-  reminderWritableFields,
   reminderMarkerWritableFields,
+  reminderWritableFields,
   tagWritableFields,
+  toBudgetId,
   transactionIntentFields,
   transactionWritableFields,
   userWritableFields,
@@ -30,150 +25,279 @@ import {
   type TIntentPatch,
 } from '../../domain/zenmoney'
 
-type TRow = { id: string | number; [field: string]: unknown }
-
+type TId = string | number
+type TRow = { id: TId; [field: string]: unknown }
 type TById = Record<string | number, TRow | undefined>
-
-/**
- * How a row present in `current` but missing from `desired` is removed.
- *
- * - `softDelete` — the transaction ratchet of materialization.md rule 1. A
- *   `deletion` entry would be converted into the same soft delete anyway.
- * - `zero` — budgets have no delete: a `deletion` entry no-ops and zeroing is
- *   the only removal (materialization.md rule 6).
- * - `deletion` — a real deletion intent, which Core emits for reminders only.
- * - `null` — the domain has no removal for this entity yet.
- */
 type TRemoval = 'softDelete' | 'zero' | 'deletion' | null
+
+type TReference = {
+  field: string
+  key: TIntentEntityKey
+  many?: boolean
+}
 
 type TEntityRow = {
   key: TIntentEntityKey
-  /** Fields a patch against an existing row may change. */
   writableFields: readonly string[]
-  /** Fields a creation intent may carry. Defaults to the writable set. */
   creationFields?: readonly string[]
-  /** This entity can only update a live same-id row. */
+  semanticFields?: readonly string[]
   existingOnly?: boolean
   removal: TRemoval
-  /** Fields written by a `zero` removal. */
   zeroFields?: readonly string[]
-  /** Rows the diff must not touch on either side. */
   skip?: (row: TRow) => boolean
-  /** A lifecycle representation that means the row is absent from the target. */
   isAbsent?: (row: TRow) => boolean
+  immutableFields?: readonly string[]
+  references?: readonly TReference[]
+  generatedId?: boolean
+  remap?: (row: TRow, mappings: TRestoreIdMappings) => TRow
 }
 
-const entityRows = [
+/** Dependency order: every rewritten reference is mapped before it is used. */
+const entityRows: readonly TEntityRow[] = [
   {
     key: 'user',
     writableFields: userWritableFields,
     removal: null,
     existingOnly: true,
-    // The root user is an account identity, not a restorable record. Its only
-    // writable restore field is the root preference above.
     skip: row => row.parent !== null,
   },
-  // Accounts, merchants, and tags have no deletion command, and the cascades a
-  // deletion triggers server-side (materialization.md rules 4-7) are not
-  // predicted yet. Emitting one would leave transactions pointing at a row that
-  // no longer exists locally, so a restore leaves these rows in place.
-  { key: 'account', writableFields: accountWritableFields, removal: null },
-  { key: 'merchant', writableFields: merchantWritableFields, removal: null },
-  { key: 'tag', writableFields: tagWritableFields, removal: null },
   {
-    key: 'budget',
-    writableFields: budgetWritableFields,
-    removal: 'zero',
-    zeroFields: ['income', 'outcome'],
+    key: 'account',
+    writableFields: accountWritableFields,
+    removal: null,
+    generatedId: true,
+  },
+  {
+    key: 'merchant',
+    writableFields: merchantWritableFields,
+    removal: null,
+    generatedId: true,
+  },
+  {
+    key: 'tag',
+    writableFields: tagWritableFields,
+    removal: null,
+    generatedId: true,
+    references: [{ field: 'parent', key: 'tag' }],
   },
   {
     key: 'reminder',
     writableFields: reminderWritableFields,
     removal: 'deletion',
+    generatedId: true,
+    references: [
+      { field: 'incomeAccount', key: 'account' },
+      { field: 'outcomeAccount', key: 'account' },
+      { field: 'tag', key: 'tag', many: true },
+      { field: 'merchant', key: 'merchant' },
+    ],
   },
   {
     key: 'reminderMarker',
     writableFields: reminderMarkerWritableFields,
     removal: 'deletion',
-    // ZenMoney does not preserve `state: deleted` as an ordinary update. It
-    // is the wire representation of absence, so restore turns it into a
-    // deletion intent or ignores it when no live marker exists.
+    generatedId: true,
     isAbsent: row => row.state === 'deleted',
+    references: [
+      { field: 'incomeAccount', key: 'account' },
+      { field: 'outcomeAccount', key: 'account' },
+      { field: 'tag', key: 'tag', many: true },
+      { field: 'merchant', key: 'merchant' },
+      { field: 'reminder', key: 'reminder' },
+    ],
   },
   {
     key: 'transaction',
     writableFields: transactionWritableFields,
     creationFields: transactionIntentFields,
+    semanticFields: transactionIntentFields,
+    immutableFields: ['created'],
     removal: 'softDelete',
-    // A deleted transaction is inert on both sides: the server never
-    // resurrects one, and recreating it under its own id is impossible because
-    // a hard-deleted id stays a tombstone. Restoring one is a new transaction
-    // with a new id, which is a command, not a diff.
+    generatedId: true,
     skip: row => row.deleted === true,
+    references: [
+      { field: 'incomeAccount', key: 'account' },
+      { field: 'outcomeAccount', key: 'account' },
+      { field: 'tag', key: 'tag', many: true },
+      { field: 'merchant', key: 'merchant' },
+      { field: 'reminderMarker', key: 'reminderMarker' },
+    ],
   },
-] as const satisfies readonly TEntityRow[]
+  {
+    key: 'budget',
+    writableFields: budgetWritableFields,
+    removal: 'zero',
+    zeroFields: ['income', 'outcome'],
+    references: [{ field: 'tag', key: 'tag' }],
+    remap: (row, mappings) => {
+      const tag = mapId(mappings, 'tag', row.tag as TId | null)
+      return {
+        ...row,
+        tag,
+        id: toBudgetId(
+          row.date as Parameters<typeof toBudgetId>[0],
+          tag as Parameters<typeof toBudgetId>[1]
+        ),
+      }
+    },
+  },
+]
 
 export type TStoreDiffScope = {
-  /** Entity types to consider. Defaults to every writable type. */
   entities?: readonly TIntentEntityKey[]
-  /**
-   * Decides whether one row participates. A row participates when either side
-   * is inside the scope, so a row that moved in or out of the scope between
-   * the two stores is not silently skipped.
-   */
   includes?: (key: TIntentEntityKey, row: TRow) => boolean
 }
 
-/** The user intent that moves `current` toward `desired` inside `scope`. */
-export function diffStores(
+export type TRestoreIdMappings = Partial<
+  Record<TIntentEntityKey, Record<string, TId>>
+>
+
+export type TRestorePlan = {
+  patch: TIntentPatch
+  mappings: TRestoreIdMappings
+}
+
+export type TRestorePlannerOptions = {
+  scope?: TStoreDiffScope
+  allocateId?: (key: TIntentEntityKey, desiredId: string) => string
+}
+
+/**
+ * Builds a transient restore plan. `allocateId` is deterministic in preview
+ * and bound to `ctx.uuid()` only while issuing the eventual command.
+ */
+export function buildRestorePlan(
   current: TDataStore,
   desired: TDataStore,
-  scope: TStoreDiffScope = {}
-): TIntentPatch {
+  options: TRestorePlannerOptions = {}
+): TRestorePlan {
+  const scope = options.scope ?? {}
   const selectedKeys = new Set<string>(scope.entities ?? intentEntityKeys)
   const patch: TIntentPatch = {}
   const patchByKey = patch as Record<string, unknown>
   const deletion: TDeletionIntent[] = []
+  const mappings: TRestoreIdMappings = {}
 
   entityRows.forEach(row => {
     if (!selectedKeys.has(row.key)) return
 
     const currentById = (current[row.key] ?? {}) as TById
     const desiredById = (desired[row.key] ?? {}) as TById
-    const intents: TRow[] = []
+    const activeCurrent = sortedRows(currentById).filter(
+      entity =>
+        !isSkipped(row, entity) &&
+        !isAbsent(row, entity) &&
+        participates(
+          scope,
+          row,
+          entity,
+          desiredById[entity.id] as TRow | undefined
+        )
+    )
+    const activeDesired = orderedDesiredRows(row, desiredById).filter(
+      entity =>
+        !isSkipped(row, entity) &&
+        !isAbsent(row, entity) &&
+        participates(
+          scope,
+          row,
+          currentById[entity.id] as TRow | undefined,
+          entity
+        )
+    )
+    const consumedCurrent = new Set<string>()
+    const mappedDesired = new Set<string>()
+    const actualByDesired = (mappings[row.key] ??= {})
 
-    unionIds(currentById, desiredById).forEach(id => {
-      const storedBefore = currentById[id]
-      const storedAfter = desiredById[id]
-      if (!inScope(scope, row.key, storedBefore, storedAfter)) return
-      if (isSkipped(row, storedBefore) || isSkipped(row, storedAfter)) return
-
-      const before = isAbsent(row, storedBefore) ? undefined : storedBefore
-      const after = isAbsent(row, storedAfter) ? undefined : storedAfter
-
-      if (!after) {
-        if (!before) return
-        const removal = removalIntent(row, before, deletion)
-        if (removal) intents.push(removal)
+    // A live same-id row is the only case where the backup identity is safe to
+    // keep. Immutable transaction creation time deliberately breaks this match.
+    activeDesired.forEach(rawDesired => {
+      if (isAbsent(row, rawDesired)) return
+      const desiredEntity = remapEntity(row, rawDesired, mappings)
+      const currentEntity = currentById[rawDesired.id]
+      if (
+        !currentEntity ||
+        isSkipped(row, currentEntity) ||
+        isAbsent(row, currentEntity) ||
+        !participates(scope, row, currentEntity, rawDesired) ||
+        immutableDiffers(row, currentEntity, desiredEntity)
+      ) {
         return
       }
+      actualByDesired[String(rawDesired.id)] = currentEntity.id
+      consumedCurrent.add(String(currentEntity.id))
+      mappedDesired.add(String(rawDesired.id))
+    })
 
+    // Exact semantic matches are a multiset: each live current candidate is
+    // consumed at most once, so duplicate imported operations retain cardinality.
+    const candidatesByFingerprint = new Map<string, TRow[]>()
+    activeCurrent.forEach(entity => {
+      if (consumedCurrent.has(String(entity.id))) return
+      const fingerprint = entityFingerprint(row, entity)
+      const candidates = candidatesByFingerprint.get(fingerprint) ?? []
+      candidates.push(entity)
+      candidatesByFingerprint.set(fingerprint, candidates)
+    })
+
+    activeDesired.forEach(rawDesired => {
+      const desiredId = String(rawDesired.id)
+      if (isAbsent(row, rawDesired) || mappedDesired.has(desiredId)) return
+      const desiredEntity = remapEntity(row, rawDesired, mappings)
+      const candidates = candidatesByFingerprint.get(
+        entityFingerprint(row, desiredEntity)
+      )
+      const semanticMatch = candidates?.shift()
+      const actualId = semanticMatch
+        ? semanticMatch.id
+        : row.generatedId
+          ? (options.allocateId ?? previewId)(row.key, desiredId)
+          : desiredEntity.id
+      actualByDesired[desiredId] = actualId
+      mappedDesired.add(desiredId)
+      if (semanticMatch) consumedCurrent.add(String(semanticMatch.id))
+    })
+
+    const intents: TRow[] = []
+    activeDesired.forEach(rawDesired => {
+      if (isAbsent(row, rawDesired)) return
+      const actualId = actualByDesired[String(rawDesired.id)]
+      if (actualId === undefined) return
+      const desiredEntity = {
+        ...remapEntity(row, rawDesired, mappings),
+        id: actualId,
+      }
+      const before = currentById[actualId]
       const intent = before
-        ? updateIntent(row, before, after)
-        : 'existingOnly' in row && row.existingOnly
+        ? updateIntent(row, before, desiredEntity)
+        : row.existingOnly
           ? undefined
-          : creationIntent(row, after)
+          : creationIntent(row, desiredEntity)
       if (intent) intents.push(intent)
+    })
+
+    activeCurrent.forEach(before => {
+      if (consumedCurrent.has(String(before.id))) return
+      const removal = removalIntent(row, before, deletion)
+      if (removal) intents.push(removal)
     })
 
     if (intents.length) patchByKey[row.key] = intents
   })
 
   if (deletion.length) patch.deletion = deletion
-  return patch
+  return { patch, mappings }
 }
 
-/** Only fields that differ, so a restore writes nothing it does not change. */
+/** Preview-safe patch form retained for focused internal callers and tests. */
+export function diffStores(
+  current: TDataStore,
+  desired: TDataStore,
+  scope: TStoreDiffScope = {}
+): TIntentPatch {
+  return buildRestorePlan(current, desired, { scope }).patch
+}
+
 function updateIntent(
   row: TEntityRow,
   before: TRow,
@@ -182,24 +306,19 @@ function updateIntent(
   const intent: TRow = { id: before.id }
   row.writableFields.forEach(field => {
     if (!(field in after)) return
-    if (isSameFieldValue(field, before[field], after[field])) return
+    if (isSameEntityFieldValue(row.key, field, before[field], after[field])) {
+      return
+    }
     intent[field] = after[field]
   })
   return Object.keys(intent).length > 1 ? intent : undefined
 }
 
-/**
- * A creation keeps the id from `desired`, so references from other restored
- * rows stay valid. Server-owned fields are not carried: the factory fills them
- * from the local user at issue time. Fields that match a factory default are
- * dropped later, by command issue.
- */
 function creationIntent(row: TEntityRow, after: TRow): TRow {
   const intent: TRow = { id: after.id }
   const fields = row.creationFields ?? row.writableFields
   fields.forEach(field => {
-    if (after[field] === undefined) return
-    intent[field] = after[field]
+    if (after[field] !== undefined) intent[field] = after[field]
   })
   return intent
 }
@@ -210,46 +329,140 @@ function removalIntent(
   deletion: TDeletionIntent[]
 ): TRow | undefined {
   if (row.removal === 'softDelete') return { id: before.id, deleted: true }
-
   if (row.removal === 'zero') {
     const intent: TRow = { id: before.id }
     row.zeroFields?.forEach(field => {
-      if (isSameFieldValue(field, before[field], 0)) return
-      intent[field] = 0
+      if (!isSameEntityFieldValue(row.key, field, before[field], 0)) {
+        intent[field] = 0
+      }
     })
     return Object.keys(intent).length > 1 ? intent : undefined
   }
-
-  if (row.removal === 'deletion') {
+  if (row.removal === 'deletion')
     deletion.push({ id: before.id, object: row.key })
-  }
   return undefined
 }
 
-function isSkipped(row: TEntityRow, entity: TRow | undefined): boolean {
-  return entity ? (row.skip?.(entity) ?? false) : false
+function remapEntity(
+  row: TEntityRow,
+  raw: TRow,
+  mappings: TRestoreIdMappings
+): TRow {
+  const remapped = { ...raw }
+  row.references?.forEach(reference => {
+    const value = raw[reference.field]
+    if (reference.many) {
+      remapped[reference.field] = Array.isArray(value)
+        ? value.map(id => mapId(mappings, reference.key, id as TId))
+        : value
+    } else {
+      remapped[reference.field] = mapId(
+        mappings,
+        reference.key,
+        value as TId | null
+      )
+    }
+  })
+  return row.remap ? row.remap(remapped, mappings) : remapped
 }
 
-function isAbsent(row: TEntityRow, entity: TRow | undefined): boolean {
-  return entity ? (row.isAbsent?.(entity) ?? false) : false
-}
-
-function inScope(
-  scope: TStoreDiffScope,
+function mapId(
+  mappings: TRestoreIdMappings,
   key: TIntentEntityKey,
-  before: TRow | undefined,
-  after: TRow | undefined
-): boolean {
-  if (!scope.includes) return true
+  id: TId | null
+): TId | null {
+  if (id === null) return null
+  return mappings[key]?.[String(id)] ?? id
+}
+
+function entityFingerprint(row: TEntityRow, entity: TRow): string {
+  const fields = row.semanticFields ?? row.creationFields ?? row.writableFields
+  return fields
+    .map(field => `${field}:${canonicalValue(row.key, field, entity[field])}`)
+    .join('|')
+}
+
+function canonicalValue(
+  entityKey: TIntentEntityKey,
+  field: string,
+  value: unknown
+): string {
+  if (field === 'comment') return JSON.stringify(value ?? '')
+  if (entityKey === 'transaction' && field === 'tag' && Array.isArray(value)) {
+    return JSON.stringify([...value].sort())
+  }
+  return JSON.stringify(value)
+}
+
+function immutableDiffers(row: TEntityRow, left: TRow, right: TRow): boolean {
   return (
-    (!!before && scope.includes(key, before)) ||
-    (!!after && scope.includes(key, after))
+    row.immutableFields?.some(
+      field =>
+        !isSameEntityFieldValue(row.key, field, left[field], right[field])
+    ) ?? false
   )
 }
 
-/** Sorted so the same pair of stores always produces the same patch. */
-function unionIds(current: TById, desired: TById): string[] {
-  return [...new Set([...Object.keys(current), ...Object.keys(desired)])].sort()
+function participates(
+  scope: TStoreDiffScope,
+  row: TEntityRow,
+  before: TRow | undefined,
+  after: TRow | undefined
+): boolean {
+  if (before && (isSkipped(row, before) || isAbsent(row, before))) {
+    before = undefined
+  }
+  if (after && (isSkipped(row, after) || isAbsent(row, after))) {
+    after = undefined
+  }
+  if (!before && !after) return false
+  return (
+    !scope.includes ||
+    (!!before && scope.includes(row.key, before)) ||
+    (!!after && scope.includes(row.key, after))
+  )
+}
+
+function isSkipped(row: TEntityRow, entity: TRow): boolean {
+  return row.skip?.(entity) ?? false
+}
+
+function isAbsent(row: TEntityRow, entity: TRow): boolean {
+  return row.isAbsent?.(entity) ?? false
+}
+
+function sortedRows(byId: TById): TRow[] {
+  return Object.values(byId)
+    .filter((entity): entity is TRow => !!entity)
+    .sort((left, right) => String(left.id).localeCompare(String(right.id)))
+}
+
+function orderedDesiredRows(row: TEntityRow, byId: TById): TRow[] {
+  const rows = sortedRows(byId)
+  if (row.key !== 'tag') return rows
+
+  const result: TRow[] = []
+  const pending = [...rows]
+  while (pending.length) {
+    const ready = pending.filter(tag => {
+      const parent = tag.parent as TId | null
+      return (
+        parent === null || result.some(candidate => candidate.id === parent)
+      )
+    })
+    // Complete-backup validation has already rejected cycles. Keep a stable
+    // fallback for scoped callers that intentionally omit a parent.
+    const batch = ready.length ? ready : [pending[0]]
+    batch.forEach(tag => {
+      result.push(tag)
+      pending.splice(pending.indexOf(tag), 1)
+    })
+  }
+  return result
+}
+
+function previewId(key: TIntentEntityKey, desiredId: string): string {
+  return `__restore__:${key}:${desiredId}`
 }
 
 export type TStoreDiffCounts = {
@@ -262,12 +475,6 @@ export type TStoreDiffSummary = Partial<
   Record<TIntentEntityKey, TStoreDiffCounts>
 >
 
-/**
- * What a patch does to a store, counted per entity type. This is what a
- * confirmation screen shows before a restore or an import is issued, so it
- * classifies against the store the patch will be applied to rather than
- * against the patch alone.
- */
 export function summarizeStoreDiff(
   current: TDataStore,
   patch: TIntentPatch
@@ -280,7 +487,6 @@ export function summarizeStoreDiff(
     const intents = patch[key] as TRow[] | undefined
     if (!intents?.length) return
     const currentById = (current[key] ?? {}) as TById
-
     intents.forEach(intent => {
       const counts = countsFor(key)
       if (!currentById[intent.id]) counts.created += 1
@@ -290,9 +496,9 @@ export function summarizeStoreDiff(
   })
 
   patch.deletion?.forEach(({ object }) => {
-    if (!(intentEntityKeys as readonly string[]).includes(object)) return
-    countsFor(object as TIntentEntityKey).removed += 1
+    if ((intentEntityKeys as readonly string[]).includes(object)) {
+      countsFor(object as TIntentEntityKey).removed += 1
+    }
   })
-
   return summary
 }

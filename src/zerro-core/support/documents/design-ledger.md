@@ -147,12 +147,14 @@ any retained point. The implementation path is
   application is impossible — a diff carries no before-values.
 - The log is additive and off the hot path. `base + outbox` remain the only
   durable replica inputs and the only thing `current` derives from.
-- Restoring a point and importing a backup are one operation:
-  `diffStores(current, desired, scope) -> TIntentPatch`. It produces an ordinary
-  command, so restore inherits materialization, transport, undo-before-push, and
-  its own journal entry. There is no second write path into the store.
-  Implemented 2026-08-01 in `internal/operations/restore/diffStores.ts`, with
-  backup import as its first consumer.
+- Restoring a point and importing a backup are one operation: an internal
+  `buildRestorePlan(current, desired, { scope, allocateId }) -> TRestorePlan`
+  produces the ordinary command's intent patch. Restore therefore inherits materialization,
+  transport, undo-before-push, and its own journal entry; there is no second
+  write path into the store. Preview receives deterministic temporary IDs and
+  apply receives real UUIDs only at dispatch. Implemented 2026-08-01 in
+  `internal/operations/restore/diffStores.ts`, with backup import as its first
+  consumer.
 - A restore removes a row only where the domain already has a removal, and the
   diff carries one row per entity type saying which: soft delete for
   transactions, zeroing for budgets, a real `deletion` for reminders, and
@@ -160,9 +162,13 @@ any retained point. The implementation path is
   three would leave transactions referencing a row that no longer exists
   locally, because the server cascades of materialization.md rules 4-7 are not
   predicted; they become expressible together, when the deletion commands ship.
-- The diff never resurrects. A transaction that is deleted on either side is
-  skipped entirely, which is the same ratchet the materializer applies, and it
-  is what makes restoring twice a no-op instead of a second round of writes.
+- Restore never reuses an absent backup ID. A live same-ID entity is updated in
+  place; otherwise an exact semantic match is reused once, and an unmatched
+  creatable entity receives a fresh ID with every dependent reference remapped.
+  Desired deleted transactions remain absent and current deleted transactions
+  never become live under their old ID. If no semantic replacement exists, a
+  desired live transaction receives a fresh ID. Repeating the restore therefore
+  converges instead of producing a second command.
 - `apply` recomputes the diff at dispatch time and never issues a patch built
   for the preview. A background pull can land between the two, and a restore is
   defined against the store it is applied to, not the one the user was shown.

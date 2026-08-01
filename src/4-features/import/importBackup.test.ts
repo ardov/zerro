@@ -22,6 +22,9 @@ import {
 
 vi.mock('6-shared/analytics', () => ({ track: () => {} }))
 
+const RESTORE_UUID = 'fresh-restore-id'
+vi.mock('uuid', () => ({ v1: () => RESTORE_UUID }))
+
 const rootUser = makeUser({ id: 1, parent: null, currency: 2 })
 const backupCollectionKeys = [
   'instrument',
@@ -256,6 +259,39 @@ describe('importBackup', () => {
       applied: false,
     })
     expect(runner.commands()).toEqual([])
+  })
+
+  it('allocates fresh ids at confirm time and converges on the next import', () => {
+    const recreated = makeSnapshot({
+      account: { backupAccount: makeAccount({ id: 'backupAccount' }) },
+      transaction: {
+        backupTransaction: makeTransaction({
+          id: 'backupTransaction',
+          incomeAccount: 'backupAccount',
+          outcomeAccount: 'backupAccount',
+          outcome: 42,
+        }),
+      },
+    })
+    const runner = makeThunkRunner(makeTestRootState(makeSnapshot()))
+
+    expect(runner.dispatch(importBackup(recreated))).toEqual({
+      ok: true,
+      applied: true,
+    })
+    const restored = runner.state().data.current
+    expect(restored.account[RESTORE_UUID]).toBeDefined()
+    expect(restored.transaction[RESTORE_UUID]).toMatchObject({
+      incomeAccount: RESTORE_UUID,
+      outcomeAccount: RESTORE_UUID,
+      outcome: 42,
+    })
+
+    expect(runner.dispatch(importBackup(recreated))).toEqual({
+      ok: true,
+      applied: false,
+    })
+    expect(runner.commands()).toHaveLength(1)
   })
 
   it('rejects a structurally valid backup from another account', () => {

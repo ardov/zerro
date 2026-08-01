@@ -152,6 +152,19 @@ describe('materializeCommand', () => {
     ).toEqual(['first'])
   })
 
+  it('treats reordered transaction tags as a no-op at command issue time', () => {
+    const current = makeTransaction({ id: 'tr-1', tag: ['food', 'home'] })
+    const snapshot = makeStore({ transaction: { 'tr-1': current } })
+
+    expect(
+      issuePatch(
+        snapshot,
+        { transaction: [{ id: 'tr-1', tag: ['home', 'food'] }] },
+        100
+      ).patch
+    ).toEqual({})
+  })
+
   it('rejects incomplete transaction creation intent before persistence', () => {
     expect(() =>
       issuePatch(

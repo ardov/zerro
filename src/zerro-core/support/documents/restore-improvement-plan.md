@@ -1,6 +1,6 @@
 # Full backup restore improvement plan
 
-- Status: implementation plan for the next restore checkpoint
+- Status: checkpoints 1–7 shipped; factory convergence and deletion cascades remain
 - Updated: 2026-08-01
 - Scope: full-backup validation, semantic reconciliation, id remapping,
   writable entity coverage, deletion cascades, preview, and verification
@@ -215,10 +215,9 @@ Normalize `state: 'deleted'` as absence:
 - never send `state: 'deleted'` as an ordinary update, because ZenMoney drops
   that field-level write.
 
-## 4. Replace id-only diffing with one restore planner
+## 4. Replace id-only diffing with one restore planner — shipped 2026-08-01
 
-The current `diffStores` joins rows only by id. Introduce one internal planner,
-for example:
+`buildRestorePlan` is the internal planner behind both preview and apply:
 
 ```ts
 buildRestorePlan(current, desired, {
@@ -231,12 +230,14 @@ The transient plan contains:
 
 - per-entity `desiredId -> actualId` mappings;
 - creations, updates, and removals;
-- unsupported actions;
-- an effective summary, including predicted cascade effects;
+- future unsupported actions;
+- the base summary; effective cascade effects follow the cascade checkpoints;
 - the resulting `TIntentPatch` when real ids are available.
 
-Keep the planner internal. Preserve the public `core.restore.preview` and
-`core.restore.apply` surface.
+It matches a live same-id row first, then exact semantic rows as a deterministic
+multiset, and allocates a fresh id only for an unmatched creatable row. Keep the
+planner internal; the public `core.restore.preview` and `core.restore.apply`
+surface remains unchanged.
 
 ### 4.1 Preview and apply allocation
 
@@ -589,8 +590,8 @@ the completion snackbar only if a command was actually appended.
 3. `feat(export): warn when pending changes are excluded`
 4. `feat(core): support root-user preference restore`
 5. `feat(core): add reminder marker intents and restore`
-6. `refactor(core): introduce restore reconciliation plan`
-7. `feat(core): restore entities with fresh ids and remap references`
+6. ~~`refactor(core): introduce restore reconciliation plan`~~ Shipped 2026-08-01.
+7. ~~`feat(core): restore entities with fresh ids and remap references`~~ Shipped 2026-08-01.
 8. `fix(core): make entity factories restore-idempotent`
 9. `feat(core): predict account deletion cascades`
 10. `feat(core): predict tag deletion cascades`

@@ -14,7 +14,7 @@ import {
 import { applyPatch } from '../../domain/zenmoney/model/applyPatch'
 import type { TDataStore } from '../../domain/zenmoney/model/store'
 import { issuePatch, materializeCommand } from '../materialization'
-import { diffStores, summarizeStoreDiff } from './diffStores'
+import { buildRestorePlan, diffStores, summarizeStoreDiff } from './diffStores'
 
 const rootUser = makeUser({ id: 1, parent: null, currency: 2 })
 
@@ -24,7 +24,9 @@ function makeSnapshot(patch: Partial<TDataStore> = {}): TDataStore {
 
 /** Applies a diff the way a real caller does: as an ordinary command. */
 function applyDiff(current: TDataStore, desired: TDataStore): TDataStore {
-  const patch = diffStores(current, desired)
+  const patch = buildRestorePlan(current, desired, {
+    allocateId: (key, id) => `restored:${key}:${id}`,
+  }).patch
   const command = issuePatch(current, patch, 1700000000000)
   return applyPatch(current, materializeCommand(current, command))
 }
@@ -132,7 +134,7 @@ describe('diffStores', () => {
     expect(diffStores(current, desired)).toEqual({
       reminderMarker: [
         {
-          id: 'created',
+          id: '__restore__:reminderMarker:created',
           incomeInstrument: 2,
           incomeAccount: 'cash',
           income: 0,
@@ -175,7 +177,7 @@ describe('diffStores', () => {
     })
   })
 
-  it('recreates a missing row under its own id', () => {
+  it('recreates a missing row under a preview-safe fresh id', () => {
     const current = makeSnapshot()
     const desired = makeSnapshot({
       tag: { food: makeTag({ id: 'food', title: 'Food', color: 5 }) },
@@ -183,12 +185,20 @@ describe('diffStores', () => {
 
     const patch = diffStores(current, desired)
     expect(patch.tag).toEqual([
-      expect.objectContaining({ id: 'food', title: 'Food', color: 5 }),
+      expect.objectContaining({
+        id: '__restore__:tag:food',
+        title: 'Food',
+        color: 5,
+      }),
     ])
 
     const next = applyDiff(current, desired)
-    expect(next.tag.food).toMatchObject({ id: 'food', title: 'Food', color: 5 })
-    expect(next.tag.food.user).toBe(rootUser.id)
+    expect(next.tag['restored:tag:food']).toMatchObject({
+      id: 'restored:tag:food',
+      title: 'Food',
+      color: 5,
+    })
+    expect(next.tag['restored:tag:food'].user).toBe(rootUser.id)
   })
 
   it('sorts ids so one pair of stores always gives one patch', () => {
@@ -200,8 +210,8 @@ describe('diffStores', () => {
       },
     })
     expect(diffStores(current, desired).tag?.map(tag => tag.id)).toEqual([
-      'a',
-      'b',
+      '__restore__:tag:a',
+      '__restore__:tag:b',
     ])
   })
 })
@@ -277,7 +287,7 @@ describe('diffStores removals', () => {
 })
 
 describe('diffStores and the deletion ratchet', () => {
-  it('never resurrects a deleted transaction', () => {
+  it('recreates a desired live transaction under a fresh id after deletion', () => {
     const current = makeSnapshot({
       transaction: {
         tr: makeTransaction({ id: 'tr', deleted: true, outcome: 10 }),
@@ -288,7 +298,12 @@ describe('diffStores and the deletion ratchet', () => {
         tr: makeTransaction({ id: 'tr', deleted: false, outcome: 25 }),
       },
     })
-    expect(diffStores(current, desired)).toEqual({})
+    expect(diffStores(current, desired).transaction).toEqual([
+      expect.objectContaining({
+        id: '__restore__:transaction:tr',
+        outcome: 25,
+      }),
+    ])
   })
 
   it('does not recreate a transaction that was deleted in the backup', () => {
@@ -297,6 +312,107 @@ describe('diffStores and the deletion ratchet', () => {
       transaction: { tr: makeTransaction({ id: 'tr', deleted: true }) },
     })
     expect(diffStores(current, desired)).toEqual({})
+  })
+})
+
+describe('restore reconciliation', () => {
+  const allocateId = (key: string, id: string) => `fresh:${key}:${id}`
+
+  it('matches semantically equal rows with different backup ids', () => {
+    const current = makeSnapshot({
+      merchant: { live: makeMerchant({ id: 'live', title: 'Corner shop' }) },
+    })
+    const desired = makeSnapshot({
+      merchant: {
+        backup: makeMerchant({ id: 'backup', title: 'Corner shop' }),
+      },
+    })
+
+    const plan = buildRestorePlan(current, desired, { allocateId })
+    expect(plan.patch).toEqual({})
+    expect(plan.mappings.merchant).toEqual({ backup: 'live' })
+  })
+
+  it('allocates fresh ids and rewrites dependent references in dependency order', () => {
+    const current = makeSnapshot({
+      account: {
+        liveAccount: makeAccount({ id: 'liveAccount', title: 'Cash' }),
+      },
+      tag: { liveTag: makeTag({ id: 'liveTag', title: 'Food' }) },
+    })
+    const desired = makeSnapshot({
+      account: {
+        backupAccount: makeAccount({ id: 'backupAccount', title: 'Cash' }),
+      },
+      tag: { backupTag: makeTag({ id: 'backupTag', title: 'Food' }) },
+      transaction: {
+        backupTransaction: makeTransaction({
+          id: 'backupTransaction',
+          incomeAccount: 'backupAccount',
+          outcomeAccount: 'backupAccount',
+          tag: ['backupTag'],
+          outcome: 42,
+        }),
+      },
+    })
+
+    const plan = buildRestorePlan(current, desired, { allocateId })
+    expect(plan.mappings).toMatchObject({
+      account: { backupAccount: 'liveAccount' },
+      tag: { backupTag: 'liveTag' },
+      transaction: { backupTransaction: 'fresh:transaction:backupTransaction' },
+    })
+    expect(plan.patch.transaction).toEqual([
+      expect.objectContaining({
+        id: 'fresh:transaction:backupTransaction',
+        incomeAccount: 'liveAccount',
+        outcomeAccount: 'liveAccount',
+        tag: ['liveTag'],
+      }),
+    ])
+  })
+
+  it('replaces a transaction when immutable created differs and then converges', () => {
+    const current = makeSnapshot({
+      transaction: {
+        old: makeTransaction({ id: 'old', created: 1, outcome: 10 }),
+      },
+    })
+    const desired = makeSnapshot({
+      transaction: {
+        old: makeTransaction({ id: 'old', created: 2, outcome: 10 }),
+      },
+    })
+
+    const patch = buildRestorePlan(current, desired, { allocateId }).patch
+    expect(patch.transaction).toEqual([
+      expect.objectContaining({ id: 'fresh:transaction:old', created: 2 }),
+      { id: 'old', deleted: true },
+    ])
+
+    const command = issuePatch(current, patch, 1700000000000)
+    const restored = applyPatch(current, materializeCommand(current, command))
+    expect(buildRestorePlan(restored, desired, { allocateId }).patch).toEqual(
+      {}
+    )
+  })
+
+  it('treats duplicate semantic rows as a multiset', () => {
+    const current = makeSnapshot({
+      transaction: {
+        first: makeTransaction({ id: 'first', created: 1, outcome: 10 }),
+        second: makeTransaction({ id: 'second', created: 1, outcome: 10 }),
+      },
+    })
+    const desired = makeSnapshot({
+      transaction: {
+        backup: makeTransaction({ id: 'backup', created: 1, outcome: 10 }),
+      },
+    })
+
+    const plan = buildRestorePlan(current, desired, { allocateId })
+    expect(plan.mappings.transaction).toEqual({ backup: 'first' })
+    expect(plan.patch.transaction).toEqual([{ id: 'second', deleted: true }])
   })
 })
 
@@ -396,7 +512,9 @@ describe('diffStores round trip', () => {
     const restored = applyDiff(drifted, backup)
     expect(restored.account.acc.title).toBe('Cash')
     expect(restored.transaction.tr.outcome).toBe(100)
-    expect(restored.transaction.later.deleted).toBe(true)
+    expect(restored.transaction['restored:transaction:later'].deleted).toBe(
+      true
+    )
     // Restoring twice is a no-op: the second diff has nothing left to write.
     expect(diffStores(restored, backup)).toEqual({})
   })
