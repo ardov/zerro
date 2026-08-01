@@ -163,9 +163,9 @@ describe('envelope budget updates', () => {
       month: request.month,
     })
     expect(changedEnvelope.meta.pendingCommandCount).toBe(1)
-    expect(changedEnvelope.data.self.assignedByCurrency[envelope.currency]).toBe(
-      123
-    )
+    expect(
+      changedEnvelope.data.self.assignedByCurrency[envelope.currency]
+    ).toBe(123)
 
     const outbox = await listOutbox(context, {})
     expect(outbox.data.items).toHaveLength(1)

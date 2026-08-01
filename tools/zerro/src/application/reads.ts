@@ -87,34 +87,29 @@ export async function listAccounts(
     bucket[code] = round((bucket[code] ?? 0) + account.balance)
   })
 
-  return readSuccess(
-    context,
-    workspace,
-    command,
-    {
-      includeArchived,
-      displayCurrency: displayCurrency ?? null,
-      ...page(rows, {
-        command,
-        revision: workspace.revision,
-        query: { includeArchived, displayCurrency: displayCurrency ?? null },
-        limit,
-        cursor: options.cursor,
-      }),
-      totals: {
-        netWorth,
-        inBudget,
-        offBudget,
-        ...(displayCurrency
-          ? {
-              netWorthConverted: convertFx(netWorth, displayCurrency, rates),
-              inBudgetConverted: convertFx(inBudget, displayCurrency, rates),
-              offBudgetConverted: convertFx(offBudget, displayCurrency, rates),
-            }
-          : {}),
-      },
-    }
-  )
+  return readSuccess(context, workspace, command, {
+    includeArchived,
+    displayCurrency: displayCurrency ?? null,
+    ...page(rows, {
+      command,
+      revision: workspace.revision,
+      query: { includeArchived, displayCurrency: displayCurrency ?? null },
+      limit,
+      cursor: options.cursor,
+    }),
+    totals: {
+      netWorth,
+      inBudget,
+      offBudget,
+      ...(displayCurrency
+        ? {
+            netWorthConverted: convertFx(netWorth, displayCurrency, rates),
+            inBudgetConverted: convertFx(inBudget, displayCurrency, rates),
+            offBudgetConverted: convertFx(offBudget, displayCurrency, rates),
+          }
+        : {}),
+    },
+  })
 }
 
 export async function searchTags(context: TToolContext, options: TReadOptions) {
@@ -197,7 +192,9 @@ export async function searchTransactions(
     workspace.current.instrument,
     command
   )
-  const types = options.type ? parseTransactionTypes(options.type, command) : undefined
+  const types = options.type
+    ? parseTransactionTypes(options.type, command)
+    : undefined
   const accountId = options.account
     ? resolveEntityId(workspace.current.account, options.account, {
         command,
@@ -311,45 +308,36 @@ export async function searchTransactions(
       )
   })
 
-  return readSuccess(
-    context,
-    workspace,
-    command,
-    {
-      displayCurrency: displayCurrency ?? null,
-      ...page(rows, {
-        command,
-        revision: workspace.revision,
-        query: {
-          query,
-          from: options.from ?? null,
-          to: options.to ?? null,
-          account: accountId ?? null,
-          tags: tagIds ?? null,
-          merchants: merchantIds ?? null,
-          types: types ?? null,
-          displayCurrency: displayCurrency ?? null,
-        },
-        limit,
-        cursor: options.cursor,
-      }),
-      totals: {
-        income: incomeTotal,
-        outcome: outcomeTotal,
-        transactionCount: rows.length,
-        ...(displayCurrency
-          ? {
-              incomeConverted: convertFx(incomeTotal, displayCurrency, rates),
-              outcomeConverted: convertFx(
-                outcomeTotal,
-                displayCurrency,
-                rates
-              ),
-            }
-          : {}),
+  return readSuccess(context, workspace, command, {
+    displayCurrency: displayCurrency ?? null,
+    ...page(rows, {
+      command,
+      revision: workspace.revision,
+      query: {
+        query,
+        from: options.from ?? null,
+        to: options.to ?? null,
+        account: accountId ?? null,
+        tags: tagIds ?? null,
+        merchants: merchantIds ?? null,
+        types: types ?? null,
+        displayCurrency: displayCurrency ?? null,
       },
-    }
-  )
+      limit,
+      cursor: options.cursor,
+    }),
+    totals: {
+      income: incomeTotal,
+      outcome: outcomeTotal,
+      transactionCount: rows.length,
+      ...(displayCurrency
+        ? {
+            incomeConverted: convertFx(incomeTotal, displayCurrency, rates),
+            outcomeConverted: convertFx(outcomeTotal, displayCurrency, rates),
+          }
+        : {}),
+    },
+  })
 }
 
 function moneySide(
@@ -401,10 +389,7 @@ export function transactionType(
   return transaction.income > 0 ? 'income' : 'outcome'
 }
 
-function parseTransactionTypes(
-  csv: string,
-  command: string
-): TrFilterType[] {
+function parseTransactionTypes(csv: string, command: string): TrFilterType[] {
   const values = csv
     .split(',')
     .map(part => part.trim())

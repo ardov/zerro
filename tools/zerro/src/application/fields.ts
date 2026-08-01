@@ -54,7 +54,10 @@ export function projectResultFields(
   if (!isRecord(result) || result.ok !== true || !('data' in result))
     return result
   const unmatched = findUnmatchedFieldPaths(result.data, fieldsCsv)
-  const projected = { ...result, data: applyFieldsProjection(result.data, fieldsCsv) }
+  const projected = {
+    ...result,
+    data: applyFieldsProjection(result.data, fieldsCsv),
+  }
   if (!unmatched.length) return projected
   const existingWarnings = Array.isArray(result.warnings) ? result.warnings : []
   const warning: TWarning = {

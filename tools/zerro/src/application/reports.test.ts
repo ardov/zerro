@@ -86,7 +86,7 @@ describe('activity report', () => {
   it('groups by account using the outcome account', async () => {
     const result = await getActivityReport(context, {
       'group-by': 'account',
-      'direction': 'outcome',
+      direction: 'outcome',
       limit: '200',
     })
     for (const item of result.data.items) {

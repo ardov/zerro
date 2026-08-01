@@ -82,10 +82,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export function hasUnconvertedCurrencyVectors(result: unknown): boolean {
   if (!isRecord(result) || result.ok !== true || !isRecord(result.data))
     return false
-  if (
-    'displayCurrency' in result.data &&
-    result.data.displayCurrency !== null
-  )
+  if ('displayCurrency' in result.data && result.data.displayCurrency !== null)
     return false
   const items = result.data.items
   if (!Array.isArray(items)) return false

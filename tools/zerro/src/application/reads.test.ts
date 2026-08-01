@@ -191,7 +191,13 @@ describe('transaction --type filter and totals', () => {
     const demo = makeDemoStore({ until: '2023-06-19' })
     await saveWorkspace(
       context.statePath,
-      { version: 1, endpoint: 'ru', base: demo, outbox: [], recentRequests: [] },
+      {
+        version: 1,
+        endpoint: 'ru',
+        base: demo,
+        outbox: [],
+        recentRequests: [],
+      },
       'fixture'
     )
 
@@ -214,7 +220,13 @@ describe('transaction --type filter and totals', () => {
     const demo = makeDemoStore({ until: '2023-06-19' })
     await saveWorkspace(
       context.statePath,
-      { version: 1, endpoint: 'ru', base: demo, outbox: [], recentRequests: [] },
+      {
+        version: 1,
+        endpoint: 'ru',
+        base: demo,
+        outbox: [],
+        recentRequests: [],
+      },
       'fixture'
     )
 
@@ -234,7 +246,13 @@ describe('transaction --type filter and totals', () => {
     const demo = makeDemoStore({ until: '2023-06-19' })
     await saveWorkspace(
       context.statePath,
-      { version: 1, endpoint: 'ru', base: demo, outbox: [], recentRequests: [] },
+      {
+        version: 1,
+        endpoint: 'ru',
+        base: demo,
+        outbox: [],
+        recentRequests: [],
+      },
       'fixture'
     )
     await expect(
