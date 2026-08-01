@@ -690,6 +690,7 @@ describe('materializeCommand', () => {
     const transaction = makeTransaction({
       id: 'transaction',
       changed: 200,
+      deleted: true,
       merchant: deleted.id,
       payee: 'Shop',
       originalPayee: 'Original shop',
@@ -787,6 +788,46 @@ describe('materializeCommand', () => {
       deletion: [{ id: merchant.id, object: 'merchant', stamp: 100, user: 1 }],
     })
     expect(materializeCommand(snapshot, command)).toEqual({})
+  })
+
+  it('purges a soft-deleted debt transaction after its merchant is deleted', () => {
+    const debt = makeAccount({ id: 'debt', type: AccountType.Debt })
+    const merchant = makeMerchant({ id: 'merchant' })
+    const transaction = makeTransaction({
+      id: 'debt-transaction',
+      deleted: true,
+      incomeAccount: debt.id,
+      outcomeAccount: 'cash',
+      income: 5,
+      outcome: 5,
+      merchant: merchant.id,
+      payee: 'Shop',
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: { [debt.id]: debt, cash: makeAccount({ id: 'cash' }) },
+      merchant: { [merchant.id]: merchant },
+      transaction: { [transaction.id]: transaction },
+    })
+    const command = issuePatch(
+      snapshot,
+      { deletion: [{ id: merchant.id, object: 'merchant' }] },
+      100
+    )
+
+    expect(materializePrimaryCommand(snapshot, command)).toEqual({
+      deletion: [{ id: merchant.id, object: 'merchant', stamp: 100, user: 1 }],
+    })
+
+    const patch = materializeCommand(snapshot, command)
+    expect(patch.transaction).toBeUndefined()
+    expect(patch.deletion).toEqual([
+      { id: merchant.id, object: 'merchant', stamp: 100, user: 1 },
+      { id: transaction.id, object: 'transaction', stamp: 100, user: 1 },
+    ])
+    const current = applyPatch(snapshot, patch)
+    expect(current.merchant).toEqual({})
+    expect(current.transaction).toEqual({})
   })
 
   it('stores minimal account creation intent and materializes through factory', () => {

@@ -323,14 +323,33 @@ function predictMerchantDeletion(
   const markerUpdates = new Map(
     (patch.reminderMarker ?? []).map(marker => [marker.id, marker])
   )
+  const merchantDeletions: TDeletionObject[] = []
   let predicted = false
 
   deletedMerchants.forEach(id => {
     if (merchantUpdates.delete(id)) predicted = true
   })
+  const transactions = overlay(snapshot.transaction, transactionUpdates)
+  transactions.forEach(transaction => {
+    if (
+      directlyDeleted.has(`transaction:${transaction.id}`) ||
+      !transaction.deleted ||
+      !transaction.merchant ||
+      !deletedMerchants.has(transaction.merchant) ||
+      !isDebtTransaction(snapshot, transaction)
+    ) {
+      return
+    }
+    transactionUpdates.delete(transaction.id)
+    directlyDeleted.add(`transaction:${transaction.id}`)
+    merchantDeletions.push(
+      merchantCascadeTransactionDeletion(transaction, patch, changedAt)
+    )
+    predicted = true
+  })
   predicted =
     rewriteMerchantReferences(
-      overlay(snapshot.transaction, transactionUpdates),
+      transactions,
       transactionUpdates,
       directlyDeleted,
       deletedMerchants,
@@ -368,6 +387,12 @@ function predictMerchantDeletion(
   else delete result.reminder
   if (markerUpdates.size) result.reminderMarker = [...markerUpdates.values()]
   else delete result.reminderMarker
+  if (merchantDeletions.length) {
+    result.deletion = appendUniqueDeletions(
+      withoutBlockedDeletions.deletion ?? [],
+      merchantDeletions
+    )
+  }
   return result
 }
 
@@ -408,14 +433,21 @@ function getDebtBlockedMerchants(
     ) {
       return
     }
-    if (
-      snapshot.account[transaction.incomeAccount]?.type === AccountType.Debt ||
-      snapshot.account[transaction.outcomeAccount]?.type === AccountType.Debt
-    ) {
+    if (isDebtTransaction(snapshot, transaction)) {
       blocked.add(transaction.merchant)
     }
   })
   return blocked
+}
+
+function isDebtTransaction(
+  snapshot: TDataStore,
+  transaction: TTransaction
+): boolean {
+  return (
+    snapshot.account[transaction.incomeAccount]?.type === AccountType.Debt ||
+    snapshot.account[transaction.outcomeAccount]?.type === AccountType.Debt
+  )
 }
 
 function getDeletedMerchants(
@@ -525,6 +557,23 @@ function transactionDeletion(
     object: 'transaction',
     stamp: changedAt,
     user: accountDeletion.user,
+  }
+}
+
+function merchantCascadeTransactionDeletion(
+  transaction: TTransaction,
+  patch: TNormalizedPatch,
+  changedAt: TMsTime
+): TDeletionObject {
+  const merchantDeletion = patch.deletion?.find(
+    item => item.object === 'merchant'
+  )
+  if (!merchantDeletion) throw new Error('Missing primary merchant deletion')
+  return {
+    id: transaction.id,
+    object: 'transaction',
+    stamp: changedAt,
+    user: merchantDeletion.user,
   }
 }
 
