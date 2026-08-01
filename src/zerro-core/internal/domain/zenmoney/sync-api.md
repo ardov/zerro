@@ -214,9 +214,14 @@ migration that needs canonical reminders re-read.
 - A second real purge path is the account-deletion cascade: deleting an
   account hard-purges transactions contained in it (even one created in the
   same request) and emits genuine `deletion[]` tombstones for them.
-  Transactions that also reference a surviving account are not purged — the
-  deleted side is nulled/converted instead (a transfer becomes one-sided on
-  the survivor).
+  Transactions that also reference a surviving account are not purged. Round 6
+  (2026-08-01) verified both directions: the survivor id is copied into both
+  account fields, the amount on the deleted side becomes `0`, and the survivor
+  balance is unchanged by the cascade. This turns the transfer into one-sided
+  income or outcome without a dangling account reference. A separate tagged
+  fixture first confirmed its tag by forceFetch, but the cash transfer was
+  already canonicalized to `tag: null` before account deletion: category is
+  stripped by transfer materialization, not this cascade.
 
 ## Debt account
 
@@ -328,7 +333,8 @@ Zerro may still normalize `source` to `null` for locally created transactions.
   accounts with recalculated balances.
 - Changing only `viewed` or `comment` returned no account patch.
 - Deleting an account permanently removed its non-transfer expense and changed
-  its transfer into one-sided income on the surviving account.
+  its transfer into one-sided income or outcome on the surviving account,
+  without changing that account's balance.
 - A soft-deleted transaction ignored a later, newer resurrection attempt.
 
 Zerro should send primary entity changes and treat returned accounts and other

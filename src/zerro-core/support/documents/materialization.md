@@ -157,8 +157,12 @@ nothing on deposit and loan, where the base reads 0.
 Deleting an account is another true purge path: transactions contained in it
 are hard-deleted (even one created in the same request) and real `deletion[]`
 tombstones are published. A transaction that also references a surviving
-account is not purged; the deleted side is nulled, so a transfer becomes
-one-sided income or outcome on the survivor.
+account is not purged: Round 6 canonical fixtures show the server copies the
+survivor id into both account fields, zeroes the removed side's amount, and
+leaves the survivor balance unchanged. The transfer becomes one-sided income or
+outcome without a dangling account reference. A tagged fixture was already
+canonicalized to `tag: null` before account deletion, so category is stripped
+by transfer materialization rather than this cascade.
 
 A local prediction must reproduce both branches, otherwise the UI shows
 transactions belonging to an account that no longer exists.

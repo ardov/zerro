@@ -439,6 +439,13 @@ Before implementation, preserve real canonical response fixtures for:
 - an already soft-deleted transaction;
 - protected debt account deletion.
 
+Round 6 supplies the ordinary-operation and both transfer-direction fixtures:
+the contained row is hard-purged; a transfer becomes one-sided by copying the
+surviving account id into both legs and zeroing the deleted side; the surviving
+balance stays unchanged. Its tagged fixture first forceFetch-confirmed the tag,
+but the transfer was already canonicalized to `tag: null` before deletion:
+category stripping belongs to transfer materialization, not this cascade.
+
 Prediction must:
 
 - hard-purge transactions with no surviving account and emit local tombstones;
