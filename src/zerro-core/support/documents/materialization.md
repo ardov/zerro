@@ -221,6 +221,12 @@ An active debt transaction is the explicit exception: the server silently
 keeps both it and its merchant. Core therefore neither plans that restore
 removal nor optimistically removes it from `current`.
 
+If that debt transaction is already soft-deleted, the blocker is gone: a later
+merchant deletion succeeds and the server hard-purges the deleted debt row.
+Core deliberately waits for that canonical purge; deleted rows are outside
+normal read models, so predicting a second debt-specific removal would not
+improve the UI and would widen the local invariant beyond the observed form.
+
 `originalPayee` is not a copy of the current name: the server fills it from
 `payee` at creation time and never updates it on rename.
 

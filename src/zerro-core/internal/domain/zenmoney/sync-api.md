@@ -196,6 +196,10 @@ migration that needs canonical reminders re-read.
   and `payee` set to `null`; a transaction retains `originalPayee`. A cash
   transfer stores neither merchant nor payee. An active debt transaction is
   different: the merchant deletion is a silent no-op and both rows remain.
+  Round 6.4 then soft-deleted each form before a separate merchant deletion:
+  the deleted ordinary row was rewritten (`merchant`/`payee` null,
+  `originalPayee` retained); the transfer had no stored link; and the deleted
+  debt row was hard-purged when its merchant could finally be deleted.
 - A direct `deletion` entry naming an existing transaction is converted to an
   ordinary soft-delete (or no-ops if already soft-deleted) and produces no
   `deletion`-array tombstone. `deleted: true` reached this way is a one-way
@@ -255,7 +259,9 @@ migration that needs canonical reminders re-read.
 - Deleting a merchant clears `merchant` and `payee` on linked ordinary
   transactions, reminders, and markers, while preserving transaction
   `originalPayee`. It does not delete the merchant while an active debt
-  transaction references it; that request is a silent no-op.
+  transaction references it; that request is a silent no-op. After the debt
+  transaction is soft-deleted, merchant deletion succeeds and hard-purges that
+  deleted debt row.
 - `payee` is trimmed at the edges but keeps Unicode and embedded newlines;
   `comment: ""` and `payee: ""` are stored as `null`. Merchant `title` is not
   trimmed, not case-folded, and not unique — empty and duplicate titles are
