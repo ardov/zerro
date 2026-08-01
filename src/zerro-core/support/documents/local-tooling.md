@@ -62,8 +62,9 @@ have no other home:
   variable wins, and the file is parsed rather than sourced;
 - the token never appears in stdout, persisted state, or error objects — not
   even truncated;
-- balance prediction stays deferred, so a transaction preview must say that
-  canonical balances may change after sync.
+- a transaction preview must say that canonical balances may change after sync.
+  Core predicts balances since 2026-07-31, so the number now moves; the
+  disclosure still holds, because ZenMoney has not confirmed it.
 
 ### Non-goals
 
@@ -661,9 +662,7 @@ Unscheduled and demand-driven. Take one only when a real agent session needs it:
 - dotted column headers so a deep `--fields` path flattens in `tsv` instead of
   nesting one JSON cell;
 - envelope creation, rename, and structure mutation — still out of scope by
-  decision, not by omission;
-- account balance prediction in previews, which depends on the materializer
-  balance rule rather than on the tool.
+  decision, not by omission.
 
 An MCP adapter is not part of this tool's roadmap. For a maintainer in a
 repository checkout, machine-readable `help` over shell already answers what an

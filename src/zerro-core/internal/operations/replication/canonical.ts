@@ -24,6 +24,7 @@ export function acceptCanonicalPatch(
   replica: {
     base: TDataStore
     outbox: readonly TCommand[]
+    redo?: readonly TCommand[]
   },
   canonicalPatch: TNormalizedPatch,
   sentOutboxCount?: number
@@ -38,6 +39,11 @@ export function acceptCanonicalPatch(
     base,
     current: replayOutbox(base, outbox),
     outbox,
-    redo: [],
+    // Acknowledging a prefix commits the applied history branch, so the undone
+    // tail goes with it. A pull commits nothing and is only a rebase, which
+    // leaves the redo stack valid: an undone command is by definition one that
+    // was never sent, and it is an absolute patch, so redoing it replays over
+    // the new base exactly like any pending command.
+    redo: sentOutboxCount ? [] : [...(replica.redo ?? [])],
   }
 }

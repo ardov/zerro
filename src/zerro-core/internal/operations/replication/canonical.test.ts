@@ -27,14 +27,16 @@ describe('canonical replica operations', () => {
     expect(first.account).not.toBe(second.account)
   })
 
-  it('rebases every pending command over a refresh patch', () => {
+  it('rebases every pending command over a refresh patch, redo included', () => {
     const pending = makeAccountCommand('Local', 10)
+    const undone = makeAccountCommand('Undone', 20)
     const accepted = acceptCanonicalPatch(
       {
         base: makeStore({
           account: { cash: makeAccount({ id: 'cash', title: 'Before' }) },
         }),
         outbox: [pending],
+        redo: [undone],
       },
       {
         serverTimestamp: 5000,
@@ -45,7 +47,9 @@ describe('canonical replica operations', () => {
     expect(accepted.base.account.cash.title).toBe('Server')
     expect(accepted.current.account.cash.title).toBe('Local')
     expect(accepted.outbox).toEqual([pending])
-    expect(accepted.redo).toEqual([])
+    // A pull acknowledges nothing, so it commits no history branch and the
+    // undone tail stays redoable over the new base.
+    expect(accepted.redo).toEqual([undone])
   })
 
   it('acknowledges exactly the sent prefix and replays later commands', () => {
@@ -57,6 +61,7 @@ describe('canonical replica operations', () => {
           account: { cash: makeAccount({ id: 'cash', title: 'Before' }) },
         }),
         outbox: [sent, duringRequest],
+        redo: [makeAccountCommand('Undone', 30)],
       },
       {
         serverTimestamp: 5000,
@@ -68,6 +73,7 @@ describe('canonical replica operations', () => {
     expect(accepted.base.account.cash.title).toBe('Canonical sent')
     expect(accepted.current.account.cash.title).toBe('During request')
     expect(accepted.outbox).toEqual([duringRequest])
+    // Acknowledging a prefix commits the applied branch, so the tail goes.
     expect(accepted.redo).toEqual([])
   })
 

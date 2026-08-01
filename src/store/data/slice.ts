@@ -53,7 +53,7 @@ const { reducer, actions } = createSlice({
       if (!state.inbox) return
       const { sentOutboxCount, ...canonicalPatch } = state.inbox
       const accepted = acceptCanonicalPatch(
-        { base: state.base, outbox: state.outbox },
+        { base: state.base, outbox: state.outbox, redo: state.redo },
         canonicalPatch,
         sentOutboxCount
       )

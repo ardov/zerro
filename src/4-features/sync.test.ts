@@ -15,11 +15,34 @@ import { makeAccount } from 'zerro-core/support/testing/zenmoneyTestData'
 import data, {
   appendClientCommand,
   applyServerPatch,
+  redoClientCommand,
   undoClientCommand,
 } from 'store/data'
 import syncReducer from 'store/sync'
 import token from 'store/token'
-import { syncData } from './sync'
+import { refreshData, syncData } from './sync'
+
+function renameCashTo(title: string, issuedAt: number) {
+  return {
+    type: 'patch' as const,
+    patch: { account: [makeAccount({ id: 'cash', title })] },
+    issuedAt,
+  }
+}
+
+/** Store holding one accepted account, so a cursor and an outbox both exist. */
+function makeSyncedStore() {
+  const store = configureStore({
+    reducer: { data, sync: syncReducer, token },
+  })
+  store.dispatch(
+    applyServerPatch({
+      serverTimestamp: 100_000,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    }) as any
+  )
+  return store
+}
 
 describe('syncData', () => {
   beforeEach(() => {
@@ -92,6 +115,16 @@ describe('syncData', () => {
     })
   })
 
+  it('acknowledges the sent prefix, dropping it from the undo stack', async () => {
+    syncMock.mockResolvedValueOnce({ data: { serverTimestamp: 200_000 } })
+    const store = makeSyncedStore()
+    store.dispatch(appendClientCommand(renameCashTo('Wallet', 10)))
+
+    await store.dispatch(syncData() as any)
+
+    expect(store.getState().data.outbox).toEqual([])
+  })
+
   it('settles pending state when the transport throws', async () => {
     syncMock.mockRejectedValueOnce(new Error('network unavailable'))
     const store = configureStore({
@@ -107,5 +140,69 @@ describe('syncData', () => {
         errorMessage: 'network unavailable',
       },
     })
+  })
+})
+
+describe('refreshData', () => {
+  beforeEach(() => {
+    syncMock.mockClear()
+  })
+
+  it('sends the cursor alone, without any pending entity', async () => {
+    syncMock.mockResolvedValueOnce({ data: { serverTimestamp: 200_000 } })
+    const store = makeSyncedStore()
+    store.dispatch(appendClientCommand(renameCashTo('Wallet', 10)))
+
+    await store.dispatch(refreshData() as any)
+
+    expect(syncMock).toHaveBeenCalledWith('', 'ru', {
+      serverTimestamp: 99_000,
+    })
+  })
+
+  it('keeps pending commands undoable by rebasing them over the new base', async () => {
+    // The canonical response carries an unrelated remote change, exactly the
+    // background case: a pull must advance `base` without acknowledging
+    // anything the user has not chosen to send.
+    syncMock.mockResolvedValueOnce({
+      data: {
+        serverTimestamp: 200_000,
+        account: [
+          makeAccount({ id: 'card', title: 'Added elsewhere', changed: 150 }),
+        ],
+      },
+    })
+    const store = makeSyncedStore()
+    const pending = renameCashTo('Wallet', 10)
+    store.dispatch(appendClientCommand(pending))
+
+    await store.dispatch(refreshData() as any)
+
+    const state = store.getState().data
+    expect(state.outbox).toEqual([pending])
+    expect(state.base.serverTimestamp).toBe(200_000)
+    expect(state.current.account.card.title).toBe('Added elsewhere')
+    // The local rename survived the rebase and is still the last command.
+    expect(state.current.account.cash.title).toBe('Wallet')
+
+    store.dispatch(undoClientCommand())
+    expect(store.getState().data.current.account.cash.title).toBe('Cash')
+  })
+
+  it('keeps the undone tail redoable across the rebase', async () => {
+    syncMock.mockResolvedValueOnce({ data: { serverTimestamp: 200_000 } })
+    const store = makeSyncedStore()
+    const undone = renameCashTo('Wallet', 10)
+    store.dispatch(appendClientCommand(undone))
+    store.dispatch(undoClientCommand())
+
+    await store.dispatch(refreshData() as any)
+
+    // Background pulls run every couple of idle minutes; losing redo to them
+    // would defeat the point of not pushing in the first place.
+    expect(store.getState().data.redo).toEqual([undone])
+    store.dispatch(redoClientCommand())
+    expect(store.getState().data.current.account.cash.title).toBe('Wallet')
+    expect(store.getState().data.outbox).toEqual([undone])
   })
 })

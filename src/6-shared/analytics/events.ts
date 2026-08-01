@@ -32,7 +32,8 @@ export type AnalyticsEventMap = {
     value: boolean | 'changed' | 'set'
   }
   similar_transactions_selected: Record<string, never>
-  sync_completed: { mode: 'first' | 'update' }
+  /** `pull` never pushes the outbox; only `first` and `update` are user-initiated. */
+  sync_completed: { mode: 'first' | 'pull' | 'update' }
   transaction_deleted: {
     mode: 'bulk' | 'single'
     source: 'bulk_toolbar' | 'context_menu' | 'preview'

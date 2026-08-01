@@ -28,6 +28,8 @@ import {
   type TNormalizedPatch,
 } from '../../domain/zenmoney'
 
+import { predictAccountBalances } from './predictBalances'
+
 export { intentPatchKeys } from '../../domain/zenmoney'
 export type { TIntentPatch } from '../../domain/zenmoney'
 
@@ -155,7 +157,22 @@ export function materializePrimaryCommand(
  * built from `materializePrimaryCommand`, so nothing here is ever sent as
  * client intent.
  *
- * Rule: the exact verified permanent-delete write — both amounts at `0.00001`
+ * Purge runs first, because it decides whether a row still exists before
+ * balances ask what that row contributes.
+ */
+function withPredictedEffects(
+  snapshot: TDataStore,
+  patch: TNormalizedPatch,
+  changedAt: TMsTime
+): TNormalizedPatch {
+  return predictAccountBalances(
+    snapshot,
+    withPurgedTransactions(snapshot, patch, changedAt)
+  )
+}
+
+/**
+ * Rule 2: the exact verified permanent-delete write — both amounts at `0.00001`
  * on the same account — makes ZenMoney purge the row and answer with a real
  * tombstone rather than an updated entity. Predicting the removal keeps
  * `current` identical to the state the next canonical diff will confirm.
@@ -164,7 +181,7 @@ export function materializePrimaryCommand(
  * triggers the server-side purge. A `deletion` entry would not:
  * ZenMoney converts a direct transaction deletion into a soft delete instead.
  */
-function withPredictedEffects(
+function withPurgedTransactions(
   snapshot: TDataStore,
   patch: TNormalizedPatch,
   changedAt: TMsTime

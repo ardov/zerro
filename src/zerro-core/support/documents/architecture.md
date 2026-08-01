@@ -1,7 +1,7 @@
 # Zerro Core architecture
 
 - Status: accepted target architecture for an incremental migration
-- Updated: 2026-07-20
+- Updated: 2026-07-31
 
 ## Purpose
 
@@ -279,15 +279,27 @@ commands. Malformed replay metadata is discarded rather than blocking
 canonical local data from loading.
 
 Undo moves the last command from `outbox` to `redo`; redo moves it back. A new
-command clears `redo`. Starting manual sync and applying a canonical base change
-also clear `redo`, because synchronization commits the currently applied
-history branch. No inverse patches are stored.
+command clears `redo`, and so does starting a manual sync, because that commits
+the currently applied history branch. No inverse patches are stored.
 
-Only `base` and `outbox` are durable inputs. `redo`, sync progress, and errors
-are ephemeral. Logout resets both history stacks in memory and awaits an
+Applying a canonical base change clears `redo` only when it acknowledges a sent
+prefix. A pull commits nothing and is only a rebase, so it preserves the undone
+tail: an undone command was by definition never sent, and it is an absolute
+patch, so redoing it replays over the new base exactly like a pending command.
+This matters because automatic sync is pull-only and runs while the user is
+idle — clearing `redo` there would destroy history in the background, which is
+the outcome pull-only sync exists to prevent.
+
+Only `base` and `outbox` are durable replica inputs. `redo`, sync progress, and
+errors are ephemeral. Logout resets both history stacks in memory and awaits an
 ordered browser-storage clear; saves queued by the previous login are
-invalidated before the clear. There is no durable inbox or incoming-change
-history.
+invalidated before the clear. There is no durable inbox.
+
+The user-visible change journal decided on 2026-07-31 does not change that rule:
+it is a separate durable record that is never replayed into `current` and is
+never a replica input. Its contract is in
+[design-ledger.md](./design-ledger.md#change-history-and-restore) and it is not
+implemented yet.
 
 Any future replica implementation must reuse the pure outbox operations. Two
 implementations of append, undo, redo, or replay rules are not acceptable.

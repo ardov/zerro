@@ -1,6 +1,6 @@
 # Zerro Core working notes
 
-- Updated: 2026-07-30
+- Updated: 2026-07-31
 - Purpose: current position, remaining work, and deferred local smells.
   Implementation history stays in Git; contracts stay in
   [architecture.md](./architecture.md); settled decisions and risks stay in
@@ -29,10 +29,10 @@ an atomic private replica, bounded reads, envelope-budget and transaction
 preview/stage, outbox undo, and explicit sync. No MCP adapter ships with it;
 that surface belongs to the open desktop-host question.
 
-Remaining work is materializer rules plus two app behaviors decided on
-2026-07-30: pull-only automatic sync and payee-to-merchant promotion. Questions
-still waiting on an answer live in
-[open-decisions.md](../../../../docs/open-decisions.md).
+Remaining work is the change history and restore feature decided on 2026-07-31,
+payee-to-merchant promotion decided on 2026-07-30, and materializer cascades that
+are not yet reachable. Questions still waiting on an
+answer live in [open-decisions.md](../../../../docs/open-decisions.md).
 
 ## Remaining work
 
@@ -40,35 +40,30 @@ still waiting on an answer live in
 
 The rule set, its evidence, and the per-rule verification requirements live in
 [materialization.md](./materialization.md). Implement one rule per checkpoint.
-Rules 1 (deleted transactions ignore patches) and 2 (the verified same-account
-permanent-delete write purges the row) are done; balances are the next valuable
-one because they are the remaining rule with a visible wrong number today.
-Account, tag, and merchant cascades become reachable when the matching deletion
-commands ship.
+Rules 1 (deleted transactions ignore patches), 2 (the verified same-account
+permanent-delete write purges the row), and 3 (account balances follow
+transactions) are done. Account, tag, and merchant cascades become reachable
+when the matching deletion commands ship, so nothing here is currently
+schedulable.
 
-### 2. Pull-only automatic sync
+### 2. Pull-only automatic sync — shipped, one part deferred
 
-Decided 2026-07-30 (see [design-ledger.md](./design-ledger.md#replica-and-sync)):
-automatic sync must never push. Today it does, so the undo history is silently
-truncated roughly every two minutes of idle time.
+Decided 2026-07-30, implemented 2026-07-31 (see
+[design-ledger.md](./design-ledger.md#replica-and-sync)). `src/4-features/sync.ts`
+now exposes `syncData` (push plus pull) and `refreshData` (pull only, sending
+the cursor alone and acknowledging nothing). Background sync and post-login use
+`refreshData`; `src/3-widgets/RefreshButton.tsx` is the only remaining pusher,
+which makes the "a push is always a deliberate user action" rule auditable by
+grep. `regularSyncPolicy.ts` was untouched — it decides _when_, not _what_.
 
-What has to change:
+`acceptCanonicalPatch` shipped with it: a canonical base change now clears
+`redo` only when it acknowledges a sent prefix, so background pulls no longer
+discard the undone tail. Manual sync still clears it up front.
 
-1. `src/4-features/sync.ts` needs a pull-only path — the canonical cursor
-   request with no transport entities and `sentOutboxCount: 0`, so pending
-   commands rebase instead of being acknowledged. Core already supports this;
-   the CLI `refresh` is the same transition.
-2. `src/3-widgets/regularSyncPolicy.ts` keeps deciding _when_ to pull. The
-   background handler stops choosing to push at all.
-3. Loading with a restored non-empty outbox shows a notice with a manual sync
-   action.
-
-Already in place: the leave confirmation in
-`src/3-widgets/RegularSyncHandler.tsx` fires whenever the outbox is not empty.
-
-Verification: the replica/sync row of [testing.md](./testing.md) — a pull with
-pending commands must rebase them and keep the undo stack, and no automatic
-path may clear an outbox prefix.
+One follow-up did not ship: **the restored-outbox notice.** Loading with a
+non-empty outbox should say so and offer a manual sync. Deferred deliberately to
+the change-history screen (item 4), which is the same surface. The leave
+confirmation in `RegularSyncHandler.tsx` still fires meanwhile.
 
 ### 3. Payee-to-merchant promotion
 
@@ -83,7 +78,44 @@ atomic, and it changes the envelope id from `payee#…` to `merchant#…`, so th
 envelope's budget, goal, parent, group, and visibility metadata must move with
 it. Compare resulting state, not patch shape.
 
-### 4. Local agent tooling — follow-ups only
+### 4. Change history and restore
+
+Decided 2026-07-31 (see
+[design-ledger.md](./design-ledger.md#change-history-and-restore)). Balance
+prediction landed first, so this is now the current work. The shape decisions
+are settled there;
+what remains is ordering, because each step has standalone value and the later
+ones are gated by measurement.
+
+1. `diffStores(current, desired, scope) -> TIntentPatch` plus backup import.
+   `exportJSON` already writes a full `TDataStore`, so import needs no new
+   format, and this step proves the function produces sane patches on real data
+   before anything depends on it. Restore of a history point is the same call
+   with a replayed snapshot instead of a parsed file.
+2. Measure a genesis snapshot and a realistic diff run on a real account. This
+   gates step 3 and is the maintainer's to run —
+   [open-decisions.md](../../../../docs/open-decisions.md#6-retention-budget-for-the-change-log).
+3. The log itself: stop discarding canonical diffs, add the genesis snapshot,
+   add compaction and age-based pruning. A separate durable record beside the
+   replica, joined to the logout clear in `store/data/replicaPersistence.ts`.
+4. Journal entries and the history screen: structured descriptors captured in
+   `runtime/redux/commands.ts` (the single chokepoint every write passes
+   through), local entries, pull entries with per-entity caps and no initial
+   full load, and push entries.
+5. Scoped restore from a point. Global restore last, behind its own
+   confirmation.
+
+The history screen is also the home for two already-decided app behaviors:
+the restored-outbox notice from pull-only sync (item 2) and the visible
+undo/redo controls of
+[open-decisions.md](../../../../docs/open-decisions.md#5-visible-undoredo-controls).
+Build them as one surface rather than three features.
+
+Balance prediction was sequenced before this deliberately: a history that says
+"you changed this" while the account balance had not moved would have been worse
+than no history.
+
+### 5. Local agent tooling — follow-ups only
 
 The MVP is complete; see the follow-up list in
 [local-tooling.md](./local-tooling.md#post-mvp-follow-ups). Nothing there is
@@ -91,8 +123,9 @@ scheduled. Take an item only when a real agent session needs it, and keep the
 MVP contracts: no implicit refresh, no combined stage-and-sync, no raw patch
 surface, and no Core internal imports from `tools/zerro`.
 
-Until balance prediction lands, transaction previews must keep stating that
-canonical account balances may change after sync.
+Balance prediction has landed, so previews now show a predicted balance rather
+than an unchanged one. `balancePendingCanonicalSync` stays: it discloses that
+ZenMoney has not confirmed the number, which is still true.
 
 ## Deferred until evidence exists
 
@@ -106,8 +139,9 @@ canonical account balances may change after sync.
 
 ## Choosing work
 
-- Materializer rules are the default next work; split by contract, one rule per
-  commit.
+- Change history and restore is the current work. The remaining materializer
+  rules are all blocked on deletion commands that do not exist yet, so they are
+  no longer the default filler.
 - Local tooling follow-ups are demand-driven, not a queue to work through.
 - A concrete product regression may override this order; document the evidence
   when it does.

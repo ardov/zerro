@@ -94,7 +94,8 @@ export const successShapes: Record<string, TShapeFields> = {
     'items[].archive': 'Whether the account is archived.',
     'items[].inBalance':
       "Whether the account counts toward the user's total balance — the same flag `totals.inBudget`/`totals.offBudget` split on.",
-    'items[].balance': 'Last balance ZenMoney confirmed for this account.',
+    'items[].balance':
+      'Account balance, including the predicted effect of staged outbox commands. Equals the balance ZenMoney confirmed when hasPendingChanges is false.',
     'items[].hasPendingChanges':
       'True when a staged outbox command may have changed this balance locally before ZenMoney confirmed it.',
     'items[].instrument': "Account's currency: id, code, symbol.",

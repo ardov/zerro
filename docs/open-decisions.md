@@ -1,6 +1,6 @@
 # Open decisions — what needs the maintainer
 
-- Updated: 2026-07-30
+- Updated: 2026-07-31
 - Purpose: everything that is blocked on a judgement call rather than on
   implementation effort. One entry per decision, with enough context to answer
   it without re-reading the architecture documents.
@@ -81,39 +81,7 @@ not exist.
 
 **Where it is recorded.** [analytics.md](./analytics.md).
 
-## 3. Fixtures for the materializer balance rule
-
-**Question.** Which real ZenMoney responses become the fixtures for predicting
-account balances after a transaction write?
-
-**Why it is open.** Balances are the next materializer rule and the only
-remaining one with a visibly wrong number today: after a transaction edit,
-`account.balance` stays stale until the next sync, and the CLI refuses to
-predict balances at all. Implementing the rule needs recorded server responses
-for the cases where the prediction is not obvious, and only you can produce
-them from a real account.
-
-**What is needed.** A captured request/response pair for each of:
-
-- a plain expense and income on one account;
-- a same-instrument transfer between two accounts;
-- a cross-instrument transfer, where the conversion rate decides the result;
-- a deleted transaction that previously affected a balance;
-- a debt transaction, which routes differently from a normal expense.
-
-Use a throwaway or clearly marked test account; the fixtures land in the repo,
-so they must not contain real balances you would not publish. Note that
-`private-fixtures/` is git-ignored if you would rather keep the raw captures
-local and commit only reduced ones.
-
-**Recommendation.** Capture the first three; they cover the visible bug. The
-deletion and debt cases can wait for their own checkpoint.
-
-**Where it is recorded.** design-ledger, _Open questions → Materializer
-evidence and versioning_, and
-[materialization.md](../src/zerro-core/support/documents/materialization.md).
-
-## 4. Analytics administration in the GA4 property
+## 3. Analytics administration in the GA4 property
 
 **Question.** The typed event layer ships and sends events; the property side
 was never finished. Which of it do you actually want?
@@ -142,7 +110,7 @@ rest as optional.
 
 **Where it is recorded.** [analytics.md](./analytics.md).
 
-## 5. Publishing zerro-core
+## 4. Publishing zerro-core
 
 **Question.** Does anything justify publishing `zerro-core` to npm or moving it
 into a real package directory?
@@ -157,7 +125,7 @@ Revisit only with that consumer in hand.
 
 **Where it is recorded.** design-ledger, _Open questions → Future surfaces_.
 
-## 6. Visible undo/redo controls
+## 5. Visible undo/redo controls
 
 **Question.** Undo and redo work through keyboard shortcuts in the loaded app,
 with no visible buttons. Should the UI expose them?
@@ -173,13 +141,50 @@ the same piece of UI, and the pending-changes notice is the natural place for
 undo to become visible.
 
 **Recommendation.** Design it together with the pending-changes notice rather
-than as a separate toolbar feature.
+than as a separate toolbar feature. The change history decided on 2026-07-31 is
+the natural home for all three — it already lists the pending commands undo
+would reverse.
 
 **Where it is recorded.** design-ledger, _Accepted product risks_.
+
+## 6. Retention budget for the change log
+
+**Question.** How far back should the change history reach, and what does that
+cost in browser storage?
+
+**Why it is open.** The log is a genesis snapshot plus every canonical diff since
+it. The genesis snapshot is roughly the size of the base already in IndexedDB,
+so the feature approximately doubles the largest stored item before any diffs
+accumulate. Whether that is acceptable — and therefore whether the window is
+three days, two weeks, or longer — depends on numbers only your real account can
+produce. Nothing about the design changes with the answer; how aggressively
+compaction folds old diffs into the genesis snapshot does.
+
+**What is needed.** From a loaded real account: the serialized size of the full
+data store, and the sizes of a run of incremental pull diffs over a few normal
+days. Both are readable from the existing persisted records; no new capture
+mechanism is required, and neither number needs to be committed.
+
+**Recommendation.** Measure before building the log, not after. This is the only
+input that can make the storage model unworkable, and it is cheap to get. If the
+diffs turn out to dominate, the fallback is a shorter window rather than a
+different architecture.
+
+**Where it is recorded.** design-ledger, _Open questions → Change log
+retention_, and
+[notes.md](../src/zerro-core/support/documents/notes.md#4-change-history-and-restore).
 
 ## Answered recently
 
 Kept briefly so a returning session sees what changed, then deleted.
+
+- **Fixtures for the materializer balance rule** (2026-07-31) — none are needed.
+  The rule shipped from behavior probing had already established, and it performs
+  no currency conversion: each side of a transaction is already in its own
+  account's currency, so a cross-currency transfer expresses its rate as the pair
+  of stored numbers, and a foreign original amount sits in `opIncome`/`opOutcome`
+  which the rule excludes. Recorded in design-ledger, _Commands and
+  materialization_.
 
 - **Automatic sync** (2026-07-30) — pushing stays manual, because an automatic
   push clears the acknowledged prefix and destroys undo. Automatic sync becomes

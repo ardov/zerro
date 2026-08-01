@@ -1,7 +1,7 @@
 # Materializer rules and cascades
 
 - Status: contract for local predicted effects
-- Updated: 2026-07-25
+- Updated: 2026-07-31
 
 ## Purpose
 
@@ -29,16 +29,16 @@ record of what live probing established.
 
 ## Rule status
 
-| #   | Operation                             | Predicted locally    | Server also does                               |
-| --- | ------------------------------------- | -------------------- | ---------------------------------------------- |
-| 1   | patch on a `deleted` transaction      | implemented (ignore) | ignores it too (one-way ratchet)               |
-| 2   | verified permanent-delete write       | implemented (purge)  | hard-purges the row, emits a real tombstone    |
-| 3   | transaction money/account/date change | **planned**          | recomputes affected `account.balance`          |
-| 4   | account deletion                      | **planned**          | hard-purges contained transactions             |
-| 5   | transfer touching a deleted account   | **planned**          | converts to one-sided on the survivor          |
-| 6   | tag deletion                          | **planned**          | nulls `transaction.tag`, drops its budget rows |
-| 7   | merchant deletion                     | **planned**          | nulls `transaction.merchant`                   |
-| 8   | merchant rename                       | **deliberately not** | rewrites `payee` + `changed` on linked rows    |
+| #   | Operation                            | Predicted locally    | Server also does                               |
+| --- | ------------------------------------ | -------------------- | ---------------------------------------------- |
+| 1   | patch on a `deleted` transaction     | implemented (ignore) | ignores it too (one-way ratchet)               |
+| 2   | verified permanent-delete write      | implemented (purge)  | hard-purges the row, emits a real tombstone    |
+| 3   | transaction or `startBalance` change | implemented (delta)  | recomputes affected `account.balance`          |
+| 4   | account deletion                     | **planned**          | hard-purges contained transactions             |
+| 5   | transfer touching a deleted account  | **planned**          | converts to one-sided on the survivor          |
+| 6   | tag deletion                         | **planned**          | nulls `transaction.tag`, drops its budget rows |
+| 7   | merchant deletion                    | **planned**          | nulls `transaction.merchant`                   |
+| 8   | merchant rename                      | **deliberately not** | rewrites `payee` + `changed` on linked rows    |
 
 Rules 4, 5, and 7 have no local producer yet — Core emits no `deletion` for
 account, tag, or transaction, only for reminders. They become reachable when
@@ -90,15 +90,20 @@ but "show deleted transactions" deliberately reveals them and would surface the
 row as a nonsense transfer. Unverified shapes intentionally keep that temporary
 behavior until a canonical response establishes what the server did.
 
-## 3. Balances follow transactions
+## 3. Balances follow transactions and the account base
 
 `account.balance` submitted by a client is ignored; the server recomputes it and
-creates no correction transaction. The observed formula for cash, checking, and
-ccard accounts:
+creates no correction transaction. Every account type follows one formula:
 
 ```txt
-balance = startBalance + sum(income) - sum(outcome)
+balance = getAccStartBalance(account) + sum(income) - sum(outcome)
 ```
+
+Only the base term is type-dependent, and it is already implemented:
+`getAccStartBalance` reads 0 for deposit and loan, whose `startBalance` holds an
+initial deposit or loan principal rather than a balance. `emoney` behaves
+exactly like `cash`. Debt accounts recompute like any other; their balance
+simply feeds no read model.
 
 Details that the prediction must honor:
 
@@ -106,16 +111,46 @@ Details that the prediction must honor:
 - `hold` does not affect the balance;
 - `opIncome`/`opOutcome` and their instruments are stored but excluded;
 - `creditLimit` neither participates nor caps the balance;
-- deposit and loan accounts showed an observed base of 0, and the debt formula
-  is not established — do not predict those two;
 - moving a transaction between accounts recalculates both sides;
 - soft-deleting a transaction returns its contribution atomically;
 - a row purged by rule 2 contributes nothing, so source transactions through the
   same non-deleted filter the read models use. Summing raw entity maps would
   briefly count amounts the server has already removed.
 
-Until this rule lands, edits leave `account.balance` stale until sync — an
-accepted risk in [design-ledger.md](./design-ledger.md).
+`predictBalances.ts` implements this as a **delta**, not a recount: it
+differences both terms of the formula before and after the patch — each touched
+transaction's contribution, and the account's own base. A created account is
+differenced against 0, which is correct because `balance` is not writable, so no
+creation intent can carry one and the factory always starts at 0. Three
+properties follow, and all are load-bearing:
+
+- materialization stays proportional to the patch rather than to the store,
+  which matters because every undo, redo, and canonical rebase replays the whole
+  outbox;
+- rebase is free. Each replay recomputes the delta against the snapshot it is
+  replayed over, so a canonical balance landing in `base` is never
+  double-counted by a command that is still pending;
+- no account type needs excluding. The whole type difference sits inside
+  `getAccStartBalance`, so reading the base through it is what keeps
+  `predictBalances.ts` free of a type filter. Do not grow one.
+
+No FX enters this rule, and none can. Each side of a transaction is already
+denominated in its own account's currency: a cross-currency transfer stores
+`outcome: 100` on the ruble account and `income: 50` on the dollar account as
+two independent numbers, so the rate — and any fee folded into it — is expressed
+by that pair rather than applied to it. A foreign original amount, when there is
+one, lives in `opIncome`/`opOutcome`, which this rule excludes. A transaction
+instrument mismatching its account is coerced by the server without converting,
+so even that malformed shape needs no handling.
+
+Results are deliberately not rounded: the server keeps decimals unrounded, and
+snapping to two places would corrupt instruments with finer precision. Float
+dust cannot accumulate, because replay always recomputes from `base`.
+
+Writes to `startBalance` and account creation are covered even though no
+producer emits them yet, because they are the same formula rather than a second
+rule: a `startBalance` write shifts the balance by the same amount, and moves
+nothing on deposit and loan, where the base reads 0.
 
 ## 4–5. Account deletion purges and rewrites
 

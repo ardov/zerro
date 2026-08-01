@@ -16,54 +16,74 @@ import { keys } from '6-shared/helpers/keys'
 import type { TNormalizedPatch } from '6-shared/types'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 
-/** All syncs with zenmoney goes through this thunk */
-export const syncData = (): AppThunk => async (dispatch, getState) => {
-  dispatch(prepareClientSync())
-  const state = getState()
-  const sentOutboxCount = state.data.outbox.length
-  const sentAt = Date.now()
-  const diff: TNormalizedPatch = {
-    ...(getPendingSyncTransport(state, sentAt) || {}),
-    serverTimestamp: getSyncCursor(state),
-  }
-  const token = getToken(state) || ''
-
-  dispatch(syncStarted())
-
-  try {
-    const response = await sync(token, zmPreferenceStorage.get(), diff)
-    const result = {
-      isSuccessful: !response.error,
-      finishedAt: Date.now(),
-      errorMessage: response.error || null,
+/**
+ * All exchanges with ZenMoney go through this thunk.
+ *
+ * `push` is the whole difference between the two modes. A push acknowledges the
+ * sent outbox prefix, which is why it may only ever be a deliberate user
+ * action: dropping that prefix destroys the undo history the user still expects
+ * to have. A pull sends no entities and acknowledges nothing, so pending
+ * commands rebase over the new base and stay undoable.
+ */
+const exchangeWithZenmoney =
+  (push: boolean): AppThunk =>
+  async (dispatch, getState) => {
+    if (push) dispatch(prepareClientSync())
+    const state = getState()
+    const sentOutboxCount = push ? state.data.outbox.length : 0
+    const sentAt = Date.now()
+    const diff: TNormalizedPatch = {
+      ...(push ? getPendingSyncTransport(state, sentAt) : undefined),
+      serverTimestamp: getSyncCursor(state),
     }
+    const token = getToken(state) || ''
 
-    if (response.data) {
-      const data = response.data
-      dispatch(applyServerPatch({ ...data, sentOutboxCount }))
-      const changedDomains = getChangedDomains(data)
-      dispatch(saveDataLocally(changedDomains))
-      track('sync_completed', {
-        mode: diff.serverTimestamp ? 'update' : 'first',
-      })
-      console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)
-    } else {
-      console.warn('Syncing failed', response.error)
-    }
+    dispatch(syncStarted())
 
-    dispatch(syncFinished(result))
-  } catch (error) {
-    const errorMessage = getErrorMessage(error)
-    console.error('Syncing failed', error)
-    dispatch(
-      syncFinished({
-        isSuccessful: false,
+    try {
+      const response = await sync(token, zmPreferenceStorage.get(), diff)
+      const result = {
+        isSuccessful: !response.error,
         finishedAt: Date.now(),
-        errorMessage,
-      })
-    )
+        errorMessage: response.error || null,
+      }
+
+      if (response.data) {
+        const data = response.data
+        dispatch(applyServerPatch({ ...data, sentOutboxCount }))
+        const changedDomains = getChangedDomains(data)
+        dispatch(saveDataLocally(changedDomains))
+        track('sync_completed', {
+          mode: !push ? 'pull' : diff.serverTimestamp ? 'update' : 'first',
+        })
+        console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)
+      } else {
+        console.warn('Syncing failed', response.error)
+      }
+
+      dispatch(syncFinished(result))
+    } catch (error) {
+      const errorMessage = getErrorMessage(error)
+      console.error('Syncing failed', error)
+      dispatch(
+        syncFinished({
+          isSuccessful: false,
+          finishedAt: Date.now(),
+          errorMessage,
+        })
+      )
+    }
   }
-}
+
+/** Pushes the pending outbox and applies the canonical response. */
+export const syncData = (): AppThunk => exchangeWithZenmoney(true)
+
+/**
+ * Pulls the canonical diff without pushing anything. Background sync uses this,
+ * so an idle tab stays current without silently acknowledging — and thereby
+ * discarding — changes the user never chose to send.
+ */
+export const refreshData = (): AppThunk => exchangeWithZenmoney(false)
 
 function getErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error)

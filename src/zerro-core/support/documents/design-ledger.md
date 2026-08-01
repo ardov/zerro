@@ -1,6 +1,6 @@
 # Zerro Core design ledger
 
-- Updated: 2026-07-30
+- Updated: 2026-07-31
 - Purpose: settled decisions, accepted risks, active bridges, and unresolved
   architectural questions. History stays in Git. Questions that need the
   maintainer rather than an implementer are listed for review in
@@ -95,6 +95,11 @@ there:
   case where they do, and it must stay that way — sending the predicted
   `deletion` instead of the write would make ZenMoney soft-delete rather than
   purge.
+- Predicted balances involve no currency conversion, and no future change to the
+  rule may introduce one. Each side of a transaction is already denominated in
+  its own account's currency, so a cross-currency transfer expresses its rate as
+  the pair of stored numbers rather than as something to apply; a foreign
+  original amount lives in `opIncome`/`opOutcome`, which the rule excludes.
 
 ### Replica and sync
 
@@ -113,12 +118,64 @@ there:
   every admitted command follows the same sparse replay contract.
 - Pushing the outbox is always a deliberate user action. Automatic sync is
   pull-only, because a push clears the acknowledged prefix and therefore
-  destroys the undo history the user still expects to have. Decided
-  2026-07-30; the background handler currently pushes and has to change.
+  destroys the undo history the user still expects to have. Decided 2026-07-30,
+  implemented 2026-07-31: `syncData` pushes and only the refresh control calls
+  it, while `refreshData` pulls and is what background sync and post-login use.
+- `redo` survives a pull and is cleared only by an acknowledgement. Implemented
+  2026-07-31 in `acceptCanonicalPatch`, which now clears the tail only when a
+  sent prefix was actually acknowledged. Manual sync is unchanged: it still
+  clears `redo` up front through `prepareClientSync`, so the commit boundary
+  stays where it was recorded. Without this, pull-only sync would have fixed
+  undo while still discarding redo every couple of idle minutes.
 - The app tells the user when unsynchronized intent exists: a leave
   confirmation before unload, and a visible notice after load when the restored
   outbox is not empty. A silent pending outbox is not acceptable, because
   nothing else distinguishes "saved locally" from "saved in ZenMoney".
+
+### Change history and restore
+
+Decided 2026-07-31. The app keeps a user-visible change history and can restore
+any retained point. The implementation path is
+[notes.md](./notes.md#4-change-history-and-restore).
+
+- The journal is not the outbox. The outbox is "what must still be sent" and is
+  truncated on acknowledgement; the journal is "what happened", is append-only,
+  is never replayed into `current`, and is pruned by age. Merging the two would
+  resend acknowledged commands.
+- Canonical diffs are already the event log. Retaining them plus one compacted
+  genesis snapshot reconstructs any retained point by forward replay. Reverse
+  application is impossible — a diff carries no before-values.
+- The log is additive and off the hot path. `base + outbox` remain the only
+  durable replica inputs and the only thing `current` derives from.
+- Restoring a point and importing a backup are one operation:
+  `diffStores(current, desired, scope) -> TIntentPatch`. It produces an ordinary
+  command, so restore inherits materialization, transport, undo-before-push, and
+  its own journal entry. There is no second write path into the store.
+- Restore never truncates the timeline. It appends one more entry like any other
+  change. Dropping later points would destroy both the record of what was
+  overwritten and the ability to restore back.
+- Scoped restore (one account, envelope, or month) is the primary form. Global
+  restore is an escape hatch behind its own confirmation, because a rewind is
+  only safe where the user knows what it overwrites.
+- Semantic labels are captured at issue time and stored in the journal, never in
+  `Command`. They are structured `{ verb, args }` rather than rendered strings,
+  so language and renamed entities resolve at display time. A label is inert: no
+  materialization or transport path may read one.
+
+Restore is not undo, and three consequences must be visible in the UI rather
+than only recorded here:
+
+- it overwrites concurrent changes from other devices inside its scope — the
+  motivating "my phone changed something" case is exactly when other real edits
+  also exist, which is why scope is the primary control;
+- it is lossy for deletions. `deleted: true` is a server-side ratchet and a
+  purged id is a permanent tombstone, so a removed transaction can only come
+  back under a new id, losing its identity and references;
+- a large restore is one big push against the accepted whole-prefix
+  acknowledgement risk, so a partial silent rejection can land a state that is
+  neither the chosen point nor the current one. The point immediately before a
+  restore is therefore exempt from pruning, so a restore is always reversible by
+  another restore.
 
 ### Product rules
 
@@ -213,8 +270,6 @@ there:
 
 ## Accepted product risks
 
-- Transaction edits may leave `account.balance` stale until synchronization;
-  balance effects belong to materialization.
 - Upsert may recreate an entity that disappeared remotely while a local patch
   remained pending.
 - A successful response is trusted as whole-batch acknowledgement. A server
@@ -253,10 +308,25 @@ and consequences in [open-decisions.md](../../../../docs/open-decisions.md).
 
 ### Materializer evidence and versioning
 
-- Which real ZenMoney responses become fixtures for transaction balance,
-  account deletion, and transfer conversion?
+- Which real ZenMoney responses become fixtures for the account-deletion and
+  transfer-survivor cascades, when those rules become reachable? The balance
+  rule needed none: probing had already established the formula, and the rule
+  performs no currency conversion, so there was no unverified assumption left to
+  confirm.
 - Future command-shape changes need an explicit compatibility decision; do not
   add a general migration framework without evidence.
+
+### Change log retention
+
+- How large is a genesis snapshot plus a realistic run of incremental diffs on a
+  real account, and what retention window does that buy? This is a measurement
+  before it is a decision, and it gates building the log. Restated in
+  [open-decisions.md](../../../../docs/open-decisions.md#6-retention-budget-for-the-change-log).
+- Does correlating a journal entry with its command need an explicit `Command`
+  id, or does `issuedAt` suffice? An id reverses the recorded "no entry id"
+  decision and bumps the persisted replica version; `issuedAt` is a
+  near-unique key with no shape change. Decide against the journal's real undo
+  and acknowledgement cases, not in the abstract.
 
 ### Future surfaces — not scheduled
 

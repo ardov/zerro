@@ -5,7 +5,7 @@ import { zenmoney } from '6-shared/api/zenmoney'
 import { setToken } from 'store/token'
 import { applyServerPatch, resetData } from 'store/data'
 import { resetViews } from 'store/view'
-import { syncData } from '4-features/sync'
+import { refreshData } from '4-features/sync'
 import { convertDiff } from '6-shared/api/zm-adapter'
 import { clearLocalData, saveDataLocally } from './localData'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
@@ -34,8 +34,9 @@ export const logIn =
     tokenStorage.set(token)
     dispatch(setToken(token))
 
-    // Sync data
-    dispatch(syncData())
+    // A fresh login has no outbox to push, and keeping the push path to the one
+    // deliberate user action makes that invariant auditable.
+    dispatch(refreshData())
   }
 
 export const loadBackup =

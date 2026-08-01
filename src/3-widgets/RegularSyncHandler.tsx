@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { useCallback, useEffect, useRef } from 'react'
 import { getLoginState } from 'store/token'
-import { syncData } from '4-features/sync'
+import { refreshData } from '4-features/sync'
 import { getLastSyncTime, getLastChangeTime } from 'store/data'
 import { selectIsSyncPending } from 'store/sync'
 import { loadLocalData } from '4-features/localData'
@@ -35,7 +35,9 @@ function useConditionalSync() {
       isDocumentHidden: document.hidden,
       now: Date.now(),
     })
-    if (shouldSync) dispatch(syncData())
+    // Pull only: a background push would acknowledge the outbox prefix and
+    // silently destroy the undo history behind the user's back.
+    if (shouldSync) dispatch(refreshData())
   }, [isLoggedIn, isPending, lastSync, regular, dispatch])
 
   return trySyncing
