@@ -88,6 +88,14 @@ and is gated by measurement. The shape decisions are settled there;
 what remains is ordering, because each step has standalone value and the later
 ones are gated by measurement.
 
+Before building the journal, improve full-backup restore according to the
+checkpointed [restore improvement plan](./restore-improvement-plan.md). It is
+the authoritative next-step plan for strict complete-backup validation, the
+pending-outbox export warning, user settings and reminder-marker coverage,
+semantic reconciliation with fresh ids, reference remapping, and deletion
+cascades. Keep the public `core.restore` surface and the ordinary-command write
+path while executing it.
+
 1. ~~`diffStores(current, desired, scope) -> TIntentPatch` plus backup
    import.~~ Shipped 2026-08-01. `internal/operations/restore/diffStores.ts`
    holds the diff and `summarizeStoreDiff`; `core.restore` exposes both plus
