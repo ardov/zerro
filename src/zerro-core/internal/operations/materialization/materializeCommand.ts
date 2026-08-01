@@ -34,6 +34,7 @@ import {
 } from '../../domain/zenmoney'
 
 import { predictAccountBalances } from './predictBalances'
+import { predictDeletionCascades } from './predictDeletionCascades'
 
 export { intentPatchKeys } from '../../domain/zenmoney'
 export type { TIntentPatch } from '../../domain/zenmoney'
@@ -190,7 +191,11 @@ function withPredictedEffects(
 ): TNormalizedPatch {
   return predictAccountBalances(
     snapshot,
-    withPurgedTransactions(snapshot, patch, changedAt)
+    predictDeletionCascades(
+      snapshot,
+      withPurgedTransactions(snapshot, patch, changedAt),
+      changedAt
+    )
   )
 }
 

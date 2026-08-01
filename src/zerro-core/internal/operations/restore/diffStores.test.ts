@@ -13,6 +13,7 @@ import {
 } from '../../../support/testing/zenmoneyTestData'
 import { applyPatch } from '../../domain/zenmoney/model/applyPatch'
 import type { TDataStore } from '../../domain/zenmoney/model/store'
+import { AccountType } from '../../domain/zenmoney/entities/accounts'
 import { issuePatch, materializeCommand } from '../materialization'
 import { buildRestorePlan, diffStores, summarizeStoreDiff } from './diffStores'
 
@@ -276,13 +277,25 @@ describe('diffStores removals', () => {
     )
   })
 
-  it('leaves accounts, tags, and merchants in place', () => {
+  it('deletes an ordinary account but keeps the protected debt singleton', () => {
     const current = makeSnapshot({
-      account: { acc: makeAccount({ id: 'acc' }) },
+      account: {
+        acc: makeAccount({ id: 'acc' }),
+        debt: makeAccount({ id: 'debt', type: AccountType.Debt }),
+      },
       tag: { food: makeTag({ id: 'food' }) },
       merchant: { shop: makeMerchant({ id: 'shop' }) },
     })
-    expect(diffStores(current, makeSnapshot())).toEqual({})
+    const desired = makeSnapshot()
+
+    expect(diffStores(current, desired)).toEqual({
+      deletion: [{ id: 'acc', object: 'account' }],
+    })
+    expect(applyDiff(current, desired).account).toEqual({
+      debt: current.account.debt,
+    })
+    expect(applyDiff(current, desired).tag).toEqual(current.tag)
+    expect(applyDiff(current, desired).merchant).toEqual(current.merchant)
   })
 })
 

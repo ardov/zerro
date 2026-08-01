@@ -45,13 +45,18 @@ export function predictAccountBalances(
   const deltas = collectAccountDeltas(snapshot, patch)
   if (!deltas.size) return patch
 
+  const deletedAccounts = new Set(
+    patch.deletion
+      ?.filter(item => item.object === 'account')
+      .map(item => item.id as TAccountId)
+  )
   const accountsById = new Map<TAccountId, TAccount>(
     (patch.account ?? []).map(account => [account.id, account])
   )
   let predicted = false
 
   deltas.forEach((delta, id) => {
-    if (!delta) return
+    if (!delta || deletedAccounts.has(id)) return
     const account = accountsById.get(id) ?? snapshot.account[id]
     if (!account) return
     accountsById.set(id, { ...account, balance: account.balance + delta })

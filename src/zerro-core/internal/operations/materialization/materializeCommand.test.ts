@@ -16,6 +16,7 @@ import {
   compileSetSimpleHiddenData,
   HiddenDataType,
 } from '../../domain/zerro/hidden-data'
+import { applyPatch } from '../../domain/zenmoney/model/applyPatch'
 import {
   issuePatch,
   materializeCommand,
@@ -476,6 +477,153 @@ describe('materializeCommand', () => {
         },
       ],
     })
+  })
+
+  it('predicts the verified account-deletion cascade without changing survivor balance', () => {
+    const deleted = makeAccount({ id: 'deleted', balance: 20 })
+    const survivor = makeAccount({ id: 'survivor', balance: -11 })
+    const contained = makeTransaction({
+      id: 'contained',
+      incomeAccount: deleted.id,
+      outcomeAccount: deleted.id,
+      income: 0,
+      outcome: 7,
+    })
+    const transfer = makeTransaction({
+      id: 'transfer',
+      incomeAccount: deleted.id,
+      outcomeAccount: survivor.id,
+      income: 11,
+      outcome: 11,
+      tag: ['must-not-survive'],
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: { [deleted.id]: deleted, [survivor.id]: survivor },
+      transaction: { [contained.id]: contained, [transfer.id]: transfer },
+    })
+    const command = issuePatch(
+      snapshot,
+      { deletion: [{ id: deleted.id, object: 'account' }] },
+      100
+    )
+
+    expect(materializePrimaryCommand(snapshot, command)).toEqual({
+      deletion: [{ id: deleted.id, object: 'account', stamp: 100, user: 1 }],
+    })
+
+    const patch = materializeCommand(snapshot, command)
+    expect(patch.deletion).toEqual([
+      { id: deleted.id, object: 'account', stamp: 100, user: 1 },
+      { id: contained.id, object: 'transaction', stamp: 100, user: 1 },
+    ])
+    expect(patch.transaction).toEqual([
+      {
+        ...transfer,
+        income: 0,
+        incomeAccount: survivor.id,
+        outcomeAccount: survivor.id,
+        tag: null,
+        changed: 1001,
+      },
+    ])
+
+    const current = applyPatch(snapshot, patch)
+    expect(current.account).toEqual({ [survivor.id]: survivor })
+    expect(current.transaction).toEqual({
+      [transfer.id]: patch.transaction![0],
+    })
+  })
+
+  it('keeps the income-side survivor as one-sided income after account deletion', () => {
+    const deleted = makeAccount({ id: 'deleted', balance: -20 })
+    const survivor = makeAccount({ id: 'survivor', balance: 11 })
+    const transfer = makeTransaction({
+      id: 'transfer',
+      incomeAccount: survivor.id,
+      outcomeAccount: deleted.id,
+      income: 11,
+      outcome: 11,
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: { [deleted.id]: deleted, [survivor.id]: survivor },
+      transaction: { [transfer.id]: transfer },
+    })
+    const command = issuePatch(
+      snapshot,
+      { deletion: [{ id: deleted.id, object: 'account' }] },
+      100
+    )
+
+    const patch = materializeCommand(snapshot, command)
+    expect(patch.deletion).toEqual([
+      { id: deleted.id, object: 'account', stamp: 100, user: 1 },
+    ])
+    expect(patch.transaction).toEqual([
+      {
+        ...transfer,
+        incomeAccount: survivor.id,
+        outcome: 0,
+        outcomeAccount: survivor.id,
+        tag: null,
+        changed: 1001,
+      },
+    ])
+    expect(applyPatch(snapshot, patch).account[survivor.id].balance).toBe(11)
+  })
+
+  it('purges a transaction created in the same command as its deleted account', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+    const command = issuePatch(
+      snapshot,
+      {
+        account: [{ id: 'deleted', instrument: 2, title: 'Disposable' }],
+        transaction: [
+          {
+            id: 'contained',
+            incomeInstrument: 2,
+            incomeAccount: 'deleted',
+            outcomeInstrument: 2,
+            outcomeAccount: 'deleted',
+            income: 0,
+            outcome: 7,
+            date: '2026-08-02',
+          },
+        ],
+        deletion: [{ id: 'deleted', object: 'account' }],
+      },
+      100
+    )
+
+    const patch = materializeCommand(snapshot, command)
+    expect(patch.transaction).toBeUndefined()
+    expect(patch.account).toBeUndefined()
+    expect(patch.deletion).toEqual([
+      { id: 'deleted', object: 'account', stamp: 100, user: 1 },
+      { id: 'contained', object: 'transaction', stamp: 100, user: 1 },
+    ])
+    expect(applyPatch(snapshot, patch).transaction).toEqual({})
+  })
+
+  it('keeps deletion dominant over an account created in the same command', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+    const command = issuePatch(
+      snapshot,
+      {
+        account: [{ id: 'deleted', instrument: 2, title: 'Disposable' }],
+        deletion: [{ id: 'deleted', object: 'account' }],
+      },
+      100
+    )
+
+    const patch = materializeCommand(snapshot, command)
+    expect(patch.account).toBeUndefined()
+    expect(applyPatch(snapshot, patch).account).toEqual({})
   })
 
   it('stores minimal account creation intent and materializes through factory', () => {

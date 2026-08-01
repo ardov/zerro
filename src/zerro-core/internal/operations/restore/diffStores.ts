@@ -7,6 +7,7 @@
  * to live current rows first, then allocates a new id only where necessary.
  */
 import {
+  AccountType,
   accountWritableFields,
   budgetWritableFields,
   intentEntityKeys,
@@ -47,6 +48,7 @@ type TEntityRow = {
   skip?: (row: TRow) => boolean
   isAbsent?: (row: TRow) => boolean
   immutableFields?: readonly string[]
+  skipRemoval?: (row: TRow) => boolean
   references?: readonly TReference[]
   generatedId?: boolean
   remap?: (row: TRow, mappings: TRestoreIdMappings) => TRow
@@ -64,7 +66,10 @@ const entityRows: readonly TEntityRow[] = [
   {
     key: 'account',
     writableFields: accountWritableFields,
-    removal: null,
+    removal: 'deletion',
+    // ZenMoney's debt account is a protected singleton: deletion is a server
+    // no-op, so predicting its removal would make current lie until sync.
+    skipRemoval: row => row.type === AccountType.Debt,
     generatedId: true,
   },
   {
@@ -278,6 +283,7 @@ export function buildRestorePlan(
 
     activeCurrent.forEach(before => {
       if (consumedCurrent.has(String(before.id))) return
+      if (row.skipRemoval?.(before)) return
       const removal = removalIntent(row, before, deletion)
       if (removal) intents.push(removal)
     })

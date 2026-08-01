@@ -29,21 +29,21 @@ record of what live probing established.
 
 ## Rule status
 
-| #   | Operation                            | Predicted locally    | Server also does                               |
-| --- | ------------------------------------ | -------------------- | ---------------------------------------------- |
-| 1   | patch on a `deleted` transaction     | implemented (ignore) | ignores it too (one-way ratchet)               |
-| 2   | verified permanent-delete write      | implemented (purge)  | hard-purges the row, emits a real tombstone    |
-| 3   | transaction or `startBalance` change | implemented (delta)  | recomputes affected `account.balance`          |
-| 4   | account deletion                     | **planned**          | hard-purges contained transactions             |
-| 5   | transfer touching a deleted account  | **planned**          | converts to one-sided on the survivor          |
-| 6   | tag deletion                         | **planned**          | nulls `transaction.tag`, drops its budget rows |
-| 7   | merchant deletion                    | **planned**          | nulls `transaction.merchant`                   |
-| 8   | merchant rename                      | **deliberately not** | rewrites `payee` + `changed` on linked rows    |
+| #   | Operation                            | Predicted locally     | Server also does                               |
+| --- | ------------------------------------ | --------------------- | ---------------------------------------------- |
+| 1   | patch on a `deleted` transaction     | implemented (ignore)  | ignores it too (one-way ratchet)               |
+| 2   | verified permanent-delete write      | implemented (purge)   | hard-purges the row, emits a real tombstone    |
+| 3   | transaction or `startBalance` change | implemented (delta)   | recomputes affected `account.balance`          |
+| 4   | account deletion                     | implemented (purge)   | hard-purges contained transactions             |
+| 5   | transfer touching a deleted account  | implemented (rewrite) | converts to one-sided on the survivor          |
+| 6   | tag deletion                         | **planned**           | nulls `transaction.tag`, drops its budget rows |
+| 7   | merchant deletion                    | **planned**           | nulls `transaction.merchant`                   |
+| 8   | merchant rename                      | **deliberately not**  | rewrites `payee` + `changed` on linked rows    |
 
-Rules 4, 5, and 7 have no local producer yet — Core emits no `deletion` for
-account, tag, or transaction, only for reminders. They become reachable when
-merchant and account deletion ship, and they are worth implementing then, not
-before.
+Rules 4 and 5 are reachable through restore: an ordinary missing account emits
+primary `deletion`, while the protected debt singleton remains untouched because
+the server ignores its deletion. Tag and merchant deletion still have no local
+producer.
 
 ## 1. Deleted transactions are a ratchet
 
@@ -165,7 +165,12 @@ canonicalized to `tag: null` before account deletion, so category is stripped
 by transfer materialization rather than this cascade.
 
 A local prediction must reproduce both branches, otherwise the UI shows
-transactions belonging to an account that no longer exists.
+transactions belonging to an account that no longer exists. The implementation
+keeps the primary account deletion as the only transport effect, adds cascade
+tombstones and rewritten transfers only to `current`, and prevents balance
+prediction from reintroducing the removed account. An already soft-deleted
+transaction is deliberately left alone because that cascade shape is untested
+and already invisible in local read models.
 
 ## 6. Tag deletion has two effects
 
