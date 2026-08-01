@@ -397,6 +397,70 @@ describe('restore reconciliation', () => {
     )
   })
 
+  it('preserves explicit null, false, and zero factory fields through restore replay', () => {
+    const desired = makeSnapshot({
+      account: {
+        account: makeAccount({
+          id: 'account',
+          title: 'Exact account',
+          role: 0,
+          savings: null,
+          capitalization: false,
+          percent: 0,
+          endDateOffset: 0,
+          payoffStep: 0,
+        }),
+      },
+      tag: {
+        tag: makeTag({
+          id: 'tag',
+          title: 'Exact tag',
+          archive: null,
+          required: null,
+          color: 0,
+        }),
+      },
+      budget: {
+        '2026-01-01#null': makeBudget({
+          id: '2026-01-01#null',
+          tag: null,
+          date: '2026-01-01',
+          incomeLock: false,
+          outcomeLock: false,
+        }),
+      },
+      reminder: {
+        reminder: makeReminder({
+          id: 'reminder',
+          incomeAccount: 'account',
+          outcomeAccount: 'account',
+          incomeInstrument: 0,
+          outcomeInstrument: 0,
+          tag: ['tag'],
+          step: null,
+          points: null,
+        }),
+      },
+      reminderMarker: {
+        marker: makeReminderMarker({
+          id: 'marker',
+          incomeAccount: 'account',
+          outcomeAccount: 'account',
+          incomeInstrument: 0,
+          outcomeInstrument: 0,
+          tag: ['tag'],
+          reminder: 'reminder',
+        }),
+      },
+    })
+
+    const restored = applyDiff(makeSnapshot(), desired)
+
+    expect(buildRestorePlan(restored, desired, { allocateId }).patch).toEqual(
+      {}
+    )
+  })
+
   it('treats duplicate semantic rows as a multiset', () => {
     const current = makeSnapshot({
       transaction: {

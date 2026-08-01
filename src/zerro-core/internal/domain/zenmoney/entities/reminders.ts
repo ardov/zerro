@@ -105,25 +105,25 @@ export function makeReminder(
     incomeAccount: draft.incomeAccount,
     outcomeAccount: draft.outcomeAccount,
 
-    id: draft.id || (ctx.uuid() as TReminderId),
-    changed: draft.changed || ctx.now(),
+    id: draft.id ?? (ctx.uuid() as TReminderId),
+    changed: draft.changed ?? ctx.now(),
 
-    incomeInstrument: draft.incomeInstrument || 2,
-    income: draft.income || 0,
-    outcomeInstrument: draft.outcomeInstrument || 2,
-    outcome: draft.outcome || 0,
+    incomeInstrument: draft.incomeInstrument ?? 2,
+    income: draft.income ?? 0,
+    outcomeInstrument: draft.outcomeInstrument ?? 2,
+    outcome: draft.outcome ?? 0,
 
-    tag: draft.tag || null,
-    merchant: draft.merchant || null,
-    payee: draft.payee || null,
-    comment: draft.comment || null,
+    tag: draft.tag ?? null,
+    merchant: draft.merchant ?? null,
+    payee: draft.payee ?? null,
+    comment: draft.comment ?? null,
 
-    interval: draft.interval || null,
-    step: draft.step || 0,
-    points: draft.points || [0],
-    startDate: toISODate(draft.startDate || ctx.now()),
-    endDate: toISODate(draft.endDate || ctx.now()),
-    notify: draft.notify || false,
+    interval: draft.interval ?? null,
+    step: draft.step === undefined ? 0 : draft.step,
+    points: draft.points === undefined ? [0] : draft.points,
+    startDate: toISODate(draft.startDate ?? ctx.now()),
+    endDate: toISODate(draft.endDate ?? ctx.now()),
+    notify: draft.notify ?? false,
   }
 }
 

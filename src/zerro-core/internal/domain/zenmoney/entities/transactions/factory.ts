@@ -26,7 +26,7 @@ export function makeTransaction(
   ctx: TCoreContext
 ): TTransaction {
   return {
-    id: draft.id || (ctx.uuid() as TTransactionId),
+    id: draft.id ?? (ctx.uuid() as TTransactionId),
     changed: toTimestamp(draft.changed, ctx),
     created: toTimestamp(draft.created, ctx),
     user: draft.user,

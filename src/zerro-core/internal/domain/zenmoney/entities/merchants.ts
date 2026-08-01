@@ -34,8 +34,8 @@ export function makeMerchant(
   return {
     user: draft.user,
     title: draft.title,
-    id: draft.id || (ctx.uuid() as TMerchantId),
-    changed: draft.changed || ctx.now(),
+    id: draft.id ?? (ctx.uuid() as TMerchantId),
+    changed: draft.changed ?? ctx.now(),
   }
 }
 export function compilePatchMerchant(

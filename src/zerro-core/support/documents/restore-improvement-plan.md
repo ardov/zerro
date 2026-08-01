@@ -1,7 +1,7 @@
 # Full backup restore improvement plan
 
-- Status: checkpoints 1–7 shipped; factory convergence and deletion cascades remain
-- Updated: 2026-08-01
+- Status: checkpoints 1–8 shipped; deletion cascades remain
+- Updated: 2026-08-02
 - Scope: full-backup validation, semantic reconciliation, id remapping,
   writable entity coverage, deletion cascades, preview, and verification
 
@@ -603,7 +603,7 @@ the completion snackbar only if a command was actually appended.
 5. `feat(core): add reminder marker intents and restore`
 6. ~~`refactor(core): introduce restore reconciliation plan`~~ Shipped 2026-08-01.
 7. ~~`feat(core): restore entities with fresh ids and remap references`~~ Shipped 2026-08-01.
-8. `fix(core): make entity factories restore-idempotent`
+8. ~~`fix(core): make entity factories restore-idempotent`~~ Shipped 2026-08-02.
 9. `feat(core): predict account deletion cascades`
 10. `feat(core): predict tag deletion cascades`
 11. `feat(core): support merchant deletion after API verification`
