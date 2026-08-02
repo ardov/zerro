@@ -15,6 +15,7 @@ import {
   retainJournal,
   journalPersistenceVersion,
   replicaPersistenceVersion,
+  validateDataStore,
   undoOutbox,
   type TCommand,
   type TPersistedJournal,
@@ -34,6 +35,9 @@ interface DataSlice {
   journal: TPersistedJournal | null
   /** Do not overwrite a quarantined journal until a new server sync succeeds. */
   journalPersistenceBlocked: boolean
+  /** A loaded active branch failed domain validation and needs full reload. */
+  journalRecoveryRequired: boolean
+  journalRecoveryReason: string | null
   inbox?: TServerInbox | null
 }
 
@@ -51,6 +55,8 @@ const initialState: DataSlice = {
   redo: [],
   journal: null,
   journalPersistenceBlocked: false,
+  journalRecoveryRequired: false,
+  journalRecoveryReason: null,
 }
 
 // SLICE
@@ -86,6 +92,8 @@ const { reducer, actions } = createSlice({
           checkpoint.serverTimestamp
         )
         state.journalPersistenceBlocked = false
+        state.journalRecoveryRequired = false
+        state.journalRecoveryReason = null
         state.base = checkpoint
         state.current = replayOutbox(checkpoint, state.outbox)
         state.inbox = null
@@ -127,7 +135,9 @@ const { reducer, actions } = createSlice({
             nextJournal,
             accepted.base.serverTimestamp
           )
-          state.journalPersistenceBlocked = false
+          if (!state.journalRecoveryRequired) {
+            state.journalPersistenceBlocked = false
+          }
         }
       }
       state.inbox = null
@@ -193,7 +203,8 @@ const { reducer, actions } = createSlice({
       ) => {
         if (!payload.journal) {
           state.journal = createPersistedJournal(state.base)
-          state.journalPersistenceBlocked = payload.preserveStored
+          const isValid = setJournalValidation(state, state.base)
+          state.journalPersistenceBlocked = payload.preserveStored || !isValid
           state.current = replayOutbox(state.base, state.outbox)
           return
         }
@@ -204,6 +215,8 @@ const { reducer, actions } = createSlice({
         if (!activeBranch) {
           state.journal = createPersistedJournal(state.base)
           state.journalPersistenceBlocked = true
+          state.journalRecoveryRequired = true
+          state.journalRecoveryReason = 'Active journal branch is missing'
           state.current = replayOutbox(state.base, state.outbox)
           return
         }
@@ -211,6 +224,8 @@ const { reducer, actions } = createSlice({
         state.journal = payload.journal
         state.journalPersistenceBlocked = false
         state.base = replayJournalBranch(activeBranch)
+        const isValid = setJournalValidation(state, state.base)
+        state.journalPersistenceBlocked = !isValid
         state.current = replayOutbox(state.base, state.outbox)
       }
     ),
@@ -279,4 +294,11 @@ function retainPersistedJournal(
 ): TPersistedJournal {
   return retainJournal(journal, serverTimestamp, defaultJournalRetentionPolicy)
     .journal
+}
+
+function setJournalValidation(state: DataSlice, base: TDataStore): boolean {
+  const validation = validateDataStore(base)
+  state.journalRecoveryRequired = !validation.ok
+  state.journalRecoveryReason = validation.ok ? null : validation.reason
+  return validation.ok
 }

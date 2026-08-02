@@ -13,6 +13,12 @@ const getBase = (state: RootState) => state.data.base
 const getOutbox = (state: RootState) => state.data.outbox
 const getRedo = (state: RootState) => state.data.redo
 
+export const getJournalRecoveryRequired = (state: RootState) =>
+  state.data.journalRecoveryRequired
+
+export const getJournalRecoveryReason = (state: RootState) =>
+  state.data.journalRecoveryReason
+
 export const getPendingSyncDiff = createSelector(
   [getBase, getOutbox],
   (base, outbox) =>

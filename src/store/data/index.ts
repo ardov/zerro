@@ -20,6 +20,8 @@ export {
   getPendingSyncTransport,
   getCanUndoClientCommand,
   getCanRedoClientCommand,
+  getJournalRecoveryReason,
+  getJournalRecoveryRequired,
   getChangedNum,
   getLastChangeTime,
   getLastSyncTime,

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 
 import {
   makeAccount,
+  makeInstrument,
   makeTransaction,
+  makeUser,
 } from 'zerro-core/support/testing/zenmoneyTestData'
 import {
   createJournalBranch,
@@ -10,6 +12,7 @@ import {
   type TCommand,
   type TPersistedJournal,
 } from 'zerro-core/replica'
+import { AccountType } from 'zerro-core/internal/domain/zenmoney'
 import {
   getChangedNum,
   getLastChangeTime,
@@ -385,6 +388,45 @@ describe('command outbox boundaries', () => {
 
     expect(restored.base.account.cash.title).toBe('Cash')
     expect(restored.journalPersistenceBlocked).toBe(true)
+  })
+
+  it('flags a semantically invalid active branch until a full reload', () => {
+    const invalid = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      instrument: [makeInstrument({ id: 1 })],
+      country: [{ id: 1, title: 'United States', currency: 1, domain: null }],
+      user: [makeUser({ id: 1, parent: null, currency: 1 })],
+      account: [
+        makeAccount({ id: 'cash', type: AccountType.Cash }),
+        makeAccount({ id: 'debt-1', type: AccountType.Debt }),
+        makeAccount({ id: 'debt-2', type: AccountType.Debt }),
+      ],
+    })
+
+    const flagged = reducer(
+      invalid,
+      restorePersistedJournal({ preserveStored: false })
+    )
+
+    expect(flagged.journalRecoveryRequired).toBe(true)
+    expect(flagged.journalRecoveryReason).toContain('debt account')
+    expect(flagged.journalPersistenceBlocked).toBe(true)
+
+    const reloaded = applyServerPatch(flagged, {
+      fullReload: true,
+      serverTimestamp: 200,
+      instrument: [makeInstrument({ id: 1 })],
+      country: [{ id: 1, title: 'United States', currency: 1, domain: null }],
+      user: [makeUser({ id: 1, parent: null, currency: 1 })],
+      account: [
+        makeAccount({ id: 'cash', type: AccountType.Cash }),
+        makeAccount({ id: 'debt', type: AccountType.Debt }),
+      ],
+    })
+
+    expect(reloaded.journalRecoveryRequired).toBe(false)
+    expect(reloaded.journalRecoveryReason).toBeNull()
+    expect(reloaded.journalPersistenceBlocked).toBe(false)
   })
 
   it('starts a sealed-history branch on a full server reload', () => {

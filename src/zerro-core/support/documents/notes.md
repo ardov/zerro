@@ -94,15 +94,17 @@ semantic reconciliation with fresh ids, reference remapping, and deletion
 cascades. Keep the public `core.restore` surface and the ordinary-command write
 path while executing it.
 
-The pure journal transition, branch compaction, validation-status shape,
-versioned persistence parser, Redux load restoration, canonical append, journal
-persistence middleware, and the explicit full-reload network path shipped
-2026-08-02 in
+The pure journal transition, branch compaction, domain snapshot validator,
+validation-status shape, versioned persistence parser, Redux load restoration,
+canonical append, journal persistence middleware, and the explicit full-reload
+network path shipped 2026-08-02 in
 `internal/operations/replication/journal.ts` and
 `runtime/persistence/journalPersistence.ts`. Redux load/recovery and canonical
 sync wiring now run in a compatibility phase: the shipped runtime still keeps
-its existing persisted base while duplicate-base removal and automatic recovery
-from a malformed journal are developed. `reloadData()` starts a new active
+its existing persisted base while duplicate-base removal and automatic network
+recovery from a malformed journal are developed. A semantically invalid active
+branch is left intact, exposed through `journalRecoveryRequired`, and blocked
+from persistence until a full-reload response is received. That thunk starts a new active
 branch from a complete server snapshot and preserves the previous branches for
 read-only history. Canonical boundaries now apply the three-month age policy
 and enforce the hard budget by pruning the oldest sealed branches; the soft
@@ -125,13 +127,15 @@ codec is shipped yet.
    not a gate for step 3 —
    [open-decisions.md](../../../../docs/open-decisions.md#6-retention-budget-for-the-change-log).
 3. Compatibility load, canonical append, journal persistence, explicit
-   full-reload branch creation, and retention pruning shipped 2026-08-02.
-   Remove the duplicate persisted base, add a compression codec for the soft
-   threshold, and add automatic recovery from an invalid active branch.
-   Journal storage already joins logout clear.
+   full-reload branch creation, retention pruning, and final-snapshot
+   validation shipped 2026-08-02. Remove the duplicate persisted base, add a
+   compression codec for the soft threshold, and add automatic network
+   recovery from a malformed persisted journal. Journal storage already joins
+   logout clear.
 4. History screen: server points open in isolated read-only time travel;
    pending outbox commands appear as a transient undo/redo tail rather than
-   journal entries. Add lazy snapshot validation and versioned point statuses.
+   journal entries. Add lazy historical-point validation and versioned point
+   status updates.
 5. Scoped restore from a validated point. Global restore last, behind its own
    confirmation.
 

@@ -28,6 +28,8 @@ describe('getBackupContent', () => {
         redo: [],
         journal: null,
         journalPersistenceBlocked: false,
+        journalRecoveryRequired: false,
+        journalRecoveryReason: null,
       },
     })
 

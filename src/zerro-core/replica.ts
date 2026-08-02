@@ -20,6 +20,12 @@ export {
 export { applyPatch } from './internal/domain/zenmoney/model/applyPatch'
 
 export {
+  dataStoreValidatorVersion,
+  validateDataStore,
+  type TDataStoreValidationResult,
+} from './internal/domain/zenmoney/model/validateStore'
+
+export {
   acceptCanonicalPatch,
   type TAcceptedCanonicalPatch,
 } from './internal/operations/replication/canonical'

@@ -254,6 +254,8 @@ type ReplicaState = {
   base: TDataStore
   outbox: Command[] // the persisted command shape defined in Commands above
   redo: Command[] // session-only undone commands
+  journal: PersistedJournal | null
+  journalRecoveryRequired: boolean // session-only recovery prompt
 }
 ```
 
@@ -279,6 +281,12 @@ type PersistedReplica = {
   outbox: Command[]
 }
 ```
+
+Loading a journal replays its active branch once and runs the domain
+`TDataStore` validator on the reconstructed base. A semantic failure leaves the
+branch and its raw storage intact, sets `journalRecoveryRequired`, and blocks
+journal writes until an explicit full reload is received. The validator is not
+run for every canonical response.
 
 Reload accepts a snapshot only when its base timestamp matches the loaded
 server base. It restores `outbox` and always starts with an empty `redo` stack.
