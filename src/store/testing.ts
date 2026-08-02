@@ -16,7 +16,13 @@ export function makeTestRootState(
 
   return {
     ...initialState,
-    data: { current, base: current, outbox: [], redo: [] },
+    data: {
+      ...initialState.data,
+      current,
+      base: current,
+      outbox: [],
+      redo: [],
+    },
     ...overrides,
   }
 }

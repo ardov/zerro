@@ -17,10 +17,41 @@ export {
   type TOutboxState,
 } from './internal/operations/replication/outbox'
 
+export { applyPatch } from './internal/domain/zenmoney/model/applyPatch'
+
 export {
   acceptCanonicalPatch,
   type TAcceptedCanonicalPatch,
 } from './internal/operations/replication/canonical'
+
+export {
+  applyCompactTransition,
+  appendCanonicalJournalPoint,
+  compactCanonicalTransition,
+  compactJournalBranchAt,
+  compactJournalAt,
+  createJournalBranch,
+  defaultJournalRetentionPolicy,
+  estimateJournalBytes,
+  replayJournal,
+  replayJournalBranch,
+  retainJournal,
+  type TCompactCanonicalTransition,
+  type TCompactDeletion,
+  type TCompactEntityChange,
+  type TJournalBranch,
+  type TJournalCollection,
+  type TJournalPoint,
+  type TJournalRetentionPolicy,
+  type TJournalRetentionResult,
+  type TJournalValidationStatus,
+} from './internal/operations/replication/journal'
+
+export {
+  journalPersistenceVersion,
+  parsePersistedJournal,
+  type TPersistedJournal,
+} from './runtime/persistence/journalPersistence'
 
 export { getSyncCursor } from './internal/operations/replication/cursor'
 

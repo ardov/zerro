@@ -1,10 +1,11 @@
 import type { TLocalData } from '6-shared/types'
-import type { TPersistedReplica } from 'zerro-core/replica'
+import type { TPersistedJournal, TPersistedReplica } from 'zerro-core/replica'
 import { keys } from '6-shared/helpers/keys'
 import { storage } from '6-shared/api/storage'
 import { convertDiff } from '6-shared/api/zm-adapter'
 
 const REPLICA_KEY = 'zerro-core-replica-v1'
+const JOURNAL_KEY = 'zerro-core-journal-v1'
 
 export type LocalKey = keyof TLocalData
 
@@ -41,6 +42,14 @@ export function getReplicaState() {
 
 export function saveReplicaState(replica: TPersistedReplica) {
   return storage.set(REPLICA_KEY, replica)
+}
+
+export function getJournalState() {
+  return storage.get(JOURNAL_KEY) as Promise<unknown>
+}
+
+export function saveJournalState(journal: TPersistedJournal) {
+  return storage.set(JOURNAL_KEY, journal)
 }
 
 export function clearStorage() {

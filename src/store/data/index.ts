@@ -7,6 +7,7 @@ export {
   prepareClientSync,
   undoClientCommand,
   redoClientCommand,
+  restorePersistedJournal,
   restorePersistedReplica,
   resetData,
 } from './slice'

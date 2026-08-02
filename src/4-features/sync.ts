@@ -26,7 +26,13 @@ import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
  * commands rebase over the new base and stay undoable.
  */
 const exchangeWithZenmoney =
-  (push: boolean): AppThunk =>
+  ({
+    push,
+    fullReload = false,
+  }: {
+    push: boolean
+    fullReload?: boolean
+  }): AppThunk =>
   async (dispatch, getState) => {
     if (push) dispatch(prepareClientSync())
     const state = getState()
@@ -34,7 +40,7 @@ const exchangeWithZenmoney =
     const sentAt = Date.now()
     const diff: TNormalizedPatch = {
       ...(push ? getPendingSyncTransport(state, sentAt) : undefined),
-      serverTimestamp: getSyncCursor(state),
+      serverTimestamp: fullReload ? 0 : getSyncCursor(state),
     }
     const token = getToken(state) || ''
 
@@ -50,11 +56,23 @@ const exchangeWithZenmoney =
 
       if (response.data) {
         const data = response.data
-        dispatch(applyServerPatch({ ...data, sentOutboxCount }))
+        dispatch(
+          applyServerPatch({
+            ...data,
+            sentOutboxCount,
+            ...(fullReload ? { fullReload: true } : {}),
+          })
+        )
         const changedDomains = getChangedDomains(data)
         dispatch(saveDataLocally(changedDomains))
         track('sync_completed', {
-          mode: !push ? 'pull' : diff.serverTimestamp ? 'update' : 'first',
+          mode: fullReload
+            ? 'update'
+            : !push
+              ? 'pull'
+              : diff.serverTimestamp
+                ? 'update'
+                : 'first',
         })
         console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)
       } else {
@@ -76,14 +94,18 @@ const exchangeWithZenmoney =
   }
 
 /** Pushes the pending outbox and applies the canonical response. */
-export const syncData = (): AppThunk => exchangeWithZenmoney(true)
+export const syncData = (): AppThunk => exchangeWithZenmoney({ push: true })
 
 /**
  * Pulls the canonical diff without pushing anything. Background sync uses this,
  * so an idle tab stays current without silently acknowledging — and thereby
  * discarding — changes the user never chose to send.
  */
-export const refreshData = (): AppThunk => exchangeWithZenmoney(false)
+export const refreshData = (): AppThunk => exchangeWithZenmoney({ push: false })
+
+/** Pulls a complete server snapshot and starts a new active journal branch. */
+export const reloadData = (): AppThunk =>
+  exchangeWithZenmoney({ push: false, fullReload: true })
 
 function getErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error)

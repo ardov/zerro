@@ -1,6 +1,6 @@
 # Zerro Core working notes
 
-- Updated: 2026-08-01
+- Updated: 2026-08-02
 - Purpose: current position, remaining work, and deferred local smells.
   Implementation history stays in Git; contracts stay in
   [architecture.md](./architecture.md); settled decisions and risks stay in
@@ -80,20 +80,34 @@ it. Compare resulting state, not patch shape.
 
 ### 4. Change history and restore
 
-Decided 2026-07-31 (see
+Revised 2026-08-02 (see
 [design-ledger.md](./design-ledger.md#change-history-and-restore)). Balance
-prediction landed first, then the store diff of step 1; the log itself is next
-and is gated by measurement. The shape decisions are settled there;
-what remains is ordering, because each step has standalone value and the later
-ones are gated by measurement.
+prediction landed first, then the store diff of step 1. The journal shape and
+initial retention defaults are now settled; real-account measurement is a later
+tuning task, not a prerequisite for implementation.
 
-Before building the journal, improve full-backup restore according to the
+While finishing the journal migration, improve full-backup restore according to the
 checkpointed [restore improvement plan](./restore-improvement-plan.md). It is
 the authoritative next-step plan for strict complete-backup validation, the
 pending-outbox export warning, user settings and reminder-marker coverage,
 semantic reconciliation with fresh ids, reference remapping, and deletion
 cascades. Keep the public `core.restore` surface and the ordinary-command write
 path while executing it.
+
+The pure journal transition, branch compaction, validation-status shape,
+versioned persistence parser, Redux load restoration, canonical append, journal
+persistence middleware, and the explicit full-reload network path shipped
+2026-08-02 in
+`internal/operations/replication/journal.ts` and
+`runtime/persistence/journalPersistence.ts`. Redux load/recovery and canonical
+sync wiring now run in a compatibility phase: the shipped runtime still keeps
+its existing persisted base while duplicate-base removal and automatic recovery
+from a malformed journal are developed. `reloadData()` starts a new active
+branch from a complete server snapshot and preserves the previous branches for
+read-only history. Canonical boundaries now apply the three-month age policy
+and enforce the hard budget by pruning the oldest sealed branches; the soft
+threshold is reported by the retention helper as a compression signal, but no
+codec is shipped yet.
 
 1. ~~`diffStores(current, desired, scope) -> TIntentPatch` plus backup
    import.~~ Shipped 2026-08-01. The internal `buildRestorePlan` first maps
@@ -105,17 +119,20 @@ path while executing it.
    replayed snapshot instead of a parsed file. Account, tag, and merchant
    removal are available; merchant removal remains blocked only by an active
    debt reference, matching the server's silent no-op.
-2. Measure a genesis snapshot and a realistic diff run on a real account. This
-   gates step 3 and is the maintainer's to run —
+2. Tune retention from a real checkpoint and compact-transition run when
+   evidence is available. The initial policy is three months, a 50 MiB soft
+   compaction/compression threshold, and a 100 MiB hard journal budget; this is
+   not a gate for step 3 —
    [open-decisions.md](../../../../docs/open-decisions.md#6-retention-budget-for-the-change-log).
-3. The log itself: stop discarding canonical diffs, add the genesis snapshot,
-   add compaction and age-based pruning. A separate durable record beside the
-   replica, joined to the logout clear in `store/data/replicaPersistence.ts`.
-4. Journal entries and the history screen: structured descriptors captured in
-   `runtime/redux/commands.ts` (the single chokepoint every write passes
-   through), local entries, pull entries with per-entity caps and no initial
-   full load, and push entries.
-5. Scoped restore from a point. Global restore last, behind its own
+3. Compatibility load, canonical append, journal persistence, explicit
+   full-reload branch creation, and retention pruning shipped 2026-08-02.
+   Remove the duplicate persisted base, add a compression codec for the soft
+   threshold, and add automatic recovery from an invalid active branch.
+   Journal storage already joins logout clear.
+4. History screen: server points open in isolated read-only time travel;
+   pending outbox commands appear as a transient undo/redo tail rather than
+   journal entries. Add lazy snapshot validation and versioned point statuses.
+5. Scoped restore from a validated point. Global restore last, behind its own
    confirmation.
 
 The history screen is also the home for two already-decided app behaviors:

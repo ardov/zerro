@@ -1,18 +1,25 @@
 import { describe, expect, it, vi } from 'vitest'
 
-const { getLocalDataMock, getReplicaStateMock } = vi.hoisted(() => ({
-  getLocalDataMock: vi.fn(),
-  getReplicaStateMock: vi.fn(),
-}))
+const { getJournalStateMock, getLocalDataMock, getReplicaStateMock } =
+  vi.hoisted(() => ({
+    getJournalStateMock: vi.fn(),
+    getLocalDataMock: vi.fn(),
+    getReplicaStateMock: vi.fn(),
+  }))
 
 vi.mock('6-shared/api/localStore', () => ({
   getLocalData: getLocalDataMock,
+  getJournalState: getJournalStateMock,
   getReplicaState: getReplicaStateMock,
   clearStorage: vi.fn(),
   saveLocalData: vi.fn(),
 }))
 
-import { makeAccount } from 'zerro-core/support/testing/zenmoneyTestData'
+import {
+  makeAccount,
+  makeStore,
+} from 'zerro-core/support/testing/zenmoneyTestData'
+import { journalPersistenceVersion } from 'zerro-core/replica'
 import { getPendingSyncDiff } from 'store/data'
 import reducer from 'store/data/slice'
 import { loadLocalData } from './localData'
@@ -93,5 +100,64 @@ describe('loadLocalData', () => {
       expect.any(Error)
     )
     warn.mockRestore()
+  })
+
+  it('restores the accepted base from the persisted journal before outbox', async () => {
+    const rawAccount = makeAccount({ id: 'cash', title: 'Raw cache' })
+    const checkpoint = makeStore({
+      serverTimestamp: 100,
+      account: { cash: rawAccount },
+    })
+    getLocalDataMock.mockResolvedValue({
+      serverTimestamp: 100,
+      account: [rawAccount],
+    })
+    getJournalStateMock.mockResolvedValue({
+      version: journalPersistenceVersion,
+      activeBranchId: 'main',
+      branches: [
+        {
+          id: 'main',
+          checkpoint,
+          serverTimestamp: 101,
+          points: [
+            {
+              id: 'server:101',
+              transition: {
+                serverTimestamp: 101,
+                upsert: {
+                  account: [{ id: 'cash', fields: { title: 'Accepted' } }],
+                },
+              },
+              validation: { kind: 'unknown' },
+            },
+          ],
+        },
+      ],
+    })
+    getReplicaStateMock.mockResolvedValue({
+      version: 3,
+      baseServerTimestamp: 101,
+      outbox: [],
+    })
+
+    let dataState = reducer(undefined, { type: 'test/init' })
+    const dispatch: any = (action: any) => {
+      if (typeof action === 'function') {
+        return action(dispatch, () => ({ data: dataState }), undefined)
+      }
+      dataState = reducer(dataState, action)
+      return action
+    }
+
+    await loadLocalData()(
+      dispatch,
+      () => ({ data: dataState }) as any,
+      undefined
+    )
+
+    expect(dataState.base.serverTimestamp).toBe(101)
+    expect(dataState.base.account.cash.title).toBe('Accepted')
+    expect(dataState.journal?.branches[0].points).toHaveLength(1)
   })
 })

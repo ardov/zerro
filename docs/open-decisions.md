@@ -152,23 +152,24 @@ would reverse.
 **Question.** How far back should the change history reach, and what does that
 cost in browser storage?
 
-**Why it is open.** The log is a genesis snapshot plus every canonical diff since
-it. The genesis snapshot is roughly the size of the base already in IndexedDB,
-so the feature approximately doubles the largest stored item before any diffs
-accumulate. Whether that is acceptable — and therefore whether the window is
-three days, two weeks, or longer — depends on numbers only your real account can
-produce. Nothing about the design changes with the answer; how aggressively
-compaction folds old diffs into the genesis snapshot does.
+**Initial answer (2026-08-02).** Start with a three-month maximum age, trigger
+compaction/compression at 50 MiB, and enforce a 100 MiB hard journal budget.
+These defaults are intentionally provisional; the journal can tune them after
+real-account measurements without changing its storage model.
 
-**What is needed.** From a loaded real account: the serialized size of the full
-data store, and the sizes of a run of incremental pull diffs over a few normal
-days. Both are readable from the existing persisted records; no new capture
-mechanism is required, and neither number needs to be committed.
+The journal is the durable source of accepted server state: one checkpoint plus
+compact canonical transitions, rather than a second copy beside the persisted
+base. The soft threshold controls when storage maintenance starts; the hard
+budget controls the maximum retained history.
 
-**Recommendation.** Measure before building the log, not after. This is the only
-input that can make the storage model unworkable, and it is cheap to get. If the
-diffs turn out to dominate, the fallback is a shorter window rather than a
-different architecture.
+**Follow-up measurement.** From a loaded real account, record the serialized
+size of one full checkpoint and compact transitions over normal activity. No
+account mutation is required. Use the result to tune the provisional age and
+byte limits, not to decide whether the architecture is viable.
+
+**Recommendation.** Ship with the provisional limits and measure later. If
+transitions dominate, shorten the retained window or improve encoding before
+changing the journal/source-of-truth architecture.
 
 **Where it is recorded.** design-ledger, _Open questions → Change log
 retention_, and

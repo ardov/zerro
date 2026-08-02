@@ -16,11 +16,12 @@ import data, {
   appendClientCommand,
   applyServerPatch,
   redoClientCommand,
+  restorePersistedJournal,
   undoClientCommand,
 } from 'store/data'
 import syncReducer from 'store/sync'
 import token from 'store/token'
-import { refreshData, syncData } from './sync'
+import { refreshData, reloadData, syncData } from './sync'
 
 function renameCashTo(title: string, issuedAt: number) {
   return {
@@ -204,5 +205,34 @@ describe('refreshData', () => {
     store.dispatch(redoClientCommand())
     expect(store.getState().data.current.account.cash.title).toBe('Wallet')
     expect(store.getState().data.outbox).toEqual([undone])
+  })
+})
+
+describe('reloadData', () => {
+  beforeEach(() => {
+    syncMock.mockClear()
+  })
+
+  it('requests a complete pull and seals the previous journal branch', async () => {
+    syncMock.mockResolvedValueOnce({
+      data: {
+        serverTimestamp: 300_000,
+        account: [makeAccount({ id: 'cash', title: 'Server Cash' })],
+      },
+    })
+    const store = makeSyncedStore()
+    store.dispatch(restorePersistedJournal({ preserveStored: false }) as any)
+    const pending = renameCashTo('Wallet', 10)
+    store.dispatch(appendClientCommand(pending))
+
+    await store.dispatch(reloadData() as any)
+
+    expect(syncMock).toHaveBeenCalledWith('', 'ru', { serverTimestamp: 0 })
+    const state = store.getState().data
+    expect(state.journal?.branches).toHaveLength(2)
+    expect(state.journal?.activeBranchId).toBe('reload:300000')
+    expect(state.base.account.cash.title).toBe('Server Cash')
+    expect(state.current.account.cash.title).toBe('Wallet')
+    expect(state.outbox).toEqual([pending])
   })
 })

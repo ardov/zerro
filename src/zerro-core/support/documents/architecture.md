@@ -237,6 +237,15 @@ domain group ids.
 
 ## Replica model
 
+During the migration the shipped runtime still persists the last accepted
+`base` as a compatibility cache beside the pending `outbox`. It now also loads,
+updates, and persists the journal branch; canonical boundaries compact points
+older than the retention window and drop the oldest sealed branches when the
+hard byte budget requires it. Removing the duplicate base storage and adding a
+compression codec are later checkpoints.
+
+### Current implementation
+
 The runtime replica consists of durable accepted and pending state plus a
 session-only redo stack:
 
@@ -295,11 +304,59 @@ errors are ephemeral. Logout resets both history stacks in memory and awaits an
 ordered browser-storage clear; saves queued by the previous login are
 invalidated before the clear. There is no durable inbox.
 
-The user-visible change journal decided on 2026-07-31 does not change that rule:
-it is a separate durable record that is never replayed into `current` and is
-never a replica input. Its contract is in
-[design-ledger.md](./design-ledger.md#change-history-and-restore) and it is not
-implemented yet.
+### Accepted journal-driven replica
+
+The target change journal is the durable source of accepted server state, not a
+second copy beside it. During the migration the compatibility base may still be
+present, but it is reconstructed from the same journal branch. That branch has
+one checkpoint followed by compact canonical transitions:
+
+```ts
+type ActiveJournalBranch = {
+  checkpoint: TDataStore
+  points: CompactCanonicalTransition[]
+}
+
+base = replay(checkpoint, points)
+current = materializeCommands(base, outbox)
+```
+
+The transition is a state delta, not a ZenMoney wire response and not a restore
+intent: it contains only changed fields, deletions, and the new server cursor.
+Its required law is `applyPatch(before, transition) === after`. The journal is
+compacted only at a canonical-sync boundary: replaying discarded points creates
+a newer checkpoint, and only points before that checkpoint become unavailable.
+
+The live outbox remains separate. It is the temporary undo/redo tail after the
+last server point, is persisted as before, and is never duplicated into the
+journal. A successful push drops its acknowledged prefix and appends the one
+canonical server point returned by ZenMoney; a pull adds a point only when it
+changes accepted state. An empty pull creates no history point.
+
+On load, replay the active branch, validate its final reconstructed `base`, and
+then replay the outbox. Per-sync validation is deliberately not on the hot
+path. Historical points are replayed and validated lazily when opened. Each
+point caches `unknown`, `valid`, or `invalid` with the validator version; a
+result from an older validator version is treated as `unknown`, not as a
+failure. An invalid point remains visible with its reason but cannot be
+restored.
+
+A user-requested full reload starts a new active branch from the complete
+server state and seals the former branch. A sealed branch remains available for
+read-only time travel and, after validation, as a restore target; it is never
+replayed into the live replica. If active-branch reconstruction or validation
+fails, retain the old branch, obtain a complete server checkpoint, and replay
+the preserved outbox over it. Opening a server point is always isolated
+read-only time travel; only an explicit restore issues an ordinary command
+against live `current`.
+
+Retention applies both an age and a byte budget. The initial policy is a
+three-month maximum age, a 50 MiB soft threshold for compaction/compression,
+and a 100 MiB hard journal budget. These are deliberately tunable defaults;
+real-account measurement can adjust them later without changing the model. Each
+branch may compact only on its own server points. The journal, its validation
+metadata, and its branches need a versioned persistence format and are cleared
+together with local data on logout.
 
 Any future replica implementation must reuse the pure outbox operations. Two
 implementations of append, undo, redo, or replay rules are not acceptable.

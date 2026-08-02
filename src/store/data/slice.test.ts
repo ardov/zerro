@@ -4,7 +4,12 @@ import {
   makeAccount,
   makeTransaction,
 } from 'zerro-core/support/testing/zenmoneyTestData'
-import type { TCommand } from 'zerro-core/replica'
+import {
+  createJournalBranch,
+  journalPersistenceVersion,
+  type TCommand,
+  type TPersistedJournal,
+} from 'zerro-core/replica'
 import {
   getChangedNum,
   getLastChangeTime,
@@ -17,6 +22,7 @@ import reducer, {
   rebaseServerInbox,
   receiveServerPatch,
   redoClientCommand,
+  restorePersistedJournal,
   resetData,
   restorePersistedReplica,
   undoClientCommand,
@@ -289,6 +295,124 @@ describe('command outbox boundaries', () => {
     )
     expect(stale.current.account.cash.title).toBe('Cash')
     expect(stale.outbox).toEqual([])
+  })
+
+  it('creates a journal checkpoint from legacy base data', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+
+    const restored = reducer(
+      base,
+      restorePersistedJournal({ preserveStored: false })
+    )
+
+    expect(restored.journal).toMatchObject({
+      version: journalPersistenceVersion,
+      activeBranchId: 'main',
+    })
+    expect(restored.journal?.branches[0].checkpoint).toEqual(restored.base)
+    expect(restored.journalPersistenceBlocked).toBe(false)
+  })
+
+  it('appends a canonical server point after journal initialization', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+    const initialized = reducer(
+      base,
+      restorePersistedJournal({ preserveStored: false })
+    )
+    const rebased = applyServerPatch(initialized, {
+      serverTimestamp: 101,
+      account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+    })
+
+    expect(rebased.journal?.branches[0].points).toHaveLength(1)
+    expect(rebased.journal?.branches[0].points[0].id).toBe('server:101')
+    expect(rebased.journal?.branches[0].serverTimestamp).toBe(101)
+  })
+
+  it('replays a persisted journal as the accepted base', () => {
+    const checkpoint = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    }).base
+    const persisted: TPersistedJournal = {
+      version: journalPersistenceVersion,
+      activeBranchId: 'main',
+      branches: [
+        {
+          ...createJournalBranch('main', checkpoint),
+          serverTimestamp: 101,
+          points: [
+            {
+              id: 'server:101',
+              transition: {
+                serverTimestamp: 101,
+                upsert: {
+                  account: [{ id: 'cash', fields: { title: 'Wallet' } }],
+                },
+              },
+              validation: { kind: 'unknown' },
+            },
+          ],
+        },
+      ],
+    }
+    const loaded = reducer(
+      applyServerPatch(undefined, { serverTimestamp: 0 }),
+      restorePersistedJournal({ journal: persisted, preserveStored: false })
+    )
+
+    expect(loaded.base.serverTimestamp).toBe(101)
+    expect(loaded.base.account.cash.title).toBe('Wallet')
+    expect(loaded.current).toEqual(loaded.base)
+  })
+
+  it('quarantines an invalid journal fallback without losing the raw base', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+
+    const restored = reducer(
+      base,
+      restorePersistedJournal({ preserveStored: true })
+    )
+
+    expect(restored.base.account.cash.title).toBe('Cash')
+    expect(restored.journalPersistenceBlocked).toBe(true)
+  })
+
+  it('starts a sealed-history branch on a full server reload', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+    const initialized = reducer(
+      base,
+      restorePersistedJournal({ preserveStored: false })
+    )
+    const pending = reducer(
+      initialized,
+      appendClientCommand(makeAccountEntry('Wallet', 10))
+    )
+
+    const reloaded = applyServerPatch(pending, {
+      fullReload: true,
+      serverTimestamp: 200,
+      account: [makeAccount({ id: 'cash', title: 'Server Cash' })],
+    })
+
+    expect(reloaded.journal?.branches).toHaveLength(2)
+    expect(reloaded.journal?.activeBranchId).toBe('reload:200')
+    expect(reloaded.journal?.branches[0].id).toBe('main')
+    expect(reloaded.base.account.cash.title).toBe('Server Cash')
+    expect(reloaded.current.account.cash.title).toBe('Wallet')
+    expect(reloaded.outbox).toHaveLength(1)
   })
 
   it('clears both history stacks when data resets on logout', () => {

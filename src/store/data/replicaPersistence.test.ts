@@ -1,21 +1,29 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-const { clearStorageMock, saveReplicaStateMock } = vi.hoisted(() => ({
-  clearStorageMock: vi.fn().mockResolvedValue(undefined),
-  saveReplicaStateMock: vi.fn().mockResolvedValue(undefined),
-}))
+const { clearStorageMock, saveJournalStateMock, saveReplicaStateMock } =
+  vi.hoisted(() => ({
+    clearStorageMock: vi.fn().mockResolvedValue(undefined),
+    saveJournalStateMock: vi.fn().mockResolvedValue(undefined),
+    saveReplicaStateMock: vi.fn().mockResolvedValue(undefined),
+  }))
 
 vi.mock('6-shared/api/localStore', () => ({
   clearStorage: clearStorageMock,
+  saveJournalState: saveJournalStateMock,
   saveReplicaState: saveReplicaStateMock,
 }))
 
 import { makeStore } from 'zerro-core/support/testing/zenmoneyTestData'
-import type { TCommand } from 'zerro-core/replica'
+import {
+  createJournalBranch,
+  journalPersistenceVersion,
+  type TCommand,
+} from 'zerro-core/replica'
 import { patchTransactionsPage } from '../view'
 import { appendClientCommand } from './slice'
 import {
   clearPersistedLocalData,
+  getPersistedJournal,
   getPersistedReplica,
   replicaPersistenceMiddleware,
 } from './replicaPersistence'
@@ -30,6 +38,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
   clearStorageMock.mockClear()
   saveReplicaStateMock.mockClear()
+  saveJournalStateMock.mockClear()
 })
 
 describe('replica persistence snapshot', () => {
@@ -49,6 +58,59 @@ describe('replica persistence snapshot', () => {
       baseServerTimestamp: 100,
       outbox: [entry],
     })
+  })
+
+  it('stores the accepted journal unless it is quarantined', () => {
+    const base = makeStore({ serverTimestamp: 100 })
+    const journal = {
+      version: journalPersistenceVersion,
+      activeBranchId: 'main',
+      branches: [createJournalBranch('main', base)],
+    }
+    const state = {
+      data: {
+        base,
+        current: base,
+        outbox: [],
+        journal,
+        journalPersistenceBlocked: false,
+      },
+    }
+
+    expect(getPersistedJournal(state)).toEqual(journal)
+    expect(
+      getPersistedJournal({
+        data: { ...state.data, journalPersistenceBlocked: true },
+      })
+    ).toBeUndefined()
+  })
+
+  it('queues journal persistence alongside a replica mutation', async () => {
+    const current = makeStore({ serverTimestamp: 100 })
+    const journal = {
+      version: journalPersistenceVersion,
+      activeBranchId: 'main',
+      branches: [createJournalBranch('main', current)],
+    }
+    const state = {
+      data: {
+        base: current,
+        current,
+        outbox: [entry],
+        journal,
+        journalPersistenceBlocked: false,
+      },
+    }
+    const invoke = (replicaPersistenceMiddleware as any)({
+      getState: () => state,
+      dispatch: vi.fn(),
+    })(vi.fn(nextAction => nextAction))
+
+    invoke(appendClientCommand(entry))
+
+    await vi.waitFor(() =>
+      expect(saveJournalStateMock).toHaveBeenCalledWith(journal)
+    )
   })
 
   it('queues a browser persistence write after a command', async () => {
