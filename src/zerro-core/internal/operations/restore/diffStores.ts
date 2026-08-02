@@ -67,6 +67,7 @@ const entityRows: readonly TEntityRow[] = [
     key: 'account',
     writableFields: accountWritableFields,
     removal: 'deletion',
+    skip: row => row.type === AccountType.Debt,
     // ZenMoney's debt account is a protected singleton: deletion is a server
     // no-op, so predicting its removal would make current lie until sync.
     skipRemoval: row => row.type === AccountType.Debt,
@@ -196,6 +197,8 @@ export function buildRestorePlan(
   const deletion: TDeletionIntent[] = []
   const mappings: TRestoreIdMappings = {}
 
+  seedDebtAccountMapping(current, desired, mappings)
+
   entityRows.forEach(row => {
     if (!selectedKeys.has(row.key)) return
 
@@ -231,6 +234,21 @@ export function buildRestorePlan(
     // keep. Immutable transaction creation time deliberately breaks this match.
     activeDesired.forEach(rawDesired => {
       if (isAbsent(row, rawDesired)) return
+      const desiredId = String(rawDesired.id)
+      const preMappedId = actualByDesired[desiredId]
+      if (preMappedId !== undefined) {
+        const preMappedCurrent = currentById[preMappedId]
+        if (
+          preMappedCurrent &&
+          !isSkipped(row, preMappedCurrent) &&
+          !isAbsent(row, preMappedCurrent) &&
+          participates(scope, row, preMappedCurrent, rawDesired)
+        ) {
+          consumedCurrent.add(String(preMappedCurrent.id))
+          mappedDesired.add(desiredId)
+        }
+        return
+      }
       const desiredEntity = remapEntity(row, rawDesired, mappings)
       const currentEntity = currentById[rawDesired.id]
       if (
@@ -306,6 +324,24 @@ export function buildRestorePlan(
 
   if (deletion.length) patch.deletion = deletion
   return { patch, mappings }
+}
+
+function seedDebtAccountMapping(
+  current: TDataStore,
+  desired: TDataStore,
+  mappings: TRestoreIdMappings
+): void {
+  const currentDebt = Object.values(current.account).filter(
+    account => account.type === AccountType.Debt
+  )
+  const desiredDebt = Object.values(desired.account).filter(
+    account => account.type === AccountType.Debt
+  )
+  if (currentDebt.length !== 1 || desiredDebt.length !== 1) return
+
+  mappings.account = {
+    [String(desiredDebt[0].id)]: currentDebt[0].id,
+  }
 }
 
 /** Preview-safe patch form retained for focused internal callers and tests. */

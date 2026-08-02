@@ -81,12 +81,17 @@ function hasUniqueRows(backup: TFullBackupWire): boolean {
     hasUniqueIds(backup.user) &&
     hasUniqueIds(backup.merchant) &&
     hasUniqueIds(backup.account) &&
+    hasExactlyOneDebtAccount(backup.account) &&
     hasUniqueIds(backup.tag) &&
     hasUniqueBudgetIdentities(backup) &&
     hasUniqueIds(backup.reminder) &&
     hasUniqueIds(backup.reminderMarker) &&
     hasUniqueIds(backup.transaction)
   )
+}
+
+function hasExactlyOneDebtAccount(rows: TFullBackupWire['account']): boolean {
+  return rows.filter(row => row.type === 'debt').length === 1
 }
 
 function hasUniqueIds<TRow extends { id: string | number }>(

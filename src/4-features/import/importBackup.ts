@@ -13,7 +13,11 @@ import type { AppThunk } from 'store'
 import { core } from 'zerro-core/redux'
 
 export type TImportBackupResult =
-  { ok: true; applied: boolean } | { ok: false; reason: 'incompatibleBackup' }
+  | { ok: true; applied: boolean }
+  | {
+      ok: false
+      reason: 'incompatibleBackup' | 'invalidCurrentState'
+    }
 
 export function checkBackupCompatibility(
   backup: TDataStore

@@ -1,11 +1,13 @@
 import {
+  AccountType,
   getRootUser,
   type TDataStore,
   type TInstrumentId,
 } from '../../domain/zenmoney'
 
 export type TBackupCompatibilityResult =
-  { ok: true } | { ok: false; reason: 'incompatibleBackup' }
+  | { ok: true }
+  | { ok: false; reason: 'incompatibleBackup' | 'invalidCurrentState' }
 
 /**
  * Checks whether a structurally valid full backup can be restored into this
@@ -17,6 +19,20 @@ export function checkBackupCompatibility(
   current: TDataStore,
   backup: TDataStore
 ): TBackupCompatibilityResult {
+  const currentDebtAccounts = Object.values(current.account).filter(
+    account => account.type === AccountType.Debt
+  )
+  if (currentDebtAccounts.length !== 1) {
+    return { ok: false, reason: 'invalidCurrentState' }
+  }
+
+  const backupDebtAccounts = Object.values(backup.account).filter(
+    account => account.type === AccountType.Debt
+  )
+  if (backupDebtAccounts.length !== 1) {
+    return { ok: false, reason: 'incompatibleBackup' }
+  }
+
   const currentRoot = getRootUser(current.user)
   const backupRoot = getRootUser(backup.user)
   if (!currentRoot || !backupRoot || currentRoot.id !== backupRoot.id) {

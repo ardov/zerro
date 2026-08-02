@@ -28,10 +28,8 @@ import {
 } from '../../internal/domain/zenmoney/entities/reminders'
 import type { TISOMonth } from '../../internal/domain/foundation/primitives'
 import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
-import {
-  buildRestorePlan,
-  type TStoreDiffScope,
-} from '../../internal/operations/restore/diffStores'
+import { buildRestorePlan } from '../../internal/operations/restore/diffStores'
+import { checkBackupCompatibility } from '../../internal/operations/restore/backupCompatibility'
 import type { TTagId } from '../../internal/domain/zenmoney/entities/tags'
 import { selectData } from './state'
 import {
@@ -349,24 +347,28 @@ export function mergeTransactionsAsTransfer(ids: TTransactionId[]): AppThunk {
 }
 
 /**
- * Writes whatever moves the store toward `desired` inside `scope`.
+ * Writes whatever moves the full current store toward `desired`.
  *
  * The diff is recomputed at dispatch time rather than taken from the caller's
  * preview: a background pull may have landed since, and the restore is defined
  * against the store it is applied to.
  */
-export function restoreDataStore(
-  desired: TDataStore,
-  scope?: TStoreDiffScope
-): AppThunk<boolean> {
+export function restoreDataStore(desired: TDataStore): AppThunk<boolean> {
   return (dispatch, getState, extra) =>
-    executeReduxCommandWithStatus(
-      (state, ctx) =>
-        buildRestorePlan(selectData(state), desired, {
-          scope,
-          allocateId: (_key, _desiredId) => ctx.uuid(),
-        }).patch
-    )(dispatch, getState, extra).applied
+    (() => {
+      const compatibility = checkBackupCompatibility(
+        selectData(getState()),
+        desired
+      )
+      if (!compatibility.ok) return false
+
+      return executeReduxCommandWithStatus(
+        (state, ctx) =>
+          buildRestorePlan(selectData(state), desired, {
+            allocateId: (_key, _desiredId) => ctx.uuid(),
+          }).patch
+      )(dispatch, getState, extra).applied
+    })()
 }
 
 function normalizeEnvelopeSettings(

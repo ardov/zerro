@@ -1,6 +1,7 @@
 # Full backup restore improvement plan
 
-- Status: checkpoints 1–11 shipped; complete-preview UI remains
+- Status: checkpoints 1–11 and debt-singleton restore guard shipped;
+  complete-preview UI remains
 - Updated: 2026-08-02
 - Scope: full-backup validation, semantic reconciliation, id remapping,
   writable entity coverage, deletion cascades, preview, and verification
@@ -44,6 +45,9 @@ JSON
 - Restore remains one ordinary command. It enters the outbox, can be undone
   before sync, is never pushed automatically, and is recalculated at confirm
   time instead of reusing the preview patch.
+- Restore is always a complete point-in-time snapshot. There is no user-facing
+  scoped restore or partial merge mode; the backup's full state is the desired
+  state to reconcile.
 - A desired entity whose old id is no longer a live same-id entity is never
   created under that old id. ZenMoney hard deletion leaves a permanent
   tombstone, and the local store does not retain enough tombstone history to
@@ -402,17 +406,23 @@ restore from emitting a cleanup update.
 
 ### 6.1 Debt account
 
-Debt is a protected singleton:
+Debt is a protected singleton and a required account invariant:
 
-- map a desired debt account to the existing current debt account regardless of
-  id before general account matching;
-- never create a second debt account;
-- never claim an extra current debt account will be deleted, because the server
-  silently ignores deletion;
-- surface an impossible removal as `unsupported` in preview.
+- a complete backup must contain exactly one account with `type: Debt`; zero or
+  multiple debt rows make the file `notABackup`;
+- the current replica must also contain exactly one debt account at restore
+  time; zero or multiple rows are an invalid current state and restore must
+  stop before preview or command issue;
+- map the backup debt id to the current debt id before general account
+  matching, then apply that mapping to every restored reference;
+- never create, update, or delete the debt account, and never include it in the
+  user-facing restore summary. Its id, title, balance, instrument, and other
+  account fields are container details and are ignored.
 
-Creating a first debt account and the exact set of legal updates require
-separate API evidence before implementation.
+The server does not expose a supported operation for creating or deleting the
+debt singleton. If the current replica violates the invariant, the eventual
+repair flow should offer the existing full **Reload data** action, which drops
+unsaved local changes and history before pulling the canonical server state.
 
 ## 7. Predict deletion cascades locally
 
@@ -624,6 +634,14 @@ modes.
   canonical response fixture.
 - `sync-api.md`: preserve new account/tag/merchant probe results.
 - `notes.md`: advance the checkpoint list as commits land.
+
+### 12.1 Deferred local-state validation
+
+Restore-time validation of the current debt singleton is part of the restore
+checkpoint. Validation while loading persisted local state is deliberately
+deferred: add it later at the persistence/load boundary and show the existing
+full **Reload data** modal when the invariant is broken. Do not broaden the
+current restore implementation to repair local state during startup.
 
 Do not rewrite those contracts ahead of implementation except where a settled
 decision already differs from the current wording. The plan is the future work;

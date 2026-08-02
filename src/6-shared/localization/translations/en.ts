@@ -467,6 +467,10 @@ export const en: typeof ru = {
     importError_notABackup: 'This does not look like a Zerro backup',
     importError_incompatibleBackup:
       'This backup belongs to a different account or needs unavailable reference data',
+    invalidCurrentStateTitle: 'Local data cannot be restored safely',
+    invalidCurrentStateDescription:
+      'Your local data is inconsistent. Reloading data will discard unsynchronized changes and local history, then download the canonical state again.',
+    invalidCurrentStateConfirm: 'Reload data',
     entity_userSettings: 'User settings',
     entity_account: 'Accounts',
     entity_merchant: 'Merchants',

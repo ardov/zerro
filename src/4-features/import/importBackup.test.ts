@@ -6,6 +6,7 @@ import { appendClientCommand } from 'store/data'
 import { makeTestRootState } from 'store/testing'
 import { applyPatch } from 'zerro-core/internal/domain/zenmoney'
 import { materializeCommand } from 'zerro-core/internal/operations/materialization'
+import { AccountType } from 'zerro-core/internal/domain/zenmoney/entities/accounts'
 import {
   makeAccount,
   makeInstrument,
@@ -41,6 +42,7 @@ const backupCollectionKeys = [
 ]
 
 function makeSnapshot(patch: Partial<TDataStore> = {}): TDataStore {
+  const { account, ...rest } = patch
   return makeStore({
     instrument: {
       1: makeInstrument({ id: 1 }),
@@ -50,7 +52,11 @@ function makeSnapshot(patch: Partial<TDataStore> = {}): TDataStore {
       1: { id: 1, title: 'United States', currency: 1, domain: 'us' },
     },
     user: { 1: rootUser },
-    ...patch,
+    ...rest,
+    account: {
+      debt: makeAccount({ id: 'debt', type: AccountType.Debt, title: 'Debt' }),
+      ...(account ?? {}),
+    },
   })
 }
 
@@ -195,6 +201,28 @@ describe('parseFullBackup', () => {
         reason: 'notABackup',
       })
     })
+  })
+
+  it('requires exactly one debt account in a complete backup', () => {
+    const complete = JSON.parse(toBackupFile(makeSnapshot())) as Record<
+      string,
+      unknown
+    >
+    const accounts = complete.account as Array<Record<string, unknown>>
+    const debt = accounts.find(account => account.type === 'debt')
+    if (!debt) throw new Error('test fixture must contain a debt account')
+
+    for (const account of [
+      accounts.filter(account => account.type !== 'debt'),
+      [...accounts, { ...debt, id: 'debt-2' }],
+    ]) {
+      expect(parseFullBackup(JSON.stringify({ ...complete, account }))).toEqual(
+        {
+          ok: false,
+          reason: 'notABackup',
+        }
+      )
+    }
   })
 })
 
@@ -350,5 +378,32 @@ describe('importBackup', () => {
     expect(
       runner.dispatch(checkBackupCompatibility(dictionaryMismatch))
     ).toEqual({ ok: false, reason: 'incompatibleBackup' })
+  })
+
+  it('rejects a current replica without exactly one debt singleton', () => {
+    const currentStates = [
+      makeStore({ ...makeSnapshot(), account: {} }),
+      makeStore({
+        ...makeSnapshot(),
+        account: {
+          firstDebt: makeAccount({ id: 'firstDebt', type: AccountType.Debt }),
+          secondDebt: makeAccount({ id: 'secondDebt', type: AccountType.Debt }),
+        },
+      }),
+    ]
+
+    currentStates.forEach(current => {
+      const runner = makeThunkRunner(makeTestRootState(current))
+
+      expect(runner.dispatch(checkBackupCompatibility(backup))).toEqual({
+        ok: false,
+        reason: 'invalidCurrentState',
+      })
+      expect(runner.dispatch(importBackup(backup))).toEqual({
+        ok: false,
+        reason: 'invalidCurrentState',
+      })
+      expect(runner.commands()).toEqual([])
+    })
   })
 })

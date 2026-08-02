@@ -57,6 +57,50 @@ describe('diffStores', () => {
     })
   })
 
+  it('maps the backup debt singleton to the current id and ignores its fields', () => {
+    const current = makeSnapshot({
+      account: {
+        currentDebt: makeAccount({
+          id: 'currentDebt',
+          type: AccountType.Debt,
+          title: 'Current debt container',
+          balance: 10,
+        }),
+        cash: makeAccount({ id: 'cash' }),
+      },
+      transaction: {
+        debtTransfer: makeTransaction({
+          id: 'debtTransfer',
+          incomeAccount: 'currentDebt',
+          outcomeAccount: 'cash',
+        }),
+      },
+    })
+    const desired = makeSnapshot({
+      account: {
+        backupDebt: makeAccount({
+          id: 'backupDebt',
+          type: AccountType.Debt,
+          title: 'A different title',
+          balance: 999,
+        }),
+        cash: makeAccount({ id: 'cash' }),
+      },
+      transaction: {
+        debtTransfer: makeTransaction({
+          id: 'debtTransfer',
+          incomeAccount: 'backupDebt',
+          outcomeAccount: 'cash',
+        }),
+      },
+    })
+
+    const plan = buildRestorePlan(current, desired)
+
+    expect(plan.mappings.account).toMatchObject({ backupDebt: 'currentDebt' })
+    expect(plan.patch).toEqual({})
+  })
+
   it('restores root-user currency and monthStartDay', () => {
     const current = makeSnapshot({
       user: {

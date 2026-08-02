@@ -17,10 +17,14 @@ import {
 } from '@mui/material'
 import { UploadIcon } from '6-shared/ui/Icons'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
+import { track } from '6-shared/analytics'
 import { parseFullBackup } from '6-shared/api/zm-adapter'
 import type { TDataStore } from '6-shared/types'
 import { useAppDispatch } from 'store'
+import { resetData } from 'store/data'
 import type { core } from 'zerro-core/redux'
+import { clearLocalData } from '4-features/localData'
+import { useConfirm } from '6-shared/ui/SmartConfirm'
 
 import {
   checkBackupCompatibility,
@@ -57,6 +61,19 @@ export function ImportBackupItem() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [pending, setPending] = useState<TPending | null>(null)
 
+  const reloadData = useCallback(async () => {
+    track('local_data_reload_requested', {})
+    dispatch(resetData())
+    await dispatch(clearLocalData())
+    window.location.reload()
+  }, [dispatch])
+  const confirmReload = useConfirm({
+    title: t('invalidCurrentStateTitle'),
+    description: t('invalidCurrentStateDescription'),
+    okText: t('invalidCurrentStateConfirm'),
+    onOk: reloadData,
+  })
+
   const handleFile = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0]
@@ -80,6 +97,10 @@ export function ImportBackupItem() {
 
       const compatibility = dispatch(checkBackupCompatibility(parsed.store))
       if (!compatibility.ok) {
+        if (compatibility.reason === 'invalidCurrentState') {
+          confirmReload()
+          return
+        }
         snackbar({ message: t(`importError_${compatibility.reason}`) })
         return
       }
@@ -91,7 +112,7 @@ export function ImportBackupItem() {
       }
       setPending({ store: parsed.store, summary })
     },
-    [dispatch, snackbar, t]
+    [confirmReload, dispatch, snackbar, t]
   )
 
   const handleConfirm = useCallback(() => {
@@ -99,13 +120,17 @@ export function ImportBackupItem() {
     const result = dispatch(importBackup(pending.store))
     setPending(null)
     if (!result.ok) {
+      if (result.reason === 'invalidCurrentState') {
+        confirmReload()
+        return
+      }
       snackbar({ message: t(`importError_${result.reason}`) })
     } else {
       snackbar({
         message: t(result.applied ? 'importDone' : 'importNoChanges'),
       })
     }
-  }, [dispatch, pending, snackbar, t])
+  }, [confirmReload, dispatch, pending, snackbar, t])
 
   return (
     <>

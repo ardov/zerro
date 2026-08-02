@@ -3,7 +3,6 @@ import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
 import {
   diffStores,
   summarizeStoreDiff,
-  type TStoreDiffScope,
   type TStoreDiffSummary,
 } from '../../internal/operations/restore/diffStores'
 import {
@@ -19,11 +18,10 @@ import { selectData } from './state'
  */
 export function preview(
   state: RootState,
-  desired: TDataStore,
-  scope?: TStoreDiffScope
+  desired: TDataStore
 ): TStoreDiffSummary {
   const current = selectData(state)
-  return summarizeStoreDiff(current, diffStores(current, desired, scope))
+  return summarizeStoreDiff(current, diffStores(current, desired))
 }
 
 /** Validates a decoded backup against the currently signed-in account. */
@@ -37,7 +35,6 @@ export function checkBackupCompatibility(
 export { restoreDataStore as apply } from './commands'
 export type {
   TStoreDiffCounts,
-  TStoreDiffScope,
   TStoreDiffSummary,
 } from '../../internal/operations/restore/diffStores'
 export type { TBackupCompatibilityResult }
