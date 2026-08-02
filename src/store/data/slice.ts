@@ -1,5 +1,5 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, current } from '@reduxjs/toolkit'
 import {
   acceptCanonicalPatch,
   appendCanonicalJournalPoint,
@@ -8,6 +8,7 @@ import {
   applyOutboxCommand,
   createJournalBranch,
   createEmptyDataStore,
+  dataStoreValidatorVersion,
   defaultJournalRetentionPolicy,
   redoOutbox,
   replayJournalBranch,
@@ -199,12 +200,20 @@ const { reducer, actions } = createSlice({
         }: PayloadAction<{
           journal?: TPersistedJournal
           preserveStored: boolean
+          recoveryReason?: string
         }>
       ) => {
         if (!payload.journal) {
           state.journal = createPersistedJournal(state.base)
           const isValid = setJournalValidation(state, state.base)
-          state.journalPersistenceBlocked = payload.preserveStored || !isValid
+          if (payload.recoveryReason) {
+            state.journalRecoveryRequired = true
+            state.journalRecoveryReason = payload.recoveryReason
+          }
+          state.journalPersistenceBlocked =
+            payload.preserveStored ||
+            !isValid ||
+            Boolean(payload.recoveryReason)
           state.current = replayOutbox(state.base, state.outbox)
           return
         }
@@ -300,5 +309,43 @@ function setJournalValidation(state: DataSlice, base: TDataStore): boolean {
   const validation = validateDataStore(base)
   state.journalRecoveryRequired = !validation.ok
   state.journalRecoveryReason = validation.ok ? null : validation.reason
+  if (!validation.ok) {
+    const transactionDiagnostic = getTransactionValidationDiagnostic(
+      base,
+      validation.reason
+    )
+    console.warn('[journal-recovery]', {
+      validatorVersion: dataStoreValidatorVersion,
+      reason: validation.reason,
+      serverTimestamp: base.serverTimestamp,
+      ...transactionDiagnostic,
+    })
+  }
   return validation.ok
+}
+
+function getTransactionValidationDiagnostic(
+  base: TDataStore,
+  reason: string
+): {
+  transactionIndex?: number
+  transactionField?: string
+  transactionId?: string
+  transaction?: TDataStore['transaction'][string]
+} {
+  const match = /^transaction\[(\d+)\]\.([A-Za-z0-9_]+)/.exec(reason)
+  if (!match || !base.transaction || typeof base.transaction !== 'object') {
+    return {}
+  }
+
+  const transactionIndex = Number(match[1])
+  const transaction = Object.values(base.transaction)[transactionIndex]
+  if (!transaction) return { transactionIndex, transactionField: match[2] }
+
+  return {
+    transactionIndex,
+    transactionField: match[2],
+    transactionId: transaction.id,
+    transaction: current(transaction),
+  }
 }

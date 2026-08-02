@@ -169,18 +169,6 @@ export function validateDataStore(
         transaction.outcomeInstrument,
         `transaction[${index}].outcomeInstrument`
       )
-      requireReference(
-        companyIds,
-        transaction.incomeBankID,
-        `transaction[${index}].incomeBankID`,
-        true
-      )
-      requireReference(
-        companyIds,
-        transaction.outcomeBankID,
-        `transaction[${index}].outcomeBankID`,
-        true
-      )
       requireTagReferences(transaction.tag, tagIds, `transaction[${index}].tag`)
       requireReference(
         merchantIds,

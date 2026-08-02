@@ -114,6 +114,8 @@ describe('parseFullBackup', () => {
           id: 'tr',
           incomeAccount: 'acc',
           outcomeAccount: 'acc',
+          incomeBankID: 999,
+          outcomeBankID: 998,
           outcome: 10,
           changed: 7000,
         }),

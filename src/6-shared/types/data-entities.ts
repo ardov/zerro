@@ -65,6 +65,7 @@ export type {
 export type {
   TTransaction,
   TTransactionId,
+  TBankOperationId,
   TZmTransaction,
 } from 'zerro-core/internal/domain/zenmoney'
 export { AccountType } from 'zerro-core/internal/domain/zenmoney'

@@ -164,8 +164,9 @@ any retained valid point. The implementation path is
   at app load, not every response. The shipped domain validator checks the
   root/debt cardinalities, references, and tag-parent cycles; a failure leaves
   the branch intact, raises the session-only `journalRecoveryRequired` flag,
-  and blocks journal persistence until full reload. Validate a historical point
-  only when it is opened or used for restore. A point caches `unknown`, `valid`,
+  and blocks journal persistence until full reload; the global recovery notice
+  offers that action with confirmation. Validate a historical point only when
+  it is opened or used for restore. A point caches `unknown`, `valid`,
   or `invalid` with the validator version; a result from an older validator
   version is `unknown` until checked again. Invalid points stay visible with a
   reason but cannot restore.

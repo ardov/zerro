@@ -335,6 +335,11 @@ be null (`role` and `company` were sent as null). Every 400 was a clean
 | `reminder`       | `id`, `changed`, `user`, `outcomeInstrument`, `outcomeAccount`, `tag`, `merchant`, `payee`, `comment`, `interval`, `step`, `points`, `startDate`, `endDate`                                                                                                                                      | `incomeInstrument: 2`, absent `incomeAccount` copies `outcomeAccount`, `notify: false`                                                                                                |
 | `reminderMarker` | `id`, `changed`, `user`, `outcomeInstrument`, `outcomeAccount`, `outcome`, `tag`, `merchant`, `payee`, `comment`, `date`, `reminder`, `state`                                                                                                                                                    | `incomeInstrument: 2`, absent `incomeAccount` copies `outcomeAccount`, `income: 0`, `notify: false`                                                                                   |
 
+`transaction.incomeBankID` and `transaction.outcomeBankID` are opaque IDs for
+bank operations supplied by a synchronization plugin. They are not references
+to `company` entities and may be non-null even when no matching company row is
+present.
+
 Reminder `income` and `outcome` were deliberately never omitted: the omission
 could have produced the zero-amount 500 shape. That is a safety blind spot, not
 evidence that the fields are optional.

@@ -4,12 +4,14 @@ import { SmartTransactionPreview } from '3-widgets/global/TransactionPreviewDraw
 import { TrContextMenu } from '3-widgets/global/TrContextMenu'
 import { AccountContextMenu } from '3-widgets/global/AccountContextMenu'
 import { SmartEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
+import { JournalRecoveryNotice } from '3-widgets/JournalRecoveryNotice'
 
 export const GlobalWidgets = () => {
   return (
     <>
       {/* Global confirm */}
       <SmartConfirm />
+      <JournalRecoveryNotice />
 
       {/* Global widgets */}
       <SmartTransactionListDrawer />

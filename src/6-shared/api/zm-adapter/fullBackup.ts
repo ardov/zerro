@@ -179,9 +179,7 @@ function hasValidReferences(backup: TFullBackupWire): boolean {
         tagReferences(row.tag) &&
         merchantReference(row.merchant) &&
         (row.reminderMarker === null ||
-          ids.reminderMarker.has(row.reminderMarker)) &&
-        (row.incomeBankID === null || ids.company.has(row.incomeBankID)) &&
-        (row.outcomeBankID === null || ids.company.has(row.outcomeBankID))
+          ids.reminderMarker.has(row.reminderMarker))
     )
   )
 }

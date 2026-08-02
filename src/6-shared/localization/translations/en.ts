@@ -471,6 +471,11 @@ export const en: typeof ru = {
     invalidCurrentStateDescription:
       'Your local data is inconsistent. Reloading data will discard unsynchronized changes and local history, then download the canonical state again.',
     invalidCurrentStateConfirm: 'Reload data',
+    journalRecoveryTitle: 'Local data needs recovery',
+    journalRecoveryDescription:
+      'The accepted server state failed an integrity check. Reloading downloads a complete server state; unsynchronized commands remain queued, and retained history stays available within its limits.',
+    journalRecoveryConfirm: 'Reload data',
+    journalRecoveryDiagnostic: 'Diagnostic',
     entity_userSettings: 'User settings',
     entity_account: 'Accounts',
     entity_merchant: 'Merchants',

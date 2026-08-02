@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   makeAccount,
@@ -427,6 +427,50 @@ describe('command outbox boundaries', () => {
     expect(reloaded.journalRecoveryRequired).toBe(false)
     expect(reloaded.journalRecoveryReason).toBeNull()
     expect(reloaded.journalPersistenceBlocked).toBe(false)
+  })
+
+  it('logs the offending transaction when a transaction reference is invalid', () => {
+    const invalid = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      instrument: [makeInstrument({ id: 1 })],
+      country: [{ id: 1, title: 'United States', currency: 1, domain: null }],
+      user: [makeUser({ id: 1, parent: null, currency: 1 })],
+      account: [
+        makeAccount({ id: 'cash', type: AccountType.Cash }),
+        makeAccount({ id: 'card', type: AccountType.Cash }),
+        makeAccount({ id: 'debt', type: AccountType.Debt }),
+      ],
+      transaction: [
+        makeTransaction({
+          id: 'tr-742',
+          incomeAccount: 'missing-account',
+          incomeBankID: 999,
+        }),
+      ],
+    })
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const flagged = reducer(
+      invalid,
+      restorePersistedJournal({ preserveStored: false })
+    )
+
+    expect(flagged.journalRecoveryReason).toContain(
+      'transaction[0].incomeAccount'
+    )
+    expect(warn).toHaveBeenCalledWith(
+      '[journal-recovery]',
+      expect.objectContaining({
+        transactionField: 'incomeAccount',
+        transactionId: 'tr-742',
+        transaction: expect.objectContaining({
+          id: 'tr-742',
+          incomeBankID: 999,
+          incomeAccount: 'missing-account',
+        }),
+      })
+    )
+    warn.mockRestore()
   })
 
   it('starts a sealed-history branch on a full server reload', () => {

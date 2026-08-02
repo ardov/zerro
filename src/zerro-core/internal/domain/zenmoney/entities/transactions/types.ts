@@ -1,6 +1,5 @@
 import type { EntityPatch } from '../../../foundation/types'
 import type { TAccountId } from '../accounts'
-import type { TCompanyId } from '../companies'
 import type { TInstrumentId } from '../instruments'
 import type { TMerchantId } from '../merchants'
 import type { TMsTime, TISODate, TUnixTime, TUnits } from '../../primitives'
@@ -9,6 +8,9 @@ import type { TTagId } from '../tags'
 import type { TUserId } from '../users'
 
 export type TTransactionId = string
+
+/** Opaque plugin-owned bank-operation ID; it is not a company reference. */
+export type TBankOperationId = number
 
 export type TZmTransaction = {
   id: TTransactionId
@@ -21,11 +23,11 @@ export type TZmTransaction = {
   /** Added as `null` by observed responses; non-null shape is not established. */
   source?: unknown
   qrCode: string | null
-  incomeBankID: TCompanyId | null
+  incomeBankID: TBankOperationId | null
   incomeInstrument: TInstrumentId
   incomeAccount: TAccountId
   income: TUnits
-  outcomeBankID: TCompanyId | null
+  outcomeBankID: TBankOperationId | null
   outcomeInstrument: TInstrumentId
   outcomeAccount: TAccountId
   outcome: TUnits

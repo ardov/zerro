@@ -160,4 +160,43 @@ describe('loadLocalData', () => {
     expect(dataState.base.account.cash.title).toBe('Accepted')
     expect(dataState.journal?.branches[0].points).toHaveLength(1)
   })
+
+  it('surfaces the parser reason when persisted journal storage is malformed', async () => {
+    getLocalDataMock.mockResolvedValue({ serverTimestamp: 100 })
+    getJournalStateMock.mockResolvedValue({
+      version: journalPersistenceVersion,
+      activeBranchId: 'main',
+      branches: [],
+    })
+    getReplicaStateMock.mockResolvedValue(undefined)
+
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    let dataState = reducer(undefined, { type: 'test/init' })
+    const dispatch: any = (action: any) => {
+      if (typeof action === 'function') {
+        return action(dispatch, () => ({ data: dataState }), undefined)
+      }
+      dataState = reducer(dataState, action)
+      return action
+    }
+
+    await loadLocalData()(
+      dispatch,
+      () => ({ data: dataState }) as any,
+      undefined
+    )
+
+    expect(dataState.journalRecoveryRequired).toBe(true)
+    expect(dataState.journalRecoveryReason).toContain(
+      'branches must be non-empty'
+    )
+    expect(warn).toHaveBeenCalledWith(
+      '[journal-recovery]',
+      expect.objectContaining({
+        source: 'persisted-journal-parser',
+        reason: expect.stringContaining('branches must be non-empty'),
+      })
+    )
+    warn.mockRestore()
+  })
 })

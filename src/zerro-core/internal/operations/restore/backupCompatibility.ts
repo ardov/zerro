@@ -70,8 +70,6 @@ export function checkBackupCompatibility(
       if (transaction.opOutcomeInstrument !== null) {
         requiredInstruments.add(transaction.opOutcomeInstrument)
       }
-      addCompany(transaction.incomeBankID)
-      addCompany(transaction.outcomeBankID)
     })
 
   if (

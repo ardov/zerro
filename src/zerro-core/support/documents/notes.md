@@ -109,7 +109,11 @@ branch from a complete server snapshot and preserves the previous branches for
 read-only history. Canonical boundaries now apply the three-month age policy
 and enforce the hard budget by pruning the oldest sealed branches; the soft
 threshold is reported by the retention helper as a compression signal, but no
-codec is shipped yet.
+codec is shipped yet. `JournalRecoveryNotice` now surfaces the recovery state
+with a confirmed full-reload action. Transaction `incomeBankID` and
+`outcomeBankID` are opaque synchronization-plugin operation IDs, so neither
+the journal validator nor backup compatibility treats them as `company`
+references.
 
 1. ~~`diffStores(current, desired, scope) -> TIntentPatch` plus backup
    import.~~ Shipped 2026-08-01. The internal `buildRestorePlan` first maps
@@ -128,7 +132,7 @@ codec is shipped yet.
    [open-decisions.md](../../../../docs/open-decisions.md#6-retention-budget-for-the-change-log).
 3. Compatibility load, canonical append, journal persistence, explicit
    full-reload branch creation, retention pruning, and final-snapshot
-   validation shipped 2026-08-02. Remove the duplicate persisted base, add a
+   validation plus the recovery notice shipped 2026-08-02. Remove the duplicate persisted base, add a
    compression codec for the soft threshold, and add automatic network
    recovery from a malformed persisted journal. Journal storage already joins
    logout clear.

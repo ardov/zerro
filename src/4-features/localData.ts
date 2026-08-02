@@ -61,7 +61,12 @@ function parseJournalOrFallback(journal: unknown) {
     return { journal: parsePersistedJournal(journal), preserveStored: false }
   } catch (error) {
     console.warn('Ignoring invalid persisted Core journal', error)
-    return { preserveStored: true }
+    const reason = error instanceof Error ? error.message : String(error)
+    console.warn('[journal-recovery]', {
+      source: 'persisted-journal-parser',
+      reason,
+    })
+    return { preserveStored: true, recoveryReason: reason }
   }
 }
 
