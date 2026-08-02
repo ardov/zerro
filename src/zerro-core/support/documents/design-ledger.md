@@ -91,10 +91,10 @@ there:
   be accepted, persisted, and materialized even before a UI exposes it.
 - `materializeCommand` and `materializePrimaryCommand` are allowed to diverge:
   the first adds predicted server effects for local `current`, the second stays
-  the transport source. The verified same-account `0.00001` purge is the first
-  case where they do, and it must stay that way — sending the predicted
-  `deletion` instead of the write would make ZenMoney soft-delete rather than
-  purge.
+  the transport source. The purge of a transaction whose amounts are both stored
+  as zero is the first case where they do, and it must stay that way — sending
+  the predicted `deletion` instead of the write would make ZenMoney soft-delete
+  rather than purge.
 - Predicted balances involve no currency conversion, and no future change to the
   rule may introduce one. Each side of a transaction is already denominated in
   its own account's currency, so a cross-currency transfer expresses its rate as

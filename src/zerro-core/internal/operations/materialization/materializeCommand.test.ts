@@ -306,11 +306,12 @@ describe('materializeCommand', () => {
     expect(retry.deletion).toBeUndefined()
   })
 
-  it('does not predict a purge outside the exact verified account shape', () => {
+  it('predicts the purge of a transfer zeroed across two accounts', () => {
     const source = makeTransaction({
       id: 'source',
       incomeAccount: 'cash',
       outcomeAccount: 'card',
+      income: 25,
       outcome: 25,
     })
     const snapshot = makeStore({
@@ -325,10 +326,125 @@ describe('materializeCommand', () => {
       300
     )
 
-    expect(materializeCommand(snapshot, command)).toEqual({
-      transaction: [
-        { ...source, income: 0.00001, outcome: 0.00001, changed: 1001 },
-      ],
+    const patch = materializeCommand(snapshot, command)
+    expect(applyPatch(snapshot, patch).transaction).toEqual({})
+
+    // Transport still carries the write that triggers the purge.
+    expect(materializePrimaryCommand(snapshot, command).transaction).toEqual([
+      { ...source, income: 0.00001, outcome: 0.00001, changed: 1001 },
+    ])
+    expect(
+      materializePrimaryCommand(snapshot, command).deletion
+    ).toBeUndefined()
+  })
+
+  it('predicts the purge of a transaction created with zeroed amounts', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+    const command = issuePatch(
+      snapshot,
+      {
+        transaction: [
+          {
+            id: 'created',
+            date: '2026-01-10',
+            income: 0.00004,
+            incomeInstrument: 1,
+            incomeAccount: 'cash',
+            outcome: 0.00004,
+            outcomeInstrument: 1,
+            outcomeAccount: 'card',
+          },
+        ],
+      },
+      300
+    )
+
+    // The row the create asks for never reaches `current`: the server rounds
+    // both amounts to zero and answers with a tombstone instead.
+    const patch = materializeCommand(snapshot, command)
+    expect(applyPatch(snapshot, patch).transaction).toEqual({})
+
+    // Transport still creates it, because that write is what purges it.
+    expect(
+      materializePrimaryCommand(snapshot, command).transaction
+    ).toMatchObject([{ id: 'created', income: 0.00004, outcome: 0.00004 }])
+  })
+
+  it('keeps a row where only one amount is zeroed', () => {
+    const source = makeTransaction({
+      id: 'source',
+      incomeAccount: 'cash',
+      outcomeAccount: 'card',
+      income: 25,
+      outcome: 25,
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      transaction: { source },
+    })
+    const command = issuePatch(
+      snapshot,
+      { transaction: [{ id: source.id, income: 0.00004, outcome: 0.001 }] },
+      300
+    )
+
+    const patch = materializeCommand(snapshot, command)
+    expect(applyPatch(snapshot, patch).transaction).toEqual({
+      source: { ...source, income: 0.00004, outcome: 0.001, changed: 1001 },
+    })
+  })
+
+  it('keeps a row zeroed only up to the ambiguous rounding boundary', () => {
+    const source = makeTransaction({
+      id: 'source',
+      incomeAccount: 'cash',
+      outcomeAccount: 'cash',
+      income: 25,
+      outcome: 25,
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      transaction: { source },
+    })
+    // At exactly 0.00005 the server stored 0 on one side and 0.0001 on the
+    // other, so the prediction stays out of it and waits for the diff.
+    const command = issuePatch(
+      snapshot,
+      { transaction: [{ id: source.id, income: 0.00005, outcome: 0.00005 }] },
+      300
+    )
+
+    const patch = materializeCommand(snapshot, command)
+    expect(applyPatch(snapshot, patch).transaction).toEqual({
+      source: { ...source, income: 0.00005, outcome: 0.00005, changed: 1001 },
+    })
+  })
+
+  it('keeps a row the server would reject rather than purge', () => {
+    const source = makeTransaction({
+      id: 'source',
+      incomeAccount: 'cash',
+      outcomeAccount: 'card',
+      income: 0,
+      outcome: 25,
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      transaction: { source },
+    })
+    // `income == outcome == 0` is a 400 on the submitted numbers, so nothing
+    // is written and nothing is purged.
+    const command = issuePatch(
+      snapshot,
+      { transaction: [{ id: source.id, outcome: 0 }] },
+      300
+    )
+
+    const patch = materializeCommand(snapshot, command)
+    expect(applyPatch(snapshot, patch).transaction).toEqual({
+      source: { ...source, outcome: 0, changed: 1001 },
     })
   })
 

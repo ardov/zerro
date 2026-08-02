@@ -205,22 +205,46 @@ migration that needs canonical reminders re-read.
   `deletion`-array tombstone. `deleted: true` reached this way is a one-way
   ratchet — no later write, however fresh its `changed`, can resurrect the
   transaction.
-- **Purge by near-zero amount is real, through a different path.** Rewriting
-  an _existing_ transaction's `income` and `outcome` to `0.00001`/`0.00001`
-  (live-verified 2026-07-25, `experiments/zenmoney-api-probe/round5`) makes the
-  server classify the upsert as a deletion: the write response's `deletion[]`
+- **Purge by zeroed amounts is real, through a different path.** Amounts are
+  stored with four decimals, and a transaction whose `income` and `outcome`
+  are _both_ stored as zero is hard-purged: the write response's `deletion[]`
   carries a genuine `{ object: 'transaction', id, stamp, user }` tombstone, and
   a follow-up `forceFetch` pull confirms the row is gone — not
   `deleted: true`, actually absent. This is a distinct code path from the
   direct-`deletion`-entry case above: an upsert can trigger a real hard purge
-  that a `deletion` array entry on the same id cannot. Earlier probing found
-  other amounts in this range persisting (`0.001` did not purge; values down
-  to `0.0004` stayed as ordinary rows) — those results are not retracted, but
-  the two are not yet reconciled by one rule. The verified case specifically
-  had `incomeAccount == outcomeAccount` on both sides; whether magnitude,
-  same-account net effect, or something else is the actual trigger is still
-  open. Do not treat "any near-zero amount purges" as proven beyond the exact
-  case above.
+  that a `deletion` array entry on the same id cannot.
+
+  Round 7 (2026-08-02, `experiments/zenmoney-api-probe/round7`) retired the
+  earlier reading of this, which had only seen a rewrite of an existing row to
+  `0.00001`/`0.00001` with `incomeAccount == outcomeAccount` (round 5,
+  2026-07-25) and left magnitude versus same-account shape open. Neither is the
+  trigger. The purge fires on a create as much as on a rewrite, across two
+  different accounts as much as one, with the debt account on a side, and with
+  or without a merchant and payee. Rounds 7b and 7c then mapped the boundary:
+
+  | sent                | stored            | fate     | round |
+  | ------------------- | ----------------- | -------- | ----- |
+  | `0.00001`/`0.00001` | `0`/`0`           | purged   | 5, 7  |
+  | `0.00004`/`0.00004` | `0`/`0`           | purged   | 7c    |
+  | `0.00004`/`0.001`   | `0`/`0.001`       | survived | 7c    |
+  | `0.00005`/`0.00005` | `0`/`0.0001`      | survived | 7c    |
+  | `0.00009`/`0.00009` | `0.0001`/`0.0001` | survived | 7b    |
+  | `0.0004`, `0.001`   | unchanged         | survived | 5     |
+
+  The mixed row carries the proof: a purged row shows nothing, so only a
+  survivor can demonstrate that `0.00004` really is stored as `0` — and that
+  one zeroed side is not enough.
+
+  `0.00005` is recorded as an observation, not a rule. The same submitted value
+  stored as `0` on the income side and `0.0001` on the outcome side within one
+  write, so the rounding at exactly half is unresolved. Treat only amounts
+  below `0.00005` as unambiguously stored as zero.
+
+  This does not contradict `income == outcome == 0` being rejected: that
+  validation runs on the submitted numbers, before rounding. Sending `0`/`0` is
+  a 400 that writes nothing, while `0.00001`/`0.00001` is an accepted write
+  that then purges.
+
 - A second real purge path is the account-deletion cascade: deleting an
   account hard-purges transactions contained in it (even one created in the
   same request) and emits genuine `deletion[]` tombstones for them.

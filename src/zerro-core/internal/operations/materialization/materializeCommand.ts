@@ -5,7 +5,6 @@ import {
   budgetRequiredFields,
   budgetWritableFields,
   getRootUserId,
-  hasDeletableAmounts,
   intentPatchKeys,
   isSameEntityFieldValue,
   makeAccount,
@@ -200,12 +199,12 @@ function withPredictedEffects(
 }
 
 /**
- * Rule 2: the exact verified permanent-delete write — both amounts at `0.00001`
- * on the same account — makes ZenMoney purge the row and answer with a real
- * tombstone rather than an updated entity. Predicting the removal keeps
- * `current` identical to the state the next canonical diff will confirm.
+ * Rule 2: a write that leaves both amounts stored as zero makes ZenMoney purge
+ * the row and answer with a real tombstone rather than an updated entity.
+ * Predicting the removal keeps `current` identical to the state the next
+ * canonical diff will confirm.
  *
- * The primary patch still carries the exact amount write, because that is what
+ * The primary patch still carries the amount write, because that is what
  * triggers the server-side purge. A `deletion` entry would not:
  * ZenMoney converts a direct transaction deletion into a soft delete instead.
  */
@@ -217,9 +216,7 @@ function withPurgedTransactions(
   const transactions = patch.transaction
   if (!transactions?.length) return patch
 
-  const purged = transactions.filter(entity =>
-    isPurgedByAmounts(snapshot, entity)
-  )
+  const purged = transactions.filter(isPurgedByAmounts)
   if (!purged.length) return patch
 
   const user = requireRootUser(snapshot, 'transaction')
@@ -242,32 +239,31 @@ function withPurgedTransactions(
 }
 
 /**
- * The purge is an effect of this write, so it is predicted only for the exact
- * verified amount and account shape.
+ * ZenMoney stores amounts with four decimals, so anything below half of the
+ * last place is stored as `0`. A row whose income and outcome are both stored
+ * as `0` is purged — on a create as much as on a rewrite, and for any
+ * combination of accounts.
  *
- * A create is never predicted: the purge is verified for rewriting an existing
- * transaction, whether a create behaves the same is untested, and Zerro never
- * issues one. A row already hidden by the read threshold is not re-deleted
- * either — that state is not something this command caused.
+ * The band deliberately stops below the halfway value: `0.00005` was stored as
+ * `0` on one side and `0.0001` on the other within a single write, so only
+ * amounts that round to zero unambiguously predict a purge.
+ *
+ * Both amounts at exactly `0` is the one zeroed shape that does not purge. The
+ * server rejects `income == outcome == 0` with a 400 on the submitted numbers,
+ * before any rounding applies, so that write lands nothing at all.
  */
-function isPurgedByAmounts(
-  snapshot: TDataStore,
-  entity: {
-    id: string
-    income: number
-    outcome: number
-    incomeAccount: string
-    outcomeAccount: string
-  }
-): boolean {
-  const stored = snapshot.transaction[entity.id]
-  if (!stored) return false
-  return (
-    entity.income === 0.00001 &&
-    entity.outcome === 0.00001 &&
-    entity.incomeAccount === entity.outcomeAccount &&
-    !hasDeletableAmounts(stored)
-  )
+const storedAsZeroBelow = 0.00005
+
+function isPurgedByAmounts(entity: {
+  income: number
+  outcome: number
+}): boolean {
+  if (entity.income === 0 && entity.outcome === 0) return false
+  return isStoredAsZero(entity.income) && isStoredAsZero(entity.outcome)
+}
+
+function isStoredAsZero(amount: number): boolean {
+  return Math.abs(amount) < storedAsZeroBelow
 }
 
 function materializeIntentPatch(

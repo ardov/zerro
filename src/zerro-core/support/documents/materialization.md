@@ -1,7 +1,7 @@
 # Materializer rules and cascades
 
 - Status: contract for local predicted effects
-- Updated: 2026-07-31
+- Updated: 2026-08-02
 
 ## Purpose
 
@@ -32,7 +32,7 @@ record of what live probing established.
 | #   | Operation                            | Predicted locally     | Server also does                                |
 | --- | ------------------------------------ | --------------------- | ----------------------------------------------- |
 | 1   | patch on a `deleted` transaction     | implemented (ignore)  | ignores it too (one-way ratchet)                |
-| 2   | verified permanent-delete write      | implemented (purge)   | hard-purges the row, emits a real tombstone     |
+| 2   | write that zeroes both amounts       | implemented (purge)   | hard-purges the row, emits a real tombstone     |
 | 3   | transaction or `startBalance` change | implemented (delta)   | recomputes affected `account.balance`           |
 | 4   | account deletion                     | implemented (purge)   | hard-purges contained transactions              |
 | 5   | transfer touching a deleted account  | implemented (rewrite) | converts to one-sided on the survivor           |
@@ -58,37 +58,49 @@ against an already-deleted transaction (`skipExisting`). Nothing else may
 recreate one under the same id — a hard-deleted id is a permanent tombstone
 server-side, so ids are never reused.
 
-## 2. The verified permanent-delete write purges the row
+## 2. Zeroed amounts purge the row
 
-Writing both amounts of an existing transaction as exactly `0.00001`, with the
-same account on both sides, makes ZenMoney purge the row: the write response
-carries a real
+ZenMoney stores transaction amounts with four decimals, and a row whose `income`
+and `outcome` both land on zero is purged: the write response carries a real
 `{ object: 'transaction', id, stamp, user }` tombstone and a follow-up
-`forceFetch` pull shows the transaction absent — not `deleted: true`, gone. This
-is the exact shape verified by the live probe. Other account combinations and
-other tiny values are not generalized into the rule: earlier probes saw
-`0.0004` and `0.001` persist, and did not isolate whether magnitude or the
-same-account shape triggered the purge.
+`forceFetch` pull shows the transaction absent — not `deleted: true`, gone. The
+trigger is the stored amounts and nothing else. Round 7 verified it on a create
+as well as a rewrite, across two accounts as well as one, and with the debt
+account on a side; the earlier same-account reading of this rule was a property
+of the one fixture that produced it, not a condition.
 
 `materializeCommand` therefore drops the entity from the patch and emits the
 deletion instead. Three properties make this safe:
 
 - **transport is unaffected.** `materializePrimaryCommand` still sends the
-  exact amount upsert, because that write is what triggers the purge. Sending a
+  amount upsert, because that write is what triggers the purge. Sending a
   `deletion` entry instead would only soft-delete the row (see rule 1), so the
   predicted effect must never leak into the request.
 - **undo needs no special case.** Undo drops the last command and replays the
   rest over `base`, which still holds the original full entity, so the predicted
   removal reverses itself.
-- **it fires only for the verified transition.** The prediction applies to an
-  existing visible row written as `0.00001`/`0.00001` on the same account —
-  never on a create, an already-hidden row, or an unverified account shape.
+- **it fires only where rounding is unambiguous.** The prediction reads "stored
+  as zero" as an amount below `0.00005`, because `0.00004` was observed storing
+  as `0` while `0.00005` stored as `0` on one side and `0.0001` on the other
+  within a single write. Amounts from `0.00005` up keep the row and wait for the
+  canonical diff.
 
-Without this rule the verified row survives in `current` until the next sync.
-The read models already hide tiny rows through their own historical threshold,
-but "show deleted transactions" deliberately reveals them and would surface the
-row as a nonsense transfer. Unverified shapes intentionally keep that temporary
-behavior until a canonical response establishes what the server did.
+Both amounts at exactly `0` is the one zeroed shape that is not a purge: the
+server rejects `income == outcome == 0` with a 400 on the submitted numbers,
+before rounding applies, so that write lands nothing at all and the row is left
+alone.
+
+Without this rule a purged row survives in `current` until the next sync. The
+read models already hide zeroed rows through their own historical threshold, but
+"show deleted transactions" deliberately reveals them and would surface the row
+as a nonsense transfer. That threshold (`hasDeletableAmounts`, `< 0.0001`) is
+now strictly wider than anything canonical data can contain: with four stored
+decimals, both amounts under `0.0001` means both are `0`, and such a row is
+purged rather than stored. It stays because it still matches rows this server
+behavior cannot produce — data predating it, and local state that has not been
+through a write. It also settles a latent disagreement: Core decides "active
+transaction" as `!deleted` in some places and as `isDeletedTransaction` in
+others, and on canonical data the two cannot differ.
 
 ## 3. Balances follow transactions and the account base
 
@@ -235,10 +247,14 @@ soft-deleted transaction shapes.
 
 - Server canonicalizations that only normalize a value we already sent:
   negative `outcome` becoming absolute, an instrument mismatch coerced to the
-  account's instrument without FX, decimals kept unrounded. These belong in
-  pre-flight validation and in the wire types, not in predicted state.
+  account's instrument without FX, an amount snapped to the four decimals the
+  server stores. These belong in pre-flight validation and in the wire types,
+  not in predicted state. Rule 2 predicts the one consequence of that snapping
+  that is not cosmetic: a row that lands on zero on both sides stops existing.
 - Anything ZenMoney refuses outright (`income == outcome == 0`, dictionary
-  writes, a second debt account). Rejection is a validation concern.
+  writes, a second debt account). Rejection is a validation concern. The first
+  of those is the boundary of rule 2: the 400 is decided on the submitted
+  numbers, before the rounding that rule 2 predicts.
 - Reminder markers for created reminders: the diff endpoint generates none.
 - Field-level silent drops (dangling `tag` → null, tag self-parent, debt
   `instrument`, marker `state: 'deleted'`). Predicting them would hide a bug

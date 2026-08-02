@@ -66,13 +66,24 @@ export function compareTransactionDates(
  * Historical read-model threshold used to hide effectively empty rows.
  *
  * This is a presentation heuristic, not a general statement about server purge
- * semantics. The exact write shape verified to produce a tombstone is kept
- * separately in the materializer.
+ * semantics; the write shape that produces a tombstone lives in the
+ * materializer.
+ *
+ * Round 7 (2026-08-02) narrowed what the threshold can still match without
+ * making it wrong. The server stores four decimals, so a canonical row with
+ * both amounts under `0.0001` has both amounts at `0` — and such a row is
+ * purged, not stored. Anything this hides is therefore a row the current server
+ * behavior cannot produce: data predating it, or local state that has not been
+ * through a write. Both stay reachable, so the threshold stays.
  */
 const deletableAmount = 0.0001
 
-/** Both amounts are small enough for Zerro to treat the row as hidden. */
-export function hasDeletableAmounts(
+/**
+ * Both amounts are small enough for Zerro to treat the row as hidden. Only
+ * `isDeletedTransaction` needs this: the materializer used to consult it to
+ * avoid re-purging an already-hidden row, and no longer has that condition.
+ */
+function hasDeletableAmounts(
   transaction: Pick<TTransaction, 'income' | 'outcome'>
 ): boolean {
   return (
