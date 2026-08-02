@@ -1,9 +1,9 @@
 # ZenMoney sync API behavior
 
 This document records behavior observed against a disposable ZenMoney account
-in four probe rounds (2026-07-16, 2026-07-19, 2026-07-24, and 2026-07-25). It
-complements the public API documentation where the live endpoint behaves more
-narrowly or exposes additional fields.
+in five probe rounds (2026-07-16, 2026-07-19, 2026-07-24, 2026-07-25, and
+2026-08-01 to 2026-08-02). It complements the public API documentation where
+the live endpoint behaves more narrowly or exposes additional fields.
 
 The reproducible probes and sanitized evidence live under
 [`experiments/zenmoney-api-probe`](../../../../experiments/zenmoney-api-probe/);
