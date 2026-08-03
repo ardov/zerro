@@ -152,6 +152,13 @@ export function getMaterializedOutboxPatches(
 /**
  * Replays the sent command prefix independently from UI `current` and returns
  * the final full primary entities plus surviving deletions for transport.
+ *
+ * An entity born and buried inside the same prefix never reaches the server:
+ * the replay starts from `base`, so an id missing there is one the server has
+ * never seen, and sending its final state would ask ZenMoney to store a row
+ * whose only purpose is to be dead. Both shapes of burial are dropped — the
+ * soft delete of transactions, which is `deleted: true` on the entity itself,
+ * and the real deletion of reminders, which is a `deletion` object.
  */
 export function buildOutboxTransport(
   base: TDataStore,
@@ -166,6 +173,8 @@ export function buildOutboxTransport(
     TDataEntityKey,
     Map<string | number, TDeletionObject>
   >()
+  const isUnknownToServer = (key: TDataEntityKey, id: string | number) =>
+    (base[key] as Record<string | number, unknown>)[id] === undefined
 
   outbox.forEach(command => {
     const patch = materializePrimaryCommand(current, command, sentAt)
@@ -194,16 +203,20 @@ export function buildOutboxTransport(
     if (!ids?.size) return
     const currentById = current[key] as Record<
       string | number,
-      { id: string | number } | undefined
+      { id: string | number; deleted?: boolean } | undefined
     >
     const entities = [...ids].flatMap(id => {
       const entity = currentById[id]
-      return entity ? [entity] : []
+      if (!entity) return []
+      if (entity.deleted && isUnknownToServer(key, id)) return []
+      return [entity]
     })
     if (entities.length) transport[key] = entities as never
   })
 
-  const deletions = [...deleted.values()].flatMap(byId => [...byId.values()])
+  const deletions = [...deleted.values()]
+    .flatMap(byId => [...byId.values()])
+    .filter(item => !isUnknownToServer(item.object, item.id))
   if (deletions.length) transport.deletion = deletions
 
   return Object.keys(transport).length ? transport : undefined

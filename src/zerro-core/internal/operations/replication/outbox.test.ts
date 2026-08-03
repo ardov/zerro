@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   makeAccount,
+  makeReminder,
   makeStore,
   makeTransaction,
   makeUser,
@@ -179,6 +180,83 @@ describe('outbox operations', () => {
     expect(
       replayOutbox(base, undoOutbox([purge], []).outbox).transaction
     ).toEqual(base.transaction)
+  })
+
+  it('omits a locally created transaction that the outbox soft-deletes', () => {
+    const base = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+      transaction: {
+        old: makeTransaction({ id: 'old', changed: 5000, outcome: 25 }),
+      },
+    })
+    const commands = [
+      makeCommand(10, {
+        transaction: [
+          {
+            id: 'new',
+            date: '2026-01-01',
+            incomeInstrument: 1,
+            incomeAccount: 'cash',
+            outcomeInstrument: 1,
+            outcomeAccount: 'cash',
+            outcome: 10,
+          },
+        ],
+      }),
+      makeCommand(20, { transaction: [{ id: 'new', deleted: true }] }),
+      makeCommand(30, { transaction: [{ id: 'old', deleted: true }] }),
+    ]
+
+    // `new` never reached the server, so its tombstone stays local; `old` is a
+    // row ZenMoney already holds and must learn about the soft delete.
+    expect(buildOutboxTransport(base, commands, 100)).toEqual({
+      transaction: [{ ...base.transaction.old, deleted: true, changed: 6000 }],
+    })
+  })
+
+  it('drops a locally created transaction that leaves nothing to send', () => {
+    const base = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+    })
+    const commands = [
+      makeCommand(10, {
+        transaction: [
+          {
+            id: 'new',
+            date: '2026-01-01',
+            incomeInstrument: 1,
+            incomeAccount: 'cash',
+            outcomeInstrument: 1,
+            outcomeAccount: 'cash',
+            outcome: 10,
+          },
+        ],
+      }),
+      makeCommand(20, { transaction: [{ id: 'new', deleted: true }] }),
+    ]
+
+    expect(buildOutboxTransport(base, commands, 100)).toBeUndefined()
+  })
+
+  it('omits the deletion of an entity the outbox itself created', () => {
+    const base = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+      reminder: { old: makeReminder({ id: 'old' }) },
+    })
+    const commands = [
+      makeCommand(10, {
+        reminder: [
+          { id: 'new', incomeAccount: 'cash', outcomeAccount: 'card' },
+        ],
+      }),
+      makeCommand(20, { deletion: [{ id: 'new', object: 'reminder' }] }),
+      makeCommand(30, { deletion: [{ id: 'old', object: 'reminder' }] }),
+    ]
+
+    // A `deletion` object for `new` would name an id the server has never seen.
+    expect(buildOutboxTransport(base, commands, 100)).toEqual({
+      deletion: [{ id: 'old', object: 'reminder', stamp: 100, user: 1 }],
+    })
   })
 
   it('keeps only the final deletion when it follows an entity patch', () => {
