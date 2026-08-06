@@ -496,6 +496,51 @@ describe('history view', () => {
     expect(selectDisplayedData(state).account.cash.title).toBe('Vault')
   })
 
+  it('carries what each row changed, without replaying anything', () => {
+    const checkpoint = makeStore({ serverTimestamp: 1 })
+    const point = makeStore({
+      serverTimestamp: 2,
+      account: { cash: makeAccount({ id: 'cash', title: 'Cash' }) },
+    })
+    const branch = appendCanonicalJournalPoint(
+      createJournalBranch('main', checkpoint),
+      checkpoint,
+      point,
+      'point-2',
+      true
+    )
+    let state = makeTestRootState(point)
+    state.data.journal = {
+      version: journalPersistenceVersion,
+      activeBranchId: 'main',
+      branches: [branch],
+    }
+    state = rootReducer(
+      state,
+      appendClientCommand(makeAccountCommand('Wallet', 10))
+    )
+
+    const rows = selectHistoryRows(state)
+    const local = rows.find(row => row.type === 'local')
+    const journal = rows.find(
+      row => row.type === 'journal' && row.entry.kind === 'sync'
+    )
+    const checkpointRow = rows.find(
+      row => row.type === 'journal' && row.entry.kind === 'checkpoint'
+    )
+
+    expect(local?.type === 'local' && local.summary).toEqual({
+      account: { changed: 1, removed: 0 },
+    })
+    expect(journal?.type === 'journal' && journal.entry.summary).toEqual({
+      account: { changed: 1, removed: 0 },
+    })
+    // A checkpoint is a whole state, not a change, so it has no diff of its own.
+    expect(
+      checkpointRow?.type === 'journal' && checkpointRow.entry.summary
+    ).toBeUndefined()
+  })
+
   it('separates the local stack from the journal with a divider', () => {
     const checkpoint = makeStore({ serverTimestamp: 1 })
     const point = makeStore({

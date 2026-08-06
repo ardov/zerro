@@ -103,7 +103,10 @@ export type TZmDiff = {
 }
 
 // The normalized diff/patch shape is owned by Zerro Core.
-export type { TNormalizedPatch } from 'zerro-core/internal/domain/zenmoney'
+export type {
+  TDataEntityKey,
+  TNormalizedPatch,
+} from 'zerro-core/internal/domain/zenmoney'
 
 export type TZmRequest = TZmDiff & {
   currentClientTimestamp: TUnixTime

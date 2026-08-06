@@ -4,6 +4,10 @@ import {
   type TDataEntityKey,
   type TDataStore,
 } from '../../domain/zenmoney'
+import {
+  summarizeCanonicalTransition,
+  type TChangeSummary,
+} from './changeSummary'
 
 export type TCompactDeletion = {
   object: TDataEntityKey
@@ -49,6 +53,9 @@ export type TJournalHistoryEntry = {
   validation: TJournalValidationStatus
   /** A checkpoint is always shown; only an unpushed sync point may collapse. */
   pushed: boolean
+  /** What this point changed against the one before it. Absent on a
+   * checkpoint, which is a whole state rather than a change. */
+  summary?: TChangeSummary
 }
 
 export type TJournalBranch = {
@@ -251,6 +258,7 @@ export function listJournalHistory(
         point.transition.serverTimestamp ?? branch.serverTimestamp,
       validation: point.validation,
       pushed: point.pushed,
+      summary: summarizeCanonicalTransition(point.transition),
     })),
   ])
 }

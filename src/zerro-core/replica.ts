@@ -59,6 +59,14 @@ export {
 } from './internal/operations/replication/journal'
 
 export {
+  isEmptyChangeSummary,
+  summarizeCanonicalTransition,
+  summarizeNormalizedPatch,
+  type TChangeCounts,
+  type TChangeSummary,
+} from './internal/operations/replication/changeSummary'
+
+export {
   journalPersistenceVersion,
   parsePersistedJournal,
   type TPersistedJournal,

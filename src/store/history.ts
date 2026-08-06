@@ -6,9 +6,12 @@ import {
 import type { RootState } from './rootReducer'
 import { appendClientCommand } from './data/slice'
 import {
+  getMaterializedOutboxPatches,
   replayOutbox,
   replayJournalPoint,
   listJournalHistory,
+  summarizeNormalizedPatch,
+  type TChangeSummary,
   type TCommand,
   type TJournalHistoryEntry,
   type TJournalPointRef,
@@ -115,6 +118,8 @@ export type THistoryRow =
       type: 'local'
       command: TCommand
       point: Extract<THistoryPointRef, { kind: 'local' }>
+      /** What this command writes, once materialized. */
+      summary: TChangeSummary
     }
   | {
       type: 'journal'
@@ -146,17 +151,21 @@ export const selectHistoryEntries = createSelector(
  * durable local outbox (most recent first). This is the whole sync-button
  * preview: it never reaches into journal history. */
 export const selectLiveHistoryRows = createSelector(
-  [selectRedo, selectOutbox],
-  (redo, outbox): THistoryRow[] => {
+  [selectRedo, selectOutbox, selectBase],
+  (redo, outbox, base): THistoryRow[] => {
     const redoRows: THistoryRow[] = redo.map(command => ({
       type: 'redo',
       command,
     }))
+    // Materialized in one pass over the outbox: each command's patch depends
+    // on the state the ones before it left behind.
+    const patches = getMaterializedOutboxPatches(base, outbox)
     const localRows: THistoryRow[] = outbox
       .map((command, index): THistoryRow => ({
         type: 'local',
         command,
         point: { kind: 'local', index },
+        summary: summarizeNormalizedPatch(patches[index] ?? {}),
       }))
       .reverse()
     return [...redoRows, ...localRows]

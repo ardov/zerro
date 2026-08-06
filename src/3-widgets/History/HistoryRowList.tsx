@@ -18,6 +18,7 @@ import {
   type THistoryPointRef,
   type THistoryRow,
 } from 'store/history'
+import { useChangeSummaryText } from './changeSummaryText'
 
 /** Renders the same ordered history list for both the sync-button preview
  * (which only ever receives redo/local rows) and the full panel. */
@@ -57,6 +58,7 @@ function HistoryRowItem({
 }) {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()
+  const summaryText = useChangeSummaryText()
   const point = historyRowPoint(row)
   const isSelected = !!point && !!selected && sameHistoryPoint(point, selected)
 
@@ -112,7 +114,11 @@ function HistoryRowItem({
       <ListItemButton selected={isSelected} onClick={() => onSelect(row.point)}>
         <ListItemText
           primary={t('unnamedChange')}
-          secondary={formatDate(row.command.issuedAt, 'd MMM yyyy, HH:mm')}
+          secondary={secondaryLine(
+            formatDate(row.command.issuedAt, 'd MMM yyyy, HH:mm'),
+            summaryText(row.summary)
+          )}
+          slotProps={{ secondary: { noWrap: true } }}
         />
       </ListItemButton>
     )
@@ -141,10 +147,19 @@ function HistoryRowItem({
             )}
           </Stack>
         }
-        secondary={formatDate(entry.serverTimestamp, 'd MMM yyyy, HH:mm')}
+        secondary={secondaryLine(
+          formatDate(entry.serverTimestamp, 'd MMM yyyy, HH:mm'),
+          summaryText(entry.summary)
+        )}
+        slotProps={{ secondary: { noWrap: true } }}
       />
     </ListItemButton>
   )
+}
+
+/** Date first, then what moved. One line, so the row height never changes. */
+function secondaryLine(date: string, summary: string): string {
+  return summary ? `${date} · ${summary}` : date
 }
 
 function rowKey(row: THistoryRow): string {

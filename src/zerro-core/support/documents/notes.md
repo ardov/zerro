@@ -178,9 +178,18 @@ references.
      closes — see
      [design-ledger.md](./design-ledger.md#change-history-and-restore) for why
      the two are separate states.
-   - **C — diff.** Per-point diff (`compactCanonicalTransition` against the
-     previous point) shown in the row; diff against live state computed on
-     demand in the panel; hidden-data decomposition grouped by envelope.
+   - **C — diff.** ~~Per-point diff (`compactCanonicalTransition` against the
+     previous point) shown in the row~~ — shipped 2026-08-06 as counts per
+     entity type in `internal/operations/replication/changeSummary.ts`: a
+     journal point summarizes its stored transition, an applied local command
+     summarizes its materialized patch, a checkpoint has no diff of its own,
+     and a soft delete counts as a removal rather than an edit. Two parts
+     remain: the diff against live state, computed on demand in the panel, and
+     hidden-data decomposition grouped by envelope. Take the decomposition
+     first — every budget, goal, and envelope edit currently reads as
+     "Напоминания 1", which is true about the ZenMoney row and useless about
+     what the user did, so the counts are misleading exactly where Zerro's own
+     workflow lives.
    - **B — labels.** The inert `Command.label` field, the closed verb union,
      and the ~27 call sites in `runtime/redux/commands.ts` that each know
      their own verb from their own name.

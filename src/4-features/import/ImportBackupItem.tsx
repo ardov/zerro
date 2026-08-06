@@ -16,6 +16,8 @@ import {
   Typography,
 } from '@mui/material'
 import { UploadIcon } from '6-shared/ui/Icons'
+import { entityLabelKeys } from '6-shared/localization/entityLabels'
+import type { TDataEntityKey } from '6-shared/types'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import { track } from '6-shared/analytics'
 import { parseFullBackup } from '6-shared/api/zm-adapter'
@@ -32,21 +34,17 @@ import {
   previewBackup,
 } from './importBackup'
 
-/** Display order of the summary, and the only entity types it can carry. */
-const entityLabels = [
-  ['user', 'entity_userSettings'],
-  ['account', 'entity_account'],
-  ['tag', 'entity_tag'],
-  ['merchant', 'entity_merchant'],
-  ['budget', 'entity_budget'],
-  ['reminder', 'entity_reminder'],
-  ['reminderMarker', 'entity_reminderMarker'],
-  ['transaction', 'entity_transaction'],
-] as const
-
 type TPending = {
   store: TDataStore
   summary: core.restore.TStoreDiffSummary
+}
+
+/** Widens the summary to every entity key so the shared display order can
+ * index it; the keys a restore never writes are simply absent. */
+function summaryByEntity(
+  summary: core.restore.TStoreDiffSummary | undefined
+): Partial<Record<TDataEntityKey, core.restore.TStoreDiffSummary['account']>> {
+  return summary ?? {}
 }
 
 /**
@@ -154,8 +152,10 @@ export function ImportBackupItem() {
         <DialogContent>
           <DialogContentText>{t('importWarning')}</DialogContentText>
           <Stack spacing={0.5} sx={{ mt: 2 }}>
-            {entityLabels.map(([key, labelKey]) => {
-              const counts = pending?.summary[key]
+            {entityLabelKeys.map(([key, labelKey]) => {
+              // A restore never writes reference data, so the tail of the
+              // shared order simply never matches here.
+              const counts = summaryByEntity(pending?.summary)[key]
               if (!counts) return null
               return (
                 <Box
