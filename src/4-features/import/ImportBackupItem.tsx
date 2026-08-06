@@ -17,7 +17,7 @@ import {
 } from '@mui/material'
 import { UploadIcon } from '6-shared/ui/Icons'
 import { entityLabelKeys } from '6-shared/localization/entityLabels'
-import type { TDataEntityKey } from '6-shared/types'
+import type { TChangeSummaryKey } from 'zerro-core/replica'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import { track } from '6-shared/analytics'
 import { parseFullBackup } from '6-shared/api/zm-adapter'
@@ -39,11 +39,13 @@ type TPending = {
   summary: core.restore.TStoreDiffSummary
 }
 
-/** Widens the summary to every entity key so the shared display order can
- * index it; the keys a restore never writes are simply absent. */
+/** Widens the summary to every key the shared display order can hold, so it
+ * can index it; the keys a restore never writes are simply absent. */
 function summaryByEntity(
   summary: core.restore.TStoreDiffSummary | undefined
-): Partial<Record<TDataEntityKey, core.restore.TStoreDiffSummary['account']>> {
+): Partial<
+  Record<TChangeSummaryKey, core.restore.TStoreDiffSummary['account']>
+> {
   return summary ?? {}
 }
 

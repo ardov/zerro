@@ -183,13 +183,15 @@ references.
      entity type in `internal/operations/replication/changeSummary.ts`: a
      journal point summarizes its stored transition, an applied local command
      summarizes its materialized patch, a checkpoint has no diff of its own,
-     and a soft delete counts as a removal rather than an edit. Two parts
-     remain: the diff against live state, computed on demand in the panel, and
-     hidden-data decomposition grouped by envelope. Take the decomposition
-     first — every budget, goal, and envelope edit currently reads as
-     "Напоминания 1", which is true about the ZenMoney row and useless about
-     what the user did, so the counts are misleading exactly where Zerro's own
-     workflow lives.
+     and a soft delete counts as a removal rather than an edit.
+     ~~Hidden-data decomposition~~ followed the same day at the type level: a
+     changed `HiddenDataType` reminder reports as `envelope-budget`, `goal`
+     and the rest, so a budget edit no longer reads as "Напоминания 1". One
+     part remains: the diff against live state, computed on demand in the
+     panel, and with it the key-level decomposition — which envelope moved —
+     which needs the payload as it was before, and therefore a replay the row
+     deliberately does not do (see
+     [design-ledger.md](./design-ledger.md#change-history-and-restore)).
    - **B — labels.** The inert `Command.label` field, the closed verb union,
      and the ~27 call sites in `runtime/redux/commands.ts` that each know
      their own verb from their own name.

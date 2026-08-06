@@ -312,11 +312,17 @@ any retained valid point. The implementation path is
 - Zerro's own state — goals, envelope budgets, envelope metadata, FX rates,
   and the other `HiddenDataType` payloads — lives as JSON in one `reminder`'s
   `comment` per month, so a changed goal reaches the diff as "1 reminder
-  changed" unless it is decomposed. The diff parses a changed hidden-data
-  reminder's `comment` before and after and emits one typed row per changed
-  key — `goal`, `envelope-budget`, `envelope-meta`, `fx-rates`, `tag-order`,
-  `user-settings`, `linked-accounts`, `linked-debtors` — grouped under the
-  envelope they belong to. This is a presentation pass over the existing
+  changed" unless it is decomposed. Decomposition happens at two levels, split
+  2026-08-06 by what each level costs. The **type** is readable from the
+  changed comment alone, so a list row reports `goal`, `envelope-budget`,
+  `envelope-meta`, `fx-rates`, `tag-order`, `user-settings`,
+  `linked-accounts` or `linked-debtors` in place of `reminder`, counting the
+  monthly records that changed. The **key** — which envelope moved — needs the
+  payload as it was before, which needs a replay, so it belongs to the detail
+  view, where the point is replayed anyway; there the rows group under the
+  envelope they belong to. Splitting them keeps the row's "no replay" rule
+  intact instead of quietly buying detail with a per-row replay. This is a
+  presentation pass over the existing
   ZenMoney-entity diff, not a second diff over derived Zerro state: derived
   state includes computed balances and activity, which would make every
   transaction look like it changed a dozen envelopes. `tag`, `account`, and

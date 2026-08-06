@@ -11,14 +11,49 @@ import {
   type TDataEntityKey,
   type TNormalizedPatch,
 } from '../../domain/zenmoney'
+import {
+  HiddenDataType,
+  parseHiddenDataComment,
+} from '../../domain/zerro/hidden-data'
 import type { TCompactCanonicalTransition } from './journal'
+
+/**
+ * What Zerro keeps inside a reminder's `comment`, named as the user knows it.
+ *
+ * Budgets, goals and envelope metadata are not ZenMoney entities: they are
+ * JSON in one reminder per month. Reported as reminders they read as
+ * "Reminders 1" for every budget the user has ever set, which is true about
+ * the row and useless about the act.
+ */
+const hiddenDataSummaryKeys = {
+  [HiddenDataType.Goals]: 'goal',
+  [HiddenDataType.Budgets]: 'envelope-budget',
+  [HiddenDataType.EnvelopeMeta]: 'envelope-meta',
+  [HiddenDataType.FxRates]: 'fx-rates',
+  [HiddenDataType.TagOrder]: 'tag-order',
+  [HiddenDataType.UserSettings]: 'user-settings',
+  [HiddenDataType.LinkedAccounts]: 'linked-accounts',
+  [HiddenDataType.LinkedDebtors]: 'linked-debtors',
+} as const satisfies Record<HiddenDataType, string>
+
+export type THiddenDataSummaryKey =
+  (typeof hiddenDataSummaryKeys)[HiddenDataType]
+
+export type TChangeSummaryKey = TDataEntityKey | THiddenDataSummaryKey
 
 export type TChangeCounts = {
   changed: number
   removed: number
 }
 
-export type TChangeSummary = Partial<Record<TDataEntityKey, TChangeCounts>>
+/**
+ * Counts of changed rows, per type. A hidden-data key counts the monthly
+ * records that changed, not the envelopes inside them — which envelope moved
+ * needs the payload before the change, and the row is built without replaying
+ * anything. That belongs to the detail view, where the point is replayed
+ * regardless.
+ */
+export type TChangeSummary = Partial<Record<TChangeSummaryKey, TChangeCounts>>
 
 /** What a canonical journal point changed against the point before it. */
 export function summarizeCanonicalTransition(
@@ -28,7 +63,10 @@ export function summarizeCanonicalTransition(
 
   dataEntityKeys.forEach(object => {
     transition.upsert?.[object]?.forEach(change => {
-      count(summary, object, isRemoval(change.fields))
+      // A transition carries only changed fields, so a hidden-data reminder
+      // is recognizable exactly when its payload is what changed — which is
+      // the case this exists for.
+      count(summary, keyFor(object, change.fields), isRemoval(change.fields))
     })
   })
   transition.deletion?.forEach(({ object }) => count(summary, object, true))
@@ -44,7 +82,7 @@ export function summarizeNormalizedPatch(
 
   dataEntityKeys.forEach(object => {
     patch[object]?.forEach(row => {
-      count(summary, object, isRemoval(row))
+      count(summary, keyFor(object, row), isRemoval(row))
     })
   })
   patch.deletion?.forEach(({ object }) => {
@@ -68,12 +106,28 @@ function isRemoval(fields: object): boolean {
   return (fields as { deleted?: unknown }).deleted === true
 }
 
+/**
+ * The type a changed row is reported under: its own, unless it is a reminder
+ * carrying Zerro's own state.
+ *
+ * A payload that fails to parse falls back to `reminder` rather than throwing
+ * — a comment this code cannot read is still a reminder that changed, and a
+ * history list must not be the thing that breaks on unfamiliar data.
+ */
+function keyFor(object: TDataEntityKey, fields: object): TChangeSummaryKey {
+  if (object !== 'reminder') return object
+  const comment = (fields as { comment?: unknown }).comment
+  if (typeof comment !== 'string') return object
+  const hidden = parseHiddenDataComment(comment)
+  return hidden ? hiddenDataSummaryKeys[hidden.type] : object
+}
+
 function count(
   summary: TChangeSummary,
-  object: TDataEntityKey,
+  key: TChangeSummaryKey,
   removed: boolean
 ): void {
-  const counts = (summary[object] ??= { changed: 0, removed: 0 })
+  const counts = (summary[key] ??= { changed: 0, removed: 0 })
   if (removed) counts.removed += 1
   else counts.changed += 1
 }

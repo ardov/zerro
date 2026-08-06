@@ -64,6 +64,8 @@ export {
   summarizeNormalizedPatch,
   type TChangeCounts,
   type TChangeSummary,
+  type TChangeSummaryKey,
+  type THiddenDataSummaryKey,
 } from './internal/operations/replication/changeSummary'
 
 export {
