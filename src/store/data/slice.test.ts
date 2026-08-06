@@ -99,7 +99,9 @@ describe('command outbox boundaries', () => {
 
     expect(appended.current.account.cash.title).toBe('Vault')
     expect(getPendingDiff(appended)?.account?.[0].title).toBe('Vault')
-    expect(getChangedNum(getRootState(appended))).toBe(1)
+    // Two commands touched the same account, so the count is the number of
+    // undoable commands (2), not the one entity they collapse to in the diff.
+    expect(getChangedNum(getRootState(appended))).toBe(2)
     expect(getLastChangeTime(getRootState(appended))).toBe(20)
 
     const undone = reducer(appended, undoClientCommand())
@@ -300,6 +302,35 @@ describe('command outbox boundaries', () => {
     expect(stale.outbox).toEqual([])
   })
 
+  it('reports an outbox that survived a reload until it is pushed', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+    const persisted = {
+      version: 3 as const,
+      baseServerTimestamp: 100,
+      outbox: [makeAccountEntry('Wallet', 10)],
+    }
+
+    const restored = reducer(base, restorePersistedReplica(persisted))
+    expect(restored.restoredOutboxCount).toBe(1)
+
+    // A command issued in this session is not something the user needs telling
+    // about, but it does not clear the ones that were already waiting.
+    const appended = reducer(
+      restored,
+      appendClientCommand(makeAccountEntry('Vault', 20))
+    )
+    expect(appended.restoredOutboxCount).toBe(1)
+
+    expect(reducer(appended, prepareClientSync()).restoredOutboxCount).toBe(0)
+    expect(
+      reducer(base, restorePersistedReplica({ ...persisted, outbox: [] }))
+        .restoredOutboxCount
+    ).toBe(0)
+  })
+
   it('creates a journal checkpoint from legacy base data', () => {
     const base = applyServerPatch(undefined, {
       serverTimestamp: 100,
@@ -360,6 +391,7 @@ describe('command outbox boundaries', () => {
                 },
               },
               validation: { kind: 'unknown' },
+              pushed: true,
             },
           ],
         },

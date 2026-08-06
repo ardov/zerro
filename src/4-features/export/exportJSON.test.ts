@@ -30,6 +30,7 @@ describe('getBackupContent', () => {
         journalPersistenceBlocked: false,
         journalRecoveryRequired: false,
         journalRecoveryReason: null,
+        restoredOutboxCount: 0,
       },
     })
 

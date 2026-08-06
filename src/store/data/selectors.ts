@@ -1,5 +1,4 @@
 import type { RootState } from 'store'
-import { getItemsCount } from './shared/getItemsCount'
 import type { TNormalizedPatch } from '6-shared/types'
 import { createSelector } from '@reduxjs/toolkit'
 import {
@@ -18,6 +17,9 @@ export const getJournalRecoveryRequired = (state: RootState) =>
 
 export const getJournalRecoveryReason = (state: RootState) =>
   state.data.journalRecoveryReason
+
+export const getRestoredOutboxCount = (state: RootState) =>
+  state.data.restoredOutboxCount
 
 export const getPendingSyncDiff = createSelector(
   [getBase, getOutbox],
@@ -38,9 +40,8 @@ export const getCanUndoClientCommand = (state: RootState) =>
 export const getCanRedoClientCommand = (state: RootState) =>
   state.sync.status !== 'pending' && getRedo(state).length > 0
 
-export const getChangedNum = (state: RootState) => {
-  return getItemsCount(getPendingSyncDiff(state))
-}
+/** Commands, not entities: how many undoable actions are waiting to be sent. */
+export const getChangedNum = (state: RootState) => getOutbox(state).length
 
 export const getLastChangeTime = createSelector([getOutbox], outbox =>
   outbox.reduce((latest, command) => Math.max(latest, command.issuedAt), 0)

@@ -23,6 +23,8 @@ import { core } from 'zerro-core/redux'
 
 import { HistoryShortcuts } from '4-features/historyShortcuts'
 import { RegularSyncHandler } from '3-widgets/RegularSyncHandler'
+import { HistoryTopBar } from '3-widgets/History/HistoryTopBar'
+import { useHistoryPanelOffset } from '3-widgets/History/HistoryPanel'
 import Nav from '3-widgets/Navigation'
 import { MobileNavigation } from '3-widgets/Navigation'
 import ErrorBoundary from '3-widgets/ErrorBoundary'
@@ -91,7 +93,7 @@ export default function App() {
       <PopoverManager>
         <RegularSyncHandler />
         {isLoggedIn && hasData && <HistoryShortcuts />}
-        <Layout isLoggedIn={isLoggedIn}>
+        <Layout isLoggedIn={isLoggedIn} hasData={hasData}>
           <ErrorBoundary>
             <Suspense fallback={<FallbackLoader />}>
               <Routes>{routes}</Routes>
@@ -115,13 +117,30 @@ function AnalyticsNavigation() {
 
 const Layout: FC<{
   isLoggedIn: boolean
+  hasData: boolean
   children: React.ReactNode
 }> = props => {
-  const { isLoggedIn, children } = props
+  const { isLoggedIn, hasData, children } = props
+  // The history panel is a persistent drawer: it draws over the page unless the
+  // layout gives back the width it takes, and "browse it next to the live app"
+  // is the whole point of the panel being non-modal.
+  const panelOffset = useHistoryPanelOffset()
   return (
     <Box sx={{ display: 'flex' }}>
       {isLoggedIn && <Navigation />}
-      <Box sx={{ minHeight: '100vh', flexGrow: 1, minWidth: 0 }}>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          flexGrow: 1,
+          minWidth: 0,
+          mr: `${panelOffset}px`,
+          transition: theme => theme.transitions.create('margin-right'),
+        }}
+      >
+        {/* Inside the content column, not above the whole layout: the
+            navigation drawer is fixed, and a full-width bar would hand it
+            the controls on its left. */}
+        {isLoggedIn && hasData && <HistoryTopBar />}
         {children}
       </Box>
     </Box>

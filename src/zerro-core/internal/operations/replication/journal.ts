@@ -31,11 +31,31 @@ export type TJournalPoint = {
   id: string
   transition: TCompactCanonicalTransition
   validation: TJournalValidationStatus
+  /** True for a point produced by the user's own push, false for a pull. */
+  pushed: boolean
+}
+
+export type TJournalPointRef = {
+  branchId: string
+  /** `null` selects the branch checkpoint; otherwise selects that point. */
+  pointId: string | null
+}
+
+export type TJournalHistoryEntry = {
+  ref: TJournalPointRef
+  branchId: string
+  kind: 'checkpoint' | 'sync'
+  serverTimestamp: number
+  validation: TJournalValidationStatus
+  /** A checkpoint is always shown; only an unpushed sync point may collapse. */
+  pushed: boolean
 }
 
 export type TJournalBranch = {
   id: string
   checkpoint: TDataStore
+  /** Lazy, cached like a point's `validation` — see `TJournalValidationStatus`. */
+  checkpointValidation: TJournalValidationStatus
   serverTimestamp: number
   points: TJournalPoint[]
 }
@@ -196,6 +216,7 @@ export function createJournalBranch(
   return {
     id,
     checkpoint,
+    checkpointValidation: { kind: 'unknown' },
     serverTimestamp: checkpoint.serverTimestamp,
     points: [],
   }
@@ -209,11 +230,57 @@ export function replayJournalBranch(branch: TJournalBranch): TDataStore {
   return { ...base, serverTimestamp: branch.serverTimestamp }
 }
 
+/** Lists every retained checkpoint and canonical server point for the history UI. */
+export function listJournalHistory(
+  journal: TJournalCollection
+): TJournalHistoryEntry[] {
+  return journal.branches.flatMap(branch => [
+    {
+      ref: { branchId: branch.id, pointId: null },
+      branchId: branch.id,
+      kind: 'checkpoint' as const,
+      serverTimestamp: branch.checkpoint.serverTimestamp,
+      validation: branch.checkpointValidation,
+      pushed: true,
+    },
+    ...branch.points.map(point => ({
+      ref: { branchId: branch.id, pointId: point.id },
+      branchId: branch.id,
+      kind: 'sync' as const,
+      serverTimestamp:
+        point.transition.serverTimestamp ?? branch.serverTimestamp,
+      validation: point.validation,
+      pushed: point.pushed,
+    })),
+  ])
+}
+
+/** Replays one retained point without applying the live outbox. */
+export function replayJournalPoint(
+  journal: TJournalCollection,
+  ref: TJournalPointRef
+): TDataStore | undefined {
+  const branch = journal.branches.find(
+    candidate => candidate.id === ref.branchId
+  )
+  if (!branch) return undefined
+  if (ref.pointId === null) return branch.checkpoint
+
+  const pointIndex = branch.points.findIndex(point => point.id === ref.pointId)
+  if (pointIndex === -1) return undefined
+
+  return replayJournal(
+    branch.checkpoint,
+    branch.points.slice(0, pointIndex + 1).map(point => point.transition)
+  )
+}
+
 export function appendCanonicalJournalPoint(
   branch: TJournalBranch,
   before: TDataStore,
   after: TDataStore,
-  pointId: string
+  pointId: string,
+  pushed: boolean
 ): TJournalBranch {
   const transition = compactCanonicalTransition(before, after)
   if (!transition) {
@@ -231,6 +298,7 @@ export function appendCanonicalJournalPoint(
             id: pointId,
             transition,
             validation: { kind: 'unknown' },
+            pushed,
           },
         ]
       : branch.points,
@@ -249,6 +317,8 @@ export function compactJournalBranchAt(
   return {
     ...branch,
     checkpoint: compacted.checkpoint,
+    // The checkpoint is a new snapshot; any cached validation is stale.
+    checkpointValidation: { kind: 'unknown' },
     points: branch.points.slice(count),
   }
 }

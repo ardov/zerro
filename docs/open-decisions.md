@@ -1,6 +1,6 @@
 # Open decisions — what needs the maintainer
 
-- Updated: 2026-07-31
+- Updated: 2026-08-03
 - Purpose: everything that is blocked on a judgement call rather than on
   implementation effort. One entry per decision, with enough context to answer
   it without re-reading the architecture documents.
@@ -125,29 +125,7 @@ Revisit only with that consumer in hand.
 
 **Where it is recorded.** design-ledger, _Open questions → Future surfaces_.
 
-## 5. Visible undo/redo controls
-
-**Question.** Undo and redo work through keyboard shortcuts in the loaded app,
-with no visible buttons. Should the UI expose them?
-
-**Why it is open.** It is accepted as a product risk rather than an oversight:
-a user who does not know the shortcut cannot discover that a mistaken edit is
-reversible. Adding controls means deciding where they live on mobile, and what
-they show when the outbox is empty.
-
-This connects to the pull-only sync decision: once an outbox can survive for
-hours, "there are unsynchronized changes" and "you can still undo them" become
-the same piece of UI, and the pending-changes notice is the natural place for
-undo to become visible.
-
-**Recommendation.** Design it together with the pending-changes notice rather
-than as a separate toolbar feature. The change history decided on 2026-07-31 is
-the natural home for all three — it already lists the pending commands undo
-would reverse.
-
-**Where it is recorded.** design-ledger, _Accepted product risks_.
-
-## 6. Retention budget for the change log
+## 5. Retention budget for the change log
 
 **Question.** How far back should the change history reach, and what does that
 cost in browser storage?
@@ -178,6 +156,13 @@ retention_, and
 ## Answered recently
 
 Kept briefly so a returning session sees what changed, then deleted.
+
+- **Visible undo/redo controls** (2026-08-03) — undo/redo surfaces on the sync
+  button's right-click/long-press panel (⟲/⟳ over the live command list), not
+  as separate toolbar buttons, and ships as part of the change-history redesign
+  rather than alone. Recorded in design-ledger, _Change history and restore_.
+  Implementation is
+  [notes.md](../src/zerro-core/support/documents/notes.md#4-change-history-and-restore).
 
 - **Fixtures for the materializer balance rule** (2026-07-31) — none are needed.
   The rule shipped from behavior probing had already established, and it performs

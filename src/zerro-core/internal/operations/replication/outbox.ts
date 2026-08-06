@@ -135,6 +135,30 @@ export function redoOutbox(
   }
 }
 
+/**
+ * Undoes every command after `keepCount` in one step, equivalent to calling
+ * `undoOutbox` that many times: the dropped suffix lands on `redo` oldest-last,
+ * so `redoOutbox` restores it one command at a time in the same order a
+ * sequence of single undos would have.
+ */
+export function undoOutboxTo(
+  outbox: readonly TCommand[],
+  redo: readonly TCommand[],
+  keepCount: number
+): TOutboxState {
+  if (
+    !Number.isInteger(keepCount) ||
+    keepCount < 0 ||
+    keepCount > outbox.length
+  )
+    throw new Error('Outbox undo target is out of range')
+
+  return {
+    outbox: outbox.slice(0, keepCount),
+    redo: [...redo, ...outbox.slice(keepCount).reverse()],
+  }
+}
+
 export function replayOutbox(
   base: TDataStore,
   outbox: readonly TCommand[]

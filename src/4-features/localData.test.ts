@@ -119,6 +119,7 @@ describe('loadLocalData', () => {
         {
           id: 'main',
           checkpoint,
+          checkpointValidation: { kind: 'unknown' },
           serverTimestamp: 101,
           points: [
             {
@@ -130,6 +131,7 @@ describe('loadLocalData', () => {
                 },
               },
               validation: { kind: 'unknown' },
+              pushed: true,
             },
           ],
         },

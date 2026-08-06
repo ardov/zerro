@@ -16,8 +16,10 @@ import {
   rebaseServerInbox,
   redoClientCommand,
   resetData,
+  restoreOutboxPosition,
   restorePersistedReplica,
   restorePersistedJournal,
+  validateJournalPoint,
   undoClientCommand,
 } from './slice'
 
@@ -88,9 +90,11 @@ function isReplicaMutation(action: unknown): boolean {
     appendClientCommand.match(action) ||
     undoClientCommand.match(action) ||
     redoClientCommand.match(action) ||
+    restoreOutboxPosition.match(action) ||
     rebaseServerInbox.match(action) ||
     restorePersistedReplica.match(action) ||
     restorePersistedJournal.match(action) ||
+    validateJournalPoint.match(action) ||
     resetData.match(action)
   )
 }

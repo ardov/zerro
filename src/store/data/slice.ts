@@ -12,13 +12,18 @@ import {
   defaultJournalRetentionPolicy,
   redoOutbox,
   replayJournalBranch,
+  replayJournalPoint,
   replayOutbox,
   retainJournal,
   journalPersistenceVersion,
   replicaPersistenceVersion,
   validateDataStore,
   undoOutbox,
+  undoOutboxTo,
   type TCommand,
+  type TDataStoreValidationResult,
+  type TJournalPointRef,
+  type TJournalValidationStatus,
   type TPersistedJournal,
   type TPersistedReplica,
 } from 'zerro-core/replica'
@@ -39,12 +44,18 @@ interface DataSlice {
   /** A loaded active branch failed domain validation and needs full reload. */
   journalRecoveryRequired: boolean
   journalRecoveryReason: string | null
+  /** How many commands came back from persistence at load and have not been
+   * pushed since. Session-only: it exists so the app can say the outbox
+   * survived a reload, which pull-only sync made possible. */
+  restoredOutboxCount: number
   inbox?: TServerInbox | null
 }
 
 export interface TServerInbox extends TNormalizedPatch {
   sentOutboxCount?: number
   fullReload?: boolean
+  /** Whether this response came from a deliberate push rather than a pull. */
+  push?: boolean
 }
 
 // INITIAL STATE
@@ -58,6 +69,7 @@ const initialState: DataSlice = {
   journalPersistenceBlocked: false,
   journalRecoveryRequired: false,
   journalRecoveryReason: null,
+  restoredOutboxCount: 0,
 }
 
 // SLICE
@@ -73,7 +85,8 @@ const { reducer, actions } = createSlice({
     ),
     rebaseServerInbox: withPerf('rebaseServerInbox', state => {
       if (!state.inbox) return
-      const { sentOutboxCount, fullReload, ...canonicalPatch } = state.inbox
+      const { sentOutboxCount, fullReload, push, ...canonicalPatch } =
+        state.inbox
       if (fullReload) {
         const checkpoint = applyPatch(createEmptyDataStore(), canonicalPatch)
         const branchId = getNextReloadBranchId(
@@ -124,7 +137,8 @@ const { reducer, actions } = createSlice({
             activeBranch,
             previousBase,
             accepted.base,
-            pointId
+            pointId,
+            Boolean(push)
           )
           const nextJournal = {
             ...state.journal,
@@ -157,6 +171,9 @@ const { reducer, actions } = createSlice({
     ),
     prepareClientSync: withPerf('prepareClientSync', state => {
       state.redo = []
+      // The user is pushing: whatever survived the reload is on its way out,
+      // so the notice about it has nothing left to say.
+      state.restoredOutboxCount = 0
     }),
     undoClientCommand: withPerf('undoClientCommand', state => {
       if (!state.outbox.length) return
@@ -183,12 +200,14 @@ const { reducer, actions } = createSlice({
           state.outbox = []
           state.redo = []
           state.current = state.base
+          state.restoredOutboxCount = 0
           return
         }
 
         state.outbox = [...payload.outbox]
         state.redo = []
         state.current = replayOutbox(state.base, state.outbox)
+        state.restoredOutboxCount = state.outbox.length
       }
     ),
     restorePersistedJournal: withPerf(
@@ -238,6 +257,48 @@ const { reducer, actions } = createSlice({
         state.current = replayOutbox(state.base, state.outbox)
       }
     ),
+    validateJournalPoint: withPerf(
+      'validateJournalPoint',
+      (state, { payload }: PayloadAction<TJournalPointRef>) => {
+        const branch = state.journal?.branches.find(
+          candidate => candidate.id === payload.branchId
+        )
+        if (!branch) return
+
+        if (payload.pointId === null) {
+          // A checkpoint is already a full snapshot; no replay is needed.
+          branch.checkpointValidation = toValidationStatus(
+            validateDataStore(branch.checkpoint)
+          )
+          return
+        }
+
+        const point = branch.points.find(
+          candidate => candidate.id === payload.pointId
+        )
+        if (!point || !state.journal) return
+        const snapshot = replayJournalPoint(state.journal, payload)
+        if (!snapshot) return
+        point.validation = toValidationStatus(validateDataStore(snapshot))
+      }
+    ),
+    /**
+     * Restores a local (unsent) point by undoing to it, not by diffing and
+     * appending: the dropped commands were never sent, so there is nothing on
+     * the server to overwrite. Reversible through redo, like a plain undo.
+     *
+     * `payload` is the same inclusive outbox index a `{ kind: 'local' }`
+     * history point ref carries — keep `outbox[0..index]`.
+     */
+    restoreOutboxPosition: withPerf(
+      'restoreOutboxPosition',
+      (state, { payload: index }: PayloadAction<number>) => {
+        const next = undoOutboxTo(state.outbox, state.redo, index + 1)
+        state.outbox = next.outbox
+        state.redo = next.redo
+        state.current = replayOutbox(state.base, state.outbox)
+      }
+    ),
     resetData: () => {
       return initialState
     },
@@ -255,10 +316,24 @@ export const {
   prepareClientSync,
   undoClientCommand,
   redoClientCommand,
+  validateJournalPoint,
+  restoreOutboxPosition,
   restorePersistedReplica,
   restorePersistedJournal,
   resetData,
 } = actions
+
+function toValidationStatus(
+  result: TDataStoreValidationResult
+): TJournalValidationStatus {
+  return result.ok
+    ? { kind: 'valid', validatorVersion: dataStoreValidatorVersion }
+    : {
+        kind: 'invalid',
+        validatorVersion: dataStoreValidatorVersion,
+        reason: result.reason,
+      }
+}
 
 function createPersistedJournal(base: TDataStore): TPersistedJournal {
   return {

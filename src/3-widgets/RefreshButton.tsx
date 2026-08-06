@@ -13,12 +13,14 @@ import {
   WarningIcon,
 } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
+import { useContextMenu } from '6-shared/hooks/useContextMenu'
 
 import { getChangedNum } from 'store/data'
 import { selectIsSyncPending, selectLastSyncResult } from 'store/sync'
 import { useAppDispatch, useAppSelector } from 'store'
 import { syncData } from '4-features/sync'
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
+import { useHistoryPreview } from '3-widgets/History/HistoryPreview'
 
 type ButtonState = 'idle' | 'pending' | 'success' | 'fail'
 
@@ -29,6 +31,14 @@ const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
   const { t } = useTranslation('common')
   const dispatch = useAppDispatch()
   const handleClick = useCallback(() => dispatch(syncData()), [dispatch])
+  const openPreview = useHistoryPreview()
+  // Anchor to the button itself, not the click point: right-click and
+  // long-press land at different spots, and a stable anchor is more
+  // predictable than a popover that jumps around depending on input method.
+  const menuProps = useContextMenu({
+    onClick: handleClick,
+    onContextMenu: event => openPreview(event.currentTarget as HTMLElement),
+  })
   const changedNum = useAppSelector(getChangedNum)
   const isPending = useAppSelector(selectIsSyncPending)
   const lastResult = useAppSelector(selectLastSyncResult)
@@ -71,13 +81,13 @@ const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
           {components[state]}
         </Badge>
       }
-      onClick={handleClick}
+      {...menuProps}
       {...rest}
     />
   ) : (
     <Tooltip title={t('refreshData')}>
       <Badge color="info" overlap="circular" badgeContent={changedNum}>
-        <IconButton onClick={handleClick} {...rest}>
+        <IconButton {...menuProps} {...rest}>
           {components[state]}
         </IconButton>
       </Badge>

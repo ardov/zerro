@@ -357,16 +357,17 @@ export function restoreDataStore(desired: TDataStore): AppThunk<boolean> {
   return (dispatch, getState, extra) =>
     (() => {
       const compatibility = checkBackupCompatibility(
-        selectData(getState()),
+        selectData(getState(), 'live'),
         desired
       )
       if (!compatibility.ok) return false
 
       return executeReduxCommandWithStatus(
         (state, ctx) =>
-          buildRestorePlan(selectData(state), desired, {
+          buildRestorePlan(selectData(state, 'live'), desired, {
             allocateId: (_key, _desiredId) => ctx.uuid(),
-          }).patch
+          }).patch,
+        { allowHistory: true }
       )(dispatch, getState, extra).applied
     })()
 }

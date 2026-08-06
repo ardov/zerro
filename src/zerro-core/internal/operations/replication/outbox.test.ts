@@ -16,6 +16,7 @@ import {
   replayOutbox,
   stageCompiledCommand,
   undoOutbox,
+  undoOutboxTo,
 } from './outbox'
 
 function makeCommand(issuedAt: number, patch: TCommand['patch']): TCommand {
@@ -68,6 +69,30 @@ describe('outbox operations', () => {
       outbox: [first, second],
       redo: [],
     })
+  })
+
+  it('undoes to a position in one step, redoable in the same order as sequential undos', () => {
+    const stepwise = undoOutbox(
+      undoOutbox([first, second, replacement], []).outbox,
+      undoOutbox([first, second, replacement], []).redo
+    )
+    const batched = undoOutboxTo([first, second, replacement], [], 1)
+
+    expect(batched).toEqual({ outbox: [first], redo: [replacement, second] })
+    expect(batched).toEqual(stepwise)
+    expect(redoOutbox(batched.outbox, batched.redo)).toEqual({
+      outbox: [first, second],
+      redo: [replacement],
+    })
+  })
+
+  it('rejects an out-of-range undo target', () => {
+    expect(() => undoOutboxTo([first], [], -1)).toThrow(
+      'Outbox undo target is out of range'
+    )
+    expect(() => undoOutboxTo([first], [], 2)).toThrow(
+      'Outbox undo target is out of range'
+    )
   })
 
   it('appends to the durable outbox and drops the redo stack', () => {

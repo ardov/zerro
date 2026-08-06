@@ -114,6 +114,39 @@ export const WhatshotIcon = createFeatherIcon(
   'rewind'
 )
 
+export const HistoryIcon = createFeatherIcon(
+  <>
+    <path d="M3 12a9 9 0 1 0 3-6.7" />
+    <polyline points="3 3 3 8 8 8" />
+    <polyline points="12 7 12 12 15 14" />
+  </>,
+  'history'
+)
+
+export const UndoIcon = createFeatherIcon(
+  <>
+    <polyline points="9 14 4 9 9 4" />
+    <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+  </>,
+  'corner-up-left'
+)
+
+export const RedoIcon = createFeatherIcon(
+  <>
+    <polyline points="15 14 20 9 15 4" />
+    <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
+  </>,
+  'corner-up-right'
+)
+
+export const SendIcon = createFeatherIcon(
+  <>
+    <line x1="22" y1="2" x2="11" y2="13" />
+    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </>,
+  'send'
+)
+
 //   <>
 //     <polygon points="11 19 2 12 11 5 11 19"></polygon>
 //     <polygon points="22 19 13 12 22 5 22 19"></polygon>

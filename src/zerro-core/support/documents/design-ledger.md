@@ -1,6 +1,6 @@
 # Zerro Core design ledger
 
-- Updated: 2026-08-01
+- Updated: 2026-08-06
 - Purpose: settled decisions, accepted risks, active bridges, and unresolved
   architectural questions. History stays in Git. Questions that need the
   maintainer rather than an implementer are listed for review in
@@ -134,7 +134,7 @@ there:
 
 ### Change history and restore
 
-Revised 2026-08-02. The app keeps a user-visible change history and can restore
+Revised 2026-08-06. The app keeps a user-visible change history and can restore
 any retained valid point. The implementation path is
 [notes.md](./notes.md#4-change-history-and-restore).
 
@@ -170,7 +170,8 @@ any retained valid point. The implementation path is
   or `invalid` with the validator version; a result from an older validator
   version is `unknown` until checked again. Invalid points stay visible with a
   reason but cannot restore.
-- Restoring a point and importing a backup are one operation: an internal
+- Restoring a journal point (server state) and importing a backup are one
+  operation: an internal
   `buildRestorePlan(current, desired, { scope, allocateId }) -> TRestorePlan`
   produces the ordinary command's intent patch. Restore therefore inherits materialization,
   transport, and undo-before-push; its accepted canonical response becomes a
@@ -179,6 +180,86 @@ any retained valid point. The implementation path is
   apply receives real UUIDs only at dispatch. Implemented 2026-08-01 in
   `internal/operations/restore/diffStores.ts`, with backup import as its first
   consumer.
+- Restoring a local (unsent) point is a plain undo to that position in the
+  outbox, not a diff-and-append. Revised 2026-08-03: diffing it against live
+  state like a journal point would ask `buildRestorePlan` to emit a `deletion`
+  for an entity the server has never seen — created and undone entirely inside
+  the local outbox — which the transport must never send. Undo has no such
+  problem, since it only removes commands that were never sent, and it stays
+  reversible through redo until the next reload.
+- The history list is a read-only projection over journal replay, and it is one
+  ordered surface rather than three: redo tail, applied local commands, then
+  journal points and sealed branches. Selecting any row below the redo tail
+  changes Core read selectors but never the live `base + outbox` replica.
+  Ordinary commands and patches are blocked while a past point is selected;
+  restore is the only write action. The sync button is the sole entry point: a normal
+  click still pushes, a right-click or long-press opens a preview of the same
+  list's live end (redo tail, applied commands, `Send`), and an action there
+  expands into a non-modal panel — a right drawer on desktop, a full-screen
+  sheet on mobile — showing the whole list. There is no separate `/history`
+  route or nav entry.
+- The list is not chronological, because `current = base + outbox`: a
+  background pull inserts a journal point under unsent local commands even
+  though it arrived later. A divider marks the boundary between the local
+  stack and the journal; it is not read as time.
+- The newest selectable row is the live replica under another name, not a point
+  in the past. Added 2026-08-06: selecting it is normalized to no selection at
+  all, so data stays live and writes stay unblocked. The normalization is a read
+  selector rather than a guard at the dispatch site, because the list moves under
+  a selection — an undo can shorten the outbox until the selected position _is_
+  the head — and the app has to become editable again without waiting for the
+  user to notice. The list still marks that row as "you are here" while the
+  status bar is open.
+- The status bar is a browsing mode rather than a rendering of the selection.
+  Revised 2026-08-06: it opens when a row is selected and closes only on its own
+  exit control or Escape, so stepping forward onto the head — which is no
+  selection at all — leaves it in place. Tying its visibility to "a point is
+  selected" would have made the forward arrow unmount the bar as a side effect of
+  its own press. It sits at the top of the viewport rather than the bottom, so it
+  pushes content down instead of overlaying the mobile bottom navigation, and it
+  keeps every control mounted and switches `disabled` instead of appearing and
+  disappearing: step back/forward across the visible rows (a collapsed run of
+  points is one step), reopen-panel, restore, go-to-current, and exit. A bar that
+  changed its height or its set of controls mid-step would shift the page the
+  user is reading. For the same reason no control changes meaning between states:
+  go-to-current jumps to the head and never exits, exit never jumps. Restore is
+  the one action that ends the session, because it writes and its result is the
+  live state.
+- A collapsed run is a position as well as a row: it stands in for its newest
+  point, which is what makes it one step rather than none. Expanded, it stays as
+  the header its own points hang under, so the expansion can be undone, and it
+  stops being a position, because each of its points is now a row of its own.
+- Issuing a command clears the selection. Added 2026-08-06: a command can only
+  be issued while the selection is not showing the past, so an append means the
+  user was effectively live and the stored point is stale by definition. Without
+  this the selection stays pinned to an outbox index that stops being the head
+  the moment the outbox grows, and the app silently rewinds to before the change
+  the user just made — the same "looks live but is not" failure the head rule
+  exists to prevent, arriving one command later.
+- The panel gives back the width it takes. Added 2026-08-06: a persistent MUI
+  drawer draws over the page unless the layout is told otherwise, and a panel
+  that covers the app it claims to sit beside is a modal with extra steps. For
+  the same reason the status bar lives inside the content column rather than
+  above the whole layout: the navigation drawer is fixed, and a full-width bar
+  hands it every control on its left.
+- A journal point stores one boolean, `pushed`: true for a point produced by
+  the user's own push, false or absent for one produced by a pull. This is the
+  only per-point distinction the journal retains about its cause; it exists so
+  the list can collapse a run of consecutive pull points into one collapsible
+  row while keeping every point the user deliberately pushed visible on its
+  own. It is not a step toward a fuller per-point audit trail — see the label
+  bullet below for why that is deliberately not retained.
+- Checkpoints validate and restore like any other point. `listJournalHistory`
+  does not hard-code an `unknown` status for a checkpoint, and validation does
+  not skip `pointId === null`; skipping it left the first point of every
+  branch permanently unrestorable, silently contradicting every other bullet
+  in this section. Validation stays lazy, so an unopened point shows no status
+  icon rather than a false "clean" one; a background sweep that validates a
+  whole branch on load is deferred until the icon is needed at rest.
+- Selecting a point does not pin it against retention. If a background pull
+  compacts the selected point into its branch checkpoint while it is open, the
+  panel and status bar must say so rather than silently falling back to live
+  data while still claiming to show the past.
 - A restore removes a row only where the domain already has a removal, and the
   diff carries one row per entity type saying which: soft delete for
   transactions, zeroing for budgets, a real `deletion` for reminders, and
@@ -203,10 +284,46 @@ any retained valid point. The implementation path is
 - Scoped restore (one account, envelope, or month) is the primary form. Global
   restore is an escape hatch behind its own confirmation, because a rewind is
   only safe where the user knows what it overwrites.
-- Semantic labels are captured at issue time and stored in the journal, never in
-  `Command`. They are structured `{ verb, args }` rather than rendered strings,
-  so language and renamed entities resolve at display time. A label is inert: no
-  materialization or transport path may read one.
+- Semantic labels are captured at issue time as an inert optional field on
+  `Command` — `label?: { verb, args }` — not stored in the journal. Revised
+  2026-08-03: a journal point is produced by squashing however many outbox
+  commands a push acknowledges into one canonical transition, so a label has
+  to survive on the command through issue, undo/redo, and push, and the
+  command is the only place that holds true across all of those; it does not
+  survive the squash into a point. History older than the last push therefore
+  carries no label, only the point's own diff (below). `args` carries both the
+  referenced id and a name snapshot taken at issue time, so a later rename
+  still resolves through the id while a deletion renders under the name that
+  existed when it was made, instead of a dangling lookup. Verbs are a closed
+  union in Core; rendering and pluralization resolve in the app against that
+  union, so a missing translation is a compile-time gap, not a blank label at
+  runtime. A label stays inert: `materializeCommand` and `buildOutboxTransport`
+  do not read it, and `parseCommandOutbox` drops a corrupt or unrecognized
+  label without failing the command it is attached to — a bad label must never
+  be the reason a durable outbox fails to load.
+- A point's own diff — `compactCanonicalTransition` against the previous point
+  — is what the list row shows. It is already what `transition` stores, so it
+  needs no replay and, unlike a diff against live state, never changes once
+  written. The diff against live state, which is what a restore would
+  overwrite, is computed only on demand in the panel. Applied local commands
+  show their label when present and fall back to their own materialized diff
+  otherwise; a checkpoint has no diff of its own, since it is a full state
+  rather than a change.
+- Zerro's own state — goals, envelope budgets, envelope metadata, FX rates,
+  and the other `HiddenDataType` payloads — lives as JSON in one `reminder`'s
+  `comment` per month, so a changed goal reaches the diff as "1 reminder
+  changed" unless it is decomposed. The diff parses a changed hidden-data
+  reminder's `comment` before and after and emits one typed row per changed
+  key — `goal`, `envelope-budget`, `envelope-meta`, `fx-rates`, `tag-order`,
+  `user-settings`, `linked-accounts`, `linked-debtors` — grouped under the
+  envelope they belong to. This is a presentation pass over the existing
+  ZenMoney-entity diff, not a second diff over derived Zerro state: derived
+  state includes computed balances and activity, which would make every
+  transaction look like it changed a dozen envelopes. `tag`, `account`, and
+  `merchant` rows keep their own entity type and only join an envelope's
+  group; they are never relabeled as `envelope`. A payload that fails to parse
+  falls back to the raw entity row instead of throwing. The diff view is
+  read-only in this pass — no per-row restore, only the point-level one below.
 
 Restore is not undo, and three consequences must be visible in the UI rather
 than only recorded here. The backup-import confirmation states all three and
@@ -325,8 +442,6 @@ shows the per-entity counts the restore would write:
   `changed` is ignored under HTTP 200, and some invalid field values are dropped
   while the write applies); the product accepts that risk to keep one stable
   whole-prefix acknowledgement rule.
-- Undo/redo is keyboard-accessible in the loaded application; visible controls
-  remain deferred.
 - Persisted replica V2 has a one-way compatibility reader that preserves its
   applied prefix and discards its redo tail. This is a bounded migration, not a
   general migration framework.
@@ -368,7 +483,7 @@ and consequences in [open-decisions.md](../../../../docs/open-decisions.md).
 - How do real-account transition sizes compare with the initial retention
   defaults? This is a follow-up measurement, not an implementation gate. It is
   restated in
-  [open-decisions.md](../../../../docs/open-decisions.md#6-retention-budget-for-the-change-log).
+  [open-decisions.md](../../../../docs/open-decisions.md#5-retention-budget-for-the-change-log).
 
 ### Future surfaces — not scheduled
 

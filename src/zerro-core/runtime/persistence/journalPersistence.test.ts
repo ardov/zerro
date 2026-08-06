@@ -13,6 +13,7 @@ const validJournal: TPersistedJournal = {
     {
       id: 'main',
       checkpoint: createEmptyDataStore(),
+      checkpointValidation: { kind: 'unknown' },
       serverTimestamp: 0,
       points: [
         {
@@ -24,6 +25,7 @@ const validJournal: TPersistedJournal = {
             },
           },
           validation: { kind: 'unknown' },
+          pushed: true,
         },
       ],
     },
@@ -53,6 +55,7 @@ describe('parsePersistedJournal', () => {
                 validatorVersion: 3,
                 reason: 'Missing debt account',
               },
+              pushed: false,
             },
           ],
         },
@@ -96,6 +99,32 @@ describe('parsePersistedJournal', () => {
         ],
       },
       'reason',
+    ],
+    [
+      {
+        ...validJournal,
+        branches: [
+          {
+            ...validJournal.branches[0],
+            checkpointValidation: undefined,
+          },
+        ],
+      },
+      'checkpointValidation',
+    ],
+    [
+      {
+        ...validJournal,
+        branches: [
+          {
+            ...validJournal.branches[0],
+            points: [
+              { ...validJournal.branches[0].points[0], pushed: undefined },
+            ],
+          },
+        ],
+      },
+      'pushed',
     ],
   ])('rejects malformed journal %#', (value, message) => {
     expect(() => parsePersistedJournal(value)).toThrow(message)

@@ -63,6 +63,10 @@ function validateBranch(
   }
   branchIds.add(value.id)
   validateCheckpoint(value.checkpoint, `${path}.checkpoint`)
+  validateValidationStatus(
+    value.checkpointValidation,
+    `${path}.checkpointValidation`
+  )
   if (!isFiniteNumber(value.serverTimestamp)) {
     throw new Error(
       `Invalid persisted journal: ${path}.serverTimestamp is invalid`
@@ -131,6 +135,9 @@ function validatePoint(
   pointIds.add(value.id)
   validateTransition(value.transition, `${path}.transition`)
   validateValidationStatus(value.validation, `${path}.validation`)
+  if (typeof value.pushed !== 'boolean') {
+    throw new Error(`Invalid persisted journal: ${path}.pushed is invalid`)
+  }
 }
 
 function validateTransition(

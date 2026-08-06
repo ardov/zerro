@@ -5,6 +5,7 @@ import displayCurrency from './displayCurrency'
 import sync from './sync'
 import token from './token'
 import view from './view'
+import history from './history'
 
 export const rootReducer = combineReducers({
   data,
@@ -12,6 +13,7 @@ export const rootReducer = combineReducers({
   token,
   displayCurrency,
   view,
+  history,
 })
 
 export type RootState = ReturnType<typeof rootReducer>

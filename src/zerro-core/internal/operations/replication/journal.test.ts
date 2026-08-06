@@ -9,6 +9,8 @@ import {
   createJournalBranch,
   defaultJournalRetentionPolicy,
   estimateJournalBytes,
+  listJournalHistory,
+  replayJournalPoint,
   replayJournal,
   replayJournalBranch,
   retainJournal,
@@ -142,7 +144,8 @@ describe('canonical journal transitions', () => {
       branch,
       checkpoint,
       after,
-      'point-ignored'
+      'point-ignored',
+      true
     )
 
     expect(next.points).toEqual([])
@@ -168,13 +171,15 @@ describe('canonical journal transitions', () => {
       branch,
       checkpoint,
       middle,
-      'point-1'
+      'point-1',
+      true
     )
     const withAfter = appendCanonicalJournalPoint(
       withMiddle,
       middle,
       after,
-      'point-2'
+      'point-2',
+      true
     )
 
     expect(withAfter.points).toHaveLength(2)
@@ -184,6 +189,50 @@ describe('canonical journal transitions', () => {
     expect(compacted.checkpoint).toEqual(middle)
     expect(compacted.points).toHaveLength(1)
     expect(replayJournalBranch(compacted)).toEqual(after)
+  })
+
+  it('lists checkpoints and replays a selected point without the outbox', () => {
+    const checkpoint = makeStore({
+      serverTimestamp: 1,
+      account: { cash: row({ id: 'cash', title: 'Cash' }) },
+    })
+    const middle = makeStore({
+      serverTimestamp: 2,
+      account: { cash: row({ id: 'cash', title: 'Wallet' }) },
+    })
+    const after = makeStore({
+      serverTimestamp: 3,
+      account: { cash: row({ id: 'cash', title: 'Current' }) },
+    })
+    const branch = appendCanonicalJournalPoint(
+      appendCanonicalJournalPoint(
+        createJournalBranch('main', checkpoint),
+        checkpoint,
+        middle,
+        'point-2',
+        false
+      ),
+      middle,
+      after,
+      'point-3',
+      true
+    )
+    const journal = { activeBranchId: 'main', branches: [branch] }
+
+    expect(listJournalHistory(journal).map(entry => entry.ref.pointId)).toEqual(
+      [null, 'point-2', 'point-3']
+    )
+    expect(listJournalHistory(journal).map(entry => entry.pushed)).toEqual([
+      true, // the checkpoint is always shown, never collapsed
+      false, // point-2 came from a pull
+      true, // point-3 came from a push
+    ])
+    expect(
+      replayJournalPoint(journal, { branchId: 'main', pointId: 'point-2' })
+    ).toEqual(middle)
+    expect(
+      replayJournalPoint(journal, { branchId: 'main', pointId: 'missing' })
+    ).toBeUndefined()
   })
 
   it('compacts points older than the retention cutoff on every branch', () => {
@@ -204,11 +253,13 @@ describe('canonical journal transitions', () => {
         createJournalBranch('main', old),
         old,
         middle,
-        'point-20'
+        'point-20',
+        true
       ),
       middle,
       current,
-      'point-30'
+      'point-30',
+      true
     )
     const journal = {
       activeBranchId: 'main',

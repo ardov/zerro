@@ -60,6 +60,7 @@ const exchangeWithZenmoney =
           applyServerPatch({
             ...data,
             sentOutboxCount,
+            push,
             ...(fullReload ? { fullReload: true } : {}),
           })
         )

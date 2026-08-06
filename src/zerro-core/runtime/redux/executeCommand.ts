@@ -1,6 +1,7 @@
 import { v1 as uuidv1 } from 'uuid'
 import type { AppDispatch, AppThunk, RootState } from 'store'
 import { appendClientCommand } from 'store/data'
+import { selectIsHistoryPointVisible } from 'store/history'
 
 import {
   issuePatch,
@@ -43,14 +44,19 @@ export function executeReduxCommand<TReceipt = unknown>(
 
 /** Like `executeReduxCommand`, but reports whether an outbox command was added. */
 export function executeReduxCommandWithStatus<TReceipt = unknown>(
-  compile: TReduxCommandCompiler<TReceipt>
+  compile: TReduxCommandCompiler<TReceipt>,
+  options: { allowHistory?: boolean } = {}
 ): AppThunk<TCommandExecution<TReceipt>> {
   return (dispatch, getState) => {
     const state = getState()
+    if (selectIsHistoryPointVisible(state) && !options.allowHistory) {
+      return { applied: false, receipt: undefined }
+    }
     const result = compile(state, defaultCtx)
     const patch = isCompiled(result) ? result.patch : result
     const applied =
-      !isEmptyPatch(patch) && appendIntentPatch(dispatch, state, patch)
+      !isEmptyPatch(patch) &&
+      appendIntentPatch(dispatch, state, patch, options.allowHistory)
 
     return {
       applied,
@@ -61,16 +67,19 @@ export function executeReduxCommandWithStatus<TReceipt = unknown>(
 
 export function executeReduxPatch(patch: TIntentPatch): AppThunk {
   return (dispatch, getState) => {
-    appendIntentPatch(dispatch, getState(), patch)
+    const state = getState()
+    if (!selectIsHistoryPointVisible(state))
+      appendIntentPatch(dispatch, state, patch)
   }
 }
 
 function appendIntentPatch(
   dispatch: AppDispatch,
   state: RootState,
-  patch: TIntentPatch
+  patch: TIntentPatch,
+  allowHistory = false
 ): boolean {
-  const data = selectData(state)
+  const data = selectData(state, allowHistory ? 'live' : 'displayed')
   const command = issuePatch(data, patch, defaultCtx.now())
   const materialized = materializeCommand(data, command)
   if (isEmptyPatch(materialized)) return false

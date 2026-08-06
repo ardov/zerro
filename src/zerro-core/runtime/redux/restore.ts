@@ -20,7 +20,7 @@ export function preview(
   state: RootState,
   desired: TDataStore
 ): TStoreDiffSummary {
-  const current = selectData(state)
+  const current = selectData(state, 'live')
   return summarizeStoreDiff(current, diffStores(current, desired))
 }
 
@@ -29,7 +29,7 @@ export function checkBackupCompatibility(
   state: RootState,
   backup: TDataStore
 ): TBackupCompatibilityResult {
-  return checkStoreBackupCompatibility(selectData(state), backup)
+  return checkStoreBackupCompatibility(selectData(state, 'live'), backup)
 }
 
 export { restoreDataStore as apply } from './commands'
