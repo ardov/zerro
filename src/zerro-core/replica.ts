@@ -18,6 +18,14 @@ export {
   type TOutboxState,
 } from './internal/operations/replication/outbox'
 
+export {
+  commandVerbs,
+  sanitizeCommandLabel,
+  type TCommandLabel,
+  type TCommandLabelArgs,
+  type TCommandVerb,
+} from './internal/operations/materialization'
+
 export { applyPatch } from './internal/domain/zenmoney/model/applyPatch'
 
 export {

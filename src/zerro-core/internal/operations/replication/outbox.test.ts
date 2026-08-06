@@ -7,7 +7,7 @@ import {
   makeTransaction,
   makeUser,
 } from '../../../support/testing/zenmoneyTestData'
-import type { TCommand } from '../materialization'
+import { materializeCommand, type TCommand } from '../materialization'
 import {
   appendOutbox,
   buildOutboxTransport,
@@ -60,6 +60,54 @@ describe('outbox operations', () => {
     expect(() =>
       parseCommandOutbox([{ type: 'patch', issuedAt: 1, patch: { nope: [] } }])
     ).toThrow('patch.nope is invalid')
+  })
+
+  it('drops a label it cannot read instead of failing the command', () => {
+    const patch = { account: [makeAccount({ id: 'cash', title: 'Wallet' })] }
+    const parsed = parseCommandOutbox([
+      { type: 'patch', issuedAt: 1, patch, label: { verb: 'budget-set' } },
+      { type: 'patch', issuedAt: 2, patch, label: { verb: 'from-the-future' } },
+      { type: 'patch', issuedAt: 3, patch, label: 'nonsense' },
+      {
+        type: 'patch',
+        issuedAt: 4,
+        patch,
+        label: { verb: 'goal-set', args: { id: 'tag#food', name: 5 } },
+      },
+    ])
+
+    // A label is decoration over unsent work: losing the decoration is fine,
+    // losing the command is not.
+    expect(parsed.map(command => command.label)).toEqual([
+      { verb: 'budget-set' },
+      undefined,
+      undefined,
+      { verb: 'goal-set', args: { id: 'tag#food' } },
+    ])
+    expect(parsed).toHaveLength(4)
+    expect(parsed.every(command => command.patch === patch)).toBe(true)
+  })
+
+  it('keeps the label out of materialization and transport', () => {
+    const base = makeStore({
+      serverTimestamp: 1_000,
+      account: { cash: makeAccount({ id: 'cash', title: 'Cash' }) },
+    })
+    const patch = { account: [{ id: 'cash', title: 'Wallet' }] }
+    const plain = makeCommand(2_000, patch)
+    const labeled: TCommand = {
+      ...plain,
+      label: { verb: 'envelope-renamed', args: { id: 'x', name: 'Food' } },
+    }
+
+    // Inert by contract: a label may never change what reaches the server.
+    expect(materializeCommand(base, labeled)).toEqual(
+      materializeCommand(base, plain)
+    )
+    expect(buildOutboxTransport(base, [labeled], 3_000)).toEqual(
+      buildOutboxTransport(base, [plain], 3_000)
+    )
+    expect(replayOutbox(base, [labeled])).toEqual(replayOutbox(base, [plain]))
   })
 
   it('moves commands between the durable outbox and session redo stack', () => {

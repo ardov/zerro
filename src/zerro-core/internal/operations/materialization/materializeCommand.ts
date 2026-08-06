@@ -37,6 +37,7 @@ import { predictDeletionCascades } from './predictDeletionCascades'
 
 export { intentPatchKeys } from '../../domain/zenmoney'
 export type { TIntentPatch } from '../../domain/zenmoney'
+import type { TCommandLabel } from './commandLabel'
 
 const intentPatchKeySet = new Set<string>(intentPatchKeys)
 
@@ -44,6 +45,8 @@ export type TCommand = {
   type: 'patch'
   issuedAt: TMsTime
   patch: TIntentPatch
+  /** What the user did, for history. Inert: nothing below this line reads it. */
+  label?: TCommandLabel
 }
 
 type TEntity = {
@@ -147,13 +150,16 @@ const entityRegistry = [
 export function issuePatch(
   snapshot: TDataStore,
   patch: TNormalizedPatch | TIntentPatch,
-  issuedAt: TMsTime
+  issuedAt: TMsTime,
+  label?: TCommandLabel
 ): TCommand {
-  return {
+  const command: TCommand = {
     type: 'patch',
     issuedAt,
     patch: compileIntentPatch(snapshot, patch, issuedAt),
   }
+  if (label) command.label = label
+  return command
 }
 
 /** Materializes one command against the latest local snapshot. */

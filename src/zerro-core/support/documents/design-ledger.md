@@ -300,7 +300,12 @@ any retained valid point. The implementation path is
   runtime. A label stays inert: `materializeCommand` and `buildOutboxTransport`
   do not read it, and `parseCommandOutbox` drops a corrupt or unrecognized
   label without failing the command it is attached to — a bad label must never
-  be the reason a durable outbox fails to load.
+  be the reason a durable outbox fails to load. Implemented 2026-08-06 in
+  `internal/operations/materialization/commandLabel.ts`, with one half of
+  `args` still dormant: the name snapshot is captured where the name is the
+  caller's own argument, and display-time resolution through the id is not
+  built, so a label renders the snapshot or nothing. Every row must survive a
+  missing label regardless — commands issued before this existed have none.
 - A point's own diff — `compactCanonicalTransition` against the previous point
   — is what the list row shows. It is already what `transition` stores, so it
   needs no replay and, unlike a diff against live state, never changes once

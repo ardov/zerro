@@ -26,6 +26,7 @@ import { issuePatch } from '../materialization'
 import type { TCompiled } from '../../../types'
 
 export type { TCommand } from '../materialization'
+import { sanitizeCommandLabel } from '../materialization'
 
 export type TOutboxState = {
   outbox: TCommand[]
@@ -47,7 +48,7 @@ export type TStagedCompiledCommand<TReceipt> = {
 export function parseCommandOutbox(value: unknown): TCommand[] {
   if (!Array.isArray(value)) throw new Error('Command outbox must be an array')
 
-  value.forEach((entry, index) => {
+  return value.map((entry, index) => {
     if (!isRecord(entry))
       throw new Error(`Command outbox[${index}] must be an object`)
     if (entry.type !== 'patch' || !isFiniteNumber(entry.issuedAt))
@@ -77,9 +78,16 @@ export function parseCommandOutbox(value: unknown): TCommand[] {
       )
         throw new Error(`Command outbox[${index}].patch.${key} is invalid`)
     })
-  })
 
-  return value as TCommand[]
+    // The label is decoration over a durable command: an unrecognized one is
+    // dropped, never a reason to fail the load and lose unsent work.
+    const label = sanitizeCommandLabel(entry.label)
+    const command = entry as unknown as TCommand
+    if (label) return { ...command, label }
+    if (command.label === undefined) return command
+    const { label: _dropped, ...withoutLabel } = command
+    return withoutLabel
+  })
 }
 
 /** Issues and appends one compiled semantic intent against the latest replay. */

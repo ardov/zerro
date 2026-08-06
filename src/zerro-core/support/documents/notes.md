@@ -196,9 +196,13 @@ references.
      under their envelope, which needs envelope titles from an app projection
      rather than from the store. Take it only if the counts turn out not to
      answer the question in real use.
-   - **B — labels.** The inert `Command.label` field, the closed verb union,
+   - ~~**B — labels.** The inert `Command.label` field, the closed verb union,
      and the ~27 call sites in `runtime/redux/commands.ts` that each know
-     their own verb from their own name.
+     their own verb from their own name.~~ Shipped 2026-08-06. `executeCommand`
+     now takes the label as a required second argument, so a new command cannot
+     be added without naming what it does. One half of `args` is dormant:
+     names are snapshotted where the caller already has one, and resolving an
+     id to a current name at display time is not built.
 
    C precedes B on purpose, reversing the obvious reading order: a label only
    describes the unsent tail the user just made and still remembers, while the

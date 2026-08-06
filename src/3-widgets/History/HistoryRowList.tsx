@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import {
   Chip,
@@ -9,7 +10,9 @@ import {
   Stack,
 } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
+import { commandVerbLabelKeys } from '6-shared/localization/commandVerbs'
 import { ChevronDownIcon } from '6-shared/ui/Icons'
+import type { TCommand } from 'zerro-core/replica'
 import { useAppDispatch } from 'store'
 import {
   historyRowPoint,
@@ -72,7 +75,7 @@ function HistoryRowItem({
     return (
       <ListItemText
         sx={{ px: 2, py: 0.5, opacity: 0.5 }}
-        primary={t('unnamedChange')}
+        primary={commandTitle(row.command, t)}
         slotProps={{ primary: { variant: 'body2' } }}
       />
     )
@@ -113,12 +116,15 @@ function HistoryRowItem({
     return (
       <ListItemButton selected={isSelected} onClick={() => onSelect(row.point)}>
         <ListItemText
-          primary={t('unnamedChange')}
+          primary={commandTitle(row.command, t)}
           secondary={secondaryLine(
             formatDate(row.command.issuedAt, 'd MMM yyyy, HH:mm'),
             summaryText(row.summary)
           )}
-          slotProps={{ secondary: { noWrap: true } }}
+          slotProps={{
+            primary: { noWrap: true },
+            secondary: { noWrap: true },
+          }}
         />
       </ListItemButton>
     )
@@ -160,6 +166,20 @@ function HistoryRowItem({
 /** Date first, then what moved. One line, so the row height never changes. */
 function secondaryLine(date: string, summary: string): string {
   return summary ? `${date} · ${summary}` : date
+}
+
+/**
+ * What the command says it did, or the generic word for one that says nothing.
+ *
+ * A label is optional by design — it is dropped when unreadable, and commands
+ * issued before labels existed have none — so every row must still render
+ * without one.
+ */
+function commandTitle(command: TCommand, t: TFunction<'history'>): string {
+  const label = command.label
+  if (!label) return t('unnamedChange')
+  const verb = t(commandVerbLabelKeys[label.verb])
+  return label.args?.name ? `${verb} · ${label.args.name}` : verb
 }
 
 function rowKey(row: THistoryRow): string {

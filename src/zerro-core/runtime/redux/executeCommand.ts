@@ -6,6 +6,7 @@ import { selectIsHistoryPointVisible } from 'store/history'
 import {
   issuePatch,
   materializeCommand,
+  type TCommandLabel,
 } from '../../internal/operations/materialization'
 import {
   isCompiled,
@@ -34,18 +35,28 @@ const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
  * without entering the adapter selector graph during module initialization.
  */
 export function executeReduxCommand<TReceipt = unknown>(
-  compile: TReduxCommandCompiler<TReceipt>
+  compile: TReduxCommandCompiler<TReceipt>,
+  options: TExecuteOptions = {}
 ): AppThunk<TReceipt | undefined> {
   return (dispatch, getState, extra) => {
-    return executeReduxCommandWithStatus(compile)(dispatch, getState, extra)
-      .receipt
+    return executeReduxCommandWithStatus(compile, options)(
+      dispatch,
+      getState,
+      extra
+    ).receipt
   }
+}
+
+export type TExecuteOptions = {
+  allowHistory?: boolean
+  /** What the user did, carried onto the command for history. */
+  label?: TCommandLabel
 }
 
 /** Like `executeReduxCommand`, but reports whether an outbox command was added. */
 export function executeReduxCommandWithStatus<TReceipt = unknown>(
   compile: TReduxCommandCompiler<TReceipt>,
-  options: { allowHistory?: boolean } = {}
+  options: TExecuteOptions = {}
 ): AppThunk<TCommandExecution<TReceipt>> {
   return (dispatch, getState) => {
     const state = getState()
@@ -55,8 +66,7 @@ export function executeReduxCommandWithStatus<TReceipt = unknown>(
     const result = compile(state, defaultCtx)
     const patch = isCompiled(result) ? result.patch : result
     const applied =
-      !isEmptyPatch(patch) &&
-      appendIntentPatch(dispatch, state, patch, options.allowHistory)
+      !isEmptyPatch(patch) && appendIntentPatch(dispatch, state, patch, options)
 
     return {
       applied,
@@ -65,11 +75,14 @@ export function executeReduxCommandWithStatus<TReceipt = unknown>(
   }
 }
 
-export function executeReduxPatch(patch: TIntentPatch): AppThunk {
+export function executeReduxPatch(
+  patch: TIntentPatch,
+  options: TExecuteOptions = {}
+): AppThunk {
   return (dispatch, getState) => {
     const state = getState()
     if (!selectIsHistoryPointVisible(state))
-      appendIntentPatch(dispatch, state, patch)
+      appendIntentPatch(dispatch, state, patch, options)
   }
 }
 
@@ -77,10 +90,10 @@ function appendIntentPatch(
   dispatch: AppDispatch,
   state: RootState,
   patch: TIntentPatch,
-  allowHistory = false
+  { allowHistory = false, label }: TExecuteOptions = {}
 ): boolean {
   const data = selectData(state, allowHistory ? 'live' : 'displayed')
-  const command = issuePatch(data, patch, defaultCtx.now())
+  const command = issuePatch(data, patch, defaultCtx.now(), label)
   const materialized = materializeCommand(data, command)
   if (isEmptyPatch(materialized)) return false
 
