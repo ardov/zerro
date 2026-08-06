@@ -6,20 +6,19 @@
  */
 import { z } from 'zod'
 
-const finiteNumber = z.number().finite()
-const timestamp = finiteNumber.nonnegative()
+const timestamp = z.number().nonnegative()
 const numberId = timestamp.int()
 const stringId = z.string().min(1)
 const nullable = <TSchema extends z.ZodType>(schema: TSchema) =>
   schema.nullable()
 const stringArray = z.array(stringId)
-const numberArray = z.array(finiteNumber)
+const numberArray = z.array(z.number())
 
 const isoDate = z.string().refine(isISODate, 'Expected a calendar ISO date')
 const jsonValue: z.ZodType = z.lazy(() =>
   z.union([
     z.string(),
-    z.number().finite(),
+    z.number(),
     z.boolean(),
     z.null(),
     z.array(jsonValue),
@@ -34,7 +33,7 @@ export const instrumentWireSchema = z
     title: z.string(),
     shortTitle: z.string(),
     symbol: z.string(),
-    rate: finiteNumber,
+    rate: z.number(),
   })
   .strict()
 
@@ -70,7 +69,7 @@ export const userWireSchema = z
     countryCode: z.string(),
     email: nullable(z.string()),
     login: nullable(z.string()),
-    monthStartDay: finiteNumber,
+    monthStartDay: z.number(),
     isForecastEnabled: z.boolean(),
     planBalanceMode: z.string(),
     planSettings: z.string(),
@@ -96,7 +95,7 @@ export const accountWireSchema = z
     user: numberId,
     instrument: numberId,
     title: z.string(),
-    role: nullable(finiteNumber),
+    role: nullable(z.number()),
     company: nullable(numberId),
     type: z.enum([
       'cash',
@@ -108,9 +107,9 @@ export const accountWireSchema = z
       'debt',
     ]),
     syncID: nullable(stringArray),
-    balance: finiteNumber,
-    startBalance: finiteNumber,
-    creditLimit: finiteNumber,
+    balance: z.number(),
+    startBalance: z.number(),
+    creditLimit: z.number(),
     inBalance: z.boolean(),
     savings: nullable(z.boolean()),
     enableCorrection: z.boolean(),
@@ -119,11 +118,11 @@ export const accountWireSchema = z
     archive: z.boolean(),
     private: z.boolean(),
     capitalization: nullable(z.boolean()),
-    percent: nullable(finiteNumber),
+    percent: nullable(z.number()),
     startDate: nullable(isoDate),
-    endDateOffset: nullable(finiteNumber),
+    endDateOffset: nullable(z.number()),
     endDateOffsetInterval: z.enum(['day', 'week', 'month', 'year']).nullable(),
-    payoffStep: nullable(finiteNumber),
+    payoffStep: nullable(z.number()),
     payoffInterval: z.enum(['month', 'year']).nullable(),
   })
   .strict()
@@ -141,7 +140,7 @@ export const tagWireSchema = z
     showOutcome: z.boolean(),
     title: z.string(),
     parent: nullable(stringId),
-    color: nullable(finiteNumber),
+    color: nullable(z.number()),
     required: nullable(z.boolean()),
     staticId: nullable(z.string()),
     picture: nullable(z.string()),
@@ -154,10 +153,10 @@ export const budgetWireSchema = z
     changed: timestamp,
     tag: nullable(stringId),
     date: isoDate,
-    income: finiteNumber,
+    income: z.number(),
     incomeLock: z.boolean(),
     isIncomeForecast: z.boolean(),
-    outcome: finiteNumber,
+    outcome: z.number(),
     outcomeLock: z.boolean(),
     isOutcomeForecast: z.boolean(),
   })
@@ -170,16 +169,16 @@ export const reminderWireSchema = z
     user: numberId,
     incomeInstrument: numberId,
     incomeAccount: stringId,
-    income: finiteNumber,
+    income: z.number(),
     outcomeInstrument: numberId,
     outcomeAccount: stringId,
-    outcome: finiteNumber,
+    outcome: z.number(),
     tag: nullable(stringArray),
     merchant: nullable(stringId),
     payee: nullable(z.string()),
     comment: nullable(z.string()),
     interval: z.enum(['day', 'week', 'month', 'year']).nullable(),
-    step: nullable(finiteNumber),
+    step: nullable(z.number()),
     points: nullable(numberArray),
     startDate: isoDate,
     endDate: isoDate,
@@ -194,10 +193,10 @@ export const reminderMarkerWireSchema = z
     user: numberId,
     incomeInstrument: numberId,
     incomeAccount: stringId,
-    income: finiteNumber,
+    income: z.number(),
     outcomeInstrument: numberId,
     outcomeAccount: stringId,
-    outcome: finiteNumber,
+    outcome: z.number(),
     tag: nullable(stringArray),
     merchant: nullable(stringId),
     payee: nullable(z.string()),
@@ -224,25 +223,25 @@ export const transactionWireSchema = z
     incomeBankID: nullable(numberId),
     incomeInstrument: numberId,
     incomeAccount: stringId,
-    income: finiteNumber,
+    income: z.number(),
     outcomeBankID: nullable(numberId),
     outcomeInstrument: numberId,
     outcomeAccount: stringId,
-    outcome: finiteNumber,
+    outcome: z.number(),
     tag: nullable(stringArray),
     merchant: nullable(stringId),
     payee: nullable(z.string()),
     originalPayee: nullable(z.string()),
     comment: nullable(z.string()),
     date: isoDate,
-    mcc: nullable(finiteNumber).optional(),
+    mcc: nullable(z.number()).optional(),
     reminderMarker: nullable(stringId),
-    opIncome: nullable(finiteNumber),
+    opIncome: nullable(z.number()),
     opIncomeInstrument: nullable(numberId),
-    opOutcome: nullable(finiteNumber),
+    opOutcome: nullable(z.number()),
     opOutcomeInstrument: nullable(numberId),
-    latitude: nullable(finiteNumber),
-    longitude: nullable(finiteNumber),
+    latitude: nullable(z.number()),
+    longitude: nullable(z.number()),
   })
   .strict()
 

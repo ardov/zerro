@@ -25,7 +25,7 @@ import {
 
 const fullBackupWireSchema = z
   .object({
-    serverTimestamp: z.number().finite().nonnegative(),
+    serverTimestamp: z.number().nonnegative(),
     instrument: z.array(instrumentWireSchema),
     country: z.array(countryWireSchema),
     company: z.array(companyWireSchema),
