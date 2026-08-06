@@ -533,6 +533,7 @@ export const en: typeof ru = {
     restoreShort: 'Restore',
     restoreServerDescription:
       'The selected state will be added as one local undoable change on top of the current one. Unsynchronized changes remain queued and may be overwritten.',
+    restoreWouldChange: 'Restoring would change',
     restoreApplied: 'The historical state was added to the local queue',
     restoreNoChanges: 'The current state already matches this point',
     pointUnavailable:

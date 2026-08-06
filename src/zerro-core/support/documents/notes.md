@@ -186,12 +186,16 @@ references.
      and a soft delete counts as a removal rather than an edit.
      ~~Hidden-data decomposition~~ followed the same day at the type level: a
      changed `HiddenDataType` reminder reports as `envelope-budget`, `goal`
-     and the rest, so a budget edit no longer reads as "Напоминания 1". One
-     part remains: the diff against live state, computed on demand in the
-     panel, and with it the key-level decomposition — which envelope moved —
-     which needs the payload as it was before, and therefore a replay the row
-     deliberately does not do (see
-     [design-ledger.md](./design-ledger.md#change-history-and-restore)).
+     and the rest, so a budget edit no longer reads as "Напоминания 1".
+     ~~The diff against live state~~ shipped with it as the panel's restore
+     preview: while a point is selected, `HistoryRestorePreview` shows what
+     restoring it would write over the live state, and there — with both
+     payloads in hand — the decomposition counts payload entries rather than
+     monthly records, deletions included. Pass C is closed except for one
+     refinement it deliberately left: naming those entries and grouping them
+     under their envelope, which needs envelope titles from an app projection
+     rather than from the store. Take it only if the counts turn out not to
+     answer the question in real use.
    - **B — labels.** The inert `Command.label` field, the closed verb union,
      and the ~27 call sites in `runtime/redux/commands.ts` that each know
      their own verb from their own name.

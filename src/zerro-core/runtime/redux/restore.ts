@@ -20,7 +20,18 @@ export function preview(
   state: RootState,
   desired: TDataStore
 ): TStoreDiffSummary {
-  const current = selectData(state, 'live')
+  return summarize(selectData(state, 'live'), desired)
+}
+
+/**
+ * The same count from two stores rather than from app state, so a caller that
+ * already holds `current` — a memoized selector, a component — can compute it
+ * without taking the whole state as a dependency.
+ */
+export function summarize(
+  current: TDataStore,
+  desired: TDataStore
+): TStoreDiffSummary {
   return summarizeStoreDiff(current, diffStores(current, desired))
 }
 

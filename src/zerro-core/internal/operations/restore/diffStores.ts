@@ -25,6 +25,11 @@ import {
   type TIntentEntityKey,
   type TIntentPatch,
 } from '../../domain/zenmoney'
+import {
+  hiddenDataSummaryKeys,
+  parseHiddenDataComment,
+  type THiddenDataSummaryKey,
+} from '../../domain/zerro/hidden-data'
 
 type TId = string | number
 type TRow = { id: TId; [field: string]: unknown }
@@ -526,8 +531,10 @@ export type TStoreDiffCounts = {
   removed: number
 }
 
+export type TStoreDiffSummaryKey = TIntentEntityKey | THiddenDataSummaryKey
+
 export type TStoreDiffSummary = Partial<
-  Record<TIntentEntityKey, TStoreDiffCounts>
+  Record<TStoreDiffSummaryKey, TStoreDiffCounts>
 >
 
 export function summarizeStoreDiff(
@@ -535,7 +542,7 @@ export function summarizeStoreDiff(
   patch: TIntentPatch
 ): TStoreDiffSummary {
   const summary: TStoreDiffSummary = {}
-  const countsFor = (key: TIntentEntityKey) =>
+  const countsFor = (key: TStoreDiffSummaryKey) =>
     (summary[key] ??= { created: 0, updated: 0, removed: 0 })
 
   intentEntityKeys.forEach(key => {
@@ -543,6 +550,18 @@ export function summarizeStoreDiff(
     if (!intents?.length) return
     const currentById = (current[key] ?? {}) as TById
     intents.forEach(intent => {
+      // Both payloads are in hand here, unlike in a list row, so a hidden-data
+      // reminder is counted by what moved inside it rather than as one row.
+      if (key === 'reminder') {
+        const hidden = countHiddenDataChanges(currentById[intent.id], intent)
+        if (hidden) {
+          const counts = countsFor(hidden.key)
+          counts.created += hidden.counts.created
+          counts.updated += hidden.counts.updated
+          counts.removed += hidden.counts.removed
+          return
+        }
+      }
       const counts = countsFor(key)
       if (!currentById[intent.id]) counts.created += 1
       else if (intent.deleted === true) counts.removed += 1
@@ -550,10 +569,106 @@ export function summarizeStoreDiff(
     })
   })
 
-  patch.deletion?.forEach(({ object }) => {
-    if ((intentEntityKeys as readonly string[]).includes(object)) {
-      countsFor(object as TIntentEntityKey).removed += 1
+  patch.deletion?.forEach(({ object, id }) => {
+    if (!(intentEntityKeys as readonly string[]).includes(object)) return
+    // A deleted hidden-data reminder takes its whole payload with it, and the
+    // current store still holds it — so this is countable too.
+    if (object === 'reminder') {
+      const hidden = countHiddenDataRemoval(
+        (current.reminder ?? {})[id as string] as TRow | undefined
+      )
+      if (hidden) {
+        countsFor(hidden.key).removed += hidden.removed
+        return
+      }
     }
+    countsFor(object as TIntentEntityKey).removed += 1
   })
   return summary
+}
+
+/** What a deleted hidden-data reminder takes with it: its payload entries, or
+ * the record itself when the payload is empty. */
+function countHiddenDataRemoval(
+  row: TRow | undefined
+): { key: THiddenDataSummaryKey; removed: number } | null {
+  const parsed = parseHiddenDataComment(asComment(row))
+  if (!parsed) return null
+  const entries = Object.keys(asPayloadMap(parsed.payload)).length
+  return {
+    key: hiddenDataSummaryKeys[parsed.type],
+    removed: entries || 1,
+  }
+}
+
+/**
+ * How many entries of Zerro's own state one reminder write moves.
+ *
+ * The payload is a map keyed by envelope (or by setting), so comparing the
+ * comment before and after says which entries changed rather than only that
+ * the month's record did. Returns `null` for a reminder that carries no
+ * hidden data, or one whose comment cannot be read — an unreadable payload is
+ * still a reminder being written, and a preview must not throw on data it does
+ * not recognize.
+ */
+function countHiddenDataChanges(
+  before: TRow | undefined,
+  after: TRow
+): { key: THiddenDataSummaryKey; counts: TStoreDiffCounts } | null {
+  const parsedAfter = parseHiddenDataComment(asComment(after))
+  if (!parsedAfter) return null
+
+  const beforePayload = asPayloadMap(
+    parseHiddenDataComment(asComment(before))?.payload
+  )
+  const afterPayload = asPayloadMap(parsedAfter.payload)
+  const counts: TStoreDiffCounts = { created: 0, updated: 0, removed: 0 }
+
+  new Set([
+    ...Object.keys(beforePayload),
+    ...Object.keys(afterPayload),
+  ]).forEach(entry => {
+    const had = entry in beforePayload
+    const has = entry in afterPayload
+    if (!had) counts.created += 1
+    else if (!has) counts.removed += 1
+    else if (!isSameJsonValue(beforePayload[entry], afterPayload[entry]))
+      counts.updated += 1
+  })
+
+  return { key: hiddenDataSummaryKeys[parsedAfter.type], counts }
+}
+
+function asComment(row: TRow | undefined): string | null {
+  const comment = row?.comment
+  return typeof comment === 'string' ? comment : null
+}
+
+function asPayloadMap(payload: unknown): Record<string, unknown> {
+  return payload && typeof payload === 'object' && !Array.isArray(payload)
+    ? (payload as Record<string, unknown>)
+    : {}
+}
+
+/** Structural equality over parsed JSON, which is all a payload ever holds. */
+function isSameJsonValue(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  if (typeof a !== typeof b || a === null || b === null) return false
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length)
+      return false
+    return a.every((item, index) => isSameJsonValue(item, b[index]))
+  }
+  if (typeof a !== 'object') return false
+  const aKeys = Object.keys(a as object)
+  const bKeys = Object.keys(b as object)
+  if (aKeys.length !== bKeys.length) return false
+  return aKeys.every(
+    key =>
+      key in (b as object) &&
+      isSameJsonValue(
+        (a as Record<string, unknown>)[key],
+        (b as Record<string, unknown>)[key]
+      )
+  )
 }

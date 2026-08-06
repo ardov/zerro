@@ -32,3 +32,15 @@ export const entityLabelKeys = [
   ['country', 'entity_country'],
   ['company', 'entity_company'],
 ] as const satisfies readonly (readonly [TChangeSummaryKey, string])[]
+
+/**
+ * Widens a summary to the whole display order so it can be indexed by any key
+ * in the list. Producers emit different subsets — a restore never writes
+ * reference data, a journal point never writes a preview count — and the keys
+ * a given producer cannot emit are simply absent.
+ */
+export function byLabelKey<TCounts>(
+  summary: Partial<Record<TChangeSummaryKey, TCounts>> | undefined
+): Partial<Record<TChangeSummaryKey, TCounts>> {
+  return summary ?? {}
+}

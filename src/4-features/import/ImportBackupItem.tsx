@@ -16,8 +16,7 @@ import {
   Typography,
 } from '@mui/material'
 import { UploadIcon } from '6-shared/ui/Icons'
-import { entityLabelKeys } from '6-shared/localization/entityLabels'
-import type { TChangeSummaryKey } from 'zerro-core/replica'
+import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import { track } from '6-shared/analytics'
 import { parseFullBackup } from '6-shared/api/zm-adapter'
@@ -37,16 +36,6 @@ import {
 type TPending = {
   store: TDataStore
   summary: core.restore.TStoreDiffSummary
-}
-
-/** Widens the summary to every key the shared display order can hold, so it
- * can index it; the keys a restore never writes are simply absent. */
-function summaryByEntity(
-  summary: core.restore.TStoreDiffSummary | undefined
-): Partial<
-  Record<TChangeSummaryKey, core.restore.TStoreDiffSummary['account']>
-> {
-  return summary ?? {}
 }
 
 /**
@@ -155,9 +144,7 @@ export function ImportBackupItem() {
           <DialogContentText>{t('importWarning')}</DialogContentText>
           <Stack spacing={0.5} sx={{ mt: 2 }}>
             {entityLabelKeys.map(([key, labelKey]) => {
-              // A restore never writes reference data, so the tail of the
-              // shared order simply never matches here.
-              const counts = summaryByEntity(pending?.summary)[key]
+              const counts = byLabelKey(pending?.summary)[key]
               if (!counts) return null
               return (
                 <Box

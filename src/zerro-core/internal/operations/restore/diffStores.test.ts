@@ -14,6 +14,7 @@ import {
 import { applyPatch } from '../../domain/zenmoney/model/applyPatch'
 import type { TDataStore } from '../../domain/zenmoney/model/store'
 import { AccountType } from '../../domain/zenmoney/entities/accounts'
+import { HiddenDataType } from '../../domain/zerro/hidden-data'
 import { issuePatch, materializeCommand } from '../materialization'
 import { buildRestorePlan, diffStores, summarizeStoreDiff } from './diffStores'
 
@@ -686,6 +687,77 @@ describe('summarizeStoreDiff', () => {
       tag: { created: 1, updated: 0, removed: 0 },
       reminder: { created: 0, updated: 0, removed: 1 },
       transaction: { created: 0, updated: 0, removed: 1 },
+    })
+  })
+
+  it('counts entries inside a hidden-data payload, not the reminder holding them', () => {
+    const budgets = (payload: object) =>
+      makeReminder({
+        id: 'budgets',
+        comment: JSON.stringify({
+          type: HiddenDataType.Budgets,
+          month: '2026-08',
+          payload,
+        }),
+      })
+    const current = makeSnapshot({
+      reminder: {
+        budgets: budgets({
+          'tag#food': 5000,
+          'tag#car': 3000,
+          'tag#gone': 1000,
+        }),
+      },
+    })
+    const desired = makeSnapshot({
+      reminder: {
+        budgets: budgets({
+          'tag#food': 5000, // unchanged
+          'tag#car': 4000, // changed
+          'tag#new': 200, // added
+        }),
+      },
+    })
+
+    // Both payloads are in hand here, so the count is envelopes rather than
+    // the one monthly record a list row can see.
+    expect(summarizeStoreDiff(current, diffStores(current, desired))).toEqual({
+      'envelope-budget': { created: 1, updated: 1, removed: 1 },
+    })
+  })
+
+  it('counts what a deleted hidden-data reminder takes with it', () => {
+    const current = makeSnapshot({
+      reminder: {
+        goals: makeReminder({
+          id: 'goals',
+          comment: JSON.stringify({
+            type: HiddenDataType.Goals,
+            month: '2026-08',
+            payload: { 'tag#car': { amount: 1 }, 'tag#trip': { amount: 2 } },
+          }),
+        }),
+      },
+    })
+    const desired = makeSnapshot({})
+
+    expect(summarizeStoreDiff(current, diffStores(current, desired))).toEqual({
+      goal: { created: 0, updated: 0, removed: 2 },
+    })
+  })
+
+  it('keeps an unreadable payload as a plain reminder', () => {
+    const current = makeSnapshot({
+      reminder: { rem: makeReminder({ id: 'rem', comment: 'Pay the rent' }) },
+    })
+    const desired = makeSnapshot({
+      reminder: {
+        rem: makeReminder({ id: 'rem', comment: '{"type":"budgets","pay' }),
+      },
+    })
+
+    expect(summarizeStoreDiff(current, diffStores(current, desired))).toEqual({
+      reminder: { created: 0, updated: 1, removed: 0 },
     })
   })
 })

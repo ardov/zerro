@@ -12,32 +12,11 @@ import {
   type TNormalizedPatch,
 } from '../../domain/zenmoney'
 import {
-  HiddenDataType,
+  hiddenDataSummaryKeys,
   parseHiddenDataComment,
+  type THiddenDataSummaryKey,
 } from '../../domain/zerro/hidden-data'
 import type { TCompactCanonicalTransition } from './journal'
-
-/**
- * What Zerro keeps inside a reminder's `comment`, named as the user knows it.
- *
- * Budgets, goals and envelope metadata are not ZenMoney entities: they are
- * JSON in one reminder per month. Reported as reminders they read as
- * "Reminders 1" for every budget the user has ever set, which is true about
- * the row and useless about the act.
- */
-const hiddenDataSummaryKeys = {
-  [HiddenDataType.Goals]: 'goal',
-  [HiddenDataType.Budgets]: 'envelope-budget',
-  [HiddenDataType.EnvelopeMeta]: 'envelope-meta',
-  [HiddenDataType.FxRates]: 'fx-rates',
-  [HiddenDataType.TagOrder]: 'tag-order',
-  [HiddenDataType.UserSettings]: 'user-settings',
-  [HiddenDataType.LinkedAccounts]: 'linked-accounts',
-  [HiddenDataType.LinkedDebtors]: 'linked-debtors',
-} as const satisfies Record<HiddenDataType, string>
-
-export type THiddenDataSummaryKey =
-  (typeof hiddenDataSummaryKeys)[HiddenDataType]
 
 export type TChangeSummaryKey = TDataEntityKey | THiddenDataSummaryKey
 

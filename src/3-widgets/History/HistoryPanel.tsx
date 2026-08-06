@@ -18,6 +18,7 @@ import {
   type THistoryPointRef,
 } from 'store/history'
 import { HistoryControls } from './HistoryControls'
+import { HistoryRestorePreview } from './HistoryRestorePreview'
 import { HistoryRowList } from './HistoryRowList'
 
 const panelWidth = 380
@@ -90,6 +91,9 @@ export function HistoryPanel() {
           <HistoryRowList rows={rows} selected={selected} onSelect={select} />
         </Box>
       )}
+      {/* Pinned under the list: it belongs to the selection, not to the row
+          that happens to be scrolled into view. */}
+      <HistoryRestorePreview />
     </Drawer>
   )
 }
