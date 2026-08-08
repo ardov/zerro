@@ -1,1 +1,0 @@
-export { DisplayAmount } from './DisplayAmount'

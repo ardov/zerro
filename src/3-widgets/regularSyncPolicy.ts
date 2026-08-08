@@ -1,5 +1,5 @@
 /** Delay between syncs if nothing changed. */
-const IDLE_SYNC_DELAY = 120_000
+const IDLE_SYNC_DELAY = 60_000
 
 type TSyncPolicyInput = {
   isOnline: boolean

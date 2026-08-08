@@ -17,7 +17,7 @@ import { formatMoney } from '6-shared/helpers/money'
 import { formatDate, parseDate } from '6-shared/helpers/date'
 import type { TISODate } from '6-shared/types'
 
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 import { DataLine } from '3-widgets/DataLine'
 import { summarizeCashflow, useCashFlow } from '../shared/cashflow'
 import type { Period } from '../shared/period'

@@ -8,7 +8,7 @@ import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 import { entries } from '6-shared/helpers/keys'
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 import { ArrowForwardIcon, ArrowBackIcon } from '6-shared/ui/Icons'
 
 export function PayeeByFrequencyCard(props: TCardProps) {

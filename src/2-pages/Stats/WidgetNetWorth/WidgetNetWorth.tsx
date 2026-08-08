@@ -24,7 +24,7 @@ import { useAppTheme } from '6-shared/ui/theme'
 import { round } from '6-shared/helpers/money'
 import { formatDate, GroupBy } from '6-shared/helpers/date'
 
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 import { DataLine } from '3-widgets/DataLine'
 import { Period, PeriodTitle } from '../shared/period'
 import type { TNetWorthPoint } from './useNetWorth'

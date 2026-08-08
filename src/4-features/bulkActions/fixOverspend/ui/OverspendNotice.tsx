@@ -8,7 +8,7 @@ import { WarningIcon } from '6-shared/ui/Icons'
 import { isZero } from '6-shared/helpers/money'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch, useAppSelector } from 'store'
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 import { fixOverspends as fixAllOverspends } from '../model/fixOverspends'
 
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {

@@ -9,7 +9,7 @@ import type { TFxAmount } from '6-shared/types'
 import { addFxAmount } from '6-shared/helpers/money'
 import { toISOMonth } from '6-shared/helpers/date'
 
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 import { Account, Subheader } from './components'
 
 export default function AccountList({ className = '' }) {

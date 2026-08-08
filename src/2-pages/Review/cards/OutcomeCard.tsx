@@ -4,7 +4,7 @@ import { formatDate } from '6-shared/helpers/date'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'

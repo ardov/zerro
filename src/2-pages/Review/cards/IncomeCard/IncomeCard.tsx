@@ -6,7 +6,7 @@ import { entries } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
 import { useAppSelector } from 'store'
 
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 
 import type { TCardProps } from '../../shared/Card'
 import { Card } from '../../shared/Card'

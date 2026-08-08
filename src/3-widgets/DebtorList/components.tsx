@@ -5,7 +5,7 @@ import type { ListItemButtonProps, ListSubheaderProps } from '@mui/material'
 import { ListSubheader, Box, Typography, ListItemButton } from '@mui/material'
 import type { TFxAmount, TFxCode } from '6-shared/types'
 import { Amount } from '6-shared/ui/Amount'
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 import { toISOMonth } from '6-shared/helpers/date'
 import { Tooltip } from '6-shared/ui/Tooltip'
 

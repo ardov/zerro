@@ -16,7 +16,7 @@ import { CloseIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import type { TDateDraft, TISOMonth } from '6-shared/types'
 
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 import {
   fixOverspends as fixAllOverspends,
   OverspendNotice,

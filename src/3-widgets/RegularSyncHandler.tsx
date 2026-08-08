@@ -76,7 +76,7 @@ export const RegularSyncHandler: FC = () => {
 
   // Main initializer. At first it loads local data and then starts regular sync process
   useEffect(() => {
-    let timer: NodeJS.Timeout
+    let timer: ReturnType<typeof setInterval>
     async function init() {
       await dispatch(loadLocalData())
       syncRef.current()

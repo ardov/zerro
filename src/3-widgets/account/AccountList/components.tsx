@@ -9,7 +9,7 @@ import { Amount } from '6-shared/ui/Amount'
 import type { TFxAmount } from '6-shared/types'
 import { Tooltip } from '6-shared/ui/Tooltip'
 
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
 import { useAccountContextMenu } from '3-widgets/global/AccountContextMenu'
 import { useContextMenu } from '6-shared/hooks/useContextMenu'

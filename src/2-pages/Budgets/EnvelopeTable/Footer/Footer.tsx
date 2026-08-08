@@ -7,7 +7,7 @@ import { TableRow } from '../shared/shared'
 
 import type { Metric } from '../models/useMetric'
 import type { TFxAmount, TISOMonth } from '6-shared/types'
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '3-widgets/DisplayAmount'
 import { useTranslation } from 'react-i18next'
 
 type FooterProps = {
