@@ -11,6 +11,7 @@ import {
   makeTransaction,
   makeUser,
 } from '../../../support/testing/zenmoneyTestData'
+import { ZERRO_DATA_ACCOUNT_NAME } from '../../../constants'
 import { applyPatch } from '../../domain/zenmoney/model/applyPatch'
 import type { TDataStore } from '../../domain/zenmoney/model/store'
 import { AccountType } from '../../domain/zenmoney/entities/accounts'
@@ -743,6 +744,59 @@ describe('summarizeStoreDiff', () => {
 
     expect(summarizeStoreDiff(current, diffStores(current, desired))).toEqual({
       goal: { created: 0, updated: 0, removed: 2 },
+    })
+  })
+
+  it('leaves out the account Zerro stores its own state under', () => {
+    const goals = makeReminder({
+      id: 'goals',
+      comment: JSON.stringify({
+        type: HiddenDataType.Goals,
+        month: '2026-08',
+        payload: { 'tag#car': { amount: 1 } },
+      }),
+    })
+    const current = makeSnapshot({
+      account: {
+        data: makeAccount({ id: 'data', title: ZERRO_DATA_ACCOUNT_NAME }),
+      },
+      reminder: { goals },
+    })
+    const patch = diffStores(current, makeSnapshot())
+
+    // The plan still removes it — restoring past its creation really does —
+    // but "Accounts remove 1" would bill Zerro's own storage for a goal the
+    // user set, so only the goal is counted.
+    expect(patch.deletion).toContainEqual({ id: 'data', object: 'account' })
+    expect(summarizeStoreDiff(current, patch)).toEqual({
+      goal: { created: 0, updated: 0, removed: 1 },
+    })
+  })
+
+  it('leaves it out when a restore would recreate it', () => {
+    const current = makeSnapshot()
+    const desired = makeSnapshot({
+      account: {
+        data: makeAccount({ id: 'data', title: ZERRO_DATA_ACCOUNT_NAME }),
+      },
+      reminder: {
+        goals: makeReminder({
+          id: 'goals',
+          incomeAccount: 'data',
+          outcomeAccount: 'data',
+          comment: JSON.stringify({
+            type: HiddenDataType.Goals,
+            month: '2026-08',
+            payload: { 'tag#car': { amount: 1 } },
+          }),
+        }),
+      },
+    })
+
+    // A creation intent carries the title, so the anchor is recognizable from
+    // the intent alone, with nothing in the current store to compare against.
+    expect(summarizeStoreDiff(current, diffStores(current, desired))).toEqual({
+      goal: { created: 1, updated: 0, removed: 0 },
     })
   })
 

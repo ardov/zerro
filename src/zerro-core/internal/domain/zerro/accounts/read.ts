@@ -40,8 +40,20 @@ export function getZerroDataAccountId(
   accounts: ById<TAccount>
 ): TAccountId | undefined {
   for (const id in accounts) {
-    if (accounts[id].title === ZERRO_DATA_ACCOUNT_NAME) return id
+    if (isZerroDataAccount(accounts[id])) return id
   }
+}
+
+/**
+ * Zerro's own storage anchor rather than an account its user keeps.
+ *
+ * The title is the whole identity, so the row is typed as loosely as that test
+ * needs: callers ask this of sparse patch rows too, where only the fields a
+ * write actually touched are present and a missing title simply fails to
+ * match.
+ */
+export function isZerroDataAccount(row: object): boolean {
+  return (row as { title?: unknown }).title === ZERRO_DATA_ACCOUNT_NAME
 }
 
 export function getZerroInBudgetAccountIds(
@@ -57,7 +69,7 @@ export function getZerroSavingAccounts(accounts: ById<TAccount>): TAccount[] {
     account =>
       !isZerroInBudgetAccount(account) &&
       account.type !== AccountType.Debt &&
-      account.title !== ZERRO_DATA_ACCOUNT_NAME
+      !isZerroDataAccount(account)
   )
 }
 

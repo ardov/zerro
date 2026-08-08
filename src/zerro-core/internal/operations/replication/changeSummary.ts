@@ -11,6 +11,7 @@ import {
   type TDataEntityKey,
   type TNormalizedPatch,
 } from '../../domain/zenmoney'
+import { isZerroDataAccount } from '../../domain/zerro/accounts'
 import {
   hiddenDataSummaryKeys,
   parseHiddenDataComment,
@@ -45,7 +46,7 @@ export function summarizeCanonicalTransition(
       // A transition carries only changed fields, so a hidden-data reminder
       // is recognizable exactly when its payload is what changed — which is
       // the case this exists for.
-      count(summary, keyFor(object, change.fields), isRemoval(change.fields))
+      countRow(summary, object, change.fields)
     })
   })
   transition.deletion?.forEach(({ object }) => count(summary, object, true))
@@ -61,7 +62,7 @@ export function summarizeNormalizedPatch(
 
   dataEntityKeys.forEach(object => {
     patch[object]?.forEach(row => {
-      count(summary, keyFor(object, row), isRemoval(row))
+      countRow(summary, object, row)
     })
   })
   patch.deletion?.forEach(({ object }) => {
@@ -85,15 +86,40 @@ function isRemoval(fields: object): boolean {
   return (fields as { deleted?: unknown }).deleted === true
 }
 
+function countRow(
+  summary: TChangeSummary,
+  object: TDataEntityKey,
+  fields: object
+): void {
+  const key = summaryKeyFor(object, fields)
+  if (key) count(summary, key, isRemoval(fields))
+}
+
 /**
  * The type a changed row is reported under: its own, unless it is a reminder
- * carrying Zerro's own state.
+ * carrying Zerro's own state — or `null` for a row no user ever asked for.
+ *
+ * The one such row is the account hidden data is stored under. Every write of
+ * a goal or a budget goes through `compileEnsureZerroDataAccount`, so without
+ * this a goal edit reports "Goals 1 · Accounts 1" and invites its reader to go
+ * looking for an account change that never happened. This is the same fix
+ * `hiddenDataSummaryKeys` makes for the reminders themselves.
+ *
+ * Recognition is by title and therefore one-sided: a deletion entry carries an
+ * id and nothing else, so a data account that goes away is still counted as an
+ * account, and no stored transition holds what would close that gap. The leak
+ * this exists for is the other direction — the account is ensured on every
+ * goal and budget write, and a creation carries every field, title included.
  *
  * A payload that fails to parse falls back to `reminder` rather than throwing
  * — a comment this code cannot read is still a reminder that changed, and a
  * history list must not be the thing that breaks on unfamiliar data.
  */
-function keyFor(object: TDataEntityKey, fields: object): TChangeSummaryKey {
+function summaryKeyFor(
+  object: TDataEntityKey,
+  fields: object
+): TChangeSummaryKey | null {
+  if (object === 'account') return isZerroDataAccount(fields) ? null : object
   if (object !== 'reminder') return object
   const comment = (fields as { comment?: unknown }).comment
   if (typeof comment !== 'string') return object

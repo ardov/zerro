@@ -25,6 +25,7 @@ import {
   type TIntentEntityKey,
   type TIntentPatch,
 } from '../../domain/zenmoney'
+import { isZerroDataAccount } from '../../domain/zerro/accounts'
 import {
   hiddenDataSummaryKeys,
   parseHiddenDataComment,
@@ -550,6 +551,9 @@ export function summarizeStoreDiff(
     if (!intents?.length) return
     const currentById = (current[key] ?? {}) as TById
     intents.forEach(intent => {
+      if (key === 'account' && isZerroDataAccountWrite(currentById, intent)) {
+        return
+      }
       // Both payloads are in hand here, unlike in a list row, so a hidden-data
       // reminder is counted by what moved inside it rather than as one row.
       if (key === 'reminder') {
@@ -571,6 +575,12 @@ export function summarizeStoreDiff(
 
   patch.deletion?.forEach(({ object, id }) => {
     if (!(intentEntityKeys as readonly string[]).includes(object)) return
+    if (
+      object === 'account' &&
+      isZerroDataAccountWrite((current.account ?? {}) as TById, { id })
+    ) {
+      return
+    }
     // A deleted hidden-data reminder takes its whole payload with it, and the
     // current store still holds it — so this is countable too.
     if (object === 'reminder') {
@@ -585,6 +595,25 @@ export function summarizeStoreDiff(
     countsFor(object as TIntentEntityKey).removed += 1
   })
   return summary
+}
+
+/**
+ * Whether a planned account write lands on Zerro's own storage anchor.
+ *
+ * It is not an account the user keeps — hidden-data writes create it and every
+ * other surface in the app hides it — so counting it here would bill Zerro's
+ * plumbing as part of what a restore costs. Either side identifies it: a
+ * creation intent carries the title, while a removal or an update leaves the
+ * title to the live row.
+ *
+ * Only the count is dropped. The plan still writes it, because restoring past
+ * its creation really does remove it, and the next goal or budget write brings
+ * it straight back.
+ */
+function isZerroDataAccountWrite(currentById: TById, intent: TRow): boolean {
+  if (isZerroDataAccount(intent)) return true
+  const before = currentById[intent.id]
+  return !!before && isZerroDataAccount(before)
 }
 
 /** What a deleted hidden-data reminder takes with it: its payload entries, or

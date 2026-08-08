@@ -5,6 +5,7 @@ import {
   makeStore,
   makeTransaction,
 } from '../../../support/testing/zenmoneyTestData'
+import { ZERRO_DATA_ACCOUNT_NAME } from '../../../constants'
 import { HiddenDataType } from '../../domain/zerro/hidden-data'
 import { compactCanonicalTransition } from './journal'
 import {
@@ -113,6 +114,54 @@ describe('change summary', () => {
       goal: { changed: 1, removed: 0 },
       reminder: { changed: 1, removed: 0 },
     })
+  })
+
+  it('leaves out the account Zerro stores its own state under', () => {
+    const goals = makeReminder({
+      id: 'goals-2026-08',
+      comment: JSON.stringify({
+        type: HiddenDataType.Goals,
+        month: '2026-08',
+        payload: { 'tag#car': { type: 'monthly', amount: 1000 } },
+      }),
+    })
+    const before = makeStore({ serverTimestamp: 10 })
+    const after = makeStore({
+      serverTimestamp: 20,
+      account: {
+        data: makeAccount({ id: 'data', title: ZERRO_DATA_ACCOUNT_NAME }),
+        cash: makeAccount({ id: 'cash', title: 'Cash' }),
+      },
+      reminder: { [goals.id]: goals },
+    })
+
+    const transition = compactCanonicalTransition(before, after)
+
+    // Setting a goal ensures the storage account exists. Counting it would
+    // report "Goals 1 · Accounts 1" and send its reader looking for a change
+    // to their own accounts that never happened — the account the user really
+    // did add is still there.
+    expect(summarizeCanonicalTransition(transition!)).toEqual({
+      goal: { changed: 1, removed: 0 },
+      account: { changed: 1, removed: 0 },
+    })
+  })
+
+  it('leaves it out of a materialized patch too', () => {
+    const summary = summarizeNormalizedPatch({
+      account: [makeAccount({ id: 'data', title: ZERRO_DATA_ACCOUNT_NAME })],
+      reminder: [
+        makeReminder({
+          id: 'goals',
+          comment: JSON.stringify({
+            type: HiddenDataType.Goals,
+            payload: { 'tag#car': { amount: 1 } },
+          }),
+        }),
+      ],
+    })
+
+    expect(summary).toEqual({ goal: { changed: 1, removed: 0 } })
   })
 
   it('falls back to the reminder when the payload cannot be read', () => {
