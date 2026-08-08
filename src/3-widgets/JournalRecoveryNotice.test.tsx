@@ -24,7 +24,10 @@ vi.mock('4-features/sync', () => ({
 
 import { JournalRecoveryNotice } from './JournalRecoveryNotice'
 
-function createStore(recoveryRequired: boolean) {
+function createStore(
+  recoveryRequired: boolean,
+  outboxRecoveryReason: string | null = null
+) {
   const data = dataReducer(undefined, { type: 'test/init' })
   return configureStore({
     reducer: { data: dataReducer },
@@ -33,6 +36,7 @@ function createStore(recoveryRequired: boolean) {
         ...data,
         journalRecoveryRequired: recoveryRequired,
         journalRecoveryReason: recoveryRequired ? 'broken graph' : null,
+        outboxRecoveryReason,
       },
     },
   })
@@ -66,5 +70,17 @@ describe('JournalRecoveryNotice', () => {
       screen.getByRole('button', { name: 'journalRecoveryConfirm' })
     )
     expect(confirmMock).toHaveBeenCalledOnce()
+  })
+
+  it('waits for corrupt outbox recovery before offering a full reload', () => {
+    const store = createStore(true, 'outbox[0] is invalid')
+
+    render(
+      <Provider store={store}>
+        <JournalRecoveryNotice />
+      </Provider>
+    )
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

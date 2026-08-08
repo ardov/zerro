@@ -1,167 +1,203 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-const { clearStorageMock, saveJournalStateMock, saveReplicaStateMock } =
-  vi.hoisted(() => ({
-    clearStorageMock: vi.fn().mockResolvedValue(undefined),
-    saveJournalStateMock: vi.fn().mockResolvedValue(undefined),
-    saveReplicaStateMock: vi.fn().mockResolvedValue(undefined),
-  }))
-
-vi.mock('6-shared/api/localStore', () => ({
-  clearStorage: clearStorageMock,
-  saveJournalState: saveJournalStateMock,
-  saveReplicaState: saveReplicaStateMock,
+const { storageMock } = vi.hoisted(() => ({
+  storageMock: {
+    saveOutbox: vi.fn().mockResolvedValue(undefined),
+    commitCanonical: vi.fn().mockResolvedValue(undefined),
+    compactOneBatch: vi.fn().mockResolvedValue({ entriesDeleted: 0 }),
+    clear: vi.fn().mockResolvedValue(undefined),
+    discardOutbox: vi.fn().mockResolvedValue(undefined),
+  },
 }))
 
+vi.mock('6-shared/api/replicaStorage', () => ({ replicaStorage: storageMock }))
+
 import { makeStore } from 'zerro-core/support/testing/zenmoneyTestData'
-import {
-  createJournalBranch,
-  journalPersistenceVersion,
-  type TCommand,
-} from 'zerro-core/replica'
 import { patchTransactionsPage } from '../view'
-import { appendClientCommand } from './slice'
+import {
+  appendClientCommand,
+  rebaseServerInbox,
+  receiveServerPatch,
+} from './slice'
 import {
   clearPersistedLocalData,
-  getPersistedJournal,
-  getPersistedReplica,
   replicaPersistenceMiddleware,
+  resetReplicaPersistenceForTests,
 } from './replicaPersistence'
 
-const entry: TCommand = {
-  type: 'patch',
-  patch: {},
-  issuedAt: 10,
-}
+const entry = { type: 'patch' as const, patch: {}, issuedAt: 10 }
 
 afterEach(() => {
-  vi.unstubAllGlobals()
-  clearStorageMock.mockClear()
-  saveReplicaStateMock.mockClear()
-  saveJournalStateMock.mockClear()
+  vi.restoreAllMocks()
+  resetReplicaPersistenceForTests()
+  Object.values(storageMock).forEach(mock => mock.mockClear())
 })
 
-describe('replica persistence snapshot', () => {
-  it('stores only the durable command outbox', () => {
-    const base = makeStore({ serverTimestamp: 100 })
+describe('replica persistence queue', () => {
+  it('stores the durable outbox after a local command', async () => {
+    const state = replicaState()
+    const invoke = middleware(state)
 
-    expect(
-      getPersistedReplica({
-        data: {
-          base,
-          current: makeStore({ serverTimestamp: 999 }),
-          outbox: [entry],
-        },
+    invoke(appendClientCommand(entry))
+
+    await vi.waitFor(() =>
+      expect(storageMock.saveOutbox).toHaveBeenCalledWith(7, [entry])
+    )
+  })
+
+  it('commits canonical base and outbox together, then attempts compaction', async () => {
+    const state = replicaState()
+    const invoke = middleware(state)
+    invoke(receiveServerPatch({ serverTimestamp: 200, push: true }))
+
+    invoke(rebaseServerInbox())
+
+    await vi.waitFor(() =>
+      expect(storageMock.commitCanonical).toHaveBeenCalledWith({
+        before: expect.objectContaining({ serverTimestamp: 100 }),
+        after: expect.objectContaining({ serverTimestamp: 200 }),
+        outbox: [],
+        pushed: true,
+        checkpointReason: undefined,
       })
-    ).toEqual({
-      version: 3,
-      baseServerTimestamp: 100,
-      outbox: [entry],
+    )
+    await vi.waitFor(() =>
+      expect(storageMock.compactOneBatch).toHaveBeenCalledOnce()
+    )
+  })
+
+  it('records recovery as the checkpoint reason even for a full reload', async () => {
+    const state = replicaState()
+    state.data.journalRecoveryRequired = true
+    const invoke = middleware(state)
+    invoke(
+      receiveServerPatch({
+        serverTimestamp: 200,
+        fullReload: true,
+        push: false,
+      })
+    )
+
+    invoke(rebaseServerInbox())
+
+    await vi.waitFor(() =>
+      expect(storageMock.commitCanonical).toHaveBeenCalledWith(
+        expect.objectContaining({ checkpointReason: 'recovery' })
+      )
+    )
+  })
+
+  it('does not persist transient view actions and always clears on logout', async () => {
+    const state = replicaState()
+    const invoke = middleware(state)
+
+    invoke(patchTransactionsPage({ search: 'coffee' }))
+    await clearPersistedLocalData()
+
+    expect(storageMock.saveOutbox).not.toHaveBeenCalled()
+    expect(storageMock.clear).toHaveBeenCalledOnce()
+  })
+
+  it('waits for a root user before creating the first replica', async () => {
+    const state = replicaState()
+    state.data.rootUserId = null
+    const invoke = middleware(state)
+    invoke(receiveServerPatch({ serverTimestamp: 200 }))
+
+    invoke(rebaseServerInbox())
+    await Promise.resolve()
+
+    expect(storageMock.commitCanonical).not.toHaveBeenCalled()
+  })
+
+  it('disables later primary writes after the first persistence failure', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    storageMock.saveOutbox.mockRejectedValueOnce(new Error('quota exceeded'))
+    const state = replicaState()
+    const dispatched: unknown[] = []
+    const invoke = (replicaPersistenceMiddleware as any)({
+      getState: () => state,
+      dispatch: (action: unknown) => dispatched.push(action),
+    })((action: any) => {
+      if (appendClientCommand.match(action))
+        state.data.outbox.push(action.payload)
+      return action
+    })
+
+    invoke(appendClientCommand(entry))
+    await vi.waitFor(() => expect(dispatched).toHaveLength(1))
+    invoke(appendClientCommand({ ...entry, issuedAt: 20 }))
+    await Promise.resolve()
+
+    expect(storageMock.saveOutbox).toHaveBeenCalledOnce()
+    expect(dispatched[0]).toMatchObject({
+      type: 'data/persistenceFailed',
+      payload: { reason: 'quota exceeded' },
     })
   })
 
-  it('stores the accepted journal unless it is quarantined', () => {
-    const base = makeStore({ serverTimestamp: 100 })
-    const journal = {
-      version: journalPersistenceVersion,
-      activeBranchId: 'main',
-      branches: [createJournalBranch('main', base)],
-    }
-    const state = {
-      data: {
-        base,
-        current: base,
-        outbox: [],
-        journal,
-        journalPersistenceBlocked: false,
-      },
-    }
-
-    expect(getPersistedJournal(state)).toEqual(journal)
-    expect(
-      getPersistedJournal({
-        data: { ...state.data, journalPersistenceBlocked: true },
-      })
-    ).toBeUndefined()
-  })
-
-  it('queues journal persistence alongside a replica mutation', async () => {
-    const current = makeStore({ serverTimestamp: 100 })
-    const journal = {
-      version: journalPersistenceVersion,
-      activeBranchId: 'main',
-      branches: [createJournalBranch('main', current)],
-    }
-    const state = {
-      data: {
-        base: current,
-        current,
-        outbox: [entry],
-        journal,
-        journalPersistenceBlocked: false,
-      },
-    }
-    const invoke = (replicaPersistenceMiddleware as any)({
-      getState: () => state,
-      dispatch: vi.fn(),
-    })(vi.fn(nextAction => nextAction))
+  it('does not overwrite a corrupt persisted outbox before explicit discard', async () => {
+    const state = replicaState()
+    state.data.outboxRecoveryReason = 'outbox[0] is invalid'
+    const invoke = middleware(state)
 
     invoke(appendClientCommand(entry))
-
-    await vi.waitFor(() =>
-      expect(saveJournalStateMock).toHaveBeenCalledWith(journal)
-    )
-  })
-
-  it('queues a browser persistence write after a command', async () => {
-    const current = makeStore({ serverTimestamp: 100 })
-    const state = {
-      data: {
-        base: current,
-        current,
-        outbox: [entry],
-      },
-    }
-    const invoke = (replicaPersistenceMiddleware as any)({
-      getState: () => state,
-      dispatch: vi.fn(),
-    })(vi.fn(nextAction => nextAction))
-
-    invoke(appendClientCommand(entry))
-
-    await vi.waitFor(() =>
-      expect(saveReplicaStateMock).toHaveBeenCalledWith({
-        version: 3,
-        baseServerTimestamp: 100,
-        outbox: [entry],
-      })
-    )
-  })
-
-  it('does not persist transient view actions', async () => {
-    const current = makeStore({ serverTimestamp: 100 })
-    const invoke = (replicaPersistenceMiddleware as any)({
-      getState: () => ({ data: { base: current, current, outbox: [] } }),
-      dispatch: vi.fn(),
-    })(vi.fn(nextAction => nextAction))
-
-    invoke(patchTransactionsPage({ search: 'coffee' }))
-
+    invoke(receiveServerPatch({ serverTimestamp: 200 }))
+    invoke(rebaseServerInbox())
     await Promise.resolve()
-    expect(saveReplicaStateMock).not.toHaveBeenCalled()
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(storageMock.saveOutbox).not.toHaveBeenCalled()
+    expect(storageMock.commitCanonical).not.toHaveBeenCalled()
   })
 
-  it('clears storage after invalidating saves from the previous login', async () => {
-    const current = makeStore({ serverTimestamp: 100 })
-    const invoke = (replicaPersistenceMiddleware as any)({
-      getState: () => ({ data: { base: current, current, outbox: [entry] } }),
-      dispatch: vi.fn(),
-    })(vi.fn(nextAction => nextAction))
+  it('does not persist outbox mutations while journal recovery is pending', async () => {
+    const state = replicaState()
+    state.data.journalRecoveryRequired = true
+    const invoke = middleware(state)
 
     invoke(appendClientCommand(entry))
-    await clearPersistedLocalData()
+    await Promise.resolve()
+    await Promise.resolve()
 
-    expect(clearStorageMock).toHaveBeenCalledOnce()
-    expect(saveReplicaStateMock).not.toHaveBeenCalled()
+    expect(storageMock.saveOutbox).not.toHaveBeenCalled()
   })
 })
+
+function replicaState() {
+  return {
+    data: {
+      rootUserId: 7 as number | null,
+      base: makeStore({ serverTimestamp: 100 }),
+      current: makeStore({ serverTimestamp: 100 }),
+      outbox: [] as (typeof entry)[],
+      redo: [],
+      inbox: null as any,
+      journalRecoveryRequired: false,
+      outboxRecoveryReason: null as string | null,
+    },
+  }
+}
+
+function middleware(state: ReturnType<typeof replicaState>) {
+  const dispatch = vi.fn()
+  const invoke = (replicaPersistenceMiddleware as any)({
+    getState: () => state,
+    dispatch,
+  })((action: any) => {
+    if (receiveServerPatch.match(action)) state.data.inbox = action.payload
+    if (rebaseServerInbox.match(action) && state.data.inbox) {
+      state.data.base = {
+        ...state.data.base,
+        serverTimestamp: state.data.inbox.serverTimestamp ?? 100,
+      }
+      state.data.current = state.data.base
+      state.data.inbox = null
+    }
+    if (appendClientCommand.match(action))
+      state.data.outbox.push(action.payload)
+    return action
+  })
+  return invoke
+}

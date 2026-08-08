@@ -20,7 +20,7 @@ import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import { isEditingTarget } from '4-features/historyShortcuts'
 import { useAppDispatch, useAppSelector } from 'store'
-import { restoreOutboxPosition, validateJournalPoint } from 'store/data'
+import { restoreOutboxPosition } from 'store/data'
 import {
   exitHistoryBrowsing,
   returnToCurrent,
@@ -28,13 +28,11 @@ import {
   selectHistoryPointData,
   selectHistoryStep,
   selectIsBrowsingHistory,
-  selectSelectedHistoryEntry,
   selectSelectedHistoryEntryMissing,
   selectSelectedHistoryPoint,
   selectSelectedHistoryTime,
 } from 'store/history'
 import { core } from 'zerro-core/redux'
-import { dataStoreValidatorVersion } from 'zerro-core/replica'
 import { historyPanelPopover } from './HistoryPanel'
 
 /**
@@ -56,19 +54,9 @@ export function HistoryTopBar() {
   const data = useAppSelector(selectHistoryPointData)
   const missing = useAppSelector(selectSelectedHistoryEntryMissing)
   const time = useAppSelector(selectSelectedHistoryTime)
-  const entry = useAppSelector(selectSelectedHistoryEntry)
   const step = useAppSelector(selectHistoryStep)
   const { displayProps: panel, open: openPanel } =
     historyPanelPopover.useProps()
-
-  // Journal points validate lazily: only once opened, cached by validator version.
-  useEffect(() => {
-    if (point?.kind !== 'journal' || !entry) return
-    const stale =
-      entry.validation.kind === 'unknown' ||
-      entry.validation.validatorVersion !== dataStoreValidatorVersion
-    if (stale) dispatch(validateJournalPoint(point.ref))
-  }, [dispatch, entry, point])
 
   // Escape leaves history. With ✕ it is the only way out, and both sit still.
   useEffect(() => {
@@ -108,10 +96,9 @@ export function HistoryTopBar() {
 
   // A null selection is the head of the list: live data under another name.
   const atHead = point === null
-  const canRestore =
-    !atHead &&
-    !missing &&
-    (point.kind === 'local' || entry?.validation.kind === 'valid')
+  // `data` is the single readiness signal: a local point out of range and a
+  // journal point still loading or missing all leave it undefined.
+  const canRestore = !atHead && data !== undefined
   const restore = () =>
     point?.kind === 'local' ? restoreLocal() : confirmRestoreServer()
 
@@ -135,7 +122,9 @@ export function HistoryTopBar() {
         <IconButton
           size="small"
           disabled={!step.back}
-          onClick={() => step.back && dispatch(selectHistoryPoint(step.back))}
+          onClick={() =>
+            step.back && void dispatch(selectHistoryPoint(step.back))
+          }
           aria-label={t('stepBack')}
         >
           <ChevronLeftIcon fontSize="small" />
@@ -144,7 +133,7 @@ export function HistoryTopBar() {
           size="small"
           disabled={!step.forward}
           onClick={() =>
-            step.forward && dispatch(selectHistoryPoint(step.forward))
+            step.forward && void dispatch(selectHistoryPoint(step.forward))
           }
           aria-label={t('stepForward')}
         >

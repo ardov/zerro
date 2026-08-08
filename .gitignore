@@ -39,3 +39,4 @@ yarn-error.log*
 
 *storybook.log
 experiments/
+.scratch/

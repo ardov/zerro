@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid'
 import type { AppDispatch, AppThunk, RootState } from 'store'
-import { appendClientCommand } from 'store/data'
+import { appendClientCommand, getReplicaWriteBlocked } from 'store/data'
 import { selectIsHistoryPointVisible } from 'store/history'
 
 import {
@@ -60,7 +60,10 @@ export function executeReduxCommandWithStatus<TReceipt = unknown>(
 ): AppThunk<TCommandExecution<TReceipt>> {
   return (dispatch, getState) => {
     const state = getState()
-    if (selectIsHistoryPointVisible(state) && !options.allowHistory) {
+    if (
+      getReplicaWriteBlocked(state) ||
+      (selectIsHistoryPointVisible(state) && !options.allowHistory)
+    ) {
       return { applied: false, receipt: undefined }
     }
     const result = compile(state, defaultCtx)
@@ -81,7 +84,7 @@ export function executeReduxPatch(
 ): AppThunk {
   return (dispatch, getState) => {
     const state = getState()
-    if (!selectIsHistoryPointVisible(state))
+    if (!getReplicaWriteBlocked(state) && !selectIsHistoryPointVisible(state))
       appendIntentPatch(dispatch, state, patch, options)
   }
 }

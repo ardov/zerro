@@ -5,7 +5,9 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { Provider } from 'react-redux'
-import dataReducer from 'store/data'
+import { rootReducer } from 'store/rootReducer'
+import { makeTestRootState } from 'store/testing'
+import { makeStore } from 'zerro-core/support/testing/zenmoneyTestData'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { TagSelect2 } from './TagSelect2'
 
@@ -46,32 +48,16 @@ function makeOutcomeTag(id: string, title: string): TTag {
 
 const createTestStore = () =>
   configureStore({
-    reducer: {
-      data: dataReducer,
-    },
-    preloadedState: {
-      data: {
-        ...dataReducer(undefined, { type: 'test/init' }),
-        current: {
-          serverTimestamp: 0,
-          instrument: {},
-          country: {},
-          company: {},
-          user: {},
-          merchant: {},
-          account: {},
-          tag: {
-            tag1: makeOutcomeTag('tag1', '🍔 Food'),
-            tag2: makeOutcomeTag('tag2', '🚗 Transport'),
-            tag3: makeOutcomeTag('tag3', '🎮 Entertainment'),
-          },
-          budget: {},
-          reminder: {},
-          reminderMarker: {},
-          transaction: {},
+    reducer: rootReducer,
+    preloadedState: makeTestRootState(
+      makeStore({
+        tag: {
+          tag1: makeOutcomeTag('tag1', '🍔 Food'),
+          tag2: makeOutcomeTag('tag2', '🚗 Transport'),
+          tag3: makeOutcomeTag('tag3', '🎮 Entertainment'),
         },
-      },
-    },
+      })
+    ),
   })
 
 describe('TagSelect2 keyboard navigation', () => {

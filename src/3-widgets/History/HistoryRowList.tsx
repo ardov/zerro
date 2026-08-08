@@ -1,13 +1,11 @@
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import {
-  Chip,
   Divider,
   IconButton,
   List,
   ListItemButton,
   ListItemText,
-  Stack,
 } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
 import { commandVerbLabelKeys } from '6-shared/localization/commandVerbs'
@@ -140,18 +138,7 @@ function HistoryRowItem({
     >
       <ListItemText
         primary={
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <span>
-              {entry.kind === 'checkpoint' ? t('checkpoint') : t('serverSync')}
-            </span>
-            {entry.validation.kind === 'invalid' && (
-              <Chip
-                size="small"
-                color="error"
-                label={t('validationInvalidShort')}
-              />
-            )}
-          </Stack>
+          entry.kind === 'checkpoint' ? t('checkpoint') : t('serverSync')
         }
         secondary={secondaryLine(
           formatDate(entry.serverTimestamp, 'd MMM yyyy, HH:mm'),
@@ -187,5 +174,5 @@ function rowKey(row: THistoryRow): string {
   if (row.type === 'redo') return `redo:${row.command.issuedAt}`
   if (row.type === 'run') return `run:${row.id}`
   if (row.type === 'local') return `local:${row.point.index}`
-  return `journal:${row.entry.branchId}:${row.entry.ref.pointId ?? 'checkpoint'}`
+  return `journal:${row.entry.sequence}`
 }

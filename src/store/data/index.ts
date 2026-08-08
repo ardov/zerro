@@ -4,17 +4,26 @@ export default reducer
 // ACTIONS
 export {
   appendClientCommand,
+  hydrateReplica,
+  hydrateCorruptOutbox,
+  hydrateCorruptReplica,
+  hydrateRecoveryOutbox,
+  corruptOutboxDiscarded,
+  recoveryCheckpointPersisted,
   prepareClientSync,
   undoClientCommand,
   redoClientCommand,
-  validateJournalPoint,
   restoreOutboxPosition,
-  restorePersistedJournal,
-  restorePersistedReplica,
   resetData,
 } from './slice'
 export { applyServerPatch } from './applyServerPatch'
-export { clearPersistedLocalData } from './replicaPersistence'
+export {
+  clearPersistedLocalData,
+  compactPersistedReplica,
+  discardPersistedOutbox,
+  persistRecoveryCheckpoint,
+  waitForPersistedReplica,
+} from './replicaPersistence'
 
 // SELECTORS
 export {
@@ -23,7 +32,10 @@ export {
   getCanUndoClientCommand,
   getCanRedoClientCommand,
   getJournalRecoveryReason,
+  getOutboxRecoveryReason,
+  getPersistenceWarning,
   getJournalRecoveryRequired,
+  getReplicaWriteBlocked,
   getRestoredOutboxCount,
   getChangedNum,
   getLastChangeTime,

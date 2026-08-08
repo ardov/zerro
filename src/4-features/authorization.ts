@@ -7,7 +7,7 @@ import { applyServerPatch, resetData } from 'store/data'
 import { resetViews } from 'store/view'
 import { refreshData } from '4-features/sync'
 import { convertDiff } from '6-shared/api/zm-adapter'
-import { clearLocalData, saveDataLocally } from './localData'
+import { clearLocalData } from './localData'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 import { getDemoData } from 'zerro-core/demo'
 
@@ -50,7 +50,6 @@ export const loadBackup =
       tokenStorage.set(zenmoney.fakeToken)
       dispatch(setToken(zenmoney.fakeToken))
       dispatch(applyServerPatch(converted))
-      dispatch(saveDataLocally())
     } catch (error) {
       console.error(error)
     }
@@ -64,7 +63,6 @@ export const loadDemoData = (): AppThunk<void> => async dispatch => {
     tokenStorage.set(zenmoney.fakeToken)
     dispatch(setToken(zenmoney.fakeToken))
     dispatch(applyServerPatch(diff))
-    dispatch(saveDataLocally())
   } catch (error) {
     console.error(error)
   }

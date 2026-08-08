@@ -1,18 +1,14 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import {
   makeAccount,
   makeInstrument,
+  makeStore,
   makeTransaction,
   makeUser,
 } from 'zerro-core/support/testing/zenmoneyTestData'
-import {
-  createJournalBranch,
-  journalPersistenceVersion,
-  type TCommand,
-  type TPersistedJournal,
-} from 'zerro-core/replica'
-import { AccountType } from 'zerro-core/internal/domain/zenmoney'
+import { type TCommand } from 'zerro-core/replica'
+import { AccountType } from '6-shared/types'
 import {
   getChangedNum,
   getLastChangeTime,
@@ -21,13 +17,13 @@ import {
 } from './selectors'
 import reducer, {
   appendClientCommand,
+  hydrateReplica,
+  hydrateRecoveryOutbox,
   prepareClientSync,
   rebaseServerInbox,
   receiveServerPatch,
   redoClientCommand,
-  restorePersistedJournal,
   resetData,
-  restorePersistedReplica,
   undoClientCommand,
 } from './slice'
 
@@ -55,6 +51,86 @@ function makeAccountEntry(title: string, issuedAt: number): TCommand {
 }
 
 describe('command outbox boundaries', () => {
+  it('hydrates base and current from one reconstructed replica', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    }).base
+    const outbox = [makeAccountEntry('Wallet', 10)]
+
+    const hydrated = reducer(
+      undefined,
+      hydrateReplica({ rootUserId: 7, base, outbox })
+    )
+
+    expect(hydrated.rootUserId).toBe(7)
+    expect(hydrated.base).toBe(base)
+    expect(hydrated.current.account.cash.title).toBe('Wallet')
+    expect(hydrated.outbox).toEqual(outbox)
+    expect(hydrated.restoredOutboxCount).toBe(1)
+  })
+
+  it('clears recovery after the cursor-zero canonical snapshot is accepted', () => {
+    const recovering = reducer(
+      undefined,
+      hydrateRecoveryOutbox({
+        rootUserId: 7,
+        outbox: [makeAccountEntry('Wallet', 10)],
+        reason: 'broken checkpoint',
+      })
+    )
+
+    const recovered = applyServerPatch(recovering, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+
+    expect(recovered.journalRecoveryRequired).toBe(false)
+    expect(recovered.journalRecoveryReason).toBeNull()
+    expect(recovered.current.account.cash.title).toBe('Wallet')
+  })
+
+  it('quarantines a recovered outbox that is invalid over the full snapshot', () => {
+    const recovering = reducer(
+      undefined,
+      hydrateRecoveryOutbox({
+        rootUserId: 7,
+        outbox: [
+          {
+            type: 'patch',
+            issuedAt: 10,
+            patch: { account: [{ id: 'cash', instrument: 999 }] },
+          },
+        ],
+        reason: 'broken checkpoint',
+      })
+    )
+
+    const recovered = applyServerPatch(recovering, {
+      fullReload: true,
+      serverTimestamp: 100,
+      instrument: [makeInstrument({ id: 1 })],
+      country: [{ id: 1, title: 'United States', currency: 1, domain: null }],
+      user: [makeUser({ id: 7, parent: null, currency: 1 })],
+      account: [
+        makeAccount({ id: 'cash', user: 7, instrument: 1 }),
+        makeAccount({
+          id: 'debt',
+          user: 7,
+          instrument: 1,
+          type: AccountType.Debt,
+        }),
+      ],
+    })
+
+    expect(recovered.outbox).toEqual([])
+    expect(recovered.current).toBe(recovered.base)
+    expect(recovered.outboxRecoveryReason).toContain(
+      'account[0].instrument references a missing entity'
+    )
+    expect(recovered.journalRecoveryRequired).toBe(true)
+  })
+
   it('applies canonical server patches with no pending commands', () => {
     const initial = reducer(undefined, { type: 'test/init' })
     const received = reducer(
@@ -277,245 +353,13 @@ describe('command outbox boundaries', () => {
     expect(prepared.redo).toEqual([])
   })
 
-  it('restores command-only persistence only over its matching base', () => {
+  it('keeps the outbox over a full server reload', () => {
     const base = applyServerPatch(undefined, {
       serverTimestamp: 100,
       account: [makeAccount({ id: 'cash', title: 'Cash' })],
     })
-    const entry = makeAccountEntry('Wallet', 10)
-    const persisted = {
-      version: 3 as const,
-      baseServerTimestamp: 100,
-      outbox: [entry],
-    }
-
-    const restored = reducer(base, restorePersistedReplica(persisted))
-    expect(restored.current.account.cash.title).toBe('Wallet')
-    expect(restored.outbox).toEqual([entry])
-    expect(restored.redo).toEqual([])
-
-    const stale = reducer(
-      base,
-      restorePersistedReplica({ ...persisted, baseServerTimestamp: 99 })
-    )
-    expect(stale.current.account.cash.title).toBe('Cash')
-    expect(stale.outbox).toEqual([])
-  })
-
-  it('reports an outbox that survived a reload until it is pushed', () => {
-    const base = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      account: [makeAccount({ id: 'cash', title: 'Cash' })],
-    })
-    const persisted = {
-      version: 3 as const,
-      baseServerTimestamp: 100,
-      outbox: [makeAccountEntry('Wallet', 10)],
-    }
-
-    const restored = reducer(base, restorePersistedReplica(persisted))
-    expect(restored.restoredOutboxCount).toBe(1)
-
-    // A command issued in this session is not something the user needs telling
-    // about, but it does not clear the ones that were already waiting.
-    const appended = reducer(
-      restored,
-      appendClientCommand(makeAccountEntry('Vault', 20))
-    )
-    expect(appended.restoredOutboxCount).toBe(1)
-
-    expect(reducer(appended, prepareClientSync()).restoredOutboxCount).toBe(0)
-    expect(
-      reducer(base, restorePersistedReplica({ ...persisted, outbox: [] }))
-        .restoredOutboxCount
-    ).toBe(0)
-  })
-
-  it('creates a journal checkpoint from legacy base data', () => {
-    const base = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      account: [makeAccount({ id: 'cash', title: 'Cash' })],
-    })
-
-    const restored = reducer(
-      base,
-      restorePersistedJournal({ preserveStored: false })
-    )
-
-    expect(restored.journal).toMatchObject({
-      version: journalPersistenceVersion,
-      activeBranchId: 'main',
-    })
-    expect(restored.journal?.branches[0].checkpoint).toEqual(restored.base)
-    expect(restored.journalPersistenceBlocked).toBe(false)
-  })
-
-  it('appends a canonical server point after journal initialization', () => {
-    const base = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      account: [makeAccount({ id: 'cash', title: 'Cash' })],
-    })
-    const initialized = reducer(
-      base,
-      restorePersistedJournal({ preserveStored: false })
-    )
-    const rebased = applyServerPatch(initialized, {
-      serverTimestamp: 101,
-      account: [makeAccount({ id: 'cash', title: 'Wallet' })],
-    })
-
-    expect(rebased.journal?.branches[0].points).toHaveLength(1)
-    expect(rebased.journal?.branches[0].points[0].id).toBe('server:101')
-    expect(rebased.journal?.branches[0].serverTimestamp).toBe(101)
-  })
-
-  it('replays a persisted journal as the accepted base', () => {
-    const checkpoint = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      account: [makeAccount({ id: 'cash', title: 'Cash' })],
-    }).base
-    const persisted: TPersistedJournal = {
-      version: journalPersistenceVersion,
-      activeBranchId: 'main',
-      branches: [
-        {
-          ...createJournalBranch('main', checkpoint),
-          serverTimestamp: 101,
-          points: [
-            {
-              id: 'server:101',
-              transition: {
-                serverTimestamp: 101,
-                upsert: {
-                  account: [{ id: 'cash', fields: { title: 'Wallet' } }],
-                },
-              },
-              validation: { kind: 'unknown' },
-              pushed: true,
-            },
-          ],
-        },
-      ],
-    }
-    const loaded = reducer(
-      applyServerPatch(undefined, { serverTimestamp: 0 }),
-      restorePersistedJournal({ journal: persisted, preserveStored: false })
-    )
-
-    expect(loaded.base.serverTimestamp).toBe(101)
-    expect(loaded.base.account.cash.title).toBe('Wallet')
-    expect(loaded.current).toEqual(loaded.base)
-  })
-
-  it('quarantines an invalid journal fallback without losing the raw base', () => {
-    const base = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      account: [makeAccount({ id: 'cash', title: 'Cash' })],
-    })
-
-    const restored = reducer(
-      base,
-      restorePersistedJournal({ preserveStored: true })
-    )
-
-    expect(restored.base.account.cash.title).toBe('Cash')
-    expect(restored.journalPersistenceBlocked).toBe(true)
-  })
-
-  it('flags a semantically invalid active branch until a full reload', () => {
-    const invalid = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      instrument: [makeInstrument({ id: 1 })],
-      country: [{ id: 1, title: 'United States', currency: 1, domain: null }],
-      user: [makeUser({ id: 1, parent: null, currency: 1 })],
-      account: [
-        makeAccount({ id: 'cash', type: AccountType.Cash }),
-        makeAccount({ id: 'debt-1', type: AccountType.Debt }),
-        makeAccount({ id: 'debt-2', type: AccountType.Debt }),
-      ],
-    })
-
-    const flagged = reducer(
-      invalid,
-      restorePersistedJournal({ preserveStored: false })
-    )
-
-    expect(flagged.journalRecoveryRequired).toBe(true)
-    expect(flagged.journalRecoveryReason).toContain('debt account')
-    expect(flagged.journalPersistenceBlocked).toBe(true)
-
-    const reloaded = applyServerPatch(flagged, {
-      fullReload: true,
-      serverTimestamp: 200,
-      instrument: [makeInstrument({ id: 1 })],
-      country: [{ id: 1, title: 'United States', currency: 1, domain: null }],
-      user: [makeUser({ id: 1, parent: null, currency: 1 })],
-      account: [
-        makeAccount({ id: 'cash', type: AccountType.Cash }),
-        makeAccount({ id: 'debt', type: AccountType.Debt }),
-      ],
-    })
-
-    expect(reloaded.journalRecoveryRequired).toBe(false)
-    expect(reloaded.journalRecoveryReason).toBeNull()
-    expect(reloaded.journalPersistenceBlocked).toBe(false)
-  })
-
-  it('logs the offending transaction when a transaction reference is invalid', () => {
-    const invalid = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      instrument: [makeInstrument({ id: 1 })],
-      country: [{ id: 1, title: 'United States', currency: 1, domain: null }],
-      user: [makeUser({ id: 1, parent: null, currency: 1 })],
-      account: [
-        makeAccount({ id: 'cash', type: AccountType.Cash }),
-        makeAccount({ id: 'card', type: AccountType.Cash }),
-        makeAccount({ id: 'debt', type: AccountType.Debt }),
-      ],
-      transaction: [
-        makeTransaction({
-          id: 'tr-742',
-          incomeAccount: 'missing-account',
-          incomeBankID: 999,
-        }),
-      ],
-    })
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-
-    const flagged = reducer(
-      invalid,
-      restorePersistedJournal({ preserveStored: false })
-    )
-
-    expect(flagged.journalRecoveryReason).toContain(
-      'transaction[0].incomeAccount'
-    )
-    expect(warn).toHaveBeenCalledWith(
-      '[journal-recovery]',
-      expect.objectContaining({
-        transactionField: 'incomeAccount',
-        transactionId: 'tr-742',
-        transaction: expect.objectContaining({
-          id: 'tr-742',
-          incomeBankID: 999,
-          incomeAccount: 'missing-account',
-        }),
-      })
-    )
-    warn.mockRestore()
-  })
-
-  it('starts a sealed-history branch on a full server reload', () => {
-    const base = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      account: [makeAccount({ id: 'cash', title: 'Cash' })],
-    })
-    const initialized = reducer(
-      base,
-      restorePersistedJournal({ preserveStored: false })
-    )
     const pending = reducer(
-      initialized,
+      base,
       appendClientCommand(makeAccountEntry('Wallet', 10))
     )
 
@@ -525,12 +369,35 @@ describe('command outbox boundaries', () => {
       account: [makeAccount({ id: 'cash', title: 'Server Cash' })],
     })
 
-    expect(reloaded.journal?.branches).toHaveLength(2)
-    expect(reloaded.journal?.activeBranchId).toBe('reload:200')
-    expect(reloaded.journal?.branches[0].id).toBe('main')
     expect(reloaded.base.account.cash.title).toBe('Server Cash')
     expect(reloaded.current.account.cash.title).toBe('Wallet')
     expect(reloaded.outbox).toHaveLength(1)
+  })
+
+  it('drops the previous account outbox when a full reload changes root user', () => {
+    const base = makeStore({
+      serverTimestamp: 100,
+      user: { 7: makeUser({ id: 7, parent: null, currency: 1 }) },
+      account: {
+        cash: makeAccount({ id: 'cash', title: 'Cash', user: 7 }),
+      },
+    })
+    const pending = reducer(
+      reducer(undefined, hydrateReplica({ rootUserId: 7, base, outbox: [] })),
+      appendClientCommand(makeAccountEntry('Wallet', 10))
+    )
+
+    const reloaded = applyServerPatch(pending, {
+      fullReload: true,
+      serverTimestamp: 200,
+      user: [makeUser({ id: 8, parent: null, currency: 1 })],
+      account: [makeAccount({ id: 'cash', title: 'Other Cash', user: 8 })],
+    })
+
+    expect(reloaded.rootUserId).toBe(8)
+    expect(reloaded.outbox).toEqual([])
+    expect(reloaded.redo).toEqual([])
+    expect(reloaded.current.account.cash.title).toBe('Other Cash')
   })
 
   it('clears both history stacks when data resets on logout', () => {

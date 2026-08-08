@@ -10,6 +10,7 @@ export {
   applyOutboxCommand,
   buildOutboxTransport,
   getMaterializedOutboxPatches,
+  parseCommandOutbox,
   redoOutbox,
   replayOutbox,
   undoOutbox,
@@ -41,30 +42,22 @@ export {
 
 export {
   applyCompactTransition,
-  appendCanonicalJournalPoint,
   compactCanonicalTransition,
-  compactJournalBranchAt,
-  compactJournalAt,
-  createJournalBranch,
-  defaultJournalRetentionPolicy,
-  estimateJournalBytes,
-  listJournalHistory,
-  replayJournal,
-  replayJournalBranch,
-  replayJournalPoint,
-  retainJournal,
   type TCompactCanonicalTransition,
   type TCompactDeletion,
   type TCompactEntityChange,
-  type TJournalBranch,
-  type TJournalCollection,
-  type TJournalPoint,
-  type TJournalPointRef,
-  type TJournalHistoryEntry,
-  type TJournalRetentionPolicy,
-  type TJournalRetentionResult,
-  type TJournalValidationStatus,
 } from './internal/operations/replication/journal'
+
+export {
+  compactJournalEntries,
+  createCheckpointEntry,
+  createTransitionEntry,
+  replayJournalEntries,
+  type TCheckpointEntry,
+  type TCheckpointReason,
+  type TJournalEntry,
+  type TTransitionEntry,
+} from './internal/operations/replication/linearJournal'
 
 export {
   isEmptyChangeSummary,
@@ -75,18 +68,8 @@ export {
   type TChangeSummaryKey,
 } from './internal/operations/replication/changeSummary'
 
-export {
-  journalPersistenceVersion,
-  parsePersistedJournal,
-  type TPersistedJournal,
-} from './runtime/persistence/journalPersistence'
-
 export { getSyncCursor } from './internal/operations/replication/cursor'
 
 export { createEmptyDataStore } from './internal/domain/zenmoney/model/store'
 
-export {
-  parsePersistedReplica,
-  replicaPersistenceVersion,
-  type TPersistedReplica,
-} from './runtime/persistence/persistence'
+export { getRootUserId } from './internal/domain/zenmoney/entities/users'

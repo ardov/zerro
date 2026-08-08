@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from 'store'
 import {
   getJournalRecoveryReason,
   getJournalRecoveryRequired,
+  getOutboxRecoveryReason,
 } from 'store/data'
 
 /** Persistent recovery prompt for a semantically invalid accepted branch. */
@@ -15,6 +16,7 @@ export const JournalRecoveryNotice = () => {
   const dispatch = useAppDispatch()
   const recoveryRequired = useAppSelector(getJournalRecoveryRequired)
   const recoveryReason = useAppSelector(getJournalRecoveryReason)
+  const outboxRecoveryReason = useAppSelector(getOutboxRecoveryReason)
   const handleReload = useCallback(() => {
     void dispatch(reloadData())
   }, [dispatch])
@@ -25,7 +27,7 @@ export const JournalRecoveryNotice = () => {
     onOk: handleReload,
   })
 
-  if (!recoveryRequired) return null
+  if (!recoveryRequired || outboxRecoveryReason !== null) return null
 
   return (
     <Snackbar open anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>

@@ -130,20 +130,23 @@ Revisit only with that consumer in hand.
 **Question.** How far back should the change history reach, and what does that
 cost in browser storage?
 
-**Initial answer (2026-08-02).** Start with a three-month maximum age, trigger
-compaction/compression at 50 MiB, and enforce a 100 MiB hard journal budget.
-These defaults are intentionally provisional; the journal can tune them after
-real-account measurements without changing its storage model.
+**Initial answer (2026-08-02, revised 2026-08-07).** Keep the stricter of a
+90-day window and a 100 MiB budget. The 50 MiB soft threshold was dropped with
+the branch model: it existed only to signal that a compression codec was
+needed, no codec was ever written, and a persisted field that reports a wish is
+worse than no field. These defaults are still provisional; they can be tuned
+after real-account measurements without changing the storage model.
 
-The journal is the durable source of accepted server state: one checkpoint plus
-compact canonical transitions, rather than a second copy beside the persisted
-base. The soft threshold controls when storage maintenance starts; the hard
-budget controls the maximum retained history.
+The journal is the durable source of accepted server state: one linear line of
+checkpoints and compact canonical transitions, rather than a second copy beside
+a persisted base.
 
 **Follow-up measurement.** From a loaded real account, record the serialized
 size of one full checkpoint and compact transitions over normal activity. No
-account mutation is required. Use the result to tune the provisional age and
-byte limits, not to decide whether the architecture is viable.
+account mutation is required. `replicaStorage` already records `loadCurrent`,
+`loadHistoricalState`, and `compactOneBatch` timings and byte counts on
+`window.zerro.logs`. Use the result to tune the provisional age and byte
+limits, not to decide whether the architecture is viable.
 
 **Recommendation.** Ship with the provisional limits and measure later. If
 transitions dominate, shorten the retained window or improve encoding before
@@ -152,6 +155,72 @@ changing the journal/source-of-truth architecture.
 **Where it is recorded.** design-ledger, _Open questions → Change log
 retention_, and
 [notes.md](../src/zerro-core/support/documents/notes.md#4-change-history-and-restore).
+
+## 6. Where replica policy lives
+
+**Question.** `6-shared/api/replicaStorage.ts` is now the largest and most
+opinionated file in the replica stack. Should it stay one module, or split into
+a dumb IndexedDB adapter plus a policy layer that owns the decisions?
+
+**Why it is open.** The move out of `zerro-core/runtime/persistence` was right
+for the part that touches IndexedDB: a packageable core should not depend on a
+browser database. But the retention policy, the choice between appending a
+checkpoint and a transition, the domain validation on replay, and the
+root-user resolution went along with it. `6-shared` is the lowest layer in the
+app and the one every other layer may import, so it is the worst place to keep
+rules that decide what the replica means. Today `commitCanonical` answers both
+"what should be written" and "how is it written" in one function.
+
+**Options.**
+
+- Leave it. One file, one transaction boundary, nothing to keep in sync. The
+  cost is that policy is reachable from anywhere and cannot be tested without
+  a database.
+- Split into an adapter in `6-shared/api` (open, get, put, cursor, transaction)
+  and a policy module that decides checkpoint-vs-transition and retention. The
+  policy becomes testable without IndexedDB, but the atomic transaction has to
+  span both, which is the thing most likely to be got wrong.
+- Push the policy back into `zerro-core` behind a storage port the app
+  implements. Best separation and it keeps the core packageable, but it is the
+  largest change and adds an interface that exists only for one implementation.
+
+**Recommendation.** Leave it for now and revisit if a second consumer appears —
+a multi-account UI or the CLI wanting the same replica would be the real
+forcing function. The single-transaction guarantee is worth more today than
+the layering purity, and the file is coherent even if it is misplaced. Record
+the trade-off rather than pretending the layer is clean.
+
+**Where it is recorded.** Not yet settled; architecture.md describes the
+current shape without judging it.
+
+## 7. What writes a checkpoint during ordinary use
+
+**Question.** Checkpoints are written only by a full sync, by recovery, and by
+retention. Retention fires only past 90 days or 100 MiB, so during ordinary use
+nothing advances `latestCheckpointSequence`. Should the runtime write one on a
+schedule — every N entries or M bytes since the last?
+
+**Why it is open.** Startup replays the whole suffix after the latest
+checkpoint, so its cost grows with the number of syncs since the last full
+reload, not with the size of the account. `applyCompactTransition` copies each
+entity map it touches, so replaying a suffix that keeps touching transactions
+costs roughly the suffix length times the transaction count. The same applies
+to opening a history point far from its nearest checkpoint.
+
+**Answer (2026-08-08).** No automatic periodic checkpoint. The manual full
+reload in the settings menu is the supported lever, and it is deliberately the
+_only_ manual one: it downloads a complete server state, appends a `full-sync`
+checkpoint, and leaves the outbox queued. Until measurement shows a real
+startup cost this is a scheduler nobody has evidence to tune, and every
+automatic threshold is another number to get wrong.
+
+**Follow-up measurement.** `window.zerro.logs.loadCurrent` already records
+`entriesRead` and `duration` per startup. If entries read at startup climb into
+the hundreds on a real account, revisit — the fix is one condition in
+`replicaPersistence`'s `checkpointReason`, not a change to the storage model.
+
+**Where it is recorded.** Here, plus the `ReloadDataItem` comment in
+`SettingsMenu.tsx`, which explains why that menu item is the checkpoint lever.
 
 ## Answered recently
 

@@ -1,49 +1,40 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { createSlice, current } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 import {
   acceptCanonicalPatch,
-  appendCanonicalJournalPoint,
   appendOutbox,
   applyPatch,
   applyOutboxCommand,
-  createJournalBranch,
   createEmptyDataStore,
-  dataStoreValidatorVersion,
-  defaultJournalRetentionPolicy,
+  getRootUserId,
   redoOutbox,
-  replayJournalBranch,
-  replayJournalPoint,
   replayOutbox,
-  retainJournal,
-  journalPersistenceVersion,
-  replicaPersistenceVersion,
-  validateDataStore,
   undoOutbox,
   undoOutboxTo,
+  validateDataStore,
   type TCommand,
-  type TDataStoreValidationResult,
-  type TJournalPointRef,
-  type TJournalValidationStatus,
-  type TPersistedJournal,
-  type TPersistedReplica,
 } from 'zerro-core/replica'
 import { withPerf } from '6-shared/helpers/performance'
 import type { TDataStore, TNormalizedPatch } from '6-shared/types'
 
 interface DataSlice {
+  rootUserId: number | null
   current: TDataStore
   base: TDataStore
   /** Applied local commands. This is the durable undo stack and sync outbox. */
   outbox: TCommand[]
   /** Undone commands available only until reload, logout, or sync. */
   redo: TCommand[]
-  /** Accepted server history; the live outbox remains separate. */
-  journal: TPersistedJournal | null
-  /** Do not overwrite a quarantined journal until a new server sync succeeds. */
-  journalPersistenceBlocked: boolean
-  /** A loaded active branch failed domain validation and needs full reload. */
+  /** The replayed canonical journal failed domain validation and needs a full
+   * reload. */
   journalRecoveryRequired: boolean
   journalRecoveryReason: string | null
+  /** The canonical state loaded, but the durable local command queue did not
+   * pass structural replay and resulting-state validation. */
+  outboxRecoveryReason: string | null
+  /** Primary persistence is best-effort and stays disabled after its first
+   * failure until reload, while Redux remains usable. */
+  persistenceWarning: string | null
   /** How many commands came back from persistence at load and have not been
    * pushed since. Session-only: it exists so the app can say the outbox
    * survived a reload, which pull-only sync made possible. */
@@ -61,14 +52,15 @@ export interface TServerInbox extends TNormalizedPatch {
 // INITIAL STATE
 const initialBase = createEmptyDataStore()
 const initialState: DataSlice = {
+  rootUserId: null,
   current: initialBase,
   base: initialBase,
   outbox: [],
   redo: [],
-  journal: null,
-  journalPersistenceBlocked: false,
   journalRecoveryRequired: false,
   journalRecoveryReason: null,
+  outboxRecoveryReason: null,
+  persistenceWarning: null,
   restoredOutboxCount: 0,
 }
 
@@ -77,6 +69,76 @@ const { reducer, actions } = createSlice({
   name: 'data',
   initialState,
   reducers: {
+    hydrateReplica: withPerf(
+      'hydrateReplica',
+      (
+        state,
+        {
+          payload,
+        }: PayloadAction<{
+          rootUserId: number
+          base: TDataStore
+          outbox: TCommand[]
+        }>
+      ) => {
+        state.rootUserId = payload.rootUserId
+        state.base = payload.base
+        state.outbox = [...payload.outbox]
+        state.redo = []
+        state.current = replayOutbox(payload.base, payload.outbox)
+        state.restoredOutboxCount = payload.outbox.length
+        state.journalRecoveryRequired = false
+        state.journalRecoveryReason = null
+        state.outboxRecoveryReason = null
+      }
+    ),
+    hydrateCorruptOutbox: withPerf(
+      'hydrateCorruptOutbox',
+      (
+        state,
+        {
+          payload,
+        }: PayloadAction<{
+          rootUserId: number
+          base: TDataStore
+          reason: string
+        }>
+      ) => {
+        state.rootUserId = payload.rootUserId
+        state.base = payload.base
+        state.current = payload.base
+        state.outbox = []
+        state.redo = []
+        state.restoredOutboxCount = 0
+        state.journalRecoveryRequired = false
+        state.journalRecoveryReason = null
+        state.outboxRecoveryReason = payload.reason
+      }
+    ),
+    hydrateCorruptReplica: withPerf(
+      'hydrateCorruptReplica',
+      (
+        state,
+        {
+          payload,
+        }: PayloadAction<{
+          rootUserId: number | null
+          journalReason: string
+          outboxReason: string
+        }>
+      ) => {
+        const empty = createEmptyDataStore()
+        state.rootUserId = payload.rootUserId
+        state.base = empty
+        state.current = empty
+        state.outbox = []
+        state.redo = []
+        state.restoredOutboxCount = 0
+        state.journalRecoveryRequired = true
+        state.journalRecoveryReason = payload.journalReason
+        state.outboxRecoveryReason = payload.outboxReason
+      }
+    ),
     receiveServerPatch: withPerf(
       'receiveServerPatch',
       (state, { payload }: PayloadAction<TServerInbox>) => {
@@ -85,35 +147,46 @@ const { reducer, actions } = createSlice({
     ),
     rebaseServerInbox: withPerf('rebaseServerInbox', state => {
       if (!state.inbox) return
+      // `push` is read by the persistence middleware, not here.
       const { sentOutboxCount, fullReload, push, ...canonicalPatch } =
         state.inbox
       if (fullReload) {
+        const recoveringJournal = state.journalRecoveryRequired
         const checkpoint = applyPatch(createEmptyDataStore(), canonicalPatch)
-        const branchId = getNextReloadBranchId(
-          state.journal,
-          checkpoint.serverTimestamp
-        )
-        const nextBranch = createJournalBranch(branchId, checkpoint)
-        state.journal = {
-          version: journalPersistenceVersion,
-          activeBranchId: branchId,
-          branches: state.journal
-            ? [...state.journal.branches, nextBranch]
-            : [nextBranch],
+        const checkpointRootUserId = getRootUserId(checkpoint.user)
+        const rootUserChanged =
+          state.rootUserId !== null &&
+          checkpointRootUserId !== null &&
+          state.rootUserId !== checkpointRootUserId
+        state.rootUserId = checkpointRootUserId ?? state.rootUserId
+        if (rootUserChanged) {
+          state.outbox = []
+          state.redo = []
+          state.restoredOutboxCount = 0
         }
-        state.journal = retainPersistedJournal(
-          state.journal,
-          checkpoint.serverTimestamp
-        )
-        state.journalPersistenceBlocked = false
+        if (recoveringJournal) {
+          const replayed = replayAndValidateOutbox(checkpoint, state.outbox)
+          if (!replayed.ok) {
+            state.base = checkpoint
+            state.current = checkpoint
+            state.outbox = []
+            state.redo = []
+            state.restoredOutboxCount = 0
+            state.outboxRecoveryReason = replayed.reason
+            state.inbox = null
+            return
+          }
+          state.current = replayed.current
+        } else {
+          state.current = replayOutbox(checkpoint, state.outbox)
+        }
         state.journalRecoveryRequired = false
         state.journalRecoveryReason = null
+        state.outboxRecoveryReason = null
         state.base = checkpoint
-        state.current = replayOutbox(checkpoint, state.outbox)
         state.inbox = null
         return
       }
-      const previousBase = state.base
       const accepted = acceptCanonicalPatch(
         { base: state.base, outbox: state.outbox, redo: state.redo },
         canonicalPatch,
@@ -124,36 +197,10 @@ const { reducer, actions } = createSlice({
       state.current = accepted.current
       state.outbox = accepted.outbox
       state.redo = accepted.redo
-      if (state.journal) {
-        const activeBranch = state.journal.branches.find(
-          branch => branch.id === state.journal?.activeBranchId
-        )
-        if (activeBranch) {
-          const pointId = getNextPointId(
-            activeBranch,
-            accepted.base.serverTimestamp
-          )
-          const nextBranch = appendCanonicalJournalPoint(
-            activeBranch,
-            previousBase,
-            accepted.base,
-            pointId,
-            Boolean(push)
-          )
-          const nextJournal = {
-            ...state.journal,
-            branches: state.journal.branches.map(branch =>
-              branch.id === nextBranch.id ? nextBranch : branch
-            ),
-          }
-          state.journal = retainPersistedJournal(
-            nextJournal,
-            accepted.base.serverTimestamp
-          )
-          if (!state.journalRecoveryRequired) {
-            state.journalPersistenceBlocked = false
-          }
-        }
+      state.rootUserId = getRootUserId(accepted.base.user) ?? state.rootUserId
+      if (state.journalRecoveryRequired) {
+        state.journalRecoveryRequired = false
+        state.journalRecoveryReason = null
       }
       state.inbox = null
     }),
@@ -189,99 +236,40 @@ const { reducer, actions } = createSlice({
       state.redo = next.redo
       state.current = replayOutbox(state.base, state.outbox)
     }),
-    restorePersistedReplica: withPerf(
-      'restorePersistedReplica',
-      (state, { payload }: PayloadAction<TPersistedReplica | undefined>) => {
-        if (
-          !payload ||
-          payload.version !== replicaPersistenceVersion ||
-          payload.baseServerTimestamp !== state.base.serverTimestamp
-        ) {
-          state.outbox = []
-          state.redo = []
-          state.current = state.base
-          state.restoredOutboxCount = 0
-          return
-        }
-
-        state.outbox = [...payload.outbox]
-        state.redo = []
-        state.current = replayOutbox(state.base, state.outbox)
-        state.restoredOutboxCount = state.outbox.length
-      }
-    ),
-    restorePersistedJournal: withPerf(
-      'restorePersistedJournal',
+    hydrateRecoveryOutbox: withPerf(
+      'hydrateRecoveryOutbox',
       (
         state,
         {
           payload,
         }: PayloadAction<{
-          journal?: TPersistedJournal
-          preserveStored: boolean
-          recoveryReason?: string
+          rootUserId: number | null
+          outbox: TCommand[]
+          reason: string
         }>
       ) => {
-        if (!payload.journal) {
-          state.journal = createPersistedJournal(state.base)
-          const isValid = setJournalValidation(state, state.base)
-          if (payload.recoveryReason) {
-            state.journalRecoveryRequired = true
-            state.journalRecoveryReason = payload.recoveryReason
-          }
-          state.journalPersistenceBlocked =
-            payload.preserveStored ||
-            !isValid ||
-            Boolean(payload.recoveryReason)
-          state.current = replayOutbox(state.base, state.outbox)
-          return
-        }
-
-        const activeBranch = payload.journal.branches.find(
-          branch => branch.id === payload.journal?.activeBranchId
-        )
-        if (!activeBranch) {
-          state.journal = createPersistedJournal(state.base)
-          state.journalPersistenceBlocked = true
-          state.journalRecoveryRequired = true
-          state.journalRecoveryReason = 'Active journal branch is missing'
-          state.current = replayOutbox(state.base, state.outbox)
-          return
-        }
-
-        state.journal = payload.journal
-        state.journalPersistenceBlocked = false
-        state.base = replayJournalBranch(activeBranch)
-        const isValid = setJournalValidation(state, state.base)
-        state.journalPersistenceBlocked = !isValid
-        state.current = replayOutbox(state.base, state.outbox)
+        state.rootUserId = payload.rootUserId
+        state.outbox = [...payload.outbox]
+        state.redo = []
+        state.restoredOutboxCount = payload.outbox.length
+        state.journalRecoveryRequired = true
+        state.journalRecoveryReason = payload.reason
+        state.outboxRecoveryReason = null
       }
     ),
-    validateJournalPoint: withPerf(
-      'validateJournalPoint',
-      (state, { payload }: PayloadAction<TJournalPointRef>) => {
-        const branch = state.journal?.branches.find(
-          candidate => candidate.id === payload.branchId
-        )
-        if (!branch) return
-
-        if (payload.pointId === null) {
-          // A checkpoint is already a full snapshot; no replay is needed.
-          branch.checkpointValidation = toValidationStatus(
-            validateDataStore(branch.checkpoint)
-          )
-          return
-        }
-
-        const point = branch.points.find(
-          candidate => candidate.id === payload.pointId
-        )
-        if (!point || !state.journal) return
-        const snapshot = replayJournalPoint(state.journal, payload)
-        if (!snapshot) return
-        point.validation = toValidationStatus(validateDataStore(snapshot))
-      }
-    ),
+    persistenceFailed: (
+      state,
+      { payload }: PayloadAction<{ reason: string }>
+    ) => {
+      state.persistenceWarning = payload.reason
+    },
+    corruptOutboxDiscarded: state => {
+      state.outboxRecoveryReason = null
+    },
+    recoveryCheckpointPersisted: state => {
+      state.journalRecoveryRequired = false
+      state.journalRecoveryReason = null
+    },
     /**
      * Restores a local (unsent) point by undoing to it, not by diffing and
      * appending: the dropped commands were never sent, so there is nothing on
@@ -310,117 +298,37 @@ export default reducer
 
 // ACTIONS
 export const {
+  hydrateReplica,
+  hydrateCorruptOutbox,
+  hydrateCorruptReplica,
   receiveServerPatch,
   rebaseServerInbox,
   appendClientCommand,
   prepareClientSync,
   undoClientCommand,
   redoClientCommand,
-  validateJournalPoint,
   restoreOutboxPosition,
-  restorePersistedReplica,
-  restorePersistedJournal,
+  hydrateRecoveryOutbox,
+  persistenceFailed,
+  corruptOutboxDiscarded,
+  recoveryCheckpointPersisted,
   resetData,
 } = actions
 
-function toValidationStatus(
-  result: TDataStoreValidationResult
-): TJournalValidationStatus {
-  return result.ok
-    ? { kind: 'valid', validatorVersion: dataStoreValidatorVersion }
-    : {
-        kind: 'invalid',
-        validatorVersion: dataStoreValidatorVersion,
-        reason: result.reason,
-      }
-}
-
-function createPersistedJournal(base: TDataStore): TPersistedJournal {
-  return {
-    version: journalPersistenceVersion,
-    activeBranchId: 'main',
-    branches: [createJournalBranch('main', base)],
-  }
-}
-
-function getNextPointId(
-  branch: TPersistedJournal['branches'][number],
-  serverTimestamp: number
-): string {
-  const prefix = `server:${serverTimestamp}`
-  let pointId = prefix
-  let suffix = 1
-  while (branch.points.some(point => point.id === pointId)) {
-    pointId = `${prefix}:${suffix}`
-    suffix += 1
-  }
-  return pointId
-}
-
-function getNextReloadBranchId(
-  journal: TPersistedJournal | null,
-  serverTimestamp: number
-): string {
-  const prefix = `reload:${serverTimestamp}`
-  let branchId = prefix
-  let suffix = 1
-  const branches = journal?.branches ?? []
-  while (branches.some(branch => branch.id === branchId)) {
-    branchId = `${prefix}:${suffix}`
-    suffix += 1
-  }
-  return branchId
-}
-
-function retainPersistedJournal(
-  journal: TPersistedJournal,
-  serverTimestamp: number
-): TPersistedJournal {
-  return retainJournal(journal, serverTimestamp, defaultJournalRetentionPolicy)
-    .journal
-}
-
-function setJournalValidation(state: DataSlice, base: TDataStore): boolean {
-  const validation = validateDataStore(base)
-  state.journalRecoveryRequired = !validation.ok
-  state.journalRecoveryReason = validation.ok ? null : validation.reason
-  if (!validation.ok) {
-    const transactionDiagnostic = getTransactionValidationDiagnostic(
-      base,
-      validation.reason
-    )
-    console.warn('[journal-recovery]', {
-      validatorVersion: dataStoreValidatorVersion,
-      reason: validation.reason,
-      serverTimestamp: base.serverTimestamp,
-      ...transactionDiagnostic,
-    })
-  }
-  return validation.ok
-}
-
-function getTransactionValidationDiagnostic(
+function replayAndValidateOutbox(
   base: TDataStore,
-  reason: string
-): {
-  transactionIndex?: number
-  transactionField?: string
-  transactionId?: string
-  transaction?: TDataStore['transaction'][string]
-} {
-  const match = /^transaction\[(\d+)\]\.([A-Za-z0-9_]+)/.exec(reason)
-  if (!match || !base.transaction || typeof base.transaction !== 'object') {
-    return {}
-  }
-
-  const transactionIndex = Number(match[1])
-  const transaction = Object.values(base.transaction)[transactionIndex]
-  if (!transaction) return { transactionIndex, transactionField: match[2] }
-
-  return {
-    transactionIndex,
-    transactionField: match[2],
-    transactionId: transaction.id,
-    transaction: current(transaction),
+  outbox: TCommand[]
+): { ok: true; current: TDataStore } | { ok: false; reason: string } {
+  try {
+    const current = replayOutbox(base, outbox)
+    const validation = validateDataStore(current)
+    return validation.ok
+      ? { ok: true, current }
+      : { ok: false, reason: validation.reason }
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error instanceof Error ? error.message : String(error),
+    }
   }
 }

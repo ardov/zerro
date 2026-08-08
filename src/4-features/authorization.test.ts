@@ -9,7 +9,6 @@ const { clearLocalDataMock } = vi.hoisted(() => ({
 
 vi.mock('./localData', () => ({
   clearLocalData: () => async () => clearLocalDataMock(),
-  saveDataLocally: vi.fn(),
 }))
 
 import { logOut } from './authorization'

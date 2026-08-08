@@ -36,7 +36,6 @@ import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
 import { appVersion } from '6-shared/config'
 
 import { useAppDispatch, useAppSelector } from 'store'
-import { resetData } from 'store/data'
 
 import { core } from 'zerro-core/redux'
 
@@ -45,7 +44,7 @@ import { logOut } from '4-features/authorization'
 import { exportCSV } from '4-features/export/exportCSV'
 import { exportJSON } from '4-features/export/exportJSON'
 import { ImportBackupItem } from '4-features/import/ImportBackupItem'
-import { clearLocalData } from '4-features/localData'
+import { reloadData } from '4-features/sync'
 import { convertZmBudgetsToZerro } from '4-features/budget/convertZmBudgetsToZerro'
 import { registerPopover } from '6-shared/historyPopovers'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
@@ -249,16 +248,24 @@ function NavItems({ onClose }: ItemProps) {
   )
 }
 
+/**
+ * The only manual way to add a checkpoint. Checkpoints are otherwise written
+ * only by recovery and retention, so this is what a user reaches for when
+ * startup replay has grown long or history should get a fresh anchor.
+ */
 function ReloadDataItem(_props: ItemProps) {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const reloadData = async () => {
+  const requestReload = useCallback(() => {
     track('local_data_reload_requested', {})
-    dispatch(resetData())
-    await dispatch(clearLocalData())
-    window.location.reload()
-  }
-  const reload = useConfirm({ onOk: reloadData })
+    void dispatch(reloadData())
+  }, [dispatch])
+  const reload = useConfirm({
+    title: t('reloadData'),
+    description: t('reloadDataDescription'),
+    okText: t('reloadData'),
+    onOk: requestReload,
+  })
   return (
     <MenuItem onClick={reload}>
       <ListItemIcon>

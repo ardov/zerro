@@ -141,35 +141,36 @@ any retained valid point. The implementation path is
 - The journal is not the outbox. The outbox is "what must still be sent" and is
   truncated on acknowledgement; it is the temporary undo/redo tail after the
   last server point. The journal is the durable source of accepted server state.
-  It has an active checkpoint plus compact canonical transitions; reconstructing
-  that branch yields `base`, then `base + outbox` yields `current`.
+  It is one linear sequence of checkpoints and compact canonical transitions;
+  replaying from the latest checkpoint yields `base`, then `base + outbox`
+  yields `current`.
 - A journal transition is a compact normalized state delta, not a raw ZenMoney
   response and not a restore intent. It stores only changed fields, deletions,
   and the new cursor, and must satisfy
   `applyPatch(before, transition) === after`. An empty pull creates no point;
   one successful push produces one canonical point, including accepted local
   and remote changes.
-- Compaction happens only at canonical-sync points. It replaces the discarded
-  prefix with a newer checkpoint, so every retained point remains forward
-  replayable. The initial retention policy is a three-month maximum age, a
-  50 MiB soft threshold for compaction/compression, and a 100 MiB hard journal
-  budget. The runtime now compacts aged prefixes and removes the oldest sealed
-  branches when the hard budget requires it; the soft threshold reports that a
-  compression codec is needed but does not yet change the storage encoding.
-  These are tunable defaults; measurement can adjust them later.
-- A full reload starts a new active branch from a complete server checkpoint and
-  seals the former branch. Sealed branches remain read-only historical and
-  validated restore candidates, never inputs to live `current`.
-- Active-branch validation is lazy: validate only its final reconstructed state
-  at app load, not every response. The shipped domain validator checks the
-  root/debt cardinalities, references, and tag-parent cycles; a failure leaves
-  the branch intact, raises the session-only `journalRecoveryRequired` flag,
-  and blocks journal persistence until full reload; the global recovery notice
-  offers that action with confirmation. Validate a historical point only when
-  it is opened or used for restore. A point caches `unknown`, `valid`,
-  or `invalid` with the validator version; a result from an older validator
-  version is `unknown` until checked again. Invalid points stay visible with a
-  reason but cannot restore.
+- Compaction folds only the oldest prefix into a `retention` checkpoint at the
+  last consumed sequence and never renumbers, so every retained point remains
+  forward replayable. Revised 2026-08-07: the retention policy is the stricter
+  of a 90-day server-time window and 100 MiB of logical entry bytes. The soft
+  compression threshold was dropped with the branch model — no codec exists,
+  and a threshold that only reported the need for one was not worth the field.
+  A single checkpoint plus the outbox is the minimum durable replica and may
+  exceed the budget. These are tunable defaults; measurement can adjust them.
+- A full reload appends another checkpoint to the same line rather than
+  starting a branch. Revised 2026-08-07: there are no branches to seal, so
+  history before a full sync stays reachable through ordinary retention
+  instead of through a separate sealed-branch lifecycle.
+- Validation runs on the reconstructed `base` at app load, not on every
+  response. The domain validator checks root/debt cardinalities, references,
+  and tag-parent cycles; a failure preserves a structurally valid outbox,
+  raises the session-only `journalRecoveryRequired` flag, and is resolved by a
+  full reload that writes a `recovery` checkpoint. Revised 2026-08-07: an
+  opened historical point is validated when it is replayed and is simply
+  unavailable if that fails. The cached per-point `unknown`/`valid`/`invalid`
+  status was removed — with eager validation on open, the only reachable states
+  were "loading" and "ready", which the snapshot status already carries.
 - Restoring a journal point (server state) and importing a backup are one
   operation: an internal
   `buildRestorePlan(current, desired, { scope, allocateId }) -> TRestorePlan`
@@ -189,7 +190,7 @@ any retained valid point. The implementation path is
   reversible through redo until the next reload.
 - The history list is a read-only projection over journal replay, and it is one
   ordered surface rather than three: redo tail, applied local commands, then
-  journal points and sealed branches. Selecting any row below the redo tail
+  journal points. Selecting any row below the redo tail
   changes Core read selectors but never the live `base + outbox` replica.
   Ordinary commands and patches are blocked while a past point is selected;
   restore is the only write action. The sync button is the sole entry point: a normal
@@ -249,17 +250,14 @@ any retained valid point. The implementation path is
   row while keeping every point the user deliberately pushed visible on its
   own. It is not a step toward a fuller per-point audit trail — see the label
   bullet below for why that is deliberately not retained.
-- Checkpoints validate and restore like any other point. `listJournalHistory`
-  does not hard-code an `unknown` status for a checkpoint, and validation does
-  not skip `pointId === null`; skipping it left the first point of every
-  branch permanently unrestorable, silently contradicting every other bullet
-  in this section. Validation stays lazy, so an unopened point shows no status
-  icon rather than a false "clean" one; a background sweep that validates a
-  whole branch on load is deferred until the icon is needed at rest.
+- Checkpoints open and restore like any other point. Nothing in the history
+  projection may special-case a checkpoint into being unopenable; doing so once
+  left the first point of every branch permanently unrestorable, silently
+  contradicting every other bullet in this section.
 - Selecting a point does not pin it against retention. If a background pull
-  compacts the selected point into its branch checkpoint while it is open, the
-  panel and status bar must say so rather than silently falling back to live
-  data while still claiming to show the past.
+  compacts the selected point away while it is open, the panel and status bar
+  must say so rather than silently falling back to live data while still
+  claiming to show the past.
 - A restore removes a row only where the domain already has a removal, and the
   diff carries one row per entity type saying which: soft delete for
   transactions, zeroing for budgets, a real `deletion` for reminders, and

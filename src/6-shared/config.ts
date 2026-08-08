@@ -16,4 +16,3 @@ export const isProduction = import.meta.env.PROD
 
 // Database parameters
 export const idbBaseName = 'zerro_data'
-export const idbStoreName = 'serverData'

@@ -7,20 +7,18 @@ const { syncMock } = vi.hoisted(() => ({
 
 vi.mock('6-shared/api/syncDiff', () => ({ sync: syncMock }))
 
-vi.mock('6-shared/api/localStore', () => ({ saveLocalData: vi.fn() }))
-
 vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
 import { makeAccount } from 'zerro-core/support/testing/zenmoneyTestData'
-import data, {
+import {
   appendClientCommand,
   applyServerPatch,
+  hydrateCorruptOutbox,
+  hydrateRecoveryOutbox,
   redoClientCommand,
-  restorePersistedJournal,
   undoClientCommand,
 } from 'store/data'
-import syncReducer from 'store/sync'
-import token from 'store/token'
+import { rootReducer } from 'store/rootReducer'
 import { refreshData, reloadData, syncData } from './sync'
 
 function renameCashTo(title: string, issuedAt: number) {
@@ -34,7 +32,7 @@ function renameCashTo(title: string, issuedAt: number) {
 /** Store holding one accepted account, so a cursor and an outbox both exist. */
 function makeSyncedStore() {
   const store = configureStore({
-    reducer: { data, sync: syncReducer, token },
+    reducer: rootReducer,
   })
   store.dispatch(
     applyServerPatch({
@@ -55,7 +53,7 @@ describe('syncData', () => {
       data: { serverTimestamp: 200 },
     })
     const store = configureStore({
-      reducer: { data, sync: syncReducer, token },
+      reducer: rootReducer,
     })
 
     await store.dispatch(syncData() as any)
@@ -70,10 +68,46 @@ describe('syncData', () => {
     expect(store.getState().data.current.serverTimestamp).toBe(200)
   })
 
+  it('does not contact the server while the persisted outbox is quarantined', async () => {
+    const store = configureStore({
+      reducer: rootReducer,
+    })
+    store.dispatch(
+      hydrateCorruptOutbox({
+        rootUserId: 7,
+        base: store.getState().data.base,
+        reason: 'outbox[0] is invalid',
+      })
+    )
+
+    await store.dispatch(syncData() as any)
+
+    expect(syncMock).not.toHaveBeenCalled()
+    expect(store.getState().sync.status).toBe('idle')
+  })
+
+  it('allows only a full reload while the canonical journal is recovering', async () => {
+    const store = configureStore({
+      reducer: rootReducer,
+    })
+    store.dispatch(
+      hydrateRecoveryOutbox({
+        rootUserId: 7,
+        outbox: [],
+        reason: 'broken checkpoint',
+      })
+    )
+
+    await store.dispatch(syncData() as any)
+    await store.dispatch(refreshData() as any)
+
+    expect(syncMock).not.toHaveBeenCalled()
+  })
+
   it('drops the redo tail before building a failed request payload', async () => {
     syncMock.mockResolvedValueOnce({ error: 'offline' })
     const store = configureStore({
-      reducer: { data, sync: syncReducer, token },
+      reducer: rootReducer,
     })
     store.dispatch(
       applyServerPatch({
@@ -129,7 +163,7 @@ describe('syncData', () => {
   it('settles pending state when the transport throws', async () => {
     syncMock.mockRejectedValueOnce(new Error('network unavailable'))
     const store = configureStore({
-      reducer: { data, sync: syncReducer, token },
+      reducer: rootReducer,
     })
 
     await store.dispatch(syncData() as any)
@@ -213,7 +247,7 @@ describe('reloadData', () => {
     syncMock.mockClear()
   })
 
-  it('requests a complete pull and seals the previous journal branch', async () => {
+  it('requests a complete pull and keeps pending commands during recovery', async () => {
     syncMock.mockResolvedValueOnce({
       data: {
         serverTimestamp: 300_000,
@@ -221,16 +255,20 @@ describe('reloadData', () => {
       },
     })
     const store = makeSyncedStore()
-    store.dispatch(restorePersistedJournal({ preserveStored: false }) as any)
     const pending = renameCashTo('Wallet', 10)
     store.dispatch(appendClientCommand(pending))
+    store.dispatch(
+      hydrateRecoveryOutbox({
+        rootUserId: 7,
+        outbox: [pending],
+        reason: 'broken checkpoint',
+      })
+    )
 
     await store.dispatch(reloadData() as any)
 
     expect(syncMock).toHaveBeenCalledWith('', 'ru', { serverTimestamp: 0 })
     const state = store.getState().data
-    expect(state.journal?.branches).toHaveLength(2)
-    expect(state.journal?.activeBranchId).toBe('reload:300000')
     expect(state.base.account.cash.title).toBe('Server Cash')
     expect(state.current.account.cash.title).toBe('Wallet')
     expect(state.outbox).toEqual([pending])

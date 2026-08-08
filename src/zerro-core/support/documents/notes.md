@@ -67,7 +67,7 @@ discard the undone tail. Manual sync still clears it up front.
 
 The last follow-up, **the restored-outbox notice**, shipped 2026-08-06 with
 pass A of item 4, which is the surface it was deferred to.
-`restorePersistedReplica` records how many commands came back from persistence,
+`hydrateReplica` records how many commands came back from persistence,
 `prepareClientSync` clears the count, and `RestoredOutboxNotice` offers the push
 while any of them are still waiting. It stands down while journal recovery is
 required: that notice holds the same corner and is the more serious problem.
@@ -102,26 +102,24 @@ semantic reconciliation with fresh ids, reference remapping, and deletion
 cascades. Keep the public `core.restore` surface and the ordinary-command write
 path while executing it.
 
-The pure journal transition, branch compaction, domain snapshot validator,
-validation-status shape, versioned persistence parser, Redux load restoration,
-canonical append, journal persistence middleware, and the explicit full-reload
-network path shipped 2026-08-02 in
-`internal/operations/replication/journal.ts` and
-`runtime/persistence/journalPersistence.ts`. Redux load/recovery and canonical
-sync wiring now run in a compatibility phase: the shipped runtime still keeps
-its existing persisted base while duplicate-base removal and automatic network
-recovery from a malformed journal are developed. A semantically invalid active
-branch is left intact, exposed through `journalRecoveryRequired`, and blocked
-from persistence until a full-reload response is received. That thunk starts a new active
-branch from a complete server snapshot and preserves the previous branches for
-read-only history. Canonical boundaries now apply the three-month age policy
-and enforce the hard budget by pruning the oldest sealed branches; the soft
-threshold is reported by the retention helper as a compression signal, but no
-codec is shipped yet. `JournalRecoveryNotice` now surfaces the recovery state
-with a confirmed full-reload action. Transaction `incomeBankID` and
-`outcomeBankID` are opaque synchronization-plugin operation IDs, so neither
-the journal validator nor backup compatibility treats them as `company`
-references.
+The branch model is gone. The durable replica is one linear journal of
+checkpoints and compact canonical transitions plus the outbox, described in
+[architecture.md](./architecture.md#replica-model) and
+[ADR 0001](../../../../docs/adr/0001-linear-indexeddb-replica.md). Pure
+transformations live in `internal/operations/replication/linearJournal.ts`; the
+IndexedDB adapter and its retention policy live in
+`6-shared/api/replicaStorage.ts`. The duplicate persisted base, the per-domain
+cache, the versioned record parsers, and the lazy per-point validation status
+were all removed rather than migrated: the schema upgrade is destructive.
+
+A replay that fails validation preserves a structurally valid outbox, sets
+`journalRecoveryRequired`, and is resolved by a full reload that writes a
+`recovery` checkpoint. `JournalRecoveryNotice` surfaces that state with a
+confirmed full-reload action, and `PersistenceWarningNotice` surfaces a failed
+primary write, after which Redux stays authoritative until reload. Transaction
+`incomeBankID` and `outcomeBankID` are opaque synchronization-plugin operation
+IDs, so neither the store validator nor backup compatibility treats them as
+`company` references.
 
 1. ~~`diffStores(current, desired, scope) -> TIntentPatch` plus backup
    import.~~ Shipped 2026-08-01. The internal `buildRestorePlan` first maps
@@ -134,16 +132,18 @@ references.
    removal are available; merchant removal remains blocked only by an active
    debt reference, matching the server's silent no-op.
 2. Tune retention from a real checkpoint and compact-transition run when
-   evidence is available. The initial policy is three months, a 50 MiB soft
-   compaction/compression threshold, and a 100 MiB hard journal budget; this is
-   not a gate for step 3 —
+   evidence is available. The shipped policy is the stricter of 90 days and
+   100 MiB of logical entry bytes; the soft compaction/compression threshold
+   was dropped with the branch model, and no compression codec exists —
    [open-decisions.md](../../../../docs/open-decisions.md#5-retention-budget-for-the-change-log).
-3. Compatibility load, canonical append, journal persistence, explicit
-   full-reload branch creation, retention pruning, and final-snapshot
-   validation plus the recovery notice shipped 2026-08-02. Remove the duplicate persisted base, add a
-   compression codec for the soft threshold, and add automatic network
-   recovery from a malformed persisted journal. Journal storage already joins
-   logout clear.
+   `replicaStorage` records `loadCurrent`, `loadHistoricalState`, and
+   `compactOneBatch` metrics on `window.zerro.logs` for that measurement.
+3. ~~Compatibility load, canonical append, journal persistence, retention, and
+   final-snapshot validation plus the recovery notice.~~ Shipped 2026-08-02 and
+   replaced 2026-08-07 by the linear IndexedDB journal, which removed the
+   duplicate persisted base and the legacy per-domain cache. Automatic network
+   recovery from a corrupt journal and a compression codec remain open. Replica
+   storage joins the logout clear.
 4. ~~History screen: server points open in isolated read-only time travel;
    pending outbox commands appear as a transient undo/redo tail rather than
    journal entries. Add lazy historical-point validation and versioned point

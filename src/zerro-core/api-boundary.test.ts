@@ -100,8 +100,7 @@ describe('zerro-core API boundary', () => {
 
     expect(replicaIndex).not.toMatch(/export \*/)
     expect(replicaIndex).toContain('appendOutbox')
-    expect(replicaIndex).toContain('parsePersistedReplica')
-    expect(replicaIndex).toContain('parsePersistedJournal')
+    expect(replicaIndex).toContain('parseCommandOutbox')
   })
 
   it('keeps the headless source entrypoint narrow and explicit', () => {

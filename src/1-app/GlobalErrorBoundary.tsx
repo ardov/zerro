@@ -1,8 +1,8 @@
 import React from 'react'
 import { captureError } from '6-shared/diagnostics'
-import { clearStorage } from '6-shared/api/localStore'
 import { tokenStorage } from '6-shared/api/tokenStorage'
 import { useTranslation } from 'react-i18next'
+import { clearPersistedLocalData } from 'store/data'
 
 export default class GlobalErrorBoundary extends React.Component<{
   children: React.ReactNode
@@ -37,11 +37,16 @@ export default class GlobalErrorBoundary extends React.Component<{
 
 function ErrorFallback() {
   const { t } = useTranslation('errorGlobal')
-  const fullRefresh = () => {
-    clearStorage()
-    localStorage.clear()
-    tokenStorage.clear()
-    window.location.reload()
+  const fullRefresh = async () => {
+    try {
+      await clearPersistedLocalData()
+    } catch (error) {
+      console.error('Failed to clear local replica before reload', error)
+    } finally {
+      localStorage.clear()
+      tokenStorage.clear()
+      window.location.reload()
+    }
   }
 
   return (
@@ -49,7 +54,7 @@ function ErrorFallback() {
       <h3>{t('message')}</h3>
       <button
         style={{ border: '1px solid #ccc', padding: 16 }}
-        onClick={fullRefresh}
+        onClick={() => void fullRefresh()}
       >
         {t('btnFix')}
       </button>

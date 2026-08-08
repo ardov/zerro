@@ -109,6 +109,37 @@ describe('Redux semantic commands', () => {
     )
   })
 
+  it('blocks new commands while a corrupt durable outbox is quarantined', () => {
+    const account = makeAccount({ id: 'cash', inBalance: false })
+    const state = makeTestRootState(makeStore({ account: { cash: account } }))
+    state.data.outboxRecoveryReason = 'outbox[0] is invalid'
+    const dispatch = makeDispatch(state)
+
+    dispatch(setAccountInBalance('cash', true))
+
+    expect(
+      dispatch.mock.calls.some(
+        ([action]: [any]) => action?.type === appendClientCommand.type
+      )
+    ).toBe(false)
+  })
+
+  it('blocks new commands while the canonical journal is awaiting recovery', () => {
+    const account = makeAccount({ id: 'cash', inBalance: false })
+    const state = makeTestRootState(makeStore({ account: { cash: account } }))
+    state.data.journalRecoveryRequired = true
+    state.data.journalRecoveryReason = 'broken checkpoint'
+    const dispatch = makeDispatch(state)
+
+    dispatch(setAccountInBalance('cash', true))
+
+    expect(
+      dispatch.mock.calls.some(
+        ([action]: [any]) => action?.type === appendClientCommand.type
+      )
+    ).toBe(false)
+  })
+
   it('keeps direct transaction wrappers on the same sparse outbox path', () => {
     const first = makeTransaction({ id: 'first', viewed: false })
     const second = makeTransaction({ id: 'second', viewed: false })

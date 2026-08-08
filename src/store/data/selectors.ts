@@ -18,8 +18,23 @@ export const getJournalRecoveryRequired = (state: RootState) =>
 export const getJournalRecoveryReason = (state: RootState) =>
   state.data.journalRecoveryReason
 
+export const getOutboxRecoveryReason = (state: RootState) =>
+  state.data.outboxRecoveryReason
+
+export const getPersistenceWarning = (state: RootState) =>
+  state.data.persistenceWarning
+
 export const getRestoredOutboxCount = (state: RootState) =>
   state.data.restoredOutboxCount
+
+/**
+ * Either recovery state means the durable replica cannot accept a local write:
+ * the canonical base is unusable, or the outbox those commands would join is
+ * quarantined until the user discards it. Sync and persistence make their own,
+ * narrower exceptions for the one exchange that resolves each state.
+ */
+export const getReplicaWriteBlocked = (state: RootState) =>
+  state.data.journalRecoveryRequired || state.data.outboxRecoveryReason !== null
 
 export const getPendingSyncDiff = createSelector(
   [getBase, getOutbox],
@@ -35,10 +50,14 @@ export function getPendingSyncTransport(
 }
 
 export const getCanUndoClientCommand = (state: RootState) =>
-  state.sync.status !== 'pending' && getOutbox(state).length > 0
+  state.sync.status !== 'pending' &&
+  !getReplicaWriteBlocked(state) &&
+  getOutbox(state).length > 0
 
 export const getCanRedoClientCommand = (state: RootState) =>
-  state.sync.status !== 'pending' && getRedo(state).length > 0
+  state.sync.status !== 'pending' &&
+  !getReplicaWriteBlocked(state) &&
+  getRedo(state).length > 0
 
 /** Commands, not entities: how many undoable actions are waiting to be sent. */
 export const getChangedNum = (state: RootState) => getOutbox(state).length

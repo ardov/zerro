@@ -8,6 +8,8 @@ import { JournalRecoveryNotice } from '3-widgets/JournalRecoveryNotice'
 import { HistoryPreview } from '3-widgets/History/HistoryPreview'
 import { HistoryPanel } from '3-widgets/History/HistoryPanel'
 import { RestoredOutboxNotice } from '3-widgets/History/RestoredOutboxNotice'
+import { PersistenceWarningNotice } from '3-widgets/PersistenceWarningNotice'
+import { OutboxRecoveryNotice } from '3-widgets/OutboxRecoveryNotice'
 
 export const GlobalWidgets = () => {
   return (
@@ -15,6 +17,8 @@ export const GlobalWidgets = () => {
       {/* Global confirm */}
       <SmartConfirm />
       <JournalRecoveryNotice />
+      <OutboxRecoveryNotice />
+      <PersistenceWarningNotice />
       <RestoredOutboxNotice />
       <HistoryPreview />
       <HistoryPanel />

@@ -237,134 +237,77 @@ domain group ids.
 
 ## Replica model
 
-During the migration the shipped runtime still persists the last accepted
-`base` as a compatibility cache beside the pending `outbox`. It now also loads,
-updates, and persists the journal branch; canonical boundaries compact points
-older than the retention window and drop the oldest sealed branches when the
-hard byte budget requires it. Removing the duplicate base storage and adding a
-compression codec are later checkpoints.
-
-### Current implementation
-
-The runtime replica consists of durable accepted and pending state plus a
-session-only redo stack:
+The browser replica is one linear canonical journal plus a command outbox. In
+memory Redux owns the reconstructed live state and session-only redo stack:
 
 ```ts
 type ReplicaState = {
   base: TDataStore
-  outbox: Command[] // the persisted command shape defined in Commands above
-  redo: Command[] // session-only undone commands
-  journal: PersistedJournal | null
-  journalRecoveryRequired: boolean // session-only recovery prompt
+  current: TDataStore // replayOutbox(base, outbox)
+  outbox: Command[]
+  redo: Command[] // session only
 }
 ```
 
-`base.serverTimestamp` identifies the accepted server snapshot. Physical
-storage may keep normalized base domains and outbox metadata in separate
-records, but together they must describe one coherent logical replica.
-
-`base` is the last accepted snapshot. `outbox` contains exactly the applied
-unsynchronized commands, so it is both the sync outbox and the undo stack.
-`current` is derived by rematerializing it:
-
-```ts
-current = materializeCommands(base, outbox)
-```
-
-Replica persistence is a separate versioned IndexedDB record storing the
-current command-only schema and nothing derived:
+IndexedDB has one database version and two stores. A schema upgrade from the
+legacy per-domain cache is destructive; there is no record-level compatibility
+format:
 
 ```ts
 type PersistedReplica = {
-  version: 3
-  baseServerTimestamp: number
+  rootUserId: number
+  serverTimestamp: number
+  headSequence: number
+  latestCheckpointSequence: number
+  oldestSequence: number
+  oldestServerTimestamp: number
+  retainedBytes: number
   outbox: Command[]
 }
+
+type JournalEntry =
+  | { rootUserId; sequence; kind: 'checkpoint'; snapshot; reason; byteSize }
+  | { rootUserId; sequence; kind: 'transition'; transition; pushed; byteSize }
 ```
 
-Loading a journal replays its active branch once and runs the domain
-`TDataStore` validator on the reconstructed base. A semantic failure leaves the
-branch and its raw storage intact, sets `journalRecoveryRequired`, and blocks
-journal writes until an explicit full reload is received. The validator is not
-run for every canonical response.
+`sequence` is monotonically increasing per root user and is the IndexedDB key
+with `rootUserId`. Server timestamps remain metadata and the synchronization
+cursor. A full sync appends another checkpoint to the same line; it does not
+create a branch. Empty pulls update only `PersistedReplica.serverTimestamp`.
 
-Reload accepts a snapshot only when its base timestamp matches the loaded
-server base. It restores `outbox` and always starts with an empty `redo` stack.
-The one-way V2 reader preserves only `outbox.slice(0, outboxHead)`, deliberately
-discarding the previously durable redo tail without losing applied pending
-commands. Malformed replay metadata is discarded rather than blocking
-canonical local data from loading.
+Only a full sync, recovery, and retention write checkpoints — there is no
+periodic one, so the replayed suffix grows with ordinary syncing until the user
+asks for a full reload. That is the deliberate manual lever, not an oversight;
+see [open-decisions.md](../../../../docs/open-decisions.md#7-what-writes-a-checkpoint-during-ordinary-use).
 
-Undo moves the last command from `outbox` to `redo`; redo moves it back. A new
-command clears `redo`, and so does starting a manual sync, because that commits
-the currently applied history branch. No inverse patches are stored.
+Startup gets the latest checkpoint directly, scans only its suffix through
+`headSequence`, validates the reconstructed base, and then replays the parsed
+outbox. History pages contain metadata only in Redux. Opening a historical
+sequence scans backward to its nearest checkpoint and keeps only that selected
+snapshot in memory. Historical viewing remains read-only; restore emits an
+ordinary live command.
 
-Applying a canonical base change clears `redo` only when it acknowledges a sent
-prefix. A pull commits nothing and is only a rebase, so it preserves the undone
-tail: an undone command was by definition never sent, and it is an absolute
-patch, so redoing it replays over the new base exactly like a pending command.
-This matters because automatic sync is pull-only and runs while the user is
-idle — clearing `redo` there would destroy history in the background, which is
-the outcome pull-only sync exists to prevent.
+Canonical entry, manifest, cursor, and outbox updates share one IndexedDB
+transaction. Redux is updated first. Browser persistence uses one Promise queue
+per tab; after its first primary write failure it is disabled until reload and
+the UI warns without blocking continued work. Compaction failures only log and
+are retried at the next canonical commit or startup. Multiple active tabs are
+intentionally not coordinated.
 
-Only `base` and `outbox` are durable replica inputs. `redo`, sync progress, and
-errors are ephemeral. Logout resets both history stacks in memory and awaits an
-ordered browser-storage clear; saves queued by the previous login are
-invalidated before the clear. There is no durable inbox.
+Retention uses the stricter of a 90-day server-time window and 100 MiB of
+logical UTF-8 JSON entry bytes. One bounded pass folds only the oldest prefix
+into a `retention` checkpoint at the last consumed sequence; sequences are
+never renumbered. A pass runs after a canonical commit and once after startup.
+The minimal current checkpoint and outbox may exceed the budget.
 
-### Accepted journal-driven replica
-
-The target change journal is the durable source of accepted server state, not a
-second copy beside it. During the migration the compatibility base may still be
-present, but it is reconstructed from the same journal branch. That branch has
-one checkpoint followed by compact canonical transitions:
-
-```ts
-type ActiveJournalBranch = {
-  checkpoint: TDataStore
-  points: CompactCanonicalTransition[]
-}
-
-base = replay(checkpoint, points)
-current = materializeCommands(base, outbox)
-```
-
-The transition is a state delta, not a ZenMoney wire response and not a restore
-intent: it contains only changed fields, deletions, and the new server cursor.
-Its required law is `applyPatch(before, transition) === after`. The journal is
-compacted only at a canonical-sync boundary: replaying discarded points creates
-a newer checkpoint, and only points before that checkpoint become unavailable.
-
-The live outbox remains separate. It is the temporary undo/redo tail after the
-last server point, is persisted as before, and is never duplicated into the
-journal. A successful push drops its acknowledged prefix and appends the one
-canonical server point returned by ZenMoney; a pull adds a point only when it
-changes accepted state. An empty pull creates no history point.
-
-On load, replay the active branch, validate its final reconstructed `base`, and
-then replay the outbox. Per-sync validation is deliberately not on the hot
-path. Historical points are replayed and validated lazily when opened. Each
-point caches `unknown`, `valid`, or `invalid` with the validator version; a
-result from an older validator version is treated as `unknown`, not as a
-failure. An invalid point remains visible with its reason but cannot be
-restored.
-
-A user-requested full reload starts a new active branch from the complete
-server state and seals the former branch. A sealed branch remains available for
-read-only time travel and, after validation, as a restore target; it is never
-replayed into the live replica. If active-branch reconstruction or validation
-fails, retain the old branch, obtain a complete server checkpoint, and replay
-the preserved outbox over it. Opening a server point is always isolated
-read-only time travel; only an explicit restore issues an ordinary command
-against live `current`.
-
-Retention applies both an age and a byte budget. The initial policy is a
-three-month maximum age, a 50 MiB soft threshold for compaction/compression,
-and a 100 MiB hard journal budget. These are deliberately tunable defaults;
-real-account measurement can adjust them later without changing the model. Each
-branch may compact only on its own server points. The journal, its validation
-metadata, and its branches need a versioned persistence format and are cleared
-together with local data on logout.
+If canonical replay is corrupt, a structurally valid outbox is preserved, a
+full sync writes a `recovery` checkpoint, and the outbox is replayed over it.
+Ordinary commands and non-recovery sync stay blocked until that checkpoint is
+accepted.
+A corrupt outbox is not guessed or partially repaired: its raw value stays in
+IndexedDB, commands and sync are blocked, and the user must explicitly discard
+it before recovery can continue. A different root user clears both stores
+before starting sequence 1, so accounts never share a journal or outbox.
 
 Any future replica implementation must reuse the pure outbox operations. Two
 implementations of append, undo, redo, or replay rules are not acceptable.

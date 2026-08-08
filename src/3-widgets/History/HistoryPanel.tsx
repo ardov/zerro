@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import type { Theme } from '@mui/material'
 import {
   Box,
+  Button,
   Divider,
   Drawer,
   IconButton,
@@ -13,6 +15,9 @@ import { registerPopover } from '6-shared/historyPopovers'
 import { useAppDispatch, useAppSelector } from 'store'
 import {
   selectHistoryRows,
+  loadHistoryPage,
+  selectCanLoadOlderHistory,
+  selectHistoryPageStatus,
   selectHighlightedHistoryPoint,
   selectHistoryPoint,
   type THistoryPointRef,
@@ -44,12 +49,21 @@ export function HistoryPanel() {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const { displayProps } = historyPanelPopover.useProps()
   const rows = useAppSelector(selectHistoryRows)
+  const canLoadOlder = useAppSelector(selectCanLoadOlderHistory)
+  const pageStatus = useAppSelector(selectHistoryPageStatus)
   // Marks the head row while the bar is open, so stepping never leaves the
   // list without a "you are here".
   const selected = useAppSelector(selectHighlightedHistoryPoint)
 
-  const select = (point: THistoryPointRef) =>
-    dispatch(selectHistoryPoint(point))
+  useEffect(() => {
+    if (displayProps.open && pageStatus === 'idle') {
+      void dispatch(loadHistoryPage({ replace: true }))
+    }
+  }, [dispatch, displayProps.open, pageStatus])
+
+  const select = (point: THistoryPointRef) => {
+    void dispatch(selectHistoryPoint(point))
+  }
 
   return (
     <Drawer
@@ -89,6 +103,15 @@ export function HistoryPanel() {
       ) : (
         <Box sx={{ overflowY: 'auto', flexGrow: 1 }}>
           <HistoryRowList rows={rows} selected={selected} onSelect={select} />
+          {canLoadOlder && (
+            <Button
+              fullWidth
+              disabled={pageStatus === 'loading'}
+              onClick={() => void dispatch(loadHistoryPage())}
+            >
+              {t('loadOlder')}
+            </Button>
+          )}
         </Box>
       )}
       {/* Pinned under the list: it belongs to the selection, not to the row

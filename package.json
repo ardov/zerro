@@ -84,6 +84,7 @@
     "@vitejs/plugin-react": "^6.0.3",
     "eslint": "^10.7.0",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "fake-indexeddb": "^6.2.5",
     "globals": "^17.7.0",
     "happy-dom": "^20.10.6",
     "knip": "^6.27.0",

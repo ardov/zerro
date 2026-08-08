@@ -26,10 +26,11 @@ describe('getBackupContent', () => {
         current,
         outbox: [{} as TCommand],
         redo: [],
-        journal: null,
-        journalPersistenceBlocked: false,
+        rootUserId: null,
         journalRecoveryRequired: false,
         journalRecoveryReason: null,
+        outboxRecoveryReason: null,
+        persistenceWarning: null,
         restoredOutboxCount: 0,
       },
     })

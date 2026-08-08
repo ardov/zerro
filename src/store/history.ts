@@ -3,45 +3,63 @@ import {
   createSlice,
   type PayloadAction,
 } from '@reduxjs/toolkit'
+import type { AppThunk } from 'store'
 import type { RootState } from './rootReducer'
-import { appendClientCommand } from './data/slice'
+import { appendClientCommand, rebaseServerInbox } from './data/slice'
 import {
   getMaterializedOutboxPatches,
   replayOutbox,
-  replayJournalPoint,
-  listJournalHistory,
+  summarizeCanonicalTransition,
   summarizeNormalizedPatch,
   type TChangeSummary,
   type TCommand,
-  type TJournalHistoryEntry,
-  type TJournalPointRef,
-  type TPersistedJournal,
+  type TJournalEntry,
 } from 'zerro-core/replica'
 import type { TDataStore } from '6-shared/types'
+import { replicaStorage } from '6-shared/api/replicaStorage'
+import { waitForPersistedReplica } from './data/replicaPersistence'
 
-/** A point the history list can select: a journal point, or a position in the
- * durable local outbox (index is inclusive — keep `outbox[0..index]`). */
 export type THistoryPointRef =
-  { kind: 'journal'; ref: TJournalPointRef } | { kind: 'local'; index: number }
+  { kind: 'journal'; sequence: number } | { kind: 'local'; index: number }
+
+export type TStoredHistoryEntry = {
+  sequence: number
+  kind: 'checkpoint' | 'sync'
+  serverTimestamp: number
+  pushed: boolean
+  summary?: TChangeSummary
+}
+
+type THistorySelection =
+  | { status: 'idle'; point: null }
+  | {
+      status: 'local'
+      point: Extract<THistoryPointRef, { kind: 'local' }>
+    }
+  | {
+      status: 'loading' | 'missing'
+      point: Extract<THistoryPointRef, { kind: 'journal' }>
+    }
+  | {
+      status: 'ready'
+      point: Extract<THistoryPointRef, { kind: 'journal' }>
+      snapshot: TDataStore
+    }
 
 type THistoryState = {
-  /**
-   * Whether the history bar is open, which is deliberately not the same
-   * question as whether a past point is selected. Stepping forward to the head
-   * of the list lands on live data, and the bar has to survive that: a
-   * navigation control that unmounts as a side effect of its own arrow leaves
-   * the user with nothing under the finger they were pressing. Only an
-   * explicit exit closes it.
-   */
   browsing: boolean
-  selectedPoint: THistoryPointRef | null
-  /** Run ids the panel has expanded into individual points. Session-only. */
+  selection: THistorySelection
+  entries: TStoredHistoryEntry[]
+  nextBeforeSequence?: number
+  pageStatus: 'idle' | 'loading' | 'ready'
   expandedRuns: string[]
 }
 
 const initialState: THistoryState = {
   browsing: false,
-  selectedPoint: null,
+  selection: { status: 'idle', point: null },
+  entries: [],
+  pageStatus: 'idle',
   expandedRuns: [],
 }
 
@@ -49,19 +67,65 @@ const { reducer, actions } = createSlice({
   name: 'history',
   initialState,
   reducers: {
-    selectHistoryPoint: (state, action: PayloadAction<THistoryPointRef>) => {
+    setHistoryPoint: (state, action: PayloadAction<THistoryPointRef>) => {
       state.browsing = true
-      state.selectedPoint = action.payload
+      state.selection =
+        action.payload.kind === 'journal'
+          ? { status: 'loading', point: action.payload }
+          : { status: 'local', point: action.payload }
     },
-    /** Jump to the head of the list. The bar stays open, so the user can keep
-     * stepping back from here. */
+    historicalStateLoaded: (
+      state,
+      action: PayloadAction<{ sequence: number; snapshot: TDataStore }>
+    ) => {
+      if (
+        state.selection.point?.kind !== 'journal' ||
+        state.selection.point.sequence !== action.payload.sequence
+      )
+        return
+      state.selection = {
+        status: 'ready',
+        point: state.selection.point,
+        snapshot: action.payload.snapshot,
+      }
+    },
+    historicalStateMissing: (state, action: PayloadAction<number>) => {
+      if (
+        state.selection.point?.kind !== 'journal' ||
+        state.selection.point.sequence !== action.payload
+      )
+        return
+      state.selection = { status: 'missing', point: state.selection.point }
+    },
+    historyPageLoading: state => {
+      state.pageStatus = 'loading'
+    },
+    historyPageFailed: state => {
+      state.pageStatus = 'ready'
+    },
+    historyPageLoaded: (
+      state,
+      action: PayloadAction<{
+        entries: TStoredHistoryEntry[]
+        nextBeforeSequence?: number
+        replace: boolean
+      }>
+    ) => {
+      const entries = action.payload.replace
+        ? action.payload.entries
+        : [...state.entries, ...action.payload.entries]
+      state.entries = Array.from(
+        new Map(entries.map(entry => [entry.sequence, entry])).values()
+      ).sort((a, b) => b.sequence - a.sequence)
+      state.nextBeforeSequence = action.payload.nextBeforeSequence
+      state.pageStatus = 'ready'
+    },
     returnToCurrent: state => {
-      state.selectedPoint = null
+      state.selection = { status: 'idle', point: null }
     },
-    /** Leave history navigation entirely. The only thing that closes the bar. */
     exitHistoryBrowsing: state => {
       state.browsing = false
-      state.selectedPoint = null
+      state.selection = { status: 'idle', point: null }
     },
     toggleHistoryRun: (state, action: PayloadAction<string>) => {
       const index = state.expandedRuns.indexOf(action.payload)
@@ -70,47 +134,126 @@ const { reducer, actions } = createSlice({
     },
   },
   extraReducers: builder => {
-    /**
-     * A command can only be issued while the selection is not showing the
-     * past — the write path blocks otherwise — so an append means the user was
-     * effectively live, and the selection is stale by definition. Dropping it
-     * keeps them there: a point ref pinned to an outbox index would stop being
-     * the head the moment the outbox grew, silently rewinding the app to
-     * before the change they just made. The bar stays open on `current`.
-     */
     builder.addCase(appendClientCommand, state => {
-      state.selectedPoint = null
+      state.selection = { status: 'idle', point: null }
+    })
+    builder.addCase(rebaseServerInbox, state => {
+      state.entries = []
+      state.nextBeforeSequence = undefined
+      state.pageStatus = 'idle'
     })
   },
 })
 
 export default reducer
 
-export const {
-  selectHistoryPoint,
-  returnToCurrent,
-  exitHistoryBrowsing,
-  toggleHistoryRun,
+const {
+  setHistoryPoint,
+  historicalStateLoaded,
+  historicalStateMissing,
+  historyPageLoading,
+  historyPageLoaded,
+  historyPageFailed,
 } = actions
 
-const selectHistory = (state: RootState) => state.history ?? initialState
-const selectJournal = (state: RootState) => state.data.journal
+export const { returnToCurrent, exitHistoryBrowsing, toggleHistoryRun } =
+  actions
+
+export const selectHistoryPoint =
+  (point: THistoryPointRef): AppThunk<Promise<void>> =>
+  async dispatch => {
+    dispatch(setHistoryPoint(point))
+    if (point.kind !== 'journal') return
+    await loadJournalPoint(dispatch, point.sequence)
+  }
+
+/** Revalidates the active journal selection after a canonical write and its
+ * retention pass. Local selections are derived from Redux and need no read. */
+export const refreshSelectedHistoryPoint =
+  (): AppThunk<Promise<void>> => async (dispatch, getState) => {
+    const point = getState().history.selection.point
+    if (point?.kind !== 'journal') return
+    await loadJournalPoint(dispatch, point.sequence)
+  }
+
+async function loadJournalPoint(
+  dispatch: (
+    action:
+      | ReturnType<typeof historicalStateLoaded>
+      | ReturnType<typeof historicalStateMissing>
+  ) => unknown,
+  sequence: number
+): Promise<void> {
+  await waitForPersistedReplica()
+  try {
+    const snapshot = await replicaStorage.loadHistoricalState(sequence)
+    dispatch(historicalStateLoaded({ sequence, snapshot }))
+  } catch (error) {
+    console.warn('Failed to load historical state', error)
+    dispatch(historicalStateMissing(sequence))
+  }
+}
+
+export const loadHistoryPage =
+  ({ replace = false }: { replace?: boolean } = {}): AppThunk<Promise<void>> =>
+  async (dispatch, getState) => {
+    const history = getState().history
+    if (history.pageStatus === 'loading') return
+    dispatch(historyPageLoading())
+    try {
+      // Same read barrier the selection uses. A canonical commit clears this
+      // page synchronously and the panel reloads it immediately, so without
+      // the wait the list would race the write that produced the new entry
+      // and settle without it.
+      await waitForPersistedReplica()
+      const page = await replicaStorage.listHistory({
+        limit: 100,
+        ...(replace || history.nextBeforeSequence === undefined
+          ? {}
+          : { beforeSequence: history.nextBeforeSequence }),
+      })
+      dispatch(
+        historyPageLoaded({
+          entries: page.entries.map(toStoredHistoryEntry),
+          nextBeforeSequence: page.nextBeforeSequence,
+          replace,
+        })
+      )
+    } catch (error) {
+      console.warn('Failed to load replica history', error)
+      dispatch(historyPageFailed())
+    }
+  }
+
+function toStoredHistoryEntry(entry: TJournalEntry): TStoredHistoryEntry {
+  return {
+    sequence: entry.sequence,
+    kind: entry.kind === 'checkpoint' ? 'checkpoint' : 'sync',
+    serverTimestamp: entry.serverTimestamp,
+    pushed: entry.kind === 'checkpoint' ? true : entry.pushed,
+    ...(entry.kind === 'transition'
+      ? { summary: summarizeCanonicalTransition(entry.transition) }
+      : {}),
+  }
+}
+
+const selectHistory = (state: RootState) => state.history
 const selectBase = (state: RootState) => state.data.base
 const selectOutbox = (state: RootState) => state.data.outbox
 const selectRedo = (state: RootState) => state.data.redo
 
 export const selectIsBrowsingHistory = (state: RootState) =>
   selectHistory(state).browsing
-
 const selectStoredHistoryPoint = (state: RootState) =>
-  selectHistory(state).selectedPoint
-
+  selectHistory(state).selection.point
 const selectExpandedRuns = (state: RootState) =>
   selectHistory(state).expandedRuns
-
-// —————————————————————————————————————————————————————————————————————————
-// Display rows
-// —————————————————————————————————————————————————————————————————————————
+export const selectHistoryEntries = (state: RootState) =>
+  selectHistory(state).entries
+export const selectCanLoadOlderHistory = (state: RootState) =>
+  selectHistory(state).nextBeforeSequence !== undefined
+export const selectHistoryPageStatus = (state: RootState) =>
+  selectHistory(state).pageStatus
 
 export type THistoryRow =
   | { type: 'redo'; command: TCommand }
@@ -118,38 +261,22 @@ export type THistoryRow =
       type: 'local'
       command: TCommand
       point: Extract<THistoryPointRef, { kind: 'local' }>
-      /** What this command writes, once materialized. */
       summary: TChangeSummary
     }
   | {
       type: 'journal'
-      entry: TJournalHistoryEntry
+      entry: TStoredHistoryEntry
       point: Extract<THistoryPointRef, { kind: 'journal' }>
-      /** Shown under an expanded run header rather than at the top level. */
       nested?: boolean
     }
-  /** A run of consecutive unpushed points from one branch, collapsed into one
-   * row. Expanded, it stays as the header its own points hang under, so the
-   * expansion can be undone. */
   | {
       type: 'run'
       id: string
-      entries: TJournalHistoryEntry[]
+      entries: TStoredHistoryEntry[]
       expanded: boolean
     }
-  /** The boundary between the local stack and the journal. */
   | { type: 'divider' }
 
-/** Every retained checkpoint and canonical server point, oldest first per branch. */
-export const selectHistoryEntries = createSelector(
-  [selectJournal],
-  (journal): TJournalHistoryEntry[] =>
-    journal ? listJournalHistory(journal) : []
-)
-
-/** The live tail only — session-only redo (furthest future first), then the
- * durable local outbox (most recent first). This is the whole sync-button
- * preview: it never reaches into journal history. */
 export const selectLiveHistoryRows = createSelector(
   [selectRedo, selectOutbox, selectBase],
   (redo, outbox, base): THistoryRow[] => {
@@ -157,8 +284,6 @@ export const selectLiveHistoryRows = createSelector(
       type: 'redo',
       command,
     }))
-    // Materialized in one pass over the outbox: each command's patch depends
-    // on the state the ones before it left behind.
     const patches = getMaterializedOutboxPatches(base, outbox)
     const localRows: THistoryRow[] = outbox
       .map((command, index): THistoryRow => ({
@@ -172,36 +297,20 @@ export const selectLiveHistoryRows = createSelector(
   }
 )
 
-/**
- * The full list top to bottom, exactly as the panel renders it: the live
- * tail above, then journal history (most recent first, consecutive unpushed
- * points from a background pull collapsed into one row unless the panel
- * expanded them). Not chronological — a background pull inserts a journal
- * point under unsent local commands even though it arrived later, because
- * `current = base + outbox`. The divider marks that boundary so the order is
- * not read as time.
- */
 export const selectHistoryRows = createSelector(
   [selectLiveHistoryRows, selectHistoryEntries, selectExpandedRuns],
   (liveRows, entries, expandedRuns): THistoryRow[] => {
-    const journalRows = groupJournalRows(
-      [...entries].reverse(),
-      new Set(expandedRuns)
-    )
+    const journalRows = groupJournalRows(entries, new Set(expandedRuns))
     const divider: THistoryRow[] =
       liveRows.length && journalRows.length ? [{ type: 'divider' }] : []
     return [...liveRows, ...divider, ...journalRows]
   }
 )
 
-/** The point a row selects, or `null` for a row that is not a position: the
- * redo tail (undone, not visitable), the divider, and an expanded run header
- * whose points are rows of their own. A collapsed run stands in for its newest
- * point, which is what makes it one step rather than none. */
 export function historyRowPoint(row: THistoryRow): THistoryPointRef | null {
   if (row.type === 'local' || row.type === 'journal') return row.point
   if (row.type === 'run' && !row.expanded)
-    return { kind: 'journal', ref: row.entries[0].ref }
+    return { kind: 'journal', sequence: row.entries[0].sequence }
   return null
 }
 
@@ -213,97 +322,72 @@ const selectSelectablePoints = createSelector(
       .filter((point): point is THistoryPointRef => point !== null)
 )
 
-// —————————————————————————————————————————————————————————————————————————
-// Selection
-// —————————————————————————————————————————————————————————————————————————
-
-/** The newest selectable row: the position live data sits at. */
-export const selectHistoryHeadPoint = createSelector(
+const selectHistoryHeadPoint = createSelector(
   [selectSelectablePoints],
-  (points): THistoryPointRef | null => points[0] ?? null
+  points => points[0] ?? null
 )
 
-/**
- * The selected point, or `null` when the selection is the head of the list.
- *
- * The head is not a point in the past — it is the live replica under another
- * name, so selecting it must leave data live and writes unblocked. Normalizing
- * here rather than at the dispatch site also covers the selection being
- * overtaken: an undo can shorten the outbox until the point the user picked
- * *is* the head, and the app has to become editable again without waiting for
- * them to notice.
- */
 export const selectSelectedHistoryPoint = createSelector(
   [selectStoredHistoryPoint, selectHistoryHeadPoint],
   (point, head): THistoryPointRef | null =>
     point && head && sameHistoryPoint(point, head) ? null : point
 )
 
-/** The row the list marks as "you are here": the selected point, or the head
- * while the bar is open. */
 export const selectHighlightedHistoryPoint = createSelector(
   [selectIsBrowsingHistory, selectSelectedHistoryPoint, selectHistoryHeadPoint],
-  (browsing, selected, head): THistoryPointRef | null =>
-    selected ?? (browsing ? head : null)
+  (browsing, selected, head) => selected ?? (browsing ? head : null)
 )
 
 export const selectHistoryPointData = createSelector(
-  [selectJournal, selectBase, selectOutbox, selectSelectedHistoryPoint],
-  (journal, base, outbox, point): TDataStore | undefined =>
-    point ? resolveHistoryPointData(journal, base, outbox, point) : undefined
+  [selectHistory, selectBase, selectOutbox, selectSelectedHistoryPoint],
+  (history, base, outbox, point): TDataStore | undefined => {
+    if (!point) return undefined
+    if (point.kind === 'local') {
+      if (point.index < 0 || point.index >= outbox.length) return undefined
+      return replayOutbox(base, outbox.slice(0, point.index + 1))
+    }
+    return history.selection.status === 'ready'
+      ? history.selection.snapshot
+      : undefined
+  }
 )
 
 export const selectDisplayedData = createSelector(
   [(state: RootState) => state.data.current, selectHistoryPointData],
-  (current, point): TDataStore => point ?? current
+  (current, point) => point ?? current
 )
 
 export const selectIsHistoryPointVisible = (state: RootState) =>
   selectSelectedHistoryPoint(state) !== null &&
   selectHistoryPointData(state) !== undefined
 
-/** The journal entry backing the current selection, if it is a journal point.
- * Carries the lazily-cached validation status a restore gates on. */
-export const selectSelectedHistoryEntry = createSelector(
+const selectSelectedHistoryEntry = createSelector(
   [selectHistoryEntries, selectSelectedHistoryPoint],
-  (entries, point): TJournalHistoryEntry | undefined => {
-    if (point?.kind !== 'journal') return undefined
-    return entries.find(
-      entry =>
-        entry.branchId === point.ref.branchId &&
-        entry.ref.pointId === point.ref.pointId
-    )
-  }
+  (entries, point) =>
+    point?.kind === 'journal'
+      ? entries.find(entry => entry.sequence === point.sequence)
+      : undefined
 )
 
-/**
- * When the selected point was made: a local command's issue time, a journal
- * point's server timestamp. Not the replayed store's `serverTimestamp` — for a
- * local point that is the last sync, which is neither when the change was made
- * nor anything the user did.
- */
 export const selectSelectedHistoryTime = createSelector(
   [selectSelectedHistoryPoint, selectOutbox, selectSelectedHistoryEntry],
   (point, outbox, entry): number | undefined => {
     if (!point) return undefined
-    if (point.kind === 'local') return outbox[point.index]?.issuedAt
-    return entry?.serverTimestamp
+    return point.kind === 'local'
+      ? outbox[point.index]?.issuedAt
+      : entry?.serverTimestamp
   }
 )
 
-/** True once a selected point can no longer be resolved — pruned by retention
- * (journal) or invalidated by a push that truncated the outbox (local). The
- * caller must say so rather than silently falling back to live data. */
-export const selectSelectedHistoryEntryMissing = (state: RootState) =>
-  selectSelectedHistoryPoint(state) !== null &&
-  selectHistoryPointData(state) === undefined
+export const selectSelectedHistoryEntryMissing = (state: RootState) => {
+  const point = selectSelectedHistoryPoint(state)
+  if (!point) return false
+  if (point.kind === 'journal') {
+    return selectHistory(state).selection.status === 'missing'
+  }
+  return selectHistoryPointData(state) === undefined
+}
 
-/**
- * Where one step back or forward lands. A `null` selection is the head, so
- * `forward` is `null` there because there is nowhere newer to go — the arrow
- * disables instead of closing the bar. `back` is `null` at the oldest row, and
- * both are `null` once the selected point has disappeared from the list.
- */
 export const selectHistoryStep = createSelector(
   [selectSelectablePoints, selectSelectedHistoryPoint],
   (points, selected) => {
@@ -324,71 +408,44 @@ export function sameHistoryPoint(
 ): boolean {
   if (a.kind === 'local' && b.kind === 'local') return a.index === b.index
   if (a.kind === 'journal' && b.kind === 'journal')
-    return a.ref.branchId === b.ref.branchId && a.ref.pointId === b.ref.pointId
+    return a.sequence === b.sequence
   return false
 }
 
-function resolveHistoryPointData(
-  journal: TPersistedJournal | null,
-  base: TDataStore,
-  outbox: readonly TCommand[],
-  point: THistoryPointRef
-): TDataStore | undefined {
-  if (point.kind === 'local') {
-    if (point.index < 0 || point.index >= outbox.length) return undefined
-    return replayOutbox(base, outbox.slice(0, point.index + 1))
-  }
-  if (!journal) return undefined
-  return replayJournalPoint(journal, point.ref)
-}
-
 function groupJournalRows(
-  entries: TJournalHistoryEntry[],
+  entries: TStoredHistoryEntry[],
   expandedRuns: ReadonlySet<string>
 ): THistoryRow[] {
   const rows: THistoryRow[] = []
-  let run: TJournalHistoryEntry[] = []
-
+  let run: TStoredHistoryEntry[] = []
   const flushRun = () => {
     if (!run.length) return
-    if (run.length === 1) {
-      rows.push(toJournalRow(run[0]))
-    } else {
-      const id = runId(run)
+    if (run.length === 1) rows.push(toJournalRow(run[0]))
+    else {
+      const id = `server:${run[0].sequence}`
       const expanded = expandedRuns.has(id)
       rows.push({ type: 'run', id, entries: run, expanded })
       if (expanded) run.forEach(entry => rows.push(toJournalRow(entry, true)))
     }
     run = []
   }
-
   entries.forEach(entry => {
-    const collapsible = entry.kind === 'sync' && !entry.pushed
-    if (!collapsible) {
-      flushRun()
-      rows.push(toJournalRow(entry))
+    if (entry.kind === 'sync' && !entry.pushed) {
+      run.push(entry)
       return
     }
-    if (run.length && run[0].branchId !== entry.branchId) flushRun()
-    run.push(entry)
+    flushRun()
+    rows.push(toJournalRow(entry))
   })
   flushRun()
-
   return rows
 }
 
-function runId(run: TJournalHistoryEntry[]): string {
-  return `${run[0].branchId}:${run[0].ref.pointId}`
-}
-
-function toJournalRow(
-  entry: TJournalHistoryEntry,
-  nested = false
-): THistoryRow {
+function toJournalRow(entry: TStoredHistoryEntry, nested = false): THistoryRow {
   return {
     type: 'journal',
     entry,
-    point: { kind: 'journal', ref: entry.ref },
+    point: { kind: 'journal', sequence: entry.sequence },
     nested,
   }
 }

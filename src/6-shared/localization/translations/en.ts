@@ -476,6 +476,12 @@ export const en: typeof ru = {
       'The accepted server state failed an integrity check. Reloading downloads a complete server state; unsynchronized commands remain queued, and retained history stays available within its limits.',
     journalRecoveryConfirm: 'Reload data',
     journalRecoveryDiagnostic: 'Diagnostic',
+    outboxRecoveryTitle: 'Local changes are damaged',
+    outboxRecoveryDescription:
+      'The synchronized local state is available, but queued unsynchronized changes cannot be read. They remain untouched until you explicitly discard them.',
+    outboxRecoveryConfirm: 'Discard local changes',
+    persistenceWarning:
+      'Local changes could not be saved. Keep this tab open and reload only after syncing.',
     entity_userSettings: 'User settings',
     entity_account: 'Accounts',
     entity_merchant: 'Merchants',
@@ -498,6 +504,8 @@ export const en: typeof ru = {
     darkMode: 'Dark Mode',
     lightMode: 'Light Mode',
     reloadData: 'Reload data',
+    reloadDataDescription:
+      'Downloads a complete server state and adds a full sync point to the history. Unsynchronized changes stay queued.',
     regularSync: 'Auto-sync',
     useIcons: 'Use icons',
     useEmojis: 'Use emojis',
@@ -512,10 +520,9 @@ export const en: typeof ru = {
   history: {
     panelTitle: 'Change history',
     noHistory: 'No history yet',
+    loadOlder: 'Load older',
     checkpoint: 'Full sync',
     serverSync: 'Update',
-    activeBranch: 'Active',
-    archivedBranch: 'Archived',
     unnamedChange: 'Change',
     verb_budgetSet: 'Budget changed',
     verb_goalSet: 'Goal changed',
@@ -548,8 +555,6 @@ export const en: typeof ru = {
     updatesCollapsed_few: '{{count}} updates',
     updatesCollapsed_many: '{{count}} updates',
     updatesCollapsed_other: '{{count}} updates',
-    validationInvalid: 'Invalid: {{reason}}',
-    validationInvalidShort: 'Invalid',
     expandRun: 'Show updates one by one',
     collapseRun: 'Collapse updates',
     goToCurrent: 'To current',

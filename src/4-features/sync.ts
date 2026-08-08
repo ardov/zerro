@@ -1,20 +1,18 @@
 import { getSyncCursor } from 'store/data/selectors'
 import { getToken } from 'store/token'
-import { saveDataLocally } from '4-features/localData'
 import { track } from '6-shared/analytics'
 import { syncFinished, syncStarted } from 'store/sync'
 import { formatDate } from '6-shared/helpers/date'
 import type { AppThunk } from 'store'
-import type { TLocalData } from '6-shared/types'
 import { sync } from '6-shared/api/syncDiff'
 import {
   getPendingSyncTransport,
   applyServerPatch,
   prepareClientSync,
 } from 'store/data'
-import { keys } from '6-shared/helpers/keys'
 import type { TNormalizedPatch } from '6-shared/types'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
+import { refreshSelectedHistoryPoint } from 'store/history'
 
 /**
  * All exchanges with ZenMoney go through this thunk.
@@ -34,6 +32,17 @@ const exchangeWithZenmoney =
     fullReload?: boolean
   }): AppThunk =>
   async (dispatch, getState) => {
+    // Narrower than `getReplicaWriteBlocked`: a full reload is exactly how
+    // journal recovery ends, so it is the one exchange allowed to run during
+    // it. A corrupt outbox blocks every exchange until the user discards it.
+    // Both states already show a persistent notice, so returning is silent by
+    // design — there is nothing this thunk could add.
+    const { journalRecoveryRequired, outboxRecoveryReason } = getState().data
+    if (
+      outboxRecoveryReason !== null ||
+      (journalRecoveryRequired && !fullReload)
+    )
+      return
     if (push) dispatch(prepareClientSync())
     const state = getState()
     const sentOutboxCount = push ? state.data.outbox.length : 0
@@ -64,8 +73,7 @@ const exchangeWithZenmoney =
             ...(fullReload ? { fullReload: true } : {}),
           })
         )
-        const changedDomains = getChangedDomains(data)
-        dispatch(saveDataLocally(changedDomains))
+        await dispatch(refreshSelectedHistoryPoint())
         track('sync_completed', {
           mode: fullReload
             ? 'update'
@@ -104,20 +112,11 @@ export const syncData = (): AppThunk => exchangeWithZenmoney({ push: true })
  */
 export const refreshData = (): AppThunk => exchangeWithZenmoney({ push: false })
 
-/** Pulls a complete server snapshot and starts a new active journal branch. */
+/** Pulls a complete server snapshot and appends a canonical checkpoint. */
 export const reloadData = (): AppThunk =>
   exchangeWithZenmoney({ push: false, fullReload: true })
 
 function getErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error)
   return message.slice(0, 500) || 'Unknown sync failure'
-}
-
-function getChangedDomains(data: TNormalizedPatch) {
-  const domains: Set<keyof TLocalData> = new Set()
-  keys(data).forEach(key => {
-    if (key === 'deletion') data[key]?.forEach(item => domains.add(item.object))
-    else domains.add(key)
-  })
-  return Array.from(domains)
 }
