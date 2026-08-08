@@ -275,9 +275,18 @@ export type THistoryRow =
       entries: TStoredHistoryEntry[]
       expanded: boolean
     }
-  | { type: 'divider' }
+  /**
+   * Names the two halves of the list. The split is the one thing a user has to
+   * understand here — above it is theirs and not sent, below it is what the
+   * server has accepted — and an unlabelled rule was indistinguishable from
+   * the hairline between rows.
+   */
+  | { type: 'section'; id: 'local' | 'journal' }
 
-export const selectLiveHistoryRows = createSelector(
+/** Redo tail and applied local commands. Split out from the full list so the
+ * two halves stay separately memoized: it recomputes on every command, while
+ * the journal half only changes when a page loads. */
+const selectLiveHistoryRows = createSelector(
   [selectRedo, selectOutbox, selectBase],
   (redo, outbox, base): THistoryRow[] => {
     const redoRows: THistoryRow[] = redo.map(command => ({
@@ -301,9 +310,13 @@ export const selectHistoryRows = createSelector(
   [selectLiveHistoryRows, selectHistoryEntries, selectExpandedRuns],
   (liveRows, entries, expandedRuns): THistoryRow[] => {
     const journalRows = groupJournalRows(entries, new Set(expandedRuns))
-    const divider: THistoryRow[] =
-      liveRows.length && journalRows.length ? [{ type: 'divider' }] : []
-    return [...liveRows, ...divider, ...journalRows]
+    const localSection: THistoryRow[] = liveRows.length
+      ? [{ type: 'section', id: 'local' }]
+      : []
+    const journalSection: THistoryRow[] = journalRows.length
+      ? [{ type: 'section', id: 'journal' }]
+      : []
+    return [...localSection, ...liveRows, ...journalSection, ...journalRows]
   }
 )
 
@@ -322,7 +335,12 @@ const selectSelectablePoints = createSelector(
       .filter((point): point is THistoryPointRef => point !== null)
 )
 
-const selectHistoryHeadPoint = createSelector(
+/**
+ * The row that is the live state. It is an ordinary row, not a synthetic
+ * "now" entry: `current` really is the newest applied command, and marking
+ * that row says so instead of asserting it beside the list.
+ */
+export const selectHistoryHeadPoint = createSelector(
   [selectSelectablePoints],
   points => points[0] ?? null
 )

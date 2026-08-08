@@ -1,13 +1,15 @@
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import {
-  Divider,
+  Chip,
   IconButton,
   List,
   ListItemButton,
   ListItemText,
+  ListSubheader,
+  Stack,
 } from '@mui/material'
-import { formatDate } from '6-shared/helpers/date'
+import { formatTimeAgo } from '6-shared/helpers/date'
 import { commandVerbLabelKeys } from '6-shared/localization/commandVerbs'
 import { ChevronDownIcon } from '6-shared/ui/Icons'
 import type { TCommand } from 'zerro-core/replica'
@@ -21,19 +23,23 @@ import {
 } from 'store/history'
 import { useChangeSummaryText } from './changeSummaryText'
 
-/** Renders the same ordered history list for both the sync-button preview
- * (which only ever receives redo/local rows) and the full panel. */
+/** Renders the ordered history list: local changes above, accepted server
+ * points below, each half under its own heading. */
 export function HistoryRowList({
   rows,
   selected,
+  head,
   onSelect,
 }: {
   rows: THistoryRow[]
   selected: THistoryPointRef | null
+  /** The row that is the live state, marked so the list always says where
+   * "now" is rather than leaving it to be inferred from the order. */
+  head: THistoryPointRef | null
   onSelect: (point: THistoryPointRef) => void
 }) {
   return (
-    // `component="div"`: the list mixes button rows and a plain divider, and
+    // `component="div"`: the list mixes button rows and plain headings, and
     // a `ul` may only hold list items.
     <List disablePadding dense component="div">
       {rows.map(row => (
@@ -41,6 +47,7 @@ export function HistoryRowList({
           key={rowKey(row)}
           row={row}
           selected={selected}
+          head={head}
           onSelect={onSelect}
         />
       ))}
@@ -51,10 +58,12 @@ export function HistoryRowList({
 function HistoryRowItem({
   row,
   selected,
+  head,
   onSelect,
 }: {
   row: THistoryRow
   selected: THistoryPointRef | null
+  head: THistoryPointRef | null
   onSelect: (point: THistoryPointRef) => void
 }) {
   const { t } = useTranslation('history')
@@ -62,11 +71,25 @@ function HistoryRowItem({
   const summaryText = useChangeSummaryText()
   const point = historyRowPoint(row)
   const isSelected = !!point && !!selected && sameHistoryPoint(point, selected)
+  const isHead = !!point && !!head && sameHistoryPoint(point, head)
 
-  if (row.type === 'divider') {
+  if (row.type === 'section') {
     // The local stack sits above the journal, and that order is not time: a
     // background pull lands under unsent commands that were made before it.
-    return <Divider sx={{ my: 0.5 }} />
+    return (
+      <ListSubheader
+        disableSticky
+        sx={{
+          bgcolor: 'transparent',
+          color: 'text.secondary',
+          typography: 'overline',
+          lineHeight: 2,
+          pt: 1,
+        }}
+      >
+        {t(row.id === 'local' ? 'sectionLocal' : 'sectionSynced')}
+      </ListSubheader>
+    )
   }
 
   if (row.type === 'redo') {
@@ -74,7 +97,11 @@ function HistoryRowItem({
       <ListItemText
         sx={{ px: 2, py: 0.5, opacity: 0.5 }}
         primary={commandTitle(row.command, t)}
-        slotProps={{ primary: { variant: 'body2' } }}
+        secondary={t('undoneHint')}
+        slotProps={{
+          primary: { variant: 'body2', noWrap: true },
+          secondary: { noWrap: true },
+        }}
       />
     )
   }
@@ -86,12 +113,11 @@ function HistoryRowItem({
         selected={isSelected}
         onClick={() => (point ? onSelect(point) : toggle())}
       >
-        <ListItemText
+        <RowText
           primary={t('updatesCollapsed', { count: row.entries.length })}
-          secondary={formatDate(
-            row.entries[0].serverTimestamp,
-            'd MMM yyyy, HH:mm'
-          )}
+          secondary={formatTimeAgo(row.entries[0].serverTimestamp)}
+          isHead={isHead}
+          nowLabel={t('nowBadge')}
         />
         <IconButton
           size="small"
@@ -113,16 +139,13 @@ function HistoryRowItem({
   if (row.type === 'local') {
     return (
       <ListItemButton selected={isSelected} onClick={() => onSelect(row.point)}>
-        <ListItemText
+        {/* No change counts here: the command's own label already names the
+            act, and "Goal changed · Goals 1" only repeats it in numbers. */}
+        <RowText
           primary={commandTitle(row.command, t)}
-          secondary={secondaryLine(
-            formatDate(row.command.issuedAt, 'd MMM yyyy, HH:mm'),
-            summaryText(row.summary)
-          )}
-          slotProps={{
-            primary: { noWrap: true },
-            secondary: { noWrap: true },
-          }}
+          secondary={formatTimeAgo(row.command.issuedAt)}
+          isHead={isHead}
+          nowLabel={t('nowBadge')}
         />
       </ListItemButton>
     )
@@ -136,23 +159,81 @@ function HistoryRowItem({
       onClick={() => onSelect(row.point)}
       sx={row.nested ? { pl: 4 } : undefined}
     >
-      <ListItemText
+      {/* Counts stay on server rows: a pull has no label of its own, so the
+          only thing that distinguishes one update from another is what moved. */}
+      <RowText
         primary={
           entry.kind === 'checkpoint' ? t('checkpoint') : t('serverSync')
         }
         secondary={secondaryLine(
-          formatDate(entry.serverTimestamp, 'd MMM yyyy, HH:mm'),
+          formatTimeAgo(entry.serverTimestamp),
           summaryText(entry.summary)
         )}
-        slotProps={{ secondary: { noWrap: true } }}
+        isHead={isHead}
+        nowLabel={t('nowBadge')}
       />
     </ListItemButton>
   )
 }
 
-/** Date first, then what moved. One line, so the row height never changes. */
-function secondaryLine(date: string, summary: string): string {
-  return summary ? `${date} · ${summary}` : date
+/** One row's text, plus the "now" marker when this row is the live state. */
+function RowText({
+  primary,
+  secondary,
+  isHead,
+  nowLabel,
+}: {
+  primary: string
+  secondary: string
+  isHead: boolean
+  nowLabel: string
+}) {
+  return (
+    <ListItemText
+      primary={
+        isHead ? (
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: 'center', minWidth: 0 }}
+          >
+            <span
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {primary}
+            </span>
+            <Chip
+              size="small"
+              color="primary"
+              variant="outlined"
+              label={nowLabel}
+              sx={{
+                height: 18,
+                flexShrink: 0,
+                '& .MuiChip-label': { px: 0.75 },
+              }}
+            />
+          </Stack>
+        ) : (
+          primary
+        )
+      }
+      secondary={secondary}
+      slotProps={{
+        primary: { noWrap: !isHead },
+        secondary: { noWrap: true },
+      }}
+    />
+  )
+}
+
+/** Time first, then what moved. One line, so the row height never changes. */
+function secondaryLine(time: string, summary: string): string {
+  return summary ? `${time} · ${summary}` : time
 }
 
 /**
@@ -170,7 +251,7 @@ function commandTitle(command: TCommand, t: TFunction<'history'>): string {
 }
 
 function rowKey(row: THistoryRow): string {
-  if (row.type === 'divider') return 'divider'
+  if (row.type === 'section') return `section:${row.id}`
   if (row.type === 'redo') return `redo:${row.command.issuedAt}`
   if (row.type === 'run') return `run:${row.id}`
   if (row.type === 'local') return `local:${row.point.index}`

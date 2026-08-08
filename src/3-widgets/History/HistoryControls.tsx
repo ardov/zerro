@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, IconButton, Stack, Tooltip } from '@mui/material'
 import { RedoIcon, SendIcon, UndoIcon } from '6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from 'store'
 import {
@@ -12,8 +12,13 @@ import {
 import { selectIsSyncPending } from 'store/sync'
 import { syncData } from '4-features/sync'
 
-/** Undo/redo and the pending-command count, shared by the sync-button preview
- * and the full panel: it is the same live outbox, just shown at two sizes. */
+/**
+ * Undo/redo and the push, above the list they act on.
+ *
+ * The pending count rides on the Send button rather than sitting beside it as
+ * a sentence: it is the number of things that button is about to do, and the
+ * "Unsent" section below already names the same commands one by one.
+ */
 export function HistoryControls() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()
@@ -50,26 +55,17 @@ export function HistoryControls() {
           </IconButton>
         </span>
       </Tooltip>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        noWrap
-        sx={{ flexGrow: 1, minWidth: 0 }}
+      <Box sx={{ flexGrow: 1 }} />
+      <Button
+        size="small"
+        variant="text"
+        startIcon={<SendIcon fontSize="small" />}
+        disabled={!pending || isSyncing}
+        onClick={() => dispatch(syncData())}
+        sx={{ flexShrink: 0, whiteSpace: 'nowrap' }}
       >
-        {t('pendingCount', { count: pending })}
-      </Typography>
-      <Tooltip title={t('sendChanges')}>
-        <span>
-          <IconButton
-            size="small"
-            color="primary"
-            disabled={!pending || isSyncing}
-            onClick={() => dispatch(syncData())}
-          >
-            <SendIcon fontSize="small" />
-          </IconButton>
-        </span>
-      </Tooltip>
+        {pending ? t('sendCount', { count: pending }) : t('sendChanges')}
+      </Button>
     </Stack>
   )
 }

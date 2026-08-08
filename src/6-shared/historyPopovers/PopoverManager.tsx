@@ -8,7 +8,8 @@ import type { Modify } from '6-shared/types'
 const PopoverMethodsContext = React.createContext<{
   close: (key: TKey) => void
   open: (key: TKey, props?: object) => void
-}>({ close: () => {}, open: () => {} })
+  openReplacing: (key: TKey, props?: object) => void
+}>({ close: () => {}, open: () => {}, openReplacing: () => {} })
 
 /** Context for props of popovers */
 const PopoverPropsContext = React.createContext<
@@ -24,15 +25,22 @@ export const PopoverManager: FC<{ children: ReactNode }> = props => {
   const stack = popoverStack.usePopoverStack()
   const [popProps, setPopProps] = useState<Record<TKey, any | undefined>>({})
 
+  const storeProps = (key: TKey, props?: object) =>
+    setPopProps(s => {
+      if (s[key] === props) return s
+      return { ...s, [key]: { ...s[key], ...props } }
+    })
+
   const methods = useMemo(
     () => ({
       close: stackActions.close,
       open: (key: TKey, props?: object) => {
-        setPopProps(s => {
-          if (s[key] === props) return s
-          return { ...s, [key]: { ...s[key], ...props } }
-        })
+        storeProps(key, props)
         stackActions.open(key)
+      },
+      openReplacing: (key: TKey, props?: object) => {
+        storeProps(key, props)
+        stackActions.openReplacing(key)
       },
     }),
     [stackActions]
@@ -79,14 +87,19 @@ export function registerPopover<
     { extra: ExtraProps; display?: WithoutBaseProps<DisplayProps> } | undefined
 
   function useMethods() {
-    const { open, close } = useContext(PopoverMethodsContext)
+    const { open, openReplacing, close } = useContext(PopoverMethodsContext)
     return useMemo(() => {
       return {
         open: (extra: ExtraProps, display?: WithoutBaseProps<DisplayProps>) =>
           open(key, { extra, display } as TStored),
+        /** Opens this popover in place of whatever is currently open. */
+        openReplacing: (
+          extra: ExtraProps,
+          display?: WithoutBaseProps<DisplayProps>
+        ) => openReplacing(key, { extra, display } as TStored),
         close: () => close(key),
       }
-    }, [open, close])
+    }, [open, openReplacing, close])
   }
 
   function useProps() {

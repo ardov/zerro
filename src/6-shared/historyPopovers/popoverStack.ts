@@ -20,6 +20,7 @@ type TLocationState = { dialogs?: TKey[] }
 
 function useActions(): {
   open: (key: TKey) => void
+  openReplacing: (key: TKey) => void
   close: (key: TKey) => void
 } {
   const location = useLocation()
@@ -34,6 +35,24 @@ function useActions(): {
         const state = getState(location)
         const nextState = { ...state, dialogs: [...currStack, key] } // add key
         navigate(pathname + search + hash, { state: nextState })
+      },
+      /**
+       * Hands the screen from whatever is open to `key` in one navigation.
+       *
+       * Closing and opening as two calls cannot work: both read `location`
+       * from this closure, so the second one still sees the stack the first
+       * one was removing, and the resulting back-step races the push. The
+       * entry is replaced rather than pushed so that closing `key` returns to
+       * the page instead of reopening the menu it was launched from.
+       */
+      openReplacing: (key: TKey) => {
+        if (!key) return
+        const { pathname, hash, search } = location
+        const state = getState(location)
+        navigate(pathname + search + hash, {
+          state: { ...state, dialogs: [key] },
+          replace: true,
+        })
       },
       close: (key: TKey) => {
         if (!key) return

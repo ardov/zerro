@@ -189,8 +189,9 @@ describe('paged history view', () => {
     await store.dispatch(loadHistoryPage() as any)
 
     expect(selectHistoryRows(store.getState()).map(row => row.type)).toEqual([
+      'section',
       'local',
-      'divider',
+      'section',
       'journal',
     ])
   })
@@ -221,14 +222,19 @@ describe('paged history view', () => {
     await store.dispatch(loadHistoryPage() as any)
 
     const collapsed = selectHistoryRows(store.getState())
-    expect(collapsed.map(row => row.type)).toEqual(['run', 'journal'])
-    const run = collapsed[0]
+    expect(collapsed.map(row => row.type)).toEqual([
+      'section',
+      'run',
+      'journal',
+    ])
+    const run = collapsed[1]
     if (run.type !== 'run') throw new Error('expected a collapsed run')
     expect(run.entries.map(entry => entry.sequence)).toEqual([3, 2])
 
     store.dispatch(toggleHistoryRun(run.id))
 
     expect(selectHistoryRows(store.getState()).map(row => row.type)).toEqual([
+      'section',
       'run',
       'journal',
       'journal',

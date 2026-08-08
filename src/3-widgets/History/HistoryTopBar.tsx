@@ -16,45 +16,47 @@ import {
   CloseIcon,
   HistoryIcon,
 } from '6-shared/ui/Icons'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
-import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import { isEditingTarget } from '4-features/historyShortcuts'
 import { useAppDispatch, useAppSelector } from 'store'
-import { restoreOutboxPosition } from 'store/data'
 import {
   exitHistoryBrowsing,
   returnToCurrent,
   selectHistoryPoint,
-  selectHistoryPointData,
   selectHistoryStep,
   selectIsBrowsingHistory,
   selectSelectedHistoryEntryMissing,
   selectSelectedHistoryPoint,
   selectSelectedHistoryTime,
 } from 'store/history'
-import { core } from 'zerro-core/redux'
 import { historyPanelPopover } from './HistoryPanel'
+import { useRestoreSelectedPoint } from './useRestoreSelectedPoint'
 
 /**
- * The transport for browsing history, open until the user explicitly leaves.
+ * The transport for browsing history once the panel is closed.
  *
- * Every control keeps its place and switches `disabled` rather than
- * unmounting: the bar pushes the page down, so a control that appears or
- * disappears as you step would shift what you are reading mid-click. For the
- * same reason no control changes meaning — stepping to the newest row disables
- * the forward arrow instead of closing the bar under the finger pressing it.
+ * While the panel is open it keeps only the job the panel cannot do: saying
+ * that the page below is not live. Stepping, opening the panel and restoring
+ * all drop out, because the panel is the better version of each — its list is
+ * the step arrows, and its footer is the restore button next to what restoring
+ * would cost. What stays are the two exits, which exist nowhere else, and the
+ * coloured rule that marks the page.
+ *
+ * The bar itself never comes and goes while browsing, only its contents:
+ * it pushes the page down, so appearing when the panel closes would shift what
+ * you are reading. For the same reason no control changes meaning — stepping
+ * to the newest row disables the forward arrow instead of closing the bar
+ * under the finger pressing it.
  */
 export function HistoryTopBar() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()
-  const snackbar = useSnackbar()
   const isNarrow = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
   const browsing = useAppSelector(selectIsBrowsingHistory)
   const point = useAppSelector(selectSelectedHistoryPoint)
-  const data = useAppSelector(selectHistoryPointData)
   const missing = useAppSelector(selectSelectedHistoryEntryMissing)
   const time = useAppSelector(selectSelectedHistoryTime)
   const step = useAppSelector(selectHistoryStep)
+  const { canRestore, restore } = useRestoreSelectedPoint()
   const { displayProps: panel, open: openPanel } =
     historyPanelPopover.useProps()
 
@@ -74,33 +76,11 @@ export function HistoryTopBar() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [browsing, dispatch])
 
-  const restoreLocal = () => {
-    if (point?.kind !== 'local') return
-    dispatch(restoreOutboxPosition(point.index))
-    dispatch(exitHistoryBrowsing())
-  }
-  const restoreServer = () => {
-    if (!data) return
-    const applied = dispatch(core.restore.apply(data))
-    dispatch(exitHistoryBrowsing())
-    snackbar({ message: applied ? t('restoreApplied') : t('restoreNoChanges') })
-  }
-  const confirmRestoreServer = useConfirm({
-    title: t('restorePoint'),
-    description: t('restoreServerDescription'),
-    okText: t('restorePoint'),
-    onOk: restoreServer,
-  })
-
   if (!browsing) return null
 
   // A null selection is the head of the list: live data under another name.
   const atHead = point === null
-  // `data` is the single readiness signal: a local point out of range and a
-  // journal point still loading or missing all leave it undefined.
-  const canRestore = !atHead && data !== undefined
-  const restore = () =>
-    point?.kind === 'local' ? restoreLocal() : confirmRestoreServer()
+  const compact = panel.open
 
   const label = missing
     ? t('pointUnavailable')
@@ -119,47 +99,61 @@ export function HistoryTopBar() {
       }}
     >
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <IconButton
-          size="small"
-          disabled={!step.back}
-          onClick={() =>
-            step.back && void dispatch(selectHistoryPoint(step.back))
-          }
-          aria-label={t('stepBack')}
+        {!compact && (
+          <>
+            <IconButton
+              size="small"
+              disabled={!step.back}
+              onClick={() =>
+                step.back && void dispatch(selectHistoryPoint(step.back))
+              }
+              aria-label={t('stepBack')}
+            >
+              <ChevronLeftIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              disabled={!step.forward}
+              onClick={() =>
+                step.forward && void dispatch(selectHistoryPoint(step.forward))
+              }
+              aria-label={t('stepForward')}
+            >
+              <ChevronRightIcon fontSize="small" />
+            </IconButton>
+          </>
+        )}
+        {/* Left-aligned while the panel is open: the panel overlays the right
+            of the page, and controls pushed under it are controls that are
+            gone. */}
+        <Typography
+          variant="caption"
+          noWrap
+          sx={{ flexGrow: compact ? 0 : 1, minWidth: 0 }}
         >
-          <ChevronLeftIcon fontSize="small" />
-        </IconButton>
-        <IconButton
-          size="small"
-          disabled={!step.forward}
-          onClick={() =>
-            step.forward && void dispatch(selectHistoryPoint(step.forward))
-          }
-          aria-label={t('stepForward')}
-        >
-          <ChevronRightIcon fontSize="small" />
-        </IconButton>
-        <Typography variant="caption" noWrap sx={{ flexGrow: 1, minWidth: 0 }}>
-          {label}
+          {atHead ? label : t('viewingPast', { time: label })}
         </Typography>
-        <IconButton
-          size="small"
-          disabled={panel.open}
-          onClick={() => openPanel({})}
-          aria-label={t('openPanel')}
-        >
-          <HistoryIcon fontSize="small" />
-        </IconButton>
-        {/* The date is the only thing allowed to shrink: a label that wraps
-            would make the bar two rows tall mid-step and shift the page. */}
-        <Button
-          size="small"
-          sx={{ flexShrink: 0, whiteSpace: 'nowrap' }}
-          disabled={!canRestore}
-          onClick={restore}
-        >
-          {isNarrow ? t('restoreShort') : t('restorePoint')}
-        </Button>
+        {!compact && (
+          <>
+            <IconButton
+              size="small"
+              onClick={() => openPanel({})}
+              aria-label={t('openPanel')}
+            >
+              <HistoryIcon fontSize="small" />
+            </IconButton>
+            {/* The date is the only thing allowed to shrink: a label that wraps
+                would make the bar two rows tall mid-step and shift the page. */}
+            <Button
+              size="small"
+              sx={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+              disabled={!canRestore}
+              onClick={restore}
+            >
+              {isNarrow ? t('restoreShort') : t('restorePoint')}
+            </Button>
+          </>
+        )}
         <Button
           size="small"
           sx={{ flexShrink: 0, whiteSpace: 'nowrap' }}

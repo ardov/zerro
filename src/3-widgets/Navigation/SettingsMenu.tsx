@@ -16,6 +16,7 @@ import {
   MoreHorizIcon,
   AccountBalanceWalletIcon,
   GlobeIcon,
+  HistoryIcon,
   TagIcon,
 } from '6-shared/ui/Icons'
 import type { PopoverProps } from '@mui/material'
@@ -40,6 +41,7 @@ import { useAppDispatch, useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
+import { useHistoryPanelFromMenu } from '3-widgets/History/HistoryPanel'
 import { logOut } from '4-features/authorization'
 import { exportCSV } from '4-features/export/exportCSV'
 import { exportJSON } from '4-features/export/exportJSON'
@@ -101,6 +103,7 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       )}
       <Divider sx={{ opacity: '0.6' }} />
       <ListSubheader>{t('data')}</ListSubheader>
+      <HistoryItem onClose={props.onClose} />
       <ExportCsvItem />
       <ExportJsonItem />
       <ImportBackupItem />
@@ -113,6 +116,24 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
 }
 
 type ItemProps = { onClose: () => void }
+
+/**
+ * The entry to change history. The panel takes this menu's place on the
+ * popover stack rather than stacking on top of it, so closing the panel
+ * returns to the page instead of reopening the menu behind it.
+ */
+function HistoryItem(_props: ItemProps) {
+  const { t } = useTranslation('history')
+  const openPanel = useHistoryPanelFromMenu()
+  return (
+    <MenuItem onClick={openPanel}>
+      <ListItemIcon>
+        <HistoryIcon />
+      </ListItemIcon>
+      <ListItemText>{t('panelTitle')}</ListItemText>
+    </MenuItem>
+  )
+}
 
 function ExportCsvItem() {
   const { t } = useTranslation('settings')
