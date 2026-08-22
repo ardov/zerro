@@ -116,7 +116,8 @@ restated there:
 ### Change history and restore
 
 The app keeps a user-visible change history and can restore any retained valid
-point. Implementation path: [notes.md](./notes.md#4-change-history-and-restore).
+point. What is still open is listed in
+[notes.md](./notes.md#remaining-work).
 
 #### The journal
 
@@ -243,19 +244,43 @@ point. Implementation path: [notes.md](./notes.md#4-change-history-and-restore).
   return under their old ID, and a desired live transaction with no semantic
   replacement gets a fresh ID — so repeating a restore converges instead of
   producing a second command.
-- A restore removes a row only where the domain already has a removal, and the
-  diff says which per entity type: soft delete for transactions, zeroing for
-  budgets, a real `deletion` for reminders, nothing for accounts, tags, and
-  merchants. Deleting those three would leave transactions referencing a locally
-  missing row, because the server cascades in
-  [materialization.md](./materialization.md) rules 4-7 are not predicted; they
-  become expressible together, when the deletion commands ship.
+- A restore removes a row the way that entity type is removed at all: soft
+  delete for transactions, zeroing for budgets, a real `deletion` for accounts,
+  merchants, tags, reminders, and reminder markers, and nothing for the user
+  row. The cascades those deletions set off are predicted locally —
+  [materialization.md](./materialization.md) rules 4-7 — so a removed account,
+  tag, or merchant does not leave transactions pointing at a missing row. Two
+  removals are deliberately skipped because the server refuses them and
+  predicting one would make `current` lie until the next sync: the debt account
+  singleton, and a merchant still referenced by an active debt transaction.
 - Restore never truncates the timeline — its response appends a later point.
   Dropping later points would destroy both the record of what was overwritten
   and the ability to restore back.
-- Scoped restore (one account, envelope, or month) is the primary form. Global
-  restore is an escape hatch behind its own confirmation, because a rewind is
-  only safe where the user knows what it overwrites.
+- Scoped restore (one account, envelope, or month) is the intended primary
+  form, with global restore as an escape hatch behind its own confirmation,
+  because a rewind is only safe where the user knows what it overwrites. Only
+  the global form is built: a history point restores whole, and a backup import
+  is always a complete snapshot. Scope is tracked as remaining work in
+  [notes.md](./notes.md#2-scoped-restore).
+
+Backup import is the file-shaped form of the same operation, and carries its own
+settled rules:
+
+- Only a complete backup produced by Zerro is importable; an incremental or
+  partial ZenMoney diff is not a backup. There is no format envelope and no
+  version field — the exported shape is the contract, and an incompatible change
+  to it requires an explicit validator update.
+- Export reads `state.data.base`, so pending local commands are never part of a
+  backup. When the outbox is not empty, export says so and lets the user cancel
+  or download anyway; it never triggers a sync to make the file complete.
+- Import is same-account only. Cross-account migration is a separate feature and
+  must never be inferred from a structurally valid file.
+- Read-only dictionaries — `instrument`, `country`, `company` — are validated
+  but never written, and user billing and subscription fields are never
+  restored.
+- Out of scope by decision rather than omission: partial or merge import,
+  exporting `current`, restoring an outbox from a backup, automatic sync after a
+  restore, and splitting one restore across several network requests.
 
 Restore is not undo, and three consequences must be visible in the UI rather
 than only recorded here. The backup-import confirmation states all three and
@@ -319,7 +344,7 @@ shows the per-entity counts the restore would write:
   derived, redo is session-only — plus the bounded request cache and nothing
   else. The tool owns its parser: Core exposes durable command-array validation,
   but the browser's persisted-replica migration parser does not belong in the
-  headless boundary. Concurrent writers are outside MVP scope, but atomic file
+  headless boundary. Concurrent writers are out of scope, but atomic file
   replacement is still required against truncated local state, and the document
   uses private directory and file permissions.
 - Stable ids come from bounded reads. Automatic title matching is deferred
@@ -333,7 +358,7 @@ shows the per-entity counts the restore would write:
   validates only its external JSON contract and resolves references for bounded
   errors, without rebuilding factory defaults or predicting balances. Envelope
   creation, rename, settings, and structure mutation, and transaction update and
-  delete, stay outside MVP.
+  delete, stay out of scope.
 - Sync is explicit and reuses the Core primary-only transport and canonical
   prefix acknowledgement, accepting the same whole-prefix and silent-drop risk
   as the app; satisfaction checks, quarantine, and retry are deferred. An empty

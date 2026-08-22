@@ -1,7 +1,7 @@
 # Zerro Core testing policy
 
 - Status: active policy; the migration completion gate is satisfied
-- Updated: 2026-07-30
+- Updated: 2026-08-22
 
 Tests protect domain rules, dependency boundaries, replay, and consumer-visible
 behavior. They should not make thin helpers or obsolete compatibility layers
@@ -45,11 +45,6 @@ the dependency.
 ### Boundary checks
 
 - `api-boundary.test.ts` protects dependency direction and adapter shape.
-- `pnpm zerro-core:package-check` emits declarations and type-checks a synthetic
-  external consumer.
-- Keep expensive package compilation explicit. Do not duplicate it inside the
-  fast unit suite unless the wrapper adds a distinct contract and has a stable
-  runtime budget.
 
 ## Remove low-value tests
 
@@ -91,7 +86,7 @@ permissive test builders.
 | Session/read facade         | Session + deterministic demo regression          |
 | Materializer/patch apply    | Focused + reducer/engine + default full suite    |
 | Replica/sync                | Reload + undo/redo + rebase + default full suite |
-| Package/dependency boundary | Boundary tests + external consumer type compile  |
+| Package/dependency boundary | Boundary tests                                   |
 
 ## Agent verification discipline
 
@@ -101,48 +96,22 @@ configuration files are unchanged.
 
 Run TypeScript and any required broad checks once before handing off the
 completed slice. Run the default full Vitest suite only for changes whose row in
-the verification matrix requires it, and run `zerro-core:package-check` only
-when the package or dependency boundary changes.
+the verification matrix requires it.
 
 Run ESLint and Prettier against touched files during the loop. Prefer Vitest's
 compact agent output: `--reporter=agent --silent=passed-only`.
 
-## Verification health
+## Manual smoke
 
-The 2026-07-13 audit found load-sensitive parallel tests, formatting and ESLint
-drift, and an untrustworthy Knip configuration. Closed on 2026-07-14:
+Automated checks do not cover the load-to-sync path, so one manual smoke does:
+initial load, budget/goal edit, transaction edit, reload with pending state,
+explicit sync with a pending outbox, undo/redo, and logout history reset. It
+last passed on 2026-07-30 and satisfied the migration completion gate.
 
-- package declaration compilation runs only as the explicit
-  `zerro-core:package-check` gate;
-- the import-heavy session parity test loads its dependencies before the test
-  timeout starts;
-- the default parallel suite is reproducibly green without a timeout increase;
-- ESLint enforces zero warnings and Core formatting is clean;
-- Knip starts from the real app, worker, and package-consumer entrypoints.
+Re-run it when replica persistence, the command shape, or the sync transport
+changes. Routine domain work does not need it.
 
 Knip output is evidence for an audit, not automatic deletion authority.
-
-## Completion gate — satisfied
-
-The Core migration was complete once:
-
-1. focused tests, TypeScript, default parallel Vitest, package consumer,
-   formatting, and dependency checks were reproducibly green;
-2. a manual smoke covered initial load, budget/goal edit, transaction edit,
-   reload with pending state, and explicit sync;
-3. production had no legacy model dependency replaced by the Core Redux API;
-4. remaining presentation/app-service compatibility had an owner and exit
-   condition.
-
-Latest manual checkpoint (2026-07-30, maintainer-run): the full smoke listed
-above passed, including undo/redo, logout history reset, and explicit sync with
-a pending outbox. The 2026-07-12 partial checkpoint it replaces stays in Git.
-
-Automated evidence at the same date: 111 test files / 495 tests green in the
-default parallel suite.
-
-Re-run the manual smoke when replica persistence, the command shape, or the
-sync transport changes; routine domain work does not need it.
 
 ## Commands
 
@@ -150,7 +119,6 @@ sync transport changes; routine domain work does not need it.
 pnpm exec vitest run path/to/test.ts
 pnpm exec tsc --noEmit
 pnpm exec vitest run
-pnpm zerro-core:package-check
 pnpm exec eslint src/zerro-core
 pnpm exec prettier --check "src/zerro-core/**/*.{ts,tsx,json,md}"
 git diff --check

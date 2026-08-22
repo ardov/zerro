@@ -1,7 +1,7 @@
-# Local finance tooling MVP
+# Local finance CLI contract
 
-- Status: complete and shipped; this document is the tool's contract
-- Updated: 2026-07-30
+- Status: shipped; this document is the tool's contract
+- Updated: 2026-08-22
 - Scope: one repository-local CLI. A second transport would come from the
   desktop-host question, not from this document.
 - Usage documentation is
@@ -14,14 +14,12 @@ A small local tool that lets an agent refresh and inspect the user's normalized
 ZenMoney snapshot, discover entities by stable id, search a bounded transaction
 history, read monthly totals and envelope metrics through Core projections,
 preview and stage envelope-budget updates and transactions, undo staged
-changes, and explicitly synchronize. All of it shipped.
+changes, and explicitly synchronize.
 
 The tool is a source consumer inside this repository. It does **not** publish
 or physically move `zerro-core`; proving the headless boundary was the point.
 
-## Starting point
-
-Do not replace these existing contracts:
+## Contracts this tool must not replace
 
 - `createZerroSession(data, ctx)` is the immutable read facade.
 - Durable replica truth is `base + outbox`; `current` is replayed from them.
@@ -31,8 +29,7 @@ Do not replace these existing contracts:
 - `buildOutboxTransport` rematerializes primary intent from `base`; predicted
   local effects must not enter transport.
 - A successful ZenMoney response acknowledges exactly the sent outbox prefix.
-  The accepted whole-prefix and silent-drop risk remains unchanged for this
-  MVP.
+  The accepted whole-prefix and silent-drop risk is unchanged here.
 - Canonical server diffs update `base`; remaining commands replay over the new
   base.
 
@@ -48,7 +45,7 @@ Useful current seams:
   transaction filtering;
 - `src/zerro-core/internal/projections/graph.ts` — shared financial projections.
 
-## Accepted MVP decisions
+## Accepted decisions
 
 The decisions themselves — one CLI with bounded JSON, separate
 preview/stage/sync, unpersisted previews, caller-provided request ids, one
@@ -76,7 +73,7 @@ have no other home:
 - a public `applyRawPatch` or arbitrary entity mutation tool;
 - account, tag, merchant, reminder, or envelope creation;
 - envelope rename, settings, or structure mutation;
-- transaction update or deletion in the MVP;
+- transaction update or deletion;
 - bulk autonomous cleanup or recategorization;
 - any network-reachable transport of its own: MCP server, HTTP server, or
   daemon. A desktop host may later expose one around these application
@@ -154,7 +151,7 @@ Rules:
 - write a complete temporary sibling file and rename it over the target;
 - reject an unknown state version or malformed Core outbox;
 - validate that `base` has a finite timestamp and an object map for every
-  normalized entity family; deep entity-field validation is outside MVP because
+  normalized entity family; deep entity-field validation is out of scope because
   the tool is the only writer;
 - an absent file means the resolved endpoint plus an empty base, outbox, and
   recent-request cache, not a partially initialized state;
@@ -199,7 +196,7 @@ pnpm zerro -- sync
 
 ## Stable output contract
 
-Human output may be added later. MVP commands emit JSON on stdout and
+Human output may be added later. Commands emit JSON on stdout and
 diagnostics on stderr.
 
 Every successful command returns:
@@ -606,7 +603,7 @@ entrypoint and so no tool imports `zerro-core/internal/*`.
 
 13. return changed-domain counts and the remaining outbox count.
 
-The MVP intentionally accepts the app's whole-prefix acknowledgement risk. Do
+The tool intentionally accepts the app's whole-prefix acknowledgement risk. Do
 not invent command ids, per-field acknowledgements, quarantine, or retries.
 
 After a successful create sync, the command response should confirm whether the
@@ -618,22 +615,9 @@ runtime response parsing, and persistence helpers. The HTTP adapter accepts
 injected `fetch` and `now` dependencies for deterministic tests. `refresh` and
 `sync` must not be two orchestration implementations.
 
-## History
+## Surface additions
 
-W-1 through W4 built this tool between 2026-07-20 and 2026-07-29: headless Core
-readiness, the CLI and atomic local replica, refresh and bounded reads,
-envelope budgets with outbox undo, semantic transaction creation, and explicit
-sync. Each wave landed as its own commit with its own gates; `git log
-tools/zerro src/zerro-core/headless.ts` is the record, and it outranks any
-retrospective summary here.
-
-Current evidence: 111 test files / 495 tests green in the default parallel
-suite, plus types, ESLint, Knip, and the package check (2026-07-30).
-
-## Shipped after the MVP
-
-These landed on top of W4 without a new wave, because each one only widened an
-existing read or its presentation:
+These widened an existing read or its presentation without changing a contract:
 
 - currency-aware reads: `--display-currency` plus `meta.rates`;
 - name lookups for `--account`, `--tag`, and `--merchant`;
@@ -648,7 +632,7 @@ a contract above. A change that alters persistence, command shape, sync, or the
 side-effect classes needs a decision in
 [design-ledger.md](./design-ledger.md), not a line in this list.
 
-## Post-MVP follow-ups
+## Follow-ups
 
 Unscheduled and demand-driven. Take one only when a real agent session needs it:
 
@@ -667,10 +651,10 @@ Unscheduled and demand-driven. Take one only when a real agent session needs it:
 An MCP adapter is not part of this tool's roadmap. For a maintainer in a
 repository checkout, machine-readable `help` over shell already answers what an
 MCP schema would. It stays open only as part of the desktop-host question in
-[open-decisions.md](../../../../docs/open-decisions.md#1-mcp-inside-a-desktop-host),
-where the point is token handling for ordinary users rather than agent
-ergonomics. If it ships there, it delegates to these same application
-functions, maps one-to-one onto these commands, and adds no logic of its own.
+`private/open-decisions.md` § 1, MCP inside a desktop host, where the point is
+token handling for ordinary users rather than agent ergonomics. If it ships
+there, it delegates to these same application functions, maps one-to-one onto
+these commands, and adds no logic of its own.
 
 ## Verification by change type
 
@@ -685,7 +669,7 @@ functions, maps one-to-one onto these commands, and adds no logic of its own.
 | transaction compiler             | compiler + resulting-state + materializer/outbox tests            |
 | replica canonical acceptance     | focused replica + reducer integration + default full suite        |
 | sync orchestration               | fixture HTTP test + replica/sync integration + default full suite |
-| Core entrypoint/package boundary | API boundary + `pnpm zerro-core:package-check`                    |
+| Core entrypoint/package boundary | `api-boundary.test.ts`                                            |
 | read options/output shaping      | focused Node test per option + `help` manifest test               |
 
 Before handing off a slice:
@@ -698,16 +682,14 @@ pnpm exec prettier --check "<touched files>"
 git diff --check
 ```
 
-Run the default parallel suite and package check only when the testing matrix
-requires them. Do not repeatedly rerun successful broad gates while their
-inputs are unchanged.
+Run the default parallel suite only when the testing matrix requires it. Do
+not repeatedly rerun successful broad gates while their inputs are unchanged.
 
 ## Continuation protocol for future agents
 
-The tool is finished, so a continuation changes a working thing rather than
-advancing a migration:
+A continuation changes a working tool rather than advancing a migration:
 
-1. confirm `cwd` is `/Users/ardov/GitHub/zerro`;
+1. confirm `cwd` is the repository root;
 2. run `git status --short`;
 3. read this document, [architecture.md](./architecture.md), and the relevant
    section of [testing.md](./testing.md);
@@ -715,7 +697,7 @@ advancing a migration:
 5. implement one independently testable slice, not a batch of follow-ups;
 6. keep the contracts above: bounded JSON, separate preview/stage/sync,
    caller-provided request ids, and `base + outbox` as the only persisted truth;
-7. list a new agent-visible option or command under **Shipped after the MVP** in
+7. list a new agent-visible option or command under **Surface additions** in
    the same commit;
 8. record any changed boundary in [design-ledger.md](./design-ledger.md);
 9. preserve unrelated working-tree changes.

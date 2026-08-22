@@ -33,17 +33,17 @@ prose.
 
 ## Document map
 
-| Document                                                        | Purpose                                            |
-| --------------------------------------------------------------- | -------------------------------------------------- |
-| [architecture.md](./architecture.md)                            | Durable boundaries and runtime contracts           |
-| [materialization.md](./materialization.md)                      | Predicted local effects and server cascades        |
-| [local-tooling.md](./local-tooling.md)                          | Agent CLI contract and what its MVP had to satisfy |
-| [design-ledger.md](./design-ledger.md)                          | Settled decisions, risks, and open questions       |
-| [notes.md](./notes.md)                                          | Current position, remaining work, deferred smells  |
-| [testing.md](./testing.md)                                      | Verification policy and completion gate            |
-| [ZenMoney sync API](../../internal/domain/zenmoney/sync-api.md) | Observed server behavior and wire shape            |
-| [tools/zerro/README.md](../../../../tools/zerro/README.md)      | How to use the shipped CLI                         |
-| [docs/open-decisions.md](../../../../docs/open-decisions.md)    | Questions waiting on the maintainer                |
+| Document                                                        | Purpose                                               |
+| --------------------------------------------------------------- | ----------------------------------------------------- |
+| [architecture.md](./architecture.md)                            | Durable boundaries and runtime contracts              |
+| [materialization.md](./materialization.md)                      | Predicted local effects and server cascades           |
+| [local-tooling.md](./local-tooling.md)                          | Agent CLI contract and the constraints it works under |
+| [design-ledger.md](./design-ledger.md)                          | Settled decisions, risks, and open questions          |
+| [notes.md](./notes.md)                                          | Current position, remaining work, deferred smells     |
+| [testing.md](./testing.md)                                      | Verification policy and completion gate               |
+| [ZenMoney sync API](../../internal/domain/zenmoney/sync-api.md) | Observed server behavior and wire shape               |
+| [tools/zerro/README.md](../../../../tools/zerro/README.md)      | How to use the shipped CLI                            |
+| `private/open-decisions.md` (not in this repository)            | Questions waiting on the maintainer                   |
 
 Entity-specific ZenMoney behavior belongs beside its implementation under
 `internal/domain/zenmoney/*/README.md`.

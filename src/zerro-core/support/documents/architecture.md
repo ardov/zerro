@@ -1,7 +1,7 @@
 # Zerro Core architecture
 
-- Status: accepted target architecture for an incremental migration
-- Updated: 2026-07-31
+- Status: accepted architecture; the migration it guided is closed
+- Updated: 2026-08-22
 
 ## Purpose
 
@@ -278,7 +278,8 @@ create a branch. Empty pulls update only `PersistedReplica.serverTimestamp`.
 Only a full sync, recovery, and retention write checkpoints — there is no
 periodic one, so the replayed suffix grows with ordinary syncing until the user
 asks for a full reload. That is the deliberate manual lever, not an oversight;
-see [open-decisions.md](../../../../docs/open-decisions.md#7-what-writes-a-checkpoint-during-ordinary-use).
+see `private/open-decisions.md` § 7, what writes a checkpoint during ordinary
+use.
 
 Startup gets the latest checkpoint directly, scans only its suffix through
 `headSequence`, validates the reconstructed base, and then replays the parsed
