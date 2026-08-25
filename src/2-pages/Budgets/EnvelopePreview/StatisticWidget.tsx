@@ -1,5 +1,7 @@
 import type { FC } from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
 import { useState } from 'react'
+import { clsx } from 'clsx'
 import {
   BarChart,
   Bar,
@@ -7,8 +9,8 @@ import {
   ResponsiveContainer,
   ReferenceDot,
 } from 'recharts'
-import type { BoxProps, ButtonBaseProps, SxProps } from '@mui/material'
-import { Stack, Box, Typography, ButtonBase } from '@mui/material'
+import type { ButtonBaseProps, SxProps } from '@mui/material'
+import { Typography, ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import type { TFxCode, TISOMonth } from '6-shared/types'
@@ -22,7 +24,9 @@ import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { trimMonths } from './shared'
 
-type StatisticWidgetProps = BoxProps & { id: core.envelopes.TEnvelopeId }
+type StatisticWidgetProps = Omit<ComponentPropsWithoutRef<'div'>, 'id'> & {
+  id: core.envelopes.TEnvelopeId
+}
 
 const WINDOW = 12 // Number of months to show in the chart
 
@@ -99,7 +103,9 @@ function useAggregatedStats(
 
 export const StatisticWidget: FC<StatisticWidgetProps> = ({
   id,
-  ...boxProps
+  className,
+  style,
+  ...rest
 }) => {
   const { t } = useTranslation('budgets', { keyPrefix: 'statisticWidget' })
   const [month, setMonth] = useMonth()
@@ -139,26 +145,21 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   }
 
   return (
-    <Box
-      {...boxProps}
-      sx={[
-        {
-          borderRadius: 1,
-          bgcolor: 'background.default',
-        },
-        ...(Array.isArray(boxProps.sx) ? boxProps.sx : [boxProps.sx]),
-      ]}
+    <div
+      {...rest}
+      className={clsx('rounded-lg bg-background', className)}
+      style={style}
     >
-      <Box sx={{ px: 2, pt: 2 }}>
-        <Typography variant="body1" sx={{ color: 'text.primary' }}>
+      <div className="px-2 pt-2">
+        <Typography variant="body1" className="text-foreground">
           <span>{t('average')} </span>
           <InlineButton onClick={switchMetric}>{t(metric)}</InlineButton>
           <span> {t('over')} </span>
           <InlineButton onClick={switchPeriod}>{t(period)}</InlineButton>
         </Typography>
-      </Box>
+      </div>
       {selectedData && (
-        <Stack spacing={0.5} sx={{ pt: 2, px: 2 }}>
+        <div className="flex flex-col gap-1 px-2 pt-2">
           <DataLine
             name={t('avgForDate', {
               date: formatDate(selectedData.month, 'LLL'),
@@ -167,9 +168,9 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
             amount={selectedData.value}
             currency={currency}
           />
-        </Stack>
+        </div>
       )}
-      <Box sx={{ width: '100%', height: '160px' }}>
+      <div className="h-40 w-full">
         <ResponsiveContainer>
           <BarChart
             data={trimmedData}
@@ -212,8 +213,8 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
             )}
           </BarChart>
         </ResponsiveContainer>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

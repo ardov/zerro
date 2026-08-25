@@ -1,11 +1,11 @@
 import type { FC } from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
 import { useState } from 'react'
+import { clsx } from 'clsx'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
-import type { BoxProps } from '@mui/material'
-import { Stack, Box } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import type { TFxAmount, TISOMonth } from '6-shared/types'
@@ -15,10 +15,12 @@ import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { getDateRange } from './shared'
 
-type ActivityWidgetProps = BoxProps & { id: core.envelopes.TEnvelopeId }
+type ActivityWidgetProps = Omit<ComponentPropsWithoutRef<'div'>, 'id'> & {
+  id: core.envelopes.TEnvelopeId
+}
 
 export const ActivityWidget: FC<ActivityWidgetProps> = props => {
-  const { id, ...boxProps } = props
+  const { id, className, style, ...rest } = props
   const { t } = useTranslation('budgets')
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
@@ -68,17 +70,12 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
   const startingAmountColor = theme.palette.primary.main
 
   return (
-    <Box
-      {...boxProps}
-      sx={[
-        {
-          borderRadius: 1,
-          bgcolor: 'background.default',
-        },
-        ...(Array.isArray(boxProps.sx) ? boxProps.sx : [boxProps.sx]),
-      ]}
+    <div
+      {...rest}
+      className={clsx('rounded-lg bg-background', className)}
+      style={style}
     >
-      <Stack spacing={0.5} sx={{ pt: 2, px: 2 }}>
+      <div className="flex flex-col gap-1 px-2 pt-2">
         <DataLine
           name={t('outcome', { ns: 'common' })}
           color={activityColor}
@@ -92,7 +89,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
           amount={selectedData?.startingAmount}
           currency={currency}
           tooltip={
-            <Stack spacing={0.5}>
+            <div className="flex flex-col gap-1">
               <DataLine
                 name={t('assignedThisMonth')}
                 amount={selectedData?.assigned}
@@ -103,11 +100,11 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
                 amount={selectedData?.leftover}
                 currency={currency}
               />
-            </Stack>
+            </div>
           }
         />
-      </Stack>
-      <Box sx={{ width: '100%', height: '160px' }}>
+      </div>
+      <div className="h-40 w-full">
         <ResponsiveContainer>
           <BarChart
             data={data}
@@ -150,8 +147,8 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
             />
           </BarChart>
         </ResponsiveContainer>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

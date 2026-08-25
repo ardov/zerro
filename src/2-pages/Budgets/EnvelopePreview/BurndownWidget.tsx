@@ -1,11 +1,11 @@
 import type { FC } from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
+import { clsx } from 'clsx'
 import { core } from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
 
 import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
-import type { BoxProps } from '@mui/material'
-import { Stack, Box } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { formatDate, getMonthLength, toISODate } from '6-shared/helpers/date'
 import { useAppTheme } from '6-shared/ui/theme'
@@ -17,11 +17,15 @@ import { DataLine } from '3-widgets/DataLine'
 
 import { useMonth } from '../MonthProvider'
 
-type BurndownWidgetProps = BoxProps & { id: core.envelopes.TEnvelopeId }
+type BurndownWidgetProps = Omit<ComponentPropsWithoutRef<'div'>, 'id'> & {
+  id: core.envelopes.TEnvelopeId
+}
 
 export const BurndownWidget: FC<BurndownWidgetProps> = ({
   id,
-  ...boxProps
+  className,
+  style,
+  ...rest
 }) => {
   const { t } = useTranslation('budgets')
   const [month] = useMonth()
@@ -29,17 +33,12 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
   const { currency } = envData[month][id]
 
   return (
-    <Box
-      {...boxProps}
-      sx={[
-        {
-          borderRadius: 1,
-          bgcolor: 'background.default',
-        },
-        ...(Array.isArray(boxProps.sx) ? boxProps.sx : [boxProps.sx]),
-      ]}
+    <div
+      {...rest}
+      className={clsx('rounded-lg bg-background', className)}
+      style={style}
     >
-      <Stack spacing={0.5} sx={{ pt: 2, px: 2 }}>
+      <div className="flex flex-col gap-1 px-2 pt-2">
         <DataLine
           name={`${t('balanceFor')} ${formatDate(month, 'LLL')}`}
           // color={activityColor}
@@ -48,11 +47,11 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
           currency={currency}
           tooltip={t('balanceChartTooltip')}
         />
-      </Stack>
-      <Box sx={{ width: '100%', height: '160px' }}>
+      </div>
+      <div className="h-40 w-full">
         <ChangesChart month={month} id={id} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 
