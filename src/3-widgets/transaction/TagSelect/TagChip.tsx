@@ -1,5 +1,4 @@
 import type { TTagId } from '6-shared/types'
-import { Box } from '@mui/material'
 
 import type { FC, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,10 +20,10 @@ function getTagLabel(tag?: core.tags.TTagPopulated): ReactNode {
   if (!tag) return null
   if (tag.icon)
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <TagIcon symbol={tag.symbol} sx={{ ml: -1.5, mr: 0.5 }} />
+      <span className="flex items-center">
+        <TagIcon symbol={tag.symbol} className="-ml-3 mr-1" />
         {tag.name}
-      </Box>
+      </span>
     )
   return tag.title
 }

@@ -230,7 +230,10 @@ const TagOption: FC<TagOptionProps> = ({ tag, isChild, onClick, selected }) => {
 
   return (
     <ListItemButton ref={ref} onClick={onClick} selected={selected}>
-      <TagIcon symbol={tag.symbol} sx={{ mr: 2, ml: isChild ? 5 : 0 }} />
+      <TagIcon
+        symbol={tag.symbol}
+        className={isChild ? 'mr-4 ml-10' : 'mr-4 ml-0'}
+      />
       <ListItemText primary={tag.name} />
     </ListItemButton>
   )

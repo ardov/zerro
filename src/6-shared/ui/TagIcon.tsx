@@ -1,27 +1,25 @@
-import type { Modify } from '6-shared/types'
-import type { BoxProps, CheckboxProps, SxProps, Theme } from '@mui/material'
-import { Box, Checkbox } from '@mui/material'
+import type { ComponentPropsWithoutRef } from 'react'
+import { clsx } from 'clsx'
+import type { CheckboxProps } from '@mui/material'
+import { Checkbox, useTheme } from '@mui/material'
 
-const emojiSizes = { s: 32, m: 40 }
-const emojiFonts = { s: '1rem', m: '1.5rem' }
-const svgSizes = { s: 20, m: 24 }
 const isSvgUrl = (symbol: string): boolean => {
   return symbol.startsWith('data:image/svg') || symbol.includes('.svg')
 }
 
-export type TagIconProps = Modify<
-  BoxProps,
-  {
-    symbol: string
-    color?: string | null
-    size?: 's' | 'm'
-    onChange?: CheckboxProps['onChange']
-    checked?: CheckboxProps['checked']
-    showCheckBox?: boolean
-    checkboxProps?: CheckboxProps
-    button?: boolean
-  }
->
+export type TagIconProps = Omit<
+  ComponentPropsWithoutRef<'div'>,
+  'children' | 'color' | 'onChange'
+> & {
+  symbol: string
+  color?: string | null
+  size?: 's' | 'm'
+  onChange?: CheckboxProps['onChange']
+  checked?: CheckboxProps['checked']
+  showCheckBox?: boolean
+  checkboxProps?: CheckboxProps
+  button?: boolean
+}
 
 export function TagIcon(props: TagIconProps) {
   const {
@@ -33,110 +31,88 @@ export function TagIcon(props: TagIconProps) {
     showCheckBox,
     checkboxProps,
     button = false,
+    className,
+    style,
     ...rest
   } = props
+  const theme = useTheme()
   const isInteractive = !!onChange
   const isSvg = isSvgUrl(symbol)
-
-  const symbolSx: SxProps<Theme> = {
-    width: emojiSizes[size],
-    height: emojiSizes[size],
-    flexShrink: 0,
-    color: theme =>
-      theme.palette.getContrastText(color || theme.palette.background.paper),
-    cursor: button ? 'pointer' : 'auto',
-    borderRadius: '50%',
-    border: color ? `1px solid ${color}` : 'none',
-    background: color
-      ? 'linear-gradient(-30deg, rgba(255,255,255,0.2), transparent)'
-      : 'none',
-    backgroundColor: theme => (color ? color : theme.palette.action.hover),
-    transition: '.2s ease-in-out',
-
-    '&:hover': {
-      transform: button ? 'scale(1.1)' : 'none',
-    },
-    '&:active': {
-      transform: button ? 'scale(1)' : 'none',
-      transition: '.1s ease-in-out',
-    },
-
-    '& .checkbox': {
-      position: 'absolute',
-    },
-    '&:hover .checkbox': {
-      opacity: isInteractive ? 1 : 0,
-      transition: '.2s',
-    },
-    '&:not(:hover) .checkbox': {
-      opacity: showCheckBox || checked ? 1 : 0,
-      transition: '.2s',
-    },
-
-    '& .emoji': {
-      fontSize: emojiFonts[size],
-    },
-    '&:hover .emoji': {
-      opacity: isInteractive ? 0 : 1,
-      transition: '.2s',
-    },
-    '&:not(:hover) .emoji': {
-      opacity: showCheckBox || checked ? 0 : 1,
-      transition: '.2s',
-    },
-
-    '& .svg-icon': {
-      width: svgSizes[size],
-      height: svgSizes[size],
-      backgroundColor: 'currentColor',
-      maskImage: `url("${symbol}")`,
-      maskPosition: 'center',
-      maskRepeat: 'no-repeat',
-      maskSize: 'contain',
-      WebkitMaskImage: `url("${symbol}")`,
-      WebkitMaskPosition: 'center',
-      WebkitMaskRepeat: 'no-repeat',
-      WebkitMaskSize: 'contain',
-    },
-    '&:hover .svg-icon': {
-      opacity: isInteractive ? 0 : 1,
-      transition: '.2s',
-    },
-    '&:not(:hover) .svg-icon': {
-      opacity: showCheckBox || checked ? 0 : 1,
-      transition: '.2s',
-    },
-  }
+  const contentIsHidden = !!showCheckBox || !!checked
+  const { className: checkboxClassName, ...restCheckboxProps } =
+    checkboxProps ?? {}
 
   return (
-    <Box
+    <div
       {...rest}
-      sx={[
-        {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-        },
-        ...(Array.isArray(symbolSx) ? symbolSx : [symbolSx]),
-        rest.sx,
-      ]}
+      className={clsx(
+        'group relative flex shrink-0 items-center justify-center rounded-full transition-transform duration-200 ease-in-out',
+        size === 's' ? 'size-8' : 'size-10',
+        color ? 'border' : 'border-0',
+        button
+          ? 'cursor-pointer hover:scale-110 active:scale-100 active:duration-100'
+          : 'cursor-auto',
+        className
+      )}
+      style={{
+        color: theme.palette.getContrastText(
+          color || theme.palette.background.paper
+        ),
+        borderColor: color || undefined,
+        backgroundColor: color || theme.palette.action.hover,
+        backgroundImage: color
+          ? 'linear-gradient(-30deg, rgba(255,255,255,0.2), transparent)'
+          : undefined,
+        ...style,
+      }}
     >
       {isSvg ? (
-        <span className="svg-icon" aria-hidden />
+        <span
+          className={clsx(
+            'bg-current transition-opacity duration-200',
+            size === 's' ? 'size-5' : 'size-6',
+            contentIsHidden ? 'opacity-0' : 'opacity-100',
+            isInteractive ? 'group-hover:opacity-0' : 'group-hover:opacity-100'
+          )}
+          style={{
+            maskImage: `url("${symbol}")`,
+            maskPosition: 'center',
+            maskRepeat: 'no-repeat',
+            maskSize: 'contain',
+            WebkitMaskImage: `url("${symbol}")`,
+            WebkitMaskPosition: 'center',
+            WebkitMaskRepeat: 'no-repeat',
+            WebkitMaskSize: 'contain',
+          }}
+          aria-hidden
+        />
       ) : (
-        <span className="emoji">{symbol}</span>
+        <span
+          className={clsx(
+            'transition-opacity duration-200',
+            size === 's' ? 'text-base' : 'text-2xl',
+            contentIsHidden ? 'opacity-0' : 'opacity-100',
+            isInteractive ? 'group-hover:opacity-0' : 'group-hover:opacity-100'
+          )}
+        >
+          {symbol}
+        </span>
       )}
       {onChange && (
         <Checkbox
-          className="checkbox"
+          className={clsx(
+            'absolute transition-opacity duration-200',
+            showCheckBox || checked ? 'opacity-100' : 'opacity-0',
+            isInteractive ? 'group-hover:opacity-100' : 'group-hover:opacity-0',
+            checkboxClassName
+          )}
           checked={checked}
           onClick={e => e.stopPropagation()}
           onChange={onChange}
           color="primary"
-          {...checkboxProps}
+          {...restCheckboxProps}
         />
       )}
-    </Box>
+    </div>
   )
 }

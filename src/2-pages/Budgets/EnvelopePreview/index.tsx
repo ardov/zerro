@@ -148,7 +148,7 @@ const Header: FC<{
         <TagIcon
           size="m"
           symbol={symbol}
-          sx={{ mr: 2, flexShrink: 0 }}
+          className="mr-4 shrink-0"
           color={color}
           onClick={openColorPicker}
           button
