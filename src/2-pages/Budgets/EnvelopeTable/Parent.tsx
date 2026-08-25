@@ -1,6 +1,6 @@
 import type { core } from 'zerro-core/redux'
 import React from 'react'
-import { Collapse, Box, IconButton } from '@mui/material'
+import { Collapse, IconButton } from '@mui/material'
 import { ChevronRightIcon } from '6-shared/ui/Icons'
 
 type ParentProps = {
@@ -36,28 +36,15 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
     }
 
     return (
-      <Box
-        sx={{
-          position: 'relative',
-          background: 'background.paper',
-          borderBottom: `0.5px solid black`,
-          borderColor: 'divider',
-          '&:last-child': { border: 0 },
-        }}
+      <div
+        className="relative last:border-0 border-b-[0.5px] border-border bg-card"
         ref={ref}
         {...rest}
       >
         {hasChildren && (
           <IconButton
             size="small"
-            sx={{
-              position: 'absolute',
-              left: -6,
-              top: 10,
-              transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: '.3s',
-              zIndex: 1,
-            }}
+            className={`absolute -left-[6px] top-[10px] z-[1] transition-transform duration-300 ${isExpanded ? 'rotate-90' : 'rotate-0'}`}
             onClick={handleExpand}
           >
             <ChevronRightIcon fontSize="inherit" />
@@ -66,16 +53,10 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
         {parent}
         {hasChildren && (
           <Collapse in={isExpanded} unmountOnExit>
-            <Box
-              sx={{
-                pb: 1,
-              }}
-            >
-              {children}
-            </Box>
+            <div className="pb-2">{children}</div>
           </Collapse>
         )}
-      </Box>
+      </div>
     )
   }
 )

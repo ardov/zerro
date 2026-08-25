@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import React, { useRef } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { ButtonBase, IconButton, Typography, Box } from '@mui/material'
+import { ButtonBase, IconButton, Typography } from '@mui/material'
 import { deepEqual } from '6-shared/helpers/deepEqual'
 import { AddIcon, ArrowDownwardIcon, ArrowUpwardIcon } from '6-shared/ui/Icons'
 import { useFloatingInput } from '6-shared/ui/FloatingInput'
@@ -85,20 +85,9 @@ export const Group: FC<TGroupProps> = ({
   )
 
   const NameCell = (
-    <Box
-      ref={ref}
-      sx={{
-        pb: 0,
-        minWidth: 0,
-        display: 'flex',
-        flexDirection: 'row',
-        alignContent: 'flex-end',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-      }}
-    >
+    <div ref={ref} className="flex min-w-0 items-center justify-start">
       <ButtonBase
-        sx={{ p: 1, ml: -1, minWidth: 0, flexShrink: 1 }}
+        className="-ml-2 min-w-0 shrink p-2"
         onClick={() => floating.open(name)}
       >
         <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
@@ -107,7 +96,7 @@ export const Group: FC<TGroupProps> = ({
       </ButtonBase>
 
       {isReordering && Actions}
-    </Box>
+    </div>
   )
 
   return (
