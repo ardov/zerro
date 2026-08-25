@@ -3,15 +3,7 @@ import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import {
-  Box,
-  Stack,
-  Divider,
-  List,
-  ListItem,
-  ListItemButton,
-  useTheme,
-} from '@mui/material'
+import { Divider, List, ListItem, ListItemButton } from '@mui/material'
 import { Total } from '6-shared/ui/Total'
 import { Amount } from '6-shared/ui/Amount'
 import {
@@ -23,7 +15,6 @@ import {
 
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 import { OneLiner } from '3-widgets/DataLine'
-import { cardStyle } from './shared'
 import { useBudgetPopover } from '../BudgetPopover'
 
 type MonthContext = `${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`
@@ -39,7 +30,6 @@ export function EnvelopeInfo(props: {
 }) {
   const { month, id } = props
   const { t } = useTranslation('budgets')
-  const theme = useTheme()
   const transactionDrawer = useEnvTransactionsDrawer()
   const openBudgetPopover = useBudgetPopover()
   const convertFx = useAppSelector(core.currency.selectConvertFx)
@@ -66,8 +56,8 @@ export function EnvelopeInfo(props: {
         : t('availableTitlePast', { context: getMonthContext(month) })
 
   return (
-    <Box sx={{ ...cardStyle, '--color': theme.palette.text.secondary }}>
-      <Stack spacing={1.5} sx={{ py: 1 }}>
+    <div className="w-full rounded-lg bg-background px-4 py-2">
+      <div className="flex flex-col gap-3 py-2">
         <Total
           title={blockTitle}
           value={totalAvailable}
@@ -82,9 +72,9 @@ export function EnvelopeInfo(props: {
                 : undefined
           }
         />
-        <Divider sx={{ opacity: '0.6' }} />
-      </Stack>
-      <List dense sx={{ mx: -2, color: 'text.secondary' }}>
+        <Divider className="opacity-60" />
+      </div>
+      <List dense className="-mx-4 text-muted-foreground">
         <ListItem>
           <OneLiner
             left={t('leftoverFrom', {
@@ -101,10 +91,7 @@ export function EnvelopeInfo(props: {
         </ListItem>
 
         <ListItemButton
-          sx={{
-            '&:hover': { color: 'text.primary' },
-            transition: '.2s ease-in-out',
-          }}
+          className="transition-colors duration-200 hover:text-foreground"
           onClick={e => openBudgetPopover(id, e.currentTarget)}
         >
           <OneLiner
@@ -120,10 +107,7 @@ export function EnvelopeInfo(props: {
         </ListItemButton>
 
         <ListItemButton
-          sx={{
-            '&:hover': { color: 'text.primary' },
-            transition: '.2s ease-in-out',
-          }}
+          className="transition-colors duration-200 hover:text-foreground"
           onClick={() => {
             transactionDrawer.open({
               envelopeConditions: {
@@ -155,6 +139,6 @@ export function EnvelopeInfo(props: {
           />
         </ListItemButton>
       </List>
-    </Box>
+    </div>
   )
 }
