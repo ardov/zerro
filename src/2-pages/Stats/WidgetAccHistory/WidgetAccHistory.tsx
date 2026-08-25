@@ -130,11 +130,8 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
 
   return (
     <ListSubheader
-      sx={{
-        borderRadius: 1,
-        marginBottom: 1,
-        cursor: onClick ? 'pointer' : 'default',
-      }}
+      className="mb-2 rounded"
+      sx={{ cursor: onClick ? 'pointer' : 'default' }}
       onClick={onClick}
     >
       <span className="flex w-full">

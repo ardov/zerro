@@ -128,7 +128,7 @@ function HistoryRowItem({
         >
           <ChevronDownIcon
             fontSize="small"
-            sx={{ transform: row.expanded ? 'rotate(180deg)' : undefined }}
+            className={row.expanded ? 'rotate-180' : undefined}
           />
         </IconButton>
       </ListItemButton>

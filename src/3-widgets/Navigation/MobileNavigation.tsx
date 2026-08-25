@@ -17,8 +17,6 @@ import { useHomeBar } from '6-shared/hooks/useHomeBar'
 import RefreshButton from '3-widgets/RefreshButton'
 import { SettingsMenu, useSettingsMenu } from './SettingsMenu'
 
-const actionSx = { minWidth: 32 }
-
 export const MobileNavigation: FC = () => {
   const { t } = useTranslation('navigation')
   const path = useLocation().pathname
@@ -36,15 +34,7 @@ export const MobileNavigation: FC = () => {
   const currentRoute = routes.find(route => path.startsWith(route.path))
 
   return (
-    <Paper
-      sx={{
-        position: 'fixed',
-        width: '100%',
-        bottom: '0',
-        paddingBottom: paddingBottom,
-        zIndex: 5,
-      }}
-    >
+    <Paper className="fixed bottom-0 z-[5] w-full" style={{ paddingBottom }}>
       <Divider className="opacity-60" />
       <BottomNavigation
         value={currentRoute?.path}
@@ -58,7 +48,7 @@ export const MobileNavigation: FC = () => {
             value={route.path}
             icon={route.icon}
             key={route.path}
-            sx={actionSx}
+            className="min-w-8"
           />
         ))}
         <BottomNavigationAction
@@ -66,9 +56,9 @@ export const MobileNavigation: FC = () => {
           value="menu"
           icon={<SettingsIcon />}
           onClick={openSettings}
-          sx={actionSx}
+          className="min-w-8"
         />
-        <RefreshButton isMobile={true} sx={actionSx} />
+        <RefreshButton isMobile={true} className="min-w-8" />
       </BottomNavigation>
       <SettingsMenu showLinks />
     </Paper>

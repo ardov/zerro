@@ -21,11 +21,13 @@ import { syncData } from '4-features/sync'
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
 
 type ButtonState = 'idle' | 'pending' | 'success' | 'fail'
+type RefreshButtonProps = {
+  isMobile?: boolean
+  className?: string
+  sx?: SxProps
+}
 
-const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
-  isMobile,
-  ...rest
-}) => {
+const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
   const { t } = useTranslation('common')
   const dispatch = useAppDispatch()
   // Sync only. History used to hang off a right-click here, which made the
