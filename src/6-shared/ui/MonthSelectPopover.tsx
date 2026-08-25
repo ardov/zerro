@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import type { PopoverProps } from '@mui/material'
 import {
-  Box,
   IconButton,
-  Popover,
   List,
-  ListItemText,
   ListItemButton,
+  ListItemText,
+  Popover,
 } from '@mui/material'
 import { ChevronRightIcon, ChevronLeftIcon } from '6-shared/ui/Icons'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
@@ -49,31 +48,22 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
   const isPrevYearDisabled = !!start && months[0] <= start
   return (
     <Popover {...rest}>
-      <Box sx={{ pt: 1, px: 1 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
+      <div className="px-2 pt-2">
+        <div className="flex items-center justify-between">
           <IconButton
             children={<ChevronLeftIcon />}
             onClick={() => setYear(year => year - 1)}
             disabled={isPrevYearDisabled}
           />
-          <Box
-            children={year}
-            sx={{ textAlign: 'center', fontSize: 'h5.fontSize' }}
-          />
+          <div className="text-center text-2xl">{year}</div>
           <IconButton
             children={<ChevronRightIcon />}
             onClick={() => setYear(year => year + 1)}
             disabled={isNextYearDisabled}
           />
-        </Box>
+        </div>
 
-        <List sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
+        <List className="grid grid-cols-3">
           {months.map(month => (
             <ListItemButton
               key={month}
@@ -88,13 +78,13 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
               selected={month === value}
               onClick={() => onChange(month)}
             >
-              <ListItemText sx={{ textAlign: 'center' }}>
+              <ListItemText className="text-center">
                 {formatDate(month, 'LLL').toUpperCase()}
               </ListItemText>
             </ListItemButton>
           ))}
         </List>
-      </Box>
+      </div>
     </Popover>
   )
 }
