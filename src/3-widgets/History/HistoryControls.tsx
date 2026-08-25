@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Box, Button, IconButton, Stack, Tooltip } from '@mui/material'
+import { Button, IconButton, Tooltip } from '@mui/material'
 import { RedoIcon, SendIcon, UndoIcon } from '6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from 'store'
 import {
@@ -28,11 +28,7 @@ export function HistoryControls() {
   const isSyncing = useAppSelector(selectIsSyncPending)
 
   return (
-    <Stack
-      direction="row"
-      spacing={0.5}
-      sx={{ alignItems: 'center', px: 1, py: 0.5 }}
-    >
+    <div className="flex flex-row items-center gap-[2px] px-2 py-1">
       <Tooltip title={t('undo')}>
         <span>
           <IconButton
@@ -55,17 +51,17 @@ export function HistoryControls() {
           </IconButton>
         </span>
       </Tooltip>
-      <Box sx={{ flexGrow: 1 }} />
+      <div className="grow" />
       <Button
         size="small"
         variant="text"
         startIcon={<SendIcon fontSize="small" />}
         disabled={!pending || isSyncing}
         onClick={() => dispatch(syncData())}
-        sx={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+        className="shrink-0 whitespace-nowrap"
       >
         {pending ? t('sendCount', { count: pending }) : t('sendChanges')}
       </Button>
-    </Stack>
+    </div>
   )
 }

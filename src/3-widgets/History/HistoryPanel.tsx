@@ -1,12 +1,10 @@
 import { useEffect } from 'react'
 import type { Theme } from '@mui/material'
 import {
-  Box,
   Button,
   Divider,
   Drawer,
   IconButton,
-  Stack,
   Typography,
   useMediaQuery,
 } from '@mui/material'
@@ -83,15 +81,7 @@ export function HistoryPanel() {
         paper: { sx: { width: isMobile ? '100%' : panelWidth } },
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          px: 2,
-          py: 1,
-        }}
-      >
+      <div className="flex items-center justify-between px-4 py-2">
         <Typography variant="h6">{t('panelTitle')}</Typography>
         <IconButton
           size="small"
@@ -100,14 +90,14 @@ export function HistoryPanel() {
         >
           <CloseIcon fontSize="small" />
         </IconButton>
-      </Box>
+      </div>
       <Divider />
       <HistoryControls />
       <Divider />
       {rows.length === 0 ? (
         <EmptyHistory loading={pageStatus === 'loading'} />
       ) : (
-        <Box sx={{ overflowY: 'auto', flexGrow: 1 }}>
+        <div className="grow overflow-y-auto">
           <HistoryRowList
             rows={rows}
             selected={selected}
@@ -119,12 +109,12 @@ export function HistoryPanel() {
               fullWidth
               disabled={pageStatus === 'loading'}
               onClick={() => void dispatch(loadHistoryPage())}
-              sx={{ my: 1 }}
+              className="my-2"
             >
               {t('loadOlder')}
             </Button>
           )}
-        </Box>
+        </div>
       )}
       {/* Pinned under the list: it belongs to the selection, not to the row
           that happens to be scrolled into view. */}
@@ -138,26 +128,16 @@ export function HistoryPanel() {
 function EmptyHistory({ loading }: { loading: boolean }) {
   const { t } = useTranslation('history')
   return (
-    <Stack
-      spacing={1}
-      sx={{
-        flexGrow: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: 4,
-        textAlign: 'center',
-        color: 'text.secondary',
-      }}
-    >
-      <HistoryIcon sx={{ fontSize: 40, opacity: 0.4 }} />
+    <div className="flex grow flex-col items-center justify-center gap-2 px-8 text-center text-muted-foreground">
+      <HistoryIcon className="text-[40px] opacity-40" />
       <Typography variant="body2">
         {loading ? t('historyLoading') : t('noHistory')}
       </Typography>
       {!loading && (
-        <Typography variant="caption" sx={{ opacity: 0.8 }}>
+        <Typography variant="caption" className="opacity-80">
           {t('noHistoryHint')}
         </Typography>
       )}
-    </Stack>
+    </div>
   )
 }

@@ -1,14 +1,7 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Theme } from '@mui/material'
-import {
-  Box,
-  Button,
-  IconButton,
-  Stack,
-  Typography,
-  useMediaQuery,
-} from '@mui/material'
+import { Button, IconButton, Typography, useMediaQuery } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
 import {
   ChevronLeftIcon,
@@ -89,16 +82,10 @@ export function HistoryTopBar() {
       : t('currentState')
 
   return (
-    <Box
-      sx={{
-        borderBottom: '2px solid',
-        borderColor: atHead ? 'divider' : 'warning.main',
-        bgcolor: 'background.paper',
-        px: { xs: 1, sm: 2 },
-        py: 0.5,
-      }}
+    <div
+      className={`border-b-2 bg-card px-2 py-1 sm:px-4 ${atHead ? 'border-border' : 'border-warning'}`}
     >
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+      <div className="flex flex-row items-center gap-[2px]">
         {!compact && (
           <>
             <IconButton
@@ -129,7 +116,7 @@ export function HistoryTopBar() {
         <Typography
           variant="caption"
           noWrap
-          sx={{ flexGrow: compact ? 0 : 1, minWidth: 0 }}
+          className={`${compact ? 'grow-0' : 'grow'} min-w-0`}
         >
           {atHead ? label : t('viewingPast', { time: label })}
         </Typography>
@@ -146,7 +133,7 @@ export function HistoryTopBar() {
                 would make the bar two rows tall mid-step and shift the page. */}
             <Button
               size="small"
-              sx={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+              className="shrink-0 whitespace-nowrap"
               disabled={!canRestore}
               onClick={restore}
             >
@@ -156,7 +143,7 @@ export function HistoryTopBar() {
         )}
         <Button
           size="small"
-          sx={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+          className="shrink-0 whitespace-nowrap"
           disabled={atHead}
           onClick={() => dispatch(returnToCurrent())}
         >
@@ -169,7 +156,7 @@ export function HistoryTopBar() {
         >
           <CloseIcon fontSize="small" />
         </IconButton>
-      </Stack>
-    </Box>
+      </div>
+    </div>
   )
 }

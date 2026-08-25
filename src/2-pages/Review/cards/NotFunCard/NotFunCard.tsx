@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { core } from 'zerro-core/redux'
 
 import {
-  Box,
   Checkbox,
   Chip,
   Dialog,
@@ -11,7 +10,6 @@ import {
   FormGroup,
   IconButton,
   Link,
-  Stack,
   Typography,
 } from '@mui/material'
 import Balancer from 'react-wrap-balancer'
@@ -59,29 +57,17 @@ export function NotFunCard(props: TCardProps) {
   const workWeek = Math.round((1 - taxesRatio) * 5 * 10) / 10
 
   const emptyCardContent = (
-    <Stack
-      sx={{
-        gap: 2,
-        alignItems: 'center',
-        width: '100%',
-      }}
-    >
+    <div className="flex w-full flex-col items-center gap-4">
       <Balancer>
         <Typography variant="body1" align="center">
           Нет доходов — нет налогов 😅
         </Typography>
       </Balancer>
-    </Stack>
+    </div>
   )
 
   const cardContent = (
-    <Stack
-      sx={{
-        gap: 2,
-        alignItems: 'center',
-        width: '100%',
-      }}
-    >
+    <div className="flex w-full flex-col items-center gap-4">
       <TaxesChart income={totalIncome} outcome={totalOutcome} />
       <Balancer>
         <Typography variant="body1" align="center">
@@ -108,7 +94,7 @@ export function NotFunCard(props: TCardProps) {
         </Typography>
       </Balancer>
 
-      <Divider sx={{ width: '100%' }} />
+      <Divider className="w-full" />
 
       <div>
         <Typography variant="body1" align="center">
@@ -119,19 +105,9 @@ export function NotFunCard(props: TCardProps) {
         </Typography>
       </div>
 
-      <Box
-        sx={{
-          textAlign: 'center',
-        }}
-      >
+      <div className="text-center">
         {taxes.map(info => (
-          <Box
-            key={info.name}
-            sx={{
-              m: 0.5,
-              display: 'inline-block',
-            }}
-          >
+          <span key={info.name} className="m-1 inline-block">
             <Tooltip title={info.comment}>
               <Chip
                 variant={'outlined'}
@@ -148,10 +124,10 @@ export function NotFunCard(props: TCardProps) {
                 }
               />
             </Tooltip>
-          </Box>
+          </span>
         ))}
-      </Box>
-      <Divider sx={{ width: '100%' }} />
+      </div>
+      <Divider className="w-full" />
       <Typography variant="body1" align="center">
         <Balancer>
           Это приблизительные цифры, подробнее можно посчитать в{' '}
@@ -181,7 +157,7 @@ export function NotFunCard(props: TCardProps) {
           (3 мин).
         </Balancer>
       </Typography>
-    </Stack>
+    </div>
   )
 
   return (
@@ -192,7 +168,7 @@ export function NotFunCard(props: TCardProps) {
             track('external_link_opened', { destination: 'taxes_settings' })
             toggleSettings()
           }}
-          sx={{ position: 'absolute', top: 8, right: 8 }}
+          className="absolute right-2 top-2"
         >
           <SettingsIcon />
         </IconButton>
@@ -202,7 +178,7 @@ export function NotFunCard(props: TCardProps) {
 
       {/* Settings */}
       <Dialog open={settings} onClose={() => toggleSettings()}>
-        <Stack direction="column" spacing={3} sx={{ p: 3 }}>
+        <div className="flex flex-col gap-6 p-6">
           <FormGroup>
             <FormControlLabel
               label="Только операции в рублях"
@@ -222,7 +198,7 @@ export function NotFunCard(props: TCardProps) {
             selected={checkedOutcome}
             onChange={setCheckedOutcome}
           />
-        </Stack>
+        </div>
       </Dialog>
     </>
   )

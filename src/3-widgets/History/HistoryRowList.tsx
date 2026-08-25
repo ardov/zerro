@@ -7,7 +7,6 @@ import {
   ListItemButton,
   ListItemText,
   ListSubheader,
-  Stack,
 } from '@mui/material'
 import { formatTimeAgo } from '6-shared/helpers/date'
 import { commandVerbLabelKeys } from '6-shared/localization/commandVerbs'
@@ -192,11 +191,7 @@ function RowText({
     <ListItemText
       primary={
         isHead ? (
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{ alignItems: 'center', minWidth: 0 }}
-          >
+          <span className="flex min-w-0 flex-row items-center gap-2">
             <span
               style={{
                 overflow: 'hidden',
@@ -217,7 +212,7 @@ function RowText({
                 '& .MuiChip-label': { px: 0.75 },
               }}
             />
-          </Stack>
+          </span>
         ) : (
           primary
         )
