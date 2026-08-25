@@ -1,4 +1,3 @@
-import { Stack } from '@mui/material'
 import type { FC } from 'react'
 import { useAppTheme } from '6-shared/ui/theme'
 import { round } from '6-shared/helpers/money'
@@ -42,7 +41,7 @@ export const TaxesChart: FC<TaxesChartProps> = ({ income, outcome }) => {
   ]
 
   return (
-    <Stack direction={'column'} spacing={1} sx={{ width: '100%' }}>
+    <div className="flex w-full flex-col gap-2">
       <ResponsiveContainer height={200} width="100%">
         <PieChart>
           <Pie
@@ -86,6 +85,6 @@ export const TaxesChart: FC<TaxesChartProps> = ({ income, outcome }) => {
           </Pie>
         </PieChart>
       </ResponsiveContainer>
-    </Stack>
+    </div>
   )
 }

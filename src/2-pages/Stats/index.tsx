@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react'
-import { Stack } from '@mui/system'
 import { useTranslation } from 'react-i18next'
 
 import { WidgetNetWorth } from './WidgetNetWorth'
@@ -18,17 +17,11 @@ export default function Stats() {
   return (
     <>
       <title>{`${t('pageTitle')} | Zerro`}</title>
-      <Stack
-        spacing={2}
-        sx={{
-          p: 3,
-          pb: 10,
-        }}
-      >
+      <div className="flex flex-col gap-4 p-6 pb-20">
         <WidgetNetWorth period={period} onTogglePeriod={togglePeriod} />
         <WidgetCashflow period={period} onTogglePeriod={togglePeriod} />
         <WidgetAccHistory period={period} />
-      </Stack>
+      </div>
     </>
   )
 }

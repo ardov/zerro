@@ -1,4 +1,4 @@
-import { ButtonBase, Stack, Typography } from '@mui/material'
+import { ButtonBase, Typography } from '@mui/material'
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
@@ -14,11 +14,11 @@ export function NoCategoryCard(props: TCardProps) {
   const count = noTag.length
   return (
     <Card>
-      <Stack spacing={1}>
+      <div className="flex flex-col gap-2">
         {count ? (
           <>
             <ButtonBase
-              sx={{ borderRadius: 1, px: 1 }}
+              className="rounded-lg px-2"
               onClick={() => props.onShowTransactions(noTag)}
             >
               <Typography variant="h4" align="center">
@@ -39,7 +39,7 @@ export function NoCategoryCard(props: TCardProps) {
             </Typography>
           </>
         )}
-      </Stack>
+      </div>
     </Card>
   )
 }
