@@ -1,6 +1,13 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["scripts/zerro-core-package/consumer.ts"],
-  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,mjs}", "tools/**/*.ts"],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "scripts/**/*.{ts,mjs}",
+    "stories/**/*.{ts,tsx}",
+    ".storybook/**/*.{ts,tsx}",
+    "tools/**/*.ts",
+    "vitest*.config.ts"
+  ],
   "ignoreDependencies": ["react-scan"]
 }

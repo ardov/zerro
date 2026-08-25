@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+import storybook from 'eslint-plugin-storybook'
 
 export default tseslint.config(
   { ignores: ['dist', 'dev-dist', 'node_modules'] },
@@ -53,5 +54,6 @@ export default tseslint.config(
         { allowShortCircuit: true, allowTernary: true },
       ],
     },
-  }
+  },
+  storybook.configs['flat/recommended']
 )

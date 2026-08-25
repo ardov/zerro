@@ -4,7 +4,7 @@
     "noUnusedLocals": true,
     "noImplicitOverride": true,
     "verbatimModuleSyntax": true,
-    "paths": { "*": ["./src/*"] },
+    "paths": { "*": ["./src/*"], "stories/*": ["./stories/*"] },
     "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "skipLibCheck": true,
@@ -21,6 +21,8 @@
   },
   "include": [
     "src",
+    "stories",
+    ".storybook",
     "typings/theme.d.ts",
     "typings/vite-env.d.ts",
     "typings/i18n.d.ts"

@@ -10,5 +10,12 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "vite.storybook.config.ts",
+    "vitest.config.ts",
+    "vitest.storybook.config.ts",
+    ".storybook/main.ts",
+    ".storybook/manager.ts"
+  ]
 }

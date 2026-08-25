@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import mdx from '@mdx-js/rollup'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -27,9 +27,5 @@ export default defineConfig({
   envPrefix: 'REACT_APP_',
   define: {
     APP_VERSION: JSON.stringify(process.env.npm_package_version),
-  },
-  test: {
-    globals: true,
-    environment: 'happy-dom',
   },
 })

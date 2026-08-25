@@ -4,6 +4,7 @@ import { Global, css } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
 import type { Theme } from '@mui/material/styles'
 import { ThemeProvider } from '@mui/material/styles'
+import type { ThemeProviderProps } from '@mui/material/styles'
 import { appTheme } from './createTheme'
 import { fixOldTheme, useAppTheme, useColorScheme } from './hooks'
 
@@ -22,11 +23,22 @@ const GlobalVaribles = (props: { theme: Theme }) => {
   return <Global styles={styles} />
 }
 
-export const AppThemeProvider: FC<{ children?: React.ReactNode }> = props => {
+export type AppThemeProviderProps = Pick<
+  ThemeProviderProps,
+  'defaultMode' | 'storageManager'
+> & {
+  children?: React.ReactNode
+}
+
+export const AppThemeProvider: FC<AppThemeProviderProps> = props => {
   const { mode } = useColorScheme()
 
   return (
-    <ThemeProvider theme={appTheme} defaultMode={mode}>
+    <ThemeProvider
+      theme={appTheme}
+      defaultMode={props.defaultMode ?? mode}
+      storageManager={props.storageManager}
+    >
       <WithTheme />
       {props.children}
     </ThemeProvider>
