@@ -1,6 +1,6 @@
 import type { FC } from 'react'
 import React from 'react'
-import { Box } from '@mui/material'
+import { clsx } from 'clsx'
 import { Amount } from '6-shared/ui/Amount'
 
 import { Btn } from './Btn'
@@ -14,20 +14,15 @@ type BudgetCellProps = {
 export const BudgetCell: FC<BudgetCellProps> = props => {
   const { value, onBudgetClick, isSelf } = props
   return (
-    <Box
-      sx={{
-        color: isSelf
-          ? 'text.disabled'
-          : value
-            ? 'text.primary'
-            : 'text.disabled',
-        display: 'flex',
-        justifyContent: 'flex-end',
-      }}
+    <div
+      className={clsx(
+        'flex justify-end',
+        isSelf || !value ? 'text-disabled-foreground' : 'text-foreground'
+      )}
     >
       <Btn onClick={onBudgetClick} disabled={isSelf}>
         <Amount value={value} decimals="ifOnly" />
       </Btn>
-    </Box>
+    </div>
   )
 }

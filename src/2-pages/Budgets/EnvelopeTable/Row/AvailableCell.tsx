@@ -1,7 +1,8 @@
 import type { FC } from 'react'
 import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { Typography, Box } from '@mui/material'
+import { clsx } from 'clsx'
+import { Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { formatMoney } from '6-shared/helpers/money'
@@ -29,7 +30,7 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
   )
 
   return (
-    <Box>
+    <div>
       <Typography variant="body1" align="right">
         {!!hiddenOverspend && (
           <Tooltip
@@ -44,30 +45,23 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
             <WarningIcon
               fontSize="small"
               color="warning"
-              sx={{ transform: 'translate(-6px, 4px)' }}
+              className="-translate-x-[6px] translate-y-1"
             />
           </Tooltip>
         )}
 
         <DraggableAmount id={id} type={DragTypes.amount} disabled={isSelf}>
-          <Box
-            component="span"
-            sx={{
-              borderRadius: 1,
-              px: 2,
-              mx: -2,
-              py: 0.5,
-              my: -0.5,
-              component: 'span',
-              display: 'inline-block',
-              color: availableColor,
-            }}
+          <span
+            className={clsx(
+              '-my-1 -mx-4 inline-block rounded-lg px-4 py-1',
+              getAvailableColorClass(availableColor)
+            )}
           >
             <Amount value={available} decimals="ifOnly" />
-          </Box>
+          </span>
         </DraggableAmount>
       </Typography>
-    </Box>
+    </div>
   )
 }
 
@@ -119,4 +113,15 @@ export function getAvailableColor(
   if (!isChild || hasAssigned) return negative
   // child tag without budget
   else return neutral
+}
+
+function getAvailableColorClass(color: string) {
+  switch (color) {
+    case 'success.main':
+      return 'text-success'
+    case 'error.main':
+      return 'text-error'
+    default:
+      return 'text-disabled-foreground'
+  }
 }

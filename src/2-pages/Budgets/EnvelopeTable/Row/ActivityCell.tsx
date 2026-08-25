@@ -1,6 +1,7 @@
 import type { FC } from 'react'
 import React from 'react'
-import { Typography, Box } from '@mui/material'
+import { clsx } from 'clsx'
+import { Typography } from '@mui/material'
 import { Amount } from '6-shared/ui/Amount'
 import { Btn } from './Btn'
 
@@ -12,18 +13,17 @@ type ActivityCellProps = {
 export const ActivityCell: FC<ActivityCellProps> = props => {
   const { value: displayActivity, onClick } = props
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        color: displayActivity ? 'text.primary' : 'text.disabled',
-      }}
+    <div
+      className={clsx(
+        'flex justify-end',
+        displayActivity ? 'text-foreground' : 'text-disabled-foreground'
+      )}
     >
       <Btn onClick={onClick}>
         <Typography variant="body1" align="right">
           <Amount value={displayActivity} decimals="ifOnly" />
         </Typography>
       </Btn>
-    </Box>
+    </div>
   )
 }
