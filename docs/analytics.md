@@ -40,7 +40,8 @@ The counter is nevertheless not running. No source file loads it: the inline
 snippet left `public/index.html` in 2019, the `window.ym` call went with the
 GA4 migration, and `src/6-shared/config.ts` now exports a `ymid` that nothing
 imports. Setting the variable in Vercel therefore changes nothing. Restoring
-the loader is an open item in [open-decisions.md](./open-decisions.md).
+the loader is an open item in the maintainer's private `open-decisions.md`,
+which is not part of this repository.
 
 ## Rules for a new or changed event
 
@@ -76,4 +77,4 @@ parameters, page views, and the absence of private data in GA4 DebugView.
 
 Registering custom dimensions, building reports, and consent policy are
 administration tasks in the GA property rather than source changes. The open
-ones are tracked in [open-decisions.md](./open-decisions.md).
+ones are tracked in the same private `open-decisions.md`.

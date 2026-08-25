@@ -2,7 +2,7 @@
 
 **Unofficial ZenMoney client with envelope budgeting superpowers**
 
-Zerro syncs with your ZenMoney account and lets you plan every koruna, euro or dollar using YNAB-style envelope budgets, savings goals and clear analytics.
+Zerro syncs with your ZenMoney account and lets you plan every koruna, euro or dollar using YNAB-style envelope budgets.
 
 [Channel with updates](https://t.me/zerroapp) | [User chat](https://t.me/zerrochat)
 
@@ -10,7 +10,7 @@ Zerro syncs with your ZenMoney account and lets you plan every koruna, euro or d
 
 - 💰 **Envelope budgets** across multiple currencies
 - 🎯 **Savings goals** for big purchases or rainy‑day funds
-- 💹 **Basic analytics** of income, expenses and net worth
+- 💹 **Analytics** of income, expenses and net worth
 - ⚡️ **Bulk actions**: merge, change categories, delete, and restore deleted operations
 - 💾 **Full backup** export and guarded restoration
 - 📱 **Mobile-friendly** progressive web app (PWA) and works even offline
@@ -24,19 +24,6 @@ Zerro syncs with your ZenMoney account and lets you plan every koruna, euro or d
 ## Contributing
 
 If you want to contribute, let's discuss the idea first here in issues or in [chat](https://t.me/zerrochat)/[dm](https://t.me/ardov). I'm open to suggestions and ideas but I don't want to waste your time on things that don't fit the product 🖤
-
-### Documentation
-
-- [docs/open-decisions.md](./docs/open-decisions.md) — questions waiting on a
-  product or deployment answer
-- [src/zerro-core/support/documents](./src/zerro-core/support/documents) —
-  domain architecture, contracts, and the design ledger
-- [tools/zerro/README.md](./tools/zerro/README.md) — the local JSON CLI over
-  your ZenMoney data
-- [docs/analytics.md](./docs/analytics.md) — product analytics policy
-
-Completed migration plans are removed once implemented; their reasoning stays
-in Git history.
 
 ### Run locally
 

@@ -1,3 +1,27 @@
+## Public / private boundary
+
+This checkout holds two repositories. `private/` is a separate, unpublished git
+repository, ignored by `.gitignore`; everything else is public on GitHub.
+
+- **Public** — anything a reader learns *about the code that already exists*:
+  source, `CONTEXT.md`, `docs/`, the Zerro Core documents, build and run docs.
+- **Private** — anything a stranger would learn *about the future or about the
+  maintainer*: roadmap, product decisions, money, users, unreleased work,
+  operational specifics.
+
+For a borderline file, ask whether it describes what already works or states an
+intent. Intent goes in `private/`. The same line applies to commit messages and
+branch names in the public repository: say what was done, not why or what comes
+next.
+
+A public document never links into `private/`: the target does not exist for
+anyone reading the repository on GitHub. Name the file as plain text instead,
+with its section, and say it is not part of this repository.
+
+`git` from the checkout root commits to the **public** repository. Commit
+private notes with `git -C private …`. Never move a file out of `private/`
+unless asked to. See `private/README.md`.
+
 ## Agent skills
 
 ### Issue tracker

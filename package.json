@@ -10,7 +10,6 @@
     "preview": "vite preview --port 3000",
     "tsc": "tsc --watch",
     "test": "vitest",
-    "zerro-core:package-check": "node scripts/check-zerro-core-package.mjs",
     "lint:css": "stylelint \"src/**/*.{css,scss}\" --max-warnings 0",
     "lint": "pnpm typecheck",
     "lint:js": "eslint src tools stories .storybook --max-warnings 0",
