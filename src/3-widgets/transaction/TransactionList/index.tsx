@@ -1,4 +1,3 @@
-import type { SxProps } from '@mui/system'
 import type {
   ByDate,
   TDateDraft,
@@ -8,10 +7,10 @@ import type {
 import { core } from 'zerro-core/redux'
 
 import type { FC } from 'react'
+import clsx from 'clsx'
 import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Theme } from '@mui/material'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { track } from '6-shared/analytics'
 import { useDebounce } from '6-shared/hooks/useDebounce'
 
@@ -33,7 +32,7 @@ export type TTransactionListProps = {
   checkedDate?: Date | null
   initialDate?: TDateDraft
   view?: TTransactionListView
-  sx?: SxProps<Theme>
+  className?: string
 }
 
 export type TTransactionListView = {
@@ -55,7 +54,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     checkedDate,
     initialDate,
     view,
-    sx,
+    className,
   } = props
 
   const dispatch = useAppDispatch()
@@ -187,35 +186,16 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   return (
     <>
-      <Box
-        sx={[
-          {
-            display: 'flex',
-            flexDirection: 'column',
-            px: 1,
-            pt: 1,
-            position: 'relative',
-          },
-          ...(Array.isArray(sx) ? sx : [sx]),
-        ]}
-      >
+      <div className={clsx('relative flex flex-col px-2 pt-2', className)}>
         {!hideFilter && (
-          <Box
-            sx={{
-              position: 'relative',
-              zIndex: 10,
-              maxWidth: 560,
-              width: '100%',
-              mx: 'auto',
-            }}
-          >
+          <div className="relative z-10 mx-auto w-full max-w-[560px]">
             <Filter
               query={query}
               onQueryChange={onQueryChange}
               search={search}
               onSearchChange={onSearchChange}
             />
-          </Box>
+          </div>
         )}
 
         <Actions
@@ -240,7 +220,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
             <EmptyState />
           )}
         </div>
-      </Box>
+      </div>
     </>
   )
 }

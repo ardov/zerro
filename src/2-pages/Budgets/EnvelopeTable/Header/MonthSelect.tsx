@@ -1,10 +1,9 @@
-import type { FC } from 'react'
+import type { FC, HTMLAttributes } from 'react'
 import { useState, useRef, useCallback } from 'react'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
-import { Box, Typography, IconButton, ButtonBase } from '@mui/material'
-import type { BoxProps } from '@mui/system'
+import { Typography, IconButton, ButtonBase } from '@mui/material'
 import type { TDateDraft, TISOMonth } from '6-shared/types'
 import { ChevronRightIcon, ChevronLeftIcon } from '6-shared/ui/Icons'
 import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
@@ -13,7 +12,7 @@ import { nextMonth, prevMonth } from '6-shared/helpers/date'
 
 import { useMonth } from '../../MonthProvider'
 
-export const MonthSelect: FC<BoxProps> = props => {
+export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
   const [month, setMonth] = useMonth()
   const list = useAppSelector(core.months.selectList)
   const first = list[0]
@@ -43,11 +42,8 @@ export const MonthSelect: FC<BoxProps> = props => {
 
   return (
     <>
-      <Box ref={paperRef} sx={{ display: 'flex' }} {...props}>
-        <ButtonBase
-          sx={{ borderRadius: 1, py: 1, pl: 1 }}
-          onClick={openPopover}
-        >
+      <div ref={paperRef} className="flex" {...props}>
+        <ButtonBase className="rounded-lg py-2 pl-2" onClick={openPopover}>
           <Typography variant="body1" noWrap>
             <b>{getMonthName(month)}</b> {getYear(month)}
           </Typography>
@@ -57,19 +53,19 @@ export const MonthSelect: FC<BoxProps> = props => {
           <IconButton
             onClick={goPrevMonth}
             disabled={isFirst}
-            sx={{ color: 'text.secondary' }}
+            className="text-muted-foreground"
           >
             <ChevronLeftIcon />
           </IconButton>
           <IconButton
             onClick={goNextMonth}
             disabled={isLast}
-            sx={{ color: 'text.secondary', ml: -1 }}
+            className="-ml-2 text-muted-foreground"
           >
             <ChevronRightIcon />
           </IconButton>
         </div>
-      </Box>
+      </div>
 
       <MonthSelectPopover
         open={!!anchorEl}

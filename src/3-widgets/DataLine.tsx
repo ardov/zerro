@@ -1,14 +1,15 @@
-import type { FC, ReactNode } from 'react'
+import type { FC, HTMLAttributes, ReactNode } from 'react'
 import React from 'react'
-import type { BoxProps, TooltipProps, TypographyProps } from '@mui/material'
-import { Box, Typography } from '@mui/material'
+import clsx from 'clsx'
+import type { TooltipProps, TypographyProps } from '@mui/material'
+import { Typography } from '@mui/material'
 import type { AmountProps } from '6-shared/ui/Amount'
 import { Tooltip } from '6-shared/ui/Tooltip'
 // TODO: use Amount instead
 import type { TSmartAmountProps } from '3-widgets/Amount'
 import { SmartAmount } from '3-widgets/Amount'
 
-type DataLineProps = BoxProps & {
+type DataLineProps = HTMLAttributes<HTMLDivElement> & {
   name: ReactNode
   amount?: AmountProps['value']
   currency?: AmountProps['currency']
@@ -30,19 +31,11 @@ export const DataLine: FC<DataLineProps> = ({
   colorOpacity = 1,
   tooltip,
   variant = 'body1',
+  className,
   ...rest
 }) => {
   return (
-    <Box
-      {...rest}
-      sx={[
-        {
-          display: 'flex',
-          flexDirection: 'row',
-        },
-        ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx]),
-      ]}
-    >
+    <div className={clsx('flex flex-row', className)} {...rest}>
       <div className="mr-2 flex min-w-0 grow items-center">
         {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
         <Tooltip title={tooltip}>
@@ -61,7 +54,7 @@ export const DataLine: FC<DataLineProps> = ({
           />
         </Typography>
       )}
-    </Box>
+    </div>
   )
 }
 
