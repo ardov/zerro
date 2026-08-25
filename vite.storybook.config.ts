@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 
 const root = path.dirname(fileURLToPath(import.meta.url))
@@ -12,9 +13,11 @@ const root = path.dirname(fileURLToPath(import.meta.url))
  * so `tsconfigPaths` alone cannot resolve their layer imports.
  */
 export default defineConfig({
+  plugins: [tailwindcss()],
   resolve: {
     tsconfigPaths: true,
     alias: {
+      '@': path.resolve(root, 'src'),
       '1-app': path.resolve(root, 'src/1-app'),
       '2-pages': path.resolve(root, 'src/2-pages'),
       '3-widgets': path.resolve(root, 'src/3-widgets'),

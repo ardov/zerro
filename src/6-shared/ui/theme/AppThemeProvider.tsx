@@ -1,5 +1,6 @@
 import type { FC } from 'react'
 import React from 'react'
+import { useLayoutEffect } from 'react'
 import { Global, css } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
 import type { Theme } from '@mui/material/styles'
@@ -12,12 +13,47 @@ import './styles.scss'
 
 fixOldTheme()
 
-const GlobalVaribles = (props: { theme: Theme }) => {
+const GlobalVariables = (props: { theme: Theme }) => {
+  const { palette, shape } = props.theme
   const styles = css`
     :root {
-      --c-bg: ${props.theme.palette.background.default};
-      --c-scrollbar: ${props.theme.palette.divider};
-      --c-primary: ${props.theme.palette.primary.main};
+      --c-bg: ${palette.background.default};
+      --c-scrollbar: ${palette.divider};
+      --c-primary: ${palette.primary.main};
+
+      --background: ${palette.background.default};
+      --foreground: ${palette.text.primary};
+      --card: ${palette.background.paper};
+      --card-foreground: ${palette.text.primary};
+      --popover: ${palette.background.paper};
+      --popover-foreground: ${palette.text.primary};
+      --primary: ${palette.primary.main};
+      --primary-foreground: ${palette.getContrastText(palette.primary.main)};
+      --secondary: ${palette.action.selected};
+      --secondary-foreground: ${palette.text.primary};
+      --muted: ${palette.action.hover};
+      --muted-foreground: ${palette.text.secondary};
+      --accent: ${palette.action.hover};
+      --accent-foreground: ${palette.text.primary};
+      --destructive: ${palette.error.main};
+      --destructive-foreground: ${palette.getContrastText(palette.error.main)};
+      --border: ${palette.divider};
+      --input: ${palette.divider};
+      --ring: ${palette.primary.main};
+      --interactive: ${palette.secondary.main};
+      --interactive-foreground: ${palette.getContrastText(
+        palette.secondary.main
+      )};
+      --success: ${palette.success.main};
+      --success-foreground: ${palette.getContrastText(palette.success.main)};
+      --warning: ${palette.warning.main};
+      --warning-foreground: ${palette.getContrastText(palette.warning.main)};
+      --info: ${palette.info.main};
+      --info-foreground: ${palette.getContrastText(palette.info.main)};
+      --error: ${palette.error.main};
+      --error-foreground: ${palette.getContrastText(palette.error.main)};
+      --disabled-foreground: ${palette.text.disabled};
+      --radius: ${shape.borderRadius}px;
     }
   `
   return <Global styles={styles} />
@@ -47,11 +83,19 @@ export const AppThemeProvider: FC<AppThemeProviderProps> = props => {
 
 const WithTheme: FC = () => {
   const theme = useAppTheme()
+
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('dark', theme.palette.mode === 'dark')
+
+    return () => root.classList.remove('dark')
+  }, [theme.palette.mode])
+
   return (
     <>
       <meta name="theme-color" content={theme.palette.background.paper} />
       <CssBaseline enableColorScheme />
-      <GlobalVaribles theme={theme} />
+      <GlobalVariables theme={theme} />
     </>
   )
 }

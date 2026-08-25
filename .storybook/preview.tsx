@@ -1,6 +1,7 @@
 import type { Decorator, Preview } from '@storybook/react-vite'
 import { INITIAL_VIEWPORTS } from 'storybook/viewport'
 import { StoryProviders } from './StoryProviders'
+import './tailwind.css'
 import './preview.css'
 
 const withAppProviders: Decorator = (Story, context) => (

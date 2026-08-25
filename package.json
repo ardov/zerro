@@ -34,7 +34,19 @@
     "defaultSeverity": "warning",
     "extends": [
       "stylelint-config-recommended-scss"
-    ]
+    ],
+    "rules": {
+      "scss/at-rule-no-unknown": [
+        true,
+        {
+          "ignoreAtRules": [
+            "custom-variant",
+            "source",
+            "theme"
+          ]
+        }
+      ]
+    }
   },
   "browserslist": [
     "defaults"
@@ -49,6 +61,7 @@
     "@mui/x-date-pickers": "^9.10.0",
     "@reduxjs/toolkit": "^2.12.0",
     "@sentry/browser": "^10.65.0",
+    "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "formik": "^2.4.9",
     "i18next": "^26.3.6",
@@ -67,6 +80,7 @@
     "react-window": "^2.2.7",
     "react-wrap-balancer": "^1.1.1",
     "recharts": "^3.9.2",
+    "tailwind-merge": "^3.6.0",
     "use-local-storage-state": "^20.0.0",
     "uuid": "^14.0.1",
     "workbox-window": "^7.4.1",
@@ -75,6 +89,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@mdx-js/rollup": "^3.1.1",
+    "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -95,6 +110,7 @@
     "sass": "^1.101.0",
     "stylelint": "^17.14.0",
     "stylelint-config-recommended-scss": "17.0.1",
+    "tailwindcss": "^4.3.3",
     "tsx": "4.23.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.63.0",

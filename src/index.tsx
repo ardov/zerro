@@ -1,5 +1,6 @@
 // import { scan } from 'react-scan' // must be imported before React and React DOM
 import '6-shared/localization'
+import './index.css'
 import { useLayoutEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { MainApp } from '1-app'

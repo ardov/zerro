@@ -4,7 +4,11 @@
     "noUnusedLocals": true,
     "noImplicitOverride": true,
     "verbatimModuleSyntax": true,
-    "paths": { "*": ["./src/*"], "stories/*": ["./stories/*"] },
+    "paths": {
+      "@/*": ["./src/*"],
+      "*": ["./src/*"],
+      "stories/*": ["./stories/*"]
+    },
     "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "skipLibCheck": true,
