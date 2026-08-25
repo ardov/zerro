@@ -1,9 +1,9 @@
-import type { BoxProps } from '@mui/material'
-import { Box, Typography } from '@mui/material'
+import type { ComponentPropsWithoutRef } from 'react'
+import { Typography } from '@mui/material'
 import type { AmountProps } from '6-shared/ui/Amount'
 import { Amount } from '6-shared/ui/Amount'
 
-interface TotalProps extends BoxProps {
+interface TotalProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
   title: string
   amountColor?: string
   align?: 'center' | 'right' | 'left'
@@ -26,14 +26,12 @@ export function Total({
   ...rest
 }: TotalProps) {
   return (
-    <Box {...rest}>
+    <div {...rest}>
       <Typography
         align={align}
         variant="body2"
         children={title}
-        sx={{
-          color: 'text.secondary',
-        }}
+        className="text-muted-foreground"
       />
       <Typography
         align={align}
@@ -48,6 +46,6 @@ export function Total({
           noShade={noShade}
         />
       </Typography>
-    </Box>
+    </div>
   )
 }

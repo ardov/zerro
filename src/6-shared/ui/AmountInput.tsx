@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { useState, useEffect, useRef } from 'react'
 import type { TextFieldProps } from '@mui/material'
-import { TextField, InputAdornment, Button, Stack } from '@mui/material'
+import { Button, InputAdornment, TextField } from '@mui/material'
 import { getCurrencySymbol } from '6-shared/helpers/money'
 import type { Modify } from '6-shared/types'
 
@@ -132,7 +132,7 @@ export const AmountInput: FC<AmountInputProps> = ({
   return (
     <div>
       {Field}
-      <Stack direction="row" sx={{ width: '100%' }}>
+      <div className="flex w-full">
         <Button
           onClick={() => {
             ref.current?.focus()
@@ -165,7 +165,7 @@ export const AmountInput: FC<AmountInputProps> = ({
         >
           ÷
         </Button>
-      </Stack>
+      </div>
     </div>
   )
 }

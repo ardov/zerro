@@ -1,14 +1,12 @@
 import type { ChangeEvent, FC } from 'react'
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { PopoverProps, SxProps } from '@mui/material'
+import type { PopoverProps } from '@mui/material'
 import {
-  Box,
   Button,
   Divider,
   InputAdornment,
   Popover,
-  Stack,
   TextField,
 } from '@mui/material'
 import './styles.scss'
@@ -63,8 +61,8 @@ export const ColorPicker: FC = () => {
 
   return (
     <Popover {...popover.displayProps}>
-      <Stack spacing={2} sx={{ p: 2 }}>
-        <Box sx={gridSx}>
+      <div className="flex flex-col gap-4 p-4">
+        <div className="grid grid-cols-6">
           {zmColors.map(color => (
             <ColorCheck
               key={color}
@@ -73,9 +71,9 @@ export const ColorPicker: FC = () => {
               onChange={() => handleColorClick(color)}
             />
           ))}
-        </Box>
+        </div>
         <Divider />
-        <Box sx={gridSx}>
+        <div className="grid grid-cols-6">
           {colors.map(color => (
             <ColorCheck
               key={color}
@@ -84,7 +82,7 @@ export const ColorPicker: FC = () => {
               onChange={() => handleColorClick(color)}
             />
           ))}
-        </Box>
+        </div>
         <TextField
           variant="outlined"
           fullWidth
@@ -108,7 +106,7 @@ export const ColorPicker: FC = () => {
         <Button fullWidth onClick={() => handleColorClick(null)}>
           {t('removeColor')}
         </Button>
-      </Stack>
+      </div>
     </Popover>
   )
 }
@@ -117,11 +115,6 @@ function isSameColor(a?: string | null, b?: string | null) {
   if (!a && !b) return true
   if (a && b) return a.toLowerCase() === b.toLowerCase()
   return false
-}
-
-const gridSx: SxProps = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(6, 1fr)',
 }
 
 type ColorCheckProps = {

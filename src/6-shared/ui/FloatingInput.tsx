@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import type { PopoverProps } from '@mui/material'
-import { TextField, Box, Popover } from '@mui/material'
+import { Popover, TextField } from '@mui/material'
 import { useFormik } from 'formik'
 
 export function useFloatingInput(
@@ -52,7 +52,7 @@ function FloatingInput(props: {
 
   return (
     <Popover open={open} onClose={submitForm} anchorEl={anchorEl}>
-      <Box component="form" onSubmit={handleSubmit} sx={{ p: 0, width: 280 }}>
+      <form className="w-[280px] p-0" onSubmit={handleSubmit}>
         <TextField
           fullWidth
           autoFocus
@@ -62,7 +62,7 @@ function FloatingInput(props: {
           onBlur={submitForm}
           slotProps={{ htmlInput: { autoComplete: 'off' } }}
         />
-      </Box>
+      </form>
     </Popover>
   )
 }
