@@ -1,6 +1,6 @@
 import { core } from 'zerro-core/redux'
 
-import { Dialog, IconButton, Link, Stack, Typography } from '@mui/material'
+import { Dialog, IconButton, Link, Typography } from '@mui/material'
 import Balancer from 'react-wrap-balancer'
 import pluralize from '6-shared/helpers/pluralize'
 import type { TFxAmount } from '6-shared/types'
@@ -25,7 +25,7 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
 
   return (
     <>
-      <Stack direction="column" spacing={1} sx={{ p: 3 }}>
+      <div className="flex flex-col gap-2 p-6">
         <Typography variant="h5" align="center">
           <Balancer>{getPeopleArray(rate).join(' ')}</Balancer>
         </Typography>
@@ -41,10 +41,10 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
             <HelpOutlineIcon fontSize="small" />
           </IconButton>
         </Typography>
-      </Stack>
+      </div>
 
       <Dialog open={isOpenInfo} onClose={toggleInfo}>
-        <Stack direction="column" spacing={3} sx={{ p: 3, maxWidth: 360 }}>
+        <div className="flex max-w-[360px] flex-col gap-6 p-6">
           <Balancer>
             <Typography variant="body1">
               Медианная зарплата в 2024 году в России{' '}
@@ -53,7 +53,7 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
               значит, что половина россиян получают меньше этой суммы.
             </Typography>
           </Balancer>
-        </Stack>
+        </div>
       </Dialog>
     </>
   )

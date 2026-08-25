@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, Collapse } from '@mui/material'
+import { Collapse } from '@mui/material'
 import { useDroppable } from '@dnd-kit/core'
 import { DragTypes } from '../DnD'
 import { useTranslation } from 'react-i18next'
@@ -24,27 +24,14 @@ export function NewGroup(props: { visible: boolean }) {
       : t('newGroup')
   return (
     <Collapse in={visible} unmountOnExit>
-      <Box
-        ref={setNodeRef}
-        sx={{
-          py: 1,
-          px: 2,
-        }}
-      >
-        <Box
-          sx={{
-            p: 2,
-            bgcolor: isOver && canDrop ? 'action.hover' : 'background.paper',
-            textAlign: 'center',
-            border: '1px dashed black',
-            borderColor: 'divider',
-            borderRadius: 2,
-          }}
+      <div ref={setNodeRef} className="px-4 py-2">
+        <div
+          className={`rounded-xl border border-dashed border-border p-4 text-center ${isOver && canDrop ? 'bg-accent' : 'bg-card'}`}
           onClick={() => setClicked(true)}
         >
           {text}
-        </Box>
-      </Box>
+        </div>
+      </div>
     </Collapse>
   )
 }

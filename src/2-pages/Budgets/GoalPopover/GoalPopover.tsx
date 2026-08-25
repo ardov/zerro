@@ -1,14 +1,7 @@
 import type { FC } from 'react'
 import { useState } from 'react'
 import type { OutlinedTextFieldProps, PopoverProps } from '@mui/material'
-import {
-  Box,
-  Popover,
-  TextField,
-  MenuItem,
-  Button,
-  IconButton,
-} from '@mui/material'
+import { Popover, TextField, MenuItem, Button, IconButton } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { CloseIcon } from '6-shared/ui/Icons'
@@ -93,14 +86,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   return (
     <>
       <Popover disableRestoreFocus onClose={onClose} {...rest}>
-        <Box
-          sx={{
-            display: 'grid',
-            rowGap: 2,
-            p: 2,
-            minWidth: 320,
-          }}
-        >
+        <div className="grid min-w-80 gap-y-4 p-4">
           <TextField
             select
             variant="outlined"
@@ -140,11 +126,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
           />
 
           {showDateBlock && (
-            <Box
-              sx={{
-                display: 'flex',
-              }}
-            >
+            <div className="flex">
               <Button
                 size="large"
                 onClick={openMonthPopover}
@@ -157,7 +139,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
               {endDate && (
                 <IconButton onClick={removeDate} children={<CloseIcon />} />
               )}
-            </Box>
+            </div>
           )}
 
           <Button onClick={save} variant="contained" color="primary">
@@ -168,7 +150,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
               {t('remove')}
             </Button>
           )}
-        </Box>
+        </div>
       </Popover>
       <MonthSelectPopover
         open={!!monthPopoverAnchor}

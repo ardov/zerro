@@ -1,7 +1,7 @@
 import type { TFxAmount, TISOMonth } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
-import type { FC } from 'react'
+import type { FC, HTMLAttributes } from 'react'
 import { useState } from 'react'
 import type { PopoverProps } from '@mui/material'
 import {
@@ -11,8 +11,6 @@ import {
   MenuList,
   MenuItem,
 } from '@mui/material'
-import type { BoxProps } from '@mui/system'
-import { Box } from '@mui/system'
 import { useTranslation } from 'react-i18next'
 import { ArrowForwardIcon } from '6-shared/ui/Icons'
 import { AmountInput } from '6-shared/ui/AmountInput'
@@ -112,7 +110,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
       anchor="top"
       {...rest}
     >
-      <Box sx={{ p: 1 }}>
+      <div className="p-2">
         <AmountInput
           autoFocus
           value={inputValue}
@@ -162,29 +160,21 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
             </MenuItem>
           ))}
         </MenuList>
-      </Box>
+      </div>
     </AdaptivePopover>
   )
 }
 
-const NameValueRow: FC<BoxProps & { name: string; value: string }> = ({
-  name,
-  value,
-  ...rest
-}) => {
+const NameValueRow: FC<
+  HTMLAttributes<HTMLDivElement> & { name: string; value: string }
+> = ({ name, value, ...rest }) => {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        width: '100%',
-        gap: 2,
-        '& > :first-of-type': { flexGrow: 1 },
-        '& > :last-child': { color: 'text.secondary' },
-      }}
+    <div
+      className="flex w-full gap-4 [&>:first-child]:grow [&>:last-child]:text-muted-foreground"
       {...rest}
     >
       <span>{name}</span>
       <span>{value}</span>
-    </Box>
+    </div>
   )
 }

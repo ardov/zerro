@@ -12,7 +12,6 @@ import {
   FormControlLabel,
   FormGroup,
   InputAdornment,
-  Stack,
   TextField,
 } from '@mui/material'
 import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
@@ -102,14 +101,9 @@ const EnvelopeEditDialogForm: FC<{
     >
       <DialogTitle>{t('titleEdit')}</DialogTitle>
       <DialogContent>
-        <Stack
-          component="form"
+        <form
           onSubmit={handleSubmit}
-          spacing={2}
-          sx={{
-            maxWidth: 360,
-            mt: 1,
-          }}
+          className="mt-2 flex max-w-[360px] flex-col gap-4"
         >
           <TextField
             label={t('nameLabel')}
@@ -216,7 +210,7 @@ const EnvelopeEditDialogForm: FC<{
           <Button onClick={close} size="large">
             {t('btnCancel')}
           </Button>
-        </Stack>
+        </form>
       </DialogContent>
     </Dialog>
   )

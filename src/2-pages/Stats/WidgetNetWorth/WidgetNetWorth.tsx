@@ -3,7 +3,6 @@ import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import {
-  Box,
   Typography,
   Paper,
   Checkbox,
@@ -115,7 +114,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
 
   return (
     <Paper>
-      <Box sx={{ p: 2, minWidth: '100%' }}>
+      <div className="min-w-full p-4">
         {/* Header */}
         <Typography variant="h5">
           {t('netWorth.title')}{' '}
@@ -127,18 +126,12 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           </span>
         </Typography>
 
-        <Typography
-          variant="body1"
-          sx={{
-            color: 'text.secondary',
-            mt: 1,
-          }}
-        >
+        <Typography variant="body1" className="mt-2 text-muted-foreground">
           <SurviveFact />
         </Typography>
-      </Box>
+      </div>
       {/* Chart */}
-      <Box sx={{ p: 2, minWidth: '100%', height: 300 }}>
+      <div className="h-[300px] min-w-full p-4">
         <ResponsiveContainer>
           <ComposedChart
             data={points}
@@ -170,16 +163,16 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
             )}
           </ComposedChart>
         </ResponsiveContainer>
-      </Box>
+      </div>
       {/* Legend */}
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         {makeCheck('fundsInBudget')}
         {makeCheck('fundsSaving')}
         {makeCheck('accountDebts')}
         {makeCheck('debts')}
         {makeCheck('lented')}
         {makeCheck('total')}
-      </Box>
+      </div>
     </Paper>
   )
 }
@@ -238,11 +231,7 @@ function SurviveFact() {
   if (fundedMonths <= 0) return null
 
   const tooltipContent = (
-    <Box
-      sx={{
-        p: 1,
-      }}
-    >
+    <div className="p-2">
       <Typography variant="body2" gutterBottom>
         {t('netWorth.tooltipCurrentBalance')}:{' '}
         <DisplayAmount value={currentBalance} />
@@ -251,7 +240,7 @@ function SurviveFact() {
         {t('netWorth.tooltipAvgExpenses')}:{' '}
         <DisplayAmount value={averageExpenses} />
       </Typography>
-    </Box>
+    </div>
   )
 
   return (

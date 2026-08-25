@@ -1,6 +1,5 @@
 import type { FC, ReactElement } from 'react'
-import { Box, Link, Typography } from '@mui/material'
-import { Stack } from '@mui/system'
+import { Link, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 
@@ -11,28 +10,17 @@ export default function Donation() {
       <title>{`${t('pageTitle')} | Zerro`}</title>
       <meta name="description" content={t('pageDescription')} />
       <link rel="canonical" href="https://zerro.app/donation" />
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-        }}
-      >
-        <Box sx={{ p: 3, pb: 8, mx: 'auto', maxWidth: 480 }}>
-          <Typography variant="h5" align="center" sx={{ marginBottom: '16px' }}>
+      <div className="flex h-full items-center justify-center">
+        <div className="mx-auto max-w-[480px] p-6 pb-16">
+          <Typography variant="h5" align="center" className="mb-4">
             {t('heading')}
           </Typography>
 
-          <Typography
-            variant="body1"
-            align="center"
-            sx={{ marginBottom: '16px' }}
-          >
+          <Typography variant="body1" align="center" className="mb-4">
             {t('subtitle')}
           </Typography>
 
-          <Stack spacing={2} sx={{ py: 2 }}>
+          <div className="flex flex-col gap-4 py-4">
             <LinkCard
               icon={<PatreonLogo />}
               primary={t('patreonTitle')}
@@ -45,18 +33,18 @@ export default function Donation() {
               secondary={t('cardDescription')}
               href="https://www.tinkoff.ru/sl/3zbRWFqgcT1"
             />
-          </Stack>
+          </div>
 
           <Typography
             variant="body1"
             color="textSecondary"
             align="center"
-            sx={{ marginBottom: '16px' }}
+            className="mb-4"
           >
             {t('afterword')}
           </Typography>
-        </Box>
-      </Box>
+        </div>
+      </div>
     </>
   )
 }
@@ -75,23 +63,17 @@ const LinkCard: FC<LinkCardProps> = props => {
       target="_blank"
       rel="noopener noreferrer"
       underline="none"
-      sx={{
-        p: 3,
-        borderRadius: 1,
-        bgcolor: 'background.paper',
-        display: 'flex',
-        boxShadow: 2,
-      }}
+      className="flex rounded-lg bg-card p-6 shadow-md"
     >
-      <Box sx={{ maxWidth: 48 }}>{icon}</Box>
-      <Box sx={{ ml: 2 }}>
+      <div className="max-w-12">{icon}</div>
+      <div className="ml-4">
         <Typography variant="h6" color="textPrimary">
           {primary}
         </Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        <Typography variant="body2" className="text-muted-foreground">
           {secondary}
         </Typography>
-      </Box>
+      </div>
     </Link>
   )
 }

@@ -15,12 +15,6 @@ import { useTranslation } from 'react-i18next'
 import { useTransactionsPageView } from './useTransactionsPageView'
 
 const sideWidth = 360
-const sideSx = {
-  width: sideWidth,
-  flexShrink: 0,
-  overflow: 'auto',
-  bgcolor: 'background.paper',
-}
 
 export default function TransactionsView() {
   const { t } = useTranslation('transactions')
@@ -47,21 +41,8 @@ export default function TransactionsView() {
       <title>{`${t('pageTitle')} | Zerro`}</title>
       <meta name="description" content={t('pageDescription')} />
       <link rel="canonical" href="https://zerro.app/transactions" />
-      <Box
-        sx={{
-          display: 'flex',
-          height: '100vh',
-        }}
-      >
-        <Box
-          sx={{
-            p: { xs: 0, md: 2 },
-            flexGrow: 1,
-            minWidth: 0,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
+      <div className="flex h-screen">
+        <div className="flex min-w-0 grow justify-center p-0 md:p-4">
           <Paper
             sx={{
               flex: '1 1 auto',
@@ -79,16 +60,16 @@ export default function TransactionsView() {
               opened={opened || undefined}
             />
           </Paper>
-        </Box>
+        </div>
 
         {isMobile ? (
           <SideContent width={sideWidth} />
         ) : (
-          <Box sx={sideSx}>
+          <div className="w-[360px] shrink-0 overflow-auto bg-card">
             <SideContent width={sideWidth} docked />
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
     </>
   )
 }
