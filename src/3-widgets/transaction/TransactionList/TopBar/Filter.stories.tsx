@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { Box } from '@mui/material'
 import { core } from 'zerro-core/redux'
 import Filter from './Filter'
 
@@ -24,14 +23,14 @@ function FilterHarness(props: {
   )
   const [search, setSearch] = useState('')
   return (
-    <Box sx={{ width: 560, maxWidth: '95vw' }}>
+    <div className="w-[560px] max-w-[95vw]">
       <Filter
         query={query}
         onQueryChange={setQuery}
         search={search}
         onSearchChange={setSearch}
       />
-    </Box>
+    </div>
   )
 }
 

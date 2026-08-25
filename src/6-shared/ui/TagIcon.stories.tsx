@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Stack } from '@mui/material'
 import { useState } from 'react'
 import { TagIcon } from './TagIcon'
 
@@ -14,11 +13,11 @@ type Story = StoryObj
 
 export const EmojiVariants: Story = {
   render: () => (
-    <Stack direction="row" spacing={1}>
+    <div className="flex gap-2">
       <TagIcon symbol="🍎" color="#e53935" size="s" />
       <TagIcon symbol="🚲" color="#1e88e5" size="m" />
       <TagIcon symbol="💼" size="m" button />
-    </Stack>
+    </div>
   ),
 }
 

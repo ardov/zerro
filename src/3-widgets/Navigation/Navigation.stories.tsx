@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Box, Drawer, Stack } from '@mui/material'
+import { Drawer } from '@mui/material'
 import NavigationDrawer from './NavDrawer'
 import { MobileNavigation } from './MobileNavigation'
 
@@ -16,31 +16,31 @@ type Story = StoryObj
 
 export const DesktopDrawer: Story = {
   render: () => (
-    <Box sx={{ minHeight: 720, bgcolor: 'background.default' }}>
+    <div className="min-h-[720px] bg-background">
       <NavigationDrawer
         open
         variant="permanent"
         slotProps={{ paper: { sx: { width: 280, position: 'relative' } } }}
       />
-    </Box>
+    </div>
   ),
 }
 
 export const MobileBottomNavigation: Story = {
   globals: { viewport: { value: 'iphone13' } },
   render: () => (
-    <Stack sx={{ minHeight: 600, bgcolor: 'background.default' }}>
+    <div className="flex min-h-[600px] flex-col bg-background">
       <MobileNavigation />
-    </Stack>
+    </div>
   ),
 }
 
 export const DrawerSurface: Story = {
   render: () => (
     <Drawer open variant="persistent" anchor="left">
-      <Box sx={{ width: 280 }}>
+      <div className="w-[280px]">
         <NavigationDrawer open variant="permanent" />
-      </Box>
+      </div>
     </Drawer>
   ),
 }

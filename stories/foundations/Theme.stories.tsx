@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Box, Stack, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { useAppTheme } from '6-shared/ui/theme'
 import { Logo } from '6-shared/ui/Logo'
 
@@ -23,33 +23,30 @@ function ThemeCatalog() {
   ] as const
 
   return (
-    <Stack spacing={3} sx={{ p: 4 }}>
+    <main className="grid gap-6 p-8">
       <Logo fill={theme.palette.primary.main} width={220} />
-      <Box>
+      <section>
         <Typography variant="h4">Typography</Typography>
         <Typography variant="h6">Envelope budgeting with clarity</Typography>
         <Typography variant="body1" color="text.secondary">
           Long labels, secondary text and monetary values should remain legible.
         </Typography>
-      </Box>
-      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+      </section>
+      <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
         {colors.map(([name, color]) => (
-          <Box
+          <li
             key={name}
-            sx={{
-              width: 112,
-              height: 72,
-              p: 1,
-              borderRadius: 1,
+            className="h-18 w-28 rounded-lg p-2"
+            style={{
               backgroundColor: color,
               color: theme.palette.getContrastText(color),
             }}
           >
             <Typography variant="caption">{name}</Typography>
-          </Box>
+          </li>
         ))}
-      </Stack>
-    </Stack>
+      </ul>
+    </main>
   )
 }
 

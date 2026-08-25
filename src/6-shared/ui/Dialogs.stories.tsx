@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button, Stack } from '@mui/material'
+import { Button } from '@mui/material'
 import { useConfirm } from './SmartConfirm'
 import { useSnackbar } from './SnackbarProvider'
 
@@ -25,14 +25,14 @@ function DialogTriggers() {
   const showSnackbar = useSnackbar()
 
   return (
-    <Stack direction="row" spacing={1}>
+    <div className="flex gap-2">
       <Button variant="contained" onClick={confirm}>
         Open confirmation
       </Button>
       <Button onClick={() => showSnackbar({ message: 'Saved in the story' })}>
         Show snackbar
       </Button>
-    </Stack>
+    </div>
   )
 }
 

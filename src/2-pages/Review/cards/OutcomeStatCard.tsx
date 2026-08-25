@@ -93,7 +93,11 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
         />
 
         {!!totalAmount && (
-          <PercentBar data={nodes} visibleData={visibleNodes} sx={{ mt: 1 }} />
+          <PercentBar
+            data={nodes}
+            visibleData={visibleNodes}
+            className="mt-2"
+          />
         )}
 
         <CategoryList

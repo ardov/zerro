@@ -14,6 +14,9 @@ const root = path.dirname(fileURLToPath(import.meta.url))
  */
 export default defineConfig({
   plugins: [tailwindcss()],
+  optimizeDeps: {
+    include: ['clsx'],
+  },
   resolve: {
     tsconfigPaths: true,
     alias: {

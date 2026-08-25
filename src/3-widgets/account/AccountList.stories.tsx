@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Box } from '@mui/material'
 import AccountList from './AccountList'
 import { DebtorList } from '3-widgets/DebtorList'
 
@@ -17,18 +16,18 @@ type Story = StoryObj
 
 export const AccountListWithDebtors: Story = {
   render: () => (
-    <Box sx={{ width: 320, p: 2 }}>
+    <div className="w-[320px] p-4">
       <AccountList />
       <DebtorList />
-    </Box>
+    </div>
   ),
 }
 
 export const NarrowViewport: Story = {
   globals: { viewport: { value: 'iphone13' } },
   render: () => (
-    <Box sx={{ width: '100%', maxWidth: 320, p: 1 }}>
+    <div className="w-full max-w-[320px] p-2">
       <AccountList />
-    </Box>
+    </div>
   ),
 }

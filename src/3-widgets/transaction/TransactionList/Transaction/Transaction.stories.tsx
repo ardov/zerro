@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { ComponentProps } from 'react'
-import { Stack, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 import { Transaction } from './Transaction'
@@ -27,7 +27,7 @@ export const Showcase: Story = {
     const transactions = useAppSelector(core.transactions.selectAll)
     const ids = Object.keys(transactions).slice(0, 8)
     return (
-      <Stack spacing={0.5} sx={{ width: 560, maxWidth: '100%' }}>
+      <div className="flex w-[560px] max-w-full flex-col gap-1">
         <Typography variant="caption" color="text.secondary">
           Generated demo operations
         </Typography>
@@ -41,7 +41,7 @@ export const Showcase: Story = {
             isChecked={index === 2}
           />
         ))}
-      </Stack>
+      </div>
     )
   },
 }

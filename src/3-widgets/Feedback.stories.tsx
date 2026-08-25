@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Alert, AlertTitle, Stack } from '@mui/material'
+import { Alert, AlertTitle } from '@mui/material'
 import { JournalRecoveryNotice } from './JournalRecoveryNotice'
 import { PersistenceWarningNotice } from './PersistenceWarningNotice'
 import { ErrorMessage } from './ErrorBoundary/ErrorMessage'
@@ -17,7 +17,7 @@ type Story = StoryObj
 
 export const InlineStates: Story = {
   render: () => (
-    <Stack spacing={1} sx={{ p: 3, maxWidth: 760 }}>
+    <div className="grid max-w-[760px] gap-2 p-6">
       <Alert severity="info">
         <AlertTitle>Changes are ready</AlertTitle>
         The local state is valid and can be synchronized.
@@ -30,7 +30,7 @@ export const InlineStates: Story = {
         <AlertTitle>Recovery required</AlertTitle>
         The accepted replica could not be replayed safely.
       </Alert>
-    </Stack>
+    </div>
   ),
 }
 

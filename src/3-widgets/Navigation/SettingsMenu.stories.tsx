@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Box } from '@mui/material'
 import { MenuButton } from './MenuButton'
 
 const meta = {
@@ -17,9 +16,9 @@ type Story = StoryObj
 export const Desktop: Story = {
   args: { showLinks: true },
   render: args => (
-    <Box sx={{ minHeight: 360 }}>
+    <div className="min-h-[360px]">
       <MenuButton {...args} />
-    </Box>
+    </div>
   ),
 }
 

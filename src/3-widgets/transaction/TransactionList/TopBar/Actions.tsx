@@ -5,7 +5,7 @@ import type { FC } from 'react'
 import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
-import { EditOutlined } from '@mui/icons-material'
+import EditOutlined from '@mui/icons-material/EditOutlined'
 import {
   Box,
   Chip,

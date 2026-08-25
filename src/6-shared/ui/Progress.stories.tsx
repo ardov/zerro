@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Stack } from '@mui/material'
 import { PercentBar } from './PercentBar'
 import { RadialProgress } from './RadialProgress'
 
@@ -19,19 +18,19 @@ const data = [
 
 export const PercentBars: Story = {
   render: () => (
-    <Stack spacing={2} sx={{ width: 360 }}>
+    <div className="flex w-[360px] flex-col gap-4">
       <PercentBar data={data} />
       <PercentBar data={data} visibleData={data.slice(0, 2)} height="12px" />
-    </Stack>
+    </div>
   ),
 }
 
 export const RadialProgressStates: Story = {
   render: () => (
-    <Stack direction="row" spacing={2}>
+    <div className="flex gap-4">
       <RadialProgress value={0} size={64} />
       <RadialProgress value={0.55} size={64} />
       <RadialProgress value={1} size={64} />
-    </Stack>
+    </div>
   ),
 }
