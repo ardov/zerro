@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import { Box, Typography, Button } from '@mui/material'
+import { Typography, Button } from '@mui/material'
 import { SyncIcon } from '6-shared/ui/Icons'
 import { useTranslation } from 'react-i18next'
 
@@ -11,30 +11,17 @@ interface ErrorMessageProps {
 export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
   const { t } = useTranslation('errorBoudary')
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 'inherit',
-      }}
-    >
-      <Box
-        sx={{
-          p: 5,
-          mx: 'auto',
-          maxWidth: 500,
-        }}
-      >
-        <Typography variant="h4" sx={{ marginBottom: '16px' }}>
+    <div className="flex h-inherit items-center justify-center">
+      <div className="mx-auto max-w-[500px] p-10">
+        <Typography variant="h4" className="mb-4">
           {t('title')}
         </Typography>
 
-        <Typography variant="body1" sx={{ marginBottom: '16px' }}>
+        <Typography variant="body1" className="mb-4">
           {t('description')}
         </Typography>
 
-        <Box sx={{ mt: 3 }}>
+        <div className="mt-6">
           <Button
             variant="contained"
             color="primary"
@@ -44,20 +31,20 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
             {t('btnRefresh')}
           </Button>
 
-          <Button onClick={onLogOut} sx={{ ml: 2 }}>
+          <Button onClick={onLogOut} className="ml-4">
             {t('btnLogOut')}
           </Button>
 
           {!!message && (
             <Typography
-              sx={{ mt: 6, color: 'text.secondary', marginBottom: '16px' }}
               variant="body1"
+              className="mt-12 mb-4 text-muted-foreground"
             >
               {t('errorMsg', { message })}
             </Typography>
           )}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }

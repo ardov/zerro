@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { ButtonBase, Collapse, Stack } from '@mui/material'
+import { ButtonBase, Collapse } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useToggle } from '6-shared/hooks/useToggle'
 import type { TISOMonth } from '6-shared/types'
@@ -143,12 +143,7 @@ function StatWidget(props: {
         )}
 
         <Collapse in={opened} unmountOnExit>
-          <Stack
-            sx={{
-              gap: 1.5,
-              mt: 2,
-            }}
-          >
+          <div className="mt-4 flex flex-col gap-3">
             {nodes.map(point => (
               <DataLine
                 key={point.id}
@@ -162,7 +157,7 @@ function StatWidget(props: {
                 }}
               />
             ))}
-          </Stack>
+          </div>
         </Collapse>
       </ButtonBase>
     </>

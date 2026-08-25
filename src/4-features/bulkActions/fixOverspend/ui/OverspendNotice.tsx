@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Button } from '@mui/material'
+import { Typography, Button } from '@mui/material'
 import type { TISOMonth } from '6-shared/types'
 import { WarningIcon } from '6-shared/ui/Icons'
 import { isZero } from '6-shared/helpers/money'
@@ -25,28 +25,11 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   if (isZero(overspend)) return null
 
   return (
-    <Box
-      sx={{
-        p: 2,
-        bgcolor: 'background.default',
-        borderRadius: 1,
-        display: 'flex',
-        flexDirection: 'row',
-      }}
-    >
-      <Box
-        sx={{
-          color: 'warning.main',
-          pt: '2px',
-        }}
-      >
+    <div className="flex flex-row rounded-lg bg-background p-4">
+      <div className="pt-[2px] text-warning">
         <WarningIcon />
-      </Box>
-      <Box
-        sx={{
-          ml: 1.5,
-        }}
-      >
+      </div>
+      <div className="ml-3">
         <Typography variant="subtitle1">
           {t('title')}{' '}
           <DisplayAmount
@@ -61,13 +44,13 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
         <Typography variant="body2">{t('description')}</Typography>
 
         <Button
-          sx={{ mt: 1, ml: -1 }}
+          className="-ml-2 mt-2"
           color="secondary"
           onClick={fixOverspends}
         >
           {t('btn')}
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

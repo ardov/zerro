@@ -1,7 +1,6 @@
 import type { MDXComponents } from 'mdx/types'
 
 import { Route, Routes } from 'react-router-dom'
-import { Box } from '@mui/material'
 import { Link } from 'react-router-dom'
 import { useAppTheme } from '6-shared/ui/theme'
 import { Logo } from '6-shared/ui/Logo'
@@ -44,63 +43,31 @@ const QuickStart = () => {
 
 export default function Main() {
   return (
-    <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
+    <main className="w-full bg-card">
       <ScrollToTop />
       <Header />
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          px: 2,
-          pt: 8,
-          pb: 8,
-        }}
-      >
-        <Box
-          className="article"
-          sx={{ width: '100%', maxWidth: 680, minWidth: 100 }}
-        >
+      <div className="flex flex-col items-center px-4 py-16">
+        <div className="article w-full min-w-[100px] max-w-[680px]">
           <Routes>
             <Route path="method" element={<Method />} />
             <Route path="quick-start" element={<QuickStart />} />
             <Route index element={<About />} />
           </Routes>
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </main>
   )
 }
 
 const Header = () => {
   const theme = useAppTheme()
   return (
-    <Box
-      sx={{
-        position: 'sticky',
-        top: 0,
-        left: 0,
-        right: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        p: 1,
-        zIndex: 100,
-      }}
-    >
+    <header className="sticky inset-x-0 top-0 z-[100] flex flex-col items-center p-2">
       <Link to="/">
-        <Box
-          sx={{
-            py: 1,
-            px: 3,
-            bgcolor: 'background.default',
-            borderRadius: 3,
-            lineHeight: 0,
-          }}
-        >
+        <div className="rounded-3xl bg-background px-6 py-2 leading-none">
           <Logo fill={theme.palette.primary.main} width="100" />
-        </Box>
+        </div>
       </Link>
-    </Box>
+    </header>
   )
 }

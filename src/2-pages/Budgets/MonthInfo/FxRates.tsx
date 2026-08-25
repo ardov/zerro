@@ -3,14 +3,7 @@ import { core } from 'zerro-core/redux'
 
 import type { FC } from 'react'
 import { useState } from 'react'
-import {
-  Box,
-  Button,
-  TextField,
-  InputAdornment,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Button, TextField, InputAdornment, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { keys } from '6-shared/helpers/keys'
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
@@ -47,18 +40,8 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   const isCurrentRates = rateData.type === 'current'
 
   return (
-    <Box
-      sx={{
-        p: 2,
-        bgcolor: 'background.default',
-        borderRadius: 1,
-      }}
-    >
-      <Stack
-        sx={{
-          gap: 1,
-        }}
-      >
+    <div className="rounded-lg bg-background p-4">
+      <div className="flex flex-col gap-2">
         {currencies.map(c => (
           <FxRateInput
             key={c.code + month}
@@ -73,9 +56,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
         <Typography
           variant="caption"
           align="center"
-          sx={{
-            color: 'text.secondary',
-          }}
+          className="text-muted-foreground"
         >
           {t(isCurrentRates ? 'title_current' : 'title', {
             date: formatDate(rateData.date, 'LLLL yyyy'),
@@ -91,8 +72,8 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
             {t('download')}
           </Button>
         )}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   )
 }
 
