@@ -1,5 +1,6 @@
 import type { FC, ReactNode } from 'react'
 import React, { useCallback } from 'react'
+import clsx from 'clsx'
 import { core } from 'zerro-core/redux'
 
 import { useDroppable } from '@dnd-kit/core'
@@ -175,15 +176,12 @@ export const Row: FC<EnvelopeRowProps> = props => {
     >
       <SlideReveal enabled={isSmall} items={revealItems}>
         <TableRow
-          sx={{
-            position: 'relative',
-            cursor: 'pointer',
-            '&:hover': { bgcolor: 'action.hover', transition: '0.1s' },
-            '&:active': { bgcolor: 'action.focus', transition: '0.1s' },
-            '&:hover .addGoal': { opacity: 1, transition: '.3s' },
-            '&:not(:hover) .addGoal': { opacity: 0 },
-            '& > *': { py: isChild ? 0.5 : 1 },
-          }}
+          className={clsx(
+            'relative cursor-pointer transition-colors duration-100 hover:bg-accent active:bg-muted',
+            'hover:[&_.addGoal]:opacity-100 hover:[&_.addGoal]:transition-opacity hover:[&_.addGoal]:duration-300',
+            '[&:not(:hover)_.addGoal]:opacity-0',
+            isChild ? '[&>*]:py-1' : '[&>*]:py-2'
+          )}
           name={
             <NameCell
               onClick={handleNameClick}

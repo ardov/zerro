@@ -40,16 +40,8 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
   return (
     <Tooltip arrow title={<TooltipContent />}>
       <ButtonBase
-        sx={{
-          display: 'flex',
-          gap: 1,
-          borderRadius: 1,
-          py: 1,
-          pl: 2,
-          pr: 1,
-          background: bg,
-          color: color,
-        }}
+        className="flex gap-2 rounded py-2 pl-4 pr-2"
+        style={{ background: bg, color }}
         {...props}
       >
         <Typography noWrap align="center" variant="body1">

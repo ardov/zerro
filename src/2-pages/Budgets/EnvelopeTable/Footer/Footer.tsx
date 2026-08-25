@@ -20,9 +20,7 @@ const Sum: FC<{ value: TFxAmount; month: TISOMonth }> = ({ value, month }) => (
     variant="overline"
     align="right"
     noWrap
-    sx={{
-      color: 'text.secondary',
-    }}
+    className="text-muted-foreground"
   >
     <DisplayAmount value={value} decimals="ifOnly" month={month} noCurrency />
   </Typography>
@@ -40,9 +38,7 @@ export const Footer: FC<FooterProps> = props => {
           <Typography
             variant="overline"
             noWrap
-            sx={{
-              color: 'text.secondary',
-            }}
+            className="text-muted-foreground"
           >
             {t('total')}
           </Typography>

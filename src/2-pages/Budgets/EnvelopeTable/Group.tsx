@@ -32,10 +32,7 @@ const Sum: FC<{ value: number }> = ({ value }) => (
   <Typography
     align="right"
     noWrap
-    sx={{
-      alignSelf: 'baseline',
-      color: 'text.disabled',
-    }}
+    className="self-baseline text-disabled-foreground"
   >
     <Amount value={value} decimals="ifOnly" />
   </Typography>
@@ -90,7 +87,7 @@ export const Group: FC<TGroupProps> = ({
         className="-ml-2 min-w-0 shrink p-2"
         onClick={() => floating.open(name)}
       >
-        <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
+        <Typography variant="h6" className="font-black" noWrap>
           {name}
         </Typography>
       </ButtonBase>
@@ -103,13 +100,7 @@ export const Group: FC<TGroupProps> = ({
     <>
       {floating.render()}
       <TableRow
-        sx={{
-          pt: 2,
-          alignItems: 'baseline',
-          borderBottom: `0.5px solid black`,
-          borderColor: 'divider',
-          '&:last-child': { border: 0 },
-        }}
+        className="items-baseline border-b-[0.5px] border-border pt-4 last:border-0"
         name={NameCell}
         assigned={<Sum value={assigned} />}
         outcome={<Sum value={activity} />}
