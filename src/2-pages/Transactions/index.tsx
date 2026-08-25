@@ -1,8 +1,8 @@
-import type { FC } from 'react'
+import type { FC, CSSProperties } from 'react'
 import { useState, useCallback } from 'react'
 import { TransactionList } from '3-widgets/transaction/TransactionList'
 import type { Theme, DrawerProps } from '@mui/material'
-import { Box, Drawer, useMediaQuery, Paper } from '@mui/material'
+import { Drawer, useMediaQuery, Paper } from '@mui/material'
 import {
   TrEmptyState,
   TransactionPreview,
@@ -43,15 +43,7 @@ export default function TransactionsView() {
       <link rel="canonical" href="https://zerro.app/transactions" />
       <div className="flex h-screen">
         <div className="flex min-w-0 grow justify-center p-0 md:p-4">
-          <Paper
-            sx={{
-              flex: '1 1 auto',
-              display: 'flex',
-              overflow: 'hidden',
-              maxWidth: 560,
-              pb: { xs: 7, md: 0 },
-            }}
-          >
+          <Paper className="flex max-w-[560px] flex-1 overflow-hidden pb-14 md:pb-0">
             <TransactionList
               checkedDate={checkedDate}
               view={view}
@@ -112,7 +104,16 @@ const SideContent: FC<{ docked?: boolean; width: number }> = ({
 
   return (
     <Drawer {...displayProps} anchor="right">
-      <Box sx={{ width: isXS ? '100vw' : width }}>{drawerContent}</Box>
+      <div
+        className="w-screen sm:w-[var(--transaction-side-width)]"
+        style={
+          {
+            '--transaction-side-width': `${isXS ? '100vw' : `${width}px`}`,
+          } as CSSProperties
+        }
+      >
+        {drawerContent}
+      </div>
     </Drawer>
   )
 }

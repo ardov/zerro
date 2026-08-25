@@ -1,16 +1,11 @@
-import type { FC } from 'react'
+import type { FC, HTMLAttributes } from 'react'
+import clsx from 'clsx'
 import { useAppDispatch, useAppSelector } from 'store'
 import { isZero } from '6-shared/helpers/money'
 import { formatDate } from '6-shared/helpers/date'
 import { startFresh } from '4-features/bulkActions/startFresh'
-import type { Theme, BoxProps } from '@mui/material'
-import {
-  Box,
-  Typography,
-  Button,
-  IconButton,
-  useMediaQuery,
-} from '@mui/material'
+import type { Theme } from '@mui/material'
+import { Typography, Button, IconButton, useMediaQuery } from '@mui/material'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import type { TDateDraft, TISOMonth } from '6-shared/types'
@@ -31,9 +26,13 @@ import { fillGoals } from '4-features/bulkActions/fillGoals'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useTranslation } from 'react-i18next'
 
-type MonthInfoProps = BoxProps & { onClose: () => void }
+type MonthInfoProps = HTMLAttributes<HTMLDivElement> & { onClose: () => void }
 
-export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
+export const MonthInfo: FC<MonthInfoProps> = ({
+  onClose,
+  className,
+  ...rest
+}) => {
   const { t } = useTranslation('budgets', { keyPrefix: 'actions' })
   const [month] = useMonth()
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
@@ -65,15 +64,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   })
 
   return (
-    <Box
-      {...rest}
-      sx={[
-        {
-          minHeight: '100vh',
-        },
-        ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx]),
-      ]}
-    >
+    <div {...rest} className={clsx('min-h-screen', className)}>
       {isMobile && (
         <div className="flex items-center px-6 py-2">
           <div className="grow">
@@ -121,7 +112,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
           </Button>
         </div>
       </div>
-    </Box>
+    </div>
   )
 }
 
