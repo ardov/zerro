@@ -5,7 +5,6 @@ import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
@@ -84,11 +83,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
           </>
         )}
 
-        <Box
-          sx={{
-            pt: 2,
-          }}
-        >
+        <div className="pt-4">
           <TextField
             value={comment}
             onChange={e => setComment(e.target.value)}
@@ -100,7 +95,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
             variant="outlined"
             margin="dense"
           />
-        </Box>
+        </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">

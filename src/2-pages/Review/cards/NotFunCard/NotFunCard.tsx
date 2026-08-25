@@ -186,7 +186,7 @@ export function NotFunCard(props: TCardProps) {
 
   return (
     <>
-      <Card sx={{ position: 'relative' }}>
+      <Card className="relative">
         <IconButton
           onClick={() => {
             track('external_link_opened', { destination: 'taxes_settings' })

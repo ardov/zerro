@@ -4,7 +4,7 @@ import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 
 import type { ButtonBaseProps } from '@mui/material'
-import { Typography, ButtonBase, Divider, Stack } from '@mui/material'
+import { Typography, ButtonBase, Divider } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { sub } from '6-shared/helpers/money'
@@ -115,7 +115,7 @@ function useTotalsModel() {
 
   function TooltipContent() {
     return (
-      <Stack spacing={1}>
+      <div className="flex flex-col gap-2">
         <Typography variant="body2" align="center">
           {messages[msgType]}
         </Typography>
@@ -139,7 +139,7 @@ function useTotalsModel() {
           amount={toBeAssigned}
           currency={currency}
         />
-      </Stack>
+      </div>
     )
   }
 

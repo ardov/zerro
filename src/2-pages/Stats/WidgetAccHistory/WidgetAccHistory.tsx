@@ -3,14 +3,7 @@ import React, { useState, useMemo, useCallback, memo } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import {
-  Box,
-  Typography,
-  Paper,
-  List,
-  ListSubheader,
-  Collapse,
-} from '@mui/material'
+import { Typography, Paper, List, ListSubheader, Collapse } from '@mui/material'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
@@ -144,21 +137,13 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
       }}
       onClick={onClick}
     >
-      <Box component="span" sx={{ display: 'flex', width: '100%' }}>
-        <Typography
-          component="span"
-          noWrap
-          sx={{ flexGrow: 1, lineHeight: 'inherit' }}
-        >
+      <span className="flex w-full">
+        <Typography component="span" noWrap className="grow leading-[inherit]">
           <b>{name}</b>
         </Typography>
 
-        <Box
-          component="span"
-          sx={{
-            color: isNegative ? 'error.main' : 'text.secondary',
-            ml: 2,
-          }}
+        <span
+          className={`${isNegative ? 'text-error' : 'text-muted-foreground'} ml-4`}
         >
           <b>
             <DisplayAmount
@@ -168,8 +153,8 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
               noShade
             />
           </b>
-        </Box>
-      </Box>
+        </span>
+      </span>
     </ListSubheader>
   )
 })
@@ -214,15 +199,7 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
       <Paper
         style={{ overflow: 'hidden', position: 'relative', marginBottom: 8 }}
       >
-        <Box
-          sx={{
-            p: 2,
-            minWidth: 160,
-            position: 'relative',
-            zIndex: 1,
-            pointerEvents: 'none',
-          }}
-        >
+        <div className="relative z-[1] min-w-40 pointer-events-none p-4">
           <Typography variant="body2">
             <span
               style={{ textDecoration: acc.archive ? 'line-through' : 'none' }}
@@ -234,7 +211,7 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
           <Typography variant="h6">
             <Amount value={balance} currency={acc.fxCode} decimals="ifAny" />
           </Typography>
-        </Box>
+        </div>
         <div
           style={{
             width: '100%',

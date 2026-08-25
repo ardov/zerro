@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
 import EditOutlined from '@mui/icons-material/EditOutlined'
 import {
-  Box,
   Chip,
   Divider,
   IconButton,
@@ -125,14 +124,9 @@ const Actions: FC<ActionsProps> = ({
         }}
         open={editModalVisible}
       />
-      <Box
+      <div
         style={{ transform: 'translateX(-50%)' }}
-        sx={{
-          position: 'absolute',
-          left: '50%',
-          bottom: 16,
-          zIndex: 1000,
-        }}
+        className="absolute bottom-4 left-1/2 z-[1000]"
       >
         <CSSTransition
           nodeRef={actionsRef}
@@ -142,16 +136,9 @@ const Actions: FC<ActionsProps> = ({
           timeout={200}
           classNames="actions-transition"
         >
-          <Box
+          <div
             ref={actionsRef}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              paddingLeft: 1,
-              bgcolor: 'info.main',
-              boxShadow: '4',
-              borderRadius: '60px',
-            }}
+            className="flex items-center rounded-[60px] bg-info pl-2 shadow-md"
           >
             <Chip
               label={t('selected', { count: ids.length })}
@@ -286,9 +273,9 @@ const Actions: FC<ActionsProps> = ({
                 </MenuItem>
               )}
 
-              <Box sx={{ my: 1 }}>
+              <div className="my-2">
                 <Divider />
-              </Box>
+              </div>
 
               <MenuItem onClick={handleCheckAll}>
                 <ListItemIcon>
@@ -297,9 +284,9 @@ const Actions: FC<ActionsProps> = ({
                 <ListItemText primary={t('selectAll')} />
               </MenuItem>
             </Menu>
-          </Box>
+          </div>
         </CSSTransition>
-      </Box>
+      </div>
     </>
   )
 }

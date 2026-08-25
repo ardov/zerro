@@ -1,7 +1,7 @@
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Paper, Card, Typography, Box, Divider } from '@mui/material'
+import { Paper, Card, Typography, Divider } from '@mui/material'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -57,12 +57,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
 
   return (
     <Paper>
-      <Box
-        sx={{
-          p: 2,
-          minWidth: '100%',
-        }}
-      >
+      <div className="min-w-full p-4">
         <Typography variant="h5">
           {t('incomesAndOutcomes')}{' '}
           <span
@@ -77,18 +72,12 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
           </span>{' '}
           <Summary income={income} outcome={outcome} />
         </Typography>
-        <Typography
-          variant="body1"
-          sx={{
-            color: 'text.secondary',
-            mt: 1,
-          }}
-        >
+        <Typography variant="body1" className="mt-2 text-muted-foreground">
           {t(savingsRate >= 0 ? 'savingsRatePositive' : 'savingsRateNegative', {
             percent: formatSavingsRate(savingsRate),
           })}
         </Typography>
-      </Box>
+      </div>
       <ResponsiveContainer height={300}>
         <AreaChart data={points}>
           <defs>
@@ -166,7 +155,7 @@ const CustomTooltip = (props: any) => {
   const savingsRate = income > 0 ? (diff / income) * 100 : 0
 
   return (
-    <Card elevation={10} sx={{ p: 2 }}>
+    <Card className="p-4 shadow-lg">
       <Typography variant="h6">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
       </Typography>
@@ -216,18 +205,14 @@ function Summary(props: { income: number; outcome: number }) {
   const netIncome = income - outcome
 
   const tooltip = (
-    <Box
-      sx={{
-        p: 1,
-      }}
-    >
+    <div className="p-2">
       <Typography variant="body2" gutterBottom>
         {t('income')}: <DisplayAmount value={income} />
       </Typography>
       <Typography variant="body2">
         {t('outcome')}: <DisplayAmount value={outcome} />
       </Typography>
-    </Box>
+    </div>
   )
 
   return (

@@ -1,7 +1,8 @@
 import type { core } from 'zerro-core/redux'
 import type { FC } from 'react'
+import type { CSSProperties } from 'react'
 import { memo, useCallback } from 'react'
-import { Box, Drawer } from '@mui/material'
+import { Drawer } from '@mui/material'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
 import { registerPopover } from '6-shared/historyPopovers'
@@ -52,7 +53,12 @@ const MemoSideDrawer = memo<TSideContentProps>(props => {
 
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
-      <Box sx={{ width: { xs: '100vw', sm: width } }}>{drawerContent}</Box>
+      <div
+        className="w-screen sm:w-[var(--side-content-width)]"
+        style={{ '--side-content-width': `${width}px` } as CSSProperties}
+      >
+        {drawerContent}
+      </div>
     </Drawer>
   )
 })
