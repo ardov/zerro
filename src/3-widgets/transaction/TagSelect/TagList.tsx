@@ -1,24 +1,21 @@
 import type { FC } from 'react'
-import type { BoxProps } from '@mui/material'
-import { Box, IconButton } from '@mui/material'
+import type { HTMLAttributes } from 'react'
+import { IconButton } from '@mui/material'
+import clsx from 'clsx'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { AddIcon } from '6-shared/ui/Icons'
-import type { Modify } from '6-shared/types'
 import { TagSelect2 } from './TagSelect2'
 import { TagChip } from './TagChip'
 import { useTranslation } from 'react-i18next'
 
-type TagListProps = Modify<
-  BoxProps,
-  {
-    tags: string[] | null
-    onChange: (tags: string[]) => void
-    tagType: 'income' | 'outcome' | null
-  }
->
+type TagListProps = Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> & {
+  tags: string[] | null
+  onChange: (tags: string[]) => void
+  tagType: 'income' | 'outcome' | null
+}
 export const TagList: FC<TagListProps> = props => {
   const { t } = useTranslation()
-  const { tags = null, onChange, tagType, ...rest } = props
+  const { tags = null, onChange, tagType, className, ...rest } = props
   const removeTag = (removeId: string) =>
     tags && onChange(tags.filter(id => id !== removeId))
   const replaceTag = (oldId: string, newId: string) =>
@@ -26,7 +23,7 @@ export const TagList: FC<TagListProps> = props => {
   const addTag = (id: string) => onChange(tags ? [...tags, id] : [id])
 
   return (
-    <Box {...rest}>
+    <div className={clsx(className)} {...rest}>
       {tags?.map(id => (
         <TagSelect2
           key={id}
@@ -56,6 +53,6 @@ export const TagList: FC<TagListProps> = props => {
           </span>
         }
       />
-    </Box>
+    </div>
   )
 }

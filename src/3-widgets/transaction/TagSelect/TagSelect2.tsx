@@ -174,11 +174,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
       onClose={onClose}
       {...popoverProps}
     >
-      <Paper
-        square
-        elevation={0}
-        sx={{ pt: 1, px: 1, position: 'sticky', top: 0, zIndex: 10 }}
-      >
+      <Paper square elevation={0} className="sticky top-0 z-10 px-2 pt-2">
         <TextField
           value={search}
           onChange={e => setSearch(e.target.value)}

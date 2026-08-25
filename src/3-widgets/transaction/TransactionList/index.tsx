@@ -225,7 +225,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           onCheckAll={checkAll}
         />
 
-        <Box sx={{ flex: '1 1 auto' }}>
+        <div className="grow">
           {groups.length ? (
             <GrouppedList
               {...{
@@ -239,7 +239,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           ) : (
             <EmptyState />
           )}
-        </Box>
+        </div>
       </Box>
     </>
   )

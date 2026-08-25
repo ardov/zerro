@@ -94,7 +94,7 @@ function HistoryRowItem({
   if (row.type === 'redo') {
     return (
       <ListItemText
-        sx={{ px: 2, py: 0.5, opacity: 0.5 }}
+        className="px-4 py-1 opacity-50"
         primary={commandTitle(row.command, t)}
         secondary={t('undoneHint')}
         slotProps={{

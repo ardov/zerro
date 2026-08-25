@@ -1,8 +1,8 @@
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { BoxProps } from '@mui/material'
 import { Paper, Typography, Collapse, Link } from '@mui/material'
+import clsx from 'clsx'
 import { QRCodeSVG as QRCode } from 'qrcode.react'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatMoney } from '6-shared/helpers/money'
@@ -11,10 +11,10 @@ import { parseReceipt } from '6-shared/helpers/receipt'
 
 interface RecieptProps {
   value?: string | null
-  sx?: BoxProps['sx']
+  className?: string
 }
 
-export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
+export const Reciept: FC<RecieptProps> = ({ value, className }) => {
   const { t } = useTranslation('reciept')
   const [showMore, setShowMore] = useState(false)
   const theme = useAppTheme()
@@ -56,7 +56,7 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
   )
 
   return (
-    <Paper sx={{ p: 2, display: 'flex', ...sx }}>
+    <Paper className={clsx('flex p-4', className)}>
       <div className="flex flex-col">{parsedContent}</div>
       <div className="ml-auto">
         <QRCode

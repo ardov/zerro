@@ -193,7 +193,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           tags={localTag}
           onChange={setLocalTag}
           tagType={trType}
-          sx={{ px: 3, py: 2, bgcolor: 'background.default' }}
+          className="bg-background px-6 py-4"
         />
       )}
       <div className="flex flex-col gap-8 p-6">

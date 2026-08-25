@@ -46,7 +46,7 @@ export const JournalRecoveryNotice = () => {
           <Typography
             component="div"
             variant="caption"
-            sx={{ mt: 1, fontFamily: 'monospace', wordBreak: 'break-word' }}
+            className="mt-2 break-words font-mono"
           >
             {t('journalRecoveryDiagnostic')}: {recoveryReason}
           </Typography>
