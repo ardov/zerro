@@ -6,7 +6,6 @@ import RefreshButton from '3-widgets/RefreshButton'
 import { MenuButton } from './MenuButton'
 import type { DrawerProps } from '@mui/material'
 import {
-  Box,
   Drawer,
   Divider,
   List,
@@ -34,90 +33,33 @@ export default function NavigationDrawer(props: DrawerProps) {
 
   return (
     <Drawer {...props}>
-      <Box
-        sx={{
-          display: 'flex',
-          position: 'relative',
-          flexDirection: 'column',
-          alignItems: 'center',
-          height: '100%',
-        }}
-      >
-        <Box
-          sx={{
-            width: '100%',
-            px: 1,
-            pt: 2,
-          }}
-        >
+      <div className="relative flex h-full flex-col items-center">
+        <div className="w-full px-2 pt-4">
           <Links />
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            width: '100%',
-            py: 3,
-          }}
-        >
+        <div className="w-full py-6">
           <Divider />
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            width: '100%',
-            px: 1,
-          }}
-        >
+        <div className="w-full px-2">
           <AccountList />
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            width: '100%',
-            px: 1,
-          }}
-        >
+        <div className="w-full px-2">
           <DebtorList />
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            height: 64,
-            width: '100%',
-            flexShrink: 0,
-          }}
-        />
+        <div className="h-16 w-full shrink-0" />
 
-        <Box
-          sx={{
-            bgcolor: 'background.paper',
-            width: '100%',
-            pt: 1,
-            pb: 2,
-            px: 3,
-            mt: 'auto',
-            position: 'sticky',
-            bottom: '0',
-            left: '0',
-            right: '0',
-            zIndex: '5',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            flexDirection: 'row',
-          }}
-        >
+        <div className="sticky inset-x-0 bottom-0 z-[5] mt-auto flex w-full shrink-0 flex-row items-center bg-card px-6 pb-4 pt-2">
           <Logo fill={theme.palette.primary.main} width="100" />
-          <Box
-            sx={{
-              ml: 'auto',
-            }}
-          >
+          <div className="ml-auto">
             <RefreshButton />
             <MenuButton edge="end" />
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
     </Drawer>
   )
 }

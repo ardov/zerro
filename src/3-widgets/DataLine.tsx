@@ -43,22 +43,14 @@ export const DataLine: FC<DataLineProps> = ({
         ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx]),
       ]}
     >
-      <Box
-        sx={{
-          flexGrow: 1,
-          mr: 1,
-          minWidth: 0,
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
+      <div className="mr-2 flex min-w-0 grow items-center">
         {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
         <Tooltip title={tooltip}>
           <Typography noWrap variant={variant}>
             {name}
           </Typography>
         </Tooltip>
-      </Box>
+      </div>
       {amount !== undefined && (
         <Typography variant={variant}>
           <SmartAmount
@@ -95,23 +87,12 @@ export const OneLiner: FC<{
   right: React.ReactNode
 }> = ({ left, right }) => {
   return (
-    <Box sx={{ typography: 'body1', display: 'flex', width: '100%' }}>
-      <Box
-        sx={{
-          flexGrow: 1,
-          minWidth: 0,
-          position: 'relative',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          maskImage: 'linear-gradient(to left, transparent, black 40px)',
-        }}
-      >
+    <div className="flex w-full text-base">
+      <div className="relative min-w-0 grow overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_left,transparent,black_40px)]">
         {left}
-      </Box>
+      </div>
 
-      <Box component="span" sx={{ ml: 1, flexShrink: 0 }}>
-        {right}
-      </Box>
-    </Box>
+      <span className="ml-2 shrink-0">{right}</span>
+    </div>
   )
 }

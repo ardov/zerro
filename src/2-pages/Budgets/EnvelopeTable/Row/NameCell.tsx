@@ -3,7 +3,7 @@ import { memo, useCallback, useRef } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useDraggable } from '@dnd-kit/core'
-import { Typography, Box, IconButton, Chip } from '@mui/material'
+import { Typography, IconButton, Chip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { TagIcon } from '6-shared/ui/TagIcon'
@@ -41,36 +41,22 @@ export const NameCell: FC<{
   const floating = useFloatingInput(ref, updateName)
 
   return (
-    <Box
+    <div
       onClick={onClick}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        minWidth: 0,
-        pl: isChild ? 5 : 0,
-      }}
+      className={`flex min-w-0 items-center gap-2 ${isChild ? 'pl-10' : ''}`}
     >
       {/* <Collapse orientation="horizontal" in={isReordering} unmountOnExit>
         <EnvDraggable id={id} />
       </Collapse> */}
       {isReordering && (
         <EnvDraggable id={id}>
-          <IconButton size="small" sx={envDraggableSx}>
+          <IconButton size="small" className="-my-2 grid place-items-center">
             <DragIndicatorIcon />
           </IconButton>
         </EnvDraggable>
       )}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexShrink: 1,
-          minWidth: 0,
-          opacity: isDefaultVisible ? 1 : 0.5,
-        }}
+      <div
+        className={`flex min-w-0 shrink items-center justify-center ${isDefaultVisible ? 'opacity-100' : 'opacity-50'}`}
       >
         <TagIcon
           symbol={isSelf ? '–' : symbol}
@@ -93,7 +79,7 @@ export const NameCell: FC<{
         >
           {isSelf ? `${name} ${t('isSelf')}` : name}
         </Typography>
-      </Box>
+      </div>
       {displCurrency !== currency && <CurrencyTag currency={currency} />}
       {!!comment && (
         <Typography
@@ -101,25 +87,15 @@ export const NameCell: FC<{
           variant="body1"
           title={comment}
           noWrap
-          sx={{
-            color: 'text.disabled',
-            flexShrink: 1000000,
-            fontStyle: 'italic',
-          }}
+          className="shrink italic text-disabled-foreground"
         >
           {comment}
         </Typography>
       )}
       {floating.render()}
-    </Box>
+    </div>
   )
 })
-
-const envDraggableSx = {
-  my: -1,
-  display: 'grid',
-  placeItems: 'center',
-}
 
 const EnvDraggable: FC<{
   id: core.envelopes.TEnvelopeId

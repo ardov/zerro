@@ -53,7 +53,7 @@ export const MonthSelect: FC<BoxProps> = props => {
           </Typography>
         </ButtonBase>
 
-        <Box>
+        <div className="flex">
           <IconButton
             onClick={goPrevMonth}
             disabled={isFirst}
@@ -68,7 +68,7 @@ export const MonthSelect: FC<BoxProps> = props => {
           >
             <ChevronRightIcon />
           </IconButton>
-        </Box>
+        </div>
       </Box>
 
       <MonthSelectPopover

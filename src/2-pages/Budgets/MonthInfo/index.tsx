@@ -10,7 +10,6 @@ import {
   Button,
   IconButton,
   useMediaQuery,
-  Stack,
 } from '@mui/material'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -76,57 +75,31 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
       ]}
     >
       {isMobile && (
-        <Box
-          sx={{
-            py: 1,
-            px: 3,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <Box
-            sx={{
-              flexGrow: 1,
-            }}
-          >
+        <div className="flex items-center px-6 py-2">
+          <div className="grow">
             <Typography variant="h6" noWrap>
               {getMonthName(month)}
             </Typography>
-          </Box>
+          </div>
 
           <Tooltip title={t('close')}>
             <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
           </Tooltip>
-        </Box>
+        </div>
       )}
-      <Stack
-        sx={{
-          gap: 2,
-          p: 3,
-        }}
-      >
+      <div className="flex flex-col gap-4 p-6">
         <OverspendNotice month={month} />
 
         <BalanceWidget month={month} />
         <ActivityStats month={month} />
         <FxRates month={month} />
 
-        <Box
-          sx={{
-            p: 2,
-            bgcolor: 'background.default',
-            borderRadius: 1,
-          }}
-        >
-          <Box
-            sx={{
-              mb: 1,
-            }}
-          >
+        <div className="rounded-lg bg-background p-4">
+          <div className="mb-2">
             <Typography variant="body1" align="center">
               {t('actions')}
             </Typography>
-          </Box>
+          </div>
 
           <Button fullWidth color="secondary" onClick={copyAllBudgets}>
             {t('copyAllBudgets.trigger')}
@@ -146,8 +119,8 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
           <Button fullWidth color="secondary" onClick={startAgain}>
             {t('startAgain.trigger')}
           </Button>
-        </Box>
-      </Stack>
+        </div>
+      </div>
     </Box>
   )
 }

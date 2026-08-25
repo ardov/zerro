@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import { Typography, Box, Button } from '@mui/material'
+import { Typography, Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { ChevronDownIcon } from '6-shared/ui/Icons'
 import type { TISOMonth } from '6-shared/types'
@@ -26,9 +26,7 @@ const ColumnTitle: FC<{ name: string; onClick?: () => void }> = props => (
     align="right"
     onClick={props.onClick}
     noWrap
-    sx={{
-      color: 'text.secondary',
-    }}
+    className="text-muted-foreground"
   >
     {props.name}
   </Typography>
@@ -56,37 +54,15 @@ export const Header: FC<HeaderProps> = props => {
 
   return (
     <>
-      <Box
-        sx={{
-          borderTopLeftRadius: 8,
-          borderTopRightRadius: 8,
-          position: 'sticky',
-          top: 0,
-          borderBottom: `1px solid black`,
-          borderColor: 'divider',
-          bgcolor: 'background.paper',
-          zIndex: 99,
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            p: 1,
-            gap: 2,
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            position: 'sticky',
-            top: 0,
-            zIndex: 9,
-          }}
-        >
+      <div className="sticky top-0 z-[99] rounded-t-lg border-b border-border bg-card">
+        <div className="sticky top-0 z-[9] flex flex-wrap justify-between gap-4 p-2">
           <MonthSelect />
 
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <div className="flex gap-4">
             {!isSmall && <GoalsProgress month={month} />}
             <ToBeAssigned onClick={onOpenOverview} />
-          </Box>
-        </Box>
+          </div>
+        </div>
 
         <TableRow
           name={
@@ -94,14 +70,12 @@ export const Header: FC<HeaderProps> = props => {
               <Button
                 size="small"
                 onClick={openOnClick}
-                sx={{ ml: -1, px: 1, py: 0 }}
+                className="-ml-2 px-2 py-0"
               >
                 <Typography
                   variant="overline"
                   noWrap
-                  sx={{
-                    color: 'text.secondary',
-                  }}
+                  className="text-muted-foreground"
                 >
                   {t('categories', {
                     ns: 'budgets',
@@ -117,7 +91,7 @@ export const Header: FC<HeaderProps> = props => {
           available={<ColumnTitle name={t('available')} onClick={nextColumn} />}
           goal={null}
         />
-      </Box>
+      </div>
       <TableMenu />
     </>
   )

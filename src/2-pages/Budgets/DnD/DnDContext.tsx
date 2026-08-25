@@ -14,8 +14,6 @@ import {
   KeyboardSensor,
 } from '@dnd-kit/core'
 import { useTranslation } from 'react-i18next'
-import type { SxProps } from '@mui/system'
-import { Box } from '@mui/system'
 import { Typography } from '@mui/material'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { useAppDispatch, useAppSelector } from 'store/index'
@@ -97,19 +95,6 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   )
 }
 
-const props: SxProps = {
-  position: 'absolute',
-  display: 'flex',
-  bgcolor: 'background.default',
-  py: 0.5,
-  px: 2,
-  borderRadius: 1,
-  width: 'auto',
-  cursor: 'grabbing',
-  userSelect: 'none',
-  transform: 'scale(1.3)',
-}
-
 let moniesRenderCount = 0
 const Monies = () => {
   const { t } = useTranslation('common')
@@ -117,9 +102,9 @@ const Monies = () => {
     moniesRenderCount = (moniesRenderCount + 1) % 7
   }, [])
   return (
-    <Box sx={props}>
+    <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-background px-4 py-1">
       {t('moneyDnd', { context: String(moniesRenderCount) })}
-    </Box>
+    </div>
   )
 }
 
@@ -142,11 +127,11 @@ const DragObj = () => {
     activeType === DragTypes.amount ? (
       <Monies />
     ) : activeType === DragTypes.envelope ? (
-      <Box sx={props}>
+      <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-background px-4 py-1">
         <Typography noWrap>
           {activeId ? envelopes[activeId].name : t('category')}
         </Typography>
-      </Box>
+      </div>
     ) : null
 
   return createPortal(<DragOverlay>{content}</DragOverlay>, document.body)
