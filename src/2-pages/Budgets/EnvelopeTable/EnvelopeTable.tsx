@@ -1,6 +1,7 @@
 import type { FC } from 'react'
 import { memo, useCallback } from 'react'
 import { shallowEqual } from 'react-redux'
+import clsx from 'clsx'
 import { deepEqual } from '6-shared/helpers/deepEqual'
 import { Paper } from '@mui/material'
 import type { TISOMonth } from '6-shared/types'
@@ -147,7 +148,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     })
 
   return (
-    <Paper className={className} sx={{ position: 'relative', pb: 1 }}>
+    <Paper className={clsx('relative pb-2', className)}>
       <Header
         month={month}
         isAllShown={showAll}

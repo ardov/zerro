@@ -45,7 +45,7 @@ export const MobileNavigation: FC = () => {
         zIndex: 5,
       }}
     >
-      <Divider sx={{ opacity: '0.6' }} />
+      <Divider className="opacity-60" />
       <BottomNavigation
         value={currentRoute?.path}
         onChange={(e, newValue) => {

@@ -168,7 +168,7 @@ const CustomTooltip = (props: any) => {
           currency={currency}
         />
       ))}
-      <Divider sx={{ my: 1 }} />
+      <Divider className="my-2" />
       <DataLine
         color="transparent"
         name={t(diff < 0 ? 'netOutcome' : 'netIncome')}

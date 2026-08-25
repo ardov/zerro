@@ -30,7 +30,7 @@ export function TagSelect(props: TagSelectProps) {
   }
 
   return (
-    <FormControl sx={{ width: 300 }}>
+    <FormControl className="w-[300px]">
       <InputLabel>{label}</InputLabel>
       <Select
         multiple

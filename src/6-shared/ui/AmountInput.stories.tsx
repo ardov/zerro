@@ -21,7 +21,7 @@ function ControlledInput(props: { signButtons?: boolean | 'auto' }) {
       signButtons={props.signButtons}
       onChange={setValue}
       onEnter={setValue}
-      sx={{ width: 280 }}
+      className="w-[280px]"
     />
   )
 }

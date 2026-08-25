@@ -101,13 +101,13 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
           <ListItemText>{t('advancedSettings')}</ListItemText>
         </MenuItem>
       )}
-      <Divider sx={{ opacity: '0.6' }} />
+      <Divider className="opacity-60" />
       <ListSubheader>{t('data')}</ListSubheader>
       <HistoryItem onClose={props.onClose} />
       <ExportCsvItem />
       <ExportJsonItem />
       <ImportBackupItem />
-      <Divider sx={{ opacity: '0.6' }} />
+      <Divider className="opacity-60" />
       <LangItem onClose={props.onClose} />
       <LogOutItem onClose={props.onClose} />
       <VersionItem onClose={props.onClose} />
@@ -264,7 +264,7 @@ function NavItems({ onClose }: ItemProps) {
         </ListItemIcon>
         <ListItemText>{t('donate')}</ListItemText>
       </MenuItem>
-      <Divider sx={{ opacity: '0.6' }} />
+      <Divider className="opacity-60" />
     </>
   )
 }
@@ -363,7 +363,7 @@ function BudgetSettingsItem() {
           <AutoAwesomeIcon />
         </ListItemIcon>
         <ListItemText
-          sx={{ whiteSpace: 'normal' }}
+          className="whitespace-normal"
           primary={t('useZmBudgets')}
           secondary={t('useZmBudgetsDescription')}
         />
@@ -376,7 +376,7 @@ function BudgetSettingsItem() {
             <AutoAwesomeIcon />
           </ListItemIcon>
           <ListItemText
-            sx={{ whiteSpace: 'normal' }}
+            className="whitespace-normal"
             primary={t('convertBudgetsFromZm')}
           />
         </MenuItem>
@@ -414,7 +414,7 @@ function VersionItem({ onClose }: ItemProps) {
     >
       <ListItemIcon />
       <ListItemText>
-        <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+        <Typography variant="overline" className="text-muted-foreground">
           {t('version', { version: appVersion })}
         </Typography>
       </ListItemText>

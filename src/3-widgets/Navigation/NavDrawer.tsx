@@ -106,7 +106,7 @@ const NavigationLink: FC<{
   const match = useMatch({ path, end: false })
   return (
     <ListItemButton
-      sx={{ borderRadius: 1 }}
+      className="rounded"
       selected={!!match}
       component={Link}
       to={path}

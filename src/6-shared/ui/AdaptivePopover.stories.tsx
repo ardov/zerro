@@ -29,7 +29,7 @@ function PopoverHarness() {
         anchor="bottom"
         onClose={() => setAnchorEl(null)}
       >
-        <Paper sx={{ p: 3, minWidth: 280 }}>
+        <Paper className="min-w-[280px] p-6">
           <Typography variant="h6">Responsive popover</Typography>
           <Typography color="text.secondary">
             Popover on desktop, swipeable drawer on mobile.
