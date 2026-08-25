@@ -3,28 +3,11 @@ import type { ById } from '6-shared/types'
 import { useCallback, useRef, useState } from 'react'
 import type { DragEndEvent, DragMoveEvent } from '@dnd-kit/core'
 import { useDndMonitor } from '@dnd-kit/core'
-import type { SxProps } from '@mui/system'
-import { Box } from '@mui/system'
 import { useAppDispatch, useAppSelector } from 'store/index'
 import { core } from 'zerro-core/redux'
 
 import { moveEnvelope } from '4-features/envelope/moveEnvelope'
 import { DragTypes } from './dragTypes'
-
-const style: SxProps = {
-  border: '1px solid red',
-  borderColor: 'primary.main',
-  transition: '0.1s ease-in-out',
-  borderRadius: 1,
-  position: 'fixed',
-  display: 'none',
-  top: 0,
-  left: 0,
-  height: 2,
-  width: 100,
-  zIndex: 100,
-  willChange: 'transform width height',
-}
 
 const OFFSET = 100
 
@@ -110,7 +93,12 @@ export function Highlight() {
     onDragCancel,
   })
 
-  return isDragging ? <Box ref={boxRef} sx={style} /> : null
+  return isDragging ? (
+    <div
+      ref={boxRef}
+      className="fixed left-0 top-0 z-[100] hidden h-2 w-[100px] rounded-lg border border-primary transition-[transform,width,height] duration-100 ease-in-out will-change-[transform,width,height]"
+    />
+  ) : null
 }
 
 function whatsHappening(
