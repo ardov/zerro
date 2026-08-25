@@ -1,4 +1,4 @@
-import { Divider, Paper, Typography } from '@mui/material'
+import { Divider, Typography } from '@mui/material'
 import { core } from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
@@ -32,7 +32,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
   const smartAssignedInFuture = toBeAssigned < 0 ? 0 : assignedInFuture
 
   return (
-    <Paper elevation={0} className="flex flex-col gap-3 bg-background p-4">
+    <div className="flex flex-col gap-3 rounded-lg bg-background p-4">
       <Total
         title={t('inBalance')}
         value={fundsEnd}
@@ -73,7 +73,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
       >
         <Balancer>{getExplaining(fundsEnd, toBeAssigned, overspend)}</Balancer>
       </Typography>
-    </Paper>
+    </div>
   )
 
   function getExplaining(

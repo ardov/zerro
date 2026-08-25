@@ -69,7 +69,7 @@ export function TagIcon(props: TagIconProps) {
       {isSvg ? (
         <span
           className={clsx(
-            'bg-current transition-opacity duration-200',
+            'shrink-0 bg-current transition-opacity duration-200',
             size === 's' ? 'size-5' : 'size-6',
             contentIsHidden ? 'opacity-0' : 'opacity-100',
             isInteractive ? 'group-hover:opacity-0' : 'group-hover:opacity-100'
@@ -89,7 +89,7 @@ export function TagIcon(props: TagIconProps) {
       ) : (
         <span
           className={clsx(
-            'transition-opacity duration-200',
+            'shrink-0 transition-opacity duration-200',
             size === 's' ? 'text-base' : 'text-2xl',
             contentIsHidden ? 'opacity-0' : 'opacity-100',
             isInteractive ? 'group-hover:opacity-0' : 'group-hover:opacity-100'
@@ -101,7 +101,7 @@ export function TagIcon(props: TagIconProps) {
       {onChange && (
         <Checkbox
           className={clsx(
-            'absolute transition-opacity duration-200',
+            '!absolute transition-opacity duration-200',
             showCheckBox || checked ? 'opacity-100' : 'opacity-0',
             isInteractive ? 'group-hover:opacity-100' : 'group-hover:opacity-0',
             checkboxClassName

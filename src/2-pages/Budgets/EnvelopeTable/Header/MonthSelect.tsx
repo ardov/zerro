@@ -43,7 +43,7 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
   return (
     <>
       <div ref={paperRef} className="flex" {...props}>
-        <ButtonBase className="rounded-lg py-2 pl-2" onClick={openPopover}>
+        <ButtonBase className="!rounded-lg py-2 pl-2" onClick={openPopover}>
           <Typography variant="body1" noWrap>
             <b>{getMonthName(month)}</b> {getYear(month)}
           </Typography>

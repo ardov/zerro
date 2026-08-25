@@ -9,7 +9,7 @@ export function useIsSmall() {
 }
 
 const rowClassName =
-  'grid w-full grid-cols-[auto_90px_16px] items-center justify-start gap-x-3 px-4 sm:grid-cols-[auto_90px_90px_90px_16px]'
+  'grid w-full grid-cols-[minmax(0,1fr)_90px_16px] items-center justify-start gap-x-3 px-4 sm:grid-cols-[minmax(0,1fr)_90px_90px_90px_16px]'
 
 export const TableRow: FC<
   HTMLAttributes<HTMLDivElement> & {
