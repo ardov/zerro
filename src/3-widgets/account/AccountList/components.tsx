@@ -1,9 +1,10 @@
 import type { FC, ReactNode } from 'react'
 import { useCallback } from 'react'
+import clsx from 'clsx'
 import { core } from 'zerro-core/redux'
 
 import type { ListItemButtonProps, ListSubheaderProps } from '@mui/material'
-import { ListSubheader, Box, Typography, ListItemButton } from '@mui/material'
+import { ListSubheader, Typography, ListItemButton } from '@mui/material'
 import { toISOMonth } from '6-shared/helpers/date'
 import { Amount } from '6-shared/ui/Amount'
 import type { TFxAmount } from '6-shared/types'
@@ -46,28 +47,21 @@ export const Account: FC<
       {...rest}
       {...propsToPass}
     >
-      <Box
-        sx={{
-          textDecoration: account.archive ? 'line-through' : 'none',
-          flexGrow: 1,
-          minWidth: 0,
-          position: 'relative',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          maskImage: 'linear-gradient(to left, transparent, black 40px)',
-        }}
+      <div
+        className={clsx(
+          'relative min-w-0 grow overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_left,transparent,black_40px)]',
+          account.archive && 'line-through'
+        )}
         title={account.title}
       >
         {account.title}
-      </Box>
+      </div>
 
-      <Box
-        component="span"
-        sx={{
-          ml: 1,
-          flexShrink: 0,
-          color: account.balance < 0 ? 'error.main' : 'text.secondary',
-        }}
+      <span
+        className={clsx(
+          'ml-2 shrink-0',
+          account.balance < 0 ? 'text-error' : 'text-muted-foreground'
+        )}
       >
         <Tooltip
           title={
@@ -85,7 +79,7 @@ export const Account: FC<
             />
           </div>
         </Tooltip>
-      </Box>
+      </span>
     </ListItemButton>
   )
 }
@@ -101,27 +95,16 @@ export const Subheader: FC<
   const isNegative = toDisplay(amount) < 0
   return (
     <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
-      <Box
-        component="span"
-        sx={{
-          display: 'flex',
-          width: '100%',
-        }}
-      >
-        <Typography
-          component="span"
-          noWrap
-          sx={{ flexGrow: 1, lineHeight: 'inherit' }}
-        >
+      <span className="flex w-full">
+        <Typography component="span" noWrap className="grow leading-[inherit]">
           <b>{name}</b>
         </Typography>
 
-        <Box
-          component="span"
-          sx={{
-            ml: 2,
-            color: isNegative ? 'error.main' : 'text.secondary',
-          }}
+        <span
+          className={clsx(
+            'ml-4',
+            isNegative ? 'text-error' : 'text-muted-foreground'
+          )}
         >
           <b>
             <DisplayAmount
@@ -131,8 +114,8 @@ export const Subheader: FC<
               noShade
             />
           </b>
-        </Box>
-      </Box>
+        </span>
+      </span>
     </ListSubheader>
   )
 }

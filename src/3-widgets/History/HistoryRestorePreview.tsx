@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Button, Stack, Typography } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
 import { useAppSelector } from 'store'
 import {
@@ -52,22 +52,13 @@ export function HistoryRestorePreview() {
   })
 
   return (
-    <Box
-      sx={{
-        px: 2,
-        py: 1.5,
-        bgcolor: 'action.hover',
-        borderTop: '1px solid',
-        borderColor: 'divider',
-        flexShrink: 0,
-      }}
-    >
+    <div className="shrink-0 border-t border-border bg-accent px-4 py-3">
       <Typography variant="overline" color="text.secondary">
         {tHistory('restoreWouldChange')}
       </Typography>
       {/* Its own scroll: with every entity type present the list would
           otherwise push the button it belongs to off the panel. */}
-      <Box sx={{ maxHeight: 160, overflowY: 'auto' }}>
+      <div className="max-h-40 overflow-y-auto">
         {missing ? (
           <Typography variant="body2" color="text.secondary">
             {tHistory('pointUnavailable')}
@@ -81,16 +72,9 @@ export function HistoryRestorePreview() {
             {tHistory('restoreNoChanges')}
           </Typography>
         ) : (
-          <Stack spacing={0.25} sx={{ mt: 0.5 }}>
+          <div className="mt-1 flex flex-col gap-[2px]">
             {rows.map(row => (
-              <Box
-                key={row.key}
-                sx={{
-                  display: 'flex',
-                  gap: 2,
-                  justifyContent: 'space-between',
-                }}
-              >
+              <div key={row.key} className="flex justify-between gap-4">
                 <Typography variant="body2" noWrap>
                   {row.label}
                 </Typography>
@@ -98,25 +82,25 @@ export function HistoryRestorePreview() {
                   variant="body2"
                   color="text.secondary"
                   noWrap
-                  sx={{ flexShrink: 0 }}
+                  className="shrink-0"
                 >
                   {row.parts}
                 </Typography>
-              </Box>
+              </div>
             ))}
-          </Stack>
+          </div>
         )}
-      </Box>
+      </div>
       <Button
         fullWidth
         size="small"
         variant="contained"
         disabled={!canRestore}
         onClick={restore}
-        sx={{ mt: 1.5 }}
+        className="mt-3"
       >
         {tHistory('restorePoint')}
       </Button>
-    </Box>
+    </div>
   )
 }

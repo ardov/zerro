@@ -2,7 +2,6 @@ import type { ChangeEvent } from 'react'
 import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
@@ -12,7 +11,6 @@ import {
   ListItemIcon,
   ListItemText,
   MenuItem,
-  Stack,
   Typography,
 } from '@mui/material'
 import { UploadIcon } from '6-shared/ui/Icons'
@@ -142,19 +140,12 @@ export function ImportBackupItem() {
         <DialogTitle>{t('importTitle')}</DialogTitle>
         <DialogContent>
           <DialogContentText>{t('importWarning')}</DialogContentText>
-          <Stack spacing={0.5} sx={{ mt: 2 }}>
+          <div className="mt-4 flex flex-col gap-1">
             {entityLabelKeys.map(([key, labelKey]) => {
               const counts = byLabelKey(pending?.summary)[key]
               if (!counts) return null
               return (
-                <Box
-                  key={key}
-                  sx={{
-                    display: 'flex',
-                    gap: 2,
-                    justifyContent: 'space-between',
-                  }}
-                >
+                <div key={key} className="flex justify-between gap-4">
                   <Typography variant="body2">{t(labelKey)}</Typography>
                   <Typography variant="body2" color="text.secondary">
                     {[
@@ -168,10 +159,10 @@ export function ImportBackupItem() {
                       .filter(Boolean)
                       .join(' · ')}
                   </Typography>
-                </Box>
+                </div>
               )
             })}
-          </Stack>
+          </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPending(null)}>{t('importCancel')}</Button>

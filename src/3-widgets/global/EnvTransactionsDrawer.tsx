@@ -1,7 +1,7 @@
 import type { TISOMonth } from '6-shared/types'
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Drawer, Box, Typography, IconButton } from '@mui/material'
+import { Drawer, Typography, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
@@ -90,36 +90,18 @@ export const SmartEnvTransactionsDrawer = () => {
       sx={contentSx}
       keepMounted={false}
     >
-      <Box
-        sx={{
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          minWidth: 320,
-        }}
-      >
-        <Box
-          sx={{
-            py: 1,
-            px: 3,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <Box
-            sx={{
-              flexGrow: 1,
-            }}
-          >
+      <div className="flex h-screen min-w-80 flex-col">
+        <div className="flex items-center px-6 py-2">
+          <div className="grow">
             <Typography variant="h6" noWrap>
               {title || t('transactions')}
             </Typography>
-          </Box>
+          </div>
 
           <Tooltip title={t('close')}>
             <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
           </Tooltip>
-        </Box>
+        </div>
 
         <TransactionList
           initialQuery={initialQuery}
@@ -127,7 +109,7 @@ export const SmartEnvTransactionsDrawer = () => {
           onTrOpen={showTransaction}
           sx={{ flex: '1 1 auto' }}
         />
-      </Box>
+      </div>
     </Drawer>
   )
 }

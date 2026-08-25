@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
+import { InputAdornment, IconButton, Chip } from '@mui/material'
 import type { DialogProps } from '@mui/material/Dialog'
 import Dialog from '@mui/material/Dialog'
 import { AmountInput } from '6-shared/ui/AmountInput'
@@ -60,22 +60,14 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', p: 2 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 1,
-            mb: 2,
-          }}
-        >
+      <div className="flex flex-col p-4">
+        <div className="mb-4 flex items-center justify-center gap-2">
           <Chip label={sourceName} />
-          <Box sx={{ mx: 1, display: 'flex', alignItems: 'center' }}>
+          <span className="mx-2 flex items-center">
             <ArrowForwardIcon />
-          </Box>
+          </span>
           <Chip label={destinationName} />
-        </Box>
+        </div>
         <AmountInput
           value={amount}
           onChange={setAmount}
@@ -96,7 +88,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
             },
           }}
         />
-      </Box>
+      </div>
     </Dialog>
   )
 }

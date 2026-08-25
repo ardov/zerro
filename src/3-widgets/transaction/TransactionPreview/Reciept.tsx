@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { BoxProps } from '@mui/material'
-import { Box, Paper, Typography, Collapse, Link } from '@mui/material'
+import { Paper, Typography, Collapse, Link } from '@mui/material'
 import { QRCodeSVG as QRCode } from 'qrcode.react'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatMoney } from '6-shared/helpers/money'
@@ -30,7 +30,7 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
         value={formatDate(parsed.t, 'dd.MM.yyyy, HH:mm')}
       />
 
-      <Box sx={{ mt: 'auto' }}>
+      <div className="mt-auto">
         <Collapse in={!showMore} unmountOnExit>
           <Link
             component="button"
@@ -41,7 +41,7 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
             {t('showMore', { ns: 'common' })}
           </Link>
         </Collapse>
-      </Box>
+      </div>
 
       <Collapse in={showMore} unmountOnExit>
         <div>
@@ -57,26 +57,15 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
 
   return (
     <Paper sx={{ p: 2, display: 'flex', ...sx }}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        {parsedContent}
-      </Box>
-      <Box
-        sx={{
-          ml: 'auto',
-        }}
-      >
+      <div className="flex flex-col">{parsedContent}</div>
+      <div className="ml-auto">
         <QRCode
           value={value}
           bgColor={theme.palette.background.paper}
           fgColor={theme.palette.text.primary}
           includeMargin
         />
-      </Box>
+      </div>
     </Paper>
   )
 }
@@ -87,27 +76,12 @@ interface LineProps {
 }
 
 const Line: FC<LineProps> = ({ name, value }) => (
-  <Box
-    sx={{
-      mb: 1,
-    }}
-  >
-    <Typography
-      variant="caption"
-      sx={{
-        color: 'text.secondary',
-        display: 'block',
-      }}
-    >
+  <div className="mb-2">
+    <Typography variant="caption" className="block text-muted-foreground">
       {name}
     </Typography>
-    <Typography
-      variant="body1"
-      sx={{
-        display: 'block',
-      }}
-    >
+    <Typography variant="body1" className="block">
       {value}
     </Typography>
-  </Box>
+  </div>
 )

@@ -1,4 +1,4 @@
-import { Drawer, Box } from '@mui/material'
+import { Drawer } from '@mui/material'
 import { registerPopover } from '6-shared/historyPopovers'
 import type { TTransactionId } from '6-shared/types'
 import type { TransactionPreviewProps } from '../transaction/TransactionPreview'
@@ -28,21 +28,14 @@ export const SmartTransactionPreview = () => {
       sx={contentSx}
       keepMounted={false}
     >
-      <Box
-        sx={{
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          minWidth: 320,
-        }}
-      >
+      <div className="flex h-screen min-w-80 flex-col">
         <TransactionPreview
           id={id}
           onClose={onClose}
           onOpenOther={onOpenOther}
           onSelectSimilar={onSelectSimilar}
         />
-      </Box>
+      </div>
     </Drawer>
   )
 }
