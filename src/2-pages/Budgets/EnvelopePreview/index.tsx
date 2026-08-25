@@ -1,6 +1,6 @@
 import type { FC } from 'react'
 import { useCallback } from 'react'
-import { Box, Typography, IconButton, Grid, ButtonBase } from '@mui/material'
+import { Typography, IconButton, ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -43,68 +43,44 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const { currency } = envMetrics
 
   return (
-    <Box
-      sx={{
-        position: 'relative',
-      }}
-    >
+    <div className="relative">
       <Header envelope={env} onClose={onClose} />
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          px: 3,
-          pb: 5,
-          pt: 3,
-        }}
-      >
-        <Grid size={12}>
-          <CommentWidget key={id} id={id} />
-        </Grid>
+      <div className="grid gap-4 px-6 pb-10 pt-6">
+        <CommentWidget key={id} id={id} />
 
-        <Grid size={12}>
-          <ButtonBase
-            onClick={e => openGoalPopover(id, e.currentTarget)}
+        <ButtonBase
+          onClick={e => openGoalPopover(id, e.currentTarget)}
+          sx={{
+            ...cardStyle,
+            display: 'flex',
+            justifyContent: 'flex-start',
+            gap: 1,
+          }}
+        >
+          <EmojiFlagsIcon />
+          <Typography
+            variant="body1"
+            component="span"
+            color={goalInfo ? 'text.primary' : 'text.disabled'}
             sx={{
-              ...cardStyle,
-              display: 'flex',
-              justifyContent: 'flex-start',
-              gap: 1,
+              textAlign: 'left',
             }}
           >
-            <EmojiFlagsIcon />
-            <Typography
-              variant="body1"
-              component="span"
-              color={goalInfo ? 'text.primary' : 'text.disabled'}
-              sx={{
-                textAlign: 'left',
-              }}
-            >
-              {goalInfo
-                ? core.goals.formatGoal(goalInfo.goal, currency)
-                : t('goal')}
-            </Typography>
-          </ButtonBase>
-        </Grid>
+            {goalInfo
+              ? core.goals.formatGoal(goalInfo.goal, currency)
+              : t('goal')}
+          </Typography>
+        </ButtonBase>
 
-        <Grid size={12}>
-          <EnvelopeInfo month={month} id={id} />
-        </Grid>
+        <EnvelopeInfo month={month} id={id} />
 
-        <Grid size={12}>
-          <BurndownWidget id={id} />
-        </Grid>
+        <BurndownWidget id={id} />
 
-        <Grid size={12}>
-          <ActivityWidget id={id} />
-        </Grid>
+        <ActivityWidget id={id} />
 
-        <Grid size={12}>
-          <StatisticWidget id={id} />
-        </Grid>
-      </Grid>
-    </Box>
+        <StatisticWidget id={id} />
+      </div>
+    </div>
   )
 }
 
@@ -125,26 +101,8 @@ const Header: FC<{
   )
   const openColorPicker = useColorPicker(color, handleColorChange)
   return (
-    <Box
-      sx={{
-        py: 1,
-        px: 3,
-        display: 'flex',
-        alignItems: 'center',
-        position: 'sticky',
-        bgcolor: 'background.paper',
-        zIndex: 5,
-        top: 0,
-      }}
-    >
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: 'flex',
-          minWidth: 0,
-          alignItems: 'center',
-        }}
-      >
+    <header className="sticky top-0 z-[5] flex items-center bg-card px-6 py-2">
+      <div className="flex min-w-0 grow items-center">
         <TagIcon
           size="m"
           symbol={symbol}
@@ -156,7 +114,7 @@ const Header: FC<{
         <Typography variant="h6" component="span" noWrap>
           {name}
         </Typography>
-      </Box>
+      </div>
       <Tooltip title={t('edit')}>
         <IconButton
           onClick={() => openEditDialog({ envelope }, { key: envelope.id })}
@@ -168,6 +126,6 @@ const Header: FC<{
       </Tooltip>
       <ColorPicker />
       <EnvelopeEditDialog />
-    </Box>
+    </header>
   )
 }
