@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, IconButton, Stack, Typography } from '@mui/material'
+import { IconButton, Typography } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
@@ -38,13 +38,7 @@ export function OutcomeCard(props: TCardProps) {
   if (payee) additionalInfo.push(payee)
   return (
     <Card>
-      <Stack
-        spacing={1}
-        sx={{
-          my: 1,
-          alignItems: 'center',
-        }}
-      >
+      <div className="my-2 flex flex-col items-center gap-2">
         <Typography variant="body1" align="center">
           {t('purchaseOfTheYear', { number: i + 1 })}
         </Typography>
@@ -54,45 +48,23 @@ export function OutcomeCard(props: TCardProps) {
         <Typography
           variant="body1"
           align="center"
-          sx={{
-            color: 'text.secondary',
-          }}
+          className="text-muted-foreground"
         >
           {additionalInfo.join('  •  ')}
         </Typography>
         {comment && (
-          <Box
-            sx={{
-              py: 0.5,
-              px: 2,
-              mt: 1,
-              alignSelf: 'center',
-              bgcolor: 'background.default',
-              borderRadius: 1,
-            }}
-          >
+          <div className="mt-2 self-center rounded-lg bg-background px-4 py-1">
             <Typography
               variant="body1"
               align="center"
-              sx={{
-                color: 'text.secondary',
-              }}
+              className="text-muted-foreground"
             >
               {comment}
             </Typography>
-          </Box>
+          </div>
         )}
 
-        <Stack
-          spacing={1}
-          direction="row"
-          sx={{
-            alignItems: 'center',
-            opacity: 0.3,
-            transition: '200ms',
-            '&:hover': { opacity: 1 },
-          }}
-        >
+        <div className="flex flex-row items-center gap-2 opacity-30 transition-opacity duration-200 hover:opacity-100">
           <IconButton size="small" onClick={prev}>
             <ArrowBackIcon />
           </IconButton>
@@ -100,8 +72,8 @@ export function OutcomeCard(props: TCardProps) {
           <IconButton size="small" onClick={next}>
             <ArrowForwardIcon />
           </IconButton>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     </Card>
   )
 }

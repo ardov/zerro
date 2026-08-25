@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { Box, Typography, Chip, Stack } from '@mui/material'
+import { Typography, Chip } from '@mui/material'
 import { entries } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
 import { useAppSelector } from 'store'
@@ -52,12 +52,7 @@ export function IncomeCard(props: TCardProps) {
 
   return (
     <Card>
-      <Stack
-        spacing={1}
-        sx={{
-          alignItems: 'center',
-        }}
-      >
+      <div className="flex flex-col items-center gap-2">
         <Typography variant="body1" align="center">
           {t('youEarned')}
         </Typography>
@@ -67,29 +62,16 @@ export function IncomeCard(props: TCardProps) {
         <Typography
           variant="body2"
           align="center"
-          sx={{
-            color: 'text.secondary',
-          }}
+          className="text-muted-foreground"
         >
           <DisplayAmount value={monthlyIncome} noShade decimals="ifOnly" />{' '}
           {t('perMonth')}
         </Typography>
         <NotFunFact income={totalIncomeFx} />
-      </Stack>
-      <Box
-        sx={{
-          mt: 3,
-          textAlign: 'center',
-        }}
-      >
+      </div>
+      <div className="mt-6 text-center">
         {incomeTags.map(tagInfo => (
-          <Box
-            key={tagInfo.id}
-            sx={{
-              m: 0.5,
-              display: 'inline-block',
-            }}
-          >
+          <span key={tagInfo.id} className="m-1 inline-block">
             <Chip
               variant={checked.includes(tagInfo.id) ? 'filled' : 'outlined'}
               clickable
@@ -109,9 +91,9 @@ export function IncomeCard(props: TCardProps) {
                 </>
               }
             />
-          </Box>
+          </span>
         ))}
-      </Box>
+      </div>
     </Card>
   )
 }

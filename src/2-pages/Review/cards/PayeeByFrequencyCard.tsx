@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
+import { ButtonBase, IconButton, Typography } from '@mui/material'
 
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
@@ -40,16 +40,16 @@ export function PayeeByFrequencyCard(props: TCardProps) {
 
   return (
     <Card>
-      <Stack spacing={1} direction="column" sx={{ alignItems: 'center' }}>
+      <div className="flex flex-col items-center gap-2">
         <Typography variant="body1" align="center">
           {t('favouritePlace', { number: i + 1 })}
         </Typography>
 
         <ButtonBase
-          sx={{ borderRadius: 1, px: 1 }}
+          className="rounded-lg px-2"
           onClick={() => props.onShowTransactions(transactions)}
         >
-          <Stack spacing={1} direction="column" sx={{ alignItems: 'center' }}>
+          <div className="flex flex-col items-center gap-2">
             <Typography variant="h4" align="center" className="info-gradient">
               {payee}
             </Typography>
@@ -65,19 +65,10 @@ export function PayeeByFrequencyCard(props: TCardProps) {
               {t('andTotalSpend')}
               <DisplayAmount value={outcome} noShade decimals="ifAny" />
             </Typography>
-          </Stack>
+          </div>
         </ButtonBase>
 
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            alignItems: 'center',
-            opacity: 0.3,
-            transition: '200ms',
-            '&:hover': { opacity: 1 },
-          }}
-        >
+        <div className="flex flex-row items-center gap-2 opacity-30 transition-opacity duration-200 hover:opacity-100">
           <IconButton size="small" onClick={prev}>
             <ArrowBackIcon />
           </IconButton>
@@ -85,8 +76,8 @@ export function PayeeByFrequencyCard(props: TCardProps) {
           <IconButton size="small" onClick={next}>
             <ArrowForwardIcon />
           </IconButton>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     </Card>
   )
 }

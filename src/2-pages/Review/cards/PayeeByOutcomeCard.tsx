@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
+import { ButtonBase, IconButton, Typography } from '@mui/material'
 
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
@@ -40,12 +40,12 @@ export function PayeeByOutcomeCard(props: TCardProps) {
 
   return (
     <Card>
-      <Stack spacing={1} sx={{ alignItems: 'center' }}>
+      <div className="flex flex-col items-center gap-2">
         <ButtonBase
-          sx={{ borderRadius: 1, px: 1 }}
+          className="rounded-lg px-2"
           onClick={() => props.onShowTransactions(transactions)}
         >
-          <Stack spacing={1} sx={{ alignItems: 'center' }}>
+          <div className="flex flex-col items-center gap-2">
             <Typography variant="h4" align="center" className="red-gradient">
               {payee}
             </Typography>
@@ -54,19 +54,10 @@ export function PayeeByOutcomeCard(props: TCardProps) {
               <DisplayAmount value={outcome} noShade decimals="ifOnly" />
               {t(' purchase', { count })}
             </Typography>
-          </Stack>
+          </div>
         </ButtonBase>
 
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            alignItems: 'center',
-            opacity: 0.3,
-            transition: '200ms',
-            '&:hover': { opacity: 1 },
-          }}
-        >
+        <div className="flex flex-row items-center gap-2 opacity-30 transition-opacity duration-200 hover:opacity-100">
           <IconButton size="small" onClick={prev}>
             <ArrowBackIcon />
           </IconButton>
@@ -74,8 +65,8 @@ export function PayeeByOutcomeCard(props: TCardProps) {
           <IconButton size="small" onClick={next}>
             <ArrowForwardIcon />
           </IconButton>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     </Card>
   )
 }

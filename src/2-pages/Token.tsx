@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Button, Typography } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { getToken } from 'store/token'
 import { useAppSelector } from 'store'
@@ -14,24 +14,17 @@ export default function Token() {
       <title>{`${t('pageTitle')} | Zerro`}</title>
       <meta name="description" content={t('pageDescription')} />
       <link rel="canonical" href="https://zerro.app/token" />
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'inherit',
-        }}
-      >
-        <Box sx={{ p: 5, mx: 'auto', maxWidth: 500 }}>
-          <Typography variant="h4" sx={{ marginBottom: '16px' }}>
+      <div className="flex h-inherit items-center justify-center">
+        <div className="mx-auto max-w-[500px] p-10">
+          <Typography variant="h4" className="mb-4">
             {t('heading')}
           </Typography>
 
-          <Typography variant="body1" sx={{ marginBottom: '16px' }}>
+          <Typography variant="body1" className="mb-4">
             {t('body')}
           </Typography>
 
-          <Box sx={{ mt: 3 }}>
+          <div className="mt-6">
             <Button
               variant="contained"
               color="primary"
@@ -39,11 +32,11 @@ export default function Token() {
             >
               {t(tokenIsVisible ? 'btnHide' : 'btnShow')}
             </Button>
-          </Box>
+          </div>
 
           {tokenIsVisible ? <h3>{token}</h3> : null}
-        </Box>
-      </Box>
+        </div>
+      </div>
     </>
   )
 }

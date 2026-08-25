@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Button, Stack, Typography } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import './index.scss'
 import type { TTransaction } from '6-shared/types'
 
@@ -33,14 +33,8 @@ export default function Review() {
   return (
     <>
       <title>{`${t('pageTitle')} | Zerro`}</title>
-      <Box className="container">
-        <Stack
-          spacing={2}
-          sx={{
-            p: 3,
-            pb: 10,
-          }}
-        >
+      <div className="container">
+        <div className="flex flex-col gap-4 p-6 pb-20">
           <CardTitle year={year} />
           <IncomeCard year={year} onShowTransactions={showTransactions} />
           <SavingsCard year={year} onShowTransactions={showTransactions} />
@@ -60,8 +54,8 @@ export default function Review() {
           <Button onClick={() => setYear(y => y - 1)}>
             {t('whatWasInPreviousYear')}
           </Button>
-        </Stack>
-      </Box>
+        </div>
+      </div>
     </>
   )
 }
@@ -73,25 +67,18 @@ function CardTitle({ year }: { year: number }) {
       <Typography
         variant="body1"
         align="center"
-        className="results"
-        sx={{
-          color: 'text.secondary',
-        }}
+        className="results text-muted-foreground"
       >
         {t('yearReview')}
       </Typography>
-      <Box
-        sx={{
-          position: 'relative',
-        }}
-      >
+      <div className="relative">
         <Typography variant="h1" align="center" className="year">
           <b>{year}</b>
         </Typography>
         <Typography variant="h1" align="center" className="year shadow">
           <b>{year}</b>
         </Typography>
-      </Box>
+      </div>
     </Card>
   )
 }

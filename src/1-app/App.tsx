@@ -8,7 +8,7 @@ import {
   useLocation,
 } from 'react-router-dom'
 import type { Theme } from '@mui/material'
-import { Box, CircularProgress, Typography, useMediaQuery } from '@mui/material'
+import { CircularProgress, Typography, useMediaQuery } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import {
   initAnalytics,
@@ -121,29 +121,23 @@ const Layout: FC<{
 }> = props => {
   const { isLoggedIn, hasData, children } = props
   return (
-    <Box sx={{ display: 'flex' }}>
+    <div className="flex">
       {isLoggedIn && <Navigation />}
-      <Box
-        sx={{
-          minHeight: '100vh',
-          flexGrow: 1,
-          minWidth: 0,
-        }}
-      >
+      <div className="min-w-0 grow">
         {/* Inside the content column, not above the whole layout: the
             navigation drawer is fixed, and a full-width bar would hand it
             the controls on its left. */}
         {isLoggedIn && hasData && <HistoryTopBar />}
         {children}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 
 const FallbackLoader = () => (
-  <Box sx={{ display: 'grid', placeContent: 'center', height: '100%' }}>
+  <div className="grid h-full place-content-center">
     <CircularProgress />
-  </Box>
+  </div>
 )
 
 const Navigation = React.memo(() => {
@@ -171,19 +165,11 @@ function MainLoader() {
     }
   }, [t])
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-      }}
-    >
+    <div className="flex h-full flex-col items-center justify-center">
       <CircularProgress />
-      <Box sx={{ mt: 4, width: '200' }}>
+      <div className="mt-8 w-[200px]">
         <Typography align="center">{hint}</Typography>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

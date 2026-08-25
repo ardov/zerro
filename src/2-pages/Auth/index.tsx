@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
-import { Box, Button, Fade, Stack, Typography, ButtonBase } from '@mui/material'
+import { Button, Fade, Typography, ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { zenmoney } from '6-shared/api/zenmoney'
@@ -30,8 +30,8 @@ export default function Auth() {
     transition: `300ms ${theme.transitions.easing.easeInOut}`,
   }
   return (
-    <Stack
-      spacing={8}
+    <div
+      className="flex min-h-screen flex-col items-center justify-center gap-16 p-6"
       style={isDragging ? dragOverStyle : defaultStyle}
       onDragOver={e => {
         e.stopPropagation()
@@ -52,18 +52,9 @@ export default function Auth() {
         e.preventDefault()
         parseFiles(e?.dataTransfer?.files)
       }}
-      sx={{
-        p: 3,
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-      }}
     >
       <Logo width="200" fill={theme.palette.primary.main} visible={logoIn} />
-      <Stack
-        spacing={3}
-        sx={{ justifyContent: 'center', alignItems: 'center' }}
-      >
+      <div className="flex flex-col items-center justify-center gap-6">
         <Fade in timeout={1000}>
           <Button
             variant="contained"
@@ -75,7 +66,7 @@ export default function Auth() {
         </Fade>
 
         <Fade in timeout={2000}>
-          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+          <Typography variant="body1" className="text-muted-foreground">
             {t('haveTrouble')}{' '}
             <ButtonBase
               onClick={() => dispatch(logIn('app'))}
@@ -102,7 +93,7 @@ export default function Auth() {
         </Fade>
 
         <Fade in timeout={3000}>
-          <Box sx={{ mt: 2 }}>
+          <div className="mt-4">
             <Button
               component={RouterLink}
               to="/about"
@@ -120,9 +111,9 @@ export default function Auth() {
             >
               {t('btnDemoMode')}
             </Button>
-          </Box>
+          </div>
         </Fade>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   )
 }

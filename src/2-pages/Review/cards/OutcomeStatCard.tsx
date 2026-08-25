@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { Box, Button, Stack } from '@mui/material'
+import { Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import type { TDateDraft, TFxAmount, TTransaction } from '6-shared/types'
@@ -76,13 +76,7 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
 
   return (
     <Card>
-      <Stack
-        sx={{
-          gap: 1,
-          mt: 1,
-          width: '80%',
-        }}
-      >
+      <div className="mt-2 flex w-4/5 flex-col gap-2">
         <DataLine
           name={t('yearlyExpenses')}
           amount={totalAmount}
@@ -106,14 +100,7 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
           onShowTransactions={handleShowTransactions}
         />
 
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 2,
-            mt: 1,
-          }}
-        >
+        <div className="mt-2 flex justify-center gap-4">
           <Tooltip title={t('combineIntoParentCategories')}>
             <Button
               onClick={() => setShowParentOnly(!showParentOnly)}
@@ -135,8 +122,8 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
               {showAll ? t('showLess') : t('showAll', { count: nodes.length })}
             </Button>
           )}
-        </Box>
-      </Stack>
+        </div>
+      </div>
     </Card>
   )
 }
@@ -277,12 +264,7 @@ const CategoryList: FC<CategoryListProps> = ({
   onShowTransactions,
 }) => {
   return (
-    <Stack
-      sx={{
-        gap: 1.5,
-        mt: 2,
-      }}
-    >
+    <div className="mt-4 flex flex-col gap-3">
       {visibleNodes.map(point => (
         <DataLine
           key={point.id}
@@ -293,6 +275,6 @@ const CategoryList: FC<CategoryListProps> = ({
           onClick={() => onShowTransactions(point)}
         />
       ))}
-    </Stack>
+    </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
@@ -28,12 +28,7 @@ export function SavingsCard({ year }: TCardProps) {
 
   return (
     <Card>
-      <Stack
-        spacing={1}
-        sx={{
-          alignItems: 'center',
-        }}
-      >
+      <div className="flex flex-col items-center gap-2">
         <Typography variant="body1" align="center">
           {t('youSaved')}
         </Typography>
@@ -45,11 +40,7 @@ export function SavingsCard({ year }: TCardProps) {
           <DisplayAmount value={savings} noShade decimals="ifOnly" />
         </Typography>
 
-        <Box
-          sx={{
-            mt: 2,
-          }}
-        >
+        <div className="mt-4">
           <Typography variant="body1" align="center">
             {t('savingsPercent', { percent: savingsPercent }) +
               ' ' +
@@ -57,18 +48,12 @@ export function SavingsCard({ year }: TCardProps) {
           </Typography>
 
           {monthsOfSavings > 0 && (
-            <Typography
-              variant="body1"
-              align="center"
-              sx={{
-                mt: 1,
-              }}
-            >
+            <Typography variant="body1" align="center" className="mt-2">
               {t('savingsMonths', { months: monthsOfSavings })}
             </Typography>
           )}
-        </Box>
-      </Stack>
+        </div>
+      </div>
     </Card>
   )
 }
