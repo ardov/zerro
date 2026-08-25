@@ -12,15 +12,11 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 
 export const Debtor: FC<
   { name: string; currency: TFxCode; balance: number } & ListItemButtonProps
-> = ({ name, currency, balance, sx, ...rest }) => {
+> = ({ name, currency, balance, className, sx, ...rest }) => {
   return (
     <ListItemButton
-      sx={{
-        typography: 'body2',
-        borderRadius: 1,
-        display: 'flex',
-        ...sx,
-      }}
+      className={clsx('flex rounded text-sm leading-[1.43]', className)}
+      sx={sx}
       {...rest}
     >
       <div
@@ -60,11 +56,11 @@ export const Subheader: FC<
     name: ReactNode
     amount: TFxAmount
   } & ListSubheaderProps
-> = ({ name, amount, sx, ...rest }) => {
+> = ({ name, amount, className, sx, ...rest }) => {
   const month = toISOMonth(new Date())
   const toDisplay = core.currency.useToDisplay(month)
   return (
-    <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
+    <ListSubheader className={clsx('rounded', className)} sx={sx} {...rest}>
       <span className="flex w-full">
         <Typography component="span" noWrap className="grow leading-[inherit]">
           <b>{name}</b>

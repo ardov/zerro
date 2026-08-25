@@ -156,7 +156,7 @@ function HistoryRowItem({
     <ListItemButton
       selected={isSelected}
       onClick={() => onSelect(row.point)}
-      sx={row.nested ? { pl: 4 } : undefined}
+      className={row.nested ? 'pl-8' : undefined}
     >
       {/* Counts stay on server rows: a pull has no label of its own, so the
           only thing that distinguishes one update from another is what moved. */}

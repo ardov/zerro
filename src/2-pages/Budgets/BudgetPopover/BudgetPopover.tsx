@@ -144,7 +144,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
             <MenuItem
               key={text}
               selected={inputValue === amount}
-              sx={{ borderRadius: 1 }}
+              className="rounded"
               onClick={() => {
                 changeAndClose(amount)
                 track('budget_quick_amount_selected', {

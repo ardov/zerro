@@ -18,7 +18,7 @@ import { getEventPosition } from '3-widgets/global/shared/helpers'
 
 export const Account: FC<
   { account: core.accounts.TAccountPopulated } & ListItemButtonProps
-> = ({ account, sx, ...rest }) => {
+> = ({ account, className, sx, ...rest }) => {
   const transactionDrawer = useTransactionDrawer()
   const openContextMenu = useAccountContextMenu()
   const showTransactions = useCallback(
@@ -38,12 +38,8 @@ export const Account: FC<
   })
   return (
     <ListItemButton
-      sx={{
-        typography: 'body2',
-        borderRadius: 1,
-        display: 'flex',
-        ...sx,
-      }}
+      className={clsx('flex rounded text-sm leading-[1.43]', className)}
+      sx={sx}
       {...rest}
       {...propsToPass}
     >
@@ -89,12 +85,12 @@ export const Subheader: FC<
     name: ReactNode
     amount: TFxAmount
   } & ListSubheaderProps
-> = ({ name, amount, sx, ...rest }) => {
+> = ({ name, amount, className, sx, ...rest }) => {
   const month = toISOMonth(new Date())
   const toDisplay = core.currency.useToDisplay(month)
   const isNegative = toDisplay(amount) < 0
   return (
-    <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
+    <ListSubheader className={clsx('rounded', className)} sx={sx} {...rest}>
       <span className="flex w-full">
         <Typography component="span" noWrap className="grow leading-[inherit]">
           <b>{name}</b>

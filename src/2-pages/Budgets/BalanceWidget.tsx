@@ -32,16 +32,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
   const smartAssignedInFuture = toBeAssigned < 0 ? 0 : assignedInFuture
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        bgcolor: 'background.default',
-        p: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1.5,
-      }}
-    >
+    <Paper elevation={0} className="flex flex-col gap-3 bg-background p-4">
       <Total
         title={t('inBalance')}
         value={fundsEnd}
@@ -78,7 +69,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
       <Typography
         variant="body2"
         align="center"
-        sx={{ color: 'text.secondary' }}
+        className="text-muted-foreground"
       >
         <Balancer>{getExplaining(fundsEnd, toBeAssigned, overspend)}</Balancer>
       </Typography>

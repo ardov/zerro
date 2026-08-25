@@ -235,7 +235,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
             onChange={e => setLocalTime(e.target.value)}
             type="time"
             size="small"
-            sx={{ minWidth: 104 }}
+            className="min-w-[104px]"
             slotProps={{
               htmlInput: {
                 sx: {
