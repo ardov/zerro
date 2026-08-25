@@ -1,8 +1,7 @@
 import type { FC, ReactNode } from 'react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import type { SxProps, Theme } from '@mui/material'
-import { Box, ButtonBase, Typography } from '@mui/material'
+import { ButtonBase, Typography } from '@mui/material'
 import { Amount } from '6-shared/ui/Amount'
 import type { DragTypes } from '2-pages/Budgets/DnD'
 
@@ -149,16 +148,16 @@ export const SlideReveal: FC<SlideRevealProps> = ({
   const isOpen = offsetX !== 0
 
   return (
-    <Box sx={{ overflow: 'hidden', position: 'relative' }}>
-      <Box
-        sx={{
-          position: 'relative',
+    <div className="relative overflow-hidden">
+      <div
+        className="relative"
+        style={{
           transform: `translateX(${offsetX}px)`,
           transition: isDragging ? 'none' : 'transform 0.2s ease-out',
         }}
       >
-        <Box
-          sx={{ touchAction: 'pan-y', position: 'relative' }}
+        <div
+          className="relative touch-pan-y"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -166,23 +165,14 @@ export const SlideReveal: FC<SlideRevealProps> = ({
         >
           {children}
           {isOpen && (
-            <Box
+            <div
               onClick={closeReveal}
-              sx={{ position: 'absolute', inset: 0, cursor: 'pointer' }}
+              className="absolute inset-0 cursor-pointer"
             />
           )}
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: '100%',
-            display: 'flex',
-            alignItems: 'stretch',
-          }}
-        >
+        <div className="absolute bottom-0 left-full top-0 flex items-stretch">
           {items.map(item => (
             <RevealCell
               key={item.key}
@@ -192,22 +182,14 @@ export const SlideReveal: FC<SlideRevealProps> = ({
               }}
             />
           ))}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }
 
-const revealCellSx: SxProps<Theme> = {
-  width: REVEAL_CELL_WIDTH,
-  px: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  bgcolor: 'action.hover',
-  borderLeft: theme => `1px solid ${theme.palette.divider}`,
-}
+const revealCellClassName =
+  'flex w-[88px] flex-col items-center justify-center border-l border-border bg-accent px-2'
 
 type CellProps = {
   item: RevealItem
@@ -218,7 +200,7 @@ const RevealCell: FC<CellProps> = ({ item, onClick }) =>
   item.draggable ? (
     <DraggableRevealCell item={item} onClick={onClick} drag={item.draggable} />
   ) : (
-    <ButtonBase onClick={onClick} sx={revealCellSx}>
+    <ButtonBase onClick={onClick} className={revealCellClassName}>
       <RevealCellContent
         label={item.label}
         value={item.value}
@@ -236,25 +218,19 @@ const DraggableRevealCell: FC<
     data: { type: drag.type, id: drag.id },
   })
   return (
-    <Box
+    <div
       ref={setNodeRef}
       onClick={onClick}
       {...attributes}
       {...listeners}
-      sx={{
-        ...revealCellSx,
-        cursor: drag.disabled ? 'pointer' : 'grab',
-        userSelect: 'none',
-        touchAction: 'manipulation',
-        '&:active': { bgcolor: 'action.focus' },
-      }}
+      className={`${revealCellClassName} ${drag.disabled ? 'cursor-pointer' : 'cursor-grab'} select-none touch-manipulation active:bg-accent`}
     >
       <RevealCellContent
         label={item.label}
         value={item.value}
         color={item.color}
       />
-    </Box>
+    </div>
   )
 }
 
@@ -267,14 +243,11 @@ const RevealCellContent: FC<{
     <Typography
       variant="caption"
       noWrap
-      sx={{
-        color: 'text.secondary',
-        lineHeight: 1.2,
-      }}
+      className="leading-[1.2] text-muted-foreground"
     >
       {label}
     </Typography>
-    <Typography variant="body2" noWrap sx={{ color }}>
+    <Typography variant="body2" noWrap style={{ color }}>
       <Amount value={value} decimals="ifOnly" />
     </Typography>
   </>

@@ -4,14 +4,12 @@ import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Box,
   Typography,
   IconButton,
   TextField,
   Fab,
   Zoom,
   Button,
-  Stack,
 } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -41,20 +39,11 @@ import { Map } from './Map'
 export const TrEmptyState = () => {
   const { t } = useTranslation('transaction')
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        color: 'text.disabled',
-        p: 3,
-      }}
-    >
-      <Typography variant="body2" align="center" sx={{ color: 'inherit' }}>
+    <div className="flex min-h-screen items-center justify-center p-6 text-disabled-foreground">
+      <Typography variant="body2" align="center" className="text-inherit">
         {t('fullEmptyState')}
       </Typography>
-    </Box>
+    </div>
   )
 }
 
@@ -190,12 +179,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   }
 
   return (
-    <Box
-      sx={{
-        minWidth: 320,
-        position: 'relative',
-      }}
-    >
+    <div className="relative min-w-80">
       <Head
         title={titles[trType]}
         onClose={onClose}
@@ -212,12 +196,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           sx={{ px: 3, py: 2, bgcolor: 'background.default' }}
         />
       )}
-      <Stack
-        spacing={4}
-        sx={{
-          p: 3,
-        }}
-      >
+      <div className="flex flex-col gap-8 p-6">
         {trType !== 'income' && (
           <AmountInput
             label={t('otcomeFrom', { account: outcomeAccount.title })}
@@ -240,7 +219,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
             size="small"
           />
         )}
-        <Stack direction="row" spacing={2}>
+        <div className="flex flex-row gap-4">
           <DatePicker
             label={t('date')}
             value={parseDate(localDate)}
@@ -266,7 +245,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
               },
             }}
           />
-        </Stack>
+        </div>
         <TextField
           label={t('payee')}
           value={localPayee || ''}
@@ -290,10 +269,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
         <Reciept value={qrCode} />
         <Map longitude={longitude} latitude={latitude} />
 
-        <Stack
-          spacing={1}
-          sx={{ typography: 'caption', color: 'text.secondary' }}
-        >
+        <div className="flex flex-col gap-2 text-xs text-muted-foreground">
           <span>
             {t('created', {
               date: formatDate(created, 'dd MMM yyyy, HH:mm'),
@@ -305,16 +281,16 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
             })}
           </span>
           <RateToWords tr={tr} />
-        </Stack>
+        </div>
 
         {!!onSelectSimilar && (
           <Button onClick={() => onSelectSimilar(changed)}>
             {t('btnOtherFromSync')}
           </Button>
         )}
-      </Stack>
+      </div>
       <SaveButton visible={hasChanges} onSave={onSave} />
-    </Box>
+    </div>
   )
 }
 
@@ -330,19 +306,8 @@ const Head: FC<{
     props
   const { t } = useTranslation('transaction')
   return (
-    <Box
-      sx={{
-        py: 1,
-        px: 3,
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
-      <Box
-        sx={{
-          flexGrow: 1,
-        }}
-      >
+    <div className="flex items-center px-6 py-2">
+      <div className="grow">
         {deleted && (
           <Typography variant="caption" color="error" noWrap>
             {t('transactionDeleted')}
@@ -351,7 +316,7 @@ const Head: FC<{
         <Typography variant="h6" noWrap>
           {title}
         </Typography>
-      </Box>
+      </div>
       {deleted ? (
         <Tooltip title={t('btnRestore')}>
           <IconButton onClick={onRestore} children={<RestoreFromTrashIcon />} />
@@ -367,7 +332,7 @@ const Head: FC<{
       <Tooltip title={t('btnClose')}>
         <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
       </Tooltip>
-    </Box>
+    </div>
   )
 }
 
@@ -375,23 +340,16 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = props => {
   const { visible, onSave } = props
   const { t } = useTranslation('transaction')
   return (
-    <Box
+    <div
       style={{ transform: 'translateX(-50%)' }}
-      sx={{
-        mt: 4,
-        zIndex: 200,
-        position: 'sticky',
-        bottom: 16,
-        left: '50%',
-        display: 'inline-block',
-      }}
+      className="sticky bottom-4 left-1/2 z-[200] mt-8 inline-block"
     >
       <Zoom in={visible}>
         <Fab variant="extended" color="primary" onClick={onSave}>
           {t('btnSave')}
         </Fab>
       </Zoom>
-    </Box>
+    </div>
   )
 }
 

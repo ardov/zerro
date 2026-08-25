@@ -3,7 +3,6 @@ import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Autocomplete,
-  Box,
   Chip,
   IconButton,
   InputBase,
@@ -11,7 +10,6 @@ import {
   MenuItem,
   Paper,
   Popover,
-  Stack,
   TextField,
 } from '@mui/material'
 import { core } from 'zerro-core/redux'
@@ -132,16 +130,13 @@ const Filter: FC<FilterProps> = ({
   )
 
   return (
-    <Paper
-      elevation={10}
-      sx={{ p: 0.75, display: 'flex', flexDirection: 'column' }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', minHeight: 36, px: 1 }}>
+    <Paper elevation={10} className="flex flex-col p-[6px]">
+      <div className="flex min-h-9 items-center px-2">
         <InputBase
           value={search}
           placeholder={t('searchComments')}
           onChange={event => onSearchChange(event.target.value)}
-          sx={{ flexGrow: 1 }}
+          className="grow"
         />
         {Boolean(search) && (
           <Tooltip title={t('clearField')}>
@@ -162,19 +157,10 @@ const Filter: FC<FilterProps> = ({
             />
           </Tooltip>
         )}
-      </Box>
+      </div>
 
       {!!appliedClauses.length && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 0.75,
-            px: 0.5,
-            pt: 0.5,
-          }}
-        >
+        <div className="flex flex-wrap items-center gap-1.5 px-0.5 pt-0.5">
           {appliedClauses.map(clause => (
             <Chip
               ref={element => {
@@ -201,7 +187,7 @@ const Filter: FC<FilterProps> = ({
               />
             </Tooltip>
           )}
-        </Box>
+        </div>
       )}
 
       <Menu
@@ -233,7 +219,7 @@ const Filter: FC<FilterProps> = ({
         }}
       >
         {editingClause && (
-          <Box sx={{ width: 340, maxWidth: '90vw', p: 1.5 }}>
+          <div className="w-[340px] max-w-[90vw] p-3">
             <FilterEditor
               clause={editingClause}
               onChange={upsertClause}
@@ -241,7 +227,7 @@ const Filter: FC<FilterProps> = ({
               onOptionsOpen={() => setEditorOptionsOpen(true)}
               onOptionsClose={() => setEditorOptionsOpen(false)}
             />
-          </Box>
+          </div>
         )}
       </Popover>
     </Paper>
@@ -319,12 +305,7 @@ function FilterEditor(props: {
       )
     case 'amount':
       return (
-        <Stack
-          direction="row"
-          sx={{
-            gap: 1,
-          }}
-        >
+        <div className="flex flex-row gap-2">
           <TextField
             autoFocus
             type="number"
@@ -352,7 +333,7 @@ function FilterEditor(props: {
               })
             }
           />
-        </Stack>
+        </div>
       )
     case 'activity':
     case 'viewed':

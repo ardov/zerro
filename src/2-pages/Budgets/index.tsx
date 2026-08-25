@@ -4,7 +4,7 @@ import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import type { Theme } from '@mui/material'
-import { Box, useMediaQuery } from '@mui/material'
+import { useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '6-shared/helpers/date'
@@ -49,25 +49,14 @@ function Budgets() {
   )
 
   const mainContent = (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'relative',
-        height: 'fit-content',
-        gap: 2,
-        width: '100%',
-        maxWidth: 800,
-        py: 3,
-      }}
-    >
+    <div className="relative flex h-fit w-full max-w-[800px] flex-col gap-4 py-6">
       <EnvelopeTable
         month={month}
         onShowTransactions={openTransactions}
         onOpenOverview={openOverview}
         onOpenDetails={openSide}
       />
-    </Box>
+    </div>
   )
 
   return (
@@ -89,13 +78,6 @@ function Budgets() {
 }
 
 const sideWidth = 360
-const sideSx = {
-  width: sideWidth,
-  flexShrink: 0,
-  overflow: 'auto',
-  bgcolor: 'background.paper',
-}
-
 const BudgetLayout: FC<{
   mainContent: ReactElement
 }> = props => {
@@ -103,29 +85,19 @@ const BudgetLayout: FC<{
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexGrow: 1,
-          justifyContent: 'center',
-          height: '100%',
-          overflow: 'auto',
-          px: { xs: 1, md: 3 },
-          pb: 6,
-        }}
-      >
+    <div className="flex h-screen">
+      <div className="flex h-full min-w-0 grow justify-center overflow-auto px-2 pb-12 md:px-6">
         {mainContent}
-      </Box>
+      </div>
 
       {isMD ? (
         <SideContent width={sideWidth} />
       ) : (
-        <Box sx={sideSx}>
+        <div className="w-[360px] shrink-0 overflow-auto bg-card">
           <SideContent width={sideWidth} docked />
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

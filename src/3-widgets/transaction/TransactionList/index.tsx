@@ -272,10 +272,10 @@ function useFilteredTransactions(
 const EmptyState = () => {
   const { t } = useTranslation('transactions')
   return (
-    <Box sx={{ p: 5 }}>
-      <Typography variant="body1" align="center" sx={{ marginBottom: '16px' }}>
+    <div className="p-10">
+      <Typography variant="body1" align="center" className="mb-4">
         {t('emptyState')}
       </Typography>
-    </Box>
+    </div>
   )
 }
