@@ -1,15 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap');
 
-html {
-  box-sizing: border-box;
-  font-family: 'IBM Plex Sans', Arial, sans-serif;
-}
+/* The reset belongs in `base` so MUI's own layered rules still win, the way
+   they did on specificity before MUI moved into a cascade layer. An unlayered
+   `* { box-sizing: inherit }` beats `.MuiInputBase-input { box-sizing:
+   content-box }` no matter how specific the class selector is, which collapses
+   every text field by its vertical padding. */
+@layer base {
+  html {
+    box-sizing: border-box;
+    font-family: 'IBM Plex Sans', Arial, sans-serif;
+  }
 
-*,
-*::before,
-*::after {
-  box-sizing: inherit;
-  -webkit-tap-highlight-color: transparent;
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 ::-webkit-scrollbar {
