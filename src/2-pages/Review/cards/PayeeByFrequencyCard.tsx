@@ -50,11 +50,11 @@ export function PayeeByFrequencyCard(props: TCardProps) {
           onClick={() => props.onShowTransactions(transactions)}
         >
           <div className="flex flex-col items-center gap-2">
-            <h2 className="info-gradient m-0 text-center type-display">
+            <h2 className="info-gradient m-0 text-center type-display font-sans">
               {payee}
             </h2>
 
-            <p className="m-0 text-center type-body">
+            <p className="m-0 text-center type-body font-sans">
               {t('purchase', { count })}
               <DisplayAmount
                 value={outcome / count}

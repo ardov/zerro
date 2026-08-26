@@ -21,7 +21,7 @@ export function NoCategoryCard(props: TCardProps) {
               className="rounded-lg px-2"
               onClick={() => props.onShowTransactions(noTag)}
             >
-              <h2 className="m-0 text-center type-display">
+              <h2 className="m-0 text-center type-display font-sans">
                 {t('title', { count })}
               </h2>
             </ButtonBase>
