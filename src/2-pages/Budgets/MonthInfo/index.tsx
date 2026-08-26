@@ -5,7 +5,7 @@ import { isZero } from '6-shared/helpers/money'
 import { formatDate } from '6-shared/helpers/date'
 import { startFresh } from '4-features/bulkActions/startFresh'
 import type { Theme } from '@mui/material'
-import { Typography, Button, IconButton, useMediaQuery } from '@mui/material'
+import { Button, IconButton, useMediaQuery } from '@mui/material'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import type { TDateDraft, TISOMonth } from '6-shared/types'
@@ -68,9 +68,9 @@ export const MonthInfo: FC<MonthInfoProps> = ({
       {isMobile && (
         <div className="flex items-center px-6 py-2">
           <div className="grow">
-            <Typography variant="h6" noWrap>
+            <h2 className="truncate text-xl font-medium leading-8">
               {getMonthName(month)}
-            </Typography>
+            </h2>
           </div>
 
           <Tooltip title={t('close')}>
@@ -87,9 +87,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({
 
         <div className="rounded-lg bg-background p-4">
           <div className="mb-2">
-            <Typography variant="body1" align="center">
-              {t('actions')}
-            </Typography>
+            <p className="text-center text-base leading-6">{t('actions')}</p>
           </div>
 
           <Button fullWidth color="secondary" onClick={copyAllBudgets}>

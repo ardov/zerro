@@ -1,4 +1,3 @@
-import { Divider, Typography } from '@mui/material'
 import { core } from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
@@ -44,7 +43,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         <Chip label={'5 счетов'} />
         <Chip label={formatMoney(fundsChange, displayCurrency)} />
       </div> */}
-      <Divider />
+      <hr className="m-0 w-full border-0 border-t border-border" />
       <DataLine
         name={t('inEnvelopes')}
         tooltip={t('inEnvelopesTooltip')}
@@ -65,14 +64,10 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         amount={toBeAssigned}
         currency={currency}
       />
-      <Divider />
-      <Typography
-        variant="body2"
-        align="center"
-        className="text-muted-foreground"
-      >
+      <hr className="m-0 w-full border-0 border-t border-border" />
+      <p className="text-center text-sm leading-[1.43] text-muted-foreground">
         <Balancer>{getExplaining(fundsEnd, toBeAssigned, overspend)}</Balancer>
-      </Typography>
+      </p>
     </div>
   )
 

@@ -3,7 +3,7 @@ import { core } from 'zerro-core/redux'
 
 import type { FC } from 'react'
 import { useState } from 'react'
-import { Button, TextField, InputAdornment, Typography } from '@mui/material'
+import { Button, TextField, InputAdornment } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { keys } from '6-shared/helpers/keys'
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
@@ -53,15 +53,11 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
             }
           />
         ))}
-        <Typography
-          variant="caption"
-          align="center"
-          className="text-muted-foreground"
-        >
+        <p className="text-center text-xs leading-[1.66] text-muted-foreground">
           {t(isCurrentRates ? 'title_current' : 'title', {
             date: formatDate(rateData.date, 'LLLL yyyy'),
           })}
-        </Typography>
+        </p>
         {isSaved && (
           <Button fullWidth onClick={() => dispatch(core.fxRates.reset(month))}>
             {t('reset')}
