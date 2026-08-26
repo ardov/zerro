@@ -45,6 +45,12 @@ renders no colour at all. `sx={{ color: 'text.disabled' }}` does work, because
 class makes text change colour that never changed before, so check what the
 element actually rendered before carrying the intent across.
 
+Two of those were revived deliberately rather than reproduced: `Total` mutes a
+zero amount and colours its error and success states, and the envelope goal
+placeholder is muted until a goal exists. `Total.stories.tsx` pins those four
+amount colours in both themes. `Total` names the states, `amountColor="error"`,
+instead of taking the palette path its props used to carry.
+
 MUI `Stack spacing` is a margin rule on the children, `& > * + * { margin-top }`,
 and it outranks a child's own `sx` margin. A flex `gap` adds to that margin
 instead of replacing it, so a child that carried `mt` beside a `spacing` Stack

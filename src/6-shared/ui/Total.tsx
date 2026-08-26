@@ -5,7 +5,8 @@ import { Amount } from '6-shared/ui/Amount'
 
 interface TotalProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
   title: string
-  amountColor?: string
+  /** Semantic state of the amount. A zero amount is muted either way. */
+  amountColor?: 'error' | 'success'
   align?: 'center' | 'right' | 'left'
   value: AmountProps['value']
   currency?: AmountProps['currency']
@@ -34,9 +35,9 @@ export function Total({
   const amountClassName = clsx(
     'm-0 type-title-lg',
     alignmentClassName,
-    amountColor === 'error.main'
+    amountColor === 'error'
       ? 'text-error'
-      : amountColor === 'success.main'
+      : amountColor === 'success'
         ? 'text-success'
         : value
           ? 'text-foreground'

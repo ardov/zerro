@@ -66,9 +66,9 @@ export function EnvelopeInfo(props: {
           noShade
           amountColor={
             totalAvailable < 0
-              ? 'error.main'
+              ? 'error'
               : totalAvailable > 0
-                ? 'success.main'
+                ? 'success'
                 : undefined
           }
         />
