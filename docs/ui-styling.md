@@ -39,7 +39,11 @@ Colors, radii, and elevation shadows are derived from the active MUI theme.
 color. MUI palette paths such as `text.disabled` are not CSS color values:
 use a resolved color, a semantic utility, or keep dynamic palette lookup in
 `sx`. MUI's `color` prop supports names such as `textDisabled`, not arbitrary
-palette paths in the installed version.
+palette paths in the installed version: `<Typography color="text.disabled">`
+renders no colour at all. `sx={{ color: 'text.disabled' }}` does work, because
+`sx` is the system. A converted element that turns such a prop into a real token
+class makes text change colour that never changed before, so check what the
+element actually rendered before carrying the intent across.
 
 MUI `Stack spacing` is a margin rule on the children, `& > * + * { margin-top }`,
 and it outranks a child's own `sx` margin. A flex `gap` adds to that margin
