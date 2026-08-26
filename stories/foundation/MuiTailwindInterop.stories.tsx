@@ -405,6 +405,37 @@ export const BudgetRows: Story = {
   },
 }
 
+export const InheritedWeight: Story = {
+  render: () => (
+    // MUI sets font-weight 500 on Tooltip, ListSubheader, Button and others.
+    // The type-* recipes must pin the weight their MUI variant declares
+    // instead of inheriting it from such a container.
+    <div className="grid gap-4 font-medium">
+      <Typography variant="body2" component="span" data-testid="mui-in-medium">
+        Reference
+      </Typography>
+      <span data-testid="native-in-medium" className="type-body-sm">
+        Candidate
+      </span>
+      <span data-testid="unrecipe-in-medium">Inherited</span>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expectMatchingStyles(
+      canvas.getByTestId('mui-in-medium'),
+      canvas.getByTestId('native-in-medium'),
+      ['fontSize', 'lineHeight', 'fontWeight']
+    )
+    await expect(
+      getComputedStyle(canvas.getByTestId('mui-in-medium')).fontWeight
+    ).toBe('400')
+    await expect(
+      getComputedStyle(canvas.getByTestId('unrecipe-in-medium')).fontWeight
+    ).toBe('500')
+  },
+}
+
 function TypographyColorPropsFixture() {
   return (
     <div className="grid gap-4">

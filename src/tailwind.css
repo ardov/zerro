@@ -62,15 +62,15 @@
 }
 
 @utility type-body {
-  @apply text-base leading-6;
+  @apply text-base leading-6 font-normal;
 }
 
 @utility type-body-sm {
-  @apply text-sm leading-[1.43];
+  @apply text-sm leading-[1.43] font-normal;
 }
 
 @utility type-caption {
-  @apply text-xs leading-[1.66];
+  @apply text-xs leading-[1.66] font-normal;
 }
 
 @utility type-overline {

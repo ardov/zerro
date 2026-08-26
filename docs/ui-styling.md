@@ -77,6 +77,11 @@ had no margin, or `mt-0` beside the margin utility it already carried. Only
 contract. `type-overline` intentionally has no letter-spacing: the active IBM
 Plex Sans MUI theme does not add the Roboto-specific overline tracking.
 
+Every recipe pins its font weight. MUI declares one on each typography variant,
+and containers such as `Tooltip`, `ListSubheader`, and `Button` set weight 500
+on their own, so a recipe that inherited weight would render differently
+depending on where it sits.
+
 `surface-card` is the shared static Paper surface recipe. Pair it with an
 explicit `shadow-elevation-1`, `shadow-elevation-2`, `shadow-elevation-4`, or
 `shadow-elevation-10` when the source surface has elevation. Padding, layout,
@@ -86,8 +91,8 @@ use it to replace Paper slots owned by Drawer, Popover, Menu, or Tooltip.
 A `ButtonBase` (and therefore `Button`, `IconButton`, and every MUI control
 built on it) renders a native `button`, which resets `font-family` to the user
 agent default. MUI `Typography` set the family itself; a native element with a
-`type-*` recipe does not, because the recipes only carry size, line height,
-weight, and case. Add `font-sans` when a converted element lives inside a
+`type-*` recipe does not, because the recipes carry size, line height, weight,
+and case but not the family. Add `font-sans` when a converted element lives inside a
 button. `Btn` in the budget row is the exception: its `sx` already sets the
 family on the button itself.
 
@@ -108,6 +113,8 @@ the themed font family only when `font-sans` is present, and `NativeMargins`
 checks that a converted paragraph resets its user agent margins.
 `TypographyColorProps` compares the `textSecondary` and `error` `color` props
 against `text-muted-foreground` and `text-error` in both themes.
+`InheritedWeight` checks that a recipe inside a `font-medium` container keeps
+the weight its MUI variant declares.
 The typography matrix compares every implemented recipe against its themed MUI
 Typography variant in light and dark mode. Dedicated 899px and 900px stories
 check both sides of the `md` breakpoint; the surface matrix compares default,

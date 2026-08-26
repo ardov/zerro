@@ -62,7 +62,7 @@ export const Subheader: FC<
   return (
     <ListSubheader className={clsx('rounded-lg', className)} sx={sx} {...rest}>
       <span className="flex w-full">
-        <span className="grow truncate leading-[inherit]">
+        <span className="grow truncate type-body leading-[inherit]">
           <b>{name}</b>
         </span>
 
