@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import React, { useRef } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { ButtonBase, IconButton, Typography } from '@mui/material'
+import { ButtonBase, IconButton } from '@mui/material'
 import { deepEqual } from '6-shared/helpers/deepEqual'
 import { AddIcon, ArrowDownwardIcon, ArrowUpwardIcon } from '6-shared/ui/Icons'
 import { useFloatingInput } from '6-shared/ui/FloatingInput'
@@ -29,13 +29,9 @@ type TGroupProps = {
   children?: React.ReactNode[]
 }
 const Sum: FC<{ value: number }> = ({ value }) => (
-  <Typography
-    align="right"
-    noWrap
-    className="self-baseline text-disabled-foreground"
-  >
+  <p className="m-0 self-baseline truncate text-right type-body text-disabled-foreground">
     <Amount value={value} decimals="ifOnly" />
-  </Typography>
+  </p>
 )
 
 export const Group: FC<TGroupProps> = ({
@@ -87,9 +83,7 @@ export const Group: FC<TGroupProps> = ({
         className="-ml-2 min-w-0 shrink p-2"
         onClick={() => floating.open(name)}
       >
-        <Typography variant="h6" className="font-black" noWrap>
-          {name}
-        </Typography>
+        <h6 className="m-0 truncate type-title font-sans font-black">{name}</h6>
       </ButtonBase>
 
       {isReordering && Actions}

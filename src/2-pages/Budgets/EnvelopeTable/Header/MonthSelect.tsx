@@ -3,7 +3,7 @@ import { useState, useRef, useCallback } from 'react'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
-import { Typography, IconButton, ButtonBase } from '@mui/material'
+import { IconButton, ButtonBase } from '@mui/material'
 import type { TDateDraft, TISOMonth } from '6-shared/types'
 import { ChevronRightIcon, ChevronLeftIcon } from '6-shared/ui/Icons'
 import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
@@ -44,9 +44,9 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
     <>
       <div ref={paperRef} className="flex" {...props}>
         <ButtonBase className="rounded-lg py-2 pl-2" onClick={openPopover}>
-          <Typography variant="body1" noWrap>
+          <p className="m-0 truncate type-body font-sans">
             <b>{getMonthName(month)}</b> {getYear(month)}
-          </Typography>
+          </p>
         </ButtonBase>
 
         <div className="flex">

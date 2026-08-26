@@ -2,7 +2,6 @@ import type { FC } from 'react'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
-import { Typography } from '@mui/material'
 import { TableRow } from '../shared/shared'
 
 import type { Metric } from '../models/useMetric'
@@ -16,14 +15,9 @@ type FooterProps = {
 }
 
 const Sum: FC<{ value: TFxAmount; month: TISOMonth }> = ({ value, month }) => (
-  <Typography
-    variant="overline"
-    align="right"
-    noWrap
-    className="text-muted-foreground"
-  >
+  <span className="truncate text-right type-overline text-muted-foreground">
     <DisplayAmount value={value} decimals="ifOnly" month={month} noCurrency />
-  </Typography>
+  </span>
 )
 
 export const Footer: FC<FooterProps> = props => {
@@ -35,13 +29,9 @@ export const Footer: FC<FooterProps> = props => {
     <TableRow
       name={
         <div>
-          <Typography
-            variant="overline"
-            noWrap
-            className="text-muted-foreground"
-          >
+          <span className="truncate type-overline text-muted-foreground">
             {t('total')}
-          </Typography>
+          </span>
         </div>
       }
       assigned={<Sum value={totals.assigned} month={month} />}

@@ -2,7 +2,6 @@ import type { FC } from 'react'
 import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { clsx } from 'clsx'
-import { Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { formatMoney } from '6-shared/helpers/money'
@@ -31,7 +30,7 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
 
   return (
     <div>
-      <Typography variant="body1" align="right">
+      <p className="m-0 text-right type-body">
         {!!hiddenOverspend && (
           <Tooltip
             title={
@@ -60,7 +59,7 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
             <Amount value={available} decimals="ifOnly" />
           </span>
         </DraggableAmount>
-      </Typography>
+      </p>
     </div>
   )
 }

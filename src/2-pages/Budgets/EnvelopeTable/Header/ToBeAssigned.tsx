@@ -4,7 +4,7 @@ import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 
 import type { ButtonBaseProps } from '@mui/material'
-import { Typography, ButtonBase, Divider } from '@mui/material'
+import { ButtonBase, Divider } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { sub } from '6-shared/helpers/money'
@@ -44,7 +44,7 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
         style={{ background: bg, color }}
         {...props}
       >
-        <Typography noWrap align="center" variant="body1">
+        <p className="m-0 truncate text-center type-body font-sans">
           {!isSmall &&
             (toBeAssigned ? t('notAllocated') : t('allAllocated')) + ' '}
           {toBeAssigned ? (
@@ -59,7 +59,7 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
           ) : (
             '👌'
           )}
-        </Typography>
+        </p>
         <ArrowForwardIcon fontSize="small" />
       </ButtonBase>
     </Tooltip>
@@ -108,9 +108,7 @@ function useTotalsModel() {
   function TooltipContent() {
     return (
       <div className="flex flex-col gap-2">
-        <Typography variant="body2" align="center">
-          {messages[msgType]}
-        </Typography>
+        <p className="m-0 text-center type-body-sm">{messages[msgType]}</p>
         <Divider />
 
         <DataLine name={t('inBalance')} amount={fundsEnd} currency={currency} />

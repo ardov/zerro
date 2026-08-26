@@ -1,7 +1,6 @@
 import type { FC } from 'react'
 import React from 'react'
 import { clsx } from 'clsx'
-import { Typography } from '@mui/material'
 import { Amount } from '6-shared/ui/Amount'
 import { Btn } from './Btn'
 
@@ -20,9 +19,9 @@ export const ActivityCell: FC<ActivityCellProps> = props => {
       )}
     >
       <Btn onClick={onClick}>
-        <Typography variant="body1" align="right">
+        <p className="m-0 text-right type-body">
           <Amount value={displayActivity} decimals="ifOnly" />
-        </Typography>
+        </p>
       </Btn>
     </div>
   )

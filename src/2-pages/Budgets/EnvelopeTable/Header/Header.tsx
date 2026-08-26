@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import { Typography, Button } from '@mui/material'
+import { Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { ChevronDownIcon } from '6-shared/ui/Icons'
 import type { TISOMonth } from '6-shared/types'
@@ -21,15 +21,12 @@ type HeaderProps = {
 }
 
 const ColumnTitle: FC<{ name: string; onClick?: () => void }> = props => (
-  <Typography
-    variant="overline"
-    align="right"
+  <span
     onClick={props.onClick}
-    noWrap
-    className="text-muted-foreground"
+    className="truncate text-right type-overline text-muted-foreground"
   >
     {props.name}
-  </Typography>
+  </span>
 )
 
 export const Header: FC<HeaderProps> = props => {
@@ -72,16 +69,12 @@ export const Header: FC<HeaderProps> = props => {
                 onClick={openOnClick}
                 className="-ml-2 px-2 py-0"
               >
-                <Typography
-                  variant="overline"
-                  noWrap
-                  className="text-muted-foreground"
-                >
+                <span className="truncate type-overline text-muted-foreground">
                   {t('categories', {
                     ns: 'budgets',
                     context: isAllShown ? 'all' : '',
                   })}
-                </Typography>
+                </span>
                 <ChevronDownIcon />
               </Button>
             </div>

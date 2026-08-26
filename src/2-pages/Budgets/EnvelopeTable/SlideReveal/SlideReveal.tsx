@@ -240,13 +240,9 @@ const RevealCellContent: FC<{
   color: string
 }> = ({ label, value, color }) => (
   <>
-    <Typography
-      variant="caption"
-      noWrap
-      className="leading-[1.2] text-muted-foreground"
-    >
+    <span className="truncate type-caption font-sans leading-[1.2] text-muted-foreground">
       {label}
-    </Typography>
+    </span>
     <Typography variant="body2" noWrap sx={{ color }}>
       <Amount value={value} decimals="ifOnly" />
     </Typography>

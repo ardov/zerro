@@ -405,6 +405,49 @@ export const BudgetRows: Story = {
   },
 }
 
+export const ButtonTypography: Story = {
+  render: () => (
+    <div className="grid gap-4">
+      <ButtonBase className="rounded-lg p-2">
+        <Typography variant="body1" data-testid="mui-in-button">
+          Reference
+        </Typography>
+      </ButtonBase>
+      <ButtonBase className="rounded-lg p-2">
+        <p data-testid="native-in-button" className="m-0 type-body font-sans">
+          Candidate
+        </p>
+      </ButtonBase>
+      <ButtonBase className="rounded-lg p-2">
+        <p data-testid="unstyled-in-button" className="m-0 type-body">
+          Inherited
+        </p>
+      </ButtonBase>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await waitForFonts()
+    const canvas = within(canvasElement)
+    const reference = canvas.getByTestId('mui-in-button')
+    const candidate = canvas.getByTestId('native-in-button')
+    await expectMatchingStyles(reference, candidate, [
+      'fontSize',
+      'lineHeight',
+      'fontWeight',
+      'letterSpacing',
+    ])
+    // A button resets font-family, so a native recipe alone inherits the user
+    // agent font. Only `font-sans` restores the family MUI Typography sets.
+    const family = getComputedStyle(reference).fontFamily
+    await expect(getComputedStyle(candidate).fontFamily).toContain(
+      family.split(',')[0]
+    )
+    await expect(
+      getComputedStyle(canvas.getByTestId('unstyled-in-button')).fontFamily
+    ).not.toContain(family.split(',')[0])
+  },
+}
+
 export const MobileRevealColors: Story = {
   render: () => (
     <div className="w-80">

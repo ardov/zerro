@@ -78,6 +78,14 @@ explicit `shadow-elevation-1`, `shadow-elevation-2`, `shadow-elevation-4`, or
 clipping, radius exceptions, and z-index remain local to the consumer. Do not
 use it to replace Paper slots owned by Drawer, Popover, Menu, or Tooltip.
 
+A `ButtonBase` (and therefore `Button`, `IconButton`, and every MUI control
+built on it) renders a native `button`, which resets `font-family` to the user
+agent default. MUI `Typography` set the family itself; a native element with a
+`type-*` recipe does not, because the recipes only carry size, line height,
+weight, and case. Add `font-sans` when a converted element lives inside a
+button. `Btn` in the budget row is the exception: its `sx` already sets the
+family on the button itself.
+
 `cn()` uses the default `tailwind-merge` configuration, which does not know the
 custom `type-*` group. Do not expect `cn('type-body', 'type-title')` to select
 the last recipe; select one recipe explicitly. Class-string order alone is not
@@ -90,6 +98,8 @@ for MUI/Tailwind coexistence, typography recipes, static Paper surfaces, icon
 centering, and budget row alignment.
 `ActivityStats.stories.tsx` checks the real income, expense, and transfer cards
 with deterministic data in both themes.
+The `ButtonTypography` story checks that a recipe inside a `ButtonBase` keeps
+the themed font family only when `font-sans` is present.
 The typography matrix compares every implemented recipe against its themed MUI
 Typography variant in light and dark mode. Dedicated 899px and 900px stories
 check both sides of the `md` breakpoint; the surface matrix compares default,
