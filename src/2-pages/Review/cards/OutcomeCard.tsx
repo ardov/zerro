@@ -49,7 +49,7 @@ export function OutcomeCard(props: TCardProps) {
           {additionalInfo.join('  •  ')}
         </p>
         {comment && (
-          <div className="mt-2 self-center rounded-lg bg-background px-4 py-1">
+          <div className="self-center rounded-lg bg-background px-4 py-1">
             <p className="m-0 text-center type-body text-muted-foreground">
               {comment}
             </p>

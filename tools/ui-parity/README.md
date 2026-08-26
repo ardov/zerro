@@ -114,15 +114,16 @@ Known accepted differences at the time of writing:
   mapping to a real `h2`. That is invisible to this harness, which records
   computed style and geometry rather than tag names.
 
-Open, not yet explained:
+Two things on `/review` look like differences and are not. Both builds are
+non-deterministic there, so reload and re-capture before believing either:
 
-- on `/review`, the pie in `NotFunCard` renders its `recharts-pie-labels` layer
-  in the current build and not in the baseline, so two labels exist only in the
-  current one. Both sides run the same recharts version and the chart's own code
-  is unchanged apart from a `Stack` becoming a `div`. Recharts only mounts that
-  layer once the pie animation reports finished, so something is keeping the
-  baseline animation from completing. The current build shows what the code
-  asks for; the baseline was dropping it.
+- `react-wrap-balancer` settles the tax paragraph at 375px or 377px depending on
+  the load, which is a whole extra line. That changes the card's height and
+  shifts every card below it, so one flaky paragraph can look like fifty
+  findings.
+- the pie in `NotFunCard` mounts its `recharts-pie-labels` layer only when the
+  pie animation reports finished, which does not always happen. The labels are
+  present in some loads of either build.
 
 ## Limits
 

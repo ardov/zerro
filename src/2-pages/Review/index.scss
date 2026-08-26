@@ -1,4 +1,9 @@
-.container {
+/* Prefixed because Tailwind owns the bare `container` and `shadow` class
+   names. An unlayered rule here wins for the properties it declares, but
+   Tailwind's utility still contributes the ones it does not: `container` was
+   adding breakpoint max-widths and `shadow` a real box-shadow behind the
+   blurred year. */
+.review-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -76,7 +81,7 @@
   -moz-text-fill-color: transparent;
   animation: gradient-animation 10s infinite alternate ease-in-out;
 
-  &.shadow {
+  &.year-shadow {
     user-select: none;
     position: absolute;
     top: 8px;

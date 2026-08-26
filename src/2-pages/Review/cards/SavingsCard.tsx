@@ -35,7 +35,7 @@ export function SavingsCard({ year }: TCardProps) {
           <DisplayAmount value={savings} noShade decimals="ifOnly" />
         </h2>
 
-        <div className="mt-4">
+        <div>
           <p className="m-0 text-center type-body">
             {t('savingsPercent', { percent: savingsPercent }) +
               ' ' +

@@ -33,7 +33,7 @@ export default function Review() {
   return (
     <>
       <title>{`${t('pageTitle')} | Zerro`}</title>
-      <div className="container">
+      <div className="review-container">
         <div className="flex flex-col gap-4 p-6 pb-20">
           <CardTitle year={year} />
           <IncomeCard year={year} onShowTransactions={showTransactions} />
@@ -71,7 +71,7 @@ function CardTitle({ year }: { year: number }) {
         <h1 className="year m-0 text-center text-[6rem] leading-[1.167] font-light">
           <b>{year}</b>
         </h1>
-        <p className="year shadow m-0 text-center text-[6rem] leading-[1.167] font-light">
+        <p className="year year-shadow m-0 text-center text-[6rem] leading-[1.167] font-light">
           <b>{year}</b>
         </p>
       </div>

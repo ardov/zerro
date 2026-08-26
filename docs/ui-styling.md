@@ -41,6 +41,19 @@ use a resolved color, a semantic utility, or keep dynamic palette lookup in
 `sx`. MUI's `color` prop supports names such as `textDisabled`, not arbitrary
 palette paths in the installed version.
 
+MUI `Stack spacing` is a margin rule on the children, `& > * + * { margin-top }`,
+and it outranks a child's own `sx` margin. A flex `gap` adds to that margin
+instead of replacing it, so a child that carried `mt` beside a `spacing` Stack
+ends up further down than it was. Check what the child actually rendered at
+before keeping its margin. A Stack written with `sx={{ gap }}` already used real
+CSS gap and converts one to one.
+
+Tailwind owns short class names that a stylesheet may already use: `container`
+and `shadow` are utilities. An unlayered rule still wins for the properties it
+declares, but the utility keeps contributing the ones it does not, so
+`.container` silently gained breakpoint max-widths and a decorative `.shadow`
+gained a real box-shadow. Prefix class names that are shared with a stylesheet.
+
 Use `cn()` when caller classes override a component's default utility classes.
 `clsx()` only concatenates classes: the last class in an HTML attribute does not
 necessarily win. Budget group rows, for example, override `items-center` with
