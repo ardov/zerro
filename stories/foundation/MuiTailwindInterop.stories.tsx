@@ -405,6 +405,35 @@ export const BudgetRows: Story = {
   },
 }
 
+export const NativeMargins: Story = {
+  render: () => (
+    <div className="grid gap-4">
+      <Typography variant="body1" data-testid="mui-paragraph">
+        Reference
+      </Typography>
+      <p data-testid="reset-paragraph" className="m-0 type-body">
+        Candidate
+      </p>
+      <p data-testid="unreset-paragraph" className="type-body">
+        Inherited
+      </p>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expectMatchingStyles(
+      canvas.getByTestId('mui-paragraph'),
+      canvas.getByTestId('reset-paragraph'),
+      ['marginTop', 'marginRight', 'marginBottom', 'marginLeft']
+    )
+    // Preflight is disabled, so a native paragraph keeps its user agent
+    // margins. MUI Typography sets `margin: 0`; a recipe alone does not.
+    const unreset = getComputedStyle(canvas.getByTestId('unreset-paragraph'))
+    await expect(unreset.marginTop).toBe('16px')
+    await expect(unreset.marginBottom).toBe('16px')
+  },
+}
+
 export const ButtonTypography: Story = {
   render: () => (
     <div className="grid gap-4">

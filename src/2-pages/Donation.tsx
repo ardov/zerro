@@ -12,9 +12,11 @@ export default function Donation() {
       <link rel="canonical" href="https://zerro.app/donation" />
       <div className="flex h-full items-center justify-center">
         <div className="mx-auto max-w-[480px] p-6 pb-16">
-          <h1 className="mb-4 text-center type-title-lg">{t('heading')}</h1>
+          <h1 className="mt-0 mb-4 text-center type-title-lg">
+            {t('heading')}
+          </h1>
 
-          <p className="mb-4 text-center type-body">{t('subtitle')}</p>
+          <p className="mt-0 mb-4 text-center type-body">{t('subtitle')}</p>
 
           <div className="flex flex-col gap-4 py-4">
             <LinkCard
@@ -31,7 +33,7 @@ export default function Donation() {
             />
           </div>
 
-          <p className="mb-4 text-center type-body text-muted-foreground">
+          <p className="mt-0 mb-4 text-center type-body text-muted-foreground">
             {t('afterword')}
           </p>
         </div>

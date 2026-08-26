@@ -64,9 +64,14 @@ Use one base recipe per element, with an optional recipe at another breakpoint:
 ```
 
 Recipes do not choose HTML semantics, margins, alignment, truncation, or colors.
-Choose those at the call site. Preflight is disabled, so native heading margins
-and weight still need an explicit decision. Local utilities such as
+Choose those at the call site. Local utilities such as
 `type-title font-normal leading-6` can override the corresponding recipe values.
+
+Preflight is disabled, so a native `p` or `h1`-`h6` keeps its user agent
+margins, which scale with font size. MUI `Typography` sets `margin: 0`, so every
+element converted away from it needs an explicit reset: `m-0` when the source
+had no margin, or `mt-0` beside the margin utility it already carried. Only
+`gutterBottom` produced a margin of its own, `0.35em` at the bottom.
 
 `type-title-lg` is the 24px / 1.334 / 400 recipe matching the themed MUI `h5`
 contract. `type-overline` intentionally has no letter-spacing: the active IBM
@@ -99,7 +104,8 @@ centering, and budget row alignment.
 `ActivityStats.stories.tsx` checks the real income, expense, and transfer cards
 with deterministic data in both themes.
 The `ButtonTypography` story checks that a recipe inside a `ButtonBase` keeps
-the themed font family only when `font-sans` is present.
+the themed font family only when `font-sans` is present, and `NativeMargins`
+checks that a converted paragraph resets its user agent margins.
 The typography matrix compares every implemented recipe against its themed MUI
 Typography variant in light and dark mode. Dedicated 899px and 900px stories
 check both sides of the `md` breakpoint; the surface matrix compares default,

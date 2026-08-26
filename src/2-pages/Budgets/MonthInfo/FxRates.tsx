@@ -53,7 +53,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
             }
           />
         ))}
-        <p className="text-center type-caption text-muted-foreground">
+        <p className="m-0 text-center type-caption text-muted-foreground">
           {t(isCurrentRates ? 'title_current' : 'title', {
             date: formatDate(rateData.date, 'LLLL yyyy'),
           })}

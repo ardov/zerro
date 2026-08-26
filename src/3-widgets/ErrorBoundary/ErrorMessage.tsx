@@ -13,9 +13,9 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
   return (
     <div className="flex h-[inherit] items-center justify-center">
       <div className="mx-auto max-w-[500px] p-10">
-        <h1 className="mb-4 type-display">{t('title')}</h1>
+        <h1 className="mt-0 mb-4 type-display">{t('title')}</h1>
 
-        <p className="mb-4 type-body">{t('description')}</p>
+        <p className="mt-0 mb-4 type-body">{t('description')}</p>
 
         <div className="mt-6">
           <Button
