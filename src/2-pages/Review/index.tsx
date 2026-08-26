@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Typography } from '@mui/material'
+import { Button } from '@mui/material'
 import './index.scss'
 import type { TTransaction } from '6-shared/types'
 
@@ -64,20 +64,16 @@ function CardTitle({ year }: { year: number }) {
   const { t } = useTranslation('yearReview')
   return (
     <Card>
-      <Typography
-        variant="body1"
-        align="center"
-        className="results text-muted-foreground"
-      >
+      <p className="results m-0 text-center text-base leading-6 text-muted-foreground">
         {t('yearReview')}
-      </Typography>
+      </p>
       <div className="relative">
-        <Typography variant="h1" align="center" className="year">
+        <h1 className="year m-0 text-center text-[6rem] leading-[1.167] font-light">
           <b>{year}</b>
-        </Typography>
-        <Typography variant="h1" align="center" className="year shadow">
+        </h1>
+        <p className="year shadow m-0 text-center text-[6rem] leading-[1.167] font-light">
           <b>{year}</b>
-        </Typography>
+        </p>
       </div>
     </Card>
   )

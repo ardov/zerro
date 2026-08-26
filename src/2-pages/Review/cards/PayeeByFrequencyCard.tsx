@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { ButtonBase, IconButton, Typography } from '@mui/material'
+import { ButtonBase, IconButton } from '@mui/material'
 
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
@@ -41,20 +41,20 @@ export function PayeeByFrequencyCard(props: TCardProps) {
   return (
     <Card>
       <div className="flex flex-col items-center gap-2">
-        <Typography variant="body1" align="center">
+        <p className="m-0 text-center text-base leading-6">
           {t('favouritePlace', { number: i + 1 })}
-        </Typography>
+        </p>
 
         <ButtonBase
           className="rounded-lg px-2"
           onClick={() => props.onShowTransactions(transactions)}
         >
           <div className="flex flex-col items-center gap-2">
-            <Typography variant="h4" align="center" className="info-gradient">
+            <h2 className="info-gradient m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
               {payee}
-            </Typography>
+            </h2>
 
-            <Typography variant="body1" align="center">
+            <p className="m-0 text-center text-base leading-6">
               {t('purchase', { count })}
               <DisplayAmount
                 value={outcome / count}
@@ -64,7 +64,7 @@ export function PayeeByFrequencyCard(props: TCardProps) {
               <br />
               {t('andTotalSpend')}
               <DisplayAmount value={outcome} noShade decimals="ifAny" />
-            </Typography>
+            </p>
           </div>
         </ButtonBase>
 

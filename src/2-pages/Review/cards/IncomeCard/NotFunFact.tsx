@@ -1,6 +1,6 @@
 import { core } from 'zerro-core/redux'
 
-import { Dialog, IconButton, Link, Typography } from '@mui/material'
+import { Dialog, IconButton, Link } from '@mui/material'
 import Balancer from 'react-wrap-balancer'
 import pluralize from '6-shared/helpers/pluralize'
 import type { TFxAmount } from '6-shared/types'
@@ -26,10 +26,10 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
   return (
     <>
       <div className="flex flex-col gap-2 p-6">
-        <Typography variant="h5" align="center">
+        <h2 className="m-0 text-center text-2xl leading-[1.334] font-normal">
           <Balancer>{getPeopleArray(rate).join(' ')}</Balancer>
-        </Typography>
-        <Typography variant="body1" align="center">
+        </h2>
+        <p className="m-0 text-center text-base leading-6">
           {`Это ${rate} ${pluralize(rate, [
             'средний россиянин',
             'средних россиянина',
@@ -40,18 +40,18 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
           <IconButton size="small" onClick={toggleInfo}>
             <HelpOutlineIcon fontSize="small" />
           </IconButton>
-        </Typography>
+        </p>
       </div>
 
       <Dialog open={isOpenInfo} onClose={toggleInfo}>
         <div className="flex max-w-[360px] flex-col gap-6 p-6">
           <Balancer>
-            <Typography variant="body1">
+            <p className="m-0 text-base leading-6">
               Медианная зарплата в 2024 году в России{' '}
               <Amount value={MEDIAN_WAGE_RUB} currency="RUB" decimals="ifAny" />{' '}
               по данным <Link href={MEDIAN_WAGE_SOURCE}>Сбериндекса</Link>. Это
               значит, что половина россиян получают меньше этой суммы.
-            </Typography>
+            </p>
           </Balancer>
         </div>
       </Dialog>

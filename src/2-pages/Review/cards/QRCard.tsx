@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ButtonBase, Typography } from '@mui/material'
+import { ButtonBase } from '@mui/material'
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
@@ -18,12 +18,12 @@ export function QRCard(props: TCardProps) {
         onClick={() => props.onShowTransactions(hasReceipt)}
       >
         <div className="flex flex-col gap-2">
-          <Typography variant="body1" align="center">
+          <p className="m-0 text-center text-base leading-6">
             {t('youAttached')}
-          </Typography>
-          <Typography variant="h4" align="center">
+          </p>
+          <h2 className="m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
             {t('receipt', { count: value })}
-          </Typography>
+          </h2>
         </div>
       </ButtonBase>
     </Card>

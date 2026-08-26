@@ -5,12 +5,10 @@ import {
   Checkbox,
   Chip,
   Dialog,
-  Divider,
   FormControlLabel,
   FormGroup,
   IconButton,
   Link,
-  Typography,
 } from '@mui/material'
 import Balancer from 'react-wrap-balancer'
 import pluralize from '6-shared/helpers/pluralize'
@@ -59,9 +57,9 @@ export function NotFunCard(props: TCardProps) {
   const emptyCardContent = (
     <div className="flex w-full flex-col items-center gap-4">
       <Balancer>
-        <Typography variant="body1" align="center">
+        <p className="m-0 text-center text-base leading-6">
           Нет доходов — нет налогов 😅
-        </Typography>
+        </p>
       </Balancer>
     </div>
   )
@@ -70,12 +68,12 @@ export function NotFunCard(props: TCardProps) {
     <div className="flex w-full flex-col items-center gap-4">
       <TaxesChart income={totalIncome} outcome={totalOutcome} />
       <Balancer>
-        <Typography variant="body1" align="center">
+        <p className="m-0 text-center text-base leading-6">
           ≈{Math.round(taxesRatio * 100)}% от вашего дохода получила Россия.
-        </Typography>
+        </p>
       </Balancer>
       <Balancer>
-        <Typography variant="body1" align="center">
+        <p className="m-0 text-center text-base leading-6">
           <b>
             {taxMonths} {pluralize(taxMonths, ['месяц', 'месяца', 'месяцев'])}
           </b>{' '}
@@ -85,24 +83,24 @@ export function NotFunCard(props: TCardProps) {
             {workWeek} {pluralize(workWeek, ['день', 'дня', 'дней'])}
           </b>{' '}
           в неделю.
-        </Typography>
+        </p>
       </Balancer>
       <Balancer>
-        <Typography variant="body1" align="center">
+        <p className="m-0 text-center text-base leading-6">
           Если вы тратите столько времени на государство, значит абсолютно
           нормально и правильно требовать от него выполнения обязательств.
-        </Typography>
+        </p>
       </Balancer>
 
-      <Divider className="w-full" />
+      <hr className="m-0 w-full border-0 border-t border-border" />
 
       <div>
-        <Typography variant="body1" align="center">
+        <p className="m-0 text-center text-base leading-6">
           Россия получила от вас
-        </Typography>
-        <Typography variant="h4" align="center" className="red-gradient">
+        </p>
+        <h2 className="red-gradient m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
           ≈<DisplayAmount value={totalTaxes} noShade decimals="ifOnly" />
-        </Typography>
+        </h2>
       </div>
 
       <div className="text-center">
@@ -127,8 +125,8 @@ export function NotFunCard(props: TCardProps) {
           </span>
         ))}
       </div>
-      <Divider className="w-full" />
-      <Typography variant="body1" align="center">
+      <hr className="m-0 w-full border-0 border-t border-border" />
+      <p className="m-0 text-center text-base leading-6">
         <Balancer>
           Это приблизительные цифры, подробнее можно посчитать в{' '}
           <Link
@@ -156,7 +154,7 @@ export function NotFunCard(props: TCardProps) {
           </Link>{' '}
           (3 мин).
         </Balancer>
-      </Typography>
+      </p>
     </div>
   )
 

@@ -1,4 +1,4 @@
-import { ButtonBase, Typography } from '@mui/material'
+import { ButtonBase } from '@mui/material'
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
@@ -21,22 +21,22 @@ export function NoCategoryCard(props: TCardProps) {
               className="rounded-lg px-2"
               onClick={() => props.onShowTransactions(noTag)}
             >
-              <Typography variant="h4" align="center">
+              <h2 className="m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
                 {t('title', { count })}
-              </Typography>
+              </h2>
             </ButtonBase>
-            <Typography variant="body1" align="center">
+            <p className="m-0 text-center text-base leading-6">
               {t('withoutCategory', { count })}
-            </Typography>
+            </p>
           </>
         ) : (
           <>
-            <Typography variant="h4" align="center">
+            <p className="m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
               👍
-            </Typography>
-            <Typography variant="body1" align="center">
+            </p>
+            <p className="m-0 text-center text-base leading-6">
               {t('allTransactionsHaveCategories')}
-            </Typography>
+            </p>
           </>
         )}
       </div>

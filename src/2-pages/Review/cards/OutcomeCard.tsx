@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { IconButton, Typography } from '@mui/material'
+import { IconButton } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
@@ -39,28 +39,20 @@ export function OutcomeCard(props: TCardProps) {
   return (
     <Card>
       <div className="my-2 flex flex-col items-center gap-2">
-        <Typography variant="body1" align="center">
+        <p className="m-0 text-center text-base leading-6">
           {t('purchaseOfTheYear', { number: i + 1 })}
-        </Typography>
-        <Typography variant="h4" align="center" className="red-gradient">
+        </p>
+        <h2 className="red-gradient m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
           <DisplayAmount value={val} noShade decimals="ifAny" />
-        </Typography>
-        <Typography
-          variant="body1"
-          align="center"
-          className="text-muted-foreground"
-        >
+        </h2>
+        <p className="m-0 text-center text-base leading-6 text-muted-foreground">
           {additionalInfo.join('  •  ')}
-        </Typography>
+        </p>
         {comment && (
           <div className="mt-2 self-center rounded-lg bg-background px-4 py-1">
-            <Typography
-              variant="body1"
-              align="center"
-              className="text-muted-foreground"
-            >
+            <p className="m-0 text-center text-base leading-6 text-muted-foreground">
               {comment}
-            </Typography>
+            </p>
           </div>
         )}
 

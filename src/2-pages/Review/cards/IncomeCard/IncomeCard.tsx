@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { Typography, Chip } from '@mui/material'
+import { Chip } from '@mui/material'
 import { entries } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
 import { useAppSelector } from 'store'
@@ -53,20 +53,14 @@ export function IncomeCard(props: TCardProps) {
   return (
     <Card>
       <div className="flex flex-col items-center gap-2">
-        <Typography variant="body1" align="center">
-          {t('youEarned')}
-        </Typography>
-        <Typography variant="h4" align="center" className="green-gradient">
+        <p className="m-0 text-center text-base leading-6">{t('youEarned')}</p>
+        <h2 className="green-gradient m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
           <DisplayAmount value={totalIncomeFx} noShade decimals="ifOnly" />
-        </Typography>
-        <Typography
-          variant="body2"
-          align="center"
-          className="text-muted-foreground"
-        >
+        </h2>
+        <p className="m-0 text-center text-sm leading-[1.43] text-muted-foreground">
           <DisplayAmount value={monthlyIncome} noShade decimals="ifOnly" />{' '}
           {t('perMonth')}
-        </Typography>
+        </p>
         <NotFunFact income={totalIncomeFx} />
       </div>
       <div className="mt-6 text-center">

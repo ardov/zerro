@@ -1,4 +1,3 @@
-import { Typography } from '@mui/material'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
@@ -29,28 +28,24 @@ export function SavingsCard({ year }: TCardProps) {
   return (
     <Card>
       <div className="flex flex-col items-center gap-2">
-        <Typography variant="body1" align="center">
-          {t('youSaved')}
-        </Typography>
-        <Typography
-          variant="h4"
-          align="center"
-          className={savings ? 'green-gradient' : 'red-gradient'}
+        <p className="m-0 text-center text-base leading-6">{t('youSaved')}</p>
+        <h2
+          className={`m-0 text-center text-[2.125rem] leading-[1.235] font-medium ${savings ? 'green-gradient' : 'red-gradient'}`}
         >
           <DisplayAmount value={savings} noShade decimals="ifOnly" />
-        </Typography>
+        </h2>
 
         <div className="mt-4">
-          <Typography variant="body1" align="center">
+          <p className="m-0 text-center text-base leading-6">
             {t('savingsPercent', { percent: savingsPercent }) +
               ' ' +
               (savingsPercent > 20 ? t('greatJob') : t('goodJob'))}
-          </Typography>
+          </p>
 
           {monthsOfSavings > 0 && (
-            <Typography variant="body1" align="center" className="mt-2">
+            <p className="m-0 mt-2 text-center text-base leading-6">
               {t('savingsMonths', { months: monthsOfSavings })}
-            </Typography>
+            </p>
           )}
         </div>
       </div>
