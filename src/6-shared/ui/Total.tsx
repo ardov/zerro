@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef } from 'react'
-import { Typography } from '@mui/material'
+import clsx from 'clsx'
 import type { AmountProps } from '6-shared/ui/Amount'
 import { Amount } from '6-shared/ui/Amount'
 
@@ -25,19 +25,35 @@ export function Total({
   amountColor,
   ...rest
 }: TotalProps) {
+  const alignmentClassName =
+    align === 'right'
+      ? 'text-right'
+      : align === 'left'
+        ? 'text-left'
+        : 'text-center'
+  const amountClassName = clsx(
+    'm-0 text-2xl leading-[1.334]',
+    alignmentClassName,
+    amountColor === 'error.main'
+      ? 'text-error'
+      : amountColor === 'success.main'
+        ? 'text-success'
+        : value
+          ? 'text-foreground'
+          : 'text-muted-foreground'
+  )
+
   return (
     <div {...rest}>
-      <Typography
-        align={align}
-        variant="body2"
-        children={title}
-        className="text-muted-foreground"
-      />
-      <Typography
-        align={align}
-        variant="h5"
-        color={amountColor || (value ? 'text.primary' : 'text.secondary')}
+      <p
+        className={clsx(
+          'm-0 text-sm leading-[1.43] text-muted-foreground',
+          alignmentClassName
+        )}
       >
+        {title}
+      </p>
+      <p className={amountClassName}>
         <Amount
           value={value}
           currency={currency}
@@ -45,7 +61,7 @@ export function Total({
           decimals={decimals}
           noShade={noShade}
         />
-      </Typography>
+      </p>
     </div>
   )
 }
