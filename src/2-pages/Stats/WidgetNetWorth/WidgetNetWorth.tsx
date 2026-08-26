@@ -2,13 +2,7 @@ import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import {
-  Typography,
-  Paper,
-  Checkbox,
-  FormControlLabel,
-  Card,
-} from '@mui/material'
+import { Typography, Checkbox, FormControlLabel } from '@mui/material'
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -113,7 +107,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
   )
 
   return (
-    <Paper>
+    <div className="surface-card shadow-elevation-1">
       <div className="min-w-full p-4">
         {/* Header */}
         <Typography variant="h5">
@@ -173,7 +167,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
         {makeCheck('lented')}
         {makeCheck('total')}
       </div>
-    </Paper>
+    </div>
   )
 }
 
@@ -198,7 +192,7 @@ const CustomTooltip = (props: any) => {
   const date = payload[0]?.payload?.date
   const values = payload.filter(v => v.value)
   return (
-    <Card elevation={10} className="p-4">
+    <div className="surface-card shadow-elevation-10 p-4">
       <Typography variant="h6">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
       </Typography>
@@ -211,7 +205,7 @@ const CustomTooltip = (props: any) => {
           currency={currency}
         />
       ))}
-    </Card>
+    </div>
   )
 }
 

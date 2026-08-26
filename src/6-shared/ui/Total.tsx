@@ -32,7 +32,7 @@ export function Total({
         ? 'text-left'
         : 'text-center'
   const amountClassName = clsx(
-    'm-0 text-2xl leading-[1.334]',
+    'm-0 type-title-lg',
     alignmentClassName,
     amountColor === 'error.main'
       ? 'text-error'

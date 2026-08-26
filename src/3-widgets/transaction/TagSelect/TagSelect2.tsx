@@ -5,7 +5,6 @@ import { useAppSelector } from 'store'
 import type { PopoverProps } from '@mui/material'
 import {
   Popover,
-  Paper,
   IconButton,
   List,
   ListItemButton,
@@ -174,7 +173,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
       onClose={onClose}
       {...popoverProps}
     >
-      <Paper square elevation={0} className="sticky top-0 z-10 px-2 pt-2">
+      <div className="surface-card sticky top-0 z-10 rounded-none shadow-none px-2 pt-2">
         <TextField
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -184,7 +183,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
           fullWidth
           autoFocus
         />
-      </Paper>
+      </div>
 
       <List>
         {flatList.map((tag, idx) => (

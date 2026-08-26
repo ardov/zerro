@@ -1,7 +1,7 @@
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Paper, Card, Typography, Divider } from '@mui/material'
+import { Typography, Divider } from '@mui/material'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -56,7 +56,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
   const colorAxisText = theme.palette.text.disabled
 
   return (
-    <Paper>
+    <div className="surface-card shadow-elevation-1">
       <div className="min-w-full p-4">
         <Typography variant="h5">
           {t('incomesAndOutcomes')}{' '}
@@ -125,7 +125,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
           <CartesianGrid opacity={0.5} vertical={false} />
         </AreaChart>
       </ResponsiveContainer>
-    </Paper>
+    </div>
   )
 }
 
@@ -155,7 +155,7 @@ const CustomTooltip = (props: any) => {
   const savingsRate = income > 0 ? (diff / income) * 100 : 0
 
   return (
-    <Card elevation={10} className="p-4">
+    <div className="surface-card shadow-elevation-10 p-4">
       <Typography variant="h6">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
       </Typography>
@@ -181,7 +181,7 @@ const CustomTooltip = (props: any) => {
         amount={savingsRate}
         currency="%"
       />
-    </Card>
+    </div>
   )
 }
 

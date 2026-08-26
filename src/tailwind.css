@@ -58,6 +58,7 @@
   --shadow-elevation-1: var(--elevation-1);
   --shadow-elevation-2: var(--elevation-2);
   --shadow-elevation-4: var(--elevation-4);
+  --shadow-elevation-10: var(--elevation-10);
 }
 
 @utility type-body {
@@ -73,7 +74,7 @@
 }
 
 @utility type-overline {
-  @apply text-xs leading-[2.66] font-normal uppercase tracking-[0.08333em];
+  @apply text-xs leading-[2.66] font-normal uppercase;
 }
 
 @utility type-title {
@@ -82,4 +83,32 @@
 
 @utility type-display {
   @apply text-[2.125rem] leading-[1.235] font-medium;
+}
+
+@utility type-title-lg {
+  @apply text-2xl leading-[1.334] font-normal;
+}
+
+@utility surface-card {
+  @apply rounded-lg bg-card text-card-foreground;
+}
+
+@utility shadow-elevation-1 {
+  box-shadow: var(--elevation-1);
+}
+
+@utility shadow-elevation-2 {
+  box-shadow: var(--elevation-2);
+}
+
+@utility shadow-elevation-4 {
+  box-shadow: var(--elevation-4);
+}
+
+@utility shadow-elevation-10 {
+  box-shadow: var(--elevation-10);
+}
+
+@utility shadow-none {
+  box-shadow: none;
 }

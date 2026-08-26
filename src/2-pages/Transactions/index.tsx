@@ -2,7 +2,7 @@ import type { FC, CSSProperties } from 'react'
 import { useState, useCallback } from 'react'
 import { TransactionList } from '3-widgets/transaction/TransactionList'
 import type { Theme, DrawerProps } from '@mui/material'
-import { Drawer, useMediaQuery, Paper } from '@mui/material'
+import { Drawer, useMediaQuery } from '@mui/material'
 import {
   TrEmptyState,
   TransactionPreview,
@@ -43,7 +43,7 @@ export default function TransactionsView() {
       <link rel="canonical" href="https://zerro.app/transactions" />
       <div className="flex h-screen">
         <div className="flex min-w-0 grow justify-center p-0 md:p-4">
-          <Paper className="flex max-w-[560px] flex-1 overflow-hidden pb-14 md:pb-0">
+          <div className="surface-card shadow-elevation-1 flex max-w-[560px] flex-1 overflow-hidden pb-14 md:pb-0">
             <TransactionList
               checkedDate={checkedDate}
               view={view}
@@ -51,7 +51,7 @@ export default function TransactionsView() {
               onTrOpen={handleTrOpen}
               opened={opened || undefined}
             />
-          </Paper>
+          </div>
         </div>
 
         {isMobile ? (

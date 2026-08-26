@@ -3,7 +3,6 @@ import { memo, useCallback } from 'react'
 import { shallowEqual } from 'react-redux'
 import clsx from 'clsx'
 import { deepEqual } from '6-shared/helpers/deepEqual'
-import { Paper } from '@mui/material'
 import type { TISOMonth } from '6-shared/types'
 import { useToggle } from '6-shared/hooks/useToggle'
 
@@ -148,7 +147,12 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     })
 
   return (
-    <Paper className={clsx('relative pb-2', className)}>
+    <div
+      className={clsx(
+        'surface-card shadow-elevation-1 relative pb-2',
+        className
+      )}
+    >
       <Header
         month={month}
         isAllShown={showAll}
@@ -160,7 +164,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
       <NewGroup visible={reorderMode} />
       {renderGroups}
       <Footer month={month} metric={metric} />
-    </Paper>
+    </div>
   )
 }
 

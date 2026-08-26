@@ -68,9 +68,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({
       {isMobile && (
         <div className="flex items-center px-6 py-2">
           <div className="grow">
-            <h2 className="truncate text-xl font-medium leading-8">
-              {getMonthName(month)}
-            </h2>
+            <h2 className="truncate type-title">{getMonthName(month)}</h2>
           </div>
 
           <Tooltip title={t('close')}>

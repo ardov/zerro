@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Paper, Typography, Collapse, Link } from '@mui/material'
+import { Typography, Collapse, Link } from '@mui/material'
 import clsx from 'clsx'
 import { QRCodeSVG as QRCode } from 'qrcode.react'
 import { useAppTheme } from '6-shared/ui/theme'
@@ -56,7 +56,9 @@ export const Reciept: FC<RecieptProps> = ({ value, className }) => {
   )
 
   return (
-    <Paper className={clsx('flex p-4', className)}>
+    <div
+      className={clsx('surface-card shadow-elevation-1 flex p-4', className)}
+    >
       <div className="flex flex-col">{parsedContent}</div>
       <div className="ml-auto">
         <QRCode
@@ -66,7 +68,7 @@ export const Reciept: FC<RecieptProps> = ({ value, className }) => {
           includeMargin
         />
       </div>
-    </Paper>
+    </div>
   )
 }
 

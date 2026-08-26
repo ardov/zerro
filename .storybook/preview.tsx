@@ -4,6 +4,20 @@ import { StoryProviders } from './StoryProviders'
 import './tailwind.css'
 import './preview.css'
 
+const viewports = {
+  ...INITIAL_VIEWPORTS,
+  zerro899: {
+    name: 'Zerro 899px',
+    styles: { width: '899px', height: '800px' },
+    type: 'desktop',
+  },
+  zerro900: {
+    name: 'Zerro 900px',
+    styles: { width: '900px', height: '800px' },
+    type: 'desktop',
+  },
+}
+
 const withAppProviders: Decorator = (Story, context) => (
   <StoryProviders context={context}>
     <Story />
@@ -23,7 +37,7 @@ const preview: Preview = {
       test: 'todo',
     },
     viewport: {
-      options: INITIAL_VIEWPORTS,
+      options: viewports,
     },
   },
   globalTypes: {

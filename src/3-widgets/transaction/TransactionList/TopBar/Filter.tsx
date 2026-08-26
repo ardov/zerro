@@ -8,7 +8,6 @@ import {
   InputBase,
   Menu,
   MenuItem,
-  Paper,
   Popover,
   TextField,
 } from '@mui/material'
@@ -130,7 +129,7 @@ const Filter: FC<FilterProps> = ({
   )
 
   return (
-    <Paper elevation={10} className="flex flex-col p-[6px]">
+    <div className="surface-card shadow-elevation-10 flex flex-col p-[6px]">
       <div className="flex min-h-9 items-center px-2">
         <InputBase
           value={search}
@@ -230,7 +229,7 @@ const Filter: FC<FilterProps> = ({
           </div>
         )}
       </Popover>
-    </Paper>
+    </div>
   )
 }
 

@@ -26,7 +26,7 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
   return (
     <>
       <div className="flex flex-col gap-2 p-6">
-        <h2 className="m-0 text-center text-2xl leading-[1.334] font-normal">
+        <h2 className="m-0 text-center type-title-lg">
           <Balancer>{getPeopleArray(rate).join(' ')}</Balancer>
         </h2>
         <p className="m-0 text-center type-body">

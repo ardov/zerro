@@ -50,9 +50,10 @@ necessarily win. Budget group rows, for example, override `items-center` with
 ## Typography recipes
 
 `src/tailwind.css` registers `type-body`, `type-body-sm`, `type-caption`,
-`type-overline`, `type-title`, and `type-display` as top-level Tailwind v4
-`@utility` rules. Tailwind emits them in the `utilities` layer and supports
-variants such as `md:type-title` (the compatibility `md` breakpoint is 900px).
+`type-overline`, `type-title`, `type-title-lg`, and `type-display` as top-level
+Tailwind v4 `@utility` rules. Tailwind emits them in the `utilities` layer and
+supports variants such as `md:type-title` (the compatibility `md` breakpoint is
+900px).
 Stylelint explicitly allows `utility`; unknown at-rule checking remains enabled.
 
 Use one base recipe per element, with an optional recipe at another breakpoint:
@@ -67,6 +68,16 @@ Choose those at the call site. Preflight is disabled, so native heading margins
 and weight still need an explicit decision. Local utilities such as
 `type-title font-normal leading-6` can override the corresponding recipe values.
 
+`type-title-lg` is the 24px / 1.334 / 400 recipe matching the themed MUI `h5`
+contract. `type-overline` intentionally has no letter-spacing: the active IBM
+Plex Sans MUI theme does not add the Roboto-specific overline tracking.
+
+`surface-card` is the shared static Paper surface recipe. Pair it with an
+explicit `shadow-elevation-1`, `shadow-elevation-2`, `shadow-elevation-4`, or
+`shadow-elevation-10` when the source surface has elevation. Padding, layout,
+clipping, radius exceptions, and z-index remain local to the consumer. Do not
+use it to replace Paper slots owned by Drawer, Popover, Menu, or Tooltip.
+
 `cn()` uses the default `tailwind-merge` configuration, which does not know the
 custom `type-*` group. Do not expect `cn('type-body', 'type-title')` to select
 the last recipe; select one recipe explicitly. Class-string order alone is not
@@ -75,11 +86,14 @@ a CSS precedence rule.
 ## Regression checks
 
 `stories/foundation/MuiTailwindInterop.stories.tsx` checks actual computed styles
-for MUI/Tailwind coexistence, icon centering, and budget row alignment.
+for MUI/Tailwind coexistence, typography recipes, static Paper surfaces, icon
+centering, and budget row alignment.
 `ActivityStats.stories.tsx` checks the real income, expense, and transfer cards
 with deterministic data in both themes.
-The `TypographyUtilities` interop story checks local weight/line-height overrides
-and the active branch of `md:type-title` at the browser's viewport width.
+The typography matrix compares every implemented recipe against its themed MUI
+Typography variant in light and dark mode. Dedicated 899px and 900px stories
+check both sides of the `md` breakpoint; the surface matrix compares default,
+square, outlined, and elevation-10 contracts in both themes.
 
 Run these with `pnpm test:storybook`. Rendering a story or passing TypeScript
 alone does not establish visual parity; affected application routes also need

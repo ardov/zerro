@@ -58,6 +58,7 @@ const GlobalVariables = (props: { theme: Theme }) => {
       --elevation-1: ${shadows[1]};
       --elevation-2: ${shadows[2]};
       --elevation-4: ${shadows[4]};
+      --elevation-10: ${shadows[10]};
     }
   `
   return <Global styles={styles} />

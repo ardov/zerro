@@ -3,7 +3,7 @@ import React, { useState, useMemo, useCallback, memo } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Typography, Paper, List, ListSubheader, Collapse } from '@mui/material'
+import { Typography, List, ListSubheader, Collapse } from '@mui/material'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
@@ -193,9 +193,7 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
     const colorId = 'gradient' + acc.id.replace(/[^a-zA-Z0-9]/g, '')
 
     return (
-      <Paper
-        style={{ overflow: 'hidden', position: 'relative', marginBottom: 8 }}
-      >
+      <div className="surface-card shadow-elevation-1 relative mb-2 overflow-hidden">
         <div className="relative z-[1] min-w-40 pointer-events-none p-4">
           <Typography variant="body2">
             <span
@@ -265,7 +263,7 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </Paper>
+      </div>
     )
   }
 )

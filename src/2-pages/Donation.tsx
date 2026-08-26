@@ -12,9 +12,7 @@ export default function Donation() {
       <link rel="canonical" href="https://zerro.app/donation" />
       <div className="flex h-full items-center justify-center">
         <div className="mx-auto max-w-[480px] p-6 pb-16">
-          <h1 className="mb-4 text-center text-2xl leading-[1.334] font-normal">
-            {t('heading')}
-          </h1>
+          <h1 className="mb-4 text-center type-title-lg">{t('heading')}</h1>
 
           <p className="mb-4 text-center type-body">{t('subtitle')}</p>
 
