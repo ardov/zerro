@@ -1,7 +1,8 @@
 import type { FC, ReactNode } from 'react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { ButtonBase, Typography } from '@mui/material'
+import { ButtonBase } from '@mui/material'
+import clsx from 'clsx'
 import { Amount } from '6-shared/ui/Amount'
 import type { DragTypes } from '2-pages/Budgets/DnD'
 
@@ -13,6 +14,7 @@ export type RevealItem = {
   key: React.Key
   label: string
   value: number
+  /** Tailwind text colour utility, not a MUI palette path. */
   color: string
   onClick?: (e: React.MouseEvent<HTMLElement>) => void
   draggable?: {
@@ -243,8 +245,8 @@ const RevealCellContent: FC<{
     <span className="truncate type-caption font-sans leading-[1.2] text-muted-foreground">
       {label}
     </span>
-    <Typography variant="body2" noWrap sx={{ color }}>
+    <p className={clsx('m-0 truncate type-body-sm font-sans', color)}>
       <Amount value={value} decimals="ifOnly" />
-    </Typography>
+    </p>
   </>
 )

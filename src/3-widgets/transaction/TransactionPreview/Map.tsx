@@ -1,19 +1,23 @@
 import type { FC } from 'react'
-import type { BoxProps } from '@mui/material'
-import { Paper } from '@mui/material'
+import clsx from 'clsx'
 import styled from '@emotion/styled'
 
 interface MapProps {
   longitude?: number | null
   latitude?: number | null
-  sx?: BoxProps['sx']
+  className?: string
 }
 
-export const Map: FC<MapProps> = ({ longitude, latitude, sx }) => {
+export const Map: FC<MapProps> = ({ longitude, latitude, className }) => {
   if (!(longitude && latitude)) return null
 
   return (
-    <Paper sx={{ overflow: 'hidden', ...sx }}>
+    <div
+      className={clsx(
+        'surface-card shadow-elevation-1 overflow-hidden',
+        className
+      )}
+    >
       <StyledIframe
         title="geo"
         src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${longitude}!3d${latitude}!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
@@ -23,7 +27,7 @@ export const Map: FC<MapProps> = ({ longitude, latitude, sx }) => {
         loading="lazy"
         allowFullScreen
       />
-    </Paper>
+    </div>
   )
 }
 

@@ -1,6 +1,6 @@
 import type { FC } from 'react'
 import { useCallback } from 'react'
-import { Typography, IconButton, ButtonBase } from '@mui/material'
+import { IconButton, ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -58,18 +58,14 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
           }}
         >
           <EmojiFlagsIcon />
-          <Typography
-            variant="body1"
-            component="span"
-            color={goalInfo ? 'text.primary' : 'text.disabled'}
-            sx={{
-              textAlign: 'left',
-            }}
-          >
+          {/* The source read `color={goalInfo ? 'text.primary' : 'text.disabled'}`,
+              but MUI's `color` prop takes `textDisabled`, not a dotted path, so
+              the muted state never rendered. Parity keeps the foreground. */}
+          <span className="type-body font-sans text-left text-foreground">
             {goalInfo
               ? core.goals.formatGoal(goalInfo.goal, currency)
               : t('goal')}
-          </Typography>
+          </span>
         </ButtonBase>
 
         <EnvelopeInfo month={month} id={id} />

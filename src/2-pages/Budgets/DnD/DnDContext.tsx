@@ -14,7 +14,6 @@ import {
   KeyboardSensor,
 } from '@dnd-kit/core'
 import { useTranslation } from 'react-i18next'
-import { Typography } from '@mui/material'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { useAppDispatch, useAppSelector } from 'store/index'
 import { core } from 'zerro-core/redux'
@@ -128,9 +127,9 @@ const DragObj = () => {
       <Monies />
     ) : activeType === DragTypes.envelope ? (
       <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-background px-4 py-1">
-        <Typography noWrap>
+        <p className="m-0 truncate type-body">
           {activeId ? envelopes[activeId].name : t('category')}
-        </Typography>
+        </p>
       </div>
     ) : null
 

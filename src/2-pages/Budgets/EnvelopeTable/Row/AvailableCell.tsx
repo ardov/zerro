@@ -114,7 +114,7 @@ export function getAvailableColor(
   else return neutral
 }
 
-function getAvailableColorClass(color: string) {
+export function getAvailableColorClass(color: string) {
   switch (color) {
     case 'success.main':
       return 'text-success'

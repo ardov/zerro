@@ -587,7 +587,7 @@ export const MobileRevealColors: Story = {
             key: 'assigned',
             label: 'Assigned',
             value: 0,
-            color: 'text.disabled',
+            color: 'text-disabled-foreground',
           },
         ]}
       >

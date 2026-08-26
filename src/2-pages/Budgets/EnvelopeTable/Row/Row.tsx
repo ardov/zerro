@@ -25,7 +25,11 @@ import { SlideReveal } from '../SlideReveal'
 import { NameCell } from './NameCell'
 import { BudgetCell } from './BudgetCell'
 import { ActivityCell } from './ActivityCell'
-import { AvailableCell, getAvailableColor } from './AvailableCell'
+import {
+  AvailableCell,
+  getAvailableColor,
+  getAvailableColorClass,
+} from './AvailableCell'
 
 type EnvelopeRowProps = {
   id: core.envelopes.TEnvelopeId
@@ -73,7 +77,8 @@ function useRevealItems(params: {
         key: Metric.assigned,
         label: t('assigned', { ns: 'common' }),
         value: assigned,
-        color: isSelf || !assigned ? 'text.disabled' : 'text.primary',
+        color:
+          isSelf || !assigned ? 'text-disabled-foreground' : 'text-foreground',
         onClick: e => openBudgetPopover(id, e.currentTarget),
       },
     },
@@ -83,7 +88,7 @@ function useRevealItems(params: {
         key: Metric.outcome,
         label: t('activity', { ns: 'common' }),
         value: activity,
-        color: activity ? 'text.primary' : 'text.disabled',
+        color: activity ? 'text-foreground' : 'text-disabled-foreground',
         onClick: () => openTransactionsPopover(id),
       },
     },
@@ -93,7 +98,9 @@ function useRevealItems(params: {
         key: Metric.available,
         label: t('available', { ns: 'common' }),
         value: available,
-        color: getAvailableColor(available, isChild, !!assigned, isSelf),
+        color: getAvailableColorClass(
+          getAvailableColor(available, isChild, !!assigned, isSelf)
+        ),
         draggable: { type: DragTypes.amount, id, disabled: !!isSelf },
       },
     },
