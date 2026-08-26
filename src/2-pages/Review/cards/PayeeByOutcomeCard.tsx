@@ -46,10 +46,10 @@ export function PayeeByOutcomeCard(props: TCardProps) {
           onClick={() => props.onShowTransactions(transactions)}
         >
           <div className="flex flex-col items-center gap-2">
-            <h2 className="red-gradient m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
+            <h2 className="red-gradient m-0 text-center type-display">
               {payee}
             </h2>
-            <p className="m-0 text-center text-base leading-6">
+            <p className="m-0 text-center type-body">
               {t('spentHere ')}
               <DisplayAmount value={outcome} noShade decimals="ifOnly" />
               {t(' purchase', { count })}

@@ -53,11 +53,11 @@ export function IncomeCard(props: TCardProps) {
   return (
     <Card>
       <div className="flex flex-col items-center gap-2">
-        <p className="m-0 text-center text-base leading-6">{t('youEarned')}</p>
-        <h2 className="green-gradient m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
+        <p className="m-0 text-center type-body">{t('youEarned')}</p>
+        <h2 className="green-gradient m-0 text-center type-display">
           <DisplayAmount value={totalIncomeFx} noShade decimals="ifOnly" />
         </h2>
-        <p className="m-0 text-center text-sm leading-[1.43] text-muted-foreground">
+        <p className="m-0 text-center type-body-sm text-muted-foreground">
           <DisplayAmount value={monthlyIncome} noShade decimals="ifOnly" />{' '}
           {t('perMonth')}
         </p>

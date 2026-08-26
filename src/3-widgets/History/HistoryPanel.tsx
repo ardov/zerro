@@ -75,9 +75,7 @@ export function HistoryPanel() {
       }}
     >
       <div className="flex items-center justify-between px-4 py-2">
-        <h2 className="m-0 text-xl leading-[1.6] font-medium">
-          {t('panelTitle')}
-        </h2>
+        <h2 className="m-0 type-title">{t('panelTitle')}</h2>
         <IconButton
           size="small"
           onClick={displayProps.onClose}
@@ -125,13 +123,11 @@ function EmptyHistory({ loading }: { loading: boolean }) {
   return (
     <div className="flex grow flex-col items-center justify-center gap-2 px-8 text-center text-muted-foreground">
       <HistoryIcon className="text-[40px] opacity-40" />
-      <p className="m-0 text-sm leading-[1.43]">
+      <p className="m-0 type-body-sm">
         {loading ? t('historyLoading') : t('noHistory')}
       </p>
       {!loading && (
-        <p className="m-0 text-xs leading-[1.66] opacity-80">
-          {t('noHistoryHint')}
-        </p>
+        <p className="m-0 type-caption opacity-80">{t('noHistoryHint')}</p>
       )}
     </div>
   )

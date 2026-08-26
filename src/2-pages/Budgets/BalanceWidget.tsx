@@ -65,7 +65,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         currency={currency}
       />
       <hr className="m-0 w-full border-0 border-t border-border" />
-      <p className="text-center text-sm leading-[1.43] text-muted-foreground">
+      <p className="text-center type-body-sm text-muted-foreground">
         <Balancer>{getExplaining(fundsEnd, toBeAssigned, overspend)}</Balancer>
       </p>
     </div>

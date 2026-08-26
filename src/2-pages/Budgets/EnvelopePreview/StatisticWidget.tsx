@@ -151,7 +151,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
       style={style}
     >
       <div className="px-4 pt-4">
-        <p className="text-base leading-6 text-foreground">
+        <p className="type-body text-foreground">
           <span>{t('average')} </span>
           <InlineButton onClick={switchMetric}>{t(metric)}</InlineButton>
           <span> {t('over')} </span>

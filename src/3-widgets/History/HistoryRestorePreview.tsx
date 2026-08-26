@@ -53,32 +53,30 @@ export function HistoryRestorePreview() {
 
   return (
     <div className="shrink-0 border-t border-border bg-accent px-4 py-3">
-      <p className="m-0 text-xs leading-[2.66] font-normal uppercase tracking-[0.08333em] text-muted-foreground">
+      <p className="m-0 type-overline text-muted-foreground">
         {tHistory('restoreWouldChange')}
       </p>
       {/* Its own scroll: with every entity type present the list would
           otherwise push the button it belongs to off the panel. */}
       <div className="max-h-40 overflow-y-auto">
         {missing ? (
-          <p className="m-0 text-sm leading-[1.43] text-muted-foreground">
+          <p className="m-0 type-body-sm text-muted-foreground">
             {tHistory('pointUnavailable')}
           </p>
         ) : !summary ? (
-          <p className="m-0 text-sm leading-[1.43] text-muted-foreground">
+          <p className="m-0 type-body-sm text-muted-foreground">
             {tHistory('restoreLoading')}
           </p>
         ) : rows.length === 0 ? (
-          <p className="m-0 text-sm leading-[1.43] text-muted-foreground">
+          <p className="m-0 type-body-sm text-muted-foreground">
             {tHistory('restoreNoChanges')}
           </p>
         ) : (
           <div className="mt-1 flex flex-col gap-[2px]">
             {rows.map(row => (
               <div key={row.key} className="flex justify-between gap-4">
-                <span className="truncate text-sm leading-[1.43]">
-                  {row.label}
-                </span>
-                <span className="shrink-0 whitespace-nowrap text-sm leading-[1.43] text-muted-foreground">
+                <span className="truncate type-body-sm">{row.label}</span>
+                <span className="shrink-0 whitespace-nowrap type-body-sm text-muted-foreground">
                   {row.parts}
                 </span>
               </div>

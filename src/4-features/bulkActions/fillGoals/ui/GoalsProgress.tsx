@@ -64,7 +64,7 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
     >
       <ButtonBase sx={baseStyles} {...btnProps} onClick={completeAll}>
         <RadialProgress value={progress} />
-        <span className="text-base leading-6">
+        <span className="type-body">
           {t('goalsProgress', { percent: Math.floor(progress * 100) })}
         </span>
       </ButtonBase>

@@ -92,7 +92,7 @@ const ArchivedList: FC<{ accs: core.accounts.TAccountPopulated[] }> = props => {
         </List>
       </Collapse>
       <ListItemButton
-        className="rounded-lg text-sm leading-[1.43] text-info"
+        className="rounded-lg type-body-sm text-info"
         onClick={toggleVisibility}
       >
         {visible ? (

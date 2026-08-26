@@ -16,11 +16,9 @@ export default function Token() {
       <link rel="canonical" href="https://zerro.app/token" />
       <div className="flex h-[inherit] items-center justify-center">
         <div className="mx-auto max-w-[500px] p-10">
-          <h1 className="mb-4 text-[2.125rem] leading-[1.235] font-medium">
-            {t('heading')}
-          </h1>
+          <h1 className="mb-4 type-display">{t('heading')}</h1>
 
-          <p className="mb-4 text-base leading-6">{t('body')}</p>
+          <p className="mb-4 type-body">{t('body')}</p>
 
           <div className="mt-6">
             <Button

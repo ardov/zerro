@@ -47,7 +47,7 @@ export function Total({
     <div {...rest}>
       <p
         className={clsx(
-          'm-0 text-sm leading-[1.43] text-muted-foreground',
+          'm-0 type-body-sm text-muted-foreground',
           alignmentClassName
         )}
       >

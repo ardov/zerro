@@ -16,9 +16,7 @@ export default function Donation() {
             {t('heading')}
           </h1>
 
-          <p className="mb-4 text-center text-base leading-6">
-            {t('subtitle')}
-          </p>
+          <p className="mb-4 text-center type-body">{t('subtitle')}</p>
 
           <div className="flex flex-col gap-4 py-4">
             <LinkCard
@@ -35,7 +33,7 @@ export default function Donation() {
             />
           </div>
 
-          <p className="mb-4 text-center text-base leading-6 text-muted-foreground">
+          <p className="mb-4 text-center type-body text-muted-foreground">
             {t('afterword')}
           </p>
         </div>
@@ -62,10 +60,8 @@ const LinkCard: FC<LinkCardProps> = props => {
     >
       <div className="max-w-12">{icon}</div>
       <div className="ml-4">
-        <h2 className="m-0 text-xl leading-[1.6] font-medium">{primary}</h2>
-        <p className="m-0 text-sm leading-[1.43] text-muted-foreground">
-          {secondary}
-        </p>
+        <h2 className="m-0 type-title">{primary}</h2>
+        <p className="m-0 type-body-sm text-muted-foreground">{secondary}</p>
       </div>
     </Link>
   )

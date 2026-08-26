@@ -29,7 +29,7 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
         <h2 className="m-0 text-center text-2xl leading-[1.334] font-normal">
           <Balancer>{getPeopleArray(rate).join(' ')}</Balancer>
         </h2>
-        <p className="m-0 text-center text-base leading-6">
+        <p className="m-0 text-center type-body">
           {`Это ${rate} ${pluralize(rate, [
             'средний россиянин',
             'средних россиянина',
@@ -46,7 +46,7 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
       <Dialog open={isOpenInfo} onClose={toggleInfo}>
         <div className="flex max-w-[360px] flex-col gap-6 p-6">
           <Balancer>
-            <p className="m-0 text-base leading-6">
+            <p className="m-0 type-body">
               Медианная зарплата в 2024 году в России{' '}
               <Amount value={MEDIAN_WAGE_RUB} currency="RUB" decimals="ifAny" />{' '}
               по данным <Link href={MEDIAN_WAGE_SOURCE}>Сбериндекса</Link>. Это

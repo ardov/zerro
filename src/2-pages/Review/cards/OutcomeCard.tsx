@@ -39,18 +39,18 @@ export function OutcomeCard(props: TCardProps) {
   return (
     <Card>
       <div className="my-2 flex flex-col items-center gap-2">
-        <p className="m-0 text-center text-base leading-6">
+        <p className="m-0 text-center type-body">
           {t('purchaseOfTheYear', { number: i + 1 })}
         </p>
-        <h2 className="red-gradient m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
+        <h2 className="red-gradient m-0 text-center type-display">
           <DisplayAmount value={val} noShade decimals="ifAny" />
         </h2>
-        <p className="m-0 text-center text-base leading-6 text-muted-foreground">
+        <p className="m-0 text-center type-body text-muted-foreground">
           {additionalInfo.join('  •  ')}
         </p>
         {comment && (
           <div className="mt-2 self-center rounded-lg bg-background px-4 py-1">
-            <p className="m-0 text-center text-base leading-6 text-muted-foreground">
+            <p className="m-0 text-center type-body text-muted-foreground">
               {comment}
             </p>
           </div>

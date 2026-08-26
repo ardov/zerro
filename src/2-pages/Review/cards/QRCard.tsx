@@ -18,10 +18,8 @@ export function QRCard(props: TCardProps) {
         onClick={() => props.onShowTransactions(hasReceipt)}
       >
         <div className="flex flex-col gap-2">
-          <p className="m-0 text-center text-base leading-6">
-            {t('youAttached')}
-          </p>
-          <h2 className="m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
+          <p className="m-0 text-center type-body">{t('youAttached')}</p>
+          <h2 className="m-0 text-center type-display">
             {t('receipt', { count: value })}
           </h2>
         </div>

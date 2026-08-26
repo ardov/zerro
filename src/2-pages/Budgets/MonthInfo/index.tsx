@@ -87,7 +87,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({
 
         <div className="rounded-lg bg-background p-4">
           <div className="mb-2">
-            <p className="text-center text-base leading-6">{t('actions')}</p>
+            <p className="text-center type-body">{t('actions')}</p>
           </div>
 
           <Button fullWidth color="secondary" onClick={copyAllBudgets}>

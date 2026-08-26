@@ -39,7 +39,7 @@ export function OutboxRecoveryNotice() {
       >
         <AlertTitle>{t('outboxRecoveryTitle')}</AlertTitle>
         {t('outboxRecoveryDescription')}
-        <div className="mt-2 break-words font-mono text-xs leading-[1.66]">
+        <div className="mt-2 break-words font-mono type-caption">
           {t('journalRecoveryDiagnostic')}: {reason}
         </div>
       </Alert>

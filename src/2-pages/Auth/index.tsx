@@ -66,7 +66,7 @@ export default function Auth() {
         </Fade>
 
         <Fade in timeout={2000}>
-          <p className="m-0 text-base leading-6 text-muted-foreground">
+          <p className="m-0 type-body text-muted-foreground">
             {t('haveTrouble')}{' '}
             <ButtonBase
               onClick={() => dispatch(logIn('app'))}

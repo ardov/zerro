@@ -43,7 +43,7 @@ export const JournalRecoveryNotice = () => {
         <AlertTitle>{t('journalRecoveryTitle')}</AlertTitle>
         {t('journalRecoveryDescription')}
         {recoveryReason && (
-          <div className="mt-2 break-words font-mono text-xs leading-[1.66]">
+          <div className="mt-2 break-words font-mono type-caption">
             {t('journalRecoveryDiagnostic')}: {recoveryReason}
           </div>
         )}

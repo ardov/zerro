@@ -59,3 +59,29 @@
   --shadow-elevation-2: var(--elevation-2);
   --shadow-elevation-4: var(--elevation-4);
 }
+
+@layer components {
+  .type-body {
+    @apply text-base leading-6;
+  }
+
+  .type-body-sm {
+    @apply text-sm leading-[1.43];
+  }
+
+  .type-caption {
+    @apply text-xs leading-[1.66];
+  }
+
+  .type-overline {
+    @apply text-xs leading-[2.66] font-normal uppercase tracking-[0.08333em];
+  }
+
+  .type-title {
+    @apply text-xl leading-[1.6] font-medium;
+  }
+
+  .type-display {
+    @apply text-[2.125rem] leading-[1.235] font-medium;
+  }
+}

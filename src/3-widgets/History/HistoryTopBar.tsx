@@ -114,7 +114,7 @@ export function HistoryTopBar() {
             of the page, and controls pushed under it are controls that are
             gone. */}
         <span
-          className={`${compact ? 'grow-0' : 'grow'} min-w-0 truncate text-xs leading-[1.66]`}
+          className={`${compact ? 'grow-0' : 'grow'} min-w-0 truncate type-caption`}
         >
           {atHead ? label : t('viewingPast', { time: label })}
         </span>

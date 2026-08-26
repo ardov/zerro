@@ -38,7 +38,7 @@ export const Account: FC<
   })
   return (
     <ListItemButton
-      className={clsx('flex rounded-lg text-sm leading-[1.43]', className)}
+      className={clsx('flex rounded-lg type-body-sm', className)}
       sx={sx}
       {...rest}
       {...propsToPass}

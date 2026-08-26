@@ -13,11 +13,9 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
   return (
     <div className="flex h-[inherit] items-center justify-center">
       <div className="mx-auto max-w-[500px] p-10">
-        <h1 className="mb-4 text-[2.125rem] leading-[1.235] font-medium">
-          {t('title')}
-        </h1>
+        <h1 className="mb-4 type-display">{t('title')}</h1>
 
-        <p className="mb-4 text-base leading-6">{t('description')}</p>
+        <p className="mb-4 type-body">{t('description')}</p>
 
         <div className="mt-6">
           <Button
@@ -34,7 +32,7 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
           </Button>
 
           {!!message && (
-            <p className="mt-12 mb-4 text-base leading-6 text-muted-foreground">
+            <p className="mt-12 mb-4 type-body text-muted-foreground">
               {t('errorMsg', { message })}
             </p>
           )}

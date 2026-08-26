@@ -28,22 +28,22 @@ export function SavingsCard({ year }: TCardProps) {
   return (
     <Card>
       <div className="flex flex-col items-center gap-2">
-        <p className="m-0 text-center text-base leading-6">{t('youSaved')}</p>
+        <p className="m-0 text-center type-body">{t('youSaved')}</p>
         <h2
-          className={`m-0 text-center text-[2.125rem] leading-[1.235] font-medium ${savings ? 'green-gradient' : 'red-gradient'}`}
+          className={`m-0 text-center type-display ${savings ? 'green-gradient' : 'red-gradient'}`}
         >
           <DisplayAmount value={savings} noShade decimals="ifOnly" />
         </h2>
 
         <div className="mt-4">
-          <p className="m-0 text-center text-base leading-6">
+          <p className="m-0 text-center type-body">
             {t('savingsPercent', { percent: savingsPercent }) +
               ' ' +
               (savingsPercent > 20 ? t('greatJob') : t('goodJob'))}
           </p>
 
           {monthsOfSavings > 0 && (
-            <p className="m-0 mt-2 text-center text-base leading-6">
+            <p className="m-0 mt-2 text-center type-body">
               {t('savingsMonths', { months: monthsOfSavings })}
             </p>
           )}

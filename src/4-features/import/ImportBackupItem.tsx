@@ -145,8 +145,8 @@ export function ImportBackupItem() {
               if (!counts) return null
               return (
                 <div key={key} className="flex justify-between gap-4">
-                  <span className="text-sm leading-[1.43]">{t(labelKey)}</span>
-                  <span className="text-sm leading-[1.43] text-muted-foreground">
+                  <span className="type-body-sm">{t(labelKey)}</span>
+                  <span className="type-body-sm text-muted-foreground">
                     {[
                       counts.created &&
                         t('importCreated', { n: counts.created }),

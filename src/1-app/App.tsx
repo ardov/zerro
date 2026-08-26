@@ -168,7 +168,7 @@ function MainLoader() {
     <div className="flex h-full flex-col items-center justify-center">
       <CircularProgress />
       <div className="mt-8 w-[200px]">
-        <p className="m-0 text-center text-base leading-6">{hint}</p>
+        <p className="m-0 text-center type-body">{hint}</p>
       </div>
     </div>
   )

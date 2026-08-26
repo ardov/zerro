@@ -30,7 +30,7 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
         <WarningIcon />
       </div>
       <div className="ml-3">
-        <p className="m-0 text-base leading-6 font-medium">
+        <p className="m-0 type-body font-medium">
           {t('title')}{' '}
           <DisplayAmount
             value={overspend}
@@ -41,7 +41,7 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
           />
           .
         </p>
-        <p className="m-0 text-sm leading-[1.43]">{t('description')}</p>
+        <p className="m-0 type-body-sm">{t('description')}</p>
 
         <Button
           className="-ml-2 mt-2"

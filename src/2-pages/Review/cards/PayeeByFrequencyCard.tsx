@@ -41,7 +41,7 @@ export function PayeeByFrequencyCard(props: TCardProps) {
   return (
     <Card>
       <div className="flex flex-col items-center gap-2">
-        <p className="m-0 text-center text-base leading-6">
+        <p className="m-0 text-center type-body">
           {t('favouritePlace', { number: i + 1 })}
         </p>
 
@@ -50,11 +50,11 @@ export function PayeeByFrequencyCard(props: TCardProps) {
           onClick={() => props.onShowTransactions(transactions)}
         >
           <div className="flex flex-col items-center gap-2">
-            <h2 className="info-gradient m-0 text-center text-[2.125rem] leading-[1.235] font-medium">
+            <h2 className="info-gradient m-0 text-center type-display">
               {payee}
             </h2>
 
-            <p className="m-0 text-center text-base leading-6">
+            <p className="m-0 text-center type-body">
               {t('purchase', { count })}
               <DisplayAmount
                 value={outcome / count}

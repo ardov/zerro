@@ -413,7 +413,7 @@ function VersionItem({ onClose }: ItemProps) {
     >
       <ListItemIcon />
       <ListItemText>
-        <span className="text-xs leading-[2.66] font-normal uppercase tracking-[0.08333em] text-muted-foreground">
+        <span className="type-overline text-muted-foreground">
           {t('version', { version: appVersion })}
         </span>
       </ListItemText>
