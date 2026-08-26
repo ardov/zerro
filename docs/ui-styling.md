@@ -106,6 +106,8 @@ with deterministic data in both themes.
 The `ButtonTypography` story checks that a recipe inside a `ButtonBase` keeps
 the themed font family only when `font-sans` is present, and `NativeMargins`
 checks that a converted paragraph resets its user agent margins.
+`TypographyColorProps` compares the `textSecondary` and `error` `color` props
+against `text-muted-foreground` and `text-error` in both themes.
 The typography matrix compares every implemented recipe against its themed MUI
 Typography variant in light and dark mode. Dedicated 899px and 900px stories
 check both sides of the `md` breakpoint; the surface matrix compares default,

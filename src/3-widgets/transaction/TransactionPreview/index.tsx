@@ -3,14 +3,7 @@ import type { TTransaction, TTransactionId } from '6-shared/types'
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Typography,
-  IconButton,
-  TextField,
-  Fab,
-  Zoom,
-  Button,
-} from '@mui/material'
+import { IconButton, TextField, Fab, Zoom, Button } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import {
@@ -40,9 +33,9 @@ export const TrEmptyState = () => {
   const { t } = useTranslation('transaction')
   return (
     <div className="flex min-h-screen items-center justify-center p-6 text-disabled-foreground">
-      <Typography variant="body2" align="center" className="text-inherit">
+      <p className="m-0 text-center type-body-sm text-inherit">
         {t('fullEmptyState')}
-      </Typography>
+      </p>
     </div>
   )
 }
@@ -309,13 +302,11 @@ const Head: FC<{
     <div className="flex items-center px-6 py-2">
       <div className="grow">
         {deleted && (
-          <Typography variant="caption" color="error" noWrap>
+          <span className="truncate type-caption text-error">
             {t('transactionDeleted')}
-          </Typography>
+          </span>
         )}
-        <Typography variant="h6" noWrap>
-          {title}
-        </Typography>
+        <h2 className="m-0 truncate type-title">{title}</h2>
       </div>
       {deleted ? (
         <Tooltip title={t('btnRestore')}>

@@ -405,6 +405,72 @@ export const BudgetRows: Story = {
   },
 }
 
+function TypographyColorPropsFixture() {
+  return (
+    <div className="grid gap-4">
+      <Typography
+        variant="body2"
+        color="textSecondary"
+        component="span"
+        data-testid="mui-secondary"
+      >
+        Secondary reference
+      </Typography>
+      <span
+        data-testid="native-secondary"
+        className="type-body-sm text-muted-foreground"
+      >
+        Secondary candidate
+      </span>
+
+      <Typography variant="caption" color="error" data-testid="mui-error">
+        Error reference
+      </Typography>
+      <span data-testid="native-error" className="type-caption text-error">
+        Error candidate
+      </span>
+    </div>
+  )
+}
+
+// `color="textSecondary"` resolves to palette.text.secondary and
+// `color="error"` to palette.error.main, the sources of the `muted-foreground`
+// and `error` tokens.
+const checkTypographyColorProps: Story['play'] = async ({ canvasElement }) => {
+  await waitForFonts()
+  const canvas = within(canvasElement)
+  const shared: ComputedProperty[] = [
+    'fontSize',
+    'lineHeight',
+    'fontWeight',
+    'fontFamily',
+    'color',
+    'marginTop',
+    'marginBottom',
+  ]
+  await expectMatchingStyles(
+    canvas.getByTestId('mui-secondary'),
+    canvas.getByTestId('native-secondary'),
+    shared
+  )
+  await expectMatchingStyles(
+    canvas.getByTestId('mui-error'),
+    canvas.getByTestId('native-error'),
+    shared
+  )
+}
+
+export const TypographyColorPropsLight: Story = {
+  render: TypographyColorPropsFixture,
+  play: checkTypographyColorProps,
+}
+
+export const TypographyColorPropsDark: Story = {
+  globals: { theme: 'dark' },
+  render: TypographyColorPropsFixture,
+  play: checkTypographyColorProps,
+}
+
 export const NativeMargins: Story = {
   render: () => (
     <div className="grid gap-4">

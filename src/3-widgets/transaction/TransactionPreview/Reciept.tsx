@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Typography, Collapse, Link } from '@mui/material'
+import { Collapse, Link } from '@mui/material'
 import clsx from 'clsx'
 import { QRCodeSVG as QRCode } from 'qrcode.react'
 import { useAppTheme } from '6-shared/ui/theme'
@@ -52,7 +52,7 @@ export const Reciept: FC<RecieptProps> = ({ value, className }) => {
       </Collapse>
     </>
   ) : (
-    <Typography variant="body1">{t('unknown')}</Typography>
+    <p className="m-0 type-body">{t('unknown')}</p>
   )
 
   return (
@@ -79,11 +79,7 @@ interface LineProps {
 
 const Line: FC<LineProps> = ({ name, value }) => (
   <div className="mb-2">
-    <Typography variant="caption" className="block text-muted-foreground">
-      {name}
-    </Typography>
-    <Typography variant="body1" className="block">
-      {value}
-    </Typography>
+    <span className="block type-caption text-muted-foreground">{name}</span>
+    <p className="m-0 type-body">{value}</p>
   </div>
 )

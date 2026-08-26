@@ -10,7 +10,6 @@ import type { FC } from 'react'
 import clsx from 'clsx'
 import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Typography } from '@mui/material'
 import { track } from '6-shared/analytics'
 import { useDebounce } from '6-shared/hooks/useDebounce'
 
@@ -253,9 +252,7 @@ const EmptyState = () => {
   const { t } = useTranslation('transactions')
   return (
     <div className="p-10">
-      <Typography variant="body1" align="center" className="mb-4">
-        {t('emptyState')}
-      </Typography>
+      <p className="mt-0 mb-4 text-center type-body">{t('emptyState')}</p>
     </div>
   )
 }

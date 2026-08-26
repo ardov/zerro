@@ -3,7 +3,6 @@ import type { FC } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from '@emotion/styled'
-import { Typography } from '@mui/material'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppSelector } from 'store'
@@ -121,19 +120,13 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
               placement="top"
               slotProps={{ popper: { disablePortal: true } }}
             >
-              <Typography
-                variant="body2"
-                component="span"
-                sx={{
-                  color: 'text.secondary',
-                }}
-              >
+              <span className="type-body-sm text-muted-foreground">
                 <SmartAmount
                   value={tr.opOutcome}
                   instrument={tr.opOutcomeInstrument}
                   decimals="ifAny"
                 />
-              </Typography>
+              </span>
             </Tooltip>
           )}
           <SmartAmount value={tr.outcome} instrument={tr.outcomeInstrument} />
@@ -156,18 +149,14 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
               placement="top"
               slotProps={{ popper: { disablePortal: true } }}
             >
-              <Typography
-                variant="body2"
-                color="textSecondary"
-                component="span"
-              >
+              <span className="type-body-sm text-muted-foreground">
                 <SmartAmount
                   value={tr.opIncome}
                   instrument={tr.opIncomeInstrument}
                   decimals="ifAny"
                   sign
                 />
-              </Typography>
+              </span>
             </Tooltip>
           )}
           <SmartAmount
