@@ -1,6 +1,7 @@
 import React from 'react'
 import { Provider } from 'react-redux'
 import { StyledEngineProvider } from '@mui/material/styles'
+import { GlobalStyles } from '@mui/material'
 import { store } from 'store'
 import { AppThemeProvider } from '6-shared/ui/theme'
 import { SnackbarProvider } from '6-shared/ui/SnackbarProvider'
@@ -13,7 +14,9 @@ export function Providers(props: {
   theme?: Pick<AppThemeProviderProps, 'defaultMode' | 'storageManager'>
 }) {
   return (
-    <StyledEngineProvider injectFirst>
+    <StyledEngineProvider injectFirst enableCssLayer>
+      {/* Declare the order before Emotion inserts any MUI rules, including in portals. */}
+      <GlobalStyles styles="@layer theme, base, mui, components, utilities;" />
       <Provider store={props.store || store}>
         <LocalizationProvider>
           <AppThemeProvider

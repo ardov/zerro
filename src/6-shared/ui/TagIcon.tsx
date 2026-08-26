@@ -101,7 +101,7 @@ export function TagIcon(props: TagIconProps) {
       {onChange && (
         <Checkbox
           className={clsx(
-            '!absolute transition-opacity duration-200',
+            'absolute transition-opacity duration-200',
             showCheckBox || checked ? 'opacity-100' : 'opacity-0',
             isInteractive ? 'group-hover:opacity-100' : 'group-hover:opacity-0',
             checkboxClassName

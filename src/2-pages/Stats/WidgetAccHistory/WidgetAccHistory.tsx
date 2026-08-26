@@ -130,7 +130,7 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
 
   return (
     <ListSubheader
-      className="mb-2 !rounded-lg"
+      className="mb-2 rounded-lg"
       sx={{ cursor: onClick ? 'pointer' : 'default' }}
       onClick={onClick}
     >

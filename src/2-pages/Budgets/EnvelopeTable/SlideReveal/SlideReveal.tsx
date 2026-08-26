@@ -157,7 +157,7 @@ export const SlideReveal: FC<SlideRevealProps> = ({
         }}
       >
         <div
-          className="relative touch-pan-y"
+          className="relative touch-auto"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -223,7 +223,7 @@ const DraggableRevealCell: FC<
       onClick={onClick}
       {...attributes}
       {...listeners}
-      className={`${revealCellClassName} ${drag.disabled ? 'cursor-pointer' : 'cursor-grab'} select-none touch-manipulation active:bg-accent`}
+      className={`${revealCellClassName} ${drag.disabled ? 'cursor-pointer' : 'cursor-grab'} select-none touch-manipulation active:bg-action-focus`}
     >
       <RevealCellContent
         label={item.label}
@@ -247,7 +247,7 @@ const RevealCellContent: FC<{
     >
       {label}
     </Typography>
-    <Typography variant="body2" noWrap style={{ color }}>
+    <Typography variant="body2" noWrap sx={{ color }}>
       <Amount value={value} decimals="ifOnly" />
     </Typography>
   </>

@@ -1,4 +1,4 @@
-@layer theme, base, components, utilities;
+@layer theme, base, mui, components, utilities;
 
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
@@ -30,6 +30,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-action-focus: var(--action-focus);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -52,4 +53,8 @@
   --radius-md: calc(var(--radius) * 0.875);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
+
+  --shadow-elevation-2: var(--elevation-2);
+  --shadow-elevation-4: var(--elevation-4);
 }

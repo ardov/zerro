@@ -38,7 +38,7 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
       className={clsx('rounded-lg bg-background', className)}
       style={style}
     >
-      <div className="flex flex-col gap-1 px-2 pt-2">
+      <div className="flex flex-col gap-1 px-4 pt-4">
         <DataLine
           name={`${t('balanceFor')} ${formatDate(month, 'LLL')}`}
           // color={activityColor}

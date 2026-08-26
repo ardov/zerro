@@ -160,7 +160,7 @@ const Filter: FC<FilterProps> = ({
       </div>
 
       {!!appliedClauses.length && (
-        <div className="flex flex-wrap items-center gap-1.5 px-0.5 pt-0.5">
+        <div className="flex flex-wrap items-center gap-1.5 px-1 pt-1">
           {appliedClauses.map(clause => (
             <Chip
               ref={element => {

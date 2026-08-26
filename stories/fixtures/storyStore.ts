@@ -4,13 +4,25 @@ import { createEmptyDataStore } from 'zerro-core/replica'
 import { rootReducer } from 'store/rootReducer'
 
 export type StoryScenario =
-  'demo' | 'empty' | 'recovery' | 'persistence-warning'
+  'demo' | 'off-budget-transfers' | 'empty' | 'recovery' | 'persistence-warning'
 
 export function makeStoryStore(scenario: StoryScenario = 'demo') {
   const demoState = makeCoreNextDemoRootState()
 
   const preloadedState = (() => {
     switch (scenario) {
+      case 'off-budget-transfers': {
+        // Transfers between two budget accounts cancel out in the overview.
+        // An off-budget destination keeps the transfer card visible.
+        const current = demoState.data.current
+        return makeCoreNextDemoRootState({
+          ...current,
+          account: {
+            ...current.account,
+            'Cash RUB': { ...current.account['Cash RUB'], inBalance: false },
+          },
+        })
+      }
       case 'empty':
         return {
           ...demoState,

@@ -269,7 +269,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
         <Reciept value={qrCode} />
         <Map longitude={longitude} latitude={latitude} />
 
-        <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+        <div className="flex flex-col gap-2 text-xs leading-[1.66] text-muted-foreground">
           <span>
             {t('created', {
               date: formatDate(created, 'dd MMM yyyy, HH:mm'),

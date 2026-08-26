@@ -122,7 +122,7 @@ function StatWidget(props: {
     <>
       <ButtonBase
         onClick={toggleOpened}
-        className="flex flex-col items-stretch !rounded-lg bg-background p-4"
+        className="flex flex-col items-stretch rounded-lg bg-background p-4"
       >
         {/* <Collapse in={opened} unmountOnExit>
           <ChangesChart mode={props.mode} />

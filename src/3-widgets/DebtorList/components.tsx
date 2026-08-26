@@ -15,7 +15,7 @@ export const Debtor: FC<
 > = ({ name, currency, balance, className, sx, ...rest }) => {
   return (
     <ListItemButton
-      className={clsx('flex !rounded-lg text-sm leading-[1.43]', className)}
+      className={clsx('flex rounded-lg text-sm leading-[1.43]', className)}
       sx={sx}
       {...rest}
     >
@@ -60,7 +60,7 @@ export const Subheader: FC<
   const month = toISOMonth(new Date())
   const toDisplay = core.currency.useToDisplay(month)
   return (
-    <ListSubheader className={clsx('!rounded-lg', className)} sx={sx} {...rest}>
+    <ListSubheader className={clsx('rounded-lg', className)} sx={sx} {...rest}>
       <span className="flex w-full">
         <Typography component="span" noWrap className="grow leading-[inherit]">
           <b>{name}</b>

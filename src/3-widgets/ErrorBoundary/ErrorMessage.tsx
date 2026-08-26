@@ -11,7 +11,7 @@ interface ErrorMessageProps {
 export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
   const { t } = useTranslation('errorBoudary')
   return (
-    <div className="flex h-inherit items-center justify-center">
+    <div className="flex h-[inherit] items-center justify-center">
       <div className="mx-auto max-w-[500px] p-10">
         <Typography variant="h4" className="mb-4">
           {t('title')}

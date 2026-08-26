@@ -150,7 +150,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
       className={clsx('rounded-lg bg-background', className)}
       style={style}
     >
-      <div className="px-2 pt-2">
+      <div className="px-4 pt-4">
         <Typography variant="body1" className="text-foreground">
           <span>{t('average')} </span>
           <InlineButton onClick={switchMetric}>{t(metric)}</InlineButton>
@@ -159,7 +159,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
         </Typography>
       </div>
       {selectedData && (
-        <div className="flex flex-col gap-1 px-2 pt-2">
+        <div className="flex flex-col gap-1 px-4 pt-4">
           <DataLine
             name={t('avgForDate', {
               date: formatDate(selectedData.month, 'LLL'),

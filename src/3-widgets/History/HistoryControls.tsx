@@ -28,7 +28,7 @@ export function HistoryControls() {
   const isSyncing = useAppSelector(selectIsSyncPending)
 
   return (
-    <div className="flex flex-row items-center gap-[2px] px-2 py-1">
+    <div className="flex flex-row items-center gap-1 px-2 py-1">
       <Tooltip title={t('undo')}>
         <span>
           <IconButton

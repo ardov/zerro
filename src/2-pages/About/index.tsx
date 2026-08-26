@@ -64,7 +64,7 @@ const Header = () => {
   return (
     <header className="sticky inset-x-0 top-0 z-[100] flex flex-col items-center p-2">
       <Link to="/">
-        <div className="rounded-3xl bg-background px-6 py-2 leading-none">
+        <div className="rounded-3xl bg-background px-6 py-2 leading-[0]">
           <Logo fill={theme.palette.primary.main} width="100" />
         </div>
       </Link>

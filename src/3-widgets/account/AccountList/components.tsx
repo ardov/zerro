@@ -38,7 +38,7 @@ export const Account: FC<
   })
   return (
     <ListItemButton
-      className={clsx('flex !rounded-lg text-sm leading-[1.43]', className)}
+      className={clsx('flex rounded-lg text-sm leading-[1.43]', className)}
       sx={sx}
       {...rest}
       {...propsToPass}
@@ -90,7 +90,7 @@ export const Subheader: FC<
   const toDisplay = core.currency.useToDisplay(month)
   const isNegative = toDisplay(amount) < 0
   return (
-    <ListSubheader className={clsx('!rounded-lg', className)} sx={sx} {...rest}>
+    <ListSubheader className={clsx('rounded-lg', className)} sx={sx} {...rest}>
       <span className="flex w-full">
         <Typography component="span" noWrap className="grow leading-[inherit]">
           <b>{name}</b>

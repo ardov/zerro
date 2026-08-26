@@ -63,7 +63,7 @@ const LinkCard: FC<LinkCardProps> = props => {
       target="_blank"
       rel="noopener noreferrer"
       underline="none"
-      className="flex rounded-lg bg-card p-6 shadow-md"
+      className="flex rounded-lg bg-card p-6 shadow-elevation-2"
     >
       <div className="max-w-12">{icon}</div>
       <div className="ml-4">

@@ -123,7 +123,7 @@ const Layout: FC<{
   return (
     <div className="flex">
       {isLoggedIn && <Navigation />}
-      <div className="min-w-0 grow">
+      <div className="min-h-screen min-w-0 grow">
         {/* Inside the content column, not above the whole layout: the
             navigation drawer is fixed, and a full-width bar would hand it
             the controls on its left. */}

@@ -15,7 +15,7 @@ const root = path.dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   plugins: [tailwindcss()],
   optimizeDeps: {
-    include: ['clsx'],
+    include: ['clsx', 'tailwind-merge', '@dnd-kit/core'],
   },
   resolve: {
     tsconfigPaths: true,

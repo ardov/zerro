@@ -155,7 +155,7 @@ const CustomTooltip = (props: any) => {
   const savingsRate = income > 0 ? (diff / income) * 100 : 0
 
   return (
-    <Card className="p-4 shadow-lg">
+    <Card elevation={10} className="p-4">
       <Typography variant="h6">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
       </Typography>

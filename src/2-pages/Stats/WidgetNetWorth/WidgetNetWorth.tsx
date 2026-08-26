@@ -198,7 +198,7 @@ const CustomTooltip = (props: any) => {
   const date = payload[0]?.payload?.date
   const values = payload.filter(v => v.value)
   return (
-    <Card className="p-4 shadow-lg">
+    <Card elevation={10} className="p-4">
       <Typography variant="h6">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
       </Typography>

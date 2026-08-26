@@ -96,7 +96,7 @@ export function Highlight() {
   return isDragging ? (
     <div
       ref={boxRef}
-      className="fixed left-0 top-0 z-[100] hidden h-2 w-[100px] rounded-lg border border-primary transition-[transform,width,height] duration-100 ease-in-out will-change-[transform,width,height]"
+      className="fixed left-0 top-0 z-[100] hidden h-[2px] w-[100px] rounded-lg border border-primary transition-[transform,width,height] duration-100 ease-in-out will-change-[transform,width,height]"
     />
   ) : null
 }

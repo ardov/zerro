@@ -40,7 +40,7 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
   return (
     <Tooltip arrow title={<TooltipContent />}>
       <ButtonBase
-        className="flex gap-2 !rounded-lg py-2 pl-4 pr-2"
+        className="flex gap-2 rounded-lg py-2 pl-4 pr-2"
         style={{ background: bg, color }}
         {...props}
       >

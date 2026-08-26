@@ -85,7 +85,7 @@ export function HistoryTopBar() {
     <div
       className={`border-b-2 bg-card px-2 py-1 sm:px-4 ${atHead ? 'border-border' : 'border-warning'}`}
     >
-      <div className="flex flex-row items-center gap-[2px]">
+      <div className="flex flex-row items-center gap-1">
         {!compact && (
           <>
             <IconButton

@@ -44,17 +44,17 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
       <ButtonBase
         disableRipple
         onClick={toggle}
-        className="-m-2 w-full justify-start rounded-lg p-2 text-left text-[inherit] font-[inherit] hover:underline"
+        className="-m-4 w-full justify-start rounded-lg p-4 text-left text-[length:inherit] hover:underline"
       >
         <ChevronRightIcon
           className={clsx(
-            'mr-2 text-secondary transition-transform duration-200 ease-in-out',
+            'mr-2 text-interactive transition-transform duration-200 ease-in-out',
             isOpen && 'rotate-90'
           )}
         />
         <strong>{title}</strong>
       </ButtonBase>
-      {isOpen && <aside className="slide-down mt-2 pl-4">{children}</aside>}
+      {isOpen && <aside className="slide-down mt-4 pl-8">{children}</aside>}
     </div>
   )
 }

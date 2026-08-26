@@ -75,7 +75,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
       className={clsx('rounded-lg bg-background', className)}
       style={style}
     >
-      <div className="flex flex-col gap-1 px-2 pt-2">
+      <div className="flex flex-col gap-1 px-4 pt-4">
         <DataLine
           name={t('outcome', { ns: 'common' })}
           color={activityColor}

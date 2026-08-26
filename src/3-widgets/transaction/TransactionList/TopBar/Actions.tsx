@@ -138,7 +138,7 @@ const Actions: FC<ActionsProps> = ({
         >
           <div
             ref={actionsRef}
-            className="flex items-center rounded-[60px] bg-info pl-2 shadow-md"
+            className="flex items-center rounded-[60px] bg-info pl-2 shadow-elevation-4"
           >
             <Chip
               label={t('selected', { count: ids.length })}

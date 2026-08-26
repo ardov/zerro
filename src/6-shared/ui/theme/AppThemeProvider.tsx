@@ -14,7 +14,7 @@ import './styles.scss'
 fixOldTheme()
 
 const GlobalVariables = (props: { theme: Theme }) => {
-  const { palette, shape } = props.theme
+  const { palette, shape, shadows } = props.theme
   const styles = css`
     :root {
       --c-bg: ${palette.background.default};
@@ -35,6 +35,7 @@ const GlobalVariables = (props: { theme: Theme }) => {
       --muted-foreground: ${palette.text.secondary};
       --accent: ${palette.action.hover};
       --accent-foreground: ${palette.text.primary};
+      --action-focus: ${palette.action.focus};
       --destructive: ${palette.error.main};
       --destructive-foreground: ${palette.getContrastText(palette.error.main)};
       --border: ${palette.divider};
@@ -54,6 +55,8 @@ const GlobalVariables = (props: { theme: Theme }) => {
       --error-foreground: ${palette.getContrastText(palette.error.main)};
       --disabled-foreground: ${palette.text.disabled};
       --radius: ${shape.borderRadius}px;
+      --elevation-2: ${shadows[2]};
+      --elevation-4: ${shadows[4]};
     }
   `
   return <Global styles={styles} />

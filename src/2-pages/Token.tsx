@@ -14,7 +14,7 @@ export default function Token() {
       <title>{`${t('pageTitle')} | Zerro`}</title>
       <meta name="description" content={t('pageDescription')} />
       <link rel="canonical" href="https://zerro.app/token" />
-      <div className="flex h-inherit items-center justify-center">
+      <div className="flex h-[inherit] items-center justify-center">
         <div className="mx-auto max-w-[500px] p-10">
           <Typography variant="h4" className="mb-4">
             {t('heading')}
