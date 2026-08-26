@@ -81,6 +81,27 @@ export const Dark: Story = {
   play: checkInterop,
 }
 
+export const TypographyUtilities: Story = {
+  render: () => (
+    <div className="grid gap-4">
+      <h2 className="m-0 type-title font-normal leading-6">Local overrides</h2>
+      <p className="m-0 type-body md:type-title">Responsive recipe</p>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const local = getComputedStyle(canvas.getByText('Local overrides'))
+    await expect(local.fontSize).toBe('20px')
+    await expect(local.fontWeight).toBe('400')
+    await expect(local.lineHeight).toBe('24px')
+
+    const wide = window.matchMedia('(min-width: 900px)').matches
+    const responsive = getComputedStyle(canvas.getByText('Responsive recipe'))
+    await expect(responsive.fontSize).toBe(wide ? '20px' : '16px')
+    await expect(responsive.lineHeight).toBe(wide ? '32px' : '24px')
+  },
+}
+
 export const BudgetRows: Story = {
   render: () => (
     <RenderColumnsProvider>

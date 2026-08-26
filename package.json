@@ -42,7 +42,8 @@
           "ignoreAtRules": [
             "custom-variant",
             "source",
-            "theme"
+            "theme",
+            "utility"
           ]
         }
       ]

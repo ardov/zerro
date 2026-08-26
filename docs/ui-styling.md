@@ -47,12 +47,39 @@ necessarily win. Budget group rows, for example, override `items-center` with
 `items-baseline`. Grid `justify-start` is not equivalent to `justifyContent:
 'initial'`: it prevents an `auto` track from stretching.
 
+## Typography recipes
+
+`src/tailwind.css` registers `type-body`, `type-body-sm`, `type-caption`,
+`type-overline`, `type-title`, and `type-display` as top-level Tailwind v4
+`@utility` rules. Tailwind emits them in the `utilities` layer and supports
+variants such as `md:type-title` (the compatibility `md` breakpoint is 900px).
+Stylelint explicitly allows `utility`; unknown at-rule checking remains enabled.
+
+Use one base recipe per element, with an optional recipe at another breakpoint:
+
+```tsx
+<h2 className="m-0 truncate type-title">{title}</h2>
+<p className="m-0 type-body md:type-title text-muted-foreground">{summary}</p>
+```
+
+Recipes do not choose HTML semantics, margins, alignment, truncation, or colors.
+Choose those at the call site. Preflight is disabled, so native heading margins
+and weight still need an explicit decision. Local utilities such as
+`type-title font-normal leading-6` can override the corresponding recipe values.
+
+`cn()` uses the default `tailwind-merge` configuration, which does not know the
+custom `type-*` group. Do not expect `cn('type-body', 'type-title')` to select
+the last recipe; select one recipe explicitly. Class-string order alone is not
+a CSS precedence rule.
+
 ## Regression checks
 
 `stories/foundation/MuiTailwindInterop.stories.tsx` checks actual computed styles
 for MUI/Tailwind coexistence, icon centering, and budget row alignment.
 `ActivityStats.stories.tsx` checks the real income, expense, and transfer cards
 with deterministic data in both themes.
+The `TypographyUtilities` interop story checks local weight/line-height overrides
+and the active branch of `md:type-title` at the browser's viewport width.
 
 Run these with `pnpm test:storybook`. Rendering a story or passing TypeScript
 alone does not establish visual parity; affected application routes also need

@@ -60,28 +60,26 @@
   --shadow-elevation-4: var(--elevation-4);
 }
 
-@layer components {
-  .type-body {
-    @apply text-base leading-6;
-  }
+@utility type-body {
+  @apply text-base leading-6;
+}
 
-  .type-body-sm {
-    @apply text-sm leading-[1.43];
-  }
+@utility type-body-sm {
+  @apply text-sm leading-[1.43];
+}
 
-  .type-caption {
-    @apply text-xs leading-[1.66];
-  }
+@utility type-caption {
+  @apply text-xs leading-[1.66];
+}
 
-  .type-overline {
-    @apply text-xs leading-[2.66] font-normal uppercase tracking-[0.08333em];
-  }
+@utility type-overline {
+  @apply text-xs leading-[2.66] font-normal uppercase tracking-[0.08333em];
+}
 
-  .type-title {
-    @apply text-xl leading-[1.6] font-medium;
-  }
+@utility type-title {
+  @apply text-xl leading-[1.6] font-medium;
+}
 
-  .type-display {
-    @apply text-[2.125rem] leading-[1.235] font-medium;
-  }
+@utility type-display {
+  @apply text-[2.125rem] leading-[1.235] font-medium;
 }
