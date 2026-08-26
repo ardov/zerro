@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Typography } from '@mui/material'
+import { Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { getToken } from 'store/token'
 import { useAppSelector } from 'store'
@@ -16,13 +16,11 @@ export default function Token() {
       <link rel="canonical" href="https://zerro.app/token" />
       <div className="flex h-[inherit] items-center justify-center">
         <div className="mx-auto max-w-[500px] p-10">
-          <Typography variant="h4" className="mb-4">
+          <h1 className="mb-4 text-[2.125rem] leading-[1.235] font-medium">
             {t('heading')}
-          </Typography>
+          </h1>
 
-          <Typography variant="body1" className="mb-4">
-            {t('body')}
-          </Typography>
+          <p className="mb-4 text-base leading-6">{t('body')}</p>
 
           <div className="mt-6">
             <Button

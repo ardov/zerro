@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Typography } from '@mui/material'
+import { Button } from '@mui/material'
 import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
 import { useAppSelector } from 'store'
 import {
@@ -53,39 +53,34 @@ export function HistoryRestorePreview() {
 
   return (
     <div className="shrink-0 border-t border-border bg-accent px-4 py-3">
-      <Typography variant="overline" color="text.secondary">
+      <p className="m-0 text-xs leading-[2.66] font-normal uppercase tracking-[0.08333em] text-muted-foreground">
         {tHistory('restoreWouldChange')}
-      </Typography>
+      </p>
       {/* Its own scroll: with every entity type present the list would
           otherwise push the button it belongs to off the panel. */}
       <div className="max-h-40 overflow-y-auto">
         {missing ? (
-          <Typography variant="body2" color="text.secondary">
+          <p className="m-0 text-sm leading-[1.43] text-muted-foreground">
             {tHistory('pointUnavailable')}
-          </Typography>
+          </p>
         ) : !summary ? (
-          <Typography variant="body2" color="text.secondary">
+          <p className="m-0 text-sm leading-[1.43] text-muted-foreground">
             {tHistory('restoreLoading')}
-          </Typography>
+          </p>
         ) : rows.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">
+          <p className="m-0 text-sm leading-[1.43] text-muted-foreground">
             {tHistory('restoreNoChanges')}
-          </Typography>
+          </p>
         ) : (
           <div className="mt-1 flex flex-col gap-[2px]">
             {rows.map(row => (
               <div key={row.key} className="flex justify-between gap-4">
-                <Typography variant="body2" noWrap>
+                <span className="truncate text-sm leading-[1.43]">
                   {row.label}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  noWrap
-                  className="shrink-0"
-                >
+                </span>
+                <span className="shrink-0 whitespace-nowrap text-sm leading-[1.43] text-muted-foreground">
                   {row.parts}
-                </Typography>
+                </span>
               </div>
             ))}
           </div>

@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
 import type { ButtonBaseProps } from '@mui/material'
-import { Typography, ButtonBase } from '@mui/material'
+import { ButtonBase } from '@mui/material'
 import type { TISOMonth } from '6-shared/types'
 import { formatMoney } from '6-shared/helpers/money'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -64,9 +64,9 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
     >
       <ButtonBase sx={baseStyles} {...btnProps} onClick={completeAll}>
         <RadialProgress value={progress} />
-        <Typography variant="body1">
+        <span className="text-base leading-6">
           {t('goalsProgress', { percent: Math.floor(progress * 100) })}
-        </Typography>
+        </span>
       </ButtonBase>
     </Tooltip>
   )

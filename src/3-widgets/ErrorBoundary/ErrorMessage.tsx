@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import { Typography, Button } from '@mui/material'
+import { Button } from '@mui/material'
 import { SyncIcon } from '6-shared/ui/Icons'
 import { useTranslation } from 'react-i18next'
 
@@ -13,13 +13,11 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
   return (
     <div className="flex h-[inherit] items-center justify-center">
       <div className="mx-auto max-w-[500px] p-10">
-        <Typography variant="h4" className="mb-4">
+        <h1 className="mb-4 text-[2.125rem] leading-[1.235] font-medium">
           {t('title')}
-        </Typography>
+        </h1>
 
-        <Typography variant="body1" className="mb-4">
-          {t('description')}
-        </Typography>
+        <p className="mb-4 text-base leading-6">{t('description')}</p>
 
         <div className="mt-6">
           <Button
@@ -36,12 +34,9 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
           </Button>
 
           {!!message && (
-            <Typography
-              variant="body1"
-              className="mt-12 mb-4 text-muted-foreground"
-            >
+            <p className="mt-12 mb-4 text-base leading-6 text-muted-foreground">
               {t('errorMsg', { message })}
-            </Typography>
+            </p>
           )}
         </div>
       </div>

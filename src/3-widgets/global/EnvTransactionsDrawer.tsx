@@ -1,7 +1,7 @@
 import type { TISOMonth } from '6-shared/types'
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Drawer, Typography, IconButton } from '@mui/material'
+import { Drawer, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
@@ -93,9 +93,9 @@ export const SmartEnvTransactionsDrawer = () => {
       <div className="flex h-screen min-w-80 flex-col">
         <div className="flex items-center px-6 py-2">
           <div className="grow">
-            <Typography variant="h6" noWrap>
+            <h2 className="m-0 truncate text-xl leading-[1.6] font-medium">
               {title || t('transactions')}
-            </Typography>
+            </h2>
           </div>
 
           <Tooltip title={t('close')}>

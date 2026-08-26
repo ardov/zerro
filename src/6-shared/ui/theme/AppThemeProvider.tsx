@@ -55,6 +55,7 @@ const GlobalVariables = (props: { theme: Theme }) => {
       --error-foreground: ${palette.getContrastText(palette.error.main)};
       --disabled-foreground: ${palette.text.disabled};
       --radius: ${shape.borderRadius}px;
+      --elevation-1: ${shadows[1]};
       --elevation-2: ${shadows[2]};
       --elevation-4: ${shadows[4]};
     }

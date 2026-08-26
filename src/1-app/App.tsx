@@ -8,7 +8,7 @@ import {
   useLocation,
 } from 'react-router-dom'
 import type { Theme } from '@mui/material'
-import { CircularProgress, Typography, useMediaQuery } from '@mui/material'
+import { CircularProgress, useMediaQuery } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import {
   initAnalytics,
@@ -168,7 +168,7 @@ function MainLoader() {
     <div className="flex h-full flex-col items-center justify-center">
       <CircularProgress />
       <div className="mt-8 w-[200px]">
-        <Typography align="center">{hint}</Typography>
+        <p className="m-0 text-center text-base leading-6">{hint}</p>
       </div>
     </div>
   )

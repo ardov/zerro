@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Typography, Button } from '@mui/material'
+import { Button } from '@mui/material'
 import type { TISOMonth } from '6-shared/types'
 import { WarningIcon } from '6-shared/ui/Icons'
 import { isZero } from '6-shared/helpers/money'
@@ -30,7 +30,7 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
         <WarningIcon />
       </div>
       <div className="ml-3">
-        <Typography variant="subtitle1">
+        <p className="m-0 text-base leading-6 font-medium">
           {t('title')}{' '}
           <DisplayAmount
             value={overspend}
@@ -40,8 +40,8 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
             decimals="ifAny"
           />
           .
-        </Typography>
-        <Typography variant="body2">{t('description')}</Typography>
+        </p>
+        <p className="m-0 text-sm leading-[1.43]">{t('description')}</p>
 
         <Button
           className="-ml-2 mt-2"

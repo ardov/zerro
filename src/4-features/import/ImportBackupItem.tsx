@@ -11,7 +11,6 @@ import {
   ListItemIcon,
   ListItemText,
   MenuItem,
-  Typography,
 } from '@mui/material'
 import { UploadIcon } from '6-shared/ui/Icons'
 import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
@@ -146,8 +145,8 @@ export function ImportBackupItem() {
               if (!counts) return null
               return (
                 <div key={key} className="flex justify-between gap-4">
-                  <Typography variant="body2">{t(labelKey)}</Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <span className="text-sm leading-[1.43]">{t(labelKey)}</span>
+                  <span className="text-sm leading-[1.43] text-muted-foreground">
                     {[
                       counts.created &&
                         t('importCreated', { n: counts.created }),
@@ -158,7 +157,7 @@ export function ImportBackupItem() {
                     ]
                       .filter(Boolean)
                       .join(' · ')}
-                  </Typography>
+                  </span>
                 </div>
               )
             })}

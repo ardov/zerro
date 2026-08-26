@@ -1,8 +1,7 @@
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import React from 'react'
 import clsx from 'clsx'
-import type { TooltipProps, TypographyProps } from '@mui/material'
-import { Typography } from '@mui/material'
+import type { TooltipProps } from '@mui/material'
 import type { AmountProps } from '6-shared/ui/Amount'
 import { Tooltip } from '6-shared/ui/Tooltip'
 // TODO: use Amount instead
@@ -18,7 +17,7 @@ type DataLineProps = HTMLAttributes<HTMLDivElement> & {
   color?: string
   colorOpacity?: number
   tooltip?: TooltipProps['title']
-  variant?: TypographyProps['variant']
+  variant?: 'body1' | 'body2' | 'caption' | 'h6'
 }
 
 export const DataLine: FC<DataLineProps> = ({
@@ -34,25 +33,32 @@ export const DataLine: FC<DataLineProps> = ({
   className,
   ...rest
 }) => {
+  const typographyClassName =
+    variant === 'body2'
+      ? 'text-sm leading-[1.43]'
+      : variant === 'caption'
+        ? 'text-xs leading-[1.66]'
+        : variant === 'h6'
+          ? 'text-xl leading-[1.6] font-medium'
+          : 'text-base leading-6'
+
   return (
     <div className={clsx('flex flex-row', className)} {...rest}>
       <div className="mr-2 flex min-w-0 grow items-center">
         {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
         <Tooltip title={tooltip}>
-          <Typography noWrap variant={variant}>
-            {name}
-          </Typography>
+          <span className={clsx('truncate', typographyClassName)}>{name}</span>
         </Tooltip>
       </div>
       {amount !== undefined && (
-        <Typography variant={variant}>
+        <span className={typographyClassName}>
           <SmartAmount
             value={amount}
             currency={currency}
             instrument={instrument}
             sign={sign}
           />
-        </Typography>
+        </span>
       )}
     </div>
   )

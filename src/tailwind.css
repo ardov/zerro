@@ -55,6 +55,7 @@
   --radius-xl: calc(var(--radius) * 1.5);
   --radius-2xl: calc(var(--radius) * 2);
 
+  --shadow-elevation-1: var(--elevation-1);
   --shadow-elevation-2: var(--elevation-2);
   --shadow-elevation-4: var(--elevation-4);
 }

@@ -1,12 +1,7 @@
 import type { FC } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  BottomNavigation,
-  BottomNavigationAction,
-  Paper,
-  Divider,
-} from '@mui/material'
+import { BottomNavigation, BottomNavigationAction } from '@mui/material'
 import {
   AccountBalanceIcon,
   BarChartIcon,
@@ -34,8 +29,11 @@ export const MobileNavigation: FC = () => {
   const currentRoute = routes.find(route => path.startsWith(route.path))
 
   return (
-    <Paper className="fixed bottom-0 z-[5] w-full" style={{ paddingBottom }}>
-      <Divider className="opacity-60" />
+    <nav
+      className="fixed bottom-0 z-[5] w-full bg-card shadow-elevation-1"
+      style={{ paddingBottom }}
+    >
+      <hr className="m-0 border-0 border-t border-border opacity-60" />
       <BottomNavigation
         value={currentRoute?.path}
         onChange={(e, newValue) => {
@@ -61,6 +59,6 @@ export const MobileNavigation: FC = () => {
         <RefreshButton isMobile={true} className="min-w-8" />
       </BottomNavigation>
       <SettingsMenu showLinks />
-    </Paper>
+    </nav>
   )
 }

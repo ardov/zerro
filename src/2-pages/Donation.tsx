@@ -1,5 +1,5 @@
 import type { FC, ReactElement } from 'react'
-import { Link, Typography } from '@mui/material'
+import { Link } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 
@@ -12,13 +12,13 @@ export default function Donation() {
       <link rel="canonical" href="https://zerro.app/donation" />
       <div className="flex h-full items-center justify-center">
         <div className="mx-auto max-w-[480px] p-6 pb-16">
-          <Typography variant="h5" align="center" className="mb-4">
+          <h1 className="mb-4 text-center text-2xl leading-[1.334] font-normal">
             {t('heading')}
-          </Typography>
+          </h1>
 
-          <Typography variant="body1" align="center" className="mb-4">
+          <p className="mb-4 text-center text-base leading-6">
             {t('subtitle')}
-          </Typography>
+          </p>
 
           <div className="flex flex-col gap-4 py-4">
             <LinkCard
@@ -35,14 +35,9 @@ export default function Donation() {
             />
           </div>
 
-          <Typography
-            variant="body1"
-            color="textSecondary"
-            align="center"
-            className="mb-4"
-          >
+          <p className="mb-4 text-center text-base leading-6 text-muted-foreground">
             {t('afterword')}
-          </Typography>
+          </p>
         </div>
       </div>
     </>
@@ -67,12 +62,10 @@ const LinkCard: FC<LinkCardProps> = props => {
     >
       <div className="max-w-12">{icon}</div>
       <div className="ml-4">
-        <Typography variant="h6" color="textPrimary">
-          {primary}
-        </Typography>
-        <Typography variant="body2" className="text-muted-foreground">
+        <h2 className="m-0 text-xl leading-[1.6] font-medium">{primary}</h2>
+        <p className="m-0 text-sm leading-[1.43] text-muted-foreground">
           {secondary}
-        </Typography>
+        </p>
       </div>
     </Link>
   )

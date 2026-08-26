@@ -3,7 +3,7 @@ import { core } from 'zerro-core/redux'
 import clsx from 'clsx'
 
 import type { ListItemButtonProps, ListSubheaderProps } from '@mui/material'
-import { ListSubheader, Typography, ListItemButton } from '@mui/material'
+import { ListSubheader, ListItemButton } from '@mui/material'
 import type { TFxAmount, TFxCode } from '6-shared/types'
 import { Amount } from '6-shared/ui/Amount'
 import { DisplayAmount } from '3-widgets/DisplayAmount'
@@ -62,9 +62,9 @@ export const Subheader: FC<
   return (
     <ListSubheader className={clsx('rounded-lg', className)} sx={sx} {...rest}>
       <span className="flex w-full">
-        <Typography component="span" noWrap className="grow leading-[inherit]">
+        <span className="grow truncate leading-[inherit]">
           <b>{name}</b>
-        </Typography>
+        </span>
 
         <span
           className={clsx(

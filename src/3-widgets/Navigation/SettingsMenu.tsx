@@ -29,7 +29,6 @@ import {
   MenuItem,
   MenuList,
   Switch,
-  Typography,
 } from '@mui/material'
 import { track } from '6-shared/analytics'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
@@ -414,9 +413,9 @@ function VersionItem({ onClose }: ItemProps) {
     >
       <ListItemIcon />
       <ListItemText>
-        <Typography variant="overline" className="text-muted-foreground">
+        <span className="text-xs leading-[2.66] font-normal uppercase tracking-[0.08333em] text-muted-foreground">
           {t('version', { version: appVersion })}
-        </Typography>
+        </span>
       </ListItemText>
     </MenuItem>
   )

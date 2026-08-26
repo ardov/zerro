@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Theme } from '@mui/material'
-import { Button, IconButton, Typography, useMediaQuery } from '@mui/material'
+import { Button, IconButton, useMediaQuery } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
 import {
   ChevronLeftIcon,
@@ -113,13 +113,11 @@ export function HistoryTopBar() {
         {/* Left-aligned while the panel is open: the panel overlays the right
             of the page, and controls pushed under it are controls that are
             gone. */}
-        <Typography
-          variant="caption"
-          noWrap
-          className={`${compact ? 'grow-0' : 'grow'} min-w-0`}
+        <span
+          className={`${compact ? 'grow-0' : 'grow'} min-w-0 truncate text-xs leading-[1.66]`}
         >
           {atHead ? label : t('viewingPast', { time: label })}
-        </Typography>
+        </span>
         {!compact && (
           <>
             <IconButton

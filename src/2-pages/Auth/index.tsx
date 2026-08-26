@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
-import { Button, Fade, Typography, ButtonBase } from '@mui/material'
+import { Button, Fade, ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { zenmoney } from '6-shared/api/zenmoney'
@@ -66,7 +66,7 @@ export default function Auth() {
         </Fade>
 
         <Fade in timeout={2000}>
-          <Typography variant="body1" className="text-muted-foreground">
+          <p className="m-0 text-base leading-6 text-muted-foreground">
             {t('haveTrouble')}{' '}
             <ButtonBase
               onClick={() => dispatch(logIn('app'))}
@@ -89,7 +89,7 @@ export default function Auth() {
             >
               {t('btnAlternativeSignIn')}
             </ButtonBase>
-          </Typography>
+          </p>
         </Fade>
 
         <Fade in timeout={3000}>

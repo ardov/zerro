@@ -1,13 +1,6 @@
 import { useEffect } from 'react'
 import type { Theme } from '@mui/material'
-import {
-  Button,
-  Divider,
-  Drawer,
-  IconButton,
-  Typography,
-  useMediaQuery,
-} from '@mui/material'
+import { Button, Drawer, IconButton, useMediaQuery } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { CloseIcon, HistoryIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
@@ -82,7 +75,9 @@ export function HistoryPanel() {
       }}
     >
       <div className="flex items-center justify-between px-4 py-2">
-        <Typography variant="h6">{t('panelTitle')}</Typography>
+        <h2 className="m-0 text-xl leading-[1.6] font-medium">
+          {t('panelTitle')}
+        </h2>
         <IconButton
           size="small"
           onClick={displayProps.onClose}
@@ -91,9 +86,9 @@ export function HistoryPanel() {
           <CloseIcon fontSize="small" />
         </IconButton>
       </div>
-      <Divider />
+      <hr className="m-0 border-0 border-t border-border" />
       <HistoryControls />
-      <Divider />
+      <hr className="m-0 border-0 border-t border-border" />
       {rows.length === 0 ? (
         <EmptyHistory loading={pageStatus === 'loading'} />
       ) : (
@@ -130,13 +125,13 @@ function EmptyHistory({ loading }: { loading: boolean }) {
   return (
     <div className="flex grow flex-col items-center justify-center gap-2 px-8 text-center text-muted-foreground">
       <HistoryIcon className="text-[40px] opacity-40" />
-      <Typography variant="body2">
+      <p className="m-0 text-sm leading-[1.43]">
         {loading ? t('historyLoading') : t('noHistory')}
-      </Typography>
+      </p>
       {!loading && (
-        <Typography variant="caption" className="opacity-80">
+        <p className="m-0 text-xs leading-[1.66] opacity-80">
           {t('noHistoryHint')}
-        </Typography>
+        </p>
       )}
     </div>
   )

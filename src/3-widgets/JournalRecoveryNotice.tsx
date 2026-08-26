@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { Alert, AlertTitle, Button, Snackbar, Typography } from '@mui/material'
+import { Alert, AlertTitle, Button, Snackbar } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { reloadData } from '4-features/sync'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
@@ -43,13 +43,9 @@ export const JournalRecoveryNotice = () => {
         <AlertTitle>{t('journalRecoveryTitle')}</AlertTitle>
         {t('journalRecoveryDescription')}
         {recoveryReason && (
-          <Typography
-            component="div"
-            variant="caption"
-            className="mt-2 break-words font-mono"
-          >
+          <div className="mt-2 break-words font-mono text-xs leading-[1.66]">
             {t('journalRecoveryDiagnostic')}: {recoveryReason}
-          </Typography>
+          </div>
         )}
       </Alert>
     </Snackbar>
