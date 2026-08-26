@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Typography, Checkbox, FormControlLabel } from '@mui/material'
+import { Checkbox, FormControlLabel } from '@mui/material'
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -110,7 +110,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
     <div className="surface-card shadow-elevation-1">
       <div className="min-w-full p-4">
         {/* Header */}
-        <Typography variant="h5">
+        <h2 className="m-0 type-title-lg">
           {t('netWorth.title')}{' '}
           <span
             style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
@@ -118,11 +118,11 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           >
             <PeriodTitle period={period} />
           </span>
-        </Typography>
+        </h2>
 
-        <Typography variant="body1" className="mt-2 text-muted-foreground">
+        <p className="mt-2 mb-0 type-body text-muted-foreground">
           <SurviveFact />
-        </Typography>
+        </p>
       </div>
       {/* Chart */}
       <div className="h-[300px] min-w-full p-4">
@@ -193,9 +193,9 @@ const CustomTooltip = (props: any) => {
   const values = payload.filter(v => v.value)
   return (
     <div className="surface-card shadow-elevation-10 p-4">
-      <Typography variant="h6">
+      <p className="m-0 type-title">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
-      </Typography>
+      </p>
       {values.map(v => (
         <DataLine
           color={v.color}
@@ -226,14 +226,14 @@ function SurviveFact() {
 
   const tooltipContent = (
     <div className="p-2">
-      <Typography variant="body2" gutterBottom>
+      <p className="mt-0 mb-[0.35em] type-body-sm">
         {t('netWorth.tooltipCurrentBalance')}:{' '}
         <DisplayAmount value={currentBalance} />
-      </Typography>
-      <Typography variant="body2">
+      </p>
+      <p className="m-0 type-body-sm">
         {t('netWorth.tooltipAvgExpenses')}:{' '}
         <DisplayAmount value={averageExpenses} />
-      </Typography>
+      </p>
     </div>
   )
 

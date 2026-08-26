@@ -1,7 +1,7 @@
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Typography, Divider } from '@mui/material'
+import { Divider } from '@mui/material'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -58,7 +58,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
   return (
     <div className="surface-card shadow-elevation-1">
       <div className="min-w-full p-4">
-        <Typography variant="h5">
+        <h2 className="m-0 type-title-lg">
           {t('incomesAndOutcomes')}{' '}
           <span
             style={{
@@ -71,12 +71,12 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
             <PeriodTitle period={period} />
           </span>{' '}
           <Summary income={income} outcome={outcome} />
-        </Typography>
-        <Typography variant="body1" className="mt-2 text-muted-foreground">
+        </h2>
+        <p className="mt-2 mb-0 type-body text-muted-foreground">
           {t(savingsRate >= 0 ? 'savingsRatePositive' : 'savingsRateNegative', {
             percent: formatSavingsRate(savingsRate),
           })}
-        </Typography>
+        </p>
       </div>
       <ResponsiveContainer height={300}>
         <AreaChart data={points}>
@@ -156,9 +156,9 @@ const CustomTooltip = (props: any) => {
 
   return (
     <div className="surface-card shadow-elevation-10 p-4">
-      <Typography variant="h6">
+      <p className="m-0 type-title">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
-      </Typography>
+      </p>
       {payload.map(v => (
         <DataLine
           color={v.color}
@@ -206,12 +206,12 @@ function Summary(props: { income: number; outcome: number }) {
 
   const tooltip = (
     <div className="p-2">
-      <Typography variant="body2" gutterBottom>
+      <p className="mt-0 mb-[0.35em] type-body-sm">
         {t('income')}: <DisplayAmount value={income} />
-      </Typography>
-      <Typography variant="body2">
+      </p>
+      <p className="m-0 type-body-sm">
         {t('outcome')}: <DisplayAmount value={outcome} />
-      </Typography>
+      </p>
     </div>
   )
 

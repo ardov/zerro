@@ -3,7 +3,7 @@ import React, { useState, useMemo, useCallback, memo } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Typography, List, ListSubheader, Collapse } from '@mui/material'
+import { List, ListSubheader, Collapse } from '@mui/material'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
@@ -135,9 +135,9 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
       onClick={onClick}
     >
       <span className="flex w-full">
-        <Typography component="span" noWrap className="grow leading-[inherit]">
+        <span className="grow truncate type-body leading-[inherit]">
           <b>{name}</b>
-        </Typography>
+        </span>
 
         <span
           className={`${isNegative ? 'text-error' : 'text-muted-foreground'} ml-4`}
@@ -195,17 +195,17 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
     return (
       <div className="surface-card shadow-elevation-1 relative mb-2 overflow-hidden">
         <div className="relative z-[1] min-w-40 pointer-events-none p-4">
-          <Typography variant="body2">
+          <p className="m-0 type-body-sm">
             <span
               style={{ textDecoration: acc.archive ? 'line-through' : 'none' }}
             >
               {acc.title}
             </span>{' '}
             {isHovering && hoverDate && formatDate(hoverDate)}
-          </Typography>
-          <Typography variant="h6">
+          </p>
+          <p className="m-0 type-title">
             <Amount value={balance} currency={acc.fxCode} decimals="ifAny" />
-          </Typography>
+          </p>
         </div>
         <div
           style={{
