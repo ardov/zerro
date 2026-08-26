@@ -111,9 +111,7 @@ const Header: FC<{
           onClick={openColorPicker}
           button
         />
-        <Typography variant="h6" component="span" noWrap>
-          {name}
-        </Typography>
+        <h2 className="truncate text-xl font-medium leading-8">{name}</h2>
       </div>
       <Tooltip title={t('edit')}>
         <IconButton

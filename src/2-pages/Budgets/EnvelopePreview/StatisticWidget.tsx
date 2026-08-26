@@ -10,7 +10,7 @@ import {
   ReferenceDot,
 } from 'recharts'
 import type { ButtonBaseProps, SxProps } from '@mui/material'
-import { Typography, ButtonBase } from '@mui/material'
+import { ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import type { TFxCode, TISOMonth } from '6-shared/types'
@@ -151,12 +151,12 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
       style={style}
     >
       <div className="px-4 pt-4">
-        <Typography variant="body1" className="text-foreground">
+        <p className="text-base leading-6 text-foreground">
           <span>{t('average')} </span>
           <InlineButton onClick={switchMetric}>{t(metric)}</InlineButton>
           <span> {t('over')} </span>
           <InlineButton onClick={switchPeriod}>{t(period)}</InlineButton>
-        </Typography>
+        </p>
       </div>
       {selectedData && (
         <div className="flex flex-col gap-1 px-4 pt-4">

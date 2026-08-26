@@ -3,7 +3,7 @@ import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Divider, List, ListItem, ListItemButton } from '@mui/material'
+import { List, ListItem, ListItemButton } from '@mui/material'
 import { Total } from '6-shared/ui/Total'
 import { Amount } from '6-shared/ui/Amount'
 import {
@@ -72,7 +72,7 @@ export function EnvelopeInfo(props: {
                 : undefined
           }
         />
-        <Divider className="opacity-60" />
+        <hr className="m-0 w-full border-0 border-t border-border opacity-60" />
       </div>
       <List dense className="-mx-4 text-muted-foreground">
         <ListItem>
