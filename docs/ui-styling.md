@@ -124,4 +124,9 @@ Run these with `pnpm test:storybook`. Rendering a story or passing TypeScript
 alone does not establish visual parity; affected application routes also need
 desktop/mobile and interaction checks.
 
+`tools/ui-parity` compares a running route against the same route served from a
+worktree of the last pre-Tailwind commit, over every text run and painted box on
+the page. Stories cover contracts that are known; the harness is what finds the
+properties nobody thought to check.
+
 See the [MUI Tailwind v4 integration guide](https://mui.com/material-ui/integrations/tailwindcss/tailwindcss-v4/).

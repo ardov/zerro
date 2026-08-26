@@ -13,6 +13,8 @@
     "lint:css": "stylelint \"src/**/*.{css,scss}\" --max-warnings 0",
     "lint": "pnpm typecheck",
     "lint:js": "eslint src tools stories .storybook --max-warnings 0",
+    "ui-parity": "node tools/ui-parity/sink.mjs",
+    "ui-parity:diff": "node tools/ui-parity/diff.mjs",
     "zerro": "tsx tools/zerro/src/cli.ts",
     "knip": "knip --dependencies",
     "knip:exports": "knip --exports --no-exit-code",
