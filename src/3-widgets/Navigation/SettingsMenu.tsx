@@ -258,7 +258,7 @@ function NavItems({ onClose }: ItemProps) {
     <>
       <ActionListItem
         onClick={handleNav('/accounts')}
-        render={<Link to="/stats" />}
+        render={<Link to="/accounts" />}
         nativeButton={false}
       >
         <ActionListItemIcon>
