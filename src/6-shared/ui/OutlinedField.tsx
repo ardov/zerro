@@ -4,20 +4,24 @@ import { Input as InputPrimitive } from '@base-ui/react/input'
 import { cn } from './shadcn/utils'
 import './OutlinedField.css'
 
+/** MUI's two outlined heights. They are the control's padding and nothing
+ * else — the notch, the label and the helper text are the same either way,
+ * which is why the frame does not take this. */
+export type TFieldSize = 'small' | 'medium'
+
 export type OutlinedFieldFrameProps = {
   label?: ReactNode
   helperText?: ReactNode
   startAdornment?: ReactNode
   endAdornment?: ReactNode
   fullWidth?: boolean
-  size?: 'small' | 'medium'
   error?: boolean
   disabled?: boolean
   className?: string
 }
 
 export type OutlinedFieldProps = Omit<ComponentPropsWithRef<'input'>, 'size'> &
-  Omit<OutlinedFieldFrameProps, 'disabled'>
+  Omit<OutlinedFieldFrameProps, 'disabled'> & { size?: TFieldSize }
 
 /** The padding MUI gives the control inside an outlined field. The adornments
  * sit outside it, so whichever side carries one loses its padding here and the
@@ -27,7 +31,7 @@ export type OutlinedFieldProps = Omit<ComponentPropsWithRef<'input'>, 'size'> &
  * has to beat: which of the two wins is Tailwind's emission order, not the
  * order they are written in. */
 export function outlinedControlClass(opts: {
-  size?: 'small' | 'medium'
+  size?: TFieldSize
   startAdornment?: ReactNode
   endAdornment?: ReactNode
   /** A select keeps room for its arrow, which sits over the control. */

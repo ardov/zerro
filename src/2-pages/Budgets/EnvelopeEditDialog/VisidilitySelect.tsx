@@ -13,18 +13,17 @@ type VisibilitySelectProps = {
 export const VisibilitySelect: FC<VisibilitySelectProps> = props => {
   const { t } = useTranslation('envelopeEditDialog')
   const { value, onChange, ...rest } = props
-  const items = {
-    [core.envelopes.envelopeVisibility.auto]: t('visibility.auto'),
-    [core.envelopes.envelopeVisibility.visible]: t('visibility.visible'),
-    [core.envelopes.envelopeVisibility.hidden]: t('visibility.hidden'),
-  }
+  const visibility = core.envelopes.envelopeVisibility
   return (
     <Select
       {...rest}
-      elKey="VisibilitySelect"
-      items={items}
       value={value}
-      onChange={next => onChange(next as core.envelopes.envelopeVisibility)}
+      onChange={onChange}
+      options={[
+        { value: visibility.auto, label: t('visibility.auto') },
+        { value: visibility.visible, label: t('visibility.visible') },
+        { value: visibility.hidden, label: t('visibility.hidden') },
+      ]}
     />
   )
 }

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import { cn } from './shadcn/utils'
 import { findMuiFocusBoundary } from './muiFocusBoundary'
+import { growSurfaceClass, overAnchor } from './popupSurface'
 import './AdaptivePopover.css'
 
 /** Base UI names the vertical swipe directions `up`/`down`, so the edge a
@@ -119,7 +120,7 @@ export function AdaptivePopover({
           anchor={trigger}
           side="bottom"
           align="start"
-          sideOffset={({ anchor }) => -anchor.height}
+          sideOffset={overAnchor}
           collisionPadding={16}
           collisionAvoidance={{ side: 'shift', align: 'shift' }}
           positionMethod="fixed"
@@ -130,7 +131,12 @@ export function AdaptivePopover({
             data-slot="adaptive-popup"
             finalFocus={finalFocus}
             className={cn(
-              'adaptive-popover max-h-[calc(100dvh-32px)] overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-elevation-8 outline-none',
+              growSurfaceClass,
+              // Slower and shallower than a menu, and out of the corner it is
+              // anchored to rather than wherever collision handling left it:
+              // this one only ever shifts, it does not flip to another side.
+              '[--grow-duration:225ms] [--grow-from:0.9] [--grow-origin:top_left]',
+              'max-h-[calc(100dvh-32px)] overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-elevation-8 outline-none',
               className
             )}
           >

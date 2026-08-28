@@ -293,15 +293,34 @@ the app uses: MUI's default, the menu's top-left over the anchor's, and
 screen and opens upward. `onCloseComplete` is there for the filter bar, which
 opens a clause editor the moment the menu is gone — starting it while the menu
 is still animating out moves focus twice. That menu also passes
-`transition-none`, which reaches the stylesheet's rule because `utilities` is
-the later layer.
+`transition-none`, which reaches the shared entrance's rule because
+`utilities` is the later layer.
 
 `MenuItem` turns Base UI's `closeOnClick` off. These menus live on the history
 stack, so closing has to go through the popover's own `onClose` and pop the
 entry exactly once; letting Base UI close the menu as well would pop it twice
 and send the user back a page. Every call site already closed explicitly.
-`arrowPadding` is zeroed on the positioner: there is no arrow, and the default
-5px of room for one shifts a menu opened at a point off that point.
+
+`popupSurface.ts` holds what the anchored popups share. `popupSurfaceClass` is
+the paper MUI drops out of a control — the menu and the select's list are the
+same one, down to the elevation and the 8px the rows sit in — described once
+the way `listRowClass` describes their rows. `popupPositioning` is the rest of
+what they hand the positioner, including the zeroed `arrowPadding`: there is no
+arrow, and the default 5px of room for one shifts a menu opened at a point off
+that point. `overAnchor` is the offset that lays a surface's top-left over the
+anchor's own, which is where MUI puts it and where Base UI does not.
+
+`growSurfaceClass` is the entrance all three anchored surfaces share, and the
+only reason the mechanism is CSS rather than utilities is that it needs
+`data-starting-style` and `data-ending-style`. They grew apart in how far, how
+long and from where, so those are `--grow-from`, `--grow-duration` and
+`--grow-origin`, set beside the class by whichever surface differs: the select
+grows less than a menu because it opens over its own field, and the adaptive
+popover is slower and grows out of the corner it is anchored to rather than
+wherever collision handling left it, since that one only ever shifts. A call
+site's `transition-none` still beats all of it, `utilities` being the later
+layer, which is how the filter bar chains a second surface off the menu
+without waiting.
 
 `OutlinedField` is MUI's outlined text field: the notched border with the label
 cut into it. Its label is always floated, which is right for a field that
@@ -313,7 +332,10 @@ and the `data-invalid` / `data-disabled` state the stylesheet keys off, so none
 of that is spelled out by hand. It is used by `AmountInput`; native props
 target the input, while `className` lands on `Field.Root` and sizes the whole
 field, label and helper text included. Use `startAdornment` and `endAdornment`
-rather than MUI `slotProps`.
+rather than MUI `slotProps`. `size` is not one of the frame's props: MUI's
+`small` and `medium` are the control's vertical padding and nothing else — the
+notch, the label and the helper text are the same either way — so it reaches
+`outlinedControlClass` and stops there.
 
 The focus ring keys off the input, not `:focus-within`. The group holds the
 adornments, and both real callers put an icon button in one — the submit arrow
@@ -353,9 +375,7 @@ settings menu, and the selects whose options were `MenuItem`s.
 `OutlinedFieldFrame`, so the notched border and floating label are the same
 ones the text field draws rather than a second copy of the geometry — that
 extraction is why `OutlinedField` now has a frame at all. `MultiSelect` is the
-same control with more than one value, which is the tag picker; its rows carry
-their own checkbox, so the tick the single select shows would be a second,
-redundant mark.
+same control with more than one value, which is the tag picker.
 
 `onChange` hands over the value, not an event. MUI's `Select` reports through a
 synthetic event whose `target` has to be rebuilt by hand to carry `name` and
@@ -363,15 +383,25 @@ synthetic event whose `target` has to be rebuilt by hand to carry `name` and
 two `@ts-expect-error`s. Formik has `setFieldValue` for exactly this, and the
 envelope edit dialog already used it for two other fields.
 
-`items` maps value to label and is not optional decoration: Base UI resolves a
-row's label from its `SelectItemText`, which does not exist until the list has
-been opened once, so a closed trigger shows the raw value without it. It also
-renders the rows when no children are given, which is every select whose rows
-are just a label. The two that need more — a currency's full name on a second
-line, a tag's checkbox — pass children instead.
+`options` is the whole list, and it is the only way to fill one: rows are data,
+not children. Base UI resolves a row's label from its `SelectItemText`, which
+does not exist until the list has been opened once, so a closed trigger shows
+the raw value unless the labels are handed over up front — `options` is that
+map as well as the rows. Every select in the app wants the same row anyway: a
+label, sometimes a muted second line, and a tick when it is the chosen one.
+Keeping the parts unexported is what makes the option type inferable from
+`value`, so a row whose value is not in the union is a type error rather than a
+cast at the call site. A row that needs more is a reason to widen the option,
+not to reopen the component. The tag picker's rows used to carry an MUI
+`Checkbox`, a form control inside a `role="option"` announcing a second
+selected state beside the row's own; they carry the same tick as every other
+select now.
 
 `SmartSelect` is gone. Its two jobs were a mobile drawer, which the plain popup
-replaces, and a history-backed open state, which `Select` owns through `elKey`.
+replaces, and a history-backed open state, which `Select` keeps: the open list
+goes on the popover stack, so Back closes it rather than leaving the page. The
+key is generated, because nothing opens a select by name and all the stack
+needs is that no two live selects share one.
 `EnvelopeEditDialog.stories.tsx` covers the part nothing else does: that a
 picked value reaches the form.
 

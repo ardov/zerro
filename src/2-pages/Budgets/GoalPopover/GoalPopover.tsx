@@ -88,17 +88,25 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
       <Popover disableRestoreFocus onClose={onClose} {...rest}>
         <div className="grid min-w-80 gap-y-4 p-4">
           <Select
-            elKey="GoalTypeSelect"
             label={t('goalType')}
             fullWidth
             value={type}
-            onChange={next => setType(next as core.goals.goalType)}
-            items={{
-              [core.goals.goalType.MONTHLY]: t('names.monthly'),
-              [core.goals.goalType.MONTHLY_SPEND]: t('names.monthlySpend'),
-              [core.goals.goalType.TARGET_BALANCE]: t('names.targetBalance'),
-              [core.goals.goalType.INCOME_PERCENT]: t('names.incomePercent'),
-            }}
+            onChange={setType}
+            options={[
+              { value: core.goals.goalType.MONTHLY, label: t('names.monthly') },
+              {
+                value: core.goals.goalType.MONTHLY_SPEND,
+                label: t('names.monthlySpend'),
+              },
+              {
+                value: core.goals.goalType.TARGET_BALANCE,
+                label: t('names.targetBalance'),
+              },
+              {
+                value: core.goals.goalType.INCOME_PERCENT,
+                label: t('names.incomePercent'),
+              },
+            ]}
           />
 
           <AmountInput

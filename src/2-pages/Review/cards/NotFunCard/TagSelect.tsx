@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import Checkbox from '@mui/material/Checkbox'
 import { formatMoney } from '6-shared/helpers/money'
 import type { TTagId } from '6-shared/types'
-import { MultiSelect, SelectItem, SelectItemText } from '6-shared/ui/Select'
+import { MultiSelect } from '6-shared/ui/Select'
 
 type TagSelectProps = {
   options: { id: TTagId; name: string; amount: number }[]
@@ -24,24 +23,17 @@ export function TagSelect(props: TagSelectProps) {
 
   return (
     <MultiSelect
-      elKey="TagSelect"
       className="w-[300px]"
       label={label}
       value={selected}
-      onChange={next => onChange(next as TTagId[])}
+      onChange={onChange}
       renderValue={renderText}
-    >
-      {options
-        .filter(t => t.amount)
-        .map(tag => (
-          // The row carries its own checkbox, so no tick beside it.
-          <SelectItem key={tag.id} value={tag.id}>
-            <Checkbox checked={selected.includes(tag.id)} tabIndex={-1} />
-            <SelectItemText>
-              {`${tag.name} (${formatMoney(tag.amount)})`}
-            </SelectItemText>
-          </SelectItem>
-        ))}
-    </MultiSelect>
+      options={options
+        .filter(tag => tag.amount)
+        .map(tag => ({
+          value: tag.id,
+          label: `${tag.name} (${formatMoney(tag.amount)})`,
+        }))}
+    />
   )
 }

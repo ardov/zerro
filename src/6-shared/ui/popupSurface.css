@@ -1,0 +1,29 @@
+@layer components {
+  /* MUI grows an anchored surface out of the corner it hangs off. Three of
+     them do it — the menu, the select's list and the adaptive popover — and
+     they differ only in how far, how long and from where, so those are
+     variables rather than three copies of the rule. The defaults are the
+     menu's; the other two set theirs in their class list.
+
+     `transition-none` from a call site still wins: `utilities` is the later
+     layer, which is how the filter bar chains a second surface off the menu
+     without waiting. */
+  .owned-grow {
+    transform-origin: var(--grow-origin, var(--transform-origin));
+    transition:
+      opacity var(--grow-duration, 150ms) ease,
+      transform var(--grow-duration, 150ms) ease;
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+      transform: scale(var(--grow-from, 0.85));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .owned-grow {
+      transition: none;
+    }
+  }
+}

@@ -7,7 +7,7 @@ import {
   MenuItem,
   Select as MuiSelect,
 } from '@mui/material'
-import { MultiSelect, Select, SelectItem, SelectItemText } from './Select'
+import { MultiSelect, Select } from './Select'
 
 const meta = {
   title: 'UI/Select',
@@ -22,18 +22,16 @@ const options = [
   { value: 'visible', label: 'Visible' },
   { value: 'hidden', label: 'Hidden' },
 ]
-const items = Object.fromEntries(options.map(o => [o.value, o.label]))
 
 function Harness() {
   const [value, setValue] = useState('auto')
   return (
     <div className="p-[200px]">
       <Select
-        elKey="storySelect"
         label="Visibility"
         value={value}
         onChange={setValue}
-        items={items}
+        options={options}
         className="w-[240px]"
       />
       <output data-testid="value">{value}</output>
@@ -46,19 +44,13 @@ function MultiHarness() {
   return (
     <div className="p-[200px]">
       <MultiSelect
-        elKey="storyMultiSelect"
         label="Tags"
         value={value}
         onChange={setValue}
+        options={options}
         renderValue={v => `${v.length} selected`}
         className="w-[240px]"
-      >
-        {options.map(o => (
-          <SelectItem key={o.value} value={o.value}>
-            <SelectItemText>{o.label}</SelectItemText>
-          </SelectItem>
-        ))}
-      </MultiSelect>
+      />
       <output data-testid="value">{value.join(',')}</output>
     </div>
   )
@@ -107,6 +99,44 @@ export const MultipleValues: Story = {
   },
 }
 
+/** The currency picker's rows: a code, and the full name under it. */
+const currencies = [
+  { value: 'USD', label: 'USD', description: 'US Dollar ($)' },
+  { value: 'EUR', label: 'EUR', description: 'Euro (€)' },
+]
+
+function DescribedHarness() {
+  const [value, setValue] = useState('USD')
+  return (
+    <div className="p-[200px]">
+      <Select
+        label="Currency"
+        value={value}
+        onChange={setValue}
+        options={currencies}
+        className="w-[240px]"
+      />
+    </div>
+  )
+}
+
+export const SecondLine: Story = {
+  render: () => <DescribedHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('combobox', { name: /Currency/ })
+
+    // The closed field shows the label alone: the second line is the row's.
+    await expect(trigger).toHaveTextContent(/^USD$/)
+    await userEvent.click(trigger)
+    const list = await body.findByRole('listbox')
+    await expect(
+      within(list).getByRole('option', { name: /EUR/ })
+    ).toHaveTextContent('Euro')
+  },
+}
+
 /** The trigger has to be the same box MUI's outlined select draws, because it
  * sits in dialogs beside fields that are still MUI. */
 function ParityFields() {
@@ -134,11 +164,10 @@ function ParityFields() {
       </div>
       <div data-testid="owned">
         <Select
-          elKey="paritySelect"
           label="Visibility"
           value="auto"
           onChange={() => {}}
-          items={items}
+          options={options}
           className="w-[240px]"
         />
       </div>

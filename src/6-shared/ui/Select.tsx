@@ -1,128 +1,128 @@
 import type { ReactNode } from 'react'
+import { useId } from 'react'
 import { Select as SelectPrimitive } from '@base-ui/react/select'
 import { popoverStack } from '6-shared/historyPopovers'
 import { CheckIcon, ChevronDownIcon } from './feather'
 import { listRowClass } from './ListRow'
 import { OutlinedFieldFrame, outlinedControlClass } from './OutlinedField'
-import type { OutlinedFieldFrameProps } from './OutlinedField'
+import type { OutlinedFieldFrameProps, TFieldSize } from './OutlinedField'
+import { overAnchor, popupPositioning, popupSurfaceClass } from './popupSurface'
 import { cn } from './shadcn/utils'
-import './Select.css'
 
-type TCommonProps = OutlinedFieldFrameProps & {
-  /** Puts the open list on the popover stack, so Back closes it rather than
-   * leaving the page. Every select in the app wants this; it is a prop only
-   * because the key has to be unique. */
-  elKey: string
-  /** The options, as value to label.
-   *
-   * Base UI resolves a row's label from its `SelectItemText`, which does not
-   * exist until the list has been opened once — so a closed trigger shows the
-   * raw value without this. It also renders the rows when no `children` are
-   * given, which is every select whose rows are just a label.
-   */
-  items?: Record<string, ReactNode>
-  children?: ReactNode
+/** One row of the list.
+ *
+ * `label` is the row's text and, through Base UI's `items`, what the closed
+ * field shows. Reading it off the rendered rows instead would leave a closed
+ * trigger showing the raw value, because the rows do not exist until the list
+ * has been opened once. */
+export type TSelectOption<T extends string> = {
+  value: T
+  label: string
+  /** A second, muted line. Only the rows show it. */
+  description?: ReactNode
+}
+
+/** Adornments are left out: the arrow already sits in that corner, and the
+ * trigger is not an input for anything to sit beside. */
+type TFieldProps = Omit<
+  OutlinedFieldFrameProps,
+  'startAdornment' | 'endAdornment'
+> & {
+  size?: TFieldSize
   'aria-label'?: string
 }
 
-export type SelectProps<T> = TCommonProps & {
+export type SelectProps<T extends string> = TFieldProps & {
   value: T
   onChange: (value: T) => void
-  /** What the closed trigger shows. Defaults to the selected item's label. */
-  renderValue?: (value: T) => ReactNode
+  options: TSelectOption<T>[]
 }
 
-export type MultiSelectProps<T> = TCommonProps & {
+export type MultiSelectProps<T extends string> = TFieldProps & {
   value: T[]
   onChange: (value: T[]) => void
-  renderValue?: (value: T[]) => ReactNode
+  options: TSelectOption<T>[]
+  /** What the closed field shows. Several values have no one label, so this is
+   * the caller's summary — «3 tags» rather than a list. */
+  renderValue: (value: T[]) => ReactNode
 }
 
 /** MUI's outlined `Select`.
  *
- * The trigger reuses `OutlinedFieldFrame`, so the notched border and floating
- * label are the same ones the text field draws rather than a second copy.
+ * The trigger goes inside `OutlinedFieldFrame`, so the notched border and the
+ * floating label are the ones the text field draws rather than a second copy.
  *
- * `onChange` takes the value, not an event. MUI's `Select` reports through a
- * synthetic event whose `target` has to be rebuilt by hand to carry `name` and
- * `value` — the shape form libraries read. Formik has `setFieldValue` for
- * exactly this, so the value goes straight to the caller. */
+ * `options` is the whole list: rows are not written by hand, because every
+ * select in the app has the same row — a label, sometimes a muted second line,
+ * and a tick when it is the chosen one.
+ *
+ * `onChange` hands over the value, not an event. MUI's `Select` reports through
+ * a synthetic event whose `target` has to be rebuilt by hand to carry `name`
+ * and `value`, which is the shape form libraries read. Formik has
+ * `setFieldValue` for exactly this. */
 export function Select<T extends string>(props: SelectProps<T>) {
-  const { value, onChange, renderValue, ...rest } = props
+  const { value, onChange, options, ...field } = props
+  const [open, onOpenChange] = useStackedOpen()
   return (
-    <SelectBase
-      {...rest}
+    <SelectPrimitive.Root
+      items={options}
       value={value}
-      onValueChange={next => onChange(next as T)}
-      display={renderValue ? renderValue(value) : <SelectPrimitive.Value />}
-    />
+      // Base UI lets a select be cleared; no row here carries a null value.
+      onValueChange={next => {
+        if (next !== null) onChange(next)
+      }}
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      <SelectField
+        {...field}
+        options={options}
+        display={<SelectPrimitive.Value />}
+      />
+    </SelectPrimitive.Root>
   )
 }
 
 /** The same control with more than one value selected, which is the tag
- * picker. Its rows carry their own checkbox, so the tick the single select
- * shows would be a second, redundant mark. */
+ * picker. Picking does not close the list, and the closed field needs a
+ * summary of its own. */
 export function MultiSelect<T extends string>(props: MultiSelectProps<T>) {
-  const { value, onChange, renderValue, ...rest } = props
+  const { value, onChange, options, renderValue, ...field } = props
+  const [open, onOpenChange] = useStackedOpen()
   return (
-    <SelectBase
-      {...rest}
+    <SelectPrimitive.Root
       multiple
+      items={options}
       value={value}
-      onValueChange={next => onChange(next as T[])}
-      display={renderValue ? renderValue(value) : <SelectPrimitive.Value />}
-    />
+      onValueChange={onChange}
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      <SelectField {...field} options={options} display={renderValue(value)} />
+    </SelectPrimitive.Root>
   )
 }
 
-function SelectBase({
-  elKey,
-  items,
-  value,
-  onValueChange,
-  multiple,
+/** Puts the open list on the popover stack, so Back closes it rather than
+ * leaving the page. Every select wants that and none of them is opened by
+ * name, so the key is generated instead of being asked for at the call site —
+ * all the stack needs is that no two live selects share one. */
+function useStackedOpen(): [boolean, (open: boolean) => void] {
+  const key = useId()
+  const [open, onOpen, onClose] = popoverStack.usePopoverState(key)
+  return [open, next => (next ? onOpen() : onClose())]
+}
+
+function SelectField<T extends string>({
+  options,
   display,
-  children,
-  className,
-  label,
-  helperText,
-  fullWidth,
   size = 'medium',
-  error,
-  disabled,
   'aria-label': ariaLabel,
-}: TCommonProps & {
-  value: unknown
-  onValueChange: (value: never) => void
-  multiple?: boolean
-  display: ReactNode
-}) {
-  const [open, onOpen, onClose] = popoverStack.usePopoverState(elKey)
-  const rows =
-    children ??
-    Object.entries(items ?? {}).map(([itemValue, label]) => (
-      <SelectItem key={itemValue} value={itemValue}>
-        <SelectItemText>{label}</SelectItemText>
-        <SelectItemCheck />
-      </SelectItem>
-    ))
+  ...frame
+}: TFieldProps & { options: TSelectOption<T>[]; display: ReactNode }) {
   return (
-    <SelectPrimitive.Root
-      // Base UI types the value against `multiple`; the public API above is
-      // what keeps the two shapes honest.
-      {...({ value, onValueChange, multiple, items } as any)}
-      open={open}
-      onOpenChange={next => (next ? onOpen() : onClose())}
-    >
-      <OutlinedFieldFrame
-        className={className}
-        label={label}
-        helperText={helperText}
-        fullWidth={fullWidth}
-        size={size}
-        error={error}
-        disabled={disabled}
-      >
+    <>
+      <OutlinedFieldFrame {...frame}>
         <SelectPrimitive.Trigger
           aria-label={ariaLabel}
           className={cn(
@@ -139,63 +139,43 @@ function SelectBase({
 
       <SelectPrimitive.Portal>
         <SelectPrimitive.Positioner
+          {...popupPositioning}
           side="bottom"
           align="start"
-          sideOffset={({ anchor }) => -anchor.height}
-          collisionPadding={16}
-          arrowPadding={0}
-          positionMethod="fixed"
-          className="z-modal"
+          sideOffset={overAnchor}
           // The list is as wide as the field it drops out of, the way MUI's is.
           style={{ minWidth: 'var(--anchor-width)' }}
         >
-          <SelectPrimitive.Popup className="owned-select max-h-[calc(100dvh-96px)] overflow-y-auto rounded-lg bg-popover py-2 text-popover-foreground shadow-elevation-8 outline-none">
-            {rows}
+          {/* A list grows less than a menu: it opens over the field, so a
+              deeper scale reads as the field jumping. */}
+          <SelectPrimitive.Popup
+            className={cn(popupSurfaceClass, '[--grow-from:0.95]')}
+          >
+            {options.map(option => (
+              <SelectPrimitive.Item
+                key={option.value}
+                value={option.value}
+                data-slot="select-item"
+                className={listRowClass}
+              >
+                {/* Base UI aligns the chosen row's text with the trigger's,
+                    and takes that measurement from `ItemText`. */}
+                <SelectPrimitive.ItemText className="min-w-0 flex-auto">
+                  <span className="block truncate">{option.label}</span>
+                  {option.description && (
+                    <span className="block type-body-sm text-muted-foreground">
+                      {option.description}
+                    </span>
+                  )}
+                </SelectPrimitive.ItemText>
+                <SelectPrimitive.ItemIndicator className="ml-4 inline-flex shrink-0 items-center text-primary">
+                  <CheckIcon fontSize="small" />
+                </SelectPrimitive.ItemIndicator>
+              </SelectPrimitive.Item>
+            ))}
           </SelectPrimitive.Popup>
         </SelectPrimitive.Positioner>
       </SelectPrimitive.Portal>
-    </SelectPrimitive.Root>
-  )
-}
-
-export function SelectItem({
-  className,
-  children,
-  ...props
-}: Omit<SelectPrimitive.Item.Props, 'className'> & { className?: string }) {
-  return (
-    <SelectPrimitive.Item
-      data-slot="select-item"
-      className={cn(listRowClass, className)}
-      {...props}
-    >
-      {children}
-    </SelectPrimitive.Item>
-  )
-}
-
-/** The row's label. Base UI reads the closed trigger's text from here, so a
- * row that renders its label directly shows the raw value instead. */
-export function SelectItemText({
-  className,
-  ...props
-}: Omit<SelectPrimitive.ItemText.Props, 'className'> & {
-  className?: string
-}) {
-  return (
-    <SelectPrimitive.ItemText
-      className={cn('min-w-0 flex-auto truncate', className)}
-      {...props}
-    />
-  )
-}
-
-/** The tick MUI puts against the chosen row. Left out where the row already
- * carries a checkbox. */
-export function SelectItemCheck() {
-  return (
-    <SelectPrimitive.ItemIndicator className="ml-4 inline-flex shrink-0 items-center text-primary">
-      <CheckIcon fontSize="small" />
-    </SelectPrimitive.ItemIndicator>
+    </>
   )
 }

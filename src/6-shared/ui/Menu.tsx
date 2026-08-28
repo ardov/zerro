@@ -2,8 +2,8 @@ import type { HTMLAttributes, ReactNode } from 'react'
 import { Menu as MenuPrimitive } from '@base-ui/react/menu'
 import { listRowClass } from './ListRow'
 import { findMuiFocusBoundary } from './muiFocusBoundary'
+import { overAnchor, popupPositioning, popupSurfaceClass } from './popupSurface'
 import { cn } from './shadcn/utils'
-import './Menu.css'
 
 export type MenuProps = Pick<
   HTMLAttributes<HTMLDivElement>,
@@ -69,26 +69,17 @@ export function Menu({
     >
       <MenuPrimitive.Portal container={container}>
         <MenuPrimitive.Positioner
+          {...popupPositioning}
           anchor={anchor}
           side={openUp ? 'top' : 'bottom'}
           align={openUp ? 'end' : 'start'}
-          // Without the offset the menu is pushed clear of the anchor. MUI
-          // lays its top-left over the anchor's, so take the height back off.
-          sideOffset={({ anchor: a }) => (openUp ? 0 : -a.height)}
-          collisionPadding={16}
-          // No arrow, so no room reserved for one: the default 5px of arrow
-          // padding shifts a menu opened at a point off that point.
-          arrowPadding={0}
-          positionMethod="fixed"
-          className="z-modal"
+          // A menu opening upward already sits above its anchor.
+          sideOffset={openUp ? 0 : overAnchor}
         >
           <MenuPrimitive.Popup
             {...props}
             data-slot="menu"
-            className={cn(
-              'owned-menu max-h-[calc(100dvh-96px)] min-w-[112px] overflow-y-auto rounded-lg bg-popover py-2 text-popover-foreground shadow-elevation-8 outline-none',
-              className
-            )}
+            className={cn(popupSurfaceClass, 'min-w-[112px]', className)}
           >
             {children}
           </MenuPrimitive.Popup>
