@@ -87,9 +87,9 @@ describe('TagSelect2 keyboard navigation', () => {
     mount(<TagSelect2 onChange={vi.fn()} />)
     await popoverOpened()
 
-    expect(
-      screen.getByText('Entertainment').closest('div[role="button"]')
-    ).toHaveClass('Mui-selected')
+    expect(screen.getByText('Entertainment').closest('button')).toHaveAttribute(
+      'data-selected'
+    )
   })
 
   test('arrow down key moves focus to next tag', async () => {
@@ -103,8 +103,8 @@ describe('TagSelect2 keyboard navigation', () => {
       expect(screen.getByText('Food')).toBeInTheDocument()
     })
 
-    const foodItem = screen.getByText('Food').closest('div[role="button"]')
-    expect(foodItem).toHaveClass('Mui-selected')
+    const foodItem = screen.getByText('Food').closest('button')
+    expect(foodItem).toHaveAttribute('data-selected')
   })
 
   test('arrow up key moves focus to previous tag', async () => {
@@ -119,8 +119,8 @@ describe('TagSelect2 keyboard navigation', () => {
       expect(screen.getByText('Food')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Food').closest('div[role="button"]')).toHaveClass(
-      'Mui-selected'
+    expect(screen.getByText('Food').closest('button')).toHaveAttribute(
+      'data-selected'
     )
   })
 
@@ -131,9 +131,9 @@ describe('TagSelect2 keyboard navigation', () => {
     const searchInput = screen.getByPlaceholderText('selectCategory')
     await userEvent.type(searchInput, '{ArrowUp}')
 
-    expect(
-      screen.getByText('Entertainment').closest('div[role="button"]')
-    ).toHaveClass('Mui-selected')
+    expect(screen.getByText('Entertainment').closest('button')).toHaveAttribute(
+      'data-selected'
+    )
 
     await userEvent.type(searchInput, '{ArrowDown}{ArrowDown}')
     await userEvent.type(searchInput, '{ArrowDown}')
@@ -142,9 +142,9 @@ describe('TagSelect2 keyboard navigation', () => {
       expect(screen.getByText('Transport')).toBeInTheDocument()
     })
 
-    expect(
-      screen.getByText('Transport').closest('div[role="button"]')
-    ).toHaveClass('Mui-selected')
+    expect(screen.getByText('Transport').closest('button')).toHaveAttribute(
+      'data-selected'
+    )
   })
 
   test('enter key selects the focused tag', async () => {
@@ -188,8 +188,8 @@ describe('TagSelect2 keyboard navigation', () => {
     await waitFor(() => {
       const entertainmentItem = screen
         .getByText('Entertainment')
-        .closest('div[role="button"]')
-      expect(entertainmentItem).toHaveClass('Mui-selected')
+        .closest('button')
+      expect(entertainmentItem).toHaveAttribute('data-selected')
     })
   })
 
@@ -203,8 +203,8 @@ describe('TagSelect2 keyboard navigation', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('showAllCategories').closest('div[role="button"]')
-      ).toHaveClass('Mui-selected')
+        screen.getByText('showAllCategories').closest('button')
+      ).toHaveAttribute('data-selected')
     })
   })
 
@@ -230,10 +230,8 @@ describe('TagSelect2 keyboard navigation', () => {
     await userEvent.type(searchInput, '{ArrowUp}')
 
     await waitFor(() => {
-      const transportItem = screen
-        .getByText('Transport')
-        .closest('div[role="button"]')
-      expect(transportItem).toHaveClass('Mui-selected')
+      const transportItem = screen.getByText('Transport').closest('button')
+      expect(transportItem).toHaveAttribute('data-selected')
     })
   })
 

@@ -1,7 +1,6 @@
 import { Button, IconButton } from '6-shared/ui/Button'
 import { useEffect } from 'react'
-import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
-import { Drawer } from '@mui/material'
+import { SideDrawer } from '6-shared/ui/SideDrawer'
 import { useTranslation } from 'react-i18next'
 import { CloseIcon, HistoryIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
@@ -19,8 +18,6 @@ import {
 import { HistoryControls } from './HistoryControls'
 import { HistoryRestorePreview } from './HistoryRestorePreview'
 import { HistoryRowList } from './HistoryRowList'
-
-const panelWidth = 380
 
 /**
  * An overlay on every size, not a column beside the page.
@@ -45,7 +42,6 @@ export function useHistoryPanelFromMenu() {
 export function HistoryPanel() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()
-  const isMobile = useBreakpointDown('md')
   const { displayProps } = historyPanelPopover.useProps()
   const rows = useAppSelector(selectHistoryRows)
   const canLoadOlder = useAppSelector(selectCanLoadOlderHistory)
@@ -66,14 +62,13 @@ export function HistoryPanel() {
   }
 
   return (
-    <Drawer
-      anchor="right"
-      variant="temporary"
+    <SideDrawer
       open={displayProps.open}
       onClose={displayProps.onClose}
-      slotProps={{
-        paper: { sx: { width: isMobile ? '100%' : panelWidth } },
-      }}
+      // MUI sized the paper through `slotProps`; the sheet takes a class, so
+      // the breakpoint is the stylesheet's rather than a media-query hook's.
+      className="w-full md:w-[380px]"
+      aria-label={t('panelTitle')}
     >
       <div className="flex items-center justify-between px-4 py-2">
         <h2 className="m-0 type-title">{t('panelTitle')}</h2>
@@ -113,7 +108,7 @@ export function HistoryPanel() {
       {/* Pinned under the list: it belongs to the selection, not to the row
           that happens to be scrolled into view. */}
       <HistoryRestorePreview />
-    </Drawer>
+    </SideDrawer>
   )
 }
 

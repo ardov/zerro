@@ -2,16 +2,11 @@ import { IconButton } from '6-shared/ui/Button'
 import type { FC, MouseEvent } from 'react'
 import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Autocomplete,
-  Chip,
-  InputBase,
-  Popover,
-  TextField,
-} from '@mui/material'
-import { Menu, MenuItem } from '6-shared/ui/Menu'
 // The three `TextField`s left are Autocomplete's own input, which it hands
 // `params` to; they convert with it.
+import { Autocomplete, Chip, InputBase, TextField } from '@mui/material'
+import { Menu, MenuItem } from '6-shared/ui/Menu'
+import { Popover } from '6-shared/ui/Popover'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
@@ -57,6 +52,10 @@ const Filter: FC<FilterProps> = ({
     null
   )
   const [editorOptionsOpen, setEditorOptionsOpen] = useState(false)
+  // The chip the editor hangs off. MUI took a function it could call after
+  // render; a value read out of the ref in the handler that opens the editor
+  // is the same thing without reading a ref while rendering.
+  const [editorAnchor, setEditorAnchor] = useState<HTMLElement | null>(null)
   const appliedClauses = query.clauses
   const editingClause = editingKind
     ? query.clauses.find(clause => clause.kind === editingKind)
@@ -93,12 +92,14 @@ const Filter: FC<FilterProps> = ({
     if (!kind) return
 
     setEditorOptionsOpen(false)
+    setEditorAnchor(chipRefs.current[kind] || null)
     setEditingKind(kind)
   }
 
   const openEditor = (clause: Clause) => {
     if (isEditableKind(clause.kind)) {
       setEditorOptionsOpen(false)
+      setEditorAnchor(chipRefs.current[clause.kind] || null)
       setEditingKind(clause.kind)
     }
   }
@@ -210,18 +211,19 @@ const Filter: FC<FilterProps> = ({
       </Menu>
 
       <Popover
-        anchorEl={() =>
-          editingKind ? chipRefs.current[editingKind] || null : null
-        }
+        anchorEl={editorAnchor}
         open={Boolean(editingClause)}
         onClose={closeEditor}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        slotProps={{
-          transition: {
-            onEntered: () => setEditorOptionsOpen(true),
-            onExit: () => setEditorOptionsOpen(false),
-          },
-        }}
+        // The editor drops out from under its chip rather than covering it.
+        placement="below"
+        // `Autocomplete` measures its popper against the surface, so its
+        // options wait until the surface has stopped scaling. Every path that
+        // closes the editor clears the flag itself, so only the entrance
+        // needs a hook here.
+        onOpenComplete={() => setEditorOptionsOpen(true)}
+        aria-label={
+          editingClause ? getClauseLabel(editingClause, labels) : undefined
+        }
       >
         {editingClause && (
           <div className="w-[340px] max-w-[90vw] p-3">

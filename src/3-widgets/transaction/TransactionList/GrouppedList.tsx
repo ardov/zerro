@@ -5,7 +5,7 @@ import { List } from 'react-window'
 import type { StaticDatePickerProps } from '@mui/x-date-pickers/StaticDatePicker'
 import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker'
 import { AutoSizer } from 'react-virtualized-auto-sizer'
-import { ListSubheader } from '@mui/material'
+import { ListRowSubheader } from '6-shared/ui/ListRow'
 import { formatDate, parseDate } from '6-shared/helpers/date'
 import type { TDateDraft, TISODate, TTransactionId } from '6-shared/types'
 import { toISODate } from '6-shared/helpers/date'
@@ -191,12 +191,13 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
         {topDate && (
           <div style={stickyOverlayStyle}>
             <div style={{ ...groupStyle, transform: `translateY(${pushY}px)` }}>
-              <ListSubheader
+              <ListRowSubheader
+                sticky
                 style={{ pointerEvents: 'auto' }}
                 onClick={() => onDateClick(topDate)}
               >
                 {formatDate(topDate)}
-              </ListSubheader>
+              </ListRowSubheader>
             </div>
           </div>
         )}
@@ -224,9 +225,9 @@ const Day = (props: RowComponentProps<DayData>): React.ReactElement => {
     <div style={{ ...groupStyle, ...style }}>
       {/* Sticky is handled by the overlay header in GrouppedList, because
           react-window's row transform breaks native `position: sticky`. */}
-      <ListSubheader disableSticky onClick={() => onDateClick(group.date)}>
+      <ListRowSubheader onClick={() => onDateClick(group.date)}>
         {formatDate(group.date)}
-      </ListSubheader>
+      </ListRowSubheader>
 
       {group.ids.map(renderTransaction)}
     </div>

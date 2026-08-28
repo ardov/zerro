@@ -2,7 +2,11 @@ import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Collapse, List, ListItemButton } from '@mui/material'
+// `Collapse` is an animation, not a list primitive; it converts with the rest
+// of MUI's transitions.
+import { Collapse } from '@mui/material'
+import { ListRows, listItemDenseClass } from '6-shared/ui/ListRow'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useToggle } from '6-shared/hooks/useToggle'
 import type { TFxAmount } from '6-shared/types'
@@ -38,7 +42,7 @@ export default function AccountList({ className = '' }) {
 
   return (
     <div className={className}>
-      <List dense>
+      <ListRows>
         <Subheader
           name={
             <Tooltip title={t('inBalanceDescription')}>
@@ -51,9 +55,9 @@ export default function AccountList({ className = '' }) {
           <Account key={acc.id} account={acc} />
         ))}
         <ArchivedList accs={inBudgetArchived} />
-      </List>
+      </ListRows>
 
-      <List dense>
+      <ListRows>
         <Subheader
           name={
             <Tooltip title={t('otherDescription')}>
@@ -66,7 +70,7 @@ export default function AccountList({ className = '' }) {
           <Account key={acc.id} account={acc} />
         ))}
         <ArchivedList accs={savingsArchived} />
-      </List>
+      </ListRows>
     </div>
   )
 }
@@ -85,14 +89,15 @@ const ArchivedList: FC<{ accs: core.accounts.TAccountPopulated[] }> = props => {
   return (
     <>
       <Collapse in={visible} unmountOnExit>
-        <List dense>
+        <ListRows>
           {accs.map(acc => (
             <Account key={acc.id} account={acc} />
           ))}
-        </List>
+        </ListRows>
       </Collapse>
-      <ListItemButton
-        className="rounded-lg type-body-sm text-info"
+      <button
+        type="button"
+        className={cn(listItemDenseClass, 'text-info')}
         onClick={toggleVisibility}
       >
         {visible ? (
@@ -110,7 +115,7 @@ const ArchivedList: FC<{ accs: core.accounts.TAccountPopulated[] }> = props => {
             )}
           </span>
         )}
-      </ListItemButton>
+      </button>
     </>
   )
 }

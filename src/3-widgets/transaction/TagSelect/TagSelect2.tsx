@@ -3,10 +3,11 @@ import type { FC, KeyboardEventHandler } from 'react'
 import React, { useEffect, useState, useRef } from 'react'
 import { createSelector } from '@reduxjs/toolkit'
 import { useAppSelector } from 'store'
-import type { PopoverProps } from '@mui/material'
-import { Popover, List, ListItemButton, ListItemText } from '@mui/material'
+import { Popover, type PopoverProps } from '6-shared/ui/Popover'
+import { ButtonBase } from '6-shared/ui/Button'
+import { ListRowText, listItemClass } from '6-shared/ui/ListRow'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
-import { AddIcon } from '6-shared/ui/Icons'
+import { AddIcon } from '6-shared/ui/feather'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import type { Modify } from '6-shared/types'
 import { useTranslation } from 'react-i18next'
@@ -69,8 +70,8 @@ export const TagSelect2: FC<TagSelectProps> = props => {
         onClose={handleClose}
         onTagSelect={handleTagSelect}
         selectedIds={value}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+        placement="below"
+        align="center"
       />
     </>
   )
@@ -81,7 +82,6 @@ type TagSelectPopoverProps = PopoverProps & {
   tagType?: TagType
   selectedIds?: string[] | null
   onTagSelect: (id: string) => void
-  showNull?: boolean
 }
 
 const TagSelectPopover: FC<TagSelectPopoverProps> = ({
@@ -90,7 +90,6 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
   exclude,
   tagType,
   selectedIds,
-  showNull = false,
   onTagSelect,
   onClose,
   ...popoverProps
@@ -104,7 +103,6 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
     search,
     tagType: localTagType,
     exclude,
-    showNull,
   })
 
   const flatList: TagNode[] = []
@@ -157,7 +155,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
     }
     if (e.key === 'Escape' || e.keyCode === 27) {
       e.preventDefault()
-      onClose?.(e, 'escapeKeyDown')
+      onClose?.()
     }
   }
 
@@ -166,6 +164,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
       open={open}
       anchorEl={anchorEl}
       onClose={onClose}
+      aria-label={t('selectCategory')}
       {...popoverProps}
     >
       <div className="surface-card sticky top-0 z-10 rounded-none shadow-none px-2 pt-2">
@@ -179,7 +178,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
         />
       </div>
 
-      <List>
+      <ul className="m-0 flex list-none flex-col p-0 py-2">
         {flatList.map((tag, idx) => (
           <TagOption
             key={tag.id}
@@ -196,7 +195,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
             label={t('showAllCategories')}
           />
         )}
-      </List>
+      </ul>
     </Popover>
   )
 }
@@ -209,7 +208,7 @@ type TagOptionProps = {
 }
 
 const TagOption: FC<TagOptionProps> = ({ tag, isChild, onClick, selected }) => {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (selected && ref.current) {
@@ -218,13 +217,13 @@ const TagOption: FC<TagOptionProps> = ({ tag, isChild, onClick, selected }) => {
   }, [selected])
 
   return (
-    <ListItemButton ref={ref} onClick={onClick} selected={selected}>
+    <TagRow ref={ref} onClick={onClick} selected={selected}>
       <TagIcon
         symbol={tag.symbol}
         className={isChild ? 'mr-4 ml-10' : 'mr-4 ml-0'}
       />
-      <ListItemText primary={tag.name} />
-    </ListItemButton>
+      <ListRowText className="my-1">{tag.name}</ListRowText>
+    </TagRow>
   )
 }
 
@@ -239,7 +238,7 @@ const ShowAllButton: FC<ShowAllButtonProps> = ({
   selected,
   label,
 }) => {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (selected && ref.current) {
@@ -248,19 +247,38 @@ const ShowAllButton: FC<ShowAllButtonProps> = ({
   }, [selected])
 
   return (
-    <ListItemButton ref={ref} onClick={onClick} selected={selected}>
-      <ListItemText primary={label} />
-    </ListItemButton>
+    <TagRow ref={ref} onClick={onClick} selected={selected}>
+      <ListRowText className="my-1">{label}</ListRowText>
+    </TagRow>
   )
 }
+
+/** Highlight follows the search field's arrow keys rather than focus, which is
+ * why `selected` is a prop here and not `:focus-visible`. */
+const TagRow: FC<{
+  ref: React.Ref<HTMLButtonElement>
+  onClick: () => void
+  selected?: boolean
+  children: React.ReactNode
+}> = ({ ref, onClick, selected, children }) => (
+  <li className="contents">
+    <ButtonBase
+      ref={ref}
+      onClick={onClick}
+      data-selected={selected || undefined}
+      className={listItemClass}
+    >
+      {children}
+    </ButtonBase>
+  </li>
+)
 
 const makeTagChecker = (props: {
   search?: string
   tagType?: TagType
   exclude?: string[] | null
-  showNull?: boolean
 }) => {
-  const { search = '', tagType = null, exclude = [], showNull = false } = props
+  const { search = '', tagType = null, exclude = [] } = props
   const checkSearch = (tag: TagNode, search: string) => {
     if (includes(tag.title, search)) return true
     const children = tag.children as TTagPopulated[]
@@ -269,7 +287,8 @@ const makeTagChecker = (props: {
   return function (tag: TagNode) {
     // never show excluded tags
     if (exclude?.includes(tag.id)) return false
-    if (!showNull && tag.id === core.tags.nullTag.id) return false
+    // The null tag is never an option here; it is what having no tag means.
+    if (tag.id === core.tags.nullTag.id) return false
     if (search) return checkSearch(tag, search)
     if (tagType === 'income') return !!tag.showIncome
     if (tagType === 'outcome') return !!tag.showOutcome

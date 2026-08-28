@@ -5,7 +5,7 @@ import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import type { TDateDraft, TISOMonth } from '6-shared/types'
-import { ChevronRightIcon, ChevronLeftIcon } from '6-shared/ui/Icons'
+import { ChevronRightIcon, ChevronLeftIcon } from '6-shared/ui/feather'
 import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
 import { formatDate } from '6-shared/helpers/date'
 import { nextMonth, prevMonth } from '6-shared/helpers/date'

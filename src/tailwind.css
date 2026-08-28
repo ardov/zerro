@@ -151,6 +151,13 @@
   z-index: var(--z-modal, 1300);
 }
 
+/* The docked navigation panel, which is fixed and therefore has to sit above
+   the page it reserves room in — but under every overlay. Same fallback
+   reasoning as `z-modal`. */
+@utility z-drawer {
+  z-index: var(--z-drawer, 1200);
+}
+
 /* MUI's action.disabledOpacity. An `@utility` rather than a `--color-*` alias
    because it is an opacity, and the fallback keeps a disabled control dimmed
    where `AppThemeProvider` is not mounted. */

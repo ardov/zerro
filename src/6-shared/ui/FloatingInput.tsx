@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import type { PopoverProps } from '@mui/material'
-import { Popover } from '@mui/material'
 import { useFormik } from 'formik'
+import { useTranslation } from 'react-i18next'
+import { Popover, type PopoverProps } from './Popover'
 import { OutlinedField } from './OutlinedField'
 
 export function useFloatingInput(
@@ -39,6 +39,7 @@ function FloatingInput(props: {
   onSubmit: (v: string) => void
 }) {
   const { value, onSubmit, open, anchorEl } = props
+  const { t } = useTranslation()
 
   const { values, handleSubmit, handleChange, setFieldValue, submitForm } =
     useFormik({
@@ -52,7 +53,12 @@ function FloatingInput(props: {
   }, [open, setFieldValue, value])
 
   return (
-    <Popover open={open} onClose={submitForm} anchorEl={anchorEl}>
+    <Popover
+      open={open}
+      onClose={submitForm}
+      anchorEl={anchorEl}
+      aria-label={t('rename')}
+    >
       <form className="w-[280px] p-0" onSubmit={handleSubmit}>
         <OutlinedField
           fullWidth

@@ -3,7 +3,8 @@ import { Drawer } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
 import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import { popoverStack } from '6-shared/historyPopovers'
-import { Dialog, useDialogFocus } from './Dialog'
+import { Dialog } from './Dialog'
+import { useOverlayFocus } from './useOverlayFocus'
 import { drawerBackdropClass, drawerSurfaceClass } from './popupSurface'
 import { cn } from './shadcn/utils'
 
@@ -31,7 +32,7 @@ export function SmartDialog({
   const { t } = useTranslation()
   const [open, , onClose] = popoverStack.usePopoverState(elKey)
   const isMobile = useBreakpointDown('sm')
-  const { container, finalFocus } = useDialogFocus(open)
+  const { finalFocus } = useOverlayFocus(open)
 
   if (!isMobile) {
     return (
@@ -49,7 +50,7 @@ export function SmartDialog({
       }}
       swipeDirection="down"
     >
-      <Drawer.Portal container={container}>
+      <Drawer.Portal>
         <Drawer.Backdrop
           className={cn(
             drawerBackdropClass,

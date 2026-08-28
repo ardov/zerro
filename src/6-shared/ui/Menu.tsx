@@ -1,7 +1,6 @@
 import type { HTMLAttributes, ReactNode } from 'react'
 import { Menu as MenuPrimitive } from '@base-ui/react/menu'
 import { listRowClass } from './ListRow'
-import { findMuiFocusBoundary } from './muiFocusBoundary'
 import { overAnchor, popupPositioning, popupSurfaceClass } from './popupSurface'
 import { cn } from './shadcn/utils'
 
@@ -54,7 +53,6 @@ export function Menu({
           new DOMRect(anchorPosition.left, anchorPosition.top, 0, 0),
       }
     : anchorEl
-  const container = findMuiFocusBoundary(anchorEl)
   const openUp = placement === 'top-end'
 
   return (
@@ -67,7 +65,7 @@ export function Menu({
         if (!next) onCloseComplete?.()
       }}
     >
-      <MenuPrimitive.Portal container={container}>
+      <MenuPrimitive.Portal>
         <MenuPrimitive.Positioner
           {...popupPositioning}
           anchor={anchor}

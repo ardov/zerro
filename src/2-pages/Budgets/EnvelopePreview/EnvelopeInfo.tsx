@@ -3,7 +3,8 @@ import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { List, ListItem, ListItemButton } from '@mui/material'
+import { ListRows, listItemDenseClass } from '6-shared/ui/ListRow'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { Total } from '6-shared/ui/Total'
 import { Amount } from '6-shared/ui/Amount'
 import {
@@ -74,8 +75,17 @@ export function EnvelopeInfo(props: {
         />
         <hr className="m-0 w-full border-0 border-t border-border opacity-60" />
       </div>
-      <List dense className="-mx-4 text-muted-foreground">
-        <ListItem>
+      <ListRows className="-mx-4 text-muted-foreground">
+        {/* Not a button: it reports a number and does nothing when pressed,
+            so it keeps the row's box without its affordances. `text-inherit`
+            gives the list its muted colour back, which `ListItemButton` used
+            to hand down through `ButtonBase`'s `color: inherit`. */}
+        <div
+          className={cn(
+            listItemDenseClass,
+            'cursor-default text-inherit hover:bg-transparent'
+          )}
+        >
           <OneLiner
             left={t('leftoverFrom', {
               month: formatDate(prevMonth(month), 'MMM'),
@@ -88,10 +98,14 @@ export function EnvelopeInfo(props: {
               />
             }
           />
-        </ListItem>
+        </div>
 
-        <ListItemButton
-          className="transition-colors duration-200 hover:text-foreground"
+        <button
+          type="button"
+          className={cn(
+            listItemDenseClass,
+            'text-inherit transition-colors duration-200 hover:text-foreground'
+          )}
           onClick={e => openBudgetPopover(id, e.currentTarget)}
         >
           <OneLiner
@@ -104,10 +118,14 @@ export function EnvelopeInfo(props: {
               />
             }
           />
-        </ListItemButton>
+        </button>
 
-        <ListItemButton
-          className="transition-colors duration-200 hover:text-foreground"
+        <button
+          type="button"
+          className={cn(
+            listItemDenseClass,
+            'text-inherit transition-colors duration-200 hover:text-foreground'
+          )}
           onClick={() => {
             transactionDrawer.open({
               envelopeConditions: {
@@ -137,8 +155,8 @@ export function EnvelopeInfo(props: {
               />
             }
           />
-        </ListItemButton>
-      </List>
+        </button>
+      </ListRows>
     </div>
   )
 }

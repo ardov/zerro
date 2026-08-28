@@ -18,6 +18,7 @@
     "available": "Доступно",
     "activity": "Операции",
     "transactions": "Операции",
+    "transaction": "Операция",
     "comment": "Комментарий",
     "currency": "Валюта",
     "currency_one": "1 валюта",
@@ -35,6 +36,10 @@
     "apply": "Применить",
     "quickAmounts": "Быстрые суммы",
     "close": "Закрыть",
+    "rename": "Переименовать",
+    "selectMonth": "Выбрать месяц",
+    "previousYear": "Предыдущий год",
+    "nextYear": "Следующий год",
     "today": "Сегодня",
     "yesterday": "Вчера",
     "selectCategory": "Выберите категорию",
@@ -122,6 +127,7 @@
     "btnSave": "Сохранить категорию",
     "btnCreate": "Создать категорию",
     "btnCancel": "Отменить",
+    "color": "Цвет",
     "removeColor": "Убрать цвет"
   },
 

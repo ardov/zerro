@@ -1,13 +1,16 @@
 import { IconButton } from '6-shared/ui/Button'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
+// `Chip` is not a list primitive; it converts with the rest of MUI's
+// data-display set.
+import { Chip } from '@mui/material'
 import {
-  Chip,
-  List,
-  ListItemButton,
-  ListItemText,
-  ListSubheader,
-} from '@mui/material'
+  ListRowSubheader,
+  ListRowText,
+  ListRows,
+  listItemDenseClass,
+} from '6-shared/ui/ListRow'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { formatTimeAgo } from '6-shared/helpers/date'
 import { commandVerbLabelKeys } from '6-shared/localization/commandVerbs'
 import { ChevronDownIcon } from '6-shared/ui/Icons'
@@ -38,9 +41,7 @@ export function HistoryRowList({
   onSelect: (point: THistoryPointRef) => void
 }) {
   return (
-    // `component="div"`: the list mixes button rows and plain headings, and
-    // a `ul` may only hold list items.
-    <List disablePadding dense component="div">
+    <ListRows disablePadding>
       {rows.map(row => (
         <HistoryRowItem
           key={rowKey(row)}
@@ -50,7 +51,7 @@ export function HistoryRowList({
           onSelect={onSelect}
         />
       ))}
-    </List>
+    </ListRows>
   )
 }
 
@@ -76,68 +77,68 @@ function HistoryRowItem({
     // The local stack sits above the journal, and that order is not time: a
     // background pull lands under unsent commands that were made before it.
     return (
-      <ListSubheader
-        disableSticky
-        sx={{
-          bgcolor: 'transparent',
-          color: 'text.secondary',
-          typography: 'overline',
-          lineHeight: 2,
-          pt: 1,
-        }}
-      >
+      // Not sticky, and re-typed to `overline` at a tighter leading. The
+      // type is spelled in utilities rather than `type-overline` so that
+      // tailwind-merge can see it beat the subheader's own `text-sm/[48px]`.
+      <ListRowSubheader className="bg-transparent pt-1 text-xs/[2] font-normal uppercase">
         {t(row.id === 'local' ? 'sectionLocal' : 'sectionSynced')}
-      </ListSubheader>
+      </ListRowSubheader>
     )
   }
 
   if (row.type === 'redo') {
     return (
-      <ListItemText
-        className="px-4 py-1 opacity-50"
-        primary={commandTitle(row.command, t)}
-        secondary={t('undoneHint')}
-        slotProps={{
-          primary: { variant: 'body2', noWrap: true },
-          secondary: { noWrap: true },
-        }}
-      />
+      <div className="px-4 py-1 opacity-50 type-body-sm">
+        <ListRowText className="my-1 truncate" secondary={t('undoneHint')}>
+          {commandTitle(row.command, t)}
+        </ListRowText>
+      </div>
     )
   }
 
   if (row.type === 'run') {
     const toggle = () => dispatch(toggleHistoryRun(row.id))
     return (
-      <ListItemButton
-        selected={isSelected}
-        onClick={() => (point ? onSelect(point) : toggle())}
-      >
-        <RowText
-          primary={t('updatesCollapsed', { count: row.entries.length })}
-          secondary={formatTimeAgo(row.entries[0].serverTimestamp)}
-          isHead={isHead}
-          nowLabel={t('nowBadge')}
-        />
+      // The chevron is a sibling of the row, not a child of it: a `button` may
+      // not contain another one. MUI's `ListItemButton` was a `div` with
+      // `role="button"`, which hid the nesting; a real button cannot.
+      <div className="relative flex w-full min-w-0">
+        <button
+          type="button"
+          className={cn(listItemDenseClass, 'pr-12')}
+          data-selected={isSelected || undefined}
+          onClick={() => (point ? onSelect(point) : toggle())}
+        >
+          <RowText
+            primary={t('updatesCollapsed', { count: row.entries.length })}
+            secondary={formatTimeAgo(row.entries[0].serverTimestamp)}
+            isHead={isHead}
+            nowLabel={t('nowBadge')}
+          />
+        </button>
         <IconButton
           size="small"
+          className="absolute top-1/2 right-2 -translate-y-1/2"
           aria-label={row.expanded ? t('collapseRun') : t('expandRun')}
-          onClick={event => {
-            event.stopPropagation()
-            toggle()
-          }}
+          onClick={toggle}
         >
           <ChevronDownIcon
             fontSize="small"
             className={row.expanded ? 'rotate-180' : undefined}
           />
         </IconButton>
-      </ListItemButton>
+      </div>
     )
   }
 
   if (row.type === 'local') {
     return (
-      <ListItemButton selected={isSelected} onClick={() => onSelect(row.point)}>
+      <button
+        type="button"
+        className={listItemDenseClass}
+        data-selected={isSelected || undefined}
+        onClick={() => onSelect(row.point)}
+      >
         {/* No change counts here: the command's own label already names the
             act, and "Goal changed · Goals 1" only repeats it in numbers. */}
         <RowText
@@ -146,17 +147,18 @@ function HistoryRowItem({
           isHead={isHead}
           nowLabel={t('nowBadge')}
         />
-      </ListItemButton>
+      </button>
     )
   }
 
   // row.type === 'journal'
   const { entry } = row
   return (
-    <ListItemButton
-      selected={isSelected}
+    <button
+      type="button"
+      data-selected={isSelected || undefined}
       onClick={() => onSelect(row.point)}
-      className={row.nested ? 'pl-8' : undefined}
+      className={cn(listItemDenseClass, row.nested && 'pl-8')}
     >
       {/* Counts stay on server rows: a pull has no label of its own, so the
           only thing that distinguishes one update from another is what moved. */}
@@ -171,7 +173,7 @@ function HistoryRowItem({
         isHead={isHead}
         nowLabel={t('nowBadge')}
       />
-    </ListItemButton>
+    </button>
   )
 }
 
@@ -188,41 +190,34 @@ function RowText({
   nowLabel: string
 }) {
   return (
-    <ListItemText
-      primary={
-        isHead ? (
-          <span className="flex min-w-0 flex-row items-center gap-2">
-            <span
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {primary}
-            </span>
-            <Chip
-              size="small"
-              color="primary"
-              variant="outlined"
-              label={nowLabel}
-              sx={{
-                height: 18,
-                flexShrink: 0,
-                '& .MuiChip-label': { px: 0.75 },
-              }}
-            />
+    <ListRowText className="my-1 truncate" secondary={secondary}>
+      {isHead ? (
+        <span className="flex min-w-0 flex-row items-center gap-2">
+          <span
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {primary}
           </span>
-        ) : (
-          primary
-        )
-      }
-      secondary={secondary}
-      slotProps={{
-        primary: { noWrap: !isHead },
-        secondary: { noWrap: true },
-      }}
-    />
+          <Chip
+            size="small"
+            color="primary"
+            variant="outlined"
+            label={nowLabel}
+            sx={{
+              height: 18,
+              flexShrink: 0,
+              '& .MuiChip-label': { px: 0.75 },
+            }}
+          />
+        </span>
+      ) : (
+        primary
+      )}
+    </ListRowText>
   )
 }
 

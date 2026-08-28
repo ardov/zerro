@@ -120,6 +120,7 @@ const GlobalVariables = (props: { theme: Theme }) => {
       /* Owned overlays stack against MUI's modals, so the level comes from
          the same theme MUI positions its own surfaces with. */
       --z-modal: ${zIndex.modal};
+      --z-drawer: ${zIndex.drawer};
     }
   `
   return <Global styles={styles} />

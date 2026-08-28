@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { List } from '@mui/material'
+import { ListRows } from '6-shared/ui/ListRow'
 import { Debtor, Subheader } from './components'
 import { addFxAmount, isZero } from '6-shared/helpers/money'
 import { keys } from '6-shared/helpers/keys'
@@ -47,7 +47,7 @@ export function DebtorList({ className = '' }) {
   return (
     <div className={className}>
       {!!iOweList.length && (
-        <List dense>
+        <ListRows>
           <Subheader name={t('iOwe')} amount={totalOwe} />
           {iOweList.map(d => (
             <Debtor
@@ -57,11 +57,11 @@ export function DebtorList({ className = '' }) {
               balance={d.balance}
             />
           ))}
-        </List>
+        </ListRows>
       )}
 
       {!!iLentList.length && (
-        <List dense>
+        <ListRows>
           <Subheader name={t('iAmOwed')} amount={totalLent} />
           {iLentList.map(d => (
             <Debtor
@@ -71,7 +71,7 @@ export function DebtorList({ className = '' }) {
               balance={d.balance}
             />
           ))}
-        </List>
+        </ListRows>
       )}
     </div>
   )

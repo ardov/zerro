@@ -212,27 +212,112 @@ a CSS precedence rule.
 
 ### Owned interactive components
 
-`AdaptivePopover` composes Base UI Popover at 900px and above and Base UI
-Drawer below 900px. Its app-owned props are `open`, `onClose`, `anchorEl`,
-`drawerSide`, `container`, children, className and accessible labels.
-`anchorEl` positions the desktop popover; `drawerSide` picks the edge the
-mobile drawer slides in from and is ignored on desktop. History remains
+`AdaptivePopover` is `Popover` at 900px and above and Base UI Drawer below
+900px. It adds exactly one prop to `PopoverProps` — `drawerSide`, the edge the
+mobile drawer slides in from, ignored on desktop — because above the
+breakpoint it adds nothing at all: the desktop half is the owned `Popover`
+rather than a second copy of it, so the two cannot drift apart in geometry,
+entrance or focus handling. Each half is its own component, so switching
+between them across the breakpoint cannot reorder anyone's hooks. The rest of
+`PopoverProps` either carries across — `onOpenComplete` is the drawer's
+`onOpenChangeComplete` — or names geometry against an anchor, which a sheet
+off an edge has none of, and the drawer half spells those out so they cannot
+reach a `div` that would not know what to do with them. History remains
 controlled by `historyPopovers`; the component does not push or pop history
-itself. Desktop positioning starts at the anchor's top-left with a 16px
-collision margin. Mobile placement defaults to bottom; budget assignment uses
-top. Focus restoration retains the external anchor through exit, but drops it
-once it leaves the document — a retained node that has been unmounted can be
-neither positioned against nor focused. Both variants render an `sr-only`
-Close part: on desktop it also enables Base UI's modal focus trap. The CSS
-contains placement/swipe transitions and a reduced-motion override.
+itself. Desktop positioning starts at the anchor's top-left with a
+16px collision margin. Mobile placement defaults to bottom; budget assignment
+uses top. Both variants render an `sr-only` Close part, which also enables
+Base UI's modal focus trap. The CSS contains placement/swipe transitions and a
+reduced-motion override.
 
-`container` defaults to the MUI dialog or drawer the anchor sits in, so during
-coexistence a surface opened from one stays inside its focus trap; pass `null`
-to force it to the body. The lookup is `findMuiFocusBoundary` in
-`6-shared/ui/muiFocusBoundary.ts` — the one place that reads MUI's class names,
-kept as a named function so it is a single deletion once the last MUI overlay
-is converted rather than a search. It is not a prop the call sites compute,
-because the trigger's ancestry is not something they know either.
+Its desktop surface therefore carries `data-slot="popover"` while the drawer
+carries `data-slot="adaptive-popup"`; stories that assert on the surface match
+either.
+
+Every owned overlay now portals to the document body. `muiFocusBoundary.ts`
+is gone: while MUI still owned a modal, a Base UI surface opened from inside
+one had to be portalled into that modal's paper, or MUI's focus trap pulled
+focus straight back out of it. That was the file's stated exit condition —
+the last MUI overlay converted — and it has been met. Two Base UI surfaces
+need no such bridge: they layer themselves, whether or not one sits inside
+the other's DOM or even its React tree. `useOverlayFocus` is down to the one
+job its name claims, and the `container` it used to feed is gone from
+`Dialog`, `SmartDialog`, `Menu`, `Popover`, `AdaptivePopover` and
+`SideDrawer`.
+
+The nested-surface stories are what hold that down, and they were rewritten
+to assert the behaviour rather than the DOM: focus stays inside the child,
+Escape takes the top surface only, and the parent gets its trigger back.
+Containment was the old mechanism, not the requirement.
+
+`SideDrawer` is MUI's temporary `Drawer`: a full-height sheet off a side edge
+over a dimmed page, square-cornered, because MUI reserved rounding for
+`SwipeableDrawer` — which this app only used off the bottom edge, where
+`SmartDialog` still is. Base UI's swipe cannot be turned off, only aimed, so
+it is aimed at `side`: the gesture undoes the entrance. The default would be
+`down`, which on a full-height scrolling sheet is the same gesture as reading
+further, and would drag the sheet off an edge it never came from. Width
+belongs to the caller through
+`className`, the way MUI took it through `sx` or `slotProps.paper`; the height
+is always the window. Six surfaces use it: both page side panels, the three
+global transaction sheets and the history panel. It reuses the same
+`owned-drawer` CSS as the other two drawers, with `--drawer-radius: 0`. Its
+stories compare the paper against MUI's in both themes and at both widths —
+edge, size, background, corners, flex direction and scroll axis — and cover
+the focus trap, the scroll lock and backdrop dismissal.
+
+`NavDrawer` is MUI's docked `Drawer`, which is two boxes rather than one: a
+root that reserves the panel's width in the page flow, and the panel itself,
+fixed and scrolling on its own. It is never dismissed — below 900px the layout
+swaps in `MobileNavigation` — so it has no open state, no backdrop and no
+focus trap, and `SideDrawer` would have been the wrong replacement. It keeps
+MUI's right border, its `zIndex.drawer` level (now a `--z-drawer` token beside
+`--z-modal`) and its hidden scrollbar, and `Navigation/index.tsx` no longer
+passes width through `sx` because the panel owns it.
+
+Its links are a real `ul` of `Link`s, which is what `ListItemButton
+component={Link}` rendered anyway, and the open section carries `aria-current`
+rather than only a selected colour.
+
+`listRowClass` is a **menu** row: tighter padding, and a label whose margin is
+zeroed because `MenuItem` zeroes it. `listItemClass` is MUI's `ListItemButton`
+— 8px around a label that keeps its own 4px, 48px against the menu row's 36px
+— and `listItemDenseClass` is its `dense` variant, which halves the padding
+and drops the label to `body2`. All three share one base, so a state added to
+a row is added to every row. They are separate classes rather than one with
+overrides because every call site that reached for the menu row and then added
+`py-2` was rederiving the list row by hand.
+
+`ListRowText` declares no type of its own; it inherits the row's, which is how
+one label is `body1` in a regular row and `body2` in a dense one, as MUI's
+`dense` context made it. Its secondary line declares no wrapping of its own
+either, so a truncating row truncates it and a `whitespace-normal` one lets
+it wrap — MUI spelled that out per call site through `slotProps`.
+
+A row that acts is now a real `button`, where MUI's `ListItemButton` was a
+`div` with `role="button"`. Two things follow. A row that carried a second
+control — the history run's expand chevron — has it as a sibling rather than
+a child, because a button may not contain one, and the row is padded to leave
+it room. And a row now paints its own `text-foreground`, where `ButtonBase`
+inherited: a list that tints its rows from above, like the envelope info
+panel, asks for `text-inherit` back. `ListRows` is MUI's `List`, and a `div` rather than a
+`ul`: MUI's was a `ul` whose children were `div role="button"` rows and
+subheaders, a list no assistive technology could read. Where the semantics are
+real — the navigation links, the tag options — the call site builds its own
+`ul` of `li`s. `ListRowSubheader` takes `sticky` as an opt-in rather than
+MUI's opt-out, and has no `dense`, because MUI's subheader does not take
+`dense` from the list around it and no call site here ever passed it.
+
+Every box was measured into place rather than reasoned into place, and the
+parity stories caught three things reasoning had wrong: the naive nav row came
+out 12px short, `ListRowText`'s hardcoded type made dense labels 4px too tall,
+and MUI's 4px label margin turned out to sit on `ListItemText`'s root rather
+than on the `primary` span inside it. `UI/List rows` compares the container,
+the subheader, the row and the label against MUI in both densities and both
+themes; the row comparison leaves out the row's own declared font, because
+MUI's `dense` is a context that reaches the label and leaves `body1` declared
+on a row that never paints with it. `ListRowText` carries a `data-slot` so
+these stories can find the label without matching on its text.
 
 `Button.tsx`, `OutlinedField.tsx`, and `ActionList.tsx` in `6-shared/ui` are
 owned Base UI compositions styled for the existing theme. These are
@@ -349,19 +434,22 @@ and so does this. `DialogActions` uses a flex `gap` where MUI puts a
 parity story compares plain buttons: a `Button` of ours resets that margin from
 the later layer.
 
-`useDialogFocus` captures the focused element when the dialog opens, before
+`useOverlayFocus` captures the focused element when the dialog opens, before
 the popup commits and autofocus moves focus. Its state initializer also covers
 a form that mounts already open with a fresh `instanceKey`. The target stays
 fixed through that opening and its exit; closing returns focus to it if it is
-still connected. A later opening captures its own target.
+still connected. A later opening captures its own target. Every owned overlay
+uses it — `Dialog`, `SmartDialog`, `Popover` and the adaptive drawer — so a
+surface never returns focus to an anchor that was merely the wrapper around
+the control someone actually pressed. It takes the open flag and nothing
+else: it once also took an anchor, to pick a portal container, and that job
+left with `muiFocusBoundary.ts`.
 
-Both `Dialog` and the mobile `SmartDialog` use that target with
-`findMuiFocusBoundary` to portal inside a parent MUI dialog or drawer. This
-also covers confirmations rendered in `GlobalWidgets`, outside the parent's
-React tree: the MUI focus trap must contain the child portal so it does not
-pull focus out of the confirmation. Escape closes the child and returns focus
-to the parent action without closing the parent drawer. The bridge matches
-MUI's paper classes, not `role="dialog"`, which owned Base UI popups also use.
+A confirmation rendered in `GlobalWidgets` — outside its parent's React tree
+— still behaves: Escape closes the child and returns focus to the parent
+action without closing the parent drawer. That used to need the portal
+bridge, because MUI's focus trap had to contain the child. Two Base UI
+surfaces layer themselves instead.
 
 `SmartDialog` is that dialog on a desktop and a drawer off the bottom edge on a
 phone, which is how MUI's `Dialog` and `SwipeableDrawer` were paired here
@@ -371,6 +459,82 @@ hands the same one to whatever opens the dialog. The envelope edit dialog used
 to get a fresh form by passing a React `key` through `displayProps`, which React
 19 warns about and the owned `DialogProps` has no room for; it uses the
 `instanceKey` that `registerPopover` already hands out for exactly this.
+
+`Popover.tsx` is an anchored modal at every viewport size. It retains MUI's
+top-left-over-anchor placement, 16px viewport margins, rounded paper and
+elevation 8. Collision handling shifts the surface into view rather than
+flipping it. On its own it never becomes a drawer; `AdaptivePopover` is what
+adds that below 900px.
+
+`placement` and `align` are MUI's `anchorOrigin` in the only two settings the
+app ever gave it: the default, which lays the paper's top edge over the
+anchor's own, and the filter editor's and tag list's `bottom`, which drops it
+clear. `align` is the horizontal half of the same pair, and it also decides
+`--grow-origin`, since a surface grows out of the corner it hangs from — which
+is why that variable is set here rather than in the shared surface class.
+`onOpenComplete` is MUI's `slots.transition.onEntered`: the filter editor's
+`Autocomplete` measures its popper against the surface, so its options wait
+until the surface has stopped scaling.
+
+The paper itself is `anchoredSurfaceClass` in `popupSurface.ts`, next to the
+menu's `popupSurfaceClass`, because two components hang a surface off an
+anchor and it is described once for both. It carries MUI's own 16px minimum
+width and height, and MUI's clipped horizontal axis: an anchored paper only
+ever grows downwards, so sideways overflow is a layout mistake rather than
+something to scroll.
+
+Its `anchorEl` controls geometry, not focus. The month header anchors to a
+wrapper around several buttons while focus returns to the arrow or label
+actually pressed inside it; `useOverlayFocus` captures that control separately.
+The retained anchor keeps exit geometry stable even when a caller clears
+`anchorEl` on close.
+
+`GoalPopover` renders `MonthSelectPopover` inside its React subtree so Base UI
+recognizes the nested modal. The calendar anchors to the date button it drops
+out of, not to whatever opened the goal: under MUI it hung off the goal's own
+anchor, which put a now-modal surface squarely over the form it belongs to.
+Escape dismisses the calendar first and returns focus to the date button;
+dismissing the goal returns focus to its opener. The registered goal keeps its
+existing history entry and `instanceKey` draft reset. The calendar still uses
+local open state; Back closes the registered goal and its nested calendar.
+Form conversion and goal commands are unchanged.
+
+The month grid uses native buttons with selected and disabled states. Its
+spacing includes the old `ListItemText` margins: substituting menu rows would
+make the calendar shorter. Year controls have localized accessible names, and
+the existing `minMonth`, `maxMonth` and `disablePast` rules still apply. The
+displayed year is scoped to one opening, the way the focus target is: paging
+to another year and dismissing without choosing does not carry that year into
+the next opening.
+
+Popover stories compare light/dark surface geometry, viewport-edge placement
+and the below-the-anchor centred variant against MUI. Month stories compare
+cell geometry and exercise date bounds. Dialog stories cover nested
+selects/calendars inside the owned `SideDrawer`, focus restoration, draft
+reset, and saving/removing a dated goal.
+
+MUI's `Drawer` is gone from the app, modal and docked alike, and with it the
+last `.MuiDrawer-paper`. So are its list primitives — `List`, `ListItem`,
+`ListItemButton`, `ListItemText`, `ListItemIcon` and `ListSubheader` — across
+the account list, the debtor list, the history rows, the envelope info panel,
+the grouped transaction list, the navigation links, the tag options and the
+account-history widget.
+
+What is left in those files is not list vocabulary: `Collapse` in the account
+list and the history widget, `Chip` in the history rows, and
+`@mui/x-date-pickers` in the grouped list. Those are a transition, a
+data-display control and a date picker, and they convert with their own kind
+rather than with the rows they happened to sit next to.
+
+MUI's `Popover` is gone from the app. Its last four callers were the floating
+rename field, the colour picker, the tag list and the transaction filter's
+clause editor. Three of them are wholly MUI-free now; only the filter still
+holds MUI's `Autocomplete`, `Chip` and `InputBase`, so that one file keeps a
+direct MUI import and stays out of the owned list. The tag list's rows went
+with its surface, from `ListItemButton` to `ButtonBase` on `listItemClass`,
+so its keyboard tests moved off MUI's `Mui-selected` class and onto the
+`data-selected` attribute every owned row carries — the same highlight, named
+by the app rather than by MUI.
 
 `OutlinedField` is MUI's outlined text field: the notched border with the label
 cut into it. `Field.Root` from Base UI supplies the label and description

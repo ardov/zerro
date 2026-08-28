@@ -2,8 +2,7 @@ import { Button } from '6-shared/ui/Button'
 import type { ChangeEvent, FC } from 'react'
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { PopoverProps } from '@mui/material'
-import { Divider, Popover } from '@mui/material'
+import { Popover, type PopoverProps } from '6-shared/ui/Popover'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
 import './styles.scss'
 import { zmColors, colors } from './colors'
@@ -56,7 +55,7 @@ export const ColorPicker: FC = () => {
   }
 
   return (
-    <Popover {...popover.displayProps}>
+    <Popover aria-label={t('color')} {...popover.displayProps}>
       <div className="flex flex-col gap-4 p-4">
         <div className="grid grid-cols-6">
           {zmColors.map(color => (
@@ -68,7 +67,7 @@ export const ColorPicker: FC = () => {
             />
           ))}
         </div>
-        <Divider />
+        <hr className="m-0 w-full border-0 border-b border-solid border-border" />
         <div className="grid grid-cols-6">
           {colors.map(color => (
             <ColorCheck

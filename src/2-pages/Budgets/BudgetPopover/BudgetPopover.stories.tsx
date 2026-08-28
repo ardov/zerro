@@ -61,7 +61,10 @@ const checkAssignment: Story['play'] = async ({ canvasElement }) => {
   const initialCommands = commandCount()
   await userEvent.click(trigger)
   let input = await body.findByPlaceholderText('0')
-  const popup = input.closest<HTMLElement>('[data-slot="adaptive-popup"]')!
+  const popup = input.closest<HTMLElement>(
+    // A drawer on a phone, the owned `Popover` above the breakpoint.
+    '[data-slot="adaptive-popup"], [data-slot="popover"]'
+  )!
   await expect(popup.getAttribute('data-placement')).toBe(
     window.innerWidth < 900 ? 'top' : null
   )
@@ -245,7 +248,18 @@ export const NestedDrawer: Story = {
     const input = await body.findByRole('textbox', { name: 'Assigned' })
     const child = input.closest('[role="dialog"]')!
     await waitFor(() => expect(input).toHaveFocus())
-    await expect(parent).toContainElement(child as HTMLElement)
+    // The child no longer sits inside the parent's DOM. MUI's drawer needed
+    // that — its focus trap could not know about a Base UI surface elsewhere
+    // in the document — and now that both are Base UI, they layer themselves.
+    // What has to hold is the behaviour the nesting bought: focus stays in
+    // the child, Escape takes the top surface only, and the parent gets its
+    // trigger back.
+    await userEvent.tab()
+    await waitFor(() =>
+      expect(child).toContainElement(
+        canvasElement.ownerDocument.activeElement as HTMLElement
+      )
+    )
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(child).not.toBeVisible())
     await expect(parent).toBeVisible()

@@ -50,6 +50,12 @@ function PopoverHarness(props: { drawerSide?: 'top' | 'bottom' }) {
   )
 }
 
+// Above the breakpoint the surface is the owned `Popover` itself, so each
+// responsive half answers to a slot of its own.
+const ADAPTIVE_SURFACE = '[data-slot="adaptive-popup"], [data-slot="popover"]'
+const ADAPTIVE_BACKDROP =
+  '[data-slot="adaptive-backdrop"], [data-slot="popover-backdrop"]'
+
 const checkDismissal: Story['play'] = async ({ canvasElement }) => {
   const canvas = within(canvasElement)
   const body = within(canvasElement.ownerDocument.body)
@@ -70,9 +76,9 @@ const checkDismissal: Story['play'] = async ({ canvasElement }) => {
   ).toBe(true)
   // Elevation and stacking come from theme tokens, not arbitrary values, and
   // both responsive variants carry the sr-only Close part.
-  const popup = input.closest<HTMLElement>('[data-slot="adaptive-popup"]')!
+  const popup = input.closest<HTMLElement>(ADAPTIVE_SURFACE)!
   const backdropStyle = getComputedStyle(
-    document.querySelector<HTMLElement>('[data-slot="adaptive-backdrop"]')!
+    document.querySelector<HTMLElement>(ADAPTIVE_BACKDROP)!
   )
   await expect(getComputedStyle(popup).boxShadow).not.toBe('none')
   await expect(backdropStyle.zIndex).toBe(String(appTheme.zIndex.modal))
@@ -93,9 +99,7 @@ const checkDismissal: Story['play'] = async ({ canvasElement }) => {
   await waitFor(() => expect(trigger).toHaveFocus())
   await userEvent.click(trigger)
   await body.findByRole('textbox', { name: 'Overlay input' })
-  const backdrop = document.querySelector<HTMLElement>(
-    '[data-slot="adaptive-backdrop"]'
-  )!
+  const backdrop = document.querySelector<HTMLElement>(ADAPTIVE_BACKDROP)!
   await userEvent.click(backdrop)
   await waitFor(() => expect(trigger).toHaveFocus())
   await expect(

@@ -24,6 +24,22 @@ export const popupPositioning = {
   className: 'z-modal',
 } as const
 
+/** MUI's `Popover` paper, which is the surface every anchored overlay of ours
+ * hangs off its anchor: `Popover` itself, and `AdaptivePopover` above the
+ * mobile breakpoint.
+ *
+ * The 16px minimums, the clipped horizontal axis and the 32px the paper keeps
+ * off the viewport are MUI's own — an anchored paper only ever grows
+ * downwards, so sideways overflow is a layout mistake rather than something
+ * to scroll.
+ *
+ * Its entrance is slower and shallower than a menu's, and grows out of the
+ * corner it hangs from rather than wherever collision handling left it: this
+ * surface only ever shifts, it does not flip to another side. Which corner
+ * that is depends on the alignment, so `--grow-origin` is set by `Popover`
+ * and not here. */
+export const anchoredSurfaceClass = `${growSurfaceClass} [--grow-duration:225ms] [--grow-from:0.9] min-h-4 min-w-4 max-h-[calc(100dvh-32px)] overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-elevation-8 outline-none`
+
 /** A surface that slides in off an edge: the adaptive popover on a phone, and
  * `SmartDialog` on one. `--drawer-radius` rounds its leading corners, and the
  * `data-placement` on the popup decides which corners those are. */

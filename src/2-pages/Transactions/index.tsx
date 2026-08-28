@@ -2,8 +2,8 @@ import type { FC, CSSProperties } from 'react'
 import { useState, useCallback } from 'react'
 import { TransactionList } from '3-widgets/transaction/TransactionList'
 import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
-import type { DrawerProps } from '@mui/material'
-import { Drawer } from '@mui/material'
+import type { SideDrawerProps } from '6-shared/ui/SideDrawer'
+import { SideDrawer } from '6-shared/ui/SideDrawer'
 import {
   TrEmptyState,
   TransactionPreview,
@@ -72,7 +72,7 @@ const trPreview = registerPopover<
     id?: TTransactionId
     onSelectSimilar?: (changed: TTransaction['changed']) => void
   },
-  DrawerProps
+  SideDrawerProps
 >('transactionPreview', {})
 
 const SideContent: FC<{ docked?: boolean; width: number }> = ({
@@ -104,7 +104,7 @@ const SideContent: FC<{ docked?: boolean; width: number }> = ({
   }
 
   return (
-    <Drawer {...displayProps} anchor="right">
+    <SideDrawer {...displayProps}>
       <div
         className="w-screen sm:w-[var(--transaction-side-width)]"
         style={
@@ -115,6 +115,6 @@ const SideContent: FC<{ docked?: boolean; width: number }> = ({
       >
         {drawerContent}
       </div>
-    </Drawer>
+    </SideDrawer>
   )
 }

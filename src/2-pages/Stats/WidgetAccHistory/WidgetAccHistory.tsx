@@ -3,7 +3,10 @@ import React, { useState, useMemo, useCallback, memo } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { List, ListSubheader, Collapse } from '@mui/material'
+// `Collapse` is an animation, not a list primitive; it converts with the rest
+// of MUI's transitions.
+import { Collapse } from '@mui/material'
+import { ListRows, ListRowSubheader } from '6-shared/ui/ListRow'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
@@ -69,7 +72,7 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
 
     return (
       <div>
-        <List dense>
+        <ListRows>
           <Subheader name={t('inBalance')} amount={totalInBudget} />
           {inBudgetActive.map(acc => (
             <AccountHistoryWidget
@@ -79,9 +82,9 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
               onClick={onClick}
             />
           ))}
-        </List>
+        </ListRows>
 
-        <List dense>
+        <ListRows>
           <Subheader name={t('other')} amount={totalSavings} />
           {savingsActive.map(acc => (
             <AccountHistoryWidget
@@ -91,16 +94,16 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
               onClick={onClick}
             />
           ))}
-        </List>
+        </ListRows>
 
-        <List dense>
+        <ListRows>
           <Subheader
             name={t('archived')}
             amount={totalArchived}
             onClick={toggleVisibility}
           />
           <Collapse in={visible} unmountOnExit>
-            <List dense disablePadding>
+            <ListRows disablePadding>
               {archived.map(acc => (
                 <AccountHistoryWidget
                   key={acc.id}
@@ -109,9 +112,9 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
                   onClick={onClick}
                 />
               ))}
-            </List>
+            </ListRows>
           </Collapse>
-        </List>
+        </ListRows>
       </div>
     )
   }
@@ -129,9 +132,9 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
   const isNegative = toDisplay(amount) < 0
 
   return (
-    <ListSubheader
-      className="mb-2 rounded-lg"
-      sx={{ cursor: onClick ? 'pointer' : 'default' }}
+    <ListRowSubheader
+      sticky
+      className={`mb-2 rounded-lg ${onClick ? 'cursor-pointer' : 'cursor-default'}`}
       onClick={onClick}
     >
       <span className="flex w-full">
@@ -152,7 +155,7 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
           </b>
         </span>
       </span>
-    </ListSubheader>
+    </ListRowSubheader>
   )
 })
 

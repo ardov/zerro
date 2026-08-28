@@ -6,7 +6,7 @@ import { useMonth } from '../MonthProvider'
 import { GoalPopover } from './GoalPopover'
 import { registerPopover } from '6-shared/historyPopovers'
 import type { TISOMonth } from '6-shared/types'
-import type { PopoverProps } from '@mui/material'
+import type { PopoverProps } from '6-shared/ui/Popover'
 
 const goalPopover = registerPopover<
   { id?: core.envelopes.TEnvelopeId; month?: TISOMonth },

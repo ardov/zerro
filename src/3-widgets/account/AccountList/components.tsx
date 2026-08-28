@@ -1,10 +1,10 @@
 import type { FC, ReactNode } from 'react'
 import { useCallback } from 'react'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { core } from 'zerro-core/redux'
 
-import type { ListItemButtonProps, ListSubheaderProps } from '@mui/material'
-import { ListSubheader, ListItemButton } from '@mui/material'
+import type { ComponentPropsWithoutRef } from 'react'
+import { ListRowSubheader, listItemDenseClass } from '6-shared/ui/ListRow'
 import { toISOMonth } from '6-shared/helpers/date'
 import { Amount } from '6-shared/ui/Amount'
 import type { TFxAmount } from '6-shared/types'
@@ -17,8 +17,11 @@ import { useContextMenu } from '6-shared/hooks/useContextMenu'
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
 export const Account: FC<
-  { account: core.accounts.TAccountPopulated } & ListItemButtonProps
-> = ({ account, className, sx, ...rest }) => {
+  { account: core.accounts.TAccountPopulated } & Omit<
+    ComponentPropsWithoutRef<'button'>,
+    'children'
+  >
+> = ({ account, className, ...rest }) => {
   const transactionDrawer = useTransactionDrawer()
   const openContextMenu = useAccountContextMenu()
   const showTransactions = useCallback(
@@ -37,14 +40,14 @@ export const Account: FC<
     onClick: showTransactions,
   })
   return (
-    <ListItemButton
-      className={clsx('flex rounded-lg type-body-sm', className)}
-      sx={sx}
+    <button
+      type="button"
+      className={cn(listItemDenseClass, className)}
       {...rest}
       {...propsToPass}
     >
       <div
-        className={clsx(
+        className={cn(
           'relative min-w-0 grow overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_left,transparent,black_40px)]',
           account.archive && 'line-through'
         )}
@@ -54,7 +57,7 @@ export const Account: FC<
       </div>
 
       <span
-        className={clsx(
+        className={cn(
           'ml-2 shrink-0',
           account.balance < 0 ? 'text-error' : 'text-muted-foreground'
         )}
@@ -76,7 +79,7 @@ export const Account: FC<
           </div>
         </Tooltip>
       </span>
-    </ListItemButton>
+    </button>
   )
 }
 
@@ -84,20 +87,20 @@ export const Subheader: FC<
   {
     name: ReactNode
     amount: TFxAmount
-  } & ListSubheaderProps
-> = ({ name, amount, className, sx, ...rest }) => {
+  } & ComponentPropsWithoutRef<'div'>
+> = ({ name, amount, className, ...rest }) => {
   const month = toISOMonth(new Date())
   const toDisplay = core.currency.useToDisplay(month)
   const isNegative = toDisplay(amount) < 0
   return (
-    <ListSubheader className={clsx('rounded-lg', className)} sx={sx} {...rest}>
+    <ListRowSubheader sticky className={cn('rounded-lg', className)} {...rest}>
       <span className="flex w-full">
         <span className="grow truncate type-body leading-[inherit]">
           <b>{name}</b>
         </span>
 
         <span
-          className={clsx(
+          className={cn(
             'ml-4',
             isNegative ? 'text-error' : 'text-muted-foreground'
           )}
@@ -112,6 +115,6 @@ export const Subheader: FC<
           </b>
         </span>
       </span>
-    </ListSubheader>
+    </ListRowSubheader>
   )
 }

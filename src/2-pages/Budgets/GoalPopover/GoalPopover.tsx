@@ -1,12 +1,11 @@
 import { Button, IconButton } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { useState } from 'react'
-import type { PopoverProps } from '@mui/material'
-import { Popover } from '@mui/material'
+import { Popover, type PopoverProps } from '6-shared/ui/Popover'
 import { Select } from '6-shared/ui/Select'
 import { useTranslation } from 'react-i18next'
 import { AmountInput } from '6-shared/ui/AmountInput'
-import { CloseIcon } from '6-shared/ui/Icons'
+import { CloseIcon } from '6-shared/ui/feather'
 import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '6-shared/helpers/date'
 import { track } from '6-shared/analytics'
@@ -42,7 +41,6 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
     useState<(typeof props)['anchorEl']>(null)
   if (!id || !month) return null
 
-  const openMonthPopover = () => setMonthPopoverAnchor(props.anchorEl)
   const closeMonthPopover = () => setMonthPopoverAnchor(null)
   const handleDateChange = (date?: TDateDraft) => {
     closeMonthPopover()
@@ -84,74 +82,79 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   }
 
   return (
-    <>
-      <Popover disableRestoreFocus onClose={onClose} {...rest}>
-        <div className="grid min-w-80 gap-y-4 p-4">
-          <Select
-            label={t('goalType')}
-            fullWidth
-            value={type}
-            onChange={setType}
-            options={[
-              { value: core.goals.goalType.MONTHLY, label: t('names.monthly') },
-              {
-                value: core.goals.goalType.MONTHLY_SPEND,
-                label: t('names.monthlySpend'),
-              },
-              {
-                value: core.goals.goalType.TARGET_BALANCE,
-                label: t('names.targetBalance'),
-              },
-              {
-                value: core.goals.goalType.INCOME_PERCENT,
-                label: t('names.incomePercent'),
-              },
-            ]}
-          />
+    <Popover
+      aria-label={t('goal', { ns: 'budgets' })}
+      onClose={onClose}
+      {...rest}
+    >
+      <div className="grid min-w-80 gap-y-4 p-4">
+        <Select
+          label={t('goalType')}
+          fullWidth
+          value={type}
+          onChange={setType}
+          options={[
+            { value: core.goals.goalType.MONTHLY, label: t('names.monthly') },
+            {
+              value: core.goals.goalType.MONTHLY_SPEND,
+              label: t('names.monthlySpend'),
+            },
+            {
+              value: core.goals.goalType.TARGET_BALANCE,
+              label: t('names.targetBalance'),
+            },
+            {
+              value: core.goals.goalType.INCOME_PERCENT,
+              label: t('names.incomePercent'),
+            },
+          ]}
+        />
 
-          <AmountInput
-            autoFocus
-            onFocus={e => e.target.select()}
-            selectOnFocus
-            value={rawValue}
-            label={amountLabels[type]}
-            fullWidth
-            onChange={value => setRawValue(+value)}
-            onEnter={value => {
-              setRawValue(+value)
-              save()
-            }}
-            currency={isInPercents ? '%' : envelope.currency}
-            placeholder="0"
-          />
+        <AmountInput
+          autoFocus
+          onFocus={e => e.target.select()}
+          selectOnFocus
+          value={rawValue}
+          label={amountLabels[type]}
+          fullWidth
+          onChange={value => setRawValue(+value)}
+          onEnter={value => {
+            setRawValue(+value)
+            save()
+          }}
+          currency={isInPercents ? '%' : envelope.currency}
+          placeholder="0"
+        />
 
-          {showDateBlock && (
-            <div className="flex">
-              <Button
-                size="large"
-                onClick={openMonthPopover}
-                fullWidth={!endDate}
-              >
-                {endDate
-                  ? formatDate(endDate, 'LLLL yyyy').toUpperCase()
-                  : t('tillDate')}
-              </Button>
-              {endDate && (
-                <IconButton onClick={removeDate} children={<CloseIcon />} />
-              )}
-            </div>
-          )}
-
-          <Button onClick={save} variant="contained" color="primary">
-            {t('save')}
-          </Button>
-          {!!goal?.amount && (
-            <Button onClick={removeGoal} variant="outlined" color="error">
-              {t('remove')}
+        {showDateBlock && (
+          <div className="flex">
+            <Button
+              size="large"
+              // The calendar hangs off this button, not off whatever opened
+              // the goal: it is a nested surface, and it lands over its own
+              // control rather than over the form it belongs to.
+              onClick={event => setMonthPopoverAnchor(event.currentTarget)}
+              fullWidth={!endDate}
+            >
+              {endDate
+                ? formatDate(endDate, 'LLLL yyyy').toUpperCase()
+                : t('tillDate')}
             </Button>
-          )}
-        </div>
-      </Popover>
+            {endDate && (
+              <IconButton onClick={removeDate} children={<CloseIcon />} />
+            )}
+          </div>
+        )}
+
+        <Button onClick={save} variant="contained" color="primary">
+          {t('save')}
+        </Button>
+        {!!goal?.amount && (
+          <Button onClick={removeGoal} variant="outlined" color="error">
+            {t('remove')}
+          </Button>
+        )}
+      </div>
       <MonthSelectPopover
         open={!!monthPopoverAnchor}
         anchorEl={monthPopoverAnchor}
@@ -160,7 +163,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
         value={endDate}
         disablePast
       />
-    </>
+    </Popover>
   )
 
   function getAmount(input: string | number) {

@@ -1,4 +1,5 @@
-import { Drawer } from '@mui/material'
+import { useTranslation } from 'react-i18next'
+import { SideDrawer } from '6-shared/ui/SideDrawer'
 import { registerPopover } from '6-shared/historyPopovers'
 import type { TTransactionId } from '6-shared/types'
 import type { TransactionPreviewProps } from '../transaction/TransactionPreview'
@@ -17,16 +18,17 @@ const trDrawerHooks = registerPopover('transaction-preview-drawer', {
 export const useTransactionPreview = trDrawerHooks.useMethods
 
 export const SmartTransactionPreview = () => {
+  const { t } = useTranslation('common')
   const drawer = trDrawerHooks.useProps()
   const { id, onOpenOther = () => {}, onSelectSimilar } = drawer.extraProps
   const { onClose, open } = drawer.displayProps
   return (
-    <Drawer
-      anchor="right"
+    <SideDrawer
       onClose={onClose}
       open={open}
-      sx={contentSx}
-      keepMounted={false}
+      // MUI sized the paper through `sx`; the sheet takes it as a class.
+      className="w-screen sm:w-[360px]"
+      aria-label={t('transaction')}
     >
       <div className="flex h-screen min-w-80 flex-col">
         <TransactionPreview
@@ -36,12 +38,6 @@ export const SmartTransactionPreview = () => {
           onSelectSimilar={onSelectSimilar}
         />
       </div>
-    </Drawer>
+    </SideDrawer>
   )
-}
-
-const drawerWidth = { xs: '100vw', sm: 360 }
-// MUI Slide uses the modal root as its viewport; only size the paper.
-const contentSx = {
-  [`& .MuiDrawer-paper`]: { width: drawerWidth },
 }

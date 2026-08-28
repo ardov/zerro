@@ -1,7 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
-import { useState } from 'react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
-import { findMuiFocusBoundary } from './muiFocusBoundary'
+import { useOverlayFocus } from './useOverlayFocus'
 import { cn } from './shadcn/utils'
 import './Dialog.css'
 
@@ -29,7 +28,7 @@ export function Dialog({
   children,
   ...props
 }: DialogProps) {
-  const { container, finalFocus } = useDialogFocus(open)
+  const { finalFocus } = useOverlayFocus(open)
   return (
     <DialogPrimitive.Root
       open={open}
@@ -37,7 +36,7 @@ export function Dialog({
         if (!next) onClose?.()
       }}
     >
-      <DialogPrimitive.Portal container={container}>
+      <DialogPrimitive.Portal>
         <DialogPrimitive.Backdrop className="owned-dialog fixed inset-0 z-modal bg-black/50" />
         <DialogPrimitive.Viewport className="fixed inset-0 z-modal flex items-center justify-center">
           <DialogPrimitive.Popup
@@ -55,35 +54,6 @@ export function Dialog({
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
   )
-}
-
-/** Capture before the popup commits and its autofocus moves focus. The
- * initializer also covers forms that mount already open with a fresh key.
- * Keep this opening's target through updates and exit, then capture again on
- * the next opening. A MUI parent must contain the portal too: it cannot know
- * that a Base UI dialog elsewhere in the document is the top modal. */
-export function useDialogFocus(open: boolean) {
-  const [opening, setOpening] = useState(() => ({
-    open,
-    target: getFocusedElement(),
-  }))
-  if (open !== opening.open) {
-    setOpening({
-      open,
-      target: open ? getFocusedElement() : opening.target,
-    })
-  }
-  const target = opening.target
-  return {
-    container: findMuiFocusBoundary(target),
-    finalFocus: () => (target?.isConnected ? target : true),
-  }
-}
-
-function getFocusedElement() {
-  if (typeof document === 'undefined') return null
-  const focused = document.activeElement
-  return focused instanceof HTMLElement ? focused : null
 }
 
 /** The heading MUI renders as an `h2` in its `h6` size. Base UI's `Title` is
