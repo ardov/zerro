@@ -1,15 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import {
-  Checkbox,
-  FormControl,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  OutlinedInput,
-  Select,
-} from '@mui/material'
+import Checkbox from '@mui/material/Checkbox'
 import { formatMoney } from '6-shared/helpers/money'
 import type { TTagId } from '6-shared/types'
+import { MultiSelect, SelectItem, SelectItemText } from '6-shared/ui/Select'
 
 type TagSelectProps = {
   options: { id: TTagId; name: string; amount: number }[]
@@ -30,29 +23,25 @@ export function TagSelect(props: TagSelectProps) {
   }
 
   return (
-    <FormControl className="w-[300px]">
-      <InputLabel>{label}</InputLabel>
-      <Select
-        multiple
-        value={selected}
-        onChange={e => {
-          const v = e.target.value
-          onChange(typeof v === 'string' ? v.split(',') : v)
-        }}
-        input={<OutlinedInput label={label} />}
-        renderValue={renderText}
-      >
-        {options
-          .filter(t => t.amount)
-          .map(tag => (
-            <MenuItem key={tag.id} value={tag.id}>
-              <Checkbox checked={selected.includes(tag.id)} />
-              <ListItemText
-                primary={`${tag.name} (${formatMoney(tag.amount)})`}
-              />
-            </MenuItem>
-          ))}
-      </Select>
-    </FormControl>
+    <MultiSelect
+      elKey="TagSelect"
+      className="w-[300px]"
+      label={label}
+      value={selected}
+      onChange={next => onChange(next as TTagId[])}
+      renderValue={renderText}
+    >
+      {options
+        .filter(t => t.amount)
+        .map(tag => (
+          // The row carries its own checkbox, so no tick beside it.
+          <SelectItem key={tag.id} value={tag.id}>
+            <Checkbox checked={selected.includes(tag.id)} tabIndex={-1} />
+            <SelectItemText>
+              {`${tag.name} (${formatMoney(tag.amount)})`}
+            </SelectItemText>
+          </SelectItem>
+        ))}
+    </MultiSelect>
   )
 }

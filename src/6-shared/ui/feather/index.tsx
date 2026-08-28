@@ -235,6 +235,11 @@ export const LocalOfferOutlinedIcon = createFeatherIcon(
   'tag'
 )
 
+export const CheckIcon = createFeatherIcon(
+  <polyline points="20 6 9 17 4 12"></polyline>,
+  'check'
+)
+
 export const DoneAllIcon = createFeatherIcon(
   <>
     <polyline points="9 11 12 14 22 4"></polyline>

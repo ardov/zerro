@@ -1,17 +1,27 @@
 import type { FC } from 'react'
-import type { SelectProps } from '@mui/material'
-import { MenuItem, ListItemText } from '@mui/material'
 import { core } from 'zerro-core/redux'
 
 import type { TFxCode, TInstrument } from '6-shared/types'
 import { getCurrencySymbol } from '6-shared/helpers/money'
-import { SmartSelect } from '6-shared/ui/SmartSelect'
+import {
+  Select,
+  SelectItem,
+  SelectItemCheck,
+  SelectItemText,
+} from '6-shared/ui/Select'
 
-export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
+type CurrencyCodeSelectProps = {
+  value: TFxCode
+  onChange: (value: TFxCode) => void
+  label?: string
+  className?: string
+}
+
+export const CurrencyCodeSelect: FC<CurrencyCodeSelectProps> = props => {
+  const { value, onChange, ...rest } = props
   const instrumentsByCode = core.instruments.useByCode()
   const userCurrency = core.users.useCurrency()
   const accs = core.accounts.useInBudget()
-  const value = props.value
 
   const fxSet = new Set(accs.map(a => a.fxCode))
   fxSet.add(userCurrency)
@@ -19,21 +29,31 @@ export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
   const instruments = [...fxSet].map(code => instrumentsByCode[code])
 
   return (
-    <SmartSelect {...props} renderValue={v => v} elKey="CurrencyCodeSelect">
+    <Select
+      {...rest}
+      elKey="CurrencyCodeSelect"
+      value={value}
+      onChange={next => onChange(next as TFxCode)}
+      // The closed field shows the code alone; the rows carry the full name.
+      renderValue={v => v}
+    >
       {instruments.map(instr => (
-        <MenuItem key={instr.shortTitle} value={instr.shortTitle}>
-          <ListItemText
-            primary={instr.shortTitle}
-            secondary={describe(instr)}
-          />
-        </MenuItem>
+        <SelectItem key={instr.shortTitle} value={instr.shortTitle}>
+          <SelectItemText>
+            <span className="block">{instr.shortTitle}</span>
+            <span className="block type-body-sm text-muted-foreground">
+              {describe(instr)}
+            </span>
+          </SelectItemText>
+          <SelectItemCheck />
+        </SelectItem>
       ))}
-    </SmartSelect>
+    </Select>
   )
 }
 
 function describe(i: TInstrument) {
   const symbol = getCurrencySymbol(i.shortTitle)
-  if (symbol !== i.shortTitle) return `${i.title} (${symbol})`
+  if (symbol !== i.shortTitle) return `${i.title} (${symbol})`
   return i.title
 }

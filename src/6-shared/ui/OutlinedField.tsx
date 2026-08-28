@@ -4,10 +4,7 @@ import { Input as InputPrimitive } from '@base-ui/react/input'
 import { cn } from './shadcn/utils'
 import './OutlinedField.css'
 
-export type OutlinedFieldProps = Omit<
-  ComponentPropsWithRef<'input'>,
-  'size'
-> & {
+export type OutlinedFieldFrameProps = {
   label?: ReactNode
   helperText?: ReactNode
   startAdornment?: ReactNode
@@ -15,31 +12,49 @@ export type OutlinedFieldProps = Omit<
   fullWidth?: boolean
   size?: 'small' | 'medium'
   error?: boolean
+  disabled?: boolean
+  className?: string
 }
 
-/** MUI's outlined text field: a notched border with the label cut into it.
+export type OutlinedFieldProps = Omit<ComponentPropsWithRef<'input'>, 'size'> &
+  Omit<OutlinedFieldFrameProps, 'disabled'>
+
+/** The padding MUI gives the control inside an outlined field. The adornments
+ * sit outside it, so whichever side carries one loses its padding here and the
+ * group takes it instead.
  *
- * The label is always floated. MUI drops an outlined label into the field
- * until it is focused or filled, and that mode is not implemented here
- * because nothing needs it yet — every converted field always holds a value.
- * A field that can be empty needs that mode added to this component, not a
- * second copy of the notch geometry.
- *
- * `Field.Root` supplies the label/description wiring and the `data-invalid` /
- * `data-disabled` state the stylesheet keys off, so none of it is spelled out
- * by hand. Native props target the input; `className` sizes the field group. */
-export function OutlinedField({
+ * Each edge names exactly one class rather than an `px-*` that a later `pl-0`
+ * has to beat: which of the two wins is Tailwind's emission order, not the
+ * order they are written in. */
+export function outlinedControlClass(opts: {
+  size?: 'small' | 'medium'
+  startAdornment?: ReactNode
+  endAdornment?: ReactNode
+  /** A select keeps room for its arrow, which sits over the control. */
+  trailingIcon?: boolean
+}) {
+  return cn(
+    'm-0 block w-full min-w-0 box-content border-0 bg-transparent font-[family-name:inherit] text-[length:inherit] leading-[inherit] text-current outline-none disabled:text-disabled-foreground',
+    opts.startAdornment ? 'pl-0' : 'pl-3.5',
+    opts.trailingIcon ? 'pr-8' : opts.endAdornment ? 'pr-0' : 'pr-3.5',
+    opts.size === 'small' ? 'py-[8.5px]' : 'py-[16.5px]'
+  )
+}
+
+/** The notched border, the floating label and the helper text, with no opinion
+ * about what sits inside. `OutlinedField` puts an input there and `Select` puts
+ * a trigger, so the notch geometry is written once. */
+export function OutlinedFieldFrame({
   className,
   label,
   helperText,
   startAdornment,
   endAdornment,
   fullWidth,
-  size = 'medium',
   error = false,
   disabled,
-  ...props
-}: OutlinedFieldProps) {
+  children,
+}: OutlinedFieldFrameProps & { children: ReactNode }) {
   return (
     <Field.Root
       invalid={error}
@@ -68,15 +83,7 @@ export function OutlinedField({
             {startAdornment}
           </span>
         )}
-        <InputPrimitive
-          {...props}
-          className={cn(
-            'm-0 block w-full min-w-0 box-content border-0 bg-transparent px-3.5 font-[family-name:inherit] text-[length:inherit] leading-[inherit] text-current outline-none placeholder:text-current placeholder:opacity-[0.42] disabled:text-disabled-foreground dark:placeholder:opacity-50',
-            startAdornment && 'pl-0',
-            endAdornment && 'pr-0',
-            size === 'small' ? 'py-[8.5px]' : 'py-[16.5px]'
-          )}
-        />
+        {children}
         {endAdornment && (
           <span className="ml-2 inline-flex shrink-0 items-center whitespace-nowrap text-muted-foreground">
             {endAdornment}
@@ -107,5 +114,50 @@ export function OutlinedField({
         </Field.Description>
       )}
     </Field.Root>
+  )
+}
+
+/** MUI's outlined text field: a notched border with the label cut into it.
+ *
+ * The label is always floated. MUI drops an outlined label into the field
+ * until it is focused or filled, and that mode is not implemented here
+ * because nothing needs it yet — every converted field always holds a value.
+ * A field that can be empty needs that mode added to this component, not a
+ * second copy of the notch geometry.
+ *
+ * `Field.Root` supplies the label/description wiring and the `data-invalid` /
+ * `data-disabled` state the stylesheet keys off, so none of it is spelled out
+ * by hand. Native props target the input; `className` sizes the field group. */
+export function OutlinedField({
+  className,
+  label,
+  helperText,
+  startAdornment,
+  endAdornment,
+  fullWidth,
+  size = 'medium',
+  error = false,
+  disabled,
+  ...props
+}: OutlinedFieldProps) {
+  return (
+    <OutlinedFieldFrame
+      className={className}
+      label={label}
+      helperText={helperText}
+      startAdornment={startAdornment}
+      endAdornment={endAdornment}
+      fullWidth={fullWidth}
+      error={error}
+      disabled={disabled}
+    >
+      <InputPrimitive
+        {...props}
+        className={cn(
+          outlinedControlClass({ size, startAdornment, endAdornment }),
+          'placeholder:text-current placeholder:opacity-[0.42] dark:placeholder:opacity-50'
+        )}
+      />
+    </OutlinedFieldFrame>
   )
 }

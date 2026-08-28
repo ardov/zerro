@@ -1,8 +1,9 @@
 import { Button, IconButton } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { useState } from 'react'
-import type { OutlinedTextFieldProps, PopoverProps } from '@mui/material'
-import { Popover, TextField, MenuItem } from '@mui/material'
+import type { PopoverProps } from '@mui/material'
+import { Popover } from '@mui/material'
+import { Select } from '6-shared/ui/Select'
 import { useTranslation } from 'react-i18next'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { CloseIcon } from '6-shared/ui/Icons'
@@ -41,8 +42,6 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
     useState<(typeof props)['anchorEl']>(null)
   if (!id || !month) return null
 
-  const handleTypeChange: OutlinedTextFieldProps['onChange'] = e =>
-    setType(e.target.value as core.goals.goalType)
   const openMonthPopover = () => setMonthPopoverAnchor(props.anchorEl)
   const closeMonthPopover = () => setMonthPopoverAnchor(null)
   const handleDateChange = (date?: TDateDraft) => {
@@ -88,27 +87,19 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
     <>
       <Popover disableRestoreFocus onClose={onClose} {...rest}>
         <div className="grid min-w-80 gap-y-4 p-4">
-          <TextField
-            select
-            variant="outlined"
-            value={type}
-            onChange={handleTypeChange}
+          <Select
+            elKey="GoalTypeSelect"
             label={t('goalType')}
             fullWidth
-          >
-            <MenuItem value={core.goals.goalType.MONTHLY}>
-              {t('names.monthly')}
-            </MenuItem>
-            <MenuItem value={core.goals.goalType.MONTHLY_SPEND}>
-              {t('names.monthlySpend')}
-            </MenuItem>
-            <MenuItem value={core.goals.goalType.TARGET_BALANCE}>
-              {t('names.targetBalance')}
-            </MenuItem>
-            <MenuItem value={core.goals.goalType.INCOME_PERCENT}>
-              {t('names.incomePercent')}
-            </MenuItem>
-          </TextField>
+            value={type}
+            onChange={next => setType(next as core.goals.goalType)}
+            items={{
+              [core.goals.goalType.MONTHLY]: t('names.monthly'),
+              [core.goals.goalType.MONTHLY_SPEND]: t('names.monthlySpend'),
+              [core.goals.goalType.TARGET_BALANCE]: t('names.targetBalance'),
+              [core.goals.goalType.INCOME_PERCENT]: t('names.incomePercent'),
+            }}
+          />
 
           <AmountInput
             autoFocus

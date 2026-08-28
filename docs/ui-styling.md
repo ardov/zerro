@@ -345,11 +345,35 @@ carries `aria-pressed` instead, which is the state the stray checkbox used to
 announce on its own. A switch is a control worth owning the day something
 needs a working one.
 
-Every MUI `Menu` is converted: the two context menus, the envelope table menu,
-the transaction action bar and the filter bar. The `MenuItem` still in the app
-is inside a MUI `Select` — `SmartSelect` and its options, the tag picker, the
-goal popover — where it is an option in a listbox rather than a menu item.
-Those convert with `Select`, not with this.
+Every MUI `Menu`, `MenuList` and `MenuItem` is converted: the two context
+menus, the envelope table menu, the transaction action bar, the filter bar, the
+settings menu, and the selects whose options were `MenuItem`s.
+
+`Select.tsx` is MUI's outlined `Select`. Its trigger goes inside
+`OutlinedFieldFrame`, so the notched border and floating label are the same
+ones the text field draws rather than a second copy of the geometry — that
+extraction is why `OutlinedField` now has a frame at all. `MultiSelect` is the
+same control with more than one value, which is the tag picker; its rows carry
+their own checkbox, so the tick the single select shows would be a second,
+redundant mark.
+
+`onChange` hands over the value, not an event. MUI's `Select` reports through a
+synthetic event whose `target` has to be rebuilt by hand to carry `name` and
+`value`, which is the shape form libraries read — `SmartSelect` did that with
+two `@ts-expect-error`s. Formik has `setFieldValue` for exactly this, and the
+envelope edit dialog already used it for two other fields.
+
+`items` maps value to label and is not optional decoration: Base UI resolves a
+row's label from its `SelectItemText`, which does not exist until the list has
+been opened once, so a closed trigger shows the raw value without it. It also
+renders the rows when no children are given, which is every select whose rows
+are just a label. The two that need more — a currency's full name on a second
+line, a tag's checkbox — pass children instead.
+
+`SmartSelect` is gone. Its two jobs were a mobile drawer, which the plain popup
+replaces, and a history-backed open state, which `Select` owns through `elKey`.
+`EnvelopeEditDialog.stories.tsx` covers the part nothing else does: that a
+picked value reaches the form.
 
 These files live beside the other shared components, not under
 `6-shared/ui/shadcn`. `components.json` points the shadcn `ui` alias at that

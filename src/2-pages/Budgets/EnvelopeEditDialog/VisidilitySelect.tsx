@@ -1,25 +1,30 @@
 import { core } from 'zerro-core/redux'
 import type { FC } from 'react'
-import type { SelectProps } from '@mui/material'
-import { MenuItem } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { SmartSelect } from '6-shared/ui/SmartSelect'
+import { Select } from '6-shared/ui/Select'
 
-export const VisibilitySelect: FC<
-  SelectProps<core.envelopes.envelopeVisibility>
-> = props => {
+type VisibilitySelectProps = {
+  value: core.envelopes.envelopeVisibility
+  onChange: (value: core.envelopes.envelopeVisibility) => void
+  label?: string
+  className?: string
+}
+
+export const VisibilitySelect: FC<VisibilitySelectProps> = props => {
   const { t } = useTranslation('envelopeEditDialog')
+  const { value, onChange, ...rest } = props
+  const items = {
+    [core.envelopes.envelopeVisibility.auto]: t('visibility.auto'),
+    [core.envelopes.envelopeVisibility.visible]: t('visibility.visible'),
+    [core.envelopes.envelopeVisibility.hidden]: t('visibility.hidden'),
+  }
   return (
-    <SmartSelect {...props} elKey="VisibilitySelect">
-      <MenuItem value={core.envelopes.envelopeVisibility.auto}>
-        {t('visibility.auto')}
-      </MenuItem>
-      <MenuItem value={core.envelopes.envelopeVisibility.visible}>
-        {t('visibility.visible')}
-      </MenuItem>
-      <MenuItem value={core.envelopes.envelopeVisibility.hidden}>
-        {t('visibility.hidden')}
-      </MenuItem>
-    </SmartSelect>
+    <Select
+      {...rest}
+      elKey="VisibilitySelect"
+      items={items}
+      value={value}
+      onChange={next => onChange(next as core.envelopes.envelopeVisibility)}
+    />
   )
 }

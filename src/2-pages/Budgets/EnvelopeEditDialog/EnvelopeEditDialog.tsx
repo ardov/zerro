@@ -154,16 +154,14 @@ const EnvelopeEditDialogForm: FC<{
             onChange={handleChange}
           /> */}
           <CurrencyCodeSelect
-            name="currency"
             label={t('currencyLabel')}
             value={values.currency}
-            onChange={handleChange}
+            onChange={v => setFieldValue('currency', v)}
           />
           <VisibilitySelect
-            name="visibility"
             label={t('visibilityLabel')}
             value={values.visibility}
-            onChange={handleChange}
+            onChange={v => setFieldValue('visibility', v)}
           />
           <FormGroup>
             {/* <FormControlLabel
