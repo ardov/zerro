@@ -24,6 +24,14 @@ export const popupPositioning = {
   className: 'z-modal',
 } as const
 
+/** A surface that slides in off an edge: the adaptive popover on a phone, and
+ * `SmartDialog` on one. `--drawer-radius` rounds its leading corners, and the
+ * `data-placement` on the popup decides which corners those are. */
+export const drawerSurfaceClass = 'owned-drawer'
+
+/** The dim behind a drawer, which lifts as the drawer is swiped away. */
+export const drawerBackdropClass = 'owned-drawer-backdrop'
+
 /** MUI lays an anchored surface's top-left over the anchor's own. Base UI
  * pushes it clear of the anchor instead, so the height comes back off. */
 export const overAnchor = ({ anchor }: { anchor: { height: number } }) =>

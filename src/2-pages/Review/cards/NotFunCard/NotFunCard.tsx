@@ -5,11 +5,11 @@ import { core } from 'zerro-core/redux'
 import {
   Checkbox,
   Chip,
-  Dialog,
   FormControlLabel,
   FormGroup,
   Link,
 } from '@mui/material'
+import { Dialog } from '6-shared/ui/Dialog'
 import Balancer from 'react-wrap-balancer'
 import pluralize from '6-shared/helpers/pluralize'
 import { round } from '6-shared/helpers/money'

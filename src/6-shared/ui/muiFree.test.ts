@@ -10,9 +10,11 @@ const OWNED = [
   'src/6-shared/ui/ActionList.tsx',
   'src/6-shared/ui/AmountInput.tsx',
   'src/6-shared/ui/Button.tsx',
+  'src/6-shared/ui/Dialog.tsx',
   'src/6-shared/ui/Menu.tsx',
   'src/6-shared/ui/OutlinedField.tsx',
   'src/6-shared/ui/Select.tsx',
+  'src/6-shared/ui/SmartDialog.tsx',
   'src/6-shared/ui/feather/index.tsx',
   'src/6-shared/ui/muiFocusBoundary.ts',
   'src/6-shared/hooks/useBreakpointDown.ts',
@@ -27,6 +29,9 @@ const OWNED = [
 const CONVERTED = [
   'src/2-pages/Budgets/BudgetPopover/BudgetPopover.tsx',
   'src/2-pages/Budgets/MonthInfo/FxRates.tsx',
+  'src/3-widgets/transaction/TransactionList/TopBar/BulkEditModal.tsx',
+  'src/4-features/import/ImportBackupItem.tsx',
+  'src/6-shared/ui/SmartConfirm.tsx',
 ]
 
 /** The mixed barrel. It re-exports the MUI-free Feather set alongside the

@@ -322,6 +322,49 @@ site's `transition-none` still beats all of it, `utilities` being the later
 layer, which is how the filter bar chains a second surface off the menu
 without waiting.
 
+`drawerSurfaceClass` and `drawerBackdropClass` are the other pair in that
+module: a surface that slides in off an edge and can be swiped back out, and
+the dim behind it, which lifts as the drawer is dragged away. Two surfaces use
+them — the adaptive popover on a phone and `SmartDialog` on one — and they
+differ only in how round the leading corners are, so `--drawer-radius` is a
+variable and `data-placement` decides which corners it lands on.
+`AdaptivePopover.css` is gone: everything in it was one of these.
+
+`Dialog.tsx` is MUI's `Dialog`: a paper centred over a dimmed page, at most
+600px wide and never taller than the window less its 32px margins. Base UI
+supplies the modal behaviour and `Dialog.Viewport` is the flex box that centres
+the paper, which is MUI's `container` under another name. The paper sits at
+elevation 24, which is the level this change had to register — `--elevation-24`
+in `AppThemeProvider` and `shadow-elevation-24` in `src/tailwind.css`, the way
+every theme value gets its counterpart. Nothing grows or slides: MUI fades a
+dialog and its backdrop in together and out slightly faster, and a dialog is
+not anchored to anything to grow out of.
+
+`DialogTitle` and `DialogContentText` are Base UI's `Title` and `Description`,
+which is what labels and describes the dialog for assistive technology rather
+than a heading and a paragraph styled to look the part. `DialogContent` drops
+its top padding when a title sits above it, which MUI does with a sibling rule
+and so does this. `DialogActions` uses a flex `gap` where MUI puts a
+`margin-left` on every child after the first — the same 8px, and it is why the
+parity story compares plain buttons: a `Button` of ours resets that margin from
+the later layer.
+
+`useReturnFocus` puts focus back where it was before the dialog opened, which
+is what MUI's `Modal` does. Base UI hands focus to the trigger instead, and a
+dialog opened from state has none, so focus landed on the body — visible in the
+settings menu, where cancelling a confirmation left the row behind unfocused.
+The element is caught during render rather than in an effect, because Base UI
+has already moved focus into the popup by the time effects run.
+
+`SmartDialog` is that dialog on a desktop and a drawer off the bottom edge on a
+phone, which is how MUI's `Dialog` and `SwipeableDrawer` were paired here
+before. History decides whether it is open, so Back closes it; unlike a
+select's generated key, this one is written down, because `registerPopover`
+hands the same one to whatever opens the dialog. The envelope edit dialog used
+to get a fresh form by passing a React `key` through `displayProps`, which React
+19 warns about and the owned `DialogProps` has no room for; it uses the
+`instanceKey` that `registerPopover` already hands out for exactly this.
+
 `OutlinedField` is MUI's outlined text field: the notched border with the label
 cut into it. `Field.Root` from Base UI supplies the label and description
 wiring and the `data-invalid` / `data-disabled` state the stylesheet keys off,

@@ -6,8 +6,12 @@ import { useTranslation } from 'react-i18next'
 import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import { cn } from './shadcn/utils'
 import { findMuiFocusBoundary } from './muiFocusBoundary'
-import { growSurfaceClass, overAnchor } from './popupSurface'
-import './AdaptivePopover.css'
+import {
+  drawerBackdropClass,
+  drawerSurfaceClass,
+  growSurfaceClass,
+  overAnchor,
+} from './popupSurface'
 
 /** Base UI names the vertical swipe directions `up`/`down`, so the edge a
  * drawer sits on does not spell its own swipe direction. */
@@ -76,7 +80,10 @@ export function AdaptivePopover({
         <Drawer.Portal container={container ?? undefined}>
           <Drawer.Backdrop
             data-slot="adaptive-backdrop"
-            className="adaptive-backdrop fixed inset-0 z-modal bg-black/50"
+            className={cn(
+              drawerBackdropClass,
+              'fixed inset-0 z-modal bg-black/50'
+            )}
           />
           <Drawer.Viewport
             className={cn(
@@ -93,7 +100,8 @@ export function AdaptivePopover({
               data-placement={drawerSide}
               finalFocus={finalFocus}
               className={cn(
-                'adaptive-drawer pointer-events-auto relative max-h-[calc(100dvh-48px)] overflow-y-auto bg-popover text-popover-foreground shadow-elevation-16 outline-none',
+                drawerSurfaceClass,
+                'pointer-events-auto relative max-h-[calc(100dvh-48px)] overflow-y-auto bg-popover text-popover-foreground shadow-elevation-16 outline-none',
                 drawerSide === 'top' || drawerSide === 'bottom'
                   ? 'w-full'
                   : 'h-full',

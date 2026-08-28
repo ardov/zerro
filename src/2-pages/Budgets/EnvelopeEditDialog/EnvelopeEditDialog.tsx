@@ -2,15 +2,9 @@ import { Button, ButtonBase } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { shallowEqual } from 'react-redux'
 import { useFormik } from 'formik'
-import type { DialogProps } from '@mui/material'
-import {
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  FormGroup,
-} from '@mui/material'
+import { Checkbox, FormControlLabel, FormGroup } from '@mui/material'
+import type { DialogProps } from '6-shared/ui/Dialog'
+import { Dialog, DialogContent, DialogTitle } from '6-shared/ui/Dialog'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
 import { useAppDispatch } from 'store'
@@ -33,11 +27,15 @@ export const useEditDialog = () => {
 }
 
 export const EnvelopeEditDialog: FC = () => {
-  const { displayProps, extraProps, close } = editDialog.useProps()
+  const { displayProps, extraProps, close, instanceKey } = editDialog.useProps()
   if (!extraProps.envelope) return null
 
   return (
+    // A fresh form on every opening: the draft is Formik's, and it starts from
+    // whichever envelope this opening carries. The key used to be handed to
+    // the dialog through `displayProps`, which React 19 warns about.
     <EnvelopeEditDialogForm
+      key={instanceKey}
       displayProps={displayProps}
       envelope={extraProps.envelope}
       close={close}

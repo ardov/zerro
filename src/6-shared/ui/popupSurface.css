@@ -26,4 +26,68 @@
       transition: none;
     }
   }
+
+  /* A surface that slides in off an edge and can be swiped back out. Two of
+     them: the adaptive popover on a phone, and a dialog on a phone. They
+     differ only in how round the leading corners are, so that is a variable
+     and the placement decides which corners it lands on. */
+  .owned-drawer {
+    transform: translate(
+      var(--drawer-swipe-movement-x, 0),
+      var(--drawer-swipe-movement-y, 0)
+    );
+    transition: transform 225ms cubic-bezier(0, 0, 0.2, 1);
+
+    &[data-placement='top'] {
+      border-radius: 0 0 var(--drawer-radius, 16px) var(--drawer-radius, 16px);
+      --closed-x: 0;
+      --closed-y: -100%;
+    }
+
+    &[data-placement='bottom'] {
+      border-radius: var(--drawer-radius, 16px) var(--drawer-radius, 16px) 0 0;
+      --closed-x: 0;
+      --closed-y: 100%;
+    }
+
+    &[data-placement='left'] {
+      border-radius: 0 var(--drawer-radius, 16px) var(--drawer-radius, 16px) 0;
+      --closed-x: -100%;
+      --closed-y: 0;
+    }
+
+    &[data-placement='right'] {
+      border-radius: var(--drawer-radius, 16px) 0 0 var(--drawer-radius, 16px);
+      --closed-x: 100%;
+      --closed-y: 0;
+    }
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      transform: translate(var(--closed-x), var(--closed-y));
+    }
+
+    &[data-swiping] {
+      transition: none;
+    }
+  }
+
+  /* The dim behind it lifts with the swipe, so a half-dragged drawer is half
+     as dark. */
+  .owned-drawer-backdrop {
+    opacity: calc(1 - var(--drawer-swipe-progress, 0));
+    transition: opacity 225ms ease;
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .owned-drawer,
+    .owned-drawer-backdrop {
+      transition: none;
+    }
+  }
 }

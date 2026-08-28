@@ -109,7 +109,7 @@ const Header: FC<{
       </div>
       <Tooltip title={t('edit')}>
         <IconButton
-          onClick={() => openEditDialog({ envelope }, { key: envelope.id })}
+          onClick={() => openEditDialog({ envelope })}
           children={<EditIcon />}
         />
       </Tooltip>

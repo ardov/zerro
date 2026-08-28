@@ -116,6 +116,7 @@ const GlobalVariables = (props: { theme: Theme }) => {
       --elevation-8: ${shadows[8]};
       --elevation-10: ${shadows[10]};
       --elevation-16: ${shadows[16]};
+      --elevation-24: ${shadows[24]};
       /* Owned overlays stack against MUI's modals, so the level comes from
          the same theme MUI positions its own surfaces with. */
       --z-modal: ${zIndex.modal};

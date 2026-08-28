@@ -1,5 +1,5 @@
 import { Button } from '6-shared/ui/Button'
-import type { DialogProps } from '@mui/material/Dialog'
+import type { DialogProps } from '6-shared/ui/Dialog'
 import type { Modify, TTransaction } from '6-shared/types'
 
 import type { FC } from 'react'
@@ -11,7 +11,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-} from '@mui/material'
+} from '6-shared/ui/Dialog'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { useAppDispatch, useAppSelector } from 'store'
 import { track } from '6-shared/analytics'
