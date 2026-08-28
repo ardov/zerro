@@ -4,7 +4,8 @@ import type { TTransaction, TTransactionId } from '6-shared/types'
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TextField, Fab, Zoom } from '@mui/material'
+import { Fab, Zoom } from '@mui/material'
+import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import {
@@ -223,41 +224,34 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
             slotProps={{ textField: { size: 'small', fullWidth: true } }}
             slots={{ openPickerIcon: CalendarIcon }}
           />
-          <TextField
+          {/* A native time input draws a picker button of its own, which MUI
+              hid too. The field's own class lands on the frame, so the input
+              is reached through it. */}
+          <OutlinedField
             label={t('time')}
             value={localTime}
             onChange={e => setLocalTime(e.target.value)}
             type="time"
             size="small"
-            className="min-w-[104px]"
-            slotProps={{
-              htmlInput: {
-                sx: {
-                  appearance: 'none',
-                  '::-webkit-calendar-picker-indicator': { display: 'none' },
-                },
-              },
-            }}
+            className="min-w-[104px] [&_input]:appearance-none [&_input::-webkit-calendar-picker-indicator]:hidden"
           />
         </div>
-        <TextField
+        <OutlinedField
           label={t('payee')}
           value={localPayee || ''}
           onChange={e => setLocalPayee(e.target.value)}
           multiline
-          maxRows="4"
+          maxRows={4}
           fullWidth
-          helperText=""
           size="small"
         />
-        <TextField
+        <OutlinedField
           label={t('comment')}
           value={localComment || ''}
           onChange={e => setLocalComment(e.target.value)}
           multiline
-          maxRows="4"
+          maxRows={4}
           fullWidth
-          helperText=""
           size="small"
         />
         <Reciept value={qrCode} />

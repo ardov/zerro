@@ -10,9 +10,8 @@ import {
   DialogTitle,
   FormControlLabel,
   FormGroup,
-  InputAdornment,
-  TextField,
 } from '@mui/material'
+import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
 import { useAppDispatch } from 'store'
 import { core } from 'zerro-core/redux'
@@ -104,7 +103,7 @@ const EnvelopeEditDialogForm: FC<{
           onSubmit={handleSubmit}
           className="mt-2 flex max-w-[360px] flex-col gap-4"
         >
-          <TextField
+          <OutlinedField
             label={t('nameLabel')}
             error={!!errors.originalName}
             helperText={errors.originalName}
@@ -112,20 +111,13 @@ const EnvelopeEditDialogForm: FC<{
             name="originalName"
             value={values.originalName}
             onChange={handleChange}
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Color
-                      value={values.colorHex}
-                      onChange={v => setFieldValue('colorHex', v)}
-                    />
-                  </InputAdornment>
-                ),
-              },
-
-              htmlInput: { autoComplete: 'off' },
-            }}
+            autoComplete="off"
+            endAdornment={
+              <Color
+                value={values.colorHex}
+                onChange={v => setFieldValue('colorHex', v)}
+              />
+            }
           />
 
           {/* Can use dnd */}

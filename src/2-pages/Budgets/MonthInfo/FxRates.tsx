@@ -4,7 +4,7 @@ import { core } from 'zerro-core/redux'
 
 import type { FC } from 'react'
 import { useState } from 'react'
-import { TextField, InputAdornment } from '@mui/material'
+import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { useTranslation } from 'react-i18next'
 import { keys } from '6-shared/helpers/keys'
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
@@ -108,9 +108,10 @@ const FxRateInput: FC<{
   )
 
   return (
-    <TextField
+    <OutlinedField
       key={code}
       size="small"
+      type="tel"
       value={value}
       onChange={e => {
         setValue(e.target.value)
@@ -118,22 +119,8 @@ const FxRateInput: FC<{
       }}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start" children={`1 ${leftCode} =`} />
-          ),
-          endAdornment: (
-            <InputAdornment
-              position="end"
-              children={rightCode}
-              onClick={swap}
-            />
-          ),
-        },
-
-        htmlInput: { type: 'tel' },
-      }}
+      startAdornment={`1 ${leftCode} =`}
+      endAdornment={<span onClick={swap}>{rightCode}</span>}
     />
   )
 }

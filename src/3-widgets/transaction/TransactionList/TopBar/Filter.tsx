@@ -10,6 +10,9 @@ import {
   TextField,
 } from '@mui/material'
 import { Menu, MenuItem } from '6-shared/ui/Menu'
+// The three `TextField`s left are Autocomplete's own input, which it hands
+// `params` to; they convert with it.
+import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 import { AddIcon, CloseIcon, FilterListIcon } from '6-shared/ui/Icons'
@@ -308,7 +311,7 @@ function FilterEditor(props: {
     case 'amount':
       return (
         <div className="flex flex-row gap-2">
-          <TextField
+          <OutlinedField
             autoFocus
             type="number"
             label={t('amountFrom')}
@@ -322,7 +325,7 @@ function FilterEditor(props: {
               })
             }
           />
-          <TextField
+          <OutlinedField
             type="number"
             label={t('amountTo')}
             value={clause.lte ?? ''}

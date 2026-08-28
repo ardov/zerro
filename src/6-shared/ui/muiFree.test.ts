@@ -24,7 +24,10 @@ const OWNED = [
 /** Surfaces converted off MUI. Their data layer still reaches MUI — the date
  * localization module pulls `@mui/x-date-pickers` — so these are checked on
  * what they import themselves rather than on a whole transitive closure. */
-const CONVERTED = ['src/2-pages/Budgets/BudgetPopover/BudgetPopover.tsx']
+const CONVERTED = [
+  'src/2-pages/Budgets/BudgetPopover/BudgetPopover.tsx',
+  'src/2-pages/Budgets/MonthInfo/FxRates.tsx',
+]
 
 /** The mixed barrel. It re-exports the MUI-free Feather set alongside the
  * three glyphs still taken from `@mui/icons-material`, so importing a Feather

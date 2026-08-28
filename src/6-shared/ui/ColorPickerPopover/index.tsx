@@ -3,7 +3,8 @@ import type { ChangeEvent, FC } from 'react'
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { PopoverProps } from '@mui/material'
-import { Divider, InputAdornment, Popover, TextField } from '@mui/material'
+import { Divider, Popover } from '@mui/material'
+import { OutlinedField } from '6-shared/ui/OutlinedField'
 import './styles.scss'
 import { zmColors, colors } from './colors'
 import { isHEX } from '6-shared/helpers/color'
@@ -78,25 +79,18 @@ export const ColorPicker: FC = () => {
             />
           ))}
         </div>
-        <TextField
-          variant="outlined"
+        <OutlinedField
           fullWidth
           value={custom}
           onChange={e => setCustom(e.target.value)}
           placeholder="#000000"
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <ColorCheck
-                    hex={isHEX(custom) ? custom : value}
-                    checked={isSameColor(value, custom)}
-                    onChange={() => handleColorClick(custom)}
-                  />
-                </InputAdornment>
-              ),
-            },
-          }}
+          endAdornment={
+            <ColorCheck
+              hex={isHEX(custom) ? custom : value}
+              checked={isSameColor(value, custom)}
+              onChange={() => handleColorClick(custom)}
+            />
+          }
         />
         <Button fullWidth onClick={() => handleColorClick(null)}>
           {t('removeColor')}

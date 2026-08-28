@@ -323,21 +323,41 @@ layer, which is how the filter bar chains a second surface off the menu
 without waiting.
 
 `OutlinedField` is MUI's outlined text field: the notched border with the label
-cut into it. Its label is always floated, which is right for a field that
-always holds a value; MUI's other mode, where an outlined label drops into an
-empty field, is not implemented because nothing needs it yet. A text field that
-can be empty gets that mode added here, not a second copy of the notch
-geometry. `Field.Root` from Base UI supplies the label and description wiring
-and the `data-invalid` / `data-disabled` state the stylesheet keys off, so none
-of that is spelled out by hand. It is used by `AmountInput`; native props
-target the input, while `className` lands on `Field.Root` and sizes the whole
-field, label and helper text included. Use `startAdornment` and `endAdornment`
-rather than MUI `slotProps`. `size` is not one of the frame's props: MUI's
-`small` and `medium` are the control's vertical padding and nothing else — the
-notch, the label and the helper text are the same either way — so it reaches
-`outlinedControlClass` and stops there.
+cut into it. `Field.Root` from Base UI supplies the label and description
+wiring and the `data-invalid` / `data-disabled` state the stylesheet keys off,
+so none of that is spelled out by hand. Native props target the input, while
+`className` lands on `Field.Root` and sizes the whole field, label and helper
+text included. Use `startAdornment` and `endAdornment` rather than MUI
+`slotProps`, and reach the input itself through the frame — the time field
+hides a native picker button with `[&_input::-webkit-calendar-picker-indicator]`.
 
-The focus ring keys off the input, not `:focus-within`. The group holds the
+The label rests inside the field and floats into the notch once the field is
+focused or filled, which is what MUI calls shrinking. `Field.Root` already
+reports both of those as `data-focused` and `data-filled`, so the two positions
+are a pair of stylesheet rules rather than React state, and the notch's legend
+opens and closes off the same two attributes. A select's trigger is not a
+`Field.Control` and nothing reports it filled, so `Select` passes `shrink`
+itself. This is why the frame takes `size` after all: the resting label sits on
+the control's own padding, and MUI rests it 7px lower on a medium field than on
+a small one.
+
+`multiline` renders a textarea that grows with what is typed into it, up to
+`maxRows` lines. MUI grows one by measuring a hidden copy of the textarea on
+every keystroke; this one puts a mirror of the text in the same grid cell and
+lets the cell size itself, so there is no layout effect and nothing to re-run
+when the value is changed from outside. The cap is `maxRows` in `lh` units —
+the line box the field already sets, so it cannot drift from the text it counts
+— and it goes on the textarea and the mirror rather than on the padded sizer,
+which would otherwise scroll its own padding and show a sliver of the next line
+under the border. The mirror reads the controlled value; an uncontrolled
+multiline field would stay at one row, and there is none.
+
+`OutlinedField.stories.tsx` pins both modes against MUI: where the label sits
+and how far the notch is open, empty and filled, in both sizes and both themes;
+and the height of a multiline field at one, three and more rows than it may
+grow to.
+
+The focus ring keys off the control, not `:focus-within`. The group holds the
 adornments, and both real callers put an icon button in one — the submit arrow
 in assignment and in money moving — so `:focus-within` would light the field up
 while `AmountInput` had already swapped the expression back for the formatted

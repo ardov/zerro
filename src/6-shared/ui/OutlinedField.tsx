@@ -15,13 +15,25 @@ export type OutlinedFieldFrameProps = {
   startAdornment?: ReactNode
   endAdornment?: ReactNode
   fullWidth?: boolean
+  /** Which of MUI's two heights this is. The frame needs it because a label
+   * that is not floated rests on the control's padding. */
+  size?: TFieldSize
+  /** Keeps the label floated whatever the control is doing. Base UI reports a
+   * field filled from its `Field.Control`, and a select's trigger is not one,
+   * so the select says so itself. */
+  shrink?: boolean
   error?: boolean
   disabled?: boolean
   className?: string
 }
 
 export type OutlinedFieldProps = Omit<ComponentPropsWithRef<'input'>, 'size'> &
-  Omit<OutlinedFieldFrameProps, 'disabled'> & { size?: TFieldSize }
+  Omit<OutlinedFieldFrameProps, 'disabled'> & {
+    /** MUI's `multiline`: a textarea that grows with what is typed into it. */
+    multiline?: boolean
+    /** How many lines it may grow to before it scrolls. */
+    maxRows?: number
+  }
 
 /** The padding MUI gives the control inside an outlined field. The adornments
  * sit outside it, so whichever side carries one loses its padding here and the
@@ -55,6 +67,8 @@ export function OutlinedFieldFrame({
   startAdornment,
   endAdornment,
   fullWidth,
+  size = 'medium',
+  shrink,
   error = false,
   disabled,
   children,
@@ -63,6 +77,11 @@ export function OutlinedFieldFrame({
     <Field.Root
       invalid={error}
       disabled={disabled}
+      // Both of these are read by the stylesheet, which is where the label's
+      // two positions live. `data-focused` and `data-filled` come from Base UI
+      // on this same element, so the label reads all four from one place.
+      data-size={size}
+      data-shrink={shrink || undefined}
       className={cn(
         'inline-flex min-w-0 flex-col align-top',
         fullWidth && 'w-full',
@@ -78,7 +97,7 @@ export function OutlinedFieldFrame({
         )}
       >
         {label && (
-          <Field.Label className="outlined-field__label pointer-events-none absolute top-0 left-0 origin-top-left translate-x-3.5 -translate-y-[9px] scale-75">
+          <Field.Label className="outlined-field__label pointer-events-none absolute top-0 left-0 origin-top-left">
             {label}
           </Field.Label>
         )}
@@ -123,11 +142,10 @@ export function OutlinedFieldFrame({
 
 /** MUI's outlined text field: a notched border with the label cut into it.
  *
- * The label is always floated. MUI drops an outlined label into the field
- * until it is focused or filled, and that mode is not implemented here
- * because nothing needs it yet — every converted field always holds a value.
- * A field that can be empty needs that mode added to this component, not a
- * second copy of the notch geometry.
+ * The label rests inside the field and floats up into the notch once the field
+ * is focused or filled, which is what MUI calls shrinking. Base UI's
+ * `Field.Root` reports both states as data attributes, so the two positions
+ * are a stylesheet rule rather than React state.
  *
  * `Field.Root` supplies the label/description wiring and the `data-invalid` /
  * `data-disabled` state the stylesheet keys off, so none of it is spelled out
@@ -142,8 +160,15 @@ export function OutlinedField({
   size = 'medium',
   error = false,
   disabled,
+  multiline,
+  maxRows,
   ...props
 }: OutlinedFieldProps) {
+  const controlClass = outlinedControlClass({
+    size,
+    startAdornment,
+    endAdornment,
+  })
   return (
     <OutlinedFieldFrame
       className={className}
@@ -152,16 +177,71 @@ export function OutlinedField({
       startAdornment={startAdornment}
       endAdornment={endAdornment}
       fullWidth={fullWidth}
+      size={size}
       error={error}
       disabled={disabled}
     >
+      {multiline ? (
+        <GrowingTextarea
+          {...props}
+          className={controlClass}
+          maxRows={maxRows}
+        />
+      ) : (
+        <InputPrimitive
+          {...props}
+          className={cn(controlClass, placeholderClass)}
+        />
+      )}
+    </OutlinedFieldFrame>
+  )
+}
+
+/** MUI dims a placeholder rather than recolouring it, and the two themes dim
+ * it by different amounts. */
+const placeholderClass =
+  'placeholder:text-current placeholder:opacity-[0.42] dark:placeholder:opacity-50'
+
+/** MUI grows a `multiline` field by measuring a hidden copy of the textarea on
+ * every keystroke. This one puts a mirror of the text in the same grid cell as
+ * the textarea and lets the cell size itself, so the height is the browser's
+ * to work out: no layout effect, and nothing to re-run when the value is
+ * changed from outside.
+ *
+ * The mirror reads the controlled value. An uncontrolled multiline field would
+ * sit at one row and not grow, and there is no such field. */
+function GrowingTextarea({
+  className,
+  maxRows,
+  ...props
+}: Omit<ComponentPropsWithRef<'input'>, 'ref' | 'type' | 'size'> & {
+  maxRows?: number
+}) {
+  const text = props.value ?? props.defaultValue ?? ''
+  // Lines, not pixels: `lh` is the line box the group already sets, so the cap
+  // cannot drift from the text it is counting. It goes on both children rather
+  // than on the sizer, so that the textarea is what scrolls — a sizer that
+  // scrolled would carry its own padding into the scrollport and show a
+  // sliver of the next line under the border.
+  const cap = maxRows ? { maxHeight: `${maxRows}lh` } : undefined
+  return (
+    <div data-slot="textarea-sizer" className={cn(className, 'grid')}>
       <InputPrimitive
         {...props}
+        render={<textarea rows={1} />}
+        style={{ ...props.style, ...cap }}
         className={cn(
-          outlinedControlClass({ size, startAdornment, endAdornment }),
-          'placeholder:text-current placeholder:opacity-[0.42] dark:placeholder:opacity-50'
+          'col-start-1 row-start-1 m-0 resize-none overflow-y-auto border-0 bg-transparent p-0 font-[family-name:inherit] text-[length:inherit] leading-[inherit] text-current outline-none disabled:text-disabled-foreground',
+          placeholderClass
         )}
       />
-    </OutlinedFieldFrame>
+      {/* The trailing space keeps a finished line from collapsing, so a typed
+          newline grows the field before the next character arrives. */}
+      <div
+        aria-hidden
+        style={cap}
+        className="invisible col-start-1 row-start-1 overflow-hidden whitespace-pre-wrap"
+      >{`${text} `}</div>
+    </div>
   )
 }

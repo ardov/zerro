@@ -122,7 +122,9 @@ function SelectField<T extends string>({
 }: TFieldProps & { options: TSelectOption<T>[]; display: ReactNode }) {
   return (
     <>
-      <OutlinedFieldFrame {...frame}>
+      {/* The trigger is not a `Field.Control`, so nothing tells the frame the
+          field is filled — but a select always shows a value. */}
+      <OutlinedFieldFrame {...frame} size={size} shrink>
         <SelectPrimitive.Trigger
           aria-label={ariaLabel}
           className={cn(

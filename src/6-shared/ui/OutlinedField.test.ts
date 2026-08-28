@@ -13,14 +13,19 @@ const tsx = read('OutlinedField.tsx')
  * on what the file actually declares has to read past them. */
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '')
 
+/** Prettier wraps a selector once it grows past the line width, so the file is
+ * searched with its whitespace collapsed and the selectors stay on one line
+ * here. */
+const flattened = css.replace(/\s+/g, ' ')
+
 const HOVER = '.outlined-field__group:hover .outlined-field__notch'
 const FOCUS =
-  '.outlined-field__group:has(:where(input):focus) .outlined-field__notch'
+  '.outlined-field__group:has(:where(input, textarea):focus) .outlined-field__notch'
 const ERROR = '[data-invalid] .outlined-field__group .outlined-field__notch'
 const DISABLED = '[data-disabled] .outlined-field__group .outlined-field__notch'
 
 const positionOf = (fragment: string) => {
-  const at = css.indexOf(fragment)
+  const at = flattened.indexOf(fragment)
   expect(at, `${fragment} is missing from OutlinedField.css`).toBeGreaterThan(
     -1
   )
@@ -51,9 +56,7 @@ function specificity(selector: string): TWeight {
       else if (rest[close] === ')' && (depth -= 1) === 0) break
     }
     if (match[1] !== 'where') {
-      const heaviest = rest
-        .slice(open + 1, close)
-        .split(',')
+      const heaviest = splitArguments(rest.slice(open + 1, close))
         .map(argument => specificity(argument))
         .sort(compare)
         .at(-1)
@@ -81,6 +84,25 @@ function specificity(selector: string): TWeight {
   return total
 }
 
+/** Splits a selector list on its own commas. A nested `:where(input,
+ * textarea)` carries commas of its own, and splitting on those would leave
+ * `textarea):focus` to be weighed as a selector. */
+function splitArguments(list: string) {
+  const parts: string[] = []
+  let depth = 0
+  let start = 0
+  for (let i = 0; i < list.length; i++) {
+    if (list[i] === '(') depth += 1
+    else if (list[i] === ')') depth -= 1
+    else if (list[i] === ',' && depth === 0) {
+      parts.push(list.slice(start, i))
+      start = i + 1
+    }
+  }
+  parts.push(list.slice(start))
+  return parts
+}
+
 const compare = (a: TWeight, b: TWeight) =>
   a[0] - b[0] || a[1] - b[1] || a[2] - b[2]
 
@@ -94,6 +116,11 @@ describe('specificity', () => {
     // costs whatever its argument costs.
     expect(specificity('.a:has(input:focus) .b')).toEqual([0, 3, 1])
     expect(specificity('.a:has(:where(input):focus) .b')).toEqual([0, 3, 0])
+    // The comma is the third: it belongs to the free `:where()`, not to the
+    // `:has()` around it, so naming a second control costs nothing.
+    expect(specificity('.a:has(:where(input, textarea):focus) .b')).toEqual([
+      0, 3, 0,
+    ])
   })
 })
 

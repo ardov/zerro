@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import type { PopoverProps } from '@mui/material'
-import { Popover, TextField } from '@mui/material'
+import { Popover } from '@mui/material'
 import { useFormik } from 'formik'
+import { OutlinedField } from './OutlinedField'
 
 export function useFloatingInput(
   ref: React.RefObject<HTMLElement | null>,
@@ -53,14 +54,14 @@ function FloatingInput(props: {
   return (
     <Popover open={open} onClose={submitForm} anchorEl={anchorEl}>
       <form className="w-[280px] p-0" onSubmit={handleSubmit}>
-        <TextField
+        <OutlinedField
           fullWidth
           autoFocus
           name="name"
           value={values.name}
           onChange={handleChange}
           onBlur={submitForm}
-          slotProps={{ htmlInput: { autoComplete: 'off' } }}
+          autoComplete="off"
         />
       </form>
     </Popover>

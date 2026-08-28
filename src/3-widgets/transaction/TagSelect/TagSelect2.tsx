@@ -4,13 +4,8 @@ import React, { useEffect, useState, useRef } from 'react'
 import { createSelector } from '@reduxjs/toolkit'
 import { useAppSelector } from 'store'
 import type { PopoverProps } from '@mui/material'
-import {
-  Popover,
-  List,
-  ListItemButton,
-  ListItemText,
-  TextField,
-} from '@mui/material'
+import { Popover, List, ListItemButton, ListItemText } from '@mui/material'
+import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { AddIcon } from '6-shared/ui/Icons'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import type { Modify } from '6-shared/types'
@@ -174,11 +169,10 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
       {...popoverProps}
     >
       <div className="surface-card sticky top-0 z-10 rounded-none shadow-none px-2 pt-2">
-        <TextField
+        <OutlinedField
           value={search}
           onChange={e => setSearch(e.target.value)}
           onKeyDown={handleKeyDown}
-          variant="outlined"
           placeholder={t('selectCategory')}
           fullWidth
           autoFocus

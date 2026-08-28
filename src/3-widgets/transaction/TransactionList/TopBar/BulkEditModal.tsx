@@ -11,8 +11,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  TextField,
 } from '@mui/material'
+import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { useAppDispatch, useAppSelector } from 'store'
 import { track } from '6-shared/analytics'
 import { core } from 'zerro-core/redux'
@@ -84,16 +84,13 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
         )}
 
         <div className="pt-4">
-          <TextField
+          <OutlinedField
             value={comment}
             onChange={e => setComment(e.target.value)}
             label={t('comment')}
             multiline
-            maxRows="4"
+            maxRows={4}
             fullWidth
-            helperText=""
-            variant="outlined"
-            margin="dense"
           />
         </div>
       </DialogContent>
