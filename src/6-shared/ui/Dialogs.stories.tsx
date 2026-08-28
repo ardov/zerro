@@ -9,6 +9,7 @@ import { useAppSelector } from 'store'
 import { MonthProvider, useMonth } from '2-pages/Budgets/MonthProvider'
 import { GoalPopover } from '2-pages/Budgets/GoalPopover/GoalPopover'
 import { MoveMoneyModal } from '4-features/moveMoney/MoveMoneyModal'
+import { SideContent, useSideContent } from '2-pages/Budgets/SideContent'
 
 const meta = {
   title: 'UI/Dialogs and feedback',
@@ -44,6 +45,82 @@ function DialogTriggers() {
 }
 
 export const Interactive: Story = { render: () => <DialogTriggers /> }
+
+function MonthConfirmationHarness() {
+  const openSide = useSideContent()
+  return (
+    <>
+      <button type="button" onClick={() => openSide('overview')}>
+        Open month overview
+      </button>
+      <SideContent width={360} />
+    </>
+  )
+}
+
+/** The confirmation lives in GlobalWidgets, outside the MUI drawer's React
+ * tree. Both responsive variants must keep focus and dismiss only themselves. */
+export const ConfirmFromDrawer: Story = {
+  globals: { viewport: { value: 'zerro900' } },
+  render: () => (
+    <MonthProvider>
+      <MonthConfirmationHarness />
+    </MonthProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const opener = canvas.getByRole('button', { name: 'Open month overview' })
+    await userEvent.click(opener)
+    const parent = await body.findByRole('dialog')
+    const trigger = within(parent).getByRole('button', {
+      name: 'Copy from last month',
+    })
+    await userEvent.click(trigger)
+    const child = await body.findByRole('dialog', { name: 'Copy all budgets?' })
+    const expectChildFocus = () =>
+      expect(child).toContainElement(
+        canvasElement.ownerDocument.activeElement as HTMLElement
+      )
+    await waitFor(expectChildFocus)
+    await waitFor(() =>
+      expect(within(child).getByRole('button', { name: 'Copy' })).toHaveFocus()
+    )
+    await userEvent.tab({ shift: true })
+    await waitFor(() =>
+      expect(
+        within(child).getByRole('button', { name: 'Cancel' })
+      ).toHaveFocus()
+    )
+    for (let i = 0; i < 3; i++) {
+      await userEvent.tab()
+      await waitFor(expectChildFocus)
+    }
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(child).not.toBeVisible())
+    await expect(parent).toBeVisible()
+    await waitFor(() => expect(trigger).toHaveFocus())
+
+    await userEvent.keyboard('{Enter}')
+    const reopened = await body.findByRole('dialog', {
+      name: 'Copy all budgets?',
+    })
+    await userEvent.click(
+      within(reopened).getByRole('button', { name: 'Cancel' })
+    )
+    await waitFor(() => expect(reopened).not.toBeVisible())
+    await expect(parent).toBeVisible()
+    await waitFor(() => expect(trigger).toHaveFocus())
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(parent).not.toBeVisible())
+    await waitFor(() => expect(opener).toHaveFocus())
+  },
+}
+
+export const ConfirmFromMobileDrawer: Story = {
+  ...ConfirmFromDrawer,
+  globals: { viewport: { value: 'iphone13' } },
+}
 
 function AmountDialogHarness({ kind }: { kind: 'goal' | 'move' }) {
   const [month] = useMonth()

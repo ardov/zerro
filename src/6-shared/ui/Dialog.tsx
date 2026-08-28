@@ -1,6 +1,7 @@
-import type { ComponentPropsWithoutRef, ReactNode, RefObject } from 'react'
-import { useEffect, useRef } from 'react'
+import type { ComponentPropsWithoutRef, ReactNode } from 'react'
+import { useState } from 'react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
+import { findMuiFocusBoundary } from './muiFocusBoundary'
 import { cn } from './shadcn/utils'
 import './Dialog.css'
 
@@ -28,7 +29,7 @@ export function Dialog({
   children,
   ...props
 }: DialogProps) {
-  const returnFocus = useReturnFocus(open)
+  const { container, finalFocus } = useDialogFocus(open)
   return (
     <DialogPrimitive.Root
       open={open}
@@ -36,12 +37,12 @@ export function Dialog({
         if (!next) onClose?.()
       }}
     >
-      <DialogPrimitive.Portal>
+      <DialogPrimitive.Portal container={container}>
         <DialogPrimitive.Backdrop className="owned-dialog fixed inset-0 z-modal bg-black/50" />
         <DialogPrimitive.Viewport className="fixed inset-0 z-modal flex items-center justify-center">
           <DialogPrimitive.Popup
             {...props}
-            finalFocus={returnFocus}
+            finalFocus={finalFocus}
             data-slot="dialog"
             className={cn(
               'owned-dialog relative m-8 flex max-h-[calc(100%-64px)] max-w-[600px] flex-col rounded-lg bg-card text-card-foreground shadow-elevation-24 outline-none',
@@ -56,37 +57,33 @@ export function Dialog({
   )
 }
 
-/** Where focus goes when the dialog closes.
- *
- * MUI's `Modal` puts it back where it was before the dialog opened. Base UI
- * hands it to the trigger instead, and a dialog opened from state has none, so
- * focus landed on the body — visible when the settings menu opens a
- * confirmation: cancelling it left the row behind unfocused.
- *
- * Reading `document.activeElement` as the dialog opens is too late, because
- * Base UI moves focus into the popup from the popup's own effect, which runs
- * before anything this component could schedule. So the last focused element
- * is followed while the dialog is closed, and the following stops when it
- * opens. A focus that reaches a dialog is skipped either way, which keeps the
- * hand-off honest if the two ever race — and means a dialog opened from
- * another dialog would hand focus back past both. Nothing stacks them. */
-export function useReturnFocus(open: boolean): RefObject<HTMLElement | null> {
-  const target = useRef<HTMLElement | null>(null)
-  useEffect(() => {
-    if (open) return
-    const follow = (event: FocusEvent) => {
-      const focused = event.target
-      if (
-        focused instanceof HTMLElement &&
-        !focused.closest('[data-slot="dialog"]')
-      ) {
-        target.current = focused
-      }
-    }
-    document.addEventListener('focusin', follow)
-    return () => document.removeEventListener('focusin', follow)
-  }, [open])
-  return target
+/** Capture before the popup commits and its autofocus moves focus. The
+ * initializer also covers forms that mount already open with a fresh key.
+ * Keep this opening's target through updates and exit, then capture again on
+ * the next opening. A MUI parent must contain the portal too: it cannot know
+ * that a Base UI dialog elsewhere in the document is the top modal. */
+export function useDialogFocus(open: boolean) {
+  const [opening, setOpening] = useState(() => ({
+    open,
+    target: getFocusedElement(),
+  }))
+  if (open !== opening.open) {
+    setOpening({
+      open,
+      target: open ? getFocusedElement() : opening.target,
+    })
+  }
+  const target = opening.target
+  return {
+    container: findMuiFocusBoundary(target),
+    finalFocus: () => (target?.isConnected ? target : true),
+  }
+}
+
+function getFocusedElement() {
+  if (typeof document === 'undefined') return null
+  const focused = document.activeElement
+  return focused instanceof HTMLElement ? focused : null
 }
 
 /** The heading MUI renders as an `h2` in its `h6` size. Base UI's `Title` is

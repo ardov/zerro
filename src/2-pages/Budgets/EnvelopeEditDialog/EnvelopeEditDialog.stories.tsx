@@ -78,3 +78,27 @@ export const PickingFromTheSelects: Story = {
     await waitFor(() => expect(currency).toHaveTextContent(chosen))
   },
 }
+
+export const ReturnsFocusAfterRemount: Story = {
+  render: PickingFromTheSelects.render,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('button', { name: 'Edit envelope' })
+
+    for (let i = 0; i < 2; i++) {
+      await userEvent.click(trigger)
+      const dialog = await body.findByRole('dialog')
+      const name = within(dialog).getByRole('textbox', { name: 'Name' })
+      await waitFor(() => expect(name).toHaveFocus())
+      await expect(name).toHaveValue('Food')
+      await userEvent.clear(name)
+      await userEvent.type(name, 'Discard this draft')
+      await userEvent.click(
+        within(dialog).getByRole('button', { name: 'Cancel' })
+      )
+      await waitFor(() => expect(dialog).not.toBeVisible())
+      await waitFor(() => expect(trigger).toHaveFocus())
+    }
+  },
+}

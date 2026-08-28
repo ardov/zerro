@@ -15,7 +15,9 @@ export function findMuiFocusBoundary(anchor: Element | null | undefined) {
   // would hand back a detached container and portal the surface into nothing.
   if (!anchor?.isConnected) return undefined
   return (
-    anchor.closest<HTMLElement>('[role="dialog"], .MuiDrawer-paper') ??
+    // Owned Base UI popups also have role="dialog". Their focus management
+    // does not need this bridge; only MUI surfaces do.
+    anchor.closest<HTMLElement>('.MuiDialog-paper, .MuiDrawer-paper') ??
     undefined
   )
 }

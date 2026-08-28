@@ -349,12 +349,19 @@ and so does this. `DialogActions` uses a flex `gap` where MUI puts a
 parity story compares plain buttons: a `Button` of ours resets that margin from
 the later layer.
 
-`useReturnFocus` puts focus back where it was before the dialog opened, which
-is what MUI's `Modal` does. Base UI hands focus to the trigger instead, and a
-dialog opened from state has none, so focus landed on the body — visible in the
-settings menu, where cancelling a confirmation left the row behind unfocused.
-The element is caught during render rather than in an effect, because Base UI
-has already moved focus into the popup by the time effects run.
+`useDialogFocus` captures the focused element when the dialog opens, before
+the popup commits and autofocus moves focus. Its state initializer also covers
+a form that mounts already open with a fresh `instanceKey`. The target stays
+fixed through that opening and its exit; closing returns focus to it if it is
+still connected. A later opening captures its own target.
+
+Both `Dialog` and the mobile `SmartDialog` use that target with
+`findMuiFocusBoundary` to portal inside a parent MUI dialog or drawer. This
+also covers confirmations rendered in `GlobalWidgets`, outside the parent's
+React tree: the MUI focus trap must contain the child portal so it does not
+pull focus out of the confirmation. Escape closes the child and returns focus
+to the parent action without closing the parent drawer. The bridge matches
+MUI's paper classes, not `role="dialog"`, which owned Base UI popups also use.
 
 `SmartDialog` is that dialog on a desktop and a drawer off the bottom edge on a
 phone, which is how MUI's `Dialog` and `SwipeableDrawer` were paired here
