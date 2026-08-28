@@ -1,6 +1,5 @@
+import { Button } from './Button'
 import { useCallback } from 'react'
-import type { ButtonProps } from '@mui/material/Button'
-import Button from '@mui/material/Button'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
@@ -15,8 +14,6 @@ type ConfirmCommonProps = {
   description?: string
   cancelText?: string
   okText?: string
-  okColor?: ButtonProps['color']
-  okVariant?: ButtonProps['variant']
 }
 
 const confirmHooks = registerPopover<ConfirmCommonProps>('confirm', {
@@ -38,8 +35,6 @@ export const SmartConfirm = () => {
     description,
     cancelText = t('cancelText'),
     okText = t('okText'),
-    okColor = 'primary',
-    okVariant = 'contained',
   } = extraProps
   return (
     <SmartDialog elKey={confirmHooks.key}>
@@ -60,8 +55,8 @@ export const SmartConfirm = () => {
             displayProps.onClose()
             onOk()
           }}
-          color={okColor}
-          variant={okVariant}
+          color="primary"
+          variant="contained"
           autoFocus
         >
           {okText}

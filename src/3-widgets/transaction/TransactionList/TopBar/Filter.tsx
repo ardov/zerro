@@ -1,10 +1,10 @@
+import { IconButton } from '6-shared/ui/Button'
 import type { FC, MouseEvent } from 'react'
 import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Autocomplete,
   Chip,
-  IconButton,
   InputBase,
   Menu,
   MenuItem,

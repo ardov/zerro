@@ -1,7 +1,7 @@
+import { Button, IconButton } from '6-shared/ui/Button'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Theme } from '@mui/material'
-import { Button, IconButton, useMediaQuery } from '@mui/material'
+import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import { formatDate } from '6-shared/helpers/date'
 import {
   ChevronLeftIcon,
@@ -43,7 +43,7 @@ import { useRestoreSelectedPoint } from './useRestoreSelectedPoint'
 export function HistoryTopBar() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()
-  const isNarrow = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const isNarrow = useBreakpointDown('sm')
   const browsing = useAppSelector(selectIsBrowsingHistory)
   const point = useAppSelector(selectSelectedHistoryPoint)
   const missing = useAppSelector(selectSelectedHistoryEntryMissing)

@@ -1,7 +1,7 @@
+import { ButtonBase } from '6-shared/ui/Button'
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import { useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'
-import { ButtonBase } from '@mui/material'
 import clsx from 'clsx'
 import { ChevronRightIcon } from '6-shared/ui/Icons'
 import { useToggle } from '6-shared/hooks/useToggle'
@@ -42,7 +42,6 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
       {...rest}
     >
       <ButtonBase
-        disableRipple
         onClick={toggle}
         className="-m-4 w-full justify-start rounded-lg p-4 text-left text-[length:inherit] hover:underline"
       >

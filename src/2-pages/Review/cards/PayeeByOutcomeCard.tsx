@@ -1,8 +1,8 @@
+import { ButtonBase, IconButton } from '6-shared/ui/Button'
 import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { ButtonBase, IconButton } from '@mui/material'
 
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'

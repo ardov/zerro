@@ -1,5 +1,5 @@
 import json2mq from 'json2mq'
-import useMediaQuery from '@mui/material/useMediaQuery'
+import { useMediaQueryValue } from './useMediaQueryValue'
 
 export function useHomeBar() {
   const iPhoneXXS11ProMediaQuery = json2mq({
@@ -20,7 +20,7 @@ export function useHomeBar() {
     maxDeviceWidth: 896,
     '-webkit-device-pixel-ratio': 3,
   })
-  const isiPhoneWithHomeBar = useMediaQuery(
+  const isiPhoneWithHomeBar = useMediaQueryValue(
     `${iPhoneXXS11ProMediaQuery}, ${iPhoneXR11MediaQuery}, ${iPhoneXSMax11ProMaxMediaQuery}`
   )
   // I don't know why, but for iPhone 8 Plus media query above is also met, so I had to use this workaround.

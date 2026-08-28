@@ -1,6 +1,7 @@
+import { Button, ButtonBase } from '6-shared/ui/Button'
 import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
-import { Button, Fade, ButtonBase } from '@mui/material'
+import { Fade } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { zenmoney } from '6-shared/api/zenmoney'
@@ -70,22 +71,7 @@ export default function Auth() {
             {t('haveTrouble')}{' '}
             <ButtonBase
               onClick={() => dispatch(logIn('app'))}
-              sx={{
-                p: 1,
-                m: -1,
-                verticalAlign: 'baseline',
-                fontSize: 'inherit',
-                fontWeight: 'inherit',
-                lineHeight: 'inherit',
-                borderRadius: 1,
-                color: theme.palette.primary.main,
-                '&:hover': {
-                  color: theme.palette.secondary.main,
-                },
-                '&:focus': {
-                  color: theme.palette.secondary.main,
-                },
-              }}
+              className="-m-2 inline p-2 align-baseline text-[length:inherit] leading-[inherit] font-[inherit] rounded-lg text-primary hover:text-interactive focus:text-interactive"
             >
               {t('btnAlternativeSignIn')}
             </ButtonBase>
@@ -95,8 +81,7 @@ export default function Auth() {
         <Fade in timeout={3000}>
           <div className="mt-4">
             <Button
-              component={RouterLink}
-              to="/about"
+              render={<RouterLink to="/about" />}
               variant="text"
               color="primary"
               size="large"

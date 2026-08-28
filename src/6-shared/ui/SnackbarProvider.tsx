@@ -1,7 +1,8 @@
+import { IconButton } from './Button'
 import type { FC } from 'react'
 import React, { useCallback, useContext, useState } from 'react'
 import type { SlideProps } from '@mui/material'
-import { IconButton, Slide, Snackbar } from '@mui/material'
+import { Slide, Snackbar } from '@mui/material'
 import { useCachedValue } from '6-shared/hooks/useCachedValue'
 import { CloseIcon } from './Icons'
 

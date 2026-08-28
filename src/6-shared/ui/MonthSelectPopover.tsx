@@ -1,12 +1,7 @@
+import { IconButton } from './Button'
 import { useState } from 'react'
 import type { PopoverProps } from '@mui/material'
-import {
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemText,
-  Popover,
-} from '@mui/material'
+import { List, ListItemButton, ListItemText, Popover } from '@mui/material'
 import { ChevronRightIcon, ChevronLeftIcon } from '6-shared/ui/Icons'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
 import type { Modify, TDateDraft, TISOMonth } from '6-shared/types'

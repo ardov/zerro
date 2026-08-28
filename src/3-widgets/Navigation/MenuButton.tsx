@@ -1,7 +1,7 @@
+import type { IconButtonProps } from '6-shared/ui/Button'
+import { IconButton } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { IconButtonProps } from '@mui/material'
-import { IconButton } from '@mui/material'
 import { SettingsIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 

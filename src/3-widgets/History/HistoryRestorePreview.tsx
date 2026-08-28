@@ -1,6 +1,6 @@
+import { Button } from '6-shared/ui/Button'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@mui/material'
 import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
 import { useAppSelector } from 'store'
 import {

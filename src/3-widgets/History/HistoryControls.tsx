@@ -1,5 +1,6 @@
+import { Button, IconButton } from '6-shared/ui/Button'
 import { useTranslation } from 'react-i18next'
-import { Button, IconButton, Tooltip } from '@mui/material'
+import { Tooltip } from '@mui/material'
 import { RedoIcon, SendIcon, UndoIcon } from '6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from 'store'
 import {

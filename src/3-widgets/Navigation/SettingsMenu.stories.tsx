@@ -19,7 +19,12 @@ const checkNestedConfirm: Story['play'] = async ({ canvasElement }) => {
   const body = within(canvasElement.ownerDocument.body)
   const trigger = canvas.getByRole('button', { name: 'Settings' })
   await userEvent.click(trigger)
-  const reload = await body.findByRole('menuitem', { name: 'Reload data' })
+  // The rows are toolbar buttons, not `menuitem`s: the list is not a popup
+  // that something opened, so it does not promise menu semantics.
+  const list = await body.findByRole('toolbar', { name: 'Settings' })
+  const reload = await within(list).findByRole('button', {
+    name: 'Reload data',
+  })
   await userEvent.click(reload)
   const cancel = await body.findByRole('button', { name: 'Cancel' })
   await waitFor(() =>

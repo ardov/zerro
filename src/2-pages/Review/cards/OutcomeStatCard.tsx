@@ -1,8 +1,8 @@
+import { Button } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import type { TDateDraft, TFxAmount, TTransaction } from '6-shared/types'

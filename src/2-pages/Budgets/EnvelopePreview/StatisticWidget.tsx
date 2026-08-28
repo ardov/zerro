@@ -1,3 +1,6 @@
+import { cn } from '6-shared/ui/shadcn/utils'
+import type { ButtonBaseProps } from '6-shared/ui/Button'
+import { ButtonBase } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import type { ComponentPropsWithoutRef } from 'react'
 import { useState } from 'react'
@@ -9,8 +12,6 @@ import {
   ResponsiveContainer,
   ReferenceDot,
 } from 'recharts'
-import type { ButtonBaseProps, SxProps } from '@mui/material'
-import { ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import type { TFxCode, TISOMonth } from '6-shared/types'
@@ -218,20 +219,9 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   )
 }
 
-const inlineButtonSx: SxProps = {
-  cursor: 'pointer',
-  fontSize: 'inherit',
-  lineHeight: 'inherit',
-  display: 'inline',
-  px: 1,
-  mx: -1,
-  borderRadius: 1,
-  verticalAlign: 'baseline',
-  color: 'info.main',
-}
+const inlineButtonClass =
+  '-mx-2 inline cursor-pointer rounded-lg px-2 align-baseline text-[length:inherit] leading-[inherit] text-info'
 
-const InlineButton: FC<ButtonBaseProps> = props => {
-  const { sx, ...delegated } = props
-  const buttonSx = sx ? { ...inlineButtonSx, ...sx } : inlineButtonSx
-  return <ButtonBase sx={buttonSx} {...delegated} />
-}
+const InlineButton: FC<ButtonBaseProps> = ({ className, ...delegated }) => (
+  <ButtonBase className={cn(inlineButtonClass, className)} {...delegated} />
+)

@@ -1,6 +1,7 @@
+import { Button, IconButton } from '6-shared/ui/Button'
 import { useEffect } from 'react'
-import type { Theme } from '@mui/material'
-import { Button, Drawer, IconButton, useMediaQuery } from '@mui/material'
+import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
+import { Drawer } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { CloseIcon, HistoryIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
@@ -44,7 +45,7 @@ export function useHistoryPanelFromMenu() {
 export function HistoryPanel() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
+  const isMobile = useBreakpointDown('md')
   const { displayProps } = historyPanelPopover.useProps()
   const rows = useAppSelector(selectHistoryRows)
   const canLoadOlder = useAppSelector(selectCanLoadOlderHistory)

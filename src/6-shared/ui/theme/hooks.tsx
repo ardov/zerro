@@ -1,9 +1,6 @@
-import {
-  useColorScheme as useMuiColorScheme,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material'
+import { useColorScheme as useMuiColorScheme, useTheme } from '@mui/material'
 import { useCallback } from 'react'
+import { useMediaQueryValue } from '6-shared/hooks/useMediaQueryValue'
 
 const THEME_KEY = 'theme'
 
@@ -11,7 +8,7 @@ export const useAppTheme = () => useTheme()
 
 export function useColorScheme() {
   const { mode, setMode } = useMuiColorScheme()
-  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
+  const prefersDark = useMediaQueryValue('(prefers-color-scheme: dark)')
   const systemTheme = prefersDark ? 'dark' : 'light'
 
   const toggle = useCallback(() => {

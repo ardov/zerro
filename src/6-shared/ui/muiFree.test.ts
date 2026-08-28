@@ -14,6 +14,8 @@ const OWNED = [
   'src/6-shared/ui/feather/index.tsx',
   'src/6-shared/ui/muiFocusBoundary.ts',
   'src/6-shared/hooks/useBreakpointDown.ts',
+  'src/6-shared/hooks/useMediaQueryValue.ts',
+  'src/6-shared/hooks/useHomeBar.ts',
   'src/6-shared/hooks/useRovingListKeys.ts',
 ]
 

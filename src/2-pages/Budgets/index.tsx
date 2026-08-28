@@ -3,8 +3,7 @@ import { useCallback } from 'react'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
-import type { Theme } from '@mui/material'
-import { useMediaQuery } from '@mui/material'
+import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '6-shared/helpers/date'
@@ -82,7 +81,7 @@ const BudgetLayout: FC<{
   mainContent: ReactElement
 }> = props => {
   const { mainContent } = props
-  const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
+  const isMD = useBreakpointDown('lg')
 
   return (
     <div className="flex h-screen">

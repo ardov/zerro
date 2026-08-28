@@ -1,3 +1,4 @@
+import { IconButton } from '6-shared/ui/Button'
 import type { TTransaction } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
@@ -9,7 +10,6 @@ import EditOutlined from '@mui/icons-material/EditOutlined'
 import {
   Chip,
   Divider,
-  IconButton,
   ListItemIcon,
   ListItemText,
   MenuItem,

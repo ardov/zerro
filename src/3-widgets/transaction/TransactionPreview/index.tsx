@@ -1,9 +1,10 @@
+import { Button, IconButton } from '6-shared/ui/Button'
 import type { TTransaction, TTransactionId } from '6-shared/types'
 
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { IconButton, TextField, Fab, Zoom, Button } from '@mui/material'
+import { TextField, Fab, Zoom } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import {

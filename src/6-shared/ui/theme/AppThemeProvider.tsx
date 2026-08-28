@@ -54,6 +54,22 @@ const GlobalVariables = (props: { theme: Theme }) => {
       /* MUI dims a disabled menu item rather than recolouring it, so this is
          an opacity and not a colour like --disabled-foreground. */
       --disabled-opacity: ${palette.action.disabledOpacity};
+      /* The rest of what MUI's Button needs, and only for the variant and
+         colour pairs the app actually renders: text in primary, secondary and
+         inherit, contained in primary, outlined in error. */
+      --primary-dark: ${palette.primary.dark};
+      --interactive-hover: ${alpha(
+        palette.secondary.main,
+        palette.action.hoverOpacity
+      )};
+      --foreground-hover: ${alpha(
+        palette.text.primary,
+        palette.action.hoverOpacity
+      )};
+      --error-hover: ${alpha(palette.error.main, palette.action.hoverOpacity)};
+      --primary-outline: ${alpha(palette.primary.main, 0.5)};
+      --error-outline: ${alpha(palette.error.main, 0.5)};
+      --disabled-background: ${palette.action.disabledBackground};
       --secondary: ${palette.action.selected};
       --secondary-foreground: ${palette.text.primary};
       --muted: ${palette.action.hover};
@@ -96,6 +112,7 @@ const GlobalVariables = (props: { theme: Theme }) => {
       --elevation-1: ${shadows[1]};
       --elevation-2: ${shadows[2]};
       --elevation-4: ${shadows[4]};
+      --elevation-6: ${shadows[6]};
       --elevation-8: ${shadows[8]};
       --elevation-10: ${shadows[10]};
       --elevation-16: ${shadows[16]};

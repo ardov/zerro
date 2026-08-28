@@ -1,6 +1,6 @@
+import { IconButton } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import type { HTMLAttributes } from 'react'
-import { IconButton } from '@mui/material'
 import clsx from 'clsx'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { AddIcon } from '6-shared/ui/Icons'

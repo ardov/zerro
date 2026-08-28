@@ -1,9 +1,10 @@
+import { IconButton } from '6-shared/ui/Button'
 import type { FC, ReactNode } from 'react'
 import { memo, useCallback, useRef } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useDraggable } from '@dnd-kit/core'
-import { IconButton, Chip } from '@mui/material'
+import { Chip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { TagIcon } from '6-shared/ui/TagIcon'

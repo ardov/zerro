@@ -1,5 +1,5 @@
+import { Button } from '6-shared/ui/Button'
 import React from 'react'
-import { Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { getToken } from 'store/token'
 import { useAppSelector } from 'store'

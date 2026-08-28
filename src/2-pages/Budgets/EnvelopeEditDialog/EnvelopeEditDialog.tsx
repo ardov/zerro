@@ -1,10 +1,9 @@
+import { Button, ButtonBase } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { shallowEqual } from 'react-redux'
 import { useFormik } from 'formik'
 import type { DialogProps } from '@mui/material'
 import {
-  Button,
-  ButtonBase,
   Checkbox,
   Dialog,
   DialogContent,
@@ -227,13 +226,8 @@ const Color: FC<ColorProps> = ({ value, onChange }) => {
     <>
       <ButtonBase
         onClick={open}
-        sx={{
-          width: 24,
-          height: 24,
-          borderRadius: '50%',
-          backgroundColor: value,
-          boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.1)',
-        }}
+        style={{ backgroundColor: value ?? undefined }}
+        className="size-6 rounded-[50%] [box-shadow:inset_0_0_0_1px_rgba(0,0,0,.1)]"
       />
       <ColorPicker />
     </>

@@ -1,14 +1,9 @@
+import { Button } from '6-shared/ui/Button'
 import type { ChangeEvent, FC } from 'react'
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { PopoverProps } from '@mui/material'
-import {
-  Button,
-  Divider,
-  InputAdornment,
-  Popover,
-  TextField,
-} from '@mui/material'
+import { Divider, InputAdornment, Popover, TextField } from '@mui/material'
 import './styles.scss'
 import { zmColors, colors } from './colors'
 import { isHEX } from '6-shared/helpers/color'

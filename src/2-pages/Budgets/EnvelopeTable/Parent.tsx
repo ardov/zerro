@@ -1,6 +1,7 @@
+import { IconButton } from '6-shared/ui/Button'
 import type { core } from 'zerro-core/redux'
 import React from 'react'
-import { Collapse, IconButton } from '@mui/material'
+import { Collapse } from '@mui/material'
 import { ChevronRightIcon } from '6-shared/ui/Icons'
 
 type ParentProps = {

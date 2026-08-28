@@ -1,5 +1,5 @@
+import { IconButton } from '6-shared/ui/Button'
 import { useState } from 'react'
-import { IconButton } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'

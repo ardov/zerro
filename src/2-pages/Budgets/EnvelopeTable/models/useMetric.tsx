@@ -1,5 +1,4 @@
-import type { Theme } from '@mui/material'
-import { useMediaQuery } from '@mui/material'
+import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import type { FC, ReactNode } from 'react'
 import React, { useContext, useState } from 'react'
 
@@ -26,7 +25,7 @@ const RenderColumnContext = React.createContext<
 >([[], () => {}])
 
 export const RenderColumnsProvider: FC<{ children: ReactNode }> = props => {
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const isMobile = useBreakpointDown('sm')
   const [mobColumns, setMobColumns] = useState<Metric[]>([Metric.available])
   const renderColumns = isMobile ? mobColumns : allColumns
   return (

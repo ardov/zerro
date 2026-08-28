@@ -1,3 +1,4 @@
+import { IconButton } from '6-shared/ui/Button'
 import { useMemo, useState } from 'react'
 import { core } from 'zerro-core/redux'
 
@@ -7,7 +8,6 @@ import {
   Dialog,
   FormControlLabel,
   FormGroup,
-  IconButton,
   Link,
 } from '@mui/material'
 import Balancer from 'react-wrap-balancer'

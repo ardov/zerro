@@ -1,11 +1,11 @@
+import { Button, IconButton } from '6-shared/ui/Button'
 import type { FC, HTMLAttributes } from 'react'
 import clsx from 'clsx'
 import { useAppDispatch, useAppSelector } from 'store'
 import { isZero } from '6-shared/helpers/money'
 import { formatDate } from '6-shared/helpers/date'
 import { startFresh } from '4-features/bulkActions/startFresh'
-import type { Theme } from '@mui/material'
-import { Button, IconButton, useMediaQuery } from '@mui/material'
+import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import type { TDateDraft, TISOMonth } from '6-shared/types'
@@ -35,7 +35,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({
 }) => {
   const { t } = useTranslation('budgets', { keyPrefix: 'actions' })
   const [month] = useMonth()
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
+  const isMobile = useBreakpointDown('md')
   const { overspend } = useAppSelector(core.months.selectTotals)[month]
 
   const dispatch = useAppDispatch()

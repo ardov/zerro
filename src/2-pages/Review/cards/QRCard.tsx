@@ -1,5 +1,5 @@
+import { ButtonBase } from '6-shared/ui/Button'
 import { useTranslation } from 'react-i18next'
-import { ButtonBase } from '@mui/material'
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'

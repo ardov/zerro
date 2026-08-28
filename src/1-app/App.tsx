@@ -7,8 +7,8 @@ import {
   Routes,
   useLocation,
 } from 'react-router-dom'
-import type { Theme } from '@mui/material'
-import { CircularProgress, useMediaQuery } from '@mui/material'
+import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
+import { CircularProgress } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import {
   initAnalytics,
@@ -141,7 +141,7 @@ const FallbackLoader = () => (
 )
 
 const Navigation = React.memo(() => {
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
+  const isMobile = useBreakpointDown('md')
   return isMobile ? <MobileNavigation /> : <Nav />
 })
 

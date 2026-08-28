@@ -1,4 +1,4 @@
-import { ButtonBase } from '@mui/material'
+import { ButtonBase } from '6-shared/ui/Button'
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'

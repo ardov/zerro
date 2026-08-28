@@ -1,5 +1,6 @@
+import { Button } from '6-shared/ui/Button'
 import { useCallback } from 'react'
-import { Alert, AlertTitle, Button, Snackbar } from '@mui/material'
+import { Alert, AlertTitle, Snackbar } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { discardCorruptOutbox } from '4-features/localData'
 import { useConfirm } from '6-shared/ui/SmartConfirm'

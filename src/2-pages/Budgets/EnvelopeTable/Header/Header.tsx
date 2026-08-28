@@ -1,5 +1,5 @@
+import { Button } from '6-shared/ui/Button'
 import type { FC } from 'react'
-import { Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { ChevronDownIcon } from '6-shared/ui/Icons'
 import type { TISOMonth } from '6-shared/types'

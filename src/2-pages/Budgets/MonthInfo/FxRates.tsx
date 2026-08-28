@@ -1,9 +1,10 @@
+import { Button } from '6-shared/ui/Button'
 import type { TFxCode, TISOMonth } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
 import type { FC } from 'react'
 import { useState } from 'react'
-import { Button, TextField, InputAdornment } from '@mui/material'
+import { TextField, InputAdornment } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { keys } from '6-shared/helpers/keys'
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'

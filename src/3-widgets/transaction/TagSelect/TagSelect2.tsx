@@ -1,3 +1,4 @@
+import { IconButton } from '6-shared/ui/Button'
 import type { FC, KeyboardEventHandler } from 'react'
 import React, { useEffect, useState, useRef } from 'react'
 import { createSelector } from '@reduxjs/toolkit'
@@ -5,7 +6,6 @@ import { useAppSelector } from 'store'
 import type { PopoverProps } from '@mui/material'
 import {
   Popover,
-  IconButton,
   List,
   ListItemButton,
   ListItemText,

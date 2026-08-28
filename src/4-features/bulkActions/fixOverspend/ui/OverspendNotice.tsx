@@ -1,8 +1,8 @@
+import { Button } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Button } from '@mui/material'
 import type { TISOMonth } from '6-shared/types'
 import { WarningIcon } from '6-shared/ui/Icons'
 import { isZero } from '6-shared/helpers/money'

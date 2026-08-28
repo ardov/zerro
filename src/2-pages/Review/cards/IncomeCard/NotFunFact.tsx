@@ -1,6 +1,7 @@
+import { IconButton } from '6-shared/ui/Button'
 import { core } from 'zerro-core/redux'
 
-import { Dialog, IconButton, Link } from '@mui/material'
+import { Dialog, Link } from '@mui/material'
 import Balancer from 'react-wrap-balancer'
 import pluralize from '6-shared/helpers/pluralize'
 import type { TFxAmount } from '6-shared/types'

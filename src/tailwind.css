@@ -22,7 +22,9 @@
 }
 
 @theme inline {
-  --font-sans: 'IBM Plex Sans', Arial, sans-serif;
+  /* The MUI theme's `typography.fontFamily`, verbatim. An extra fallback here
+     would show up on any element the two libraries both style. */
+  --font-sans: 'IBM Plex Sans', sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -36,6 +38,13 @@
   --color-primary-focus: var(--primary-focus);
   --color-primary-selected: var(--primary-selected);
   --color-primary-selected-hover: var(--primary-selected-hover);
+  --color-primary-dark: var(--primary-dark);
+  --color-interactive-hover: var(--interactive-hover);
+  --color-foreground-hover: var(--foreground-hover);
+  --color-error-hover: var(--error-hover);
+  --color-primary-outline: var(--primary-outline);
+  --color-error-outline: var(--error-outline);
+  --color-disabled-background: var(--disabled-background);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -112,6 +121,10 @@
 
 @utility shadow-elevation-4 {
   box-shadow: var(--elevation-4);
+}
+
+@utility shadow-elevation-6 {
+  box-shadow: var(--elevation-6);
 }
 
 @utility shadow-elevation-8 {

@@ -1,6 +1,6 @@
+import { ButtonBase, IconButton } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { useCallback } from 'react'
-import { IconButton, ButtonBase } from '@mui/material'
 import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 import { TagIcon } from '6-shared/ui/TagIcon'
@@ -17,7 +17,7 @@ import { useMonth } from '../MonthProvider'
 import { EnvelopeEditDialog, useEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
 import { CommentWidget } from './CommentWidget'
-import { cardStyle } from './shared'
+import { cardClass } from './shared'
 import { useGoalPopover } from '../GoalPopover'
 import { BurndownWidget } from './BurndownWidget'
 import { EnvelopeInfo } from './EnvelopeInfo'
@@ -51,12 +51,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 
         <ButtonBase
           onClick={e => openGoalPopover(id, e.currentTarget)}
-          sx={{
-            ...cardStyle,
-            display: 'flex',
-            justifyContent: 'flex-start',
-            gap: 1,
-          }}
+          className={clsx(cardClass, 'flex justify-start gap-2')}
         >
           <EmojiFlagsIcon />
           <span

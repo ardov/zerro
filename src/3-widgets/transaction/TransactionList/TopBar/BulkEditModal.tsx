@@ -1,3 +1,4 @@
+import { Button } from '6-shared/ui/Button'
 import type { DialogProps } from '@mui/material/Dialog'
 import type { Modify, TTransaction } from '6-shared/types'
 
@@ -5,7 +6,6 @@ import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,

@@ -1,5 +1,6 @@
+import { Button, IconButton } from '6-shared/ui/Button'
 import { useCallback, useState } from 'react'
-import { Alert, AlertTitle, Button, IconButton, Snackbar } from '@mui/material'
+import { Alert, AlertTitle, Snackbar } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { syncData } from '4-features/sync'

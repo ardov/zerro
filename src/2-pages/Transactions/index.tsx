@@ -1,8 +1,9 @@
 import type { FC, CSSProperties } from 'react'
 import { useState, useCallback } from 'react'
 import { TransactionList } from '3-widgets/transaction/TransactionList'
-import type { Theme, DrawerProps } from '@mui/material'
-import { Drawer, useMediaQuery } from '@mui/material'
+import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
+import type { DrawerProps } from '@mui/material'
+import { Drawer } from '@mui/material'
 import {
   TrEmptyState,
   TransactionPreview,
@@ -18,7 +19,7 @@ const sideWidth = 360
 
 export default function TransactionsView() {
   const { t } = useTranslation('transactions')
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
+  const isMobile = useBreakpointDown('md')
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const { open } = trPreview.useMethods()
   const view = useTransactionsPageView()
@@ -80,7 +81,7 @@ const SideContent: FC<{ docked?: boolean; width: number }> = ({
 }) => {
   const { displayProps, extraProps, open } = trPreview.useProps()
   const { id, onSelectSimilar } = extraProps
-  const isXS = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const isXS = useBreakpointDown('sm')
 
   const openAnother = (id: TTransactionId) => {
     open({ id, onSelectSimilar })

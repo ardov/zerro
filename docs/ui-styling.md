@@ -128,7 +128,10 @@ necessarily win. Budget group rows, for example, override `items-center` with
 `src/6-shared/ui/theme/breakpoints.ts` is the single source. The MUI theme is
 built from that map, so `theme.breakpoints.down(...)` and the MUI-free
 `useBreakpointDown(...)` hook switch on the same pixel, including MUI's 0.05px
-subtraction. `src/tailwind.css` mirrors the same numbers because Tailwind cannot read
+subtraction. Every component switches through that hook; MUI's `useMediaQuery`
+is gone from the app. The queries that are not breakpoints at all — colour
+scheme, the iPhone home bar — go through `useMediaQueryValue`, which is the
+store the breakpoint hook is built on. `src/tailwind.css` mirrors the same numbers because Tailwind cannot read
 TypeScript; that mirror is the one place a value has to be changed twice. It is
 written in pixels, not Tailwind's usual `rem`, so the mirror cannot drift from
 the pixel queries MUI and `useBreakpointDown` run whenever the root font size
@@ -169,6 +172,12 @@ had no margin, or `mt-0` beside the margin utility it already carried. Only
 contract. `type-overline` intentionally has no letter-spacing: the active IBM
 Plex Sans MUI theme does not add the Roboto-specific overline tracking.
 
+MUI's typography variants carry letter-spacing only while the theme keeps
+Roboto: `createTypography` drops it outright for any other family, and this
+theme sets IBM Plex Sans. That is why `type-overline` has no tracking, and why
+the owned `Button` has none either — reading MUI's source rather than the
+rendered result would have added it to both.
+
 Every recipe pins its font weight. MUI declares one on each typography variant,
 and containers such as `Tooltip`, `ListSubheader`, and `Button` set weight 500
 on their own, so a recipe that inherited weight would render differently
@@ -187,6 +196,12 @@ agent default. MUI `Typography` set the family itself; a native element with a
 and case but not the family. Add `font-sans` when a converted element lives inside a
 button. `Btn` in the budget row is the exception: its `sx` already sets the
 family on the button itself.
+
+`tailwind-merge` treats `font-size` as conflicting with `leading` — the
+`text-sm/6` shorthand is why — so a later size class written on its own
+silently deletes an earlier `leading-*` and the element loses its height.
+Where both are set, put them in one `text-<size>/<leading>` utility so they
+cannot be separated.
 
 `cn()` uses the default `tailwind-merge` configuration, which does not know the
 custom `type-*` group. Do not expect `cn('type-body', 'type-title')` to select
@@ -221,9 +236,45 @@ because the trigger's ancestry is not something they know either.
 
 `Button.tsx`, `OutlinedField.tsx`, and `ActionList.tsx` in `6-shared/ui` are
 owned Base UI compositions styled for the existing theme. These are
-deliberately narrow contracts, not copies of the MUI prop surface. `IconButton`
-takes `edge="start" | "end"` for the negative margin that lines an icon up with
-a field's edge, the way MUI's `edge` does.
+deliberately narrow contracts, not copies of the MUI prop surface.
+
+`Button.tsx` carries `Button`, `IconButton` and `ButtonBase`, and MUI's names
+for what they take: `variant`, `color`, `size`, `fullWidth`, `startIcon`,
+`edge`. What it does _not_ carry is every combination MUI offers.
+`buttonPalettes` lists the variant and colour pairs this app renders — text in
+primary, secondary and inherit; contained in primary; outlined in primary and
+error — and that table is the contract. Each pair needs tokens, a disabled
+state and a dark shade of its own, so an unused one is not free. A pair no
+entry covers falls back to the variant's primary rather than rendering
+unstyled, and `Button.stories.tsx` builds its parity matrix by walking the
+table, so a pair added there is compared against MUI without anyone
+remembering to list it. `variant` and `color` stay separate props rather than a
+discriminated union of the pairs, because a call site that picks its variant
+with a ternary hands over `'contained' | 'outlined'` in one prop and TypeScript
+will not distribute that across union members.
+
+Two things the owned Button does differently on purpose. It shows a real focus
+ring: MUI leaves `.Mui-focusVisible` unstyled and lets the ripple stand in for
+it, and there is no ripple here. And it does not resize a `startIcon`. MUI
+shrinks one to 20px through `& > *:nth-of-type(1)`, but that rule sits in the
+`mui` layer while every icon in this app carries a Tailwind size utility from
+the later `utilities` layer — so MUI has never actually resized one of these
+glyphs, and matching what the app renders means leaving the icon alone.
+
+`RESET` declares neither `padding` nor `border-width`: each of the three
+components adds exactly one of each. A reset that set them would leave two
+classes contending for one property with only Tailwind's emission order to
+separate them, which is not a precedence rule.
+
+`ActionList` also carries the parts a MUI `MenuItem` was assembled from —
+`ActionListItemIcon`, `ActionListItemText`, `ActionListItemAction`,
+`ActionListSubheader`, `ActionListDivider`. They stay inside the ActionList
+family rather than being published as a generic `ListItemIcon` or `Divider`,
+because they carry this list's geometry and nothing else needs them.
+`ActionListItemText` has no margin of its own: MUI's `ListItemText` does, but
+`MenuItem` zeroes it, and a row that keeps it is 8px taller than the one it
+replaced. `ActionList.stories.tsx` compares rows, icon slots, subheaders and
+dividers against the MUI originals.
 
 `OutlinedField` is MUI's outlined text field: the notched border with the label
 cut into it. Its label is always floated, which is right for a field that
@@ -254,8 +305,23 @@ not there. Base UI's Toolbar gives roving focus, the arrows and disabled-item
 handling; `useRovingListKeys` adds the Home/End and typeahead its composite
 root does not forward. It does not open a second popup or take initial focus
 from the amount field. It is the replacement for MUI `MenuList`/`MenuItem` in
-owned overlays; `SettingsMenu` still runs on `MenuList` inside
-`AdaptivePopover` and is the next one to convert.
+owned overlays, and `SettingsMenu` now runs on it.
+
+That change is visible to assistive technology and to tests: the rows are
+toolbar buttons, not `menuitem`s, so `SettingsMenu.stories.tsx` looks for a
+`toolbar` and the buttons inside it. The rows that navigate render an anchor
+through `render={<Link />}` and must pass `nativeButton={false}`, or Base UI
+assumes a native `button` and drops the link semantics. The auto-sync and
+budget-source rows keep a MUI `Switch`, made inert — it never had an
+`onChange`, the row's `onClick` is what toggles the setting — and the row
+carries `aria-pressed` instead, which is the state the stray checkbox used to
+announce on its own. A switch is a control worth owning the day something
+needs a working one.
+
+The `MenuList` and `MenuItem` still in the app are inside real MUI `Menu` and
+`Select` popups — context menus, selects, the transaction top bar. Those are
+menus in the sense `ActionList` deliberately is not, so they need a menu
+component rather than this one.
 
 These files live beside the other shared components, not under
 `6-shared/ui/shadcn`. `components.json` points the shadcn `ui` alias at that

@@ -1,11 +1,10 @@
-import type { Theme } from '@mui/material'
-import { useMediaQuery } from '@mui/material'
+import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import { cn } from '6-shared/ui/shadcn/utils'
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import { Metric, useColumns } from '../models/useMetric'
 
 export function useIsSmall() {
-  return useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  return useBreakpointDown('sm')
 }
 
 const rowClassName =

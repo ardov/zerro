@@ -1,11 +1,11 @@
+import type { IconButtonProps } from '6-shared/ui/Button'
+import { IconButton } from '6-shared/ui/Button'
 import type { FC, ReactNode } from 'react'
 import React, { useCallback } from 'react'
 import clsx from 'clsx'
 import { core } from 'zerro-core/redux'
 
 import { useDroppable } from '@dnd-kit/core'
-import type { IconButtonProps } from '@mui/material'
-import { IconButton } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { EmojiFlagsIcon } from '6-shared/ui/Icons'

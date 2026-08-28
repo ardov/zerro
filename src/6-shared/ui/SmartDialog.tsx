@@ -1,5 +1,6 @@
-import type { DialogProps, Theme } from '@mui/material'
-import { Dialog, SwipeableDrawer, useMediaQuery } from '@mui/material'
+import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
+import type { DialogProps } from '@mui/material'
+import { Dialog, SwipeableDrawer } from '@mui/material'
 import { popoverStack } from '6-shared/historyPopovers'
 
 export type TSmartDialogProps = Omit<DialogProps, 'open'> & { elKey: string }
@@ -11,7 +12,7 @@ const drawerPaperProps = {
 export function SmartDialog(props: TSmartDialogProps) {
   const { elKey, ...dialogProps } = props
   const [open, onOpen, onClose] = popoverStack.usePopoverState(elKey)
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const isMobile = useBreakpointDown('sm')
 
   return isMobile ? (
     <SwipeableDrawer

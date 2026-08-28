@@ -1,17 +1,19 @@
+import { Button } from '6-shared/ui/Button'
 import type { ChangeEvent } from 'react'
 import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
 } from '@mui/material'
+import {
+  ActionListItem,
+  ActionListItemIcon,
+  ActionListItemText,
+} from '6-shared/ui/ActionList'
 import { UploadIcon } from '6-shared/ui/Icons'
 import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
@@ -120,12 +122,12 @@ export function ImportBackupItem() {
 
   return (
     <>
-      <MenuItem onClick={() => inputRef.current?.click()}>
-        <ListItemIcon>
+      <ActionListItem onClick={() => inputRef.current?.click()}>
+        <ActionListItemIcon>
           <UploadIcon />
-        </ListItemIcon>
-        <ListItemText>{t('restoreFromBackup')}</ListItemText>
-      </MenuItem>
+        </ActionListItemIcon>
+        <ActionListItemText>{t('restoreFromBackup')}</ActionListItemText>
+      </ActionListItem>
 
       <input
         ref={inputRef}

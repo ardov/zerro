@@ -19,16 +19,16 @@ import {
   HistoryIcon,
   TagIcon,
 } from '6-shared/ui/Icons'
+import Switch from '@mui/material/Switch'
 import {
-  Divider,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  ListItemText,
-  ListSubheader,
-  MenuItem,
-  MenuList,
-  Switch,
-} from '@mui/material'
+  ActionList,
+  ActionListDivider,
+  ActionListItem,
+  ActionListItemAction,
+  ActionListItemIcon,
+  ActionListItemText,
+  ActionListSubheader,
+} from '6-shared/ui/ActionList'
 import { track } from '6-shared/analytics'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import {
@@ -76,9 +76,9 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
   const { displayProps } = settingsHooks.useProps()
   return (
     <AdaptivePopover {...displayProps} aria-label={t('settings')}>
-      <MenuList>
+      <ActionList aria-label={t('settings')}>
         <Settings showLinks={showLinks} onClose={displayProps.onClose} />
-      </MenuList>
+      </ActionList>
     </AdaptivePopover>
   )
 }
@@ -89,7 +89,7 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
   return (
     <>
       {props.showLinks && <NavItems onClose={props.onClose} />}
-      <ListSubheader>{t('settings')}</ListSubheader>
+      <ActionListSubheader>{t('settings')}</ActionListSubheader>
       <ThemeItem onClose={props.onClose} />
       <ReloadDataItem onClose={props.onClose} />
       <AutoSyncItem />
@@ -99,26 +99,43 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
           <BudgetSettingsItem />
         </>
       ) : (
-        <MenuItem onClick={() => setExpanded(true)}>
-          <ListItemIcon>
+        <ActionListItem onClick={() => setExpanded(true)}>
+          <ActionListItemIcon>
             <MoreHorizIcon />
-          </ListItemIcon>
-          <ListItemText>{t('advancedSettings')}</ListItemText>
-        </MenuItem>
+          </ActionListItemIcon>
+          <ActionListItemText>{t('advancedSettings')}</ActionListItemText>
+        </ActionListItem>
       )}
-      <Divider className="opacity-60" />
-      <ListSubheader>{t('data')}</ListSubheader>
+      <ActionListDivider className="opacity-60" />
+      <ActionListSubheader>{t('data')}</ActionListSubheader>
       <HistoryItem onClose={props.onClose} />
       <ExportCsvItem />
       <ExportJsonItem />
       <ImportBackupItem />
-      <Divider className="opacity-60" />
+      <ActionListDivider className="opacity-60" />
       <LangItem onClose={props.onClose} />
       <LogOutItem onClose={props.onClose} />
       <VersionItem onClose={props.onClose} />
     </>
   )
 }
+
+/** The switch in this menu has never been operable on its own: it carries no
+ * `onChange`, and the row's `onClick` is what toggles the setting. Now that the
+ * row is a real button, the input is made inert so it cannot be focused or
+ * clicked inside one, and `aria-pressed` on the row carries the state that the
+ * stray checkbox used to announce separately. It stays MUI until a switch is
+ * needed somewhere that justifies owning one. */
+const DecorativeSwitch = ({ checked }: { checked: boolean }) => (
+  <Switch
+    edge="end"
+    checked={checked}
+    readOnly
+    tabIndex={-1}
+    aria-hidden
+    className="pointer-events-none"
+  />
+)
 
 type ItemProps = { onClose: () => void }
 
@@ -131,12 +148,12 @@ function HistoryItem(_props: ItemProps) {
   const { t } = useTranslation('history')
   const openPanel = useHistoryPanelFromMenu()
   return (
-    <MenuItem onClick={openPanel}>
-      <ListItemIcon>
+    <ActionListItem onClick={openPanel}>
+      <ActionListItemIcon>
         <HistoryIcon />
-      </ListItemIcon>
-      <ListItemText>{t('panelTitle')}</ListItemText>
-    </MenuItem>
+      </ActionListItemIcon>
+      <ActionListItemText>{t('panelTitle')}</ActionListItemText>
+    </ActionListItem>
   )
 }
 
@@ -148,12 +165,12 @@ function ExportCsvItem() {
     dispatch(exportCSV)
   }
   return (
-    <MenuItem onClick={handleExportCSV}>
-      <ListItemIcon>
+    <ActionListItem onClick={handleExportCSV}>
+      <ActionListItemIcon>
         <SaveAltIcon />
-      </ListItemIcon>
-      <ListItemText>{t('downloadCSV')}</ListItemText>
-    </MenuItem>
+      </ActionListItemIcon>
+      <ActionListItemText>{t('downloadCSV')}</ActionListItemText>
+    </ActionListItem>
   )
 }
 
@@ -177,12 +194,12 @@ function ExportJsonItem() {
     else downloadBackup()
   }
   return (
-    <MenuItem onClick={handleExportJson}>
-      <ListItemIcon>
+    <ActionListItem onClick={handleExportJson}>
+      <ActionListItemIcon>
         <SaveAltIcon />
-      </ListItemIcon>
-      <ListItemText>{t('fullBackup')}</ListItemText>
-    </MenuItem>
+      </ActionListItemIcon>
+      <ActionListItemText>{t('fullBackup')}</ActionListItemText>
+    </ActionListItem>
   )
 }
 
@@ -195,14 +212,14 @@ function ThemeItem({ onClose }: ItemProps) {
     track('setting_changed', { setting: 'theme', value: 'changed' })
   }
   return (
-    <MenuItem onClick={handleThemeChange}>
-      <ListItemIcon>
+    <ActionListItem onClick={handleThemeChange}>
+      <ActionListItemIcon>
         {theme.mode === 'dark' ? <WbSunnyIcon /> : <NightsStayIcon />}
-      </ListItemIcon>
-      <ListItemText>
+      </ActionListItemIcon>
+      <ActionListItemText>
         {t(theme.mode === 'dark' ? 'lightMode' : 'darkMode')}
-      </ListItemText>
-    </MenuItem>
+      </ActionListItemText>
+    </ActionListItem>
   )
 }
 
@@ -217,15 +234,13 @@ function LangItem(_props: ItemProps) {
   }
 
   return (
-    <MenuItem onClick={setNextLang}>
-      <ListItemIcon>
+    <ActionListItem onClick={setNextLang}>
+      <ActionListItemIcon>
         <GlobeIcon />
-      </ListItemIcon>
-      <ListItemText>{t('language')}</ListItemText>
-      <ListItemSecondaryAction>
-        {currentLang.toUpperCase()}
-      </ListItemSecondaryAction>
-    </MenuItem>
+      </ActionListItemIcon>
+      <ActionListItemText>{t('language')}</ActionListItemText>
+      <ActionListItemAction>{currentLang.toUpperCase()}</ActionListItemAction>
+    </ActionListItem>
   )
 }
 
@@ -233,7 +248,7 @@ function NavItems({ onClose }: ItemProps) {
   const { t } = useTranslation('navigation')
   const navigate = useNavigate()
   const handleNav =
-    (path: string): React.MouseEventHandler<HTMLAnchorElement> =>
+    (path: string): React.MouseEventHandler<HTMLElement> =>
     e => {
       e.preventDefault()
       onClose()
@@ -241,35 +256,47 @@ function NavItems({ onClose }: ItemProps) {
     }
   return (
     <>
-      <MenuItem onClick={handleNav('/accounts')} component={Link} to="/stats">
-        <ListItemIcon>
-          <AccountBalanceWalletIcon />
-        </ListItemIcon>
-        <ListItemText>{t('accounts')}</ListItemText>
-      </MenuItem>
-      <MenuItem onClick={handleNav('/review')} component={Link} to="/review">
-        <ListItemIcon>
-          <WhatshotIcon />
-        </ListItemIcon>
-        <ListItemText>{t('yearWrapped')}</ListItemText>
-      </MenuItem>
-      <MenuItem onClick={handleNav('/about')} component={Link} to="/about">
-        <ListItemIcon>
-          <HelpOutlineIcon />
-        </ListItemIcon>
-        <ListItemText>{t('about')}</ListItemText>
-      </MenuItem>
-      <MenuItem
-        onClick={handleNav('/donation')}
-        component={Link}
-        to="/donation"
+      <ActionListItem
+        onClick={handleNav('/accounts')}
+        render={<Link to="/stats" />}
+        nativeButton={false}
       >
-        <ListItemIcon>
+        <ActionListItemIcon>
+          <AccountBalanceWalletIcon />
+        </ActionListItemIcon>
+        <ActionListItemText>{t('accounts')}</ActionListItemText>
+      </ActionListItem>
+      <ActionListItem
+        onClick={handleNav('/review')}
+        render={<Link to="/review" />}
+        nativeButton={false}
+      >
+        <ActionListItemIcon>
+          <WhatshotIcon />
+        </ActionListItemIcon>
+        <ActionListItemText>{t('yearWrapped')}</ActionListItemText>
+      </ActionListItem>
+      <ActionListItem
+        onClick={handleNav('/about')}
+        render={<Link to="/about" />}
+        nativeButton={false}
+      >
+        <ActionListItemIcon>
+          <HelpOutlineIcon />
+        </ActionListItemIcon>
+        <ActionListItemText>{t('about')}</ActionListItemText>
+      </ActionListItem>
+      <ActionListItem
+        onClick={handleNav('/donation')}
+        render={<Link to="/donation" />}
+        nativeButton={false}
+      >
+        <ActionListItemIcon>
           <FavoriteBorderIcon />
-        </ListItemIcon>
-        <ListItemText>{t('donate')}</ListItemText>
-      </MenuItem>
-      <Divider className="opacity-60" />
+        </ActionListItemIcon>
+        <ActionListItemText>{t('donate')}</ActionListItemText>
+      </ActionListItem>
+      <ActionListDivider className="opacity-60" />
     </>
   )
 }
@@ -293,12 +320,12 @@ function ReloadDataItem(_props: ItemProps) {
     onOk: requestReload,
   })
   return (
-    <MenuItem onClick={reload}>
-      <ListItemIcon>
+    <ActionListItem onClick={reload}>
+      <ActionListItemIcon>
         <SyncIcon />
-      </ListItemIcon>
-      <ListItemText>{t('reloadData')}</ListItemText>
-    </MenuItem>
+      </ActionListItemIcon>
+      <ActionListItemText>{t('reloadData')}</ActionListItemText>
+    </ActionListItem>
   )
 }
 
@@ -310,13 +337,15 @@ function AutoSyncItem() {
     track('setting_changed', { setting: 'auto_sync', value: !regular })
   }
   return (
-    <MenuItem onClick={handleClick}>
-      <ListItemIcon>
+    <ActionListItem onClick={handleClick} aria-pressed={regular}>
+      <ActionListItemIcon>
         {regular ? <SyncIcon /> : <SyncDisabledIcon />}
-      </ListItemIcon>
-      <ListItemText>{t('regularSync')}</ListItemText>
-      <Switch edge="end" checked={regular} />
-    </MenuItem>
+      </ActionListItemIcon>
+      <ActionListItemText>{t('regularSync')}</ActionListItemText>
+      <ActionListItemAction>
+        <DecorativeSwitch checked={regular} />
+      </ActionListItemAction>
+    </ActionListItem>
   )
 }
 
@@ -330,12 +359,14 @@ function IconModeItem() {
     track('setting_changed', { setting: 'emoji_icons', value: next })
   }
   return (
-    <MenuItem onClick={handleClick}>
-      <ListItemIcon>
+    <ActionListItem onClick={handleClick}>
+      <ActionListItemIcon>
         <TagIcon />
-      </ListItemIcon>
-      <ListItemText>{t(emojiIcons ? 'useIcons' : 'useEmojis')}</ListItemText>
-    </MenuItem>
+      </ActionListItemIcon>
+      <ActionListItemText>
+        {t(emojiIcons ? 'useIcons' : 'useEmojis')}
+      </ActionListItemText>
+    </ActionListItem>
   )
 }
 
@@ -363,28 +394,30 @@ function BudgetSettingsItem() {
 
   return (
     <>
-      <MenuItem onClick={toggleSetting}>
-        <ListItemIcon>
+      <ActionListItem onClick={toggleSetting} aria-pressed={!!preferZmBudgets}>
+        <ActionListItemIcon>
           <AutoAwesomeIcon />
-        </ListItemIcon>
-        <ListItemText
+        </ActionListItemIcon>
+        <ActionListItemText
           className="whitespace-normal"
-          primary={t('useZmBudgets')}
           secondary={t('useZmBudgetsDescription')}
-        />
-        <Switch edge="end" checked={!!preferZmBudgets} />
-      </MenuItem>
+        >
+          {t('useZmBudgets')}
+        </ActionListItemText>
+        <ActionListItemAction>
+          <DecorativeSwitch checked={!!preferZmBudgets} />
+        </ActionListItemAction>
+      </ActionListItem>
 
       {!preferZmBudgets && (
-        <MenuItem onClick={convertBudgets}>
-          <ListItemIcon>
+        <ActionListItem onClick={convertBudgets}>
+          <ActionListItemIcon>
             <AutoAwesomeIcon />
-          </ListItemIcon>
-          <ListItemText
-            className="whitespace-normal"
-            primary={t('convertBudgetsFromZm')}
-          />
-        </MenuItem>
+          </ActionListItemIcon>
+          <ActionListItemText className="whitespace-normal">
+            {t('convertBudgetsFromZm')}
+          </ActionListItemText>
+        </ActionListItem>
       )}
     </>
   )
@@ -399,30 +432,30 @@ function LogOutItem({ onClose }: ItemProps) {
     dispatch(logOut())
   }
   return (
-    <MenuItem onClick={handleClick}>
-      <ListItemIcon>
+    <ActionListItem onClick={handleClick}>
+      <ActionListItemIcon>
         <ExitToAppIcon />
-      </ListItemIcon>
-      <ListItemText>{t('logOut')}</ListItemText>
-    </MenuItem>
+      </ActionListItemIcon>
+      <ActionListItemText>{t('logOut')}</ActionListItemText>
+    </ActionListItem>
   )
 }
 
 function VersionItem({ onClose }: ItemProps) {
   const { t } = useTranslation('settings')
   return (
-    <MenuItem
+    <ActionListItem
       onClick={() => {
         onClose()
         window.location.reload()
       }}
     >
-      <ListItemIcon />
-      <ListItemText>
+      <ActionListItemIcon />
+      <ActionListItemText>
         <span className="type-overline text-muted-foreground">
           {t('version', { version: appVersion })}
         </span>
-      </ListItemText>
-    </MenuItem>
+      </ActionListItemText>
+    </ActionListItem>
   )
 }

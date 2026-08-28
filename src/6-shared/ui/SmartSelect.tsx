@@ -3,15 +3,15 @@ import type { SelectProps } from '@mui/material'
 import { FormControl, InputLabel, MenuList, Select } from '@mui/material'
 import { popoverStack } from '6-shared/historyPopovers'
 
-import type { Theme } from '@mui/material'
-import { SwipeableDrawer, useMediaQuery } from '@mui/material'
+import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
+import { SwipeableDrawer } from '@mui/material'
 
 type TSmartSelectProps<T = unknown> = SelectProps<T> & { elKey: string }
 
 export function SmartSelect<T>(props: TSmartSelectProps<T>) {
   const { elKey, ...selectProps } = props
   const [open, onOpen, onClose] = popoverStack.usePopoverState(elKey)
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const isMobile = useBreakpointDown('sm')
 
   const labelId = props.label
     ? `${props.id || 'smart-select'}-label`

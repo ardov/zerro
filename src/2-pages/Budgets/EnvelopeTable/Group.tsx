@@ -1,8 +1,8 @@
+import { ButtonBase, IconButton } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import React, { useRef } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { ButtonBase, IconButton } from '@mui/material'
 import { deepEqual } from '6-shared/helpers/deepEqual'
 import { AddIcon, ArrowDownwardIcon, ArrowUpwardIcon } from '6-shared/ui/Icons'
 import { useFloatingInput } from '6-shared/ui/FloatingInput'

@@ -15,7 +15,6 @@ import {
   type AdaptivePopoverProps,
 } from '6-shared/ui/AdaptivePopover'
 
-import { cn } from '6-shared/ui/shadcn/utils'
 import { useAppDispatch, useAppSelector } from 'store'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 import { useQuickActions } from './useQuickActions'
@@ -145,11 +144,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
                 })
               }}
             >
-              <NameValueRow
-                className="my-1"
-                name={text}
-                value={format.env(amount)}
-              />
+              <NameValueRow name={text} value={format.env(amount)} />
             </ActionListItem>
           ))}
         </ActionList>
@@ -160,13 +155,10 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
 
 const NameValueRow: FC<
   HTMLAttributes<HTMLDivElement> & { name: string; value: string }
-> = ({ name, value, className, ...rest }) => {
+> = ({ name, value, ...rest }) => {
   return (
     <div
-      className={cn(
-        'flex w-full gap-4 [&>:first-child]:grow [&>:last-child]:text-muted-foreground',
-        className
-      )}
+      className="flex w-full gap-4 [&>:first-child]:grow [&>:last-child]:text-muted-foreground"
       {...rest}
     >
       <span>{name}</span>

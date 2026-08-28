@@ -1,10 +1,11 @@
+import type { ButtonBaseProps } from '6-shared/ui/Button'
+import { ButtonBase } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
 
-import type { ButtonBaseProps } from '@mui/material'
-import { ButtonBase, Divider } from '@mui/material'
+import { Divider } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { sub } from '6-shared/helpers/money'

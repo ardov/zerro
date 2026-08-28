@@ -1,7 +1,7 @@
+import { ButtonBase } from '6-shared/ui/Button'
 import type { FC, ReactNode } from 'react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { ButtonBase } from '@mui/material'
 import clsx from 'clsx'
 import { Amount } from '6-shared/ui/Amount'
 import type { DragTypes } from '2-pages/Budgets/DnD'
