@@ -4,7 +4,7 @@ import { useLayoutEffect } from 'react'
 import { Global, css } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
 import type { Theme } from '@mui/material/styles'
-import { ThemeProvider } from '@mui/material/styles'
+import { ThemeProvider, alpha } from '@mui/material/styles'
 import type { ThemeProviderProps } from '@mui/material/styles'
 import { appTheme } from './createTheme'
 import { fixOldTheme, useAppTheme, useColorScheme } from './hooks'
@@ -14,7 +14,7 @@ import './styles.scss'
 fixOldTheme()
 
 const GlobalVariables = (props: { theme: Theme }) => {
-  const { palette, shape, shadows } = props.theme
+  const { palette, shape, shadows, zIndex } = props.theme
   const styles = css`
     :root {
       --c-bg: ${palette.background.default};
@@ -29,6 +29,31 @@ const GlobalVariables = (props: { theme: Theme }) => {
       --popover-foreground: ${palette.text.primary};
       --primary: ${palette.primary.main};
       --primary-foreground: ${palette.getContrastText(palette.primary.main)};
+      /* The state fills MUI paints a text button and a selected menu item
+         with. The theme already names these opacities — createTheme even
+         pins hoverOpacity itself — so they are composed here rather than
+         written out as \`bg-primary/4\` at each call site, where a change to
+         the theme would not reach them. Selected-and-hovered is the sum of
+         the two, the way MUI stacks them. */
+      --primary-hover: ${alpha(
+        palette.primary.main,
+        palette.action.hoverOpacity
+      )};
+      --primary-focus: ${alpha(
+        palette.primary.main,
+        palette.action.focusOpacity
+      )};
+      --primary-selected: ${alpha(
+        palette.primary.main,
+        palette.action.selectedOpacity
+      )};
+      --primary-selected-hover: ${alpha(
+        palette.primary.main,
+        palette.action.selectedOpacity + palette.action.hoverOpacity
+      )};
+      /* MUI dims a disabled menu item rather than recolouring it, so this is
+         an opacity and not a colour like --disabled-foreground. */
+      --disabled-opacity: ${palette.action.disabledOpacity};
       --secondary: ${palette.action.selected};
       --secondary-foreground: ${palette.text.primary};
       --muted: ${palette.action.hover};
@@ -39,7 +64,20 @@ const GlobalVariables = (props: { theme: Theme }) => {
       --destructive: ${palette.error.main};
       --destructive-foreground: ${palette.getContrastText(palette.error.main)};
       --border: ${palette.divider};
-      --input: ${palette.divider};
+      /* The outlined field border is heavier than the divider, so --input is
+         a value of its own rather than an alias of --border. MUI's own
+         OutlinedInput builds it as 23% of the colour that sits on the
+         background, so build it the same way instead of pasting the two
+         literals that expression happens to produce today. */
+      --input: ${alpha(
+        palette.mode === 'light' ? palette.common.black : palette.common.white,
+        0.23
+      )};
+      --action-active: ${palette.action.active};
+      /* MUI disables a field's border with action.disabled and greys its text
+         with text.disabled. They hold the same value in the default palette,
+         so they are only distinguishable once one of them moves. */
+      --action-disabled: ${palette.action.disabled};
       --ring: ${palette.primary.main};
       --interactive: ${palette.secondary.main};
       --interactive-foreground: ${palette.getContrastText(
@@ -58,7 +96,12 @@ const GlobalVariables = (props: { theme: Theme }) => {
       --elevation-1: ${shadows[1]};
       --elevation-2: ${shadows[2]};
       --elevation-4: ${shadows[4]};
+      --elevation-8: ${shadows[8]};
       --elevation-10: ${shadows[10]};
+      --elevation-16: ${shadows[16]};
+      /* Owned overlays stack against MUI's modals, so the level comes from
+         the same theme MUI positions its own surfaces with. */
+      --z-modal: ${zIndex.modal};
     }
   `
   return <Global styles={styles} />

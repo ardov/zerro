@@ -3,26 +3,24 @@ import { core } from 'zerro-core/redux'
 
 import type { FC, HTMLAttributes } from 'react'
 import { useState } from 'react'
-import type { PopoverProps } from '@mui/material'
-import {
-  ListItemText,
-  InputAdornment,
-  IconButton,
-  MenuList,
-  MenuItem,
-} from '@mui/material'
+import { IconButton } from '6-shared/ui/Button'
+import { ActionList, ActionListItem } from '6-shared/ui/ActionList'
 import { useTranslation } from 'react-i18next'
-import { ArrowForwardIcon } from '6-shared/ui/Icons'
+import { ArrowForwardIcon } from '6-shared/ui/feather'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { formatMoney } from '6-shared/helpers/money'
 import { track } from '6-shared/analytics'
-import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
+import {
+  AdaptivePopover,
+  type AdaptivePopoverProps,
+} from '6-shared/ui/AdaptivePopover'
 
+import { cn } from '6-shared/ui/shadcn/utils'
 import { useAppDispatch, useAppSelector } from 'store'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 import { useQuickActions } from './useQuickActions'
 
-export type TBudgetPopoverProps = Omit<PopoverProps, 'onClose'> & {
+export type TBudgetPopoverProps = Omit<AdaptivePopoverProps, 'onClose'> & {
   onClose: () => void
   id: core.envelopes.TEnvelopeId
   month: TISOMonth
@@ -37,6 +35,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   const envelope = useAppSelector(core.activity.selectEnvelopeMetrics)[month][
     id
   ]
+  const envelopeName = useAppSelector(core.envelopes.selectAll)[id]?.name
   const convertFx = useAppSelector(core.currency.selectConvertFx)
 
   const currency = {
@@ -106,9 +105,10 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
 
   return (
     <AdaptivePopover
-      onClose={() => changeAndClose(+inputValue)}
-      anchor="top"
       {...rest}
+      onClose={() => changeAndClose(+inputValue)}
+      drawerSide="top"
+      aria-label={envelopeName || t('budget')}
     >
       <div className="p-2">
         <AmountInput
@@ -120,31 +120,24 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
           helperText={helperText}
           signButtons="auto"
           placeholder="0"
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">{currency.env}</InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    edge="end"
-                    onClick={() => changeAndClose(+inputValue)}
-                  >
-                    <ArrowForwardIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
+          aria-label={t('assigned')}
+          startAdornment={currency.env}
+          endAdornment={
+            <IconButton
+              edge="end"
+              aria-label={t('apply')}
+              onClick={() => changeAndClose(+inputValue)}
+            >
+              <ArrowForwardIcon />
+            </IconButton>
+          }
         />
 
-        <MenuList>
+        <ActionList aria-label={t('quickAmounts')}>
           {quickActions.map(({ text, amount }, index) => (
-            <MenuItem
+            <ActionListItem
               key={text}
               selected={inputValue === amount}
-              className="rounded-lg"
               onClick={() => {
                 changeAndClose(amount)
                 track('budget_quick_amount_selected', {
@@ -152,14 +145,14 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
                 })
               }}
             >
-              <ListItemText
-                primary={
-                  <NameValueRow name={text} value={format.env(amount)} />
-                }
+              <NameValueRow
+                className="my-1"
+                name={text}
+                value={format.env(amount)}
               />
-            </MenuItem>
+            </ActionListItem>
           ))}
-        </MenuList>
+        </ActionList>
       </div>
     </AdaptivePopover>
   )
@@ -167,10 +160,13 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
 
 const NameValueRow: FC<
   HTMLAttributes<HTMLDivElement> & { name: string; value: string }
-> = ({ name, value, ...rest }) => {
+> = ({ name, value, className, ...rest }) => {
   return (
     <div
-      className="flex w-full gap-4 [&>:first-child]:grow [&>:last-child]:text-muted-foreground"
+      className={cn(
+        'flex w-full gap-4 [&>:first-child]:grow [&>:last-child]:text-muted-foreground',
+        className
+      )}
       {...rest}
     >
       <span>{name}</span>

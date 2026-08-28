@@ -1,5 +1,4 @@
 import { DetailsBox } from '../Components'
-import { Box } from '@mui/material'
 import wholeImg from './whole-screenshot.png'
 import { Head } from '../Head'
 
@@ -43,17 +42,10 @@ import { Head } from '../Head'
 
 Ура, мы готовы распределять деньги! Откройте текущий месяц и посмотрите на цифру «Не распределено» — именно столько денег нужно распределить по категориям (конвертам). Если какой-то категории не хватает, создайте её в Дзен-мани.
 
-<Box
-  component="img"
+<img
   src={wholeImg}
   alt="Примерно так выглядит интерфейс внутри"
-  sx={{
-    my: 4,
-    maxWidth: '100%',
-    borderRadius: 1,
-    border: '1px solid rgba(0,0,0,0.08)',
-    boxShadow: '0 8px 32px 0 rgba(0,0,0,0.16)',
-  }}
+  className="my-8 max-w-full rounded-lg border border-solid border-[rgba(0,0,0,0.08)] [box-shadow:0_8px_32px_0_rgba(0,0,0,0.16)]"
 />
 
 ### Как копить?

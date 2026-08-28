@@ -34,6 +34,8 @@ export const en: typeof ru = {
     moneyDnd_5: 'Monies',
     moneyDnd_6: 'Monies',
     edit: 'Edit',
+    apply: 'Apply',
+    quickAmounts: 'Quick amounts',
     close: 'Close',
     today: 'Today',
     yesterday: 'Yesterday',

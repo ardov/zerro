@@ -2,11 +2,13 @@ import type { FC } from 'react'
 import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { InputAdornment, IconButton, Chip } from '@mui/material'
+import { Chip } from '@mui/material'
+import { IconButton } from '6-shared/ui/Button'
 import type { DialogProps } from '@mui/material/Dialog'
 import Dialog from '@mui/material/Dialog'
 import { AmountInput } from '6-shared/ui/AmountInput'
-import { ArrowForwardIcon } from '6-shared/ui/Icons'
+import { ArrowForwardIcon } from '6-shared/ui/feather'
+import { useTranslation } from 'react-i18next'
 import type { Modify, TISOMonth } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 
@@ -23,6 +25,7 @@ export type MoveMoneyModalProps = Modify<
 >
 
 export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
+  const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const { open, onClose, source, month, destination } = props
 
@@ -76,17 +79,15 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
           selectOnFocus
           fullWidth
           placeholder="0"
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton edge="end" onClick={handleSubmit}>
-                    <ArrowForwardIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
+          endAdornment={
+            <IconButton
+              edge="end"
+              aria-label={t('apply')}
+              onClick={handleSubmit}
+            >
+              <ArrowForwardIcon />
+            </IconButton>
+          }
         />
       </div>
     </Dialog>

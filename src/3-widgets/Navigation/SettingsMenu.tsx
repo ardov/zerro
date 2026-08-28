@@ -19,7 +19,6 @@ import {
   HistoryIcon,
   TagIcon,
 } from '6-shared/ui/Icons'
-import type { PopoverProps } from '@mui/material'
 import {
   Divider,
   ListItemIcon,
@@ -32,7 +31,10 @@ import {
 } from '@mui/material'
 import { track } from '6-shared/analytics'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
-import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
+import {
+  AdaptivePopover,
+  type AdaptivePopoverProps,
+} from '6-shared/ui/AdaptivePopover'
 import { appVersion } from '6-shared/config'
 
 import { useAppDispatch, useAppSelector } from 'store'
@@ -51,7 +53,10 @@ import { registerPopover } from '6-shared/historyPopovers'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useColorScheme } from '6-shared/ui/theme'
 
-const settingsHooks = registerPopover<object, PopoverProps>('settingsMenu', {})
+const settingsHooks = registerPopover<object, AdaptivePopoverProps>(
+  'settingsMenu',
+  {}
+)
 
 export const useSettingsMenu = () => {
   const { open } = settingsHooks.useMethods()
@@ -67,9 +72,10 @@ type SettingsMenuProps = { showLinks?: boolean }
 
 export const SettingsMenu: FC<SettingsMenuProps> = props => {
   const { showLinks } = props
+  const { t } = useTranslation('settings')
   const { displayProps } = settingsHooks.useProps()
   return (
-    <AdaptivePopover {...displayProps}>
+    <AdaptivePopover {...displayProps} aria-label={t('settings')}>
       <MenuList>
         <Settings showLinks={showLinks} onClose={displayProps.onClose} />
       </MenuList>

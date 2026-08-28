@@ -67,6 +67,12 @@ type TBaseProps = { open: boolean; onClose: () => void }
 
 const registeredPopovers = {} as Record<TKey, any>
 
+/** Bumped on every open so each one yields a fresh `instanceKey`.
+ *
+ * A timestamp would collide when two opens land in the same millisecond, and
+ * the value is only ever compared against the previous one. */
+let openCounter = 0
+
 export function registerPopover<
   ExtraProps extends object = object,
   DisplayProps extends object = TBaseProps,
@@ -84,19 +90,29 @@ export function registerPopover<
   registeredPopovers[key] = true
 
   type TStored =
-    { extra: ExtraProps; display?: WithoutBaseProps<DisplayProps> } | undefined
+    | {
+        extra: ExtraProps
+        display?: WithoutBaseProps<DisplayProps>
+        instanceKey: number
+      }
+    | undefined
 
   function useMethods() {
     const { open, openReplacing, close } = useContext(PopoverMethodsContext)
     return useMemo(() => {
       return {
         open: (extra: ExtraProps, display?: WithoutBaseProps<DisplayProps>) =>
-          open(key, { extra, display } as TStored),
+          open(key, { extra, display, instanceKey: ++openCounter } as TStored),
         /** Opens this popover in place of whatever is currently open. */
         openReplacing: (
           extra: ExtraProps,
           display?: WithoutBaseProps<DisplayProps>
-        ) => openReplacing(key, { extra, display } as TStored),
+        ) =>
+          openReplacing(key, {
+            extra,
+            display,
+            instanceKey: ++openCounter,
+          } as TStored),
         close: () => close(key),
       }
     }, [open, openReplacing, close])
@@ -109,6 +125,7 @@ export function registerPopover<
     const props = useContext(PopoverPropsContext)[key] as TStored
     const display = props?.display || defaultDisplayProps
     const extraProps = props?.extra || defaultExtraProps
+    const instanceKey = props?.instanceKey ?? 0
 
     return useMemo(() => {
       const displayProps = {
@@ -117,8 +134,12 @@ export function registerPopover<
         onClose: methods.close,
       } as WithBaseProps<DisplayProps>
 
-      return { key, displayProps, extraProps, ...methods }
-    }, [display, extraProps, isOpened, methods])
+      // `instanceKey` is deliberately not part of `displayProps`: it is a
+      // React key, and React 19 warns when one arrives through a spread. Use
+      // it as `<Popover key={instanceKey} />` when a popover must start from
+      // a fresh draft on every opening.
+      return { key, instanceKey, displayProps, extraProps, ...methods }
+    }, [display, extraProps, instanceKey, isOpened, methods])
   }
 
   return { useMethods, useProps, key }

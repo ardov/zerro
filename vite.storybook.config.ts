@@ -15,7 +15,21 @@ const root = path.dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   plugins: [tailwindcss()],
   optimizeDeps: {
-    include: ['clsx', 'tailwind-merge', '@dnd-kit/core'],
+    include: [
+      'clsx',
+      'tailwind-merge',
+      '@dnd-kit/core',
+      '@mui/material/Dialog',
+      'formik',
+      'react-wrap-balancer',
+      'recharts',
+      '@base-ui/react/button',
+      '@base-ui/react/field',
+      '@base-ui/react/input',
+      '@base-ui/react/popover',
+      '@base-ui/react/drawer',
+      '@base-ui/react/toolbar',
+    ],
   },
   resolve: {
     tsconfigPaths: true,

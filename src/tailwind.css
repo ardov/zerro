@@ -7,10 +7,18 @@
 
 @theme {
   --spacing: 0.25rem;
-  --breakpoint-sm: 37.5rem;
-  --breakpoint-md: 56.25rem;
-  --breakpoint-lg: 75rem;
-  --breakpoint-xl: 96rem;
+  /* Mirrors `breakpoints` in src/6-shared/ui/theme/breakpoints.ts, which is
+     the single source these values are derived from. Keep them in step.
+     Pixels, not rem: MUI and `useBreakpointDown` query pixels, and a rem
+     mirror would drift from them whenever the root font size is not 16px. */
+  --breakpoint-sm: 600px;
+  --breakpoint-md: 900px;
+  --breakpoint-lg: 1200px;
+  --breakpoint-xl: 1536px;
+  /* Tailwind ships a `2xl` at 96rem, which is this scale's `xl` under another
+     name and in another unit. Clear it so the registered breakpoints are
+     exactly the ones `breakpoints.ts` defines. */
+  --breakpoint-2xl: initial;
 }
 
 @theme inline {
@@ -24,12 +32,18 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-focus: var(--primary-focus);
+  --color-primary-selected: var(--primary-selected);
+  --color-primary-selected-hover: var(--primary-selected-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-action-active: var(--action-active);
+  --color-action-disabled: var(--action-disabled);
   --color-action-focus: var(--action-focus);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
@@ -54,11 +68,6 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.5);
   --radius-2xl: calc(var(--radius) * 2);
-
-  --shadow-elevation-1: var(--elevation-1);
-  --shadow-elevation-2: var(--elevation-2);
-  --shadow-elevation-4: var(--elevation-4);
-  --shadow-elevation-10: var(--elevation-10);
 }
 
 @utility type-body {
@@ -105,8 +114,31 @@
   box-shadow: var(--elevation-4);
 }
 
+@utility shadow-elevation-8 {
+  box-shadow: var(--elevation-8);
+}
+
 @utility shadow-elevation-10 {
   box-shadow: var(--elevation-10);
+}
+
+@utility shadow-elevation-16 {
+  box-shadow: var(--elevation-16);
+}
+
+/* Overlays that must stack against MUI modals during the migration. The
+   fallback is MUI's own default modal level, so the utility still stacks
+   where `AppThemeProvider` is not mounted (isolated stories, for example)
+   instead of collapsing to `z-index: auto`. */
+@utility z-modal {
+  z-index: var(--z-modal, 1300);
+}
+
+/* MUI's action.disabledOpacity. An `@utility` rather than a `--color-*` alias
+   because it is an opacity, and the fallback keeps a disabled control dimmed
+   where `AppThemeProvider` is not mounted. */
+@utility opacity-disabled {
+  opacity: var(--disabled-opacity, 0.38);
 }
 
 @utility shadow-none {

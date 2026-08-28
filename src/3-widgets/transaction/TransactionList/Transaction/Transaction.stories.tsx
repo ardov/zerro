@@ -4,6 +4,8 @@ import { Typography } from '@mui/material'
 import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 import { Transaction } from './Transaction'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { useTransactionPreview } from '3-widgets/global/TransactionPreviewDrawer'
 
 const meta = {
   title: 'Finance/Transaction',
@@ -58,6 +60,43 @@ export const SelectionMode: Story = {
         {...args}
         id={id}
       />
+    )
+  },
+}
+
+function PreviewHarness() {
+  const transactions = useAppSelector(core.transactions.selectAll)
+  const transaction = Object.values(transactions).find(
+    tr => core.transactions.getType(tr) === 'outcome'
+  )!
+  const preview = useTransactionPreview()
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => preview.open({ id: transaction.id })}
+      >
+        Edit expense
+      </button>
+      <output data-testid="expense">{transaction.outcome}</output>
+    </>
+  )
+}
+
+export const AmountEditorRegression: Story = {
+  render: () => <PreviewHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Edit expense' }))
+    const input = await body.findByRole('textbox', { name: /Expense from / })
+    await expect(input.getBoundingClientRect().height).toBe(40)
+    await userEvent.click(input)
+    await userEvent.clear(input)
+    await userEvent.type(input, '25,5+4.5')
+    await userEvent.click(await body.findByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(canvas.getByTestId('expense')).toHaveTextContent(/^30$/)
     )
   },
 }

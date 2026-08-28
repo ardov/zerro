@@ -18,6 +18,33 @@ portals use the same provider so utilities override MUI defaults without
 `!important`. Tailwind Preflight remains disabled; MUI `CssBaseline` supplies
 the reset.
 
+Every co-located component stylesheet wraps its rules in `@layer components`.
+An unlayered rule outranks the whole `mui` layer, and a stylesheet that is the
+first to declare a layer name registers that layer's position, so unlayered or
+ad-hoc-layer CSS makes the order depend on module load order.
+
+`components` is an earlier layer than `utilities`, so a rule in a co-located
+stylesheet cannot outrank a Tailwind utility however specific it is. Whenever a
+property's precedence is decided in CSS, that property has to leave the class
+list entirely — `OutlinedField` owns the `border` shorthand in its stylesheet
+precisely because a `border` utility on the same element would pin the width
+back to 1px.
+
+Reach for a stylesheet when the _order_ of state rules matters. Tailwind, not
+the class string, decides when each variant is emitted, and it emits
+`focus-within` before `hover` — so `group-hover:` and `group-focus-within:`
+rules at equal specificity resolve hover-last, and a hovered field silently
+loses its focus ring. `src/6-shared/ui/OutlinedField.test.ts` pins that order.
+
+Order only decides while the weights stay level, so a rule set written this way
+has to keep every selector at one specificity. `:has()` is the trap: it takes
+the weight of its most specific argument, so `:has(input:focus)` is a whole
+element heavier than `:hover` and starts outranking the rules under it.
+`:where()` costs nothing, which is why the focus rule reads
+`:has(:where(input):focus)` — the argument then contributes only its
+pseudo-class. The same test computes all four weights rather than trusting the
+selectors to look alike.
+
 ## Converting values
 
 MUI's numeric spacing uses 8px units; Tailwind uses 4px units. Other numeric
@@ -33,8 +60,34 @@ properties are not spacing and must be checked individually.
 | `color: 'secondary.main'` | `text-interactive`                          |
 | `bgcolor: 'action.focus'` | `bg-action-focus`                           |
 | `boxShadow: 2` / `4`      | `shadow-elevation-2` / `shadow-elevation-4` |
+| `zIndex: modal`           | `z-modal`                                   |
 
-Colors, radii, and elevation shadows are derived from the active MUI theme.
+Colors, radii, elevation shadows, and the modal stacking level are derived from
+the active MUI theme. Every value `AppThemeProvider` emits gets a Tailwind
+counterpart in `src/tailwind.css` — a `--color-*` alias, a `--shadow-*` alias,
+or an `@utility` — in the same change that adds it. A theme variable with no
+counterpart forces `[box-shadow:var(--elevation-8)]` at the call site and
+quietly reintroduces arbitrary values. Elevations 1, 2, 4, 8, 10 and 16 are
+registered as `@utility` blocks; they are deliberately not also `@theme`
+entries, because Tailwind would emit both rules and only the later one would
+ever apply. `--input` is MUI's outlined field border — 23% of the colour that
+sits on the background, built the way `OutlinedInput` builds it rather than
+pasted as a literal, and heavier than the `--border` divider. `--action-active`
+is the icon colour and `--action-disabled` is the one MUI greys a disabled
+field's border with, which is a different token from the `--disabled-foreground`
+it greys the text with.
+
+The rule runs the other way too: a value the theme already names does not get
+rewritten as a literal in a class list. MUI's state fills are
+`palette.action.hoverOpacity`, `focusOpacity` and `selectedOpacity` over a
+colour, and `createTheme` pins `hoverOpacity` itself, so writing
+`hover:bg-primary/4` would fork that number where no change to the theme could
+reach it. `--primary-hover`, `--primary-focus`, `--primary-selected` and
+`--primary-selected-hover` are composed in `AppThemeProvider` the way `--input`
+is; the last is the sum of the selected and hover opacities, which is how MUI
+stacks them. `--disabled-opacity` is `action.disabledOpacity` and is an
+`@utility` (`opacity-disabled`) rather than a `--color-*` alias, because MUI
+dims a disabled menu item instead of recolouring it.
 `secondary` is the semantic selected-surface token, not MUI's secondary brand
 color. MUI palette paths such as `text.disabled` are not CSS color values:
 use a resolved color, a semantic utility, or keep dynamic palette lookup in
@@ -69,6 +122,22 @@ Use `cn()` when caller classes override a component's default utility classes.
 necessarily win. Budget group rows, for example, override `items-center` with
 `items-baseline`. Grid `justify-start` is not equivalent to `justifyContent:
 'initial'`: it prevents an `auto` track from stretching.
+
+## Breakpoints
+
+`src/6-shared/ui/theme/breakpoints.ts` is the single source. The MUI theme is
+built from that map, so `theme.breakpoints.down(...)` and the MUI-free
+`useBreakpointDown(...)` hook switch on the same pixel, including MUI's 0.05px
+subtraction. `src/tailwind.css` mirrors the same numbers because Tailwind cannot read
+TypeScript; that mirror is the one place a value has to be changed twice. It is
+written in pixels, not Tailwind's usual `rem`, so the mirror cannot drift from
+the pixel queries MUI and `useBreakpointDown` run whenever the root font size
+is not 16px. `breakpoints.test.ts` reads `tailwind.css` and checks both halves,
+because nothing else notices when only one of them moves — the app keeps
+compiling and `md:` simply starts switching at a different pixel than
+`useBreakpointDown('md')`. The same test rejects any breakpoint Tailwind
+registers that this map does not define, which is what `--breakpoint-2xl:
+initial` is there to clear. Do not write a media query string in a component.
 
 ## Typography recipes
 
@@ -125,6 +194,132 @@ the last recipe; select one recipe explicitly. Class-string order alone is not
 a CSS precedence rule.
 
 ## Regression checks
+
+### Owned interactive components
+
+`AdaptivePopover` composes Base UI Popover at 900px and above and Base UI
+Drawer below 900px. Its app-owned props are `open`, `onClose`, `anchorEl`,
+`drawerSide`, `container`, children, className and accessible labels.
+`anchorEl` positions the desktop popover; `drawerSide` picks the edge the
+mobile drawer slides in from and is ignored on desktop. History remains
+controlled by `historyPopovers`; the component does not push or pop history
+itself. Desktop positioning starts at the anchor's top-left with a 16px
+collision margin. Mobile placement defaults to bottom; budget assignment uses
+top. Focus restoration retains the external anchor through exit, but drops it
+once it leaves the document — a retained node that has been unmounted can be
+neither positioned against nor focused. Both variants render an `sr-only`
+Close part: on desktop it also enables Base UI's modal focus trap. The CSS
+contains placement/swipe transitions and a reduced-motion override.
+
+`container` defaults to the MUI dialog or drawer the anchor sits in, so during
+coexistence a surface opened from one stays inside its focus trap; pass `null`
+to force it to the body. The lookup is `findMuiFocusBoundary` in
+`6-shared/ui/muiFocusBoundary.ts` — the one place that reads MUI's class names,
+kept as a named function so it is a single deletion once the last MUI overlay
+is converted rather than a search. It is not a prop the call sites compute,
+because the trigger's ancestry is not something they know either.
+
+`Button.tsx`, `OutlinedField.tsx`, and `ActionList.tsx` in `6-shared/ui` are
+owned Base UI compositions styled for the existing theme. These are
+deliberately narrow contracts, not copies of the MUI prop surface. `IconButton`
+takes `edge="start" | "end"` for the negative margin that lines an icon up with
+a field's edge, the way MUI's `edge` does.
+
+`OutlinedField` is MUI's outlined text field: the notched border with the label
+cut into it. Its label is always floated, which is right for a field that
+always holds a value; MUI's other mode, where an outlined label drops into an
+empty field, is not implemented because nothing needs it yet. A text field that
+can be empty gets that mode added here, not a second copy of the notch
+geometry. `Field.Root` from Base UI supplies the label and description wiring
+and the `data-invalid` / `data-disabled` state the stylesheet keys off, so none
+of that is spelled out by hand. It is used by `AmountInput`; native props
+target the input, while `className` lands on `Field.Root` and sizes the whole
+field, label and helper text included. Use `startAdornment` and `endAdornment`
+rather than MUI `slotProps`.
+
+The focus ring keys off the input, not `:focus-within`. The group holds the
+adornments, and both real callers put an icon button in one — the submit arrow
+in assignment and in money moving — so `:focus-within` would light the field up
+while `AmountInput` had already swapped the expression back for the formatted
+value. MUI paints the ring from the input's own focus handler and leaves the
+resting border when focus reaches an adornment; so does this. `AmountInput` owns the input's
+`ref` and `type` — the ref drives `selectOnFocus` and the sign buttons, and
+`tel` raises the numeric keypad — so both are removed from its prop type and
+applied after the caller's spread.
+
+`ActionList` is a persistent list of actions inside an existing overlay, with
+toolbar semantics rather than menu semantics: the list is always on screen and
+nothing opened it, so `role="menu"` would promise a dismissable popup that is
+not there. Base UI's Toolbar gives roving focus, the arrows and disabled-item
+handling; `useRovingListKeys` adds the Home/End and typeahead its composite
+root does not forward. It does not open a second popup or take initial focus
+from the amount field. It is the replacement for MUI `MenuList`/`MenuItem` in
+owned overlays; `SettingsMenu` still runs on `MenuList` inside
+`AdaptivePopover` and is the next one to convert.
+
+These files live beside the other shared components, not under
+`6-shared/ui/shadcn`. `components.json` points the shadcn `ui` alias at that
+directory, so anything named `button.tsx` or `input.tsx` there is a target
+`shadcn add` will overwrite. The directory holds only `utils.ts` (`cn`), which
+is the alias shadcn actually needs.
+
+Each owned surface carries one accessible name, and they differ: the assignment
+popover is named for its envelope, the amount field is `assigned`, and the quick
+amounts list is `quickAmounts`. Repeating one label across the dialog, its input
+and its action list makes a screen reader announce the same word three times.
+
+`BudgetPopover` and `AmountInput` no longer import MUI. The shared theme still
+supplies colors, the input border, the icon colour, elevation 8/16 and the
+modal z-index through CSS variables.
+
+Icons live in `6-shared/ui/feather`, built by an owned `createFeatherIcon` that
+reproduces what MUI's `createSvgIcon` gave these glyphs: a `1em` box, the
+`fontSize` and `color` props, stroke from `currentColor`. The whole Feather set
+moved at once rather than one glyph at a time, so there is one factory instead
+of two. `6-shared/ui/Icons.tsx` re-exports it along with the three glyphs that
+have no Feather equivalent and still come from `@mui/icons-material`; import
+from `feather` directly when a module must stay off MUI. The directory is
+`feather/`, not `icons/`: `icons` and `Icons.tsx` are the same path on a
+case-insensitive filesystem, and the two would resolve to different modules on
+macOS and on CI.
+
+`src/6-shared/ui/muiFree.test.ts` is what keeps that split honest. Reading a
+Feather glyph through the mixed `Icons` barrel compiles, looks identical at the
+call site, and quietly returns MUI to the bundle, so the test walks the whole
+import graph of the owned set and fails with the chain that reached MUI. The
+converted surfaces are checked on their own imports instead of transitively:
+their data layer legitimately reaches `@mui/x-date-pickers` through date
+localization, which is not what the claim is about. Add a module to `OWNED` in
+that file when it is converted.
+
+Base UI is roughly 40-65 kB gzipped, and while both libraries ship the app pays
+for MUI and Base UI at once. That is the budget for the coexistence period, not
+a permanent state: keep the owned set to surfaces that have actually been
+converted, and remove the MUI equivalent in the same change rather than leaving
+two implementations of one control. `@mui/x-date-pickers` pulls its own older
+`@base-ui/utils`; a `pnpm.overrides` pin collapses the two onto one copy, and
+the pin comes out once the pickers catch up.
+
+Assignment dismissal via Escape/backdrop/swipe applies the draft, as do Enter,
+the submit button and quick actions. An unchanged value emits no command.
+Browser Back changes history without invoking that apply callback; Forward
+restores the retained draft. Expression parsing and financial calculations are
+unchanged.
+
+The AmountInput stories compare outlined-field geometry and computed styles
+against MUI in both sizes and themes. They cannot cover hover, because
+synthetic pointer events do not set CSS `:hover`; the border's state
+precedence and its weights are pinned by `OutlinedField.test.ts` instead. The
+parity matrix uses a plain currency symbol for its adornment, which cannot tell
+input focus and `:focus-within` apart, so `AdornmentButtonFocus` runs the same
+comparison with a focusable adornment and checks the border against MUI on both
+sides of a Tab. AdaptivePopover and
+assignment stories cover dismissal, focus, scroll lock, keyboard/typeahead,
+899/900px behavior, synthetic touch swipe, nested MUI drawers, history and
+foreign-currency helper text. Existing dialog/transaction stories exercise the shared input's callers;
+settings stories cover a MUI confirmation above the new overlay.
+
+### Static compatibility
 
 `stories/foundation/MuiTailwindInterop.stories.tsx` checks actual computed styles
 for MUI/Tailwind coexistence, typography recipes, static Paper surfaces, icon

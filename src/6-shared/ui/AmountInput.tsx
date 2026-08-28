@@ -1,12 +1,16 @@
 import type { FC } from 'react'
 import { useState, useEffect, useRef } from 'react'
-import type { TextFieldProps } from '@mui/material'
-import { Button, InputAdornment, TextField } from '@mui/material'
+import { Button } from './Button'
+import { OutlinedField, type OutlinedFieldProps } from './OutlinedField'
 import { getCurrencySymbol } from '6-shared/helpers/money'
 import type { Modify } from '6-shared/types'
 
+// `ref` and `type` are owned: the ref drives selectOnFocus and the sign
+// buttons, and `tel` is what raises the numeric keypad on mobile.
+type TFieldProps = Omit<OutlinedFieldProps, 'ref' | 'type'>
+
 export type AmountInputProps = Modify<
-  TextFieldProps,
+  TFieldProps,
   {
     value: number
     currency?: string
@@ -28,7 +32,7 @@ export const AmountInput: FC<AmountInputProps> = ({
   onFocus,
   onKeyDown,
   autoFocus,
-  slotProps,
+  endAdornment,
   ...rest
 }) => {
   const ref = useRef<HTMLInputElement>(null)
@@ -70,7 +74,7 @@ export const AmountInput: FC<AmountInputProps> = ({
     }
   }
 
-  const changeHandler: TextFieldProps['onChange'] = e => {
+  const changeHandler: TFieldProps['onChange'] = e => {
     const cleaned = e.target.value
       .replace(/[^0-9,.+\-/*]/g, '')
       .replace(/,/g, '.')
@@ -78,15 +82,15 @@ export const AmountInput: FC<AmountInputProps> = ({
     const computed = calc(cleaned)
     if (computed !== value) onChange(computed)
   }
-  const focusHandler: TextFieldProps['onFocus'] = e => {
+  const focusHandler: TFieldProps['onFocus'] = e => {
     setFocused(true)
     if (onFocus) onFocus(e)
   }
-  const blurHandler: TextFieldProps['onBlur'] = e => {
+  const blurHandler: TFieldProps['onBlur'] = e => {
     setFocused(false)
     if (onBlur) onBlur(e)
   }
-  const keyDownHandler: TextFieldProps['onKeyDown'] = e => {
+  const keyDownHandler: TFieldProps['onKeyDown'] = e => {
     if (onEnter && e.key === 'Enter') {
       e.preventDefault()
       onEnter(calc(expression))
@@ -94,32 +98,18 @@ export const AmountInput: FC<AmountInputProps> = ({
     if (onKeyDown) onKeyDown(e)
   }
 
-  const slotPropsMerged = {
-    ...slotProps,
-    input: {
-      endAdornment: sym && (
-        <InputAdornment position="end" disableTypography children={sym} />
-      ),
-      ...slotProps?.input,
-    },
-    htmlInput: {
-      type: 'tel',
-      ...slotProps?.htmlInput,
-    },
-  }
-
   const Field = (
-    <TextField
+    <OutlinedField
       value={focused ? expression || '' : formattedValue || ''}
-      variant="outlined"
-      inputRef={ref}
       onChange={changeHandler}
       onFocus={focusHandler}
       onBlur={blurHandler}
       onKeyDown={keyDownHandler}
       autoFocus={autoFocus}
-      slotProps={slotPropsMerged}
+      endAdornment={endAdornment === undefined ? sym : endAdornment}
       {...rest}
+      ref={ref}
+      type="tel"
     />
   )
 

@@ -18,7 +18,7 @@ export const useGoalPopover = () => {
   const { open } = goalPopover.useMethods()
   const openPopover = useCallback(
     (id: core.envelopes.TEnvelopeId, anchorEl?: Element) =>
-      open({ id, month }, { anchorEl, key: Date.now() }),
+      open({ id, month }, { anchorEl }),
     [month, open]
   )
   return openPopover
@@ -28,5 +28,12 @@ export const SmartGoalPopover: FC = () => {
   const popover = goalPopover.useProps()
   const { month, id } = popover.extraProps
   if (!month || !id) return null
-  return <GoalPopover {...popover.displayProps} {...{ month, id }} />
+  // Keyed by the opening, so each one starts from a fresh draft.
+  return (
+    <GoalPopover
+      key={popover.instanceKey}
+      {...popover.displayProps}
+      {...{ month, id }}
+    />
+  )
 }

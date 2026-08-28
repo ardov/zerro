@@ -1,0 +1,65 @@
+@layer components {
+  /* The state colours live here rather than in `group-*` utilities because
+     their precedence has to be exact and Tailwind decides utility order for
+     us: it emits `focus-within` before `hover`, so a hovered, focused field
+     would lose its focus ring. Source order here is ours, and it reproduces
+     MUI's: hover, then focus, then error, then disabled.
+
+     Every rule weighs exactly (0,3,0) — one class, one state, one class — so
+     they all sit at the same specificity and order alone decides. The focus
+     rule keeps that weight on purpose: `:has()` takes the specificity of its
+     most specific argument, so a bare `:has(input:focus)` would weigh (0,3,1)
+     and beat the error and disabled rules below it. `:where(input)` costs
+     nothing, which leaves `:focus` as the only thing the argument contributes.
+     `OutlinedField.test.ts` pins both the order and the weights. */
+
+  /* The width and style live here too. A `components` rule cannot outrank a
+     Tailwind utility — `utilities` is the later layer — so a `border` class on
+     the fieldset would pin it back to 1px however this block is written. Any
+     property whose precedence is decided here has to leave the class list. */
+  .outlined-field__notch {
+    border: 1px solid var(--input);
+  }
+
+  /* MUI drops the hover border on touch devices; so does this. */
+  @media (hover: hover) {
+    .outlined-field__group:hover .outlined-field__notch {
+      border-color: var(--foreground);
+    }
+  }
+
+  /* The input's own focus, not `:focus-within`. MUI paints the ring from the
+     input's focus handler, so tabbing to an adornment button — the submit
+     arrow assignment and money moving both put there — leaves the resting
+     border. `:focus-within` would light the whole field up instead, while
+     `AmountInput` had already swapped the expression back for the formatted
+     value. */
+  .outlined-field__group:has(:where(input):focus) .outlined-field__notch {
+    border-width: 2px;
+    border-color: var(--primary);
+  }
+
+  [data-invalid] .outlined-field__group .outlined-field__notch {
+    border-color: var(--error);
+  }
+
+  [data-disabled] .outlined-field__group .outlined-field__notch {
+    border-color: var(--action-disabled);
+  }
+
+  .outlined-field__label {
+    color: var(--muted-foreground);
+  }
+
+  .outlined-field__group:has(:where(input):focus) .outlined-field__label {
+    color: var(--primary);
+  }
+
+  [data-invalid] .outlined-field__group .outlined-field__label {
+    color: var(--error);
+  }
+
+  [data-disabled] .outlined-field__group .outlined-field__label {
+    color: var(--disabled-foreground);
+  }
+}

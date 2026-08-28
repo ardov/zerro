@@ -1,5 +1,6 @@
 import { createTheme } from '@mui/material/styles'
 import { blueGrey, blue, green, grey } from '@mui/material/colors'
+import { breakpoints } from './breakpoints'
 
 const hoverOpacity = 0.04
 
@@ -11,6 +12,7 @@ export const mainColors = {
 }
 
 export const appTheme = createTheme({
+  breakpoints: { values: { ...breakpoints } },
   colorSchemes: {
     light: {
       palette: {
