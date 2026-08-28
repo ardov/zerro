@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
-import type { PopoverProps } from '@mui/material'
-import { Menu, MenuItem } from '@mui/material'
+import type { MenuProps } from '6-shared/ui/Menu'
+import { Menu, MenuItem } from '6-shared/ui/Menu'
 import { useTranslation } from 'react-i18next'
 import { registerPopover } from '6-shared/historyPopovers'
 
@@ -11,7 +11,7 @@ type TableMenuProps = {
   onReorderModeToggle: () => void
 }
 
-const tableMenu = registerPopover<TableMenuProps, PopoverProps>('tableMenu', {
+const tableMenu = registerPopover<TableMenuProps, MenuProps>('tableMenu', {
   isAllShown: false,
   isReordering: false,
   onShowAllToggle: () => {},

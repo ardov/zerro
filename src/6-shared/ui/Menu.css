@@ -1,0 +1,23 @@
+@layer components {
+  /* MUI grows a menu out of the corner it is anchored to. `transition-none`
+     from a call site still wins: `utilities` is the later layer, which is how
+     the filter bar chains a second surface off the menu without waiting. */
+  .owned-menu {
+    transform-origin: var(--transform-origin);
+    transition:
+      opacity 150ms ease,
+      transform 150ms ease;
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .owned-menu {
+      transition: none;
+    }
+  }
+}

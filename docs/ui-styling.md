@@ -266,15 +266,42 @@ components adds exactly one of each. A reset that set them would leave two
 classes contending for one property with only Tailwind's emission order to
 separate them, which is not a precedence rule.
 
-`ActionList` also carries the parts a MUI `MenuItem` was assembled from —
-`ActionListItemIcon`, `ActionListItemText`, `ActionListItemAction`,
-`ActionListSubheader`, `ActionListDivider`. They stay inside the ActionList
-family rather than being published as a generic `ListItemIcon` or `Divider`,
-because they carry this list's geometry and nothing else needs them.
-`ActionListItemText` has no margin of its own: MUI's `ListItemText` does, but
-`MenuItem` zeroes it, and a row that keeps it is 8px taller than the one it
-replaced. `ActionList.stories.tsx` compares rows, icon slots, subheaders and
-dividers against the MUI originals.
+`ListRow.tsx` holds the row vocabulary MUI spread across `MenuItem`,
+`ListItemIcon`, `ListItemText`, `ListItemSecondaryAction`, `ListSubheader` and
+`Divider`: `listRowClass` plus `ListRowIcon`, `ListRowText`, `ListRowAction`,
+`ListRowSubheader` and `ListRowDivider`. Two containers use it and their
+semantics differ, so it belongs to neither of them rather than being borrowed
+from whichever defined it first. It is not published as a generic
+`ListItemIcon` or `Divider`, because it carries these two lists' geometry and
+nothing else needs it. `ListRowText` has no margin of its own: MUI's
+`ListItemText` does, but `MenuItem` zeroes it, and a row that keeps it is 8px
+taller than the one it replaced.
+
+`listRowClass` spells the disabled state twice, once as `disabled:` and once as
+`aria-disabled:`. A toolbar row is a real `button` and carries `disabled`; a
+menu row is a `div` with `aria-disabled`, because a menu keeps its disabled
+items focusable so they are still announced. Only one variant ever matches, and
+without both a disabled menu row is not dimmed at all.
+`ActionList.stories.tsx` compares rows, icon slots, subheaders and dividers
+against the MUI originals.
+
+`Menu.tsx` is MUI's `Menu`: a popup with menu semantics, positioned against an
+element (`anchorEl`) or a point (`anchorPosition`, for a context menu opened by
+a right click or a long press). `placement` has two values, which are the two
+the app uses: MUI's default, the menu's top-left over the anchor's, and
+`top-end` for the transaction action bar, which sits at the bottom of the
+screen and opens upward. `onCloseComplete` is there for the filter bar, which
+opens a clause editor the moment the menu is gone — starting it while the menu
+is still animating out moves focus twice. That menu also passes
+`transition-none`, which reaches the stylesheet's rule because `utilities` is
+the later layer.
+
+`MenuItem` turns Base UI's `closeOnClick` off. These menus live on the history
+stack, so closing has to go through the popover's own `onClose` and pop the
+entry exactly once; letting Base UI close the menu as well would pop it twice
+and send the user back a page. Every call site already closed explicitly.
+`arrowPadding` is zeroed on the positioner: there is no arrow, and the default
+5px of room for one shifts a menu opened at a point off that point.
 
 `OutlinedField` is MUI's outlined text field: the notched border with the label
 cut into it. Its label is always floated, which is right for a field that
@@ -318,10 +345,11 @@ carries `aria-pressed` instead, which is the state the stray checkbox used to
 announce on its own. A switch is a control worth owning the day something
 needs a working one.
 
-The `MenuList` and `MenuItem` still in the app are inside real MUI `Menu` and
-`Select` popups — context menus, selects, the transaction top bar. Those are
-menus in the sense `ActionList` deliberately is not, so they need a menu
-component rather than this one.
+Every MUI `Menu` is converted: the two context menus, the envelope table menu,
+the transaction action bar and the filter bar. The `MenuItem` still in the app
+is inside a MUI `Select` — `SmartSelect` and its options, the tag picker, the
+goal popover — where it is an option in a listbox rather than a menu item.
+Those convert with `Select`, not with this.
 
 These files live beside the other shared components, not under
 `6-shared/ui/shadcn`. `components.json` points the shadcn `ui` alias at that

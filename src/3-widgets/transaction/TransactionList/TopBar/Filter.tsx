@@ -6,11 +6,10 @@ import {
   Autocomplete,
   Chip,
   InputBase,
-  Menu,
-  MenuItem,
   Popover,
   TextField,
 } from '@mui/material'
+import { Menu, MenuItem } from '6-shared/ui/Menu'
 import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 import { AddIcon, CloseIcon, FilterListIcon } from '6-shared/ui/Icons'
@@ -193,8 +192,12 @@ const Filter: FC<FilterProps> = ({
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={() => setMenuAnchor(null)}
-        transitionDuration={0}
-        slotProps={{ transition: { onExited: openPendingEditor } }}
+        onCloseComplete={openPendingEditor}
+        // The clause editor opens the moment this menu is gone, so the menu
+        // does not animate out. `utilities` is the later layer, so this beats
+        // the transition the stylesheet gives every other menu.
+        className="transition-none"
+        aria-label={t('addFilter')}
       >
         {availableKinds.map(kind => (
           <MenuItem key={kind} onClick={() => chooseKind(kind)}>

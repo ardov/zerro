@@ -8,14 +8,13 @@ import {
   MenuItem,
   MenuList,
 } from '@mui/material'
+import { ActionList, ActionListItem } from './ActionList'
 import {
-  ActionList,
-  ActionListDivider,
-  ActionListItem,
-  ActionListItemIcon,
-  ActionListItemText,
-  ActionListSubheader,
-} from './ActionList'
+  ListRowDivider,
+  ListRowIcon,
+  ListRowSubheader,
+  ListRowText,
+} from './ListRow'
 import { AddIcon } from './feather'
 
 const meta = { title: 'UI/Action list' } satisfies Meta
@@ -53,24 +52,24 @@ function Matrix() {
 
       <div data-testid="owned" className="w-[320px] bg-card">
         <ActionList aria-label="Owned">
-          <ActionListSubheader>Section</ActionListSubheader>
+          <ListRowSubheader>Section</ListRowSubheader>
           <ActionListItem>
-            <ActionListItemIcon>
+            <ListRowIcon>
               <AddIcon />
-            </ActionListItemIcon>
-            <ActionListItemText>Plain row</ActionListItemText>
+            </ListRowIcon>
+            <ListRowText>Plain row</ListRowText>
           </ActionListItem>
-          <ActionListDivider className="opacity-60" />
+          <ListRowDivider className="opacity-60" />
           <ActionListItem>
-            <ActionListItemIcon>
+            <ListRowIcon>
               <AddIcon />
-            </ActionListItemIcon>
-            <ActionListItemText
+            </ListRowIcon>
+            <ListRowText
               className="whitespace-normal"
               secondary="A second line of explanation"
             >
               With description
-            </ActionListItemText>
+            </ListRowText>
           </ActionListItem>
         </ActionList>
       </div>
@@ -110,7 +109,7 @@ const compare: Story['play'] = async ({ canvasElement }) => {
   await expect(
     all(owned, '[data-slot="action-list-item"] > span:first-child')
   ).toEqual(all(legacy, '.MuiListItemIcon-root'))
-  await expect(all(owned, '[data-slot="action-list-subheader"]')).toEqual(
+  await expect(all(owned, '[data-slot="list-row-subheader"]')).toEqual(
     all(legacy, '.MuiListSubheader-root')
   )
   await expect(all(owned, 'hr')).toEqual(all(legacy, 'hr'))

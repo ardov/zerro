@@ -9,11 +9,8 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material'
-import {
-  ActionListItem,
-  ActionListItemIcon,
-  ActionListItemText,
-} from '6-shared/ui/ActionList'
+import { ActionListItem } from '6-shared/ui/ActionList'
+import { ListRowIcon, ListRowText } from '6-shared/ui/ListRow'
 import { UploadIcon } from '6-shared/ui/Icons'
 import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
@@ -123,10 +120,10 @@ export function ImportBackupItem() {
   return (
     <>
       <ActionListItem onClick={() => inputRef.current?.click()}>
-        <ActionListItemIcon>
+        <ListRowIcon>
           <UploadIcon />
-        </ActionListItemIcon>
-        <ActionListItemText>{t('restoreFromBackup')}</ActionListItemText>
+        </ListRowIcon>
+        <ListRowText>{t('restoreFromBackup')}</ListRowText>
       </ActionListItem>
 
       <input

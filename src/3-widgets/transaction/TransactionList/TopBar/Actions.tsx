@@ -7,14 +7,9 @@ import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
 import EditOutlined from '@mui/icons-material/EditOutlined'
-import {
-  Chip,
-  Divider,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
-  Menu,
-} from '@mui/material'
+import { Chip } from '@mui/material'
+import { Menu, MenuItem } from '6-shared/ui/Menu'
+import { ListRowDivider, ListRowIcon, ListRowText } from '6-shared/ui/ListRow'
 import {
   LocalOfferOutlinedIcon,
   DoneAllIcon,
@@ -166,35 +161,33 @@ const Actions: FC<ActionsProps> = ({
             <Tooltip title={t('actions')}>
               <IconButton
                 children={<MoreVertIcon />}
-                aria-controls="actions-menu"
                 aria-haspopup="true"
                 onClick={handleClick}
               />
             </Tooltip>
 
             <Menu
-              id="actions-menu"
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={closeMenu}
-              anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
-              transformOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              placement="top-end"
+              aria-label={t('actions')}
             >
               {actions.markViewed && (
                 <MenuItem onClick={handleMarkViewed}>
-                  <ListItemIcon>
+                  <ListRowIcon>
                     <VisibilityIcon />
-                  </ListItemIcon>
-                  <ListItemText primary={t('markViewed')} />
+                  </ListRowIcon>
+                  <ListRowText>{t('markViewed')}</ListRowText>
                 </MenuItem>
               )}
 
               {actions.bulkEdit && (
                 <MenuItem onClick={() => setEditModalVisible(true)}>
-                  <ListItemIcon>
+                  <ListRowIcon>
                     <EditOutlined />
-                  </ListItemIcon>
-                  <ListItemText primary={t('edit')} />
+                  </ListRowIcon>
+                  <ListRowText>{t('edit')}</ListRowText>
                 </MenuItem>
               )}
 
@@ -209,13 +202,12 @@ const Actions: FC<ActionsProps> = ({
                     onUncheckAll()
                   }}
                 >
-                  <ListItemIcon>
+                  <ListRowIcon>
                     <MergeTypeIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={t('combineToOutcome')}
-                    secondary={t('combineToOutcomeComment')}
-                  />
+                  </ListRowIcon>
+                  <ListRowText secondary={t('combineToOutcomeComment')}>
+                    {t('combineToOutcome')}
+                  </ListRowText>
                 </MenuItem>
               )}
 
@@ -230,25 +222,23 @@ const Actions: FC<ActionsProps> = ({
                     onUncheckAll()
                   }}
                 >
-                  <ListItemIcon>
+                  <ListRowIcon>
                     <MergeTypeIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={t('combineToIncome')}
-                    secondary={t('combineToIncomeComment')}
-                  />
+                  </ListRowIcon>
+                  <ListRowText secondary={t('combineToIncomeComment')}>
+                    {t('combineToIncome')}
+                  </ListRowText>
                 </MenuItem>
               )}
 
               {actions.collapseTransactionsEasy && (
                 <MenuItem onClick={handleDelete}>
-                  <ListItemIcon>
+                  <ListRowIcon>
                     <MergeTypeIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={t('mergeTransactions')}
-                    secondary={t('mergeTransactionsComment')}
-                  />
+                  </ListRowIcon>
+                  <ListRowText secondary={t('mergeTransactionsComment')}>
+                    {t('mergeTransactions')}
+                  </ListRowText>
                 </MenuItem>
               )}
 
@@ -263,25 +253,24 @@ const Actions: FC<ActionsProps> = ({
                     onUncheckAll()
                   }}
                 >
-                  <ListItemIcon>
+                  <ListRowIcon>
                     <MergeTypeIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={t('mergeAsTransfer')}
-                    secondary={t('mergeAsTransferComment')}
-                  />
+                  </ListRowIcon>
+                  <ListRowText secondary={t('mergeAsTransferComment')}>
+                    {t('mergeAsTransfer')}
+                  </ListRowText>
                 </MenuItem>
               )}
 
               <div className="my-2">
-                <Divider />
+                <ListRowDivider />
               </div>
 
               <MenuItem onClick={handleCheckAll}>
-                <ListItemIcon>
+                <ListRowIcon>
                   <DoneAllIcon />
-                </ListItemIcon>
-                <ListItemText primary={t('selectAll')} />
+                </ListRowIcon>
+                <ListRowText>{t('selectAll')}</ListRowText>
               </MenuItem>
             </Menu>
           </div>

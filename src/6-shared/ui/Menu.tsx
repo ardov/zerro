@@ -1,0 +1,123 @@
+import type { HTMLAttributes, ReactNode } from 'react'
+import { Menu as MenuPrimitive } from '@base-ui/react/menu'
+import { listRowClass } from './ListRow'
+import { findMuiFocusBoundary } from './muiFocusBoundary'
+import { cn } from './shadcn/utils'
+import './Menu.css'
+
+export type MenuProps = Pick<
+  HTMLAttributes<HTMLDivElement>,
+  'className' | 'aria-label' | 'aria-labelledby'
+> & {
+  open: boolean
+  onClose?: () => void
+  /** Element the menu is positioned against. */
+  anchorEl?: Element | null
+  /** A point to open at instead, for a context menu that was opened by a
+   * right click or a long press and has no element to hang off. */
+  anchorPosition?: { left: number; top: number }
+  /** Which corner the menu grows from. MUI's default puts the menu's top-left
+   * on the anchor's top-left; `top-end` is the transaction action bar, which
+   * sits at the bottom of the screen and has to open upward. */
+  placement?: 'bottom-start' | 'top-end'
+  /** Runs once the menu has finished closing. Chaining a second surface off a
+   * menu needs this: opening it while the menu is still animating out moves
+   * focus twice. */
+  onCloseComplete?: () => void
+  children?: ReactNode
+}
+
+/** MUI's `Menu`: a popup with menu semantics, positioned against an element or
+ * a point.
+ *
+ * This is the counterpart to `ActionList`, which is a toolbar. A menu was
+ * opened by something and can be dismissed, so `role="menu"` promises nothing
+ * it does not deliver here. Base UI supplies the focus trap, the arrows,
+ * typeahead and dismissal.
+ *
+ * History, not this component, decides whether the menu is open: every caller
+ * registers through `historyPopovers`. */
+export function Menu({
+  open,
+  onClose,
+  anchorEl,
+  anchorPosition,
+  placement = 'bottom-start',
+  onCloseComplete,
+  className,
+  children,
+  ...props
+}: MenuProps) {
+  const anchor = anchorPosition
+    ? {
+        getBoundingClientRect: () =>
+          new DOMRect(anchorPosition.left, anchorPosition.top, 0, 0),
+      }
+    : anchorEl
+  const container = findMuiFocusBoundary(anchorEl)
+  const openUp = placement === 'top-end'
+
+  return (
+    <MenuPrimitive.Root
+      open={open}
+      onOpenChange={next => {
+        if (!next) onClose?.()
+      }}
+      onOpenChangeComplete={next => {
+        if (!next) onCloseComplete?.()
+      }}
+    >
+      <MenuPrimitive.Portal container={container}>
+        <MenuPrimitive.Positioner
+          anchor={anchor}
+          side={openUp ? 'top' : 'bottom'}
+          align={openUp ? 'end' : 'start'}
+          // Without the offset the menu is pushed clear of the anchor. MUI
+          // lays its top-left over the anchor's, so take the height back off.
+          sideOffset={({ anchor: a }) => (openUp ? 0 : -a.height)}
+          collisionPadding={16}
+          // No arrow, so no room reserved for one: the default 5px of arrow
+          // padding shifts a menu opened at a point off that point.
+          arrowPadding={0}
+          positionMethod="fixed"
+          className="z-modal"
+        >
+          <MenuPrimitive.Popup
+            {...props}
+            data-slot="menu"
+            className={cn(
+              'owned-menu max-h-[calc(100dvh-96px)] min-w-[112px] overflow-y-auto rounded-lg bg-popover py-2 text-popover-foreground shadow-elevation-8 outline-none',
+              className
+            )}
+          >
+            {children}
+          </MenuPrimitive.Popup>
+        </MenuPrimitive.Positioner>
+      </MenuPrimitive.Portal>
+    </MenuPrimitive.Root>
+  )
+}
+
+/** Closing is the call site's job, so `closeOnClick` is off.
+ *
+ * These menus live on the history stack: closing has to go through the
+ * popover's own `onClose` so the entry pops exactly once. Letting Base UI
+ * close the menu as well would pop it twice and send the user back a page. */
+export function MenuItem({
+  className,
+  selected,
+  ...props
+}: Omit<MenuPrimitive.Item.Props, 'className'> & {
+  className?: string
+  selected?: boolean
+}) {
+  return (
+    <MenuPrimitive.Item
+      data-slot="menu-item"
+      data-selected={selected || undefined}
+      closeOnClick={false}
+      className={cn(listRowClass, className)}
+      {...props}
+    />
+  )
+}

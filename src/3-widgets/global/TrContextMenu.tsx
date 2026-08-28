@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { useCallback } from 'react'
-import type { MenuProps } from '@mui/material'
-import { Menu, MenuItem } from '@mui/material'
+import type { MenuProps } from '6-shared/ui/Menu'
+import { Menu, MenuItem } from '6-shared/ui/Menu'
 import type { TTransaction, TTransactionId } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
@@ -9,7 +9,6 @@ import { track } from '6-shared/analytics'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { getMenuPosition } from './shared/helpers'
 
 type TTrMenuProps = {
   id: TTransactionId
@@ -25,8 +24,8 @@ const trContext = registerPopover<TTrMenuProps, MenuProps>(
 export const useTrContextMenu = () => {
   const { open } = trContext.useMethods()
   const openMenu = useCallback(
-    (props: TTrMenuProps, anchorPosition?: { left: number; top: number }) => {
-      open(props, getMenuPosition(anchorPosition))
+    (props: TTrMenuProps, anchorPosition: { left: number; top: number }) => {
+      open(props, { anchorPosition })
     },
     [open]
   )

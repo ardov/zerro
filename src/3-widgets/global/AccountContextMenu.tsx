@@ -1,15 +1,13 @@
 import type { TAccountId } from '6-shared/types'
 import type { FC } from 'react'
 import { useCallback } from 'react'
-import type { MenuProps } from '@mui/material'
-import { Menu, MenuItem } from '@mui/material'
+import type { MenuProps } from '6-shared/ui/Menu'
+import { Menu, MenuItem } from '6-shared/ui/Menu'
 import { useAppDispatch } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
 import { track } from '6-shared/analytics'
 import { useTranslation } from 'react-i18next'
 import { core } from 'zerro-core/redux'
-
-import { getMenuPosition } from './shared/helpers'
 
 type AccountMenuProps = { id: TAccountId }
 
@@ -23,9 +21,9 @@ export const useAccountContextMenu = () => {
   const openMenu = useCallback(
     (
       props: AccountMenuProps,
-      anchorPosition?: { left: number; top: number }
+      anchorPosition: { left: number; top: number }
     ) => {
-      open(props, getMenuPosition(anchorPosition))
+      open(props, { anchorPosition })
     },
     [open]
   )

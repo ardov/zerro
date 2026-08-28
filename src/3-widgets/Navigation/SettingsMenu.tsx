@@ -20,15 +20,14 @@ import {
   TagIcon,
 } from '6-shared/ui/Icons'
 import Switch from '@mui/material/Switch'
+import { ActionList, ActionListItem } from '6-shared/ui/ActionList'
 import {
-  ActionList,
-  ActionListDivider,
-  ActionListItem,
-  ActionListItemAction,
-  ActionListItemIcon,
-  ActionListItemText,
-  ActionListSubheader,
-} from '6-shared/ui/ActionList'
+  ListRowAction,
+  ListRowDivider,
+  ListRowIcon,
+  ListRowSubheader,
+  ListRowText,
+} from '6-shared/ui/ListRow'
 import { track } from '6-shared/analytics'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import {
@@ -89,7 +88,7 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
   return (
     <>
       {props.showLinks && <NavItems onClose={props.onClose} />}
-      <ActionListSubheader>{t('settings')}</ActionListSubheader>
+      <ListRowSubheader>{t('settings')}</ListRowSubheader>
       <ThemeItem onClose={props.onClose} />
       <ReloadDataItem onClose={props.onClose} />
       <AutoSyncItem />
@@ -100,19 +99,19 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
         </>
       ) : (
         <ActionListItem onClick={() => setExpanded(true)}>
-          <ActionListItemIcon>
+          <ListRowIcon>
             <MoreHorizIcon />
-          </ActionListItemIcon>
-          <ActionListItemText>{t('advancedSettings')}</ActionListItemText>
+          </ListRowIcon>
+          <ListRowText>{t('advancedSettings')}</ListRowText>
         </ActionListItem>
       )}
-      <ActionListDivider className="opacity-60" />
-      <ActionListSubheader>{t('data')}</ActionListSubheader>
+      <ListRowDivider className="opacity-60" />
+      <ListRowSubheader>{t('data')}</ListRowSubheader>
       <HistoryItem onClose={props.onClose} />
       <ExportCsvItem />
       <ExportJsonItem />
       <ImportBackupItem />
-      <ActionListDivider className="opacity-60" />
+      <ListRowDivider className="opacity-60" />
       <LangItem onClose={props.onClose} />
       <LogOutItem onClose={props.onClose} />
       <VersionItem onClose={props.onClose} />
@@ -149,10 +148,10 @@ function HistoryItem(_props: ItemProps) {
   const openPanel = useHistoryPanelFromMenu()
   return (
     <ActionListItem onClick={openPanel}>
-      <ActionListItemIcon>
+      <ListRowIcon>
         <HistoryIcon />
-      </ActionListItemIcon>
-      <ActionListItemText>{t('panelTitle')}</ActionListItemText>
+      </ListRowIcon>
+      <ListRowText>{t('panelTitle')}</ListRowText>
     </ActionListItem>
   )
 }
@@ -166,10 +165,10 @@ function ExportCsvItem() {
   }
   return (
     <ActionListItem onClick={handleExportCSV}>
-      <ActionListItemIcon>
+      <ListRowIcon>
         <SaveAltIcon />
-      </ActionListItemIcon>
-      <ActionListItemText>{t('downloadCSV')}</ActionListItemText>
+      </ListRowIcon>
+      <ListRowText>{t('downloadCSV')}</ListRowText>
     </ActionListItem>
   )
 }
@@ -195,10 +194,10 @@ function ExportJsonItem() {
   }
   return (
     <ActionListItem onClick={handleExportJson}>
-      <ActionListItemIcon>
+      <ListRowIcon>
         <SaveAltIcon />
-      </ActionListItemIcon>
-      <ActionListItemText>{t('fullBackup')}</ActionListItemText>
+      </ListRowIcon>
+      <ListRowText>{t('fullBackup')}</ListRowText>
     </ActionListItem>
   )
 }
@@ -213,12 +212,12 @@ function ThemeItem({ onClose }: ItemProps) {
   }
   return (
     <ActionListItem onClick={handleThemeChange}>
-      <ActionListItemIcon>
+      <ListRowIcon>
         {theme.mode === 'dark' ? <WbSunnyIcon /> : <NightsStayIcon />}
-      </ActionListItemIcon>
-      <ActionListItemText>
+      </ListRowIcon>
+      <ListRowText>
         {t(theme.mode === 'dark' ? 'lightMode' : 'darkMode')}
-      </ActionListItemText>
+      </ListRowText>
     </ActionListItem>
   )
 }
@@ -235,11 +234,11 @@ function LangItem(_props: ItemProps) {
 
   return (
     <ActionListItem onClick={setNextLang}>
-      <ActionListItemIcon>
+      <ListRowIcon>
         <GlobeIcon />
-      </ActionListItemIcon>
-      <ActionListItemText>{t('language')}</ActionListItemText>
-      <ActionListItemAction>{currentLang.toUpperCase()}</ActionListItemAction>
+      </ListRowIcon>
+      <ListRowText>{t('language')}</ListRowText>
+      <ListRowAction>{currentLang.toUpperCase()}</ListRowAction>
     </ActionListItem>
   )
 }
@@ -261,42 +260,42 @@ function NavItems({ onClose }: ItemProps) {
         render={<Link to="/accounts" />}
         nativeButton={false}
       >
-        <ActionListItemIcon>
+        <ListRowIcon>
           <AccountBalanceWalletIcon />
-        </ActionListItemIcon>
-        <ActionListItemText>{t('accounts')}</ActionListItemText>
+        </ListRowIcon>
+        <ListRowText>{t('accounts')}</ListRowText>
       </ActionListItem>
       <ActionListItem
         onClick={handleNav('/review')}
         render={<Link to="/review" />}
         nativeButton={false}
       >
-        <ActionListItemIcon>
+        <ListRowIcon>
           <WhatshotIcon />
-        </ActionListItemIcon>
-        <ActionListItemText>{t('yearWrapped')}</ActionListItemText>
+        </ListRowIcon>
+        <ListRowText>{t('yearWrapped')}</ListRowText>
       </ActionListItem>
       <ActionListItem
         onClick={handleNav('/about')}
         render={<Link to="/about" />}
         nativeButton={false}
       >
-        <ActionListItemIcon>
+        <ListRowIcon>
           <HelpOutlineIcon />
-        </ActionListItemIcon>
-        <ActionListItemText>{t('about')}</ActionListItemText>
+        </ListRowIcon>
+        <ListRowText>{t('about')}</ListRowText>
       </ActionListItem>
       <ActionListItem
         onClick={handleNav('/donation')}
         render={<Link to="/donation" />}
         nativeButton={false}
       >
-        <ActionListItemIcon>
+        <ListRowIcon>
           <FavoriteBorderIcon />
-        </ActionListItemIcon>
-        <ActionListItemText>{t('donate')}</ActionListItemText>
+        </ListRowIcon>
+        <ListRowText>{t('donate')}</ListRowText>
       </ActionListItem>
-      <ActionListDivider className="opacity-60" />
+      <ListRowDivider className="opacity-60" />
     </>
   )
 }
@@ -321,10 +320,10 @@ function ReloadDataItem(_props: ItemProps) {
   })
   return (
     <ActionListItem onClick={reload}>
-      <ActionListItemIcon>
+      <ListRowIcon>
         <SyncIcon />
-      </ActionListItemIcon>
-      <ActionListItemText>{t('reloadData')}</ActionListItemText>
+      </ListRowIcon>
+      <ListRowText>{t('reloadData')}</ListRowText>
     </ActionListItem>
   )
 }
@@ -338,13 +337,11 @@ function AutoSyncItem() {
   }
   return (
     <ActionListItem onClick={handleClick} aria-pressed={regular}>
-      <ActionListItemIcon>
-        {regular ? <SyncIcon /> : <SyncDisabledIcon />}
-      </ActionListItemIcon>
-      <ActionListItemText>{t('regularSync')}</ActionListItemText>
-      <ActionListItemAction>
+      <ListRowIcon>{regular ? <SyncIcon /> : <SyncDisabledIcon />}</ListRowIcon>
+      <ListRowText>{t('regularSync')}</ListRowText>
+      <ListRowAction>
         <DecorativeSwitch checked={regular} />
-      </ActionListItemAction>
+      </ListRowAction>
     </ActionListItem>
   )
 }
@@ -360,12 +357,10 @@ function IconModeItem() {
   }
   return (
     <ActionListItem onClick={handleClick}>
-      <ActionListItemIcon>
+      <ListRowIcon>
         <TagIcon />
-      </ActionListItemIcon>
-      <ActionListItemText>
-        {t(emojiIcons ? 'useIcons' : 'useEmojis')}
-      </ActionListItemText>
+      </ListRowIcon>
+      <ListRowText>{t(emojiIcons ? 'useIcons' : 'useEmojis')}</ListRowText>
     </ActionListItem>
   )
 }
@@ -395,28 +390,28 @@ function BudgetSettingsItem() {
   return (
     <>
       <ActionListItem onClick={toggleSetting} aria-pressed={!!preferZmBudgets}>
-        <ActionListItemIcon>
+        <ListRowIcon>
           <AutoAwesomeIcon />
-        </ActionListItemIcon>
-        <ActionListItemText
+        </ListRowIcon>
+        <ListRowText
           className="whitespace-normal"
           secondary={t('useZmBudgetsDescription')}
         >
           {t('useZmBudgets')}
-        </ActionListItemText>
-        <ActionListItemAction>
+        </ListRowText>
+        <ListRowAction>
           <DecorativeSwitch checked={!!preferZmBudgets} />
-        </ActionListItemAction>
+        </ListRowAction>
       </ActionListItem>
 
       {!preferZmBudgets && (
         <ActionListItem onClick={convertBudgets}>
-          <ActionListItemIcon>
+          <ListRowIcon>
             <AutoAwesomeIcon />
-          </ActionListItemIcon>
-          <ActionListItemText className="whitespace-normal">
+          </ListRowIcon>
+          <ListRowText className="whitespace-normal">
             {t('convertBudgetsFromZm')}
-          </ActionListItemText>
+          </ListRowText>
         </ActionListItem>
       )}
     </>
@@ -433,10 +428,10 @@ function LogOutItem({ onClose }: ItemProps) {
   }
   return (
     <ActionListItem onClick={handleClick}>
-      <ActionListItemIcon>
+      <ListRowIcon>
         <ExitToAppIcon />
-      </ActionListItemIcon>
-      <ActionListItemText>{t('logOut')}</ActionListItemText>
+      </ListRowIcon>
+      <ListRowText>{t('logOut')}</ListRowText>
     </ActionListItem>
   )
 }
@@ -450,12 +445,12 @@ function VersionItem({ onClose }: ItemProps) {
         window.location.reload()
       }}
     >
-      <ActionListItemIcon />
-      <ActionListItemText>
+      <ListRowIcon />
+      <ListRowText>
         <span className="type-overline text-muted-foreground">
           {t('version', { version: appVersion })}
         </span>
-      </ActionListItemText>
+      </ListRowText>
     </ActionListItem>
   )
 }
