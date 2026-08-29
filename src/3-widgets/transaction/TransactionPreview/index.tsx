@@ -1,22 +1,20 @@
 import { Button, IconButton } from '6-shared/ui/Button'
-import type { TTransaction, TTransactionId } from '6-shared/types'
+import type { TISODate, TTransaction, TTransactionId } from '6-shared/types'
 
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Fab, Zoom } from '@mui/material'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
-import { DatePicker } from '@mui/x-date-pickers'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import {
   DeleteIcon,
   CloseIcon,
   RestoreFromTrashIcon,
-  CalendarIcon,
 } from '6-shared/ui/Icons'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { rateToWords } from '6-shared/helpers/money'
-import { formatDate, parseDate, toISODate } from '6-shared/helpers/date'
+import { formatDate, parseDate } from '6-shared/helpers/date'
 import { track } from '6-shared/analytics'
 
 import { useAppCommand, useAppSelector } from 'store'
@@ -215,14 +213,13 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           />
         )}
         <div className="flex flex-row gap-4">
-          <DatePicker
+          <OutlinedField
             label={t('date')}
-            value={parseDate(localDate)}
-            onChange={date => date && setLocalDate(toISODate(date))}
-            showDaysOutsideCurrentMonth
-            format="dd.MM.yyyy"
-            slotProps={{ textField: { size: 'small', fullWidth: true } }}
-            slots={{ openPickerIcon: CalendarIcon }}
+            value={localDate}
+            onChange={event => setLocalDate(event.target.value as TISODate)}
+            type="date"
+            fullWidth
+            size="small"
           />
           {/* A native time input draws a picker button of its own, which MUI
               hid too. The field's own class lands on the frame, so the input

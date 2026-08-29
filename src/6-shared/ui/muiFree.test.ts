@@ -37,9 +37,9 @@ const OWNED = [
   'src/6-shared/hooks/useRovingListKeys.ts',
 ]
 
-/** Surfaces converted off MUI. Their data layer still reaches MUI — the date
- * localization module pulls `@mui/x-date-pickers` — so these are checked on
- * what they import themselves rather than on a whole transitive closure. */
+/** Surfaces converted off MUI are checked on their own imports rather than a
+ * whole transitive closure: an application surface can still use shared
+ * infrastructure while that infrastructure is being migrated separately. */
 const CONVERTED = [
   'src/2-pages/Budgets/BudgetPopover/BudgetPopover.tsx',
   'src/2-pages/Budgets/MonthInfo/FxRates.tsx',
@@ -84,6 +84,7 @@ const CONVERTED = [
   'src/3-widgets/transaction/TransactionList/TopBar/Filter.tsx',
   'src/3-widgets/Navigation/MobileNavigation.tsx',
   'src/3-widgets/RefreshButton.tsx',
+  'src/3-widgets/transaction/TransactionList/GrouppedList.tsx',
 ]
 
 /** The mixed barrel. It re-exports the MUI-free Feather set alongside the

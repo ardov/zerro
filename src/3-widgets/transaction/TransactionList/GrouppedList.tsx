@@ -2,15 +2,15 @@ import type { FC } from 'react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ListImperativeAPI, RowComponentProps } from 'react-window'
 import { List } from 'react-window'
-import type { StaticDatePickerProps } from '@mui/x-date-pickers/StaticDatePicker'
-import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker'
 import { AutoSizer } from 'react-virtualized-auto-sizer'
 import { ListRowSubheader } from '6-shared/ui/ListRow'
-import { formatDate, parseDate } from '6-shared/helpers/date'
+import { formatDate } from '6-shared/helpers/date'
 import type { TDateDraft, TISODate, TTransactionId } from '6-shared/types'
 import { toISODate } from '6-shared/helpers/date'
 import { SmartDialog } from '6-shared/ui/SmartDialog'
 import { registerPopover } from '6-shared/historyPopovers'
+import { OutlinedField } from '6-shared/ui/OutlinedField'
+import { useTranslation } from 'react-i18next'
 
 type GroupNode = {
   date: TISODate
@@ -103,15 +103,13 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
   const onDateClick = useCallback(
     (date: TISODate) => {
       datePopover.open({
-        value: parseDate(date),
-        minDate: parseDate(groups[groups.length - 1]?.date || 0),
-        maxDate: parseDate(groups[0]?.date || 0),
+        value: date,
+        minDate: groups[groups.length - 1]?.date,
+        maxDate: groups[0]?.date,
         // Closing is handled inside `DateDialog` via its own (fresh) onClose —
         // the `close` captured here is stale (the dialog isn't on the history
         // stack yet at click time), so calling it would be a no-op.
-        onChange: (d: TDateDraft | null) => {
-          if (d) scrollToDate(d as TISODate)
-        },
+        onChange: scrollToDate,
       })
     },
     [datePopover, groups, scrollToDate]
@@ -257,32 +255,40 @@ const stickyOverlayStyle: React.CSSProperties = {
 //
 
 type TDateDialogProps = {
-  value: StaticDatePickerProps['value']
-  minDate?: StaticDatePickerProps['minDate']
-  maxDate?: StaticDatePickerProps['maxDate']
-  onChange: StaticDatePickerProps['onChange']
+  value: TISODate
+  minDate?: TISODate
+  maxDate?: TISODate
+  onChange: (date: TISODate) => void
 }
 
 const dateDialog = registerPopover<TDateDialogProps>('listSateDialog', {
-  value: new Date(),
+  value: toISODate(new Date()),
   onChange: () => {},
 })
 
 const DateDialog = () => {
+  const { t } = useTranslation('transaction')
   const { extraProps, displayProps } = dateDialog.useProps()
-  const { onChange, ...pickerProps } = extraProps
+  const { onChange, value, minDate, maxDate } = extraProps
   return (
     <SmartDialog elKey={dateDialog.key}>
-      <StaticDatePicker
-        {...pickerProps}
-        openTo="day"
-        // No action bar — picking a day applies and closes immediately.
-        slotProps={{ actionBar: { actions: [] } }}
-        onChange={(value, ...rest) => {
-          displayProps.onClose()
-          onChange?.(value, ...rest)
-        }}
-      />
+      <div className="w-[280px] p-4">
+        <OutlinedField
+          autoFocus
+          type="date"
+          label={t('date')}
+          value={value}
+          min={minDate}
+          max={maxDate}
+          fullWidth
+          onChange={event => {
+            const date = event.target.value
+            if (!date) return
+            displayProps.onClose()
+            onChange(date as TISODate)
+          }}
+        />
+      </div>
     </SmartDialog>
   )
 }

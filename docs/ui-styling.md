@@ -610,9 +610,10 @@ found them.
 
 MUI's `Collapse` is gone too — it was the only transition of MUI's this app
 ever used, at six call sites, every one of them `in` plus `unmountOnExit` and
-nothing else. What is left in those files is neither list vocabulary nor a
-transition: `Chip` in the history rows, `Link` in the receipt, and
-`@mui/x-date-pickers` in the grouped list.
+nothing else. The date pickers are gone too: transaction editing uses the
+native date control, and the grouped list opens that same bounded control in
+its existing `SmartDialog`. The native control is the smallest fit for both
+single-date interactions; no calendar overlay needs to be owned.
 
 MUI's `Popover` is gone from the app. Its last four callers were the floating
 rename field, the colour picker, the tag list and the transaction filter's
@@ -759,17 +760,17 @@ Feather glyph through the mixed `Icons` barrel compiles, looks identical at the
 call site, and quietly returns MUI to the bundle, so the test walks the whole
 import graph of the owned set and fails with the chain that reached MUI. The
 converted surfaces are checked on their own imports instead of transitively:
-their data layer legitimately reaches `@mui/x-date-pickers` through date
-localization, which is not what the claim is about. Add a module to `OWNED` in
-that file when it is converted.
+shared infrastructure has its own migration step and does not make a surface
+itself an MUI consumer. Add a module to `OWNED` in that file when it is
+converted.
 
 Base UI is roughly 40-65 kB gzipped, and while both libraries ship the app pays
 for MUI and Base UI at once. That is the budget for the coexistence period, not
 a permanent state: keep the owned set to surfaces that have actually been
 converted, and remove the MUI equivalent in the same change rather than leaving
-two implementations of one control. `@mui/x-date-pickers` pulls its own older
-`@base-ui/utils`; a `pnpm.overrides` pin collapses the two onto one copy, and
-the pin comes out once the pickers catch up.
+two implementations of one control. `@mui/x-date-pickers` still remains in the
+dependency graph only until package cleanup; its temporary `pnpm.overrides`
+entry goes with that final removal.
 
 Assignment dismissal via Escape/backdrop/swipe applies the draft, as do Enter,
 the submit button and quick actions. An unchanged value emits no command.
