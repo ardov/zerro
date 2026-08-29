@@ -8,8 +8,21 @@ import { alpha } from './color'
  * The composed ones are composed here rather than written as an opacity
  * modifier at the call site: `hover:bg-primary/4` would fork the number that
  * `action.hoverOpacity` names, where no change to the palette could reach it.
- * They are also composed in TypeScript rather than in CSS, because `alpha`
- * replaces an alpha where `color-mix` multiplies one — see `color.ts`.
+ *
+ * They are composed in TypeScript rather than in CSS, but not for want of a
+ * CSS spelling: `rgb(from var(--primary) r g b / 0.04)` replaces an alpha
+ * exactly the way `alpha()` does, and the app already uses that syntax over
+ * `currentColor` in the stats widgets. `color-mix` is the one that would be
+ * wrong, because it multiplies.
+ *
+ * The reason is that a custom property is an unevaluated token stream. A token
+ * written that way computes to `rgb(from #37474f r g b / 0.04)` and paints as
+ * `color(srgb …)`, so it stops being a colour anything can read back — neither
+ * a parity story comparing notations nor a check that the palette did not move
+ * between two builds. The palette is static, so composing once at module load
+ * costs nothing and leaves every token a plain `rgba()`. `getContrastText`
+ * has to run in JavaScript for a tag's colour regardless, so `color.ts` is
+ * there either way.
  *
  * Every name here needs a counterpart in `src/tailwind.css`, a `--color-*`
  * alias or an `@utility`, or it forces `[box-shadow:var(--elevation-8)]` at

@@ -1,10 +1,12 @@
 /** The two colour calculations the palette is described in terms of, kept to
  * MUI's own arithmetic so the values they produce do not move.
  *
- * `alpha` is not a mix. It *replaces* a colour's alpha rather than multiplying
- * it, which is why the state fills built on `action.selected` — itself already
- * transparent — come out at the opacity they name. CSS `color-mix(… ,
- * transparent)` multiplies, and would quietly make every one of those fainter. */
+ * `alpha` *replaces* a colour's alpha rather than multiplying it, which is why
+ * the state fills built on `action.selected` — itself already transparent —
+ * come out at the opacity they name and not at a fraction of it. Only one of
+ * the two CSS spellings does the same: `rgb(from C r g b / a)` replaces, and
+ * `color-mix(in srgb, C a%, transparent)` multiplies. See `tokens.ts` for why
+ * the composition stays here rather than moving to the former. */
 
 type Rgb = [red: number, green: number, blue: number]
 

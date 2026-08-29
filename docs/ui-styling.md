@@ -107,13 +107,25 @@ colour, and `createTheme` pins `hoverOpacity` itself, so writing
 reach it. `--primary-hover`, `--primary-focus`, `--primary-selected` and
 `--primary-selected-hover` are composed in `tokens.ts` the way `--input` is; the
 last is the sum of the selected and hover opacities, which is how MUI stacks
-them. They are composed in TypeScript rather than as CSS `color-mix()`, because
-`alpha()` *replaces* a colour's alpha where `color-mix(…, transparent)`
-multiplies it — the fills built on `action.selected`, which is itself already
-transparent, would come out several times fainter. `color.ts` holds that
-function and `getContrastText`, and `color.test.ts` recomputes every
-`contrastText` in the palette to say the arithmetic still agrees with the values
-the palette was frozen from. `--disabled-opacity` is `action.disabledOpacity` and is an
+them.
+
+They are composed in TypeScript, and the reason is not that CSS cannot do it.
+`alpha()` _replaces_ a colour's alpha, and so does `rgb(from C r g b / a)` — the
+syntax the stats widgets already use over `currentColor`. It is
+`color-mix(in srgb, C a%, transparent)` that would be wrong here: it multiplies,
+so the fills built on `action.selected`, itself already transparent, would come
+out at a fraction of the opacity they name.
+
+What decides it is that a custom property is an unevaluated token stream. A
+token written as `rgb(from var(--primary) r g b / 0.04)` computes to
+`rgb(from #37474f r g b / 0.04)` and paints as `color(srgb …)`, so it stops
+being a colour anything can read back — not a parity story comparing notations,
+and not a check that the palette has not moved between two builds. The palette
+is static, so composing once at module load costs nothing and leaves every token
+a plain `rgba()`. `color.ts` holds that function and `getContrastText` — which
+has to run in JavaScript for a tag's colour whatever the tokens do — and
+`color.test.ts` recomputes every `contrastText` in the palette to say the
+arithmetic still agrees with the values it was frozen from. `--disabled-opacity` is `action.disabledOpacity` and is an
 `@utility` (`opacity-disabled`) rather than a `--color-*` alias, because MUI
 dims a disabled menu item instead of recolouring it.
 `secondary` is the semantic selected-surface token, not MUI's secondary brand
