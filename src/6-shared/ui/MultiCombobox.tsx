@@ -1,5 +1,6 @@
 import { Combobox } from '@base-ui/react/combobox'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CheckIcon, ChevronDownIcon, CloseIcon } from './feather'
 import { listRowClass } from './ListRow'
 import { OutlinedFieldFrame } from './OutlinedField'
@@ -25,6 +26,7 @@ type MultiComboboxProps<T extends string> = {
 /** A filterable multiple-select field. Unlike an autocomplete, its input only
  * narrows a fixed set of values: committing text never creates a filter value. */
 export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
+  const { t } = useTranslation()
   const selected = props.options.filter(option =>
     props.value.includes(option.value)
   )
@@ -52,7 +54,7 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
                     >
                       <span className="truncate">{option.label}</span>
                       <Combobox.ChipRemove
-                        aria-label={`Remove ${option.label}`}
+                        aria-label={t('removeValue', { label: option.label })}
                         className="inline-flex size-4 shrink-0 items-center justify-center rounded-sm border-0 bg-transparent p-0 text-inherit hover:bg-foreground-hover focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
                       >
                         <CloseIcon fontSize="small" />
@@ -69,7 +71,7 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
             </Combobox.Value>
           </Combobox.Chips>
           <Combobox.Trigger
-            aria-label={`Open ${props.label}`}
+            aria-label={t('openOptions', { label: props.label })}
             className="absolute right-1 inline-flex size-8 items-center justify-center rounded-[50%] border-0 bg-transparent p-0 text-action-active hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             <ChevronDownIcon />

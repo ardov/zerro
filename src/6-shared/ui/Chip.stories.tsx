@@ -104,7 +104,14 @@ export const Parity: Story = { render: () => <Pair />, play: compare }
 export const DarkParity: Story = { ...Parity, globals: { theme: 'dark' } }
 
 /** MUI makes a deletable chip one keyboard target: Delete and Backspace invoke
- * the same action as its trailing cross. */
+ * the same action as its trailing cross.
+ *
+ * It is focusable but not a button, which is the one place this chip does not
+ * follow MUI. MUI renders a delete-only chip through `ButtonBase`, so it is a
+ * `div` that says `role="button"` — and Enter and Space on it do nothing,
+ * because there is no `onClick` to invoke. The role is dropped here rather
+ * than kept for parity's sake, so nothing is announced as a button that has no
+ * action to offer. */
 export const KeyboardDelete: Story = {
   render: function Render() {
     const [present, setPresent] = useState(true)
@@ -116,8 +123,12 @@ export const KeyboardDelete: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const chip = canvas.getByRole('button', { name: 'Category' })
+    const chip = canvas
+      .getByText('Category')
+      .closest<HTMLElement>('[data-slot="chip"]')!
+    await expect(chip).not.toHaveAttribute('role')
     chip.focus()
+    await expect(chip).toHaveFocus()
     await userEvent.keyboard('{Delete}')
     await expect(canvas.getByText('Removed')).toBeInTheDocument()
   },

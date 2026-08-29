@@ -212,7 +212,14 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           <OutlinedField
             label={t('date')}
             value={localDate}
-            onChange={event => setLocalDate(event.target.value as TISODate)}
+            // A native date control reports an emptied or half-typed date as
+            // an empty string, which is not a date this transaction can be
+            // saved with. Leave the last good one until a whole one arrives.
+            onChange={event => {
+              const date = event.target.value
+              if (!date) return
+              setLocalDate(date as TISODate)
+            }}
             type="date"
             fullWidth
             size="small"

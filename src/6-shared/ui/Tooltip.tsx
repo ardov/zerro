@@ -3,6 +3,26 @@ import type { ReactElement, ReactNode } from 'react'
 import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip'
 import { cn } from './shadcn/utils'
 
+/** MUI's `enterDelay`. It is declared on every trigger as well as on the
+ * shared provider, so a tooltip rendered outside the provider — a unit test,
+ * an isolated render — opens on the same schedule. */
+const OPEN_DELAY = 300
+
+/** One provider for the whole app, mounted in `1-app/Providers`.
+ *
+ * Base UI groups the tooltips under a single provider: moving from one trigger
+ * to the next inside the group's window opens the second instantly instead of
+ * waiting out the delay again, which is what makes a row of icon buttons read
+ * as one thing rather than as five that each have to be earned. MUI had no
+ * grouping and made every tooltip wait; this is deliberately not that. */
+export function TooltipProvider(props: { children: ReactNode }) {
+  return (
+    <TooltipPrimitive.Provider delay={OPEN_DELAY}>
+      {props.children}
+    </TooltipPrimitive.Provider>
+  )
+}
+
 export type TooltipProps = {
   /** Nothing is rendered without one, so a call site can pass a value that
    * may be empty and not branch around it. */
@@ -84,56 +104,56 @@ function ActiveTooltip({
   }
 
   return (
-    // The delay lives on the provider in Base UI, so each tooltip brings its
-    // own. Sharing one would let a second tooltip skip the wait after a
-    // first, which MUI did not do here either.
-    <TooltipPrimitive.Provider delay={300}>
-      <TooltipPrimitive.Root
-        open={open}
-        onOpenChange={nextOpen => setOpen(nextOpen)}
-        triggerId={triggerId}
-        disableHoverablePopup={disableInteractive}
-      >
-        <TooltipPrimitive.Trigger
-          // MUI named its child rather than describing it: a string title
-          // became the child's `aria-label`, which is the only accessible
-          // name every icon-only button in this app has. Base UI describes
-          // instead, and describing an unnamed button leaves it unnamed.
-          id={triggerId}
-          aria-label={typeof title === 'string' ? title : undefined}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchEnd}
-          render={children}
-        />
-        <TooltipPrimitive.Portal>
-          <TooltipPrimitive.Positioner
-            side={placement}
-            sideOffset={14}
-            collisionPadding={2}
-            positionMethod="fixed"
-            className="z-tooltip"
+    <TooltipPrimitive.Root
+      open={open}
+      onOpenChange={nextOpen => setOpen(nextOpen)}
+      triggerId={triggerId}
+      disableHoverablePopup={disableInteractive}
+    >
+      <TooltipPrimitive.Trigger
+        // MUI named its child rather than describing it: a string title
+        // became the child's `aria-label`, which is the only accessible
+        // name every icon-only button in this app has. Base UI describes
+        // instead, and describing an unnamed button leaves it unnamed.
+        id={triggerId}
+        // The provider carries this too. Declaring it here as well keeps a
+        // tooltip outside the provider on the same schedule; it does not cost
+        // the grouping, because a trigger inside the group's instant window
+        // opens at zero whatever its own delay says.
+        delay={OPEN_DELAY}
+        aria-label={typeof title === 'string' ? title : undefined}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        render={children}
+      />
+      <TooltipPrimitive.Portal>
+        <TooltipPrimitive.Positioner
+          side={placement}
+          sideOffset={14}
+          collisionPadding={2}
+          positionMethod="fixed"
+          className="z-tooltip"
+        >
+          <TooltipPrimitive.Popup
+            data-slot="tooltip"
+            className={cn(
+              // 14px at the theme's own line height. The size is this app's override of
+              // MUI's 11px, and it was the only reason this file used to wrap MUI.
+              'max-w-[300px] rounded-lg bg-tooltip px-2 py-1 text-center font-sans text-sm/[1.5] font-medium break-words text-tooltip-foreground',
+              className
+            )}
           >
-            <TooltipPrimitive.Popup
-              data-slot="tooltip"
-              className={cn(
-                // 14px at the theme's own line height. The size is this app's override of
-                // MUI's 11px, and it was the only reason this file used to wrap MUI.
-                'max-w-[300px] rounded-lg bg-tooltip px-2 py-1 text-center font-sans text-sm/[1.5] font-medium break-words text-tooltip-foreground',
-                className
-              )}
-            >
-              {arrow && (
-                <TooltipPrimitive.Arrow className="text-tooltip">
-                  <ArrowShape />
-                </TooltipPrimitive.Arrow>
-              )}
-              {title}
-            </TooltipPrimitive.Popup>
-          </TooltipPrimitive.Positioner>
-        </TooltipPrimitive.Portal>
-      </TooltipPrimitive.Root>
-    </TooltipPrimitive.Provider>
+            {arrow && (
+              <TooltipPrimitive.Arrow className="text-tooltip">
+                <ArrowShape />
+              </TooltipPrimitive.Arrow>
+            )}
+            {title}
+          </TooltipPrimitive.Popup>
+        </TooltipPrimitive.Positioner>
+      </TooltipPrimitive.Portal>
+    </TooltipPrimitive.Root>
   )
 }
 

@@ -36,6 +36,8 @@
     "apply": "Применить",
     "quickAmounts": "Быстрые суммы",
     "close": "Закрыть",
+    "removeValue": "Убрать {{label}}",
+    "openOptions": "Открыть список: {{label}}",
     "rename": "Переименовать",
     "selectMonth": "Выбрать месяц",
     "previousYear": "Предыдущий год",

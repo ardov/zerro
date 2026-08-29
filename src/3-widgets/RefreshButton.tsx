@@ -1,5 +1,5 @@
 import { IconButton } from '6-shared/ui/Button'
-import type { FC, ReactNode } from 'react'
+import type { ComponentProps, FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CircularProgress } from '6-shared/ui/CircularProgress'
@@ -87,13 +87,18 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
   )
 }
 
-function SyncBadge(props: { count: number; children: ReactNode }) {
+type SyncBadgeProps = ComponentProps<'span'> & { count: number }
+
+/** The root spreads what it is handed: `Tooltip` renders its trigger through
+ * this element, and a component that keeps its props to itself would swallow
+ * the handlers, the id and the label and leave the tooltip inert. */
+function SyncBadge({ count, children, className, ...props }: SyncBadgeProps) {
   return (
-    <span className="relative inline-flex">
-      {props.children}
-      {props.count > 0 && (
+    <span {...props} className={cn('relative inline-flex', className)}>
+      {children}
+      {count > 0 && (
         <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full bg-info px-0.5 text-[0.625rem]/4 font-medium text-info-foreground">
-          {props.count > 99 ? '99+' : props.count}
+          {count > 99 ? '99+' : count}
         </span>
       )}
     </span>

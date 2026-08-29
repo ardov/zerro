@@ -38,6 +38,8 @@ export const en: typeof ru = {
     apply: 'Apply',
     quickAmounts: 'Quick amounts',
     close: 'Close',
+    removeValue: 'Remove {{label}}',
+    openOptions: 'Open options: {{label}}',
     rename: 'Rename',
     selectMonth: 'Select month',
     previousYear: 'Previous year',

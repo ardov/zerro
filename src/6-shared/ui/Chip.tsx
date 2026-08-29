@@ -39,11 +39,15 @@ export function Chip({
   ...props
 }: ChipProps) {
   const small = size === 'small'
+  // A deletable chip is focusable so Backspace and Delete can reach it, but
+  // only a chip that does something when it is activated is a button: Enter
+  // and Space on a delete-only chip do nothing, and announcing it as a button
+  // promises an action it does not have.
   const interactive = Boolean(onClick || onDelete)
   return (
     <div
       data-slot="chip"
-      role={interactive ? 'button' : undefined}
+      role={onClick ? 'button' : undefined}
       tabIndex={tabIndex ?? (interactive ? 0 : undefined)}
       onClick={onClick}
       onKeyDown={event => {

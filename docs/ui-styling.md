@@ -623,10 +623,26 @@ _describes_ a trigger, and describing an unnamed icon button leaves it
 unnamed, which is what the settings-menu story caught the moment the wrapper
 changed. MUI named the child, so this does too.
 
+One thing about it is deliberately not MUI's. Base UI groups every tooltip
+under a single `Tooltip.Provider`, and a trigger entered within the group's
+window opens instantly instead of waiting out the 300ms again — so a row of
+icon buttons reads as one thing rather than as five that each have to be
+earned. That provider is mounted once, in `Providers`, next to the snackbar's.
+The delay is declared on each trigger as well, so a tooltip rendered outside
+the provider keeps the same schedule; a trigger inside the group's instant
+window opens at zero whatever its own delay says, which is why saying it twice
+costs nothing.
+
 `Chip` is a `div` even when it has an `onClick`, because that is what MUI
 rendered and because a deletable chip would otherwise be a button inside a
 button. The root remains the single keyboard target; Enter/Space click it and
-Delete/Backspace remove a deletable chip. Its story
+Delete/Backspace remove a deletable chip. `role="button"` goes on the ones
+that do something when activated, which is the second place this chip does not
+follow MUI: MUI renders a delete-only chip through `ButtonBase` and it comes
+out a `div` saying `role="button"`, where Enter and Space do nothing because
+there is no `onClick` to invoke. Such a chip stays focusable here so Backspace
+can reach it, but it is not announced as a button, because that promises an
+action it does not have. Its story
 measures all eight shapes the app asks for — filled and outlined, medium and
 small, primary, deletable — root and label, in both themes. Three of its
 numbers came out of that measurement rather than out of the MUI source: the
