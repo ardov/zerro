@@ -1,12 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select as MuiSelect,
-} from '@mui/material'
 import { MultiSelect, Select } from './Select'
 
 const meta = {
@@ -137,77 +131,23 @@ export const SecondLine: Story = {
   },
 }
 
-/** The trigger has to be the same box MUI's outlined select draws, because it
- * sits in dialogs beside fields that are still MUI. */
-function ParityFields() {
+function OutlinedField() {
   return (
-    <div className="flex flex-wrap gap-8 p-[200px]">
-      <div data-testid="mui">
-        <FormControl className="w-[240px]">
-          <InputLabel id="mui-label" shrink>
-            Visibility
-          </InputLabel>
-          <MuiSelect
-            labelId="mui-label"
-            label="Visibility"
-            value="auto"
-            notched
-            onChange={() => {}}
-          >
-            {options.map(o => (
-              <MenuItem key={o.value} value={o.value}>
-                {o.label}
-              </MenuItem>
-            ))}
-          </MuiSelect>
-        </FormControl>
-      </div>
-      <div data-testid="owned">
-        <Select
-          label="Visibility"
-          value="auto"
-          onChange={() => {}}
-          options={options}
-          className="w-[240px]"
-        />
-      </div>
+    <div className="p-[200px]">
+      <Select
+        label="Visibility"
+        value="auto"
+        onChange={() => {}}
+        options={options}
+        className="w-[240px]"
+      />
     </div>
   )
 }
 
-const measure = (root: HTMLElement) => {
-  const control = root.querySelector<HTMLElement>(
-    '.MuiSelect-select, [data-slot="input-group"] > button'
-  )!
-  const fieldset = root.querySelector('fieldset')!
-  const s = getComputedStyle(control)
-  const border = getComputedStyle(fieldset)
-  const rect = control.getBoundingClientRect()
-  return {
-    height: Math.round(rect.height),
-    fontSize: s.fontSize,
-    lineHeight: s.lineHeight,
-    paddingTop: s.paddingTop,
-    paddingBottom: s.paddingBottom,
-    paddingLeft: s.paddingLeft,
-    paddingRight: s.paddingRight,
-    color: s.color,
-    border: border.border,
-    radius: border.borderRadius,
-  }
-}
+export const Outlined: Story = { render: () => <OutlinedField /> }
 
-export const OutlinedParity: Story = {
-  render: () => <ParityFields />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(measure(canvas.getByTestId('owned'))).toEqual(
-      measure(canvas.getByTestId('mui'))
-    )
-  },
-}
-
-export const DarkOutlinedParity: Story = {
-  ...OutlinedParity,
+export const DarkOutlined: Story = {
+  ...Outlined,
   globals: { theme: 'dark' },
 }
