@@ -6,7 +6,7 @@ import { cn } from './shadcn/utils'
 /** legacy UI dims a placeholder rather than recolouring it, and the two themes dim
  * it by different amounts. */
 export const inputPlaceholderClass =
-  'placeholder:text-current placeholder:opacity-[0.42] placeholder:disabled:opacity-disabled dark:placeholder:opacity-50'
+  'placeholder:text-current placeholder:opacity-[0.42] disabled:placeholder:opacity-disabled dark:placeholder:opacity-50'
 
 export type GrowingTextareaProps = Omit<
   ComponentPropsWithRef<'input'>,

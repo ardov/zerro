@@ -96,14 +96,14 @@ describe('theme-init', () => {
   it('keeps explicit choices and returns to the system default reversibly', () => {
     const page = runThemeManager({
       prefersDark: true,
-      stored: { 'zerro-color-scheme': 'light' },
+      stored: { theme: 'light' },
     })
 
     expect(page.manager.getTheme()).toBe('light')
     page.manager.toggle()
 
     expect(page.manager.getTheme()).toBe('dark')
-    expect(page.values.has('zerro-color-scheme')).toBe(false)
+    expect(page.values.has('theme')).toBe(false)
   })
 
   it('applies storage changes from another tab and notifies subscribers', () => {
@@ -111,8 +111,8 @@ describe('theme-init', () => {
     const listener = vi.fn()
     page.manager.subscribe(listener)
 
-    page.values.set('zerro-color-scheme', 'dark')
-    page.dispatchStorage('zerro-color-scheme')
+    page.values.set('theme', 'dark')
+    page.dispatchStorage('theme')
 
     expect(page.root.classList.contains('dark')).toBe(true)
     expect(page.root.style.colorScheme).toBe('dark')
@@ -127,20 +127,19 @@ describe('theme-init', () => {
     expect(page.root.classList.contains('dark')).toBe(true)
   })
 
-  it('migrates JSON-quoted legacy values and removes stale keys', () => {
+  it('accepts the JSON-quoted values written by the original theme setting', () => {
     const page = runThemeManager({ stored: { theme: '"dark"' } })
 
-    expect(page.values.get('zerro-color-scheme')).toBe('dark')
-    expect(page.values.has('theme')).toBe(false)
+    expect(page.manager.getTheme()).toBe('dark')
+    expect(page.root.classList.contains('dark')).toBe(true)
   })
 
-  it('does not resurrect a legacy choice after returning to system', () => {
+  it('ignores invalid stored values and follows the system', () => {
     const page = runThemeManager({
-      stored: { 'zerro-color-scheme': 'system', theme: 'dark' },
+      prefersDark: true,
+      stored: { theme: 'invalid' },
     })
 
-    expect(page.manager.getTheme()).toBe('light')
-    expect(page.values.has('zerro-color-scheme')).toBe(false)
-    expect(page.values.has('theme')).toBe(false)
+    expect(page.manager.getTheme()).toBe('dark')
   })
 })

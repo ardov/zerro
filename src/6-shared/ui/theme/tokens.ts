@@ -32,10 +32,6 @@ function paletteTokens(palette: TPalette) {
   const isLight = palette.mode === 'light'
 
   return {
-    '--c-bg': background.default,
-    '--c-scrollbar': palette.divider,
-    '--c-primary': palette.primary.main,
-
     '--background': background.default,
     '--foreground': text.primary,
     '--card': background.paper,

@@ -2,3 +2,5 @@
 
 @source '../src';
 @source '../stories';
+@source not '../src/**/*.test.ts';
+@source not '../src/**/*.test.tsx';

@@ -42,18 +42,9 @@ const references = (css: string) =>
  * `[var(--whatever)]` means editing this list, and that is the moment to ask
  * whether it wants an `@utility` instead.
  *
- * The first three are read by stylesheets that have no class list to put a
- * utility on — the document's scrollbar in `theme/styles.scss`, and the MDX
- * content in `2-pages/About/index.scss`. The fourth is the case the counterpart
- * rule exists to prevent: `Switch.tsx` spells it `opacity-[var(...)]`, an
- * arbitrary value at the call site, and it stays visible here rather than
- * quietly passing. */
-const READ_DIRECTLY = [
-  '--c-bg',
-  '--c-scrollbar',
-  '--c-primary',
-  '--switch-track-opacity',
-]
+ * The switch track opacity is deliberately read as an arbitrary value because
+ * it differs between color schemes and is not a color token. */
+const READ_DIRECTLY = ['--switch-track-opacity']
 
 describe('theme tokens and their Tailwind counterparts', () => {
   it('reads the whole of what the theme emits', () => {

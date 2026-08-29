@@ -7,8 +7,7 @@
 */
 
 ;(() => {
-  const STORAGE_KEY = 'zerro-color-scheme'
-  const LEGACY_KEYS = ['theme']
+  const STORAGE_KEY = 'theme'
   const fallback = new Map()
 
   const storage = {
@@ -50,38 +49,12 @@
     }
   }
 
-  const migratePreference = () => {
-    const current = parsePreference(storage.get(STORAGE_KEY))
-
-    if (current === 'system') {
-      storage.clear(STORAGE_KEY)
-    } else if (current === 'light' || current === 'dark') {
-      LEGACY_KEYS.forEach(key => storage.clear(key))
-      return
-    } else {
-      for (const key of LEGACY_KEYS) {
-        const legacy = parsePreference(storage.get(key))
-        if (legacy === 'light' || legacy === 'dark') {
-          storage.set(STORAGE_KEY, legacy)
-          break
-        }
-        if (legacy === 'system') break
-      }
-    }
-
-    // Without this cleanup, returning to the system scheme could resurrect an
-    // old preference on a later page load.
-    LEGACY_KEYS.forEach(key => storage.clear(key))
-  }
-
-  migratePreference()
-
   const listeners = new Set()
   const query = matchMedia('(prefers-color-scheme: dark)')
   const getSystemTheme = () => (query.matches ? 'dark' : 'light')
 
   const getTheme = () => {
-    const preference = storage.get(STORAGE_KEY)
+    const preference = parsePreference(storage.get(STORAGE_KEY))
     return preference === 'light' || preference === 'dark'
       ? preference
       : getSystemTheme()

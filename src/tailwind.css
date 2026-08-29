@@ -81,6 +81,12 @@
   --color-error-foreground: var(--error-foreground);
   --color-disabled-foreground: var(--disabled-foreground);
 
+  /* Currently unused aliases. They remain declared so their status is visible
+     without making the token surface appear accidentally incomplete. */
+  /* --color-primary-focus, --color-accent-foreground, --color-destructive,
+     --color-destructive-foreground, --color-input,
+     --color-interactive-foreground, --color-success-foreground */
+
   --radius-xs: calc(var(--radius) * 0.5);
   --radius-sm: calc(var(--radius) * 0.75);
   --radius-md: calc(var(--radius) * 0.875);
