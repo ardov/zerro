@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Alert, AlertTitle } from '@mui/material'
 import { JournalRecoveryNotice } from './JournalRecoveryNotice'
 import { PersistenceWarningNotice } from './PersistenceWarningNotice'
 import { ErrorMessage } from './ErrorBoundary/ErrorMessage'
@@ -14,25 +13,6 @@ const meta = {
 
 export default meta
 type Story = StoryObj
-
-export const InlineStates: Story = {
-  render: () => (
-    <div className="grid max-w-[760px] gap-2 p-6">
-      <Alert severity="info">
-        <AlertTitle>Changes are ready</AlertTitle>
-        The local state is valid and can be synchronized.
-      </Alert>
-      <Alert severity="warning">
-        <AlertTitle>Persistence warning</AlertTitle>
-        The session remains usable, but local persistence needs attention.
-      </Alert>
-      <Alert severity="error" variant="filled">
-        <AlertTitle>Recovery required</AlertTitle>
-        The accepted replica could not be replayed safely.
-      </Alert>
-    </div>
-  ),
-}
 
 export const JournalRecovery: Story = {
   parameters: { app: { scenario: 'recovery', globalWidgets: true } },
