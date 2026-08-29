@@ -1,9 +1,7 @@
 import { IconButton } from '6-shared/ui/Button'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
-// `Chip` is not a list primitive; it converts with the rest of MUI's
-// data-display set.
-import { Chip } from '@mui/material'
+import { Chip } from '6-shared/ui/Chip'
 import {
   ListRowSubheader,
   ListRowText,
@@ -13,7 +11,7 @@ import {
 import { cn } from '6-shared/ui/shadcn/utils'
 import { formatTimeAgo } from '6-shared/helpers/date'
 import { commandVerbLabelKeys } from '6-shared/localization/commandVerbs'
-import { ChevronDownIcon } from '6-shared/ui/Icons'
+import { ChevronDownIcon } from '6-shared/ui/feather'
 import type { TCommand } from 'zerro-core/replica'
 import { useAppDispatch } from 'store'
 import {
@@ -207,11 +205,7 @@ function RowText({
             color="primary"
             variant="outlined"
             label={nowLabel}
-            sx={{
-              height: 18,
-              flexShrink: 0,
-              '& .MuiChip-label': { px: 0.75 },
-            }}
+            className="h-[18px] shrink-0 [&_[data-slot=chip-label]]:px-1.5"
           />
         </span>
       ) : (

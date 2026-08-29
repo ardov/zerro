@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { SxProps } from '@mui/material'
 import { BottomNavigationAction } from '@mui/material'
-import CircularProgress from '@mui/material/CircularProgress'
+import { CircularProgress } from '6-shared/ui/CircularProgress'
 import Badge from '@mui/material/Badge'
 import {
   SyncIcon,

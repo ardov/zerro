@@ -1,8 +1,8 @@
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import React from 'react'
 import clsx from 'clsx'
-import type { TooltipProps } from '@mui/material'
 import type { AmountProps } from '6-shared/ui/Amount'
+import type { TooltipProps } from '6-shared/ui/Tooltip'
 import { Tooltip } from '6-shared/ui/Tooltip'
 // TODO: use Amount instead
 import type { TSmartAmountProps } from '3-widgets/Amount'

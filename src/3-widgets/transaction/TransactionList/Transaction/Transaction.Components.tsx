@@ -42,7 +42,7 @@ export const Symbol: FC<SymbolProps> = ({
         symbol={symbol}
         showCheckBox={isInSelectionMode}
         checked={isChecked}
-        onChange={() => onToggle?.(tr.id)}
+        onCheckedChange={() => onToggle?.(tr.id)}
         color={color}
         size="m"
       />
@@ -118,7 +118,6 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                 />
               }
               placement="top"
-              slotProps={{ popper: { disablePortal: true } }}
             >
               <span className="type-body-sm text-muted-foreground">
                 <SmartAmount
@@ -147,7 +146,6 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                 />
               }
               placement="top"
-              slotProps={{ popper: { disablePortal: true } }}
             >
               <span className="type-body-sm text-muted-foreground">
                 <SmartAmount

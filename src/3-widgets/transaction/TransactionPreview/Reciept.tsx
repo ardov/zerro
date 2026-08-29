@@ -1,7 +1,8 @@
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Collapse, Link } from '@mui/material'
+import { linkClass } from '6-shared/ui/Link'
+import { Collapse } from '6-shared/ui/Collapse'
 import clsx from 'clsx'
 import { QRCodeSVG as QRCode } from 'qrcode.react'
 import { useAppTheme } from '6-shared/ui/theme'
@@ -31,19 +32,20 @@ export const Reciept: FC<RecieptProps> = ({ value, className }) => {
       />
 
       <div className="mt-auto">
-        <Collapse in={!showMore} unmountOnExit>
-          <Link
-            component="button"
-            variant="caption"
-            color="primary"
+        <Collapse open={!showMore}>
+          <button
+            type="button"
+            // MUI's `component="button"`, which came with a reset so the
+            // control reads as text rather than as a control.
+            className={`${linkClass} m-0 border-0 bg-transparent p-0 align-middle font-sans type-caption select-none`}
             onClick={() => setShowMore(true)}
           >
             {t('showMore', { ns: 'common' })}
-          </Link>
+          </button>
         </Collapse>
       </div>
 
-      <Collapse in={showMore} unmountOnExit>
+      <Collapse open={showMore}>
         <div>
           <Line name={t('fn')} value={parsed.fn} />
           <Line name={t('i')} value={parsed.i} />

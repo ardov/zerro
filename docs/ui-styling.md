@@ -319,6 +319,25 @@ MUI's `dense` is a context that reaches the label and leaves `body1` declared
 on a row that never paints with it. `ListRowText` carries a `data-slot` so
 these stories can find the label without matching on its text.
 
+`Collapse` is MUI's, on Base UI's `Collapsible`: height from nothing to what
+the content needs, over the theme's standard 300ms, with the content unmounted
+while closed. It is driven rather than triggered — Base UI pairs a panel with
+the button that opens it, and not one of these panels is opened by a button
+beside it — so the root is controlled and `Collapsible.Trigger` left out. The
+root is `display: contents`, because MUI animated a single box and Base UI's
+root exists only to carry state; a closed collapse leaves that empty box in
+the DOM, which lays nothing out.
+
+Two things about it were measured rather than assumed. Base UI keeps
+`--collapsible-panel-height` current, so a panel whose content grows while it
+is open follows the content instead of clipping it — which is what MUI's
+`height: auto` at rest bought, and there is a story that says so. And MUI stops
+clipping once it arrives, so the panel's `overflow` flips to `visible` through
+a discrete transition delayed by the height's own duration, declared on the
+open state so that only opening waits and closing clips from the first frame.
+That delay is why the story polls for the rest state instead of asserting it
+once: a discrete transition is not something `getAnimations` reports on.
+
 `Button.tsx`, `OutlinedField.tsx`, and `ActionList.tsx` in `6-shared/ui` are
 owned Base UI compositions styled for the existing theme. These are
 deliberately narrow contracts, not copies of the MUI prop surface.
@@ -520,11 +539,80 @@ the account list, the debtor list, the history rows, the envelope info panel,
 the grouped transaction list, the navigation links, the tag options and the
 account-history widget.
 
-What is left in those files is not list vocabulary: `Collapse` in the account
-list and the history widget, `Chip` in the history rows, and
-`@mui/x-date-pickers` in the grouped list. Those are a transition, a
-data-display control and a date picker, and they convert with their own kind
-rather than with the rows they happened to sit next to.
+`Checkbox`, `InputBase`, `CircularProgress` and `Switch` round out the
+controls. The checkbox's glyph is drawn in the component rather than imported:
+it is the control's own artwork — two Material shapes where the ticked one is
+a filled box with the tick cut out of it, not the empty one with a tick laid
+over — and nothing else asks for it. `CheckboxField` is MUI's
+`FormControlLabel`, which only ever held a checkbox here, so the two are one
+component and `control={<Checkbox />}` goes away with it.
+
+`Switch` is drawn but not wired. The only one in the app is decorative: the
+settings row carries the click and `aria-pressed`, and the switch used to be
+an inert MUI input inside it. It is a span now, so there is nothing to make
+inert.
+
+`InputBase` is a field with none of `OutlinedField`'s decoration, for the two
+places that draw their own surface around it. Its input takes `font: inherit`
+rather than a family and a size, because a bare input starts from the
+browser's 13.33px and every measurement under it — the `1.4375em` height most
+of all — is a multiple of what it inherits. The root's line height is that
+same `1.4375`, not `type-body`'s 24px, which is what the field's 32px comes
+from. Its multiline form shares `GrowingTextarea` with `OutlinedField`, so a
+comment follows controlled content instead of becoming a one-line scrollport.
+
+`CircularProgress` is two animations at once: the svg turns at a constant rate
+while the arc it draws grows and shrinks. One would either stutter or never
+close the loop. There is no determinate variant, because nothing in this app
+knows how far along it is.
+
+Four more scheme-dependent values joined the theme with them — the switch's
+thumb, track and track opacity, which MUI builds out of the scheme's extremes
+rather than out of the palette. And two notations that the parity stories
+caught twice over: `rounded-full` computes to 9999px where MUI writes `50%`,
+and Tailwind's opacity modifier mixes in `oklab` where MUI writes `rgba`.
+
+`Tooltip`, `Chip` and `Link` are owned now as well. `Tooltip.tsx` had wrapped
+MUI's only to make the label 14px instead of 11px, which is now simply what
+the class says; the wrapper stays because every call site already imports it,
+so converting one file converted thirteen. Three things about it are MUI's
+rather than Base UI's: the default side is `bottom`, touch holds for 700ms and
+stays open for 1500ms after release, and a string title becomes the child's
+`aria-label`. That last one is not decoration — Base UI
+_describes_ a trigger, and describing an unnamed icon button leaves it
+unnamed, which is what the settings-menu story caught the moment the wrapper
+changed. MUI named the child, so this does too.
+
+`Chip` is a `div` even when it has an `onClick`, because that is what MUI
+rendered and because a deletable chip would otherwise be a button inside a
+button. The root remains the single keyboard target; Enter/Space click it and
+Delete/Backspace remove a deletable chip. Its story
+measures all eight shapes the app asks for — filled and outlined, medium and
+small, primary, deletable — root and label, in both themes. Three of its
+numbers came out of that measurement rather than out of the MUI source: the
+radius and the root's type do not change with the size (MUI puts the smaller
+type on the label), and an outlined chip's delete cross keeps the filled one's
+margins.
+
+`Link`'s underline is a fainter shade of the link itself, but only when the
+underline is always there; one that appears on hover is drawn in the text's
+own colour, because at rest there is nothing to distinguish it from. The one
+control that is a button doing a link's job takes `linkClass` and brings its
+own button reset, which is what MUI's `component="button"` did.
+
+Those three added six tokens, all of them composed opacities that belong in
+`AppThemeProvider` rather than as `/70` at a call site: the tooltip's fill and
+type, the chip's hover, border, primary border and the two states of its
+delete cross, and the link's underline. Writing them as Tailwind opacity
+modifiers would have been visually right and textually different — Tailwind
+mixes in `oklab` where MUI writes `rgba` — which is how the parity stories
+found them.
+
+MUI's `Collapse` is gone too — it was the only transition of MUI's this app
+ever used, at six call sites, every one of them `in` plus `unmountOnExit` and
+nothing else. What is left in those files is neither list vocabulary nor a
+transition: `Chip` in the history rows, `Link` in the receipt, and
+`@mui/x-date-pickers` in the grouped list.
 
 MUI's `Popover` is gone from the app. Its last four callers were the floating
 rename field, the colour picker, the tag list and the transaction filter's

@@ -4,7 +4,9 @@ import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 // The three `TextField`s left are Autocomplete's own input, which it hands
 // `params` to; they convert with it.
-import { Autocomplete, Chip, InputBase, TextField } from '@mui/material'
+import { Autocomplete, TextField } from '@mui/material'
+import { Chip } from '6-shared/ui/Chip'
+import { InputBase } from '6-shared/ui/InputBase'
 import { Menu, MenuItem } from '6-shared/ui/Menu'
 import { Popover } from '6-shared/ui/Popover'
 import { OutlinedField } from '6-shared/ui/OutlinedField'

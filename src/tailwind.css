@@ -56,6 +56,16 @@
   --color-action-focus: var(--action-focus);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-chip-hover: var(--chip-hover);
+  --color-chip-border: var(--chip-border);
+  --color-chip-primary-border: var(--chip-primary-border);
+  --color-link-underline: var(--link-underline);
+  --color-switch-thumb: var(--switch-thumb);
+  --color-switch-track: var(--switch-track);
+  --color-chip-delete: var(--chip-delete);
+  --color-chip-delete-hover: var(--chip-delete-hover);
+  --color-tooltip: var(--tooltip);
+  --color-tooltip-foreground: var(--tooltip-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -156,6 +166,12 @@
    reasoning as `z-modal`. */
 @utility z-drawer {
   z-index: var(--z-drawer, 1200);
+}
+
+/* A tooltip sits above every overlay, including the modal ones it can be
+   opened from inside. Same fallback reasoning as `z-modal`. */
+@utility z-tooltip {
+  z-index: var(--z-tooltip, 1500);
 }
 
 /* MUI's action.disabledOpacity. An `@utility` rather than a `--color-*` alias

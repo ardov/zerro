@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Collapse } from '@mui/material'
+import { Collapse } from '6-shared/ui/Collapse'
 import { useDroppable } from '@dnd-kit/core'
 import { DragTypes } from '../DnD'
 import { useTranslation } from 'react-i18next'
@@ -23,7 +23,7 @@ export function NewGroup(props: { visible: boolean }) {
       ? t('dropCategoryHere')
       : t('newGroup')
   return (
-    <Collapse in={visible} unmountOnExit>
+    <Collapse open={visible}>
       <div ref={setNodeRef} className="px-4 py-2">
         <div
           className={`rounded-2xl border border-dashed border-border p-4 text-center ${isOver && canDrop ? 'bg-accent' : 'bg-card'}`}

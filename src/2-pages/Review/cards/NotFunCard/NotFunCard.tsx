@@ -2,20 +2,16 @@ import { IconButton } from '6-shared/ui/Button'
 import { useMemo, useState } from 'react'
 import { core } from 'zerro-core/redux'
 
-import {
-  Checkbox,
-  Chip,
-  FormControlLabel,
-  FormGroup,
-  Link,
-} from '@mui/material'
+import { CheckboxField } from '6-shared/ui/Checkbox'
+import { Link } from '6-shared/ui/Link'
+import { Chip } from '6-shared/ui/Chip'
 import { Dialog } from '6-shared/ui/Dialog'
 import Balancer from 'react-wrap-balancer'
 import pluralize from '6-shared/helpers/pluralize'
 import { round } from '6-shared/helpers/money'
 import { entries } from '6-shared/helpers/keys'
 import { useToggle } from '6-shared/hooks/useToggle'
-import { SettingsIcon } from '6-shared/ui/Icons'
+import { SettingsIcon } from '6-shared/ui/feather'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { track } from '6-shared/analytics'
 import { DisplayAmount } from '3-widgets/DisplayAmount'
@@ -175,12 +171,13 @@ export function NotFunCard(props: TCardProps) {
       {/* Settings */}
       <Dialog open={settings} onClose={() => toggleSettings()}>
         <div className="flex flex-col gap-6 p-6">
-          <FormGroup>
-            <FormControlLabel
+          <div className="flex flex-col">
+            <CheckboxField
               label="Только операции в рублях"
-              control={<Checkbox checked={onlyRUB} onChange={toggleRUB} />}
+              checked={onlyRUB}
+              onCheckedChange={() => toggleRUB()}
             />
-          </FormGroup>
+          </div>
           <TagSelect
             label="Доходы"
             options={income}

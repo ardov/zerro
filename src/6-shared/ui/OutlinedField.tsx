@@ -2,6 +2,10 @@ import type { ComponentPropsWithRef, ReactNode } from 'react'
 import { Field } from '@base-ui/react/field'
 import { Input as InputPrimitive } from '@base-ui/react/input'
 import { cn } from './shadcn/utils'
+import {
+  GrowingTextarea,
+  inputPlaceholderClass,
+} from './GrowingTextarea'
 import './OutlinedField.css'
 
 /** MUI's two outlined heights. They are the control's padding and nothing
@@ -190,58 +194,9 @@ export function OutlinedField({
       ) : (
         <InputPrimitive
           {...props}
-          className={cn(controlClass, placeholderClass)}
+          className={cn(controlClass, inputPlaceholderClass)}
         />
       )}
     </OutlinedFieldFrame>
-  )
-}
-
-/** MUI dims a placeholder rather than recolouring it, and the two themes dim
- * it by different amounts. */
-const placeholderClass =
-  'placeholder:text-current placeholder:opacity-[0.42] dark:placeholder:opacity-50'
-
-/** MUI grows a `multiline` field by measuring a hidden copy of the textarea on
- * every keystroke. This one puts a mirror of the text in the same grid cell as
- * the textarea and lets the cell size itself, so the height is the browser's
- * to work out: no layout effect, and nothing to re-run when the value is
- * changed from outside.
- *
- * The mirror reads the controlled value. An uncontrolled multiline field would
- * sit at one row and not grow, and there is no such field. */
-function GrowingTextarea({
-  className,
-  maxRows,
-  ...props
-}: Omit<ComponentPropsWithRef<'input'>, 'ref' | 'type' | 'size'> & {
-  maxRows?: number
-}) {
-  const text = props.value ?? props.defaultValue ?? ''
-  // Lines, not pixels: `lh` is the line box the group already sets, so the cap
-  // cannot drift from the text it is counting. It goes on both children rather
-  // than on the sizer, so that the textarea is what scrolls — a sizer that
-  // scrolled would carry its own padding into the scrollport and show a
-  // sliver of the next line under the border.
-  const cap = maxRows ? { maxHeight: `${maxRows}lh` } : undefined
-  return (
-    <div data-slot="textarea-sizer" className={cn(className, 'grid')}>
-      <InputPrimitive
-        {...props}
-        render={<textarea rows={1} />}
-        style={{ ...props.style, ...cap }}
-        className={cn(
-          'col-start-1 row-start-1 m-0 resize-none overflow-y-auto border-0 bg-transparent p-0 font-[family-name:inherit] text-[length:inherit] leading-[inherit] text-current outline-none disabled:text-disabled-foreground',
-          placeholderClass
-        )}
-      />
-      {/* The trailing space keeps a finished line from collapsing, so a typed
-          newline grows the field before the next character arrives. */}
-      <div
-        aria-hidden
-        style={cap}
-        className="invisible col-start-1 row-start-1 overflow-hidden whitespace-pre-wrap"
-      >{`${text} `}</div>
-    </div>
   )
 }

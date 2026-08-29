@@ -3,9 +3,7 @@ import React, { useState, useMemo, useCallback, memo } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-// `Collapse` is an animation, not a list primitive; it converts with the rest
-// of MUI's transitions.
-import { Collapse } from '@mui/material'
+import { Collapse } from '6-shared/ui/Collapse'
 import { ListRows, ListRowSubheader } from '6-shared/ui/ListRow'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
 import { useAppTheme } from '6-shared/ui/theme'
@@ -102,7 +100,7 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
             amount={totalArchived}
             onClick={toggleVisibility}
           />
-          <Collapse in={visible} unmountOnExit>
+          <Collapse open={visible}>
             <ListRows disablePadding>
               {archived.map(acc => (
                 <AccountHistoryWidget

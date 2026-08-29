@@ -1,0 +1,38 @@
+@layer components {
+  /* MUI's indeterminate spinner is two animations at once: the whole svg
+     turns at a constant rate while the arc it draws grows and shrinks. Doing
+     it with one would either stutter or never close the loop. */
+  .owned-spinner {
+    animation: owned-spinner-rotate 1.4s linear infinite;
+  }
+
+  .owned-spinner-arc {
+    stroke-dasharray: 80px, 200px;
+    stroke-dashoffset: 0;
+    animation: owned-spinner-dash 1.4s ease-in-out infinite;
+  }
+
+  @keyframes owned-spinner-rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes owned-spinner-dash {
+    0% {
+      stroke-dasharray: 1px, 200px;
+      stroke-dashoffset: 0;
+    }
+    50% {
+      stroke-dasharray: 100px, 200px;
+      stroke-dashoffset: -15px;
+    }
+    100% {
+      stroke-dasharray: 1px, 200px;
+      stroke-dashoffset: -126px;
+    }
+  }
+}

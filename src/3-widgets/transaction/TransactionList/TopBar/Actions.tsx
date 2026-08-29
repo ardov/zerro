@@ -7,7 +7,7 @@ import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
 import EditOutlined from '@mui/icons-material/EditOutlined'
-import { Chip } from '@mui/material'
+import { Chip } from '6-shared/ui/Chip'
 import { Menu, MenuItem } from '6-shared/ui/Menu'
 import { ListRowDivider, ListRowIcon, ListRowText } from '6-shared/ui/ListRow'
 import {

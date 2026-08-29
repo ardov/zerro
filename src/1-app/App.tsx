@@ -8,7 +8,7 @@ import {
   useLocation,
 } from 'react-router-dom'
 import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
-import { CircularProgress } from '@mui/material'
+import { CircularProgress } from '6-shared/ui/CircularProgress'
 import { useTranslation } from 'react-i18next'
 import {
   initAnalytics,

@@ -2,9 +2,7 @@ import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-// `Collapse` is an animation, not a list primitive; it converts with the rest
-// of MUI's transitions.
-import { Collapse } from '@mui/material'
+import { Collapse } from '6-shared/ui/Collapse'
 import { ListRows, listItemDenseClass } from '6-shared/ui/ListRow'
 import { cn } from '6-shared/ui/shadcn/utils'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -88,7 +86,7 @@ const ArchivedList: FC<{ accs: core.accounts.TAccountPopulated[] }> = props => {
 
   return (
     <>
-      <Collapse in={visible} unmountOnExit>
+      <Collapse open={visible}>
         <ListRows>
           {accs.map(acc => (
             <Account key={acc.id} account={acc} />

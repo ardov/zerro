@@ -32,7 +32,7 @@ export const Selectable: Story = {
           size="m"
           showCheckBox
           checked={checked}
-          onChange={event => setChecked(event.target.checked)}
+          onCheckedChange={setChecked}
         />
       )
     }

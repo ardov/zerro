@@ -1,9 +1,9 @@
 import type { FC } from 'react'
 import { useState } from 'react'
-import { InputBase, InputAdornment } from '@mui/material'
-import { NotesIcon } from '6-shared/ui/Icons'
+import { InputBase } from '6-shared/ui/InputBase'
+import { NotesIcon } from '6-shared/ui/feather'
 import { useAppDispatch, useAppSelector } from 'store'
-import { cardStyle } from './shared'
+import { cardClass } from './shared'
 import { core } from 'zerro-core/redux'
 
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
@@ -35,7 +35,7 @@ export const CommentWidget: FC<{ id: core.envelopes.TEnvelopeId }> = ({
 
   return (
     <InputBase
-      sx={cardStyle}
+      className={cardClass}
       placeholder={t('comment')}
       value={value}
       onChange={e => {
@@ -43,11 +43,7 @@ export const CommentWidget: FC<{ id: core.envelopes.TEnvelopeId }> = ({
         applyChanges(e.target.value)
       }}
       multiline
-      startAdornment={
-        <InputAdornment position="start" component="label">
-          <NotesIcon />
-        </InputAdornment>
-      }
+      startAdornment={<NotesIcon />}
     />
   )
 }

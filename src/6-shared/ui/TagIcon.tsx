@@ -1,7 +1,9 @@
 import type { ComponentPropsWithoutRef } from 'react'
 import { clsx } from 'clsx'
-import type { CheckboxProps } from '@mui/material'
-import { Checkbox, useTheme } from '@mui/material'
+// `useTheme` is here for `getContrastText`, which is a colour calculation
+// rather than a control; it converts with the theme.
+import { useTheme } from '@mui/material'
+import { Checkbox, type CheckboxProps } from './Checkbox'
 
 const isSvgUrl = (symbol: string): boolean => {
   return symbol.startsWith('data:image/svg') || symbol.includes('.svg')
@@ -14,8 +16,8 @@ export type TagIconProps = Omit<
   symbol: string
   color?: string | null
   size?: 's' | 'm'
-  onChange?: CheckboxProps['onChange']
-  checked?: CheckboxProps['checked']
+  onCheckedChange?: CheckboxProps['onCheckedChange']
+  checked?: boolean
   showCheckBox?: boolean
   checkboxProps?: CheckboxProps
   button?: boolean
@@ -26,7 +28,7 @@ export function TagIcon(props: TagIconProps) {
     symbol,
     color,
     size = 's',
-    onChange,
+    onCheckedChange,
     checked,
     showCheckBox,
     checkboxProps,
@@ -36,7 +38,7 @@ export function TagIcon(props: TagIconProps) {
     ...rest
   } = props
   const theme = useTheme()
-  const isInteractive = !!onChange
+  const isInteractive = !!onCheckedChange
   const isSvg = isSvgUrl(symbol)
   const contentIsHidden = !!showCheckBox || !!checked
   const { className: checkboxClassName, ...restCheckboxProps } =
@@ -98,7 +100,7 @@ export function TagIcon(props: TagIconProps) {
           {symbol}
         </span>
       )}
-      {onChange && (
+      {onCheckedChange && (
         <Checkbox
           className={clsx(
             'absolute transition-opacity duration-200',
@@ -108,8 +110,7 @@ export function TagIcon(props: TagIconProps) {
           )}
           checked={checked}
           onClick={e => e.stopPropagation()}
-          onChange={onChange}
-          color="primary"
+          onCheckedChange={onCheckedChange}
           {...restCheckboxProps}
         />
       )}

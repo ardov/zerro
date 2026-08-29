@@ -19,7 +19,7 @@ import {
   HistoryIcon,
   TagIcon,
 } from '6-shared/ui/Icons'
-import Switch from '@mui/material/Switch'
+import { Switch } from '6-shared/ui/Switch'
 import { ActionList, ActionListItem } from '6-shared/ui/ActionList'
 import {
   ListRowAction,
@@ -120,20 +120,11 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
 }
 
 /** The switch in this menu has never been operable on its own: it carries no
- * `onChange`, and the row's `onClick` is what toggles the setting. Now that the
- * row is a real button, the input is made inert so it cannot be focused or
- * clicked inside one, and `aria-pressed` on the row carries the state that the
- * stray checkbox used to announce separately. It stays MUI until a switch is
- * needed somewhere that justifies owning one. */
+ * `onChange`, and the row's `onClick` is what toggles the setting. The owned
+ * `Switch` is drawn rather than wired for exactly that reason, so there is no
+ * input to make inert any more; `aria-pressed` on the row carries the state. */
 const DecorativeSwitch = ({ checked }: { checked: boolean }) => (
-  <Switch
-    edge="end"
-    checked={checked}
-    readOnly
-    tabIndex={-1}
-    aria-hidden
-    className="pointer-events-none"
-  />
+  <Switch edge="end" checked={checked} />
 )
 
 type ItemProps = { onClose: () => void }

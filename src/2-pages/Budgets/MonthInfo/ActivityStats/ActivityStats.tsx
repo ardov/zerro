@@ -2,7 +2,7 @@ import { ButtonBase } from '6-shared/ui/Button'
 import { useCallback } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { Collapse } from '@mui/material'
+import { Collapse } from '6-shared/ui/Collapse'
 import { useTranslation } from 'react-i18next'
 import { useToggle } from '6-shared/hooks/useToggle'
 import type { TISOMonth } from '6-shared/types'
@@ -125,7 +125,7 @@ function StatWidget(props: {
         onClick={toggleOpened}
         className="flex flex-col items-stretch rounded-lg bg-background p-4"
       >
-        {/* <Collapse in={opened} unmountOnExit>
+        {/* <Collapse open={opened}>
           <ChangesChart mode={props.mode} />
           <div className="h-3" />
         </Collapse> */}
@@ -136,7 +136,7 @@ function StatWidget(props: {
           <PercentBar data={nodes} className="mt-3" />
         )}
 
-        <Collapse in={opened} unmountOnExit>
+        <Collapse open={opened}>
           <div className="mt-4 flex flex-col gap-3">
             {nodes.map(point => (
               <DataLine

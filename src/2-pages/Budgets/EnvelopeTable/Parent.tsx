@@ -1,8 +1,8 @@
 import { IconButton } from '6-shared/ui/Button'
 import type { core } from 'zerro-core/redux'
 import React from 'react'
-import { Collapse } from '@mui/material'
-import { ChevronRightIcon } from '6-shared/ui/Icons'
+import { Collapse } from '6-shared/ui/Collapse'
+import { ChevronRightIcon } from '6-shared/ui/feather'
 
 type ParentProps = {
   id: core.envelopes.TEnvelopeId
@@ -53,7 +53,7 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
         )}
         {parent}
         {hasChildren && (
-          <Collapse in={isExpanded} unmountOnExit>
+          <Collapse open={isExpanded}>
             <div className="pb-2">{children}</div>
           </Collapse>
         )}

@@ -27,6 +27,10 @@ const GlobalVariables = (props: { theme: Theme }) => {
       --card-foreground: ${palette.text.primary};
       --popover: ${palette.background.paper};
       --popover-foreground: ${palette.text.primary};
+      /* MUI does not build the tooltip out of a palette colour: it is grey
+         700 at 92 per cent, over white type. */
+      --tooltip: ${alpha(palette.grey[700], 0.92)};
+      --tooltip-foreground: ${palette.common.white};
       --primary: ${palette.primary.main};
       --primary-foreground: ${palette.getContrastText(palette.primary.main)};
       /* The state fills MUI paints a text button and a selected menu item
@@ -94,6 +98,34 @@ const GlobalVariables = (props: { theme: Theme }) => {
          with text.disabled. They hold the same value in the default palette,
          so they are only distinguishable once one of them moves. */
       --action-disabled: ${palette.action.disabled};
+      /* A chip's own three. Its fill is action.selected, which --secondary
+         already carries; these are the ones nothing else names: the tint a
+         clickable chip takes, the border MUI draws an outlined one with, and
+         the two states of the delete cross. */
+      --chip-hover: ${alpha(
+        palette.action.selected,
+        palette.action.selectedOpacity + palette.action.hoverOpacity
+      )};
+      --chip-primary-border: ${alpha(palette.primary.main, 0.7)};
+      /* A link's underline, which MUI draws in a fainter shade of the link
+         itself and hands back to the text colour on hover. */
+      --link-underline: ${alpha(palette.primary.main, 0.4)};
+      /* A switch, which MUI builds out of the scheme's extremes rather than
+         out of the palette: the thumb is white on light and grey 300 on dark,
+         and the track is the opposite colour at an opacity that also differs
+         by scheme. */
+      --switch-thumb: ${
+        palette.mode === 'light' ? palette.common.white : palette.grey[300]
+      };
+      --switch-track: ${
+        palette.mode === 'light' ? palette.common.black : palette.common.white
+      };
+      --switch-track-opacity: ${palette.mode === 'light' ? 0.38 : 0.3};
+      --chip-border: ${
+        palette.mode === 'light' ? palette.grey[400] : palette.grey[700]
+      };
+      --chip-delete: ${alpha(palette.text.primary, 0.26)};
+      --chip-delete-hover: ${alpha(palette.text.primary, 0.4)};
       --ring: ${palette.primary.main};
       --interactive: ${palette.secondary.main};
       --interactive-foreground: ${palette.getContrastText(
@@ -121,6 +153,7 @@ const GlobalVariables = (props: { theme: Theme }) => {
          the same theme MUI positions its own surfaces with. */
       --z-modal: ${zIndex.modal};
       --z-drawer: ${zIndex.drawer};
+      --z-tooltip: ${zIndex.tooltip};
     }
   `
   return <Global styles={styles} />

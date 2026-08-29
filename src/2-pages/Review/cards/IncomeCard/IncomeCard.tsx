@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { Chip } from '@mui/material'
+import { Chip } from '6-shared/ui/Chip'
 import { entries } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
 import { useAppSelector } from 'store'
@@ -68,7 +68,6 @@ export function IncomeCard(props: TCardProps) {
           <span key={tagInfo.id} className="m-1 inline-block">
             <Chip
               variant={checked.includes(tagInfo.id) ? 'filled' : 'outlined'}
-              clickable
               onClick={() => toggle(tagInfo.id)}
               onDoubleClick={() =>
                 props.onShowTransactions(tagInfo.transactions)

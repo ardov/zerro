@@ -1,16 +1,7 @@
 import type { TISOMonth } from '6-shared/types'
 
-/** The same surface as `cardStyle`, for elements that have left MUI. Both
- * exist only while `CommentWidget` is still a MUI `InputBase`. */
+/** The surface the preview's own boxes sit on. */
 export const cardClass = 'w-full rounded-lg bg-background px-4 py-2'
-
-export const cardStyle = {
-  borderRadius: 1,
-  py: 1,
-  px: 2,
-  bgcolor: 'background.default',
-  width: '100%',
-}
 
 export function getDateRange(
   dates: TISOMonth[],

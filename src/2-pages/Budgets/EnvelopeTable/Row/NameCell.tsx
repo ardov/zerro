@@ -4,7 +4,7 @@ import { memo, useCallback, useRef } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useDraggable } from '@dnd-kit/core'
-import { Chip } from '@mui/material'
+import { Chip } from '6-shared/ui/Chip'
 import { useTranslation } from 'react-i18next'
 
 import { TagIcon } from '6-shared/ui/TagIcon'

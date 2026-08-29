@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { Chip } from '@mui/material'
+import { Chip } from '6-shared/ui/Chip'
 import { IconButton } from '6-shared/ui/Button'
 import type { DialogProps } from '6-shared/ui/Dialog'
 import { Dialog } from '6-shared/ui/Dialog'

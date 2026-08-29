@@ -71,7 +71,7 @@ function InteropFixture() {
         <Typography className="grow leading-[inherit]">Accounts</Typography>
         <span>100</span>
       </div>
-      <TagIcon symbol="🍎" showCheckBox size="m" onChange={() => {}} />
+      <TagIcon symbol="🍎" showCheckBox size="m" onCheckedChange={() => {}} />
     </div>
   )
 }
@@ -99,7 +99,9 @@ const checkInterop: Story['play'] = async ({ canvasElement }) => {
   await expect(getComputedStyle(canvas.getByText('Accounts')).lineHeight).toBe(
     '48px'
   )
-  const checkbox = canvas.getByRole('checkbox').closest('.MuiCheckbox-root')!
+  const checkbox = canvas
+    .getByRole('checkbox')
+    .closest<HTMLElement>('[data-slot="checkbox"]')!
   await expect(getComputedStyle(checkbox).position).toBe('absolute')
   const icon = canvas.getByText('🍎').getBoundingClientRect()
   const wrapper = checkbox.parentElement!.getBoundingClientRect()

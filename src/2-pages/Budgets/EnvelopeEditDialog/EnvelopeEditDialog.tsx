@@ -2,7 +2,7 @@ import { Button, ButtonBase } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { shallowEqual } from 'react-redux'
 import { useFormik } from 'formik'
-import { Checkbox, FormControlLabel, FormGroup } from '@mui/material'
+import { CheckboxField } from '6-shared/ui/Checkbox'
 import type { DialogProps } from '6-shared/ui/Dialog'
 import { Dialog, DialogContent, DialogTitle } from '6-shared/ui/Dialog'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
@@ -153,7 +153,7 @@ const EnvelopeEditDialogForm: FC<{
             value={values.visibility}
             onChange={v => setFieldValue('visibility', v)}
           />
-          <FormGroup>
+          <div className="flex flex-col">
             {/* <FormControlLabel
               name="showIncome"
               checked={values.showIncome}
@@ -161,12 +161,11 @@ const EnvelopeEditDialogForm: FC<{
               control={<Checkbox />}
               label="Доходная"
             /> */}
-            <FormControlLabel
+            <CheckboxField
               name="keepIncome"
               label={t('keepIncomeLabel')}
               checked={values.keepIncome}
-              onChange={handleChange}
-              control={<Checkbox />}
+              onCheckedChange={checked => setFieldValue('keepIncome', checked)}
             />
             {/* <FormControlLabel
               name="carryNegatives"
@@ -189,7 +188,7 @@ const EnvelopeEditDialogForm: FC<{
               control={<Checkbox />}
               label="Показывать в бюджете"
             /> */}
-          </FormGroup>
+          </div>
 
           <Button type="submit" size="large" variant="contained">
             {t('btnSave')}
