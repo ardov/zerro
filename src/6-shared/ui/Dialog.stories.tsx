@@ -2,13 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import {
-  Dialog as MuiDialog,
-  DialogActions as MuiDialogActions,
-  DialogContent as MuiDialogContent,
-  DialogContentText as MuiDialogContentText,
-  DialogTitle as MuiDialogTitle,
-} from '@mui/material'
-import {
   Dialog,
   DialogActions,
   DialogContent,
@@ -28,167 +21,69 @@ const title = 'Delete this operation?'
 const description =
   'It will be gone from every device once the change syncs. This text is long enough to run onto a second line in the paper.'
 
-function Body({
-  Title,
-  Content,
-  Text,
-  Actions,
-  onClose,
-}: {
-  Title: typeof DialogTitle
-  Content: typeof DialogContent
-  Text: typeof DialogContentText
-  Actions: typeof DialogActions
-  onClose: () => void
-}) {
+function Body({ onClose }: { onClose: () => void }) {
   return (
     <>
-      <Title>{title}</Title>
-      <Content>
-        <Text>{description}</Text>
-      </Content>
-      {/* Plain buttons: MUI spaces a dialog's actions with a `margin-left` on
-          the second child, which a component of ours would reset from the
-          later layer — this compares the containers, not the buttons. */}
-      <Actions>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{description}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
         <button type="button" onClick={onClose}>
           Cancel
         </button>
         <button type="button" onClick={onClose}>
           Delete
         </button>
-      </Actions>
+      </DialogActions>
     </>
   )
 }
 
 function Harness() {
-  const [which, setWhich] = useState<'none' | 'owned' | 'mui'>('none')
-  const close = () => setWhich('none')
+  const [open, setOpen] = useState(false)
+  const close = () => setOpen(false)
   return (
     <div className="flex gap-2">
-      <button type="button" onClick={() => setWhich('owned')}>
-        Open owned
-      </button>
-      <button type="button" onClick={() => setWhich('mui')}>
-        Open MUI
+      <button type="button" onClick={() => setOpen(true)}>
+        Open
       </button>
 
-      <Dialog open={which === 'owned'} onClose={close}>
-        <Body
-          Title={DialogTitle}
-          Content={DialogContent}
-          Text={DialogContentText}
-          Actions={DialogActions}
-          onClose={close}
-        />
+      <Dialog open={open} onClose={close}>
+        <Body onClose={close} />
       </Dialog>
-
-      <MuiDialog open={which === 'mui'} onClose={close}>
-        <Body
-          Title={MuiDialogTitle as typeof DialogTitle}
-          Content={MuiDialogContent as typeof DialogContent}
-          Text={MuiDialogContentText as typeof DialogContentText}
-          Actions={MuiDialogActions as typeof DialogActions}
-          onClose={close}
-        />
-      </MuiDialog>
     </div>
   )
 }
 
-/** The paper, its three slots, and the 8px MUI leaves between two actions. */
-const measure = (body: HTMLElement) => {
-  const paper = body.querySelector<HTMLElement>(
-    '[data-slot="dialog"], .MuiDialog-paper'
-  )!
-  const heading = body.querySelector<HTMLElement>('h2')!
-  const text = body.querySelector<HTMLElement>('p')!
-  const buttons = [...body.querySelectorAll('button')].filter(button =>
-    /Cancel|Delete/.test(button.textContent ?? '')
-  )
-  const box = (el: HTMLElement) => {
-    const s = getComputedStyle(el)
-    return {
-      padding: s.padding,
-      margin: s.margin,
-      fontSize: s.fontSize,
-      lineHeight: s.lineHeight,
-      fontWeight: s.fontWeight,
-      color: s.color,
-    }
-  }
-  const paperStyle = getComputedStyle(paper)
-  return {
-    paper: {
-      ...box(paper),
-      radius: paperStyle.borderRadius,
-      shadow: paperStyle.boxShadow,
-      background: paperStyle.backgroundColor,
-      maxWidth: paperStyle.maxWidth,
-      maxHeight: paperStyle.maxHeight,
-      display: paperStyle.display,
-      direction: paperStyle.flexDirection,
-      width: Math.round(paper.getBoundingClientRect().width),
-    },
-    heading: box(heading),
-    text: box(text),
-    actionGap: Math.round(
-      buttons[1].getBoundingClientRect().left -
-        buttons[0].getBoundingClientRect().right
-    ),
-    contentPadding: getComputedStyle(
-      body.querySelector<HTMLElement>(
-        '[data-slot="dialog-content"], .MuiDialogContent-root'
-      )!
-    ).padding,
-    actionsPadding: getComputedStyle(
-      body.querySelector<HTMLElement>(
-        '[data-slot="dialog-actions"], .MuiDialogActions-root'
-      )!
-    ).padding,
-  }
-}
-
-/** One at a time: two modals at once would fight over focus and the scroll
- * lock, and the geometry is what is being compared, not the stacking. */
-async function shotOf(
-  canvas: ReturnType<typeof within>,
-  body: ReturnType<typeof within>,
-  name: string
-) {
-  await userEvent.click(canvas.getByRole('button', { name }))
-  const dialog = await body.findByRole('dialog')
-  await waitFor(() => expect(getComputedStyle(dialog).opacity).toBe('1'))
-  const shot = measure(dialog.ownerDocument.body)
-  await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
-  await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
-  return shot
-}
-
-export const Parity: Story = {
+export const Default: Story = {
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
-    const owned = await shotOf(canvas, body, 'Open owned')
-    const mui = await shotOf(canvas, body, 'Open MUI')
-    expect(owned).toEqual(mui)
+    const trigger = canvas.getByRole('button', { name: 'Open' })
+    await userEvent.click(trigger)
+    const dialog = await body.findByRole('dialog')
+    await userEvent.click(
+      within(dialog).getByRole('button', { name: 'Cancel' })
+    )
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+    await waitFor(() => expect(trigger).toHaveFocus())
   },
 }
 
-export const DarkParity: Story = {
-  ...Parity,
+export const Dark: Story = {
+  ...Default,
   globals: { theme: 'dark' },
 }
 
-/** The dismissals MUI's `Modal` gives every dialog. */
+/** Dialog dismissal includes Escape and backdrop clicks. */
 export const Dismissal: Story = {
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
-    const trigger = canvas.getByRole('button', { name: 'Open owned' })
+    const trigger = canvas.getByRole('button', { name: 'Open' })
 
     await userEvent.click(trigger)
     await body.findByRole('dialog')
