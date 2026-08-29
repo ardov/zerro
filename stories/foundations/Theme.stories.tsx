@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Typography } from '@mui/material'
 import { getContrastText, useAppTheme } from '6-shared/ui/theme'
 import { Logo } from '6-shared/ui/Logo'
 
@@ -26,11 +25,11 @@ function ThemeCatalog() {
     <main className="grid gap-6 p-8">
       <Logo fill={theme.palette.primary.main} width={220} />
       <section>
-        <Typography variant="h4">Typography</Typography>
-        <Typography variant="h6">Envelope budgeting with clarity</Typography>
-        <Typography variant="body1" color="text.secondary">
+        <h1 className="type-display font-sans">Typography</h1>
+        <h2 className="type-title font-sans">Envelope budgeting with clarity</h2>
+        <p className="type-body font-sans text-muted-foreground">
           Long labels, secondary text and monetary values should remain legible.
-        </Typography>
+        </p>
       </section>
       <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
         {colors.map(([name, color]) => (
@@ -42,7 +41,7 @@ function ThemeCatalog() {
               color: getContrastText(color),
             }}
           >
-            <Typography variant="caption">{name}</Typography>
+            <span className="type-caption font-sans">{name}</span>
           </li>
         ))}
       </ul>

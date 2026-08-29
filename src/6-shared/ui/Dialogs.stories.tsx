@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from '@mui/material'
 import { useConfirm } from './SmartConfirm'
 import { useSnackbar } from './SnackbarProvider'
+import { Button } from './Button'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { core } from 'zerro-core/redux'
@@ -60,7 +60,7 @@ function MonthConfirmationHarness() {
   )
 }
 
-/** The confirmation lives in GlobalWidgets, outside the MUI drawer's React
+/** The confirmation lives in GlobalWidgets, outside the drawer's React
  * tree. Both responsive variants must keep focus and dismiss only themselves. */
 export const ConfirmFromDrawer: Story = {
   globals: { viewport: { value: 'zerro900' } },

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useTheme } from '@mui/material/styles'
+import { radius } from '6-shared/ui/theme/palette'
 
 const meta = {
   title: 'Foundation/Tailwind compatibility theme',
@@ -46,8 +46,6 @@ const colorTokens = [
 ] as const
 
 function ThemeFoundation() {
-  const theme = useTheme()
-
   return (
     <main className="min-h-screen bg-background p-6 font-sans text-foreground">
       <div className="mx-auto grid max-w-5xl gap-8">
@@ -56,8 +54,8 @@ function ThemeFoundation() {
             Tailwind compatibility theme
           </h1>
           <p className="text-sm text-muted-foreground">
-            Four-pixel spacing and semantic tokens resolved from the active MUI
-            theme.
+            Four-pixel spacing and semantic tokens resolved from the active
+            color scheme.
           </p>
         </header>
 
@@ -113,8 +111,7 @@ function ThemeFoundation() {
             Shape and typography
           </h2>
           <p>
-            IBM Plex Sans · MUI radius {String(theme.shape.borderRadius)}px ·
-            Tailwind radius-lg
+            IBM Plex Sans · radius {String(radius)}px · Tailwind radius-lg
           </p>
           <div className="h-12 rounded-lg border border-border bg-muted" />
         </section>

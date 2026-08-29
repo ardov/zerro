@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Typography } from '@mui/material'
 import { Amount } from './Amount'
 
 const meta = {
@@ -20,15 +19,15 @@ export const WithSign: Story = { args: { value: 420, sign: true } }
 export const CurrencyAndDecimalVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-2">
-      <Typography>
+      <div className="font-sans">
         <Amount value={1234.5} currency="RUB" decimals="ifOnly" />
-      </Typography>
-      <Typography>
+      </div>
+      <div className="font-sans">
         <Amount value={1234.5} currency="EUR" decimals="ifAny" sign />
-      </Typography>
-      <Typography>
+      </div>
+      <div className="font-sans">
         <Amount value={-1234.5} currency="USD" noShade />
-      </Typography>
+      </div>
     </div>
   ),
 }

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { Button, Paper, Typography } from '@mui/material'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { AdaptivePopover } from './AdaptivePopover'
+import { Button } from './Button'
 import { zIndex } from './theme/palette'
 
 const meta = {
@@ -35,16 +35,16 @@ function PopoverHarness(props: { drawerSide?: 'top' | 'bottom' }) {
         aria-label="Responsive popover"
         onClose={() => setAnchorEl(null)}
       >
-        <Paper className="min-w-[280px] p-6">
-          <Typography variant="h6">Responsive popover</Typography>
-          <Typography color="text.secondary">
+        <div className="min-w-[280px] p-6">
+          <h2 className="type-title">Responsive popover</h2>
+          <p className="type-body text-muted-foreground">
             Popover on desktop, swipeable drawer on mobile.
-          </Typography>
+          </p>
           <input aria-label="Overlay input" autoFocus />
           <button type="button" onClick={() => setAnchorEl(null)}>
             Close surface
           </button>
-        </Paper>
+        </div>
       </AdaptivePopover>
     </>
   )
