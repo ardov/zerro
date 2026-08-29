@@ -125,11 +125,6 @@ function StatWidget(props: {
         onClick={toggleOpened}
         className="flex flex-col items-stretch rounded-lg bg-background p-4"
       >
-        {/* <Collapse open={opened}>
-          <ChangesChart mode={props.mode} />
-          <div className="h-3" />
-        </Collapse> */}
-
         <DataLine name={name} amount={totalAmount} currency={currency} />
 
         {showBar && !!totalAmount && (

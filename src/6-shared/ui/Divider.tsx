@@ -2,9 +2,8 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { cn } from './shadcn/utils'
 
 /**
- * legacy UI's `Divider` in its only shape this app draws: a full-width horizontal
- * rule. `min-w-0` and `shrink-0` are what keep it from being stretched or
- * squeezed by the flex containers it sits in.
+ * A full-width horizontal rule. `min-w-0` and `shrink-0` keep it from being
+ * stretched or squeezed by the flex containers it sits in.
  */
 export function Divider({
   className,

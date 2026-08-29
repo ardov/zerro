@@ -2,8 +2,7 @@ import type { ReactNode } from 'react'
 import { Button as ButtonPrimitive } from '@base-ui/react/button'
 import { cn } from './shadcn/utils'
 
-/** legacy UI's ButtonBase reset, which is all `ButtonBase` ever contributed: a
- * native button with every user agent decoration taken off it.
+/** Shared reset for a native button with every user-agent decoration removed.
  *
  * It deliberately declares neither `padding` nor `border-width`: both are
  * decided per variant below, and a reset that set them would leave two classes
@@ -19,12 +18,10 @@ const borders = {
   outlined: 'border border-solid',
 }
 
-/** legacy UI's `typography.button` under this theme.
+/** Button typography under the application theme.
  *
- * No tracking: legacy UI's variants carry letter-spacing only while the theme keeps
- * Roboto — `createTypography` drops it outright for any other family, and this
- * theme sets IBM Plex Sans. `type-overline` is missing its tracking for the
- * same reason. `textTransform: none` is the app's own override.
+ * IBM Plex Sans uses no added tracking here, and labels keep their authored
+ * capitalization.
  *
  * Size and line height ride in one `text-<size>/<leading>` utility because
  * tailwind-merge treats `font-size` as conflicting with `leading` — the
@@ -52,15 +49,11 @@ const geometry = {
   },
 }
 
-/** Only the variant and colour pairs the app renders, and this table is the
- * contract. legacy UI offers every colour against every variant; carrying the ones
- * nothing uses would mean carrying their tokens, their disabled states and
- * their dark shades too.
+/** Only the variant and color pairs the app renders; this table is the contract.
  *
- * `Button.stories.tsx` builds its parity matrix by walking this object, so a
- * pair added here is compared against legacy UI without anyone remembering to list
- * it, and a pair a call site asks for but nothing implements falls back to the
- * variant's primary rather than rendering unstyled. */
+ * `Button.stories.tsx` builds its variant matrix from this object. A pair a
+ * call site asks for but nothing implements falls back to the variant's
+ * primary color rather than rendering unstyled. */
 export const buttonPalettes = {
   text: {
     primary: 'text-primary hover:bg-primary-hover',
@@ -79,8 +72,7 @@ export const buttonPalettes = {
   },
 }
 
-/** legacy UI pulls a start icon back over the button's own padding, and a small
- * button has less of it to cancel. */
+/** Pull a start icon back over the button's own padding. */
 const startIconOffset = { small: '-ml-0.5', medium: '-ml-1', large: '-ml-1' }
 
 type TSize = 'small' | 'medium' | 'large'
@@ -89,7 +81,7 @@ type TSize = 'small' | 'medium' | 'large'
  * of the implemented pairs. A call site that picks its variant with a ternary
  * hands over `'contained' | 'outlined'` in one prop, and TypeScript will not
  * distribute that across union members. `buttonPalettes` is the contract, and
- * the parity story walks it. */
+ * the story matrix walks it. */
 export type ButtonProps = Omit<ButtonPrimitive.Props, 'className' | 'color'> & {
   className?: string
   variant?: keyof typeof buttonPalettes
@@ -145,12 +137,12 @@ export function Button({
   )
 }
 
-/** Padding, not a fixed box: legacy UI sizes an icon button by what it wraps, so a
+/** Padding, not a fixed box: the icon button is sized by what it wraps, so a
  * larger glyph makes a larger button. */
 const iconGeometry = {
   small: 'p-[5px] text-[1.125rem]',
   // `text-[1.5rem]`, not `text-2xl`: the named size carries a line height with
-  // it, and legacy UI sets only the font size here.
+  // it, while this geometry sets only the font size.
   medium: 'p-2 text-[1.5rem]',
 }
 
@@ -160,7 +152,7 @@ const iconPalettes = {
   primary: 'text-primary hover:bg-primary-hover',
 }
 
-/** legacy UI pulls a small button back by 3px and a medium one by 12px, because the
+/** Pull a small button back by 3px and a medium one by 12px, because the
  * padding it is cancelling differs. */
 const edges = {
   start: { small: '-ml-[3px]', medium: '-ml-3' },
@@ -175,7 +167,7 @@ export type IconButtonProps = Omit<
   size?: 'small' | 'medium'
   color?: keyof typeof iconPalettes
   /** Pulls the button back over the padding of the field or bar it sits in,
-   * the way legacy UI's `edge` does, so the icon lines up with the edge. */
+   * so the icon lines up with the edge. */
   edge?: 'start' | 'end'
 }
 
@@ -191,7 +183,7 @@ export function IconButton({
       data-slot="icon-button"
       className={cn(
         RESET,
-        // `rounded-[50%]`, not `rounded-full`: legacy UI's 50% turns a non-square
+        // `rounded-[50%]`, not `rounded-full`: 50% turns a non-square
         // icon button into an ellipse where `rounded-full` makes a stadium.
         'border-0 shrink-0 rounded-[50%] text-center transition-colors duration-150 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:bg-transparent disabled:text-action-disabled',
         iconGeometry[size],
@@ -208,8 +200,7 @@ export type ButtonBaseProps = Omit<ButtonPrimitive.Props, 'className'> & {
   className?: string
 }
 
-/** A native button with nothing on it, for call sites that bring their own
- * styling. This is legacy UI's `ButtonBase` minus the ripple. */
+/** A reset native button for call sites that bring their own styling. */
 export function ButtonBase({ className, ...props }: ButtonBaseProps) {
   return (
     <ButtonPrimitive

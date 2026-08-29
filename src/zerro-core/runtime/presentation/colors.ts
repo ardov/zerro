@@ -1,7 +1,6 @@
 /**
  * Deterministic Zerro UI color for a tag without an explicit color. The palette
- * is a frozen snapshot of the app palette (Material
- * shades 100-900 + A100 minus theme backgrounds); it must stay stable so tag
+ * is a frozen 201-color scale; it must stay stable so tag
  * colors do not change between releases and clients.
  */
 export function getColorForString(str: string): string {

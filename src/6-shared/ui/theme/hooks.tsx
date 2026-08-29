@@ -49,8 +49,8 @@ export function useColorScheme() {
 
 /** The palette for the scheme on screen.
  *
- * It is a palette rather than a theme: everything else the legacy UI theme carried —
- * spacing, breakpoints, typography, the shadows — is either a Tailwind token
+ * It is a palette rather than a theme: spacing, breakpoints, typography and
+ * shadows are either Tailwind tokens
  * or `breakpoints.ts`. What is left is the colours a chart or an SVG has to be
  * handed as a value, because a CSS variable cannot reach a `stroke` attribute. */
 export function useAppTheme() {

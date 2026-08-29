@@ -118,31 +118,6 @@ const EnvelopeEditDialogForm: FC<{
             }
           />
 
-          {/* Can use dnd */}
-          {/* <TagSelect
-            label="Родительская категория"
-            tagFilters={{ topLevel: true, exclude: id ? [id] : undefined }}
-            value={values.parentTagId}
-            onChange={v => setFieldValue('parentTagId', v || null)}
-          /> */}
-
-          {/* Can use dnd */}
-          {/* <TextField
-            label="Группа"
-            name="group"
-            inputProps={{ autoComplete: 'off' }}
-            value={values.group}
-            onChange={handleChange}
-          /> */}
-
-          {/* <TextField
-            label="Комментарий"
-            name="comment"
-            multiline
-            inputProps={{ autoComplete: 'off' }}
-            value={values.comment}
-            onChange={handleChange}
-          /> */}
           <CurrencyCodeSelect
             label={t('currencyLabel')}
             value={values.currency}
@@ -154,40 +129,12 @@ const EnvelopeEditDialogForm: FC<{
             onChange={v => setFieldValue('visibility', v)}
           />
           <div className="flex flex-col">
-            {/* <FormControlLabel
-              name="showIncome"
-              checked={values.showIncome}
-              onChange={handleChange}
-              control={<Checkbox />}
-              label="Доходная"
-            /> */}
             <CheckboxField
               name="keepIncome"
               label={t('keepIncomeLabel')}
               checked={values.keepIncome}
               onCheckedChange={checked => setFieldValue('keepIncome', checked)}
             />
-            {/* <FormControlLabel
-              name="carryNegatives"
-              checked={values.carryNegatives}
-              onChange={handleChange}
-              control={<Checkbox />}
-              label="Переносить минусы"
-            /> */}
-            {/* <FormControlLabel
-              name="showInBudget"
-              checked={values.showInBudget}
-              onChange={handleChange}
-              control={<Checkbox />}
-              label="Расходная"
-            /> */}
-            {/* <FormControlLabel
-              name="budgetOutcome"
-              checked={values.budgetOutcome}
-              onChange={handleChange}
-              control={<Checkbox />}
-              label="Показывать в бюджете"
-            /> */}
           </div>
 
           <Button type="submit" size="large" variant="contained">

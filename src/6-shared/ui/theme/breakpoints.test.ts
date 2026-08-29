@@ -15,7 +15,7 @@ const tailwind = readFileSync(
 describe('breakpoints', () => {
   // A `down` query stops short of the breakpoint rather than at it, so that
   // `down('md')` and a `md:` utility cannot both match at 900px. What matters
-  // is that property, not the 0.05px legacy UI's arithmetic used to reach it, so the
+  // is that property, not the 0.05px used to reach it, so the
   // bound is read back out of the query and compared to the breakpoint it
   // names. The subtraction going missing makes the first assertion fail; a
   // change to the breakpoints themselves changes nothing here.
@@ -38,7 +38,7 @@ describe('breakpoints', () => {
 
   // Tailwind cannot read TypeScript, so `src/tailwind.css` restates these
   // numbers — the one place in the scheme where a value has to be changed
-  // twice. Nothing else notices when only one half moves: the app keeps
+  // twice. Nothing else notices when only one half moves: the project keeps
   // compiling and `md:` simply starts switching at a different pixel than
   // `useBreakpointDown('md')`.
   it('matches the mirror in tailwind.css, in pixels', () => {
@@ -50,7 +50,7 @@ describe('breakpoints', () => {
   })
 
   // Tailwind ships a `2xl` of its own. Anything it registers beyond this map
-  // is a breakpoint no legacy UI component and no owned hook can switch on.
+  // would be a breakpoint no application component or hook can switch on.
   it('leaves no breakpoint registered that this map does not define', () => {
     const registered = [
       ...tailwind.matchAll(/--breakpoint-([\w.]+):\s*([^;]+);/g),

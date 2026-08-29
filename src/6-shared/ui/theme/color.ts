@@ -1,5 +1,5 @@
-/** The two colour calculations the palette is described in terms of, kept to
- * legacy UI's own arithmetic so the values they produce do not move.
+/** The two color calculations used by the palette. Their exact arithmetic is
+ * stable so generated token values do not move.
  *
  * `alpha` *replaces* a colour's alpha rather than multiplying it, which is why
  * the state fills built on `action.selected` — itself already transparent —
@@ -38,7 +38,7 @@ export function alpha(color: string, value: number): string {
   return `rgba(${r}, ${g}, ${b}, ${clamped})`
 }
 
-/** W3C relative luminance, rounded the way legacy UI rounds it — the third decimal
+/** W3C relative luminance, rounded to three decimals because the third decimal
  * is what decides a colour sitting on the contrast threshold. */
 export function getLuminance(color: string): number {
   const channels = toRgb(color).map(channel => {
@@ -60,9 +60,9 @@ export function getContrastRatio(foreground: string, background: string) {
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
 }
 
-/** White or near-black over a background, at legacy UI's threshold of 3. Every
+/** White or near-black over a background, at a contrast threshold of 3. Every
  * static pairing is already written into the palette as `contrastText`; this
- * is for the colours the app does not choose — a tag's, above all. */
+ * is for dynamic colors, especially tag colors. */
 export function getContrastText(background: string): string {
   return getContrastRatio(background, '#fff') >= 3
     ? '#fff'

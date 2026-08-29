@@ -3,7 +3,7 @@
      their precedence has to be exact and Tailwind decides utility order for
      us: it emits `focus-within` before `hover`, so a hovered, focused field
      would lose its focus ring. Source order here is ours, and it reproduces
-     legacy UI's: hover, then focus, then error, then disabled.
+     the component contract: hover, then focus, then error, then disabled.
 
      Every rule weighs exactly (0,3,0) — one class, one state, one class — so
      they all sit at the same specificity and order alone decides. The focus
@@ -21,16 +21,15 @@
     border: 1px solid var(--input);
   }
 
-  /* legacy UI drops the hover border on touch devices; so does this. */
+  /* Do not apply hover borders on touch-only devices. */
   @media (hover: hover) {
     .outlined-field__group:hover .outlined-field__notch {
       border-color: var(--foreground);
     }
   }
 
-  /* The control's own focus, not `:focus-within`. legacy UI paints the ring from the
-     input's focus handler, so tabbing to an adornment button — the submit
-     arrow assignment and money moving both put there — leaves the resting
+  /* The control's own focus, not `:focus-within`, so tabbing to an adornment
+     button — the submit arrow and money moving both put one there — leaves the resting
      border. `:focus-within` would light the whole field up instead, while
      `AmountInput` had already swapped the expression back for the formatted
      value. A multiline field's control is a textarea, and `:where()` still
@@ -49,7 +48,7 @@
     border-color: var(--action-disabled);
   }
 
-  /* The label's two positions. legacy UI rests it on the control's own padding and
+  /* The label rests on the control's padding and
      floats it into the notch once the field is focused or filled — Base UI
      puts both of those on the field root, along with the `data-shrink` a
      select sets for itself, so all three are read the same way.

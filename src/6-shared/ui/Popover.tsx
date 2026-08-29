@@ -10,8 +10,7 @@ import {
 } from './popupSurface'
 import { cn } from './shadcn/utils'
 
-/** legacy UI's `transformOrigin`, which the app only ever set to match the
- * alignment: a surface grows out of the corner it hangs from. */
+/** A surface grows out of the corner selected by its alignment. */
 const growOrigins = {
   start: '[--grow-origin:top_left]',
   center: '[--grow-origin:top_center]',
@@ -26,14 +25,14 @@ export type PopoverProps = Pick<
   onClose?: () => void
   /** Runs once the entrance has finished. Content that measures itself
    * against the surface — an `Autocomplete`'s popper — cannot position
-   * against one that is still scaling. legacy UI's `slots.transition.onEntered`. */
+   * against one that is still scaling. */
   onOpenComplete?: () => void
   /** Positioning anchor, which need not be the button that opened the popup. */
   anchorEl?: Element | null
-  /** legacy UI's vertical `anchorOrigin`, of which the app used two: `over` lays
+  /** Vertical placement: `over` lays
    * the paper's top edge over the anchor's own, `below` drops it clear. */
   placement?: 'over' | 'below'
-  /** legacy UI's horizontal `anchorOrigin`. */
+  /** Horizontal alignment against the anchor. */
   align?: keyof typeof growOrigins
   children?: ReactNode
 }

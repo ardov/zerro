@@ -10,10 +10,8 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-// The amount colours are deliberate: legacy UI's `color` prop silently dropped the
-// palette paths this component was written with, so before the migration every
-// amount rendered in the foreground colour. These states are the intent the
-// props always described, turned on knowingly.
+// The amount colors are deliberate and reflect the semantic states described
+// by the component props.
 function AmountStates() {
   return (
     <div className="flex gap-8">

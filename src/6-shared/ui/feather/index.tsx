@@ -1,7 +1,7 @@
 /** Every icon in the app.
  *
- * Almost all of them are Feather outlines. The three at the bottom are solid
- * Material silhouettes, kept in Material's own shape because the Feather set
+ * Almost all are Feather outlines. The three at the bottom are solid
+ * silhouettes because the Feather set
  * has nothing that reads as a sparkle, a restore-from-trash or a drag handle.
  * `6-shared/ui/Icons` re-exports the whole module and is what call sites
  * import from; nothing outside this directory names `feather` directly.

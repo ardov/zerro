@@ -18,8 +18,7 @@ export type TSmartDialogProps = {
   'aria-label'?: string
 }
 
-/** A dialog on a desktop and a drawer off the bottom edge on a phone, which is
- * how legacy UI's `Dialog` and `SwipeableDrawer` were paired here before.
+/** A dialog on desktop and a bottom drawer on a phone.
  *
  * Only history closes it: `onClose` pops the stack entry, and the open state
  * comes back from the stack rather than from state of its own. */
@@ -65,7 +64,7 @@ export function SmartDialog({
             data-placement="bottom"
             className={cn(
               drawerSurfaceClass,
-              // legacy UI rounded this one less than the popover's drawer.
+              // This bottom sheet is less rounded than the popover drawer.
               'pointer-events-auto relative flex max-h-[calc(100dvh-48px)] w-full flex-col overflow-y-auto bg-card text-card-foreground shadow-elevation-16 outline-none [--drawer-radius:8px]',
               className
             )}

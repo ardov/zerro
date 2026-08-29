@@ -13,9 +13,9 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-/** The two selects in this form are the reason this story exists. legacy UI's
- * `Select` reported through a synthetic event whose `target` had to be rebuilt
- * by hand so formik's `handleChange` could read `name` and `value`; the owned
+/** The two selects in this form are the reason this story exists. The shared
+ * `Select` reports values directly, so the form adapter rebuilds the event
+ * shape that Formik's `handleChange` expects; the shared
  * one hands over the value and the form uses `setFieldValue`. Nothing else
  * checks that the picked value reaches the form. */
 function EditHarness() {

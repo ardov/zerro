@@ -76,10 +76,8 @@ export function EnvelopeInfo(props: {
         <hr className="m-0 w-full border-0 border-t border-border opacity-60" />
       </div>
       <ListRows className="-mx-4 text-muted-foreground">
-        {/* Not a button: it reports a number and does nothing when pressed,
-            so it keeps the row's box without its affordances. `text-inherit`
-            gives the list its muted colour back, which `ListItemButton` used
-            to hand down through `ButtonBase`'s `color: inherit`. */}
+        {/* Not a button: it reports a number and has no action. `text-inherit`
+            keeps the list's muted color without adding an affordance. */}
         <div
           className={cn(
             listItemDenseClass,

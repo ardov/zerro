@@ -38,11 +38,6 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         currency={currency}
         onClick={cycleForward}
       />
-      {/* <div>
-        <Chip label={currString.trim()} />
-        <Chip label={'5 счетов'} />
-        <Chip label={formatMoney(fundsChange, displayCurrency)} />
-      </div> */}
       <hr className="m-0 w-full border-0 border-t border-border" />
       <DataLine
         name={t('inEnvelopes')}

@@ -19,7 +19,7 @@ export type TBreakpoint = keyof typeof breakpoints
  * under it. It stays in the map because it is the bottom of the scale. */
 export type TBreakpointDown = Exclude<TBreakpoint, 'xs'>
 
-/** Stops 0.05px short of the breakpoint, which is legacy UI's arithmetic, kept so
+/** Stops 0.05px short of the breakpoint so
  * that a `down` query and the Tailwind variant of the same name cannot both
  * match on the breakpoint pixel itself. */
 export function mediaQueryDown(key: TBreakpointDown) {

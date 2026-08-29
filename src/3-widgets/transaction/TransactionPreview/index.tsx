@@ -217,9 +217,8 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
             fullWidth
             size="small"
           />
-          {/* A native time input draws a picker button of its own, which legacy UI
-              hid too. The field's own class lands on the frame, so the input
-              is reached through it. */}
+          {/* Hide the native time-picker button. The field class lands on the
+              frame, so the input is reached through it. */}
           <OutlinedField
             label={t('time')}
             value={localTime}
@@ -323,9 +322,8 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = props => {
       style={{ transform: 'translateX(-50%)' }}
       className="sticky bottom-4 left-1/2 z-[200] mt-8 inline-block"
     >
-      {/* legacy UI's extended `Fab` under a `Zoom`: a pill at the contained button's
-          own colours, scaled out of the way rather than unmounted. Hidden it
-          is not a tab stop, which legacy UI's `Zoom` left it as. */}
+      {/* Keep the pill mounted while scaling it out. A hidden pill is removed
+          from keyboard navigation. */}
       <Button
         variant="contained"
         color="primary"

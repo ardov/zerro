@@ -23,7 +23,7 @@ import { HistoryRowList } from './HistoryRowList'
  * An overlay on every size, not a column beside the page.
  *
  * It was a persistent drawer so history could be browsed next to the live app,
- * but the app's own breakpoints watch the viewport rather than the space left
+ * but the layout breakpoints watch the viewport rather than the space left
  * over: giving the panel 380px shrank the content box without moving the
  * layout to its narrower form, so the budget table collapsed to bare icons
  * behind a horizontal scrollbar. Overlaying costs nothing that was working.
@@ -65,8 +65,7 @@ export function HistoryPanel() {
     <SideDrawer
       open={displayProps.open}
       onClose={displayProps.onClose}
-      // legacy UI sized the paper through `slotProps`; the sheet takes a class, so
-      // the breakpoint is the stylesheet's rather than a media-query hook's.
+      // The sheet width is responsive in CSS, so no media-query hook is needed.
       className="w-full md:w-[380px]"
       aria-label={t('panelTitle')}
     >

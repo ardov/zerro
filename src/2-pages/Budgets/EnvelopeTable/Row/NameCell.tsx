@@ -46,9 +46,6 @@ export const NameCell: FC<{
       onClick={onClick}
       className={`flex min-w-0 items-center gap-2 ${isChild ? 'pl-10' : ''}`}
     >
-      {/* <Collapse orientation="horizontal" in={isReordering} unmountOnExit>
-        <EnvDraggable id={id} />
-      </Collapse> */}
       {isReordering && (
         <EnvDraggable id={id}>
           <IconButton size="small" className="-my-2 grid place-items-center">

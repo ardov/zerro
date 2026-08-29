@@ -1,8 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { cn } from './shadcn/utils'
 
-/** The row vocabulary legacy UI spread across `MenuItem`, `ListItemIcon`,
- * `ListItemText`, `ListItemSecondaryAction` and `ListSubheader`.
+/** Shared row vocabulary for menus, action lists and navigation.
  *
  * Two containers use it and their semantics differ: `ActionList` is a toolbar
  * that is always on screen, `Menu` is a menu that something opened. The
@@ -20,11 +19,11 @@ import { cn } from './shadcn/utils'
 const rowBase =
   'relative flex w-full min-w-0 cursor-pointer items-center rounded-lg border-0 bg-transparent px-4 text-left font-sans whitespace-nowrap text-foreground hover:bg-accent focus-visible:bg-action-focus focus-visible:outline-none data-selected:bg-primary-selected data-selected:hover:bg-primary-selected-hover disabled:pointer-events-none disabled:opacity-disabled aria-disabled:pointer-events-none aria-disabled:opacity-disabled'
 
-/** A menu row: legacy UI's `MenuItem`, which is tighter than a list's and pins a
+/** A menu row, tighter than a list row and with a
  * minimum height so a row with no icon still reads as a target. */
 export const listRowClass = `${rowBase} min-h-12 py-1.5 type-body sm:min-h-9`
 
-/** A list row: legacy UI's `ListItemButton`. Taller than a menu row — 8px around a
+/** A list row. Taller than a menu row — 8px around a
  * label that keeps its own 4px, where `MenuItem` takes 6px and zeroes the
  * label's — and no minimum, because a list row is sized by what is in it.
  *
@@ -33,7 +32,7 @@ export const listRowClass = `${rowBase} min-h-12 py-1.5 type-body sm:min-h-9`
  * rederiving this one. */
 export const listItemClass = `${rowBase} py-2 type-body`
 
-/** legacy UI's `dense` list row, which halves the padding and drops the label to
+/** A dense list row, which halves the padding and drops the label to
  * `body2`. The account, debtor and history lists are all dense. */
 export const listItemDenseClass = `${rowBase} py-1 type-body-sm`
 
@@ -52,13 +51,10 @@ export function ListRowIcon({
   )
 }
 
-/** No margin of its own: legacy UI's `ListItemText` has one, but `MenuItem` zeroes
- * it, and a menu row that keeps it is 8px taller than the one it replaced. A
- * list row adds it back with `my-1`, which is where legacy UI puts it too.
+/** No margin of its own: menu rows stay compact, while list rows add `my-1`.
  *
  * No type of its own either — it inherits the row's, so the same label is
- * `body1` in a regular row and `body2` in a dense one, as legacy UI's `dense`
- * context made it. */
+ * `body1` in a regular row and `body2` in a dense one. */
 export function ListRowText({
   className,
   secondary,
@@ -74,8 +70,8 @@ export function ListRowText({
       {children}
       {secondary && (
         // No wrapping rule of its own: it inherits the row's, so a truncating
-        // row truncates it too. It clips with an ellipsis where legacy UI passed
-        // `noWrap`, and wraps freely under a `whitespace-normal` row, where
+        // row truncates it too. It clips with an ellipsis under `whitespace-nowrap`
+        // and wraps freely under a `whitespace-normal` row, where
         // nothing overflows for the ellipsis to land on.
         <span className="block min-w-0 overflow-hidden text-ellipsis type-body-sm text-muted-foreground">
           {secondary}
@@ -85,8 +81,7 @@ export function ListRowText({
   )
 }
 
-/** legacy UI positions a secondary action absolutely; in a flex row the same place
- * is reached by pushing it to the end, without taking it out of the flow. */
+/** Push a secondary action to the end without taking it out of the flow. */
 export function ListRowAction({
   className,
   ...props
@@ -99,14 +94,11 @@ export function ListRowAction({
   )
 }
 
-/** legacy UI's `ListSubheader`, whose two options are opt-in here rather than
- * opt-out. legacy UI sticks it to the top of the scroll container unless told not
- * to; the menus that use it never wanted that, so `sticky` is a prop the
- * scrolling lists ask for instead of one the menus have to refuse.
+/** A list subheader whose optional behaviors are explicit. `sticky` is a prop
+ * scrolling lists request rather than a default menus must disable.
  *
- * There is no `dense` here because legacy UI's is not inherited from the list: a
- * subheader in a dense list is still 48px unless it is told otherwise, and no
- * call site in this app ever told it. */
+ * There is no `dense` option because subheader geometry does not inherit row
+ * density. */
 export function ListRowSubheader({
   className,
   sticky,
@@ -125,14 +117,13 @@ export function ListRowSubheader({
   )
 }
 
-/** legacy UI's `List`: the box around a stack of rows, with 8px above and below
+/** The box around a stack of rows, with 8px above and below
  * that `disablePadding` takes away. `dense` is not a prop here — it only ever
  * set a context that told the rows below to be dense, and the rows say so
  * themselves.
  *
- * A `div`, not a `ul`. legacy UI's was a `ul` whose children were `div role=button`
- * subheaders and rows, which is not a list any assistive technology could
- * read; it announced nothing that the headings inside it did not. Where the
+ * A `div`, not a `ul`, because several consumers are action groups rather than
+ * semantic lists. Where the
  * list semantics are real — the navigation links, the tag options — the call
  * site builds a `ul` of `li`s itself and skips this. */
 export function ListRows({

@@ -8,26 +8,24 @@ import { cn } from './shadcn/utils'
 export type SideDrawerProps = {
   open: boolean
   onClose?: () => void
-  /** The edge it slides in from, and the edge it is swiped back out towards.
-   * legacy UI's `anchor`; every caller is `right` so far, and the two vertical
+  /** The edge it slides in from and is swiped back out towards. Every caller
+   * is `right` so far; the two vertical
    * edges belong to `SmartDialog` and the adaptive popover, which round their
    * leading corners. */
   side?: 'left' | 'right'
-  /** The sheet's width. legacy UI sized the paper through `sx` or `slotProps`; the
-   * height is always the full window, as it was there. */
+  /** The sheet's width. Its height is always the full viewport. */
   className?: string
   children?: ReactNode
   'aria-label'?: string
   'aria-labelledby'?: string
 }
 
-/** legacy UI's temporary `Drawer`: a full-height sheet off a side edge, over a
+/** A full-height sheet off a side edge, over a
  * dimmed page, dismissed by the backdrop, Escape or a swipe back towards its
  * own edge.
  *
- * Square rather than rounded — legacy UI kept the rounding for `SwipeableDrawer`,
- * which this app only ever used off the bottom edge, where `SmartDialog`
- * still is. The swipe is Base UI's and cannot be turned off, only aimed: its
+ * Square rather than rounded; bottom sheets own their leading-corner radius.
+ * The swipe is Base UI's and cannot be turned off, only aimed: its
  * default is `down`, which on a full-height sheet fights the sheet's own
  * vertical scrolling and drags it off an edge it never came from. Aiming it
  * at `side` is what makes the gesture undo the entrance. */
@@ -70,7 +68,7 @@ export function SideDrawer({
             finalFocus={finalFocus}
             className={cn(
               drawerSurfaceClass,
-              // legacy UI's paper, which is a flex column that scrolls as a whole.
+              // A flex column that scrolls as a whole.
               'pointer-events-auto relative flex h-full flex-col overflow-y-auto bg-card text-card-foreground shadow-elevation-16 outline-none [--drawer-radius:0px]',
               className
             )}

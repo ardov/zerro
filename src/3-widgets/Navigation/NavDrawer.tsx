@@ -22,7 +22,7 @@ import AccountList from '3-widgets/account/AccountList'
 import { DebtorList } from '3-widgets/DebtorList'
 import { useTranslation } from 'react-i18next'
 
-/** legacy UI's docked `Drawer`, which is two boxes rather than one: a root that
+/** The docked drawer has two boxes: a root that
  * reserves the panel's width in the page flow, and the panel itself, which is
  * fixed and scrolls on its own. It is never dismissed — the mobile layout
  * swaps in `MobileNavigation` instead — so there is no open state, no
@@ -105,8 +105,8 @@ function Links() {
   )
 }
 
-/** A real list of links, which is what legacy UI's `ListItemButton component={Link}`
- * rendered anyway. `aria-current` is what marks the open section; the row's
+/** A semantic list of navigation links. `aria-current` marks the open section;
+ * the row's
  * `data-selected` only paints it. */
 const NavigationLink: FC<{
   icon: React.ReactNode

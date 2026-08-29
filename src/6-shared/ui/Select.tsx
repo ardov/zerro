@@ -46,7 +46,7 @@ export type MultiSelectProps<T extends string> = TFieldProps & {
   renderValue: (value: T[]) => ReactNode
 }
 
-/** legacy UI's outlined `Select`.
+/** An outlined select.
  *
  * The trigger goes inside `OutlinedFieldFrame`, so the notched border and the
  * floating label are the ones the text field draws rather than a second copy.
@@ -55,9 +55,8 @@ export type MultiSelectProps<T extends string> = TFieldProps & {
  * select in the app has the same row — a label, sometimes a muted second line,
  * and a tick when it is the chosen one.
  *
- * `onChange` hands over the value, not an event. legacy UI's `Select` reports through
- * a synthetic event whose `target` has to be rebuilt by hand to carry `name`
- * and `value`, which is the shape form libraries read. Formik has
+ * `onChange` hands over the value, not an event. Form libraries that require
+ * an event-shaped value adapt it at their boundary. Formik has
  * `setFieldValue` for exactly this. */
 export function Select<T extends string>(props: SelectProps<T>) {
   const { value, onChange, options, ...field } = props
@@ -134,7 +133,7 @@ function SelectField<T extends string>({
           side="bottom"
           align="start"
           sideOffset={overAnchor}
-          // The list is as wide as the field it drops out of, the way legacy UI's is.
+          // The list is at least as wide as its field.
           style={{ minWidth: 'var(--anchor-width)' }}
         >
           {/* A list grows less than a menu: it opens over the field, so a

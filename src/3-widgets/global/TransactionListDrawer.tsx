@@ -53,7 +53,7 @@ export const SmartTransactionListDrawer = () => {
     <SideDrawer
       onClose={onClose}
       open={open}
-      // legacy UI sized the paper through `sx`; the sheet takes it as a class.
+      // Full-width on phones, fixed-width from the small breakpoint.
       className="w-screen sm:w-[360px]"
       aria-label={title || t('transactions')}
     >

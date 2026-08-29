@@ -1,13 +1,5 @@
-/** The app's palette, written out.
- *
- * It used to be four overrides handed to legacy UI's `createTheme`, which filled in
- * everything else and derived each colour's `light`, `dark` and `contrastText`
- * at runtime. These are those results, read off the resolved theme rather than
- * recomputed here: the derivations were legacy UI's, they ran once per colour, and
- * keeping the machinery would have meant keeping legacy UI to run it.
- *
- * The four the app actually chose are marked. Everything else is a Material
- * default, and none of it is load-bearing beyond looking the way it did. */
+/** The complete light and dark application palettes. Values are explicit so
+ * token generation is deterministic and does not require runtime derivation. */
 
 export type TColorScheme = 'light' | 'dark'
 
@@ -183,8 +175,7 @@ export const palettes: Record<TColorScheme, TPalette> = { light, dark }
 /** `shape.borderRadius`, in pixels. */
 export const radius = 8
 
-/** Material's elevation ladder, at the eight levels this app raises a surface
- * to. They are scheme-independent: legacy UI draws the same shadow on either. */
+/** Scheme-independent elevation shadows used by raised surfaces. */
 export const elevations: Record<number, string> = {
   1: '0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12)',
   2: '0px 3px 1px -2px rgba(0,0,0,0.2),0px 2px 2px 0px rgba(0,0,0,0.14),0px 1px 5px 0px rgba(0,0,0,0.12)',
@@ -196,5 +187,5 @@ export const elevations: Record<number, string> = {
   24: '0px 11px 15px -7px rgba(0,0,0,0.2),0px 24px 38px 3px rgba(0,0,0,0.14),0px 9px 46px 8px rgba(0,0,0,0.12)',
 }
 
-/** legacy UI's stacking levels, for the three kinds of surface this app layers. */
+/** Stacking levels for drawers, modals and tooltips. */
 export const zIndex = { drawer: 1200, modal: 1300, tooltip: 1500 }

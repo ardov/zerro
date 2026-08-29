@@ -2,17 +2,17 @@ import { cn } from './shadcn/utils'
 
 export type SwitchProps = {
   checked?: boolean
-  /** legacy UI's `edge`, which pulls the control's padding back off the row it ends. */
+  /** Pull the control's padding back off the edge of its row. */
   edge?: 'start' | 'end'
   className?: string
 }
 
-/** legacy UI's `Switch`, drawn but not wired: the only one in this app is decorative,
- * and the row it sits in carries both the click and the state. It is a span
+/** A decorative switch; the row carries both the click and the state.
+ * It is a span
  * rather than an input for that reason — an input inside a button is neither
  * focusable nor announceable in a way that helps.
  *
- * The geometry is legacy UI's: a 34x14 track inside 12px of padding, with a 20px
+ * The geometry is a 34x14 track inside 12px of padding, with a 20px
  * thumb that travels 20px. */
 export function Switch({ checked, edge, className }: SwitchProps) {
   return (

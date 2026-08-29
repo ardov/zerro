@@ -2,18 +2,16 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { cn } from './shadcn/utils'
 
 export type LinkProps = ComponentPropsWithoutRef<'a'> & {
-  /** legacy UI's `underline`. `hover` is its default everywhere in this app. */
+  /** Underline policy; `hover` is the application default. */
   underline?: 'always' | 'hover' | 'none'
 }
 
-/** legacy UI's `Link`: an anchor in the primary colour whose underline is drawn in
+/** An anchor in the primary color whose underline is drawn in
  * a fainter shade of itself until the pointer is on it. */
 const linkBase =
   'cursor-pointer text-primary [-webkit-tap-highlight-color:transparent]'
 
-/** The look without the anchor, for the one control that is a button doing a
- * link's job — legacy UI's `component="button"`, which brought a button reset with
- * it that the call site spells out. */
+/** Link styling without the anchor, for the control that uses button semantics. */
 export const linkClass = `${linkBase} underline decoration-link-underline hover:decoration-[inherit]`
 
 export function Link({ underline = 'always', className, ...props }: LinkProps) {
