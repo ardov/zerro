@@ -1,8 +1,8 @@
 import { Button, IconButton } from '6-shared/ui/Button'
 import { useCallback, useState } from 'react'
-import { Alert, AlertTitle, Snackbar } from '@mui/material'
+import { SnackbarNotice } from '6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
-import { CloseIcon } from '6-shared/ui/Icons'
+import { CloseIcon } from '6-shared/ui/feather'
 import { syncData } from '4-features/sync'
 import { useAppDispatch, useAppSelector } from 'store'
 import {
@@ -38,10 +38,9 @@ export const RestoredOutboxNotice = () => {
   if (dismissed || !restoredCount || !pendingCount) return null
 
   return (
-    <Snackbar open anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-      <Alert
+    <SnackbarNotice
         severity="info"
-        variant="filled"
+        title={t('restoredOutboxTitle')}
         action={
           <>
             <Button color="inherit" size="small" onClick={handleSync}>
@@ -58,9 +57,7 @@ export const RestoredOutboxNotice = () => {
           </>
         }
       >
-        <AlertTitle>{t('restoredOutboxTitle')}</AlertTitle>
         {t('restoredOutboxDescription', { count: pendingCount })}
-      </Alert>
-    </Snackbar>
+    </SnackbarNotice>
   )
 }

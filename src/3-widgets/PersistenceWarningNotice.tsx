@@ -1,4 +1,4 @@
-import { Alert, Snackbar } from '@mui/material'
+import { SnackbarNotice } from '6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector } from 'store'
 import { getPersistenceWarning } from 'store/data'
@@ -10,10 +10,8 @@ export function PersistenceWarningNotice() {
   if (!reason) return null
 
   return (
-    <Snackbar open anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-      <Alert severity="warning" variant="filled">
-        {t('persistenceWarning')}
-      </Alert>
-    </Snackbar>
+    <SnackbarNotice severity="warning" position="bottom-center">
+      {t('persistenceWarning')}
+    </SnackbarNotice>
   )
 }

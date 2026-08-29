@@ -1,6 +1,6 @@
 import { Button } from '6-shared/ui/Button'
 import { useCallback } from 'react'
-import { Alert, AlertTitle, Snackbar } from '@mui/material'
+import { SnackbarNotice } from '6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
 import { discardCorruptOutbox } from '4-features/localData'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
@@ -28,22 +28,19 @@ export function OutboxRecoveryNotice() {
   if (!reason) return null
 
   return (
-    <Snackbar open anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-      <Alert
+    <SnackbarNotice
         severity="error"
-        variant="filled"
+        title={t('outboxRecoveryTitle')}
         action={
           <Button color="inherit" size="small" onClick={confirmDiscard}>
             {t('outboxRecoveryConfirm')}
           </Button>
         }
       >
-        <AlertTitle>{t('outboxRecoveryTitle')}</AlertTitle>
         {t('outboxRecoveryDescription')}
         <div className="mt-2 break-words font-mono type-caption">
           {t('journalRecoveryDiagnostic')}: {reason}
         </div>
-      </Alert>
-    </Snackbar>
+    </SnackbarNotice>
   )
 }

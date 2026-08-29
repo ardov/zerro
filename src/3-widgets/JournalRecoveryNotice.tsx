@@ -1,6 +1,6 @@
 import { Button } from '6-shared/ui/Button'
 import { useCallback } from 'react'
-import { Alert, AlertTitle, Snackbar } from '@mui/material'
+import { SnackbarNotice } from '6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
 import { reloadData } from '4-features/sync'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
@@ -31,24 +31,21 @@ export const JournalRecoveryNotice = () => {
   if (!recoveryRequired || outboxRecoveryReason !== null) return null
 
   return (
-    <Snackbar open anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-      <Alert
+    <SnackbarNotice
         severity="error"
-        variant="filled"
+        title={t('journalRecoveryTitle')}
         action={
           <Button color="inherit" size="small" onClick={confirmReload}>
             {t('journalRecoveryConfirm')}
           </Button>
         }
       >
-        <AlertTitle>{t('journalRecoveryTitle')}</AlertTitle>
         {t('journalRecoveryDescription')}
         {recoveryReason && (
           <div className="mt-2 break-words font-mono type-caption">
             {t('journalRecoveryDiagnostic')}: {recoveryReason}
           </div>
         )}
-      </Alert>
-    </Snackbar>
+    </SnackbarNotice>
   )
 }

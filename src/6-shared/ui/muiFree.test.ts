@@ -26,6 +26,8 @@ const OWNED = [
   'src/6-shared/ui/Tooltip.tsx',
   'src/6-shared/ui/SideDrawer.tsx',
   'src/6-shared/ui/Select.tsx',
+  'src/6-shared/ui/SnackbarNotice.tsx',
+  'src/6-shared/ui/SnackbarProvider.tsx',
   'src/6-shared/ui/SmartDialog.tsx',
   'src/6-shared/ui/feather/index.tsx',
   'src/6-shared/hooks/useBreakpointDown.ts',
@@ -74,6 +76,10 @@ const CONVERTED = [
   'src/3-widgets/transaction/TransactionList/TopBar/BulkEditModal.tsx',
   'src/4-features/import/ImportBackupItem.tsx',
   'src/6-shared/ui/SmartConfirm.tsx',
+  'src/3-widgets/PersistenceWarningNotice.tsx',
+  'src/3-widgets/OutboxRecoveryNotice.tsx',
+  'src/3-widgets/JournalRecoveryNotice.tsx',
+  'src/3-widgets/History/RestoredOutboxNotice.tsx',
 ]
 
 /** The mixed barrel. It re-exports the MUI-free Feather set alongside the
