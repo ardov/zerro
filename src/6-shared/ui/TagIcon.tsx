@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef } from 'react'
-import { clsx } from 'clsx'
+import { cn } from './shadcn/utils'
 import { getContrastText } from './theme/color'
 import { Checkbox, type CheckboxProps } from './Checkbox'
 
@@ -44,7 +44,7 @@ export function TagIcon(props: TagIconProps) {
   return (
     <div
       {...rest}
-      className={clsx(
+      className={cn(
         'group relative flex shrink-0 items-center justify-center rounded-full transition-transform duration-200 ease-in-out',
         size === 's' ? 'size-8' : 'size-10',
         color ? 'border' : 'border-0',
@@ -71,7 +71,7 @@ export function TagIcon(props: TagIconProps) {
     >
       {isSvg ? (
         <span
-          className={clsx(
+          className={cn(
             'shrink-0 bg-current transition-opacity duration-200',
             size === 's' ? 'size-5' : 'size-6',
             contentIsHidden ? 'opacity-0' : 'opacity-100',
@@ -91,7 +91,7 @@ export function TagIcon(props: TagIconProps) {
         />
       ) : (
         <span
-          className={clsx(
+          className={cn(
             'shrink-0 transition-opacity duration-200',
             size === 's' ? 'text-base' : 'text-2xl',
             contentIsHidden ? 'opacity-0' : 'opacity-100',
@@ -103,7 +103,7 @@ export function TagIcon(props: TagIconProps) {
       )}
       {onCheckedChange && (
         <Checkbox
-          className={clsx(
+          className={cn(
             'absolute transition-opacity duration-200',
             showCheckBox || checked ? 'opacity-100' : 'opacity-0',
             isInteractive ? 'group-hover:opacity-100' : 'group-hover:opacity-0',

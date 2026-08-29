@@ -1,6 +1,6 @@
 import type { FC } from 'react'
 import type { ComponentPropsWithoutRef } from 'react'
-import { clsx } from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { core } from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
@@ -35,7 +35,7 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
   return (
     <div
       {...rest}
-      className={clsx('rounded-lg bg-background', className)}
+      className={cn('rounded-lg bg-background', className)}
       style={style}
     >
       <div className="flex flex-col gap-1 px-4 pt-4">

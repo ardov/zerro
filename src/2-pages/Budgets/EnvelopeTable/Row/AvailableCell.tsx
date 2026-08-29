@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { clsx } from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { formatMoney } from '6-shared/helpers/money'
@@ -51,7 +51,7 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
 
         <DraggableAmount id={id} type={DragTypes.amount} disabled={isSelf}>
           <span
-            className={clsx(
+            className={cn(
               '-my-1 -mx-4 inline-block rounded-lg px-4 py-1',
               getAvailableColorClass(availableColor)
             )}

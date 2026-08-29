@@ -2,7 +2,7 @@ import { ButtonBase } from '6-shared/ui/Button'
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import { useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { ChevronRightIcon } from '6-shared/ui/Icons'
 import { useToggle } from '6-shared/hooks/useToggle'
 
@@ -23,7 +23,7 @@ export const ExampleBox: FC<ExampleBoxProps> = ({
 }) => {
   return (
     <div
-      className={clsx('my-4 flex rounded-lg bg-background p-6', className)}
+      className={cn('my-4 flex rounded-lg bg-background p-6', className)}
       {...rest}
     >
       {symbol && <span className="mr-2 min-w-6">{symbol}</span>}
@@ -38,7 +38,7 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
   const [isOpen, toggle] = useToggle(false)
   return (
     <div
-      className={clsx('my-4 rounded-lg bg-background p-6', className)}
+      className={cn('my-4 rounded-lg bg-background p-6', className)}
       {...rest}
     >
       <ButtonBase
@@ -46,7 +46,7 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
         className="-m-4 w-full justify-start rounded-lg p-4 text-left text-[length:inherit] hover:underline"
       >
         <ChevronRightIcon
-          className={clsx(
+          className={cn(
             'mr-2 text-interactive transition-transform duration-200 ease-in-out',
             isOpen && 'rotate-90'
           )}
@@ -64,7 +64,7 @@ export const Muted: FC<HTMLAttributes<HTMLSpanElement>> = ({
   ...rest
 }) => {
   return (
-    <span className={clsx('text-muted-foreground', className)} {...rest}>
+    <span className={cn('text-muted-foreground', className)} {...rest}>
       {children}
     </span>
   )

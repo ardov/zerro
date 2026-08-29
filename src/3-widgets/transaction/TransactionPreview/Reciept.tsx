@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { linkClass } from '6-shared/ui/Link'
 import { Collapse } from '6-shared/ui/Collapse'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { QRCodeSVG as QRCode } from 'qrcode.react'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatMoney } from '6-shared/helpers/money'
@@ -58,9 +58,7 @@ export const Reciept: FC<RecieptProps> = ({ value, className }) => {
   )
 
   return (
-    <div
-      className={clsx('surface-card shadow-elevation-1 flex p-4', className)}
-    >
+    <div className={cn('surface-card shadow-elevation-1 flex p-4', className)}>
       <div className="flex flex-col">{parsedContent}</div>
       <div className="ml-auto">
         <QRCode

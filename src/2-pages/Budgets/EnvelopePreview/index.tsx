@@ -1,7 +1,7 @@
 import { ButtonBase, IconButton } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import { useCallback } from 'react'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { useTranslation } from 'react-i18next'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -51,11 +51,11 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 
         <ButtonBase
           onClick={e => openGoalPopover(id, e.currentTarget)}
-          className={clsx(cardClass, 'flex justify-start gap-2')}
+          className={cn(cardClass, 'flex justify-start gap-2')}
         >
           <EmojiFlagsIcon />
           <span
-            className={clsx(
+            className={cn(
               'type-body font-sans text-left',
               goalInfo ? 'text-foreground' : 'text-disabled-foreground'
             )}

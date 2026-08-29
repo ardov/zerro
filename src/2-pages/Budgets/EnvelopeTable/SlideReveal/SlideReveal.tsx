@@ -2,7 +2,7 @@ import { ButtonBase } from '6-shared/ui/Button'
 import type { FC, ReactNode } from 'react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { Amount } from '6-shared/ui/Amount'
 import type { DragTypes } from '2-pages/Budgets/DnD'
 
@@ -245,7 +245,7 @@ const RevealCellContent: FC<{
     <span className="truncate type-caption font-sans leading-[1.2] text-muted-foreground">
       {label}
     </span>
-    <p className={clsx('m-0 truncate type-body-sm font-sans', color)}>
+    <p className={cn('m-0 truncate type-body-sm font-sans', color)}>
       <Amount value={value} decimals="ifOnly" />
     </p>
   </>

@@ -7,7 +7,7 @@ import type {
 import { core } from 'zerro-core/redux'
 
 import type { FC } from 'react'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { track } from '6-shared/analytics'
@@ -185,7 +185,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   return (
     <>
-      <div className={clsx('relative flex flex-col px-2 pt-2', className)}>
+      <div className={cn('relative flex flex-col px-2 pt-2', className)}>
         {!hideFilter && (
           <div className="relative z-10 mx-auto w-full max-w-[560px]">
             <Filter

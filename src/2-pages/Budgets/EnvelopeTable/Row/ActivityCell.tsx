@@ -1,6 +1,6 @@
 import type { FC } from 'react'
 import React from 'react'
-import { clsx } from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { Amount } from '6-shared/ui/Amount'
 import { Btn } from './Btn'
 
@@ -13,7 +13,7 @@ export const ActivityCell: FC<ActivityCellProps> = props => {
   const { value: displayActivity, onClick } = props
   return (
     <div
-      className={clsx(
+      className={cn(
         'flex justify-end',
         displayActivity ? 'text-foreground' : 'text-disabled-foreground'
       )}

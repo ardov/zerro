@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef, FC } from 'react'
-import { clsx } from 'clsx'
+import { cn } from '../shadcn/utils'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useTranslation } from 'react-i18next'
 
@@ -42,7 +42,7 @@ export const PercentBar: FC<PercentBarProps> = ({
   return (
     <div
       {...rest}
-      className={clsx('flex w-full overflow-hidden rounded-[6px]', className)}
+      className={cn('flex w-full overflow-hidden rounded-[6px]', className)}
       style={{ height, ...style }}
     >
       {displayData.map((bar, i) => (

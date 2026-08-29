@@ -1,6 +1,6 @@
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import React from 'react'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import type { AmountProps } from '6-shared/ui/Amount'
 import type { TooltipProps } from '6-shared/ui/Tooltip'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -43,11 +43,11 @@ export const DataLine: FC<DataLineProps> = ({
           : 'type-body'
 
   return (
-    <div className={clsx('flex flex-row', className)} {...rest}>
+    <div className={cn('flex flex-row', className)} {...rest}>
       <div className="mr-2 flex min-w-0 grow items-center">
         {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
         <Tooltip title={tooltip}>
-          <span className={clsx('truncate', typographyClassName)}>{name}</span>
+          <span className={cn('truncate', typographyClassName)}>{name}</span>
         </Tooltip>
       </div>
       {amount !== undefined && (

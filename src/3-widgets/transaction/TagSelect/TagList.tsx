@@ -1,7 +1,7 @@
 import { IconButton } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import type { HTMLAttributes } from 'react'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { AddIcon } from '6-shared/ui/Icons'
 import { TagSelect2 } from './TagSelect2'
@@ -23,7 +23,7 @@ export const TagList: FC<TagListProps> = props => {
   const addTag = (id: string) => onChange(tags ? [...tags, id] : [id])
 
   return (
-    <div className={clsx(className)} {...rest}>
+    <div className={cn(className)} {...rest}>
       {tags?.map(id => (
         <TagSelect2
           key={id}

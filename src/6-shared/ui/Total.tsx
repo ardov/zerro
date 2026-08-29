@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef } from 'react'
-import clsx from 'clsx'
+import { cn } from './shadcn/utils'
 import type { AmountProps } from '6-shared/ui/Amount'
 import { Amount } from '6-shared/ui/Amount'
 
@@ -32,7 +32,7 @@ export function Total({
       : align === 'left'
         ? 'text-left'
         : 'text-center'
-  const amountClassName = clsx(
+  const amountClassName = cn(
     'm-0 type-title-lg',
     alignmentClassName,
     amountColor === 'error'
@@ -47,7 +47,7 @@ export function Total({
   return (
     <div {...rest}>
       <p
-        className={clsx(
+        className={cn(
           'm-0 type-body-sm text-muted-foreground',
           alignmentClassName
         )}

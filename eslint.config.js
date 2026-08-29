@@ -49,11 +49,30 @@ export default tseslint.config(
         { skipStrings: true, skipTemplates: true, skipJSXText: true },
       ],
       'no-empty': ['error', { allowEmptyCatch: true }],
+      // `cn` (clsx + tailwind-merge) is the only class-name helper we use:
+      // raw clsx skips the Tailwind conflict resolution.
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'clsx',
+              message:
+                "Use `cn` from '6-shared/ui/shadcn/utils' instead of clsx.",
+            },
+          ],
+        },
+      ],
       '@typescript-eslint/no-unused-expressions': [
         'error',
         { allowShortCircuit: true, allowTernary: true },
       ],
     },
+  },
+  {
+    // The single place clsx is allowed: the implementation of `cn` itself.
+    files: ['src/6-shared/ui/shadcn/utils.ts'],
+    rules: { 'no-restricted-imports': 'off' },
   },
   storybook.configs['flat/recommended']
 )

@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { memo, useCallback } from 'react'
 import { shallowEqual } from 'react-redux'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { deepEqual } from '6-shared/helpers/deepEqual'
 import type { TISOMonth } from '6-shared/types'
 import { useToggle } from '6-shared/hooks/useToggle'
@@ -148,10 +148,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
 
   return (
     <div
-      className={clsx(
-        'surface-card shadow-elevation-1 relative pb-2',
-        className
-      )}
+      className={cn('surface-card shadow-elevation-1 relative pb-2', className)}
     >
       <Header
         month={month}

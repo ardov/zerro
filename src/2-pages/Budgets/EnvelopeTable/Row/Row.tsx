@@ -2,7 +2,7 @@ import type { IconButtonProps } from '6-shared/ui/Button'
 import { IconButton } from '6-shared/ui/Button'
 import type { FC, ReactNode } from 'react'
 import React, { useCallback } from 'react'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { core } from 'zerro-core/redux'
 
 import { useDroppable } from '@dnd-kit/core'
@@ -183,7 +183,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
     >
       <SlideReveal enabled={isSmall} items={revealItems}>
         <TableRow
-          className={clsx(
+          className={cn(
             'relative cursor-pointer transition-colors duration-100 hover:bg-accent active:bg-action-focus',
             'hover:[&_.addGoal]:opacity-100 hover:[&_.addGoal]:transition-opacity hover:[&_.addGoal]:duration-300',
             '[&:not(:hover)_.addGoal]:opacity-0',

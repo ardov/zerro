@@ -4,7 +4,6 @@ import { ButtonBase } from '6-shared/ui/Button'
 import type { FC } from 'react'
 import type { ComponentPropsWithoutRef } from 'react'
 import { useState } from 'react'
-import { clsx } from 'clsx'
 import {
   BarChart,
   Bar,
@@ -148,7 +147,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   return (
     <div
       {...rest}
-      className={clsx('rounded-lg bg-background', className)}
+      className={cn('rounded-lg bg-background', className)}
       style={style}
     >
       <div className="px-4 pt-4">

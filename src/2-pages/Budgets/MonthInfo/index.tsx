@@ -1,6 +1,6 @@
 import { Button, IconButton } from '6-shared/ui/Button'
 import type { FC, HTMLAttributes } from 'react'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { useAppDispatch, useAppSelector } from 'store'
 import { isZero } from '6-shared/helpers/money'
 import { formatDate } from '6-shared/helpers/date'
@@ -64,7 +64,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({
   })
 
   return (
-    <div {...rest} className={clsx('min-h-screen', className)}>
+    <div {...rest} className={cn('min-h-screen', className)}>
       {isMobile && (
         <div className="flex items-center px-6 py-2">
           <div className="grow">

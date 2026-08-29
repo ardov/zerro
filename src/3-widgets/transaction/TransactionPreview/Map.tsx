@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import clsx from 'clsx'
+import { cn } from '6-shared/ui/shadcn/utils'
 
 interface MapProps {
   longitude?: number | null
@@ -12,7 +12,7 @@ export const Map: FC<MapProps> = ({ longitude, latitude, className }) => {
 
   return (
     <div
-      className={clsx(
+      className={cn(
         'surface-card shadow-elevation-1 overflow-hidden',
         className
       )}
