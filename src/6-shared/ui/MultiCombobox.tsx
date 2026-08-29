@@ -1,7 +1,7 @@
 import { Combobox } from '@base-ui/react/combobox'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckIcon, ChevronDownIcon, CloseIcon } from './feather'
+import { CheckIcon, ChevronDownIcon, CloseIcon } from './Icons'
 import { listRowClass } from './ListRow'
 import { OutlinedFieldFrame } from './OutlinedField'
 import { popupPositioning, popupSurfaceClass } from './popupSurface'

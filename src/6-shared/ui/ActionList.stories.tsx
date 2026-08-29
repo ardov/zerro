@@ -11,7 +11,7 @@ import {
 import { ActionList, ActionListItem } from './ActionList'
 import { Divider } from './Divider'
 import { ListRowIcon, ListRowSubheader, ListRowText } from './ListRow'
-import { AddIcon } from './feather'
+import { AddIcon } from './Icons'
 
 const meta = { title: 'UI/Action list' } satisfies Meta
 

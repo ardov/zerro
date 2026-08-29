@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, within } from 'storybook/test'
 import { Button as MuiButton, IconButton as MuiIconButton } from '@mui/material'
 import { Button, IconButton, buttonPalettes } from './Button'
-import { AddIcon } from './feather'
+import { AddIcon } from './Icons'
 
 const meta = { title: 'UI/Button' } satisfies Meta
 

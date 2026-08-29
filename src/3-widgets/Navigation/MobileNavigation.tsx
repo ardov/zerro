@@ -6,7 +6,7 @@ import {
   BarChartIcon,
   SettingsIcon,
   SyncAltIcon,
-} from '6-shared/ui/feather'
+} from '6-shared/ui/Icons'
 import { useHomeBar } from '6-shared/hooks/useHomeBar'
 import RefreshButton from '3-widgets/RefreshButton'
 import { SettingsMenu, useSettingsMenu } from './SettingsMenu'

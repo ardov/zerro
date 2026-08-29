@@ -8,7 +8,7 @@ import {
   SyncDisabledIcon,
   DoneIcon,
   WarningIcon,
-} from '6-shared/ui/feather'
+} from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { cn } from '6-shared/ui/shadcn/utils'
 

@@ -2,7 +2,7 @@ import { Toast } from '@base-ui/react/toast'
 import { IconButton } from './Button'
 import type { FC } from 'react'
 import React, { useCallback, useContext } from 'react'
-import { CloseIcon } from './feather'
+import { CloseIcon } from './Icons'
 
 export type TSnackBarProps = {
   message: string

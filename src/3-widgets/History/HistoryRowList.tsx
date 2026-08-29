@@ -11,7 +11,7 @@ import {
 import { cn } from '6-shared/ui/shadcn/utils'
 import { formatTimeAgo } from '6-shared/helpers/date'
 import { commandVerbLabelKeys } from '6-shared/localization/commandVerbs'
-import { ChevronDownIcon } from '6-shared/ui/feather'
+import { ChevronDownIcon } from '6-shared/ui/Icons'
 import type { TCommand } from 'zerro-core/replica'
 import { useAppDispatch } from 'store'
 import {

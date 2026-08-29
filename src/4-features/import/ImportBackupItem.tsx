@@ -11,7 +11,7 @@ import {
 } from '6-shared/ui/Dialog'
 import { ActionListItem } from '6-shared/ui/ActionList'
 import { ListRowIcon, ListRowText } from '6-shared/ui/ListRow'
-import { UploadIcon } from '6-shared/ui/feather'
+import { UploadIcon } from '6-shared/ui/Icons'
 import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import { track } from '6-shared/analytics'

@@ -1,8 +1,9 @@
 # UI styling compatibility
 
-The application is styled with Tailwind utilities over its own palette. Emotion
-is gone from it, and MUI is down to four icon glyphs and the cascade-layer setup
-in `Providers`, which is shared by the application and Storybook.
+The application is styled with Tailwind utilities over its own palette. Neither
+MUI nor Emotion is reachable from it any more: `src/muiFree.test.ts` walks the
+whole module graph from `src/index.tsx` and fails on the first `@mui/*` or
+`@emotion/*` specifier it finds, naming the import chain that reached it.
 
 `public/theme-init.js` resolves the system or stored scheme as a blocking head
 script, before React and before the first paint. It owns the root `dark` class,
@@ -12,35 +13,54 @@ the current page without breaking rendering. The React hook only subscribes to
 that manager. Storybook loads the same manager but pins its selected scheme in
 a local provider, so changing a story never writes an application preference.
 
-Storybook mounts one thing the application does not: `theme/storyTheme.ts`, the
-MUI theme the app used to be built on. The parity stories compare an owned
-component against the MUI one it replaced, and an unthemed MUI component renders
-Roboto on a 4px radius — every comparison would fail for a reason that is not
-the component's. It is mounted in `.storybook/StoryProviders.tsx` and nowhere
-else, so it is outside the production application graph.
+Storybook is where MUI still runs. The parity stories compare an owned component
+against the MUI one it replaced, so `.storybook/StoryProviders.tsx` mounts two
+things the application does not: `theme/storyTheme.ts`, the MUI theme the app
+used to be built on — an unthemed MUI component renders Roboto on a 4px radius,
+and every comparison would fail for a reason that is not the component's — and
+`StyledEngineProvider`, described below. Both sit there rather than in
+`1-app/Providers.tsx` so that nothing the application ships can reach them.
 
 ## Cascade
 
-`StyledEngineProvider` enables `@layer mui`. The layer order is declared both
-before Emotion's rules and in the Tailwind entry point:
+The layer order is declared in the Tailwind entry point:
 
 ```css
 @layer theme, base, mui, components, utilities;
 ```
 
-`injectFirst` alone is insufficient: unlayered MUI declarations override layered
-Tailwind utilities regardless of stylesheet insertion order. Components and
-portals use the same provider so utilities override MUI defaults without
-`!important`.
+That statement is the intent, not literally what the browser registers. Vite
+splits the CSS into chunks, and `dist/index.html` links the one holding
+`styles.scss` — that is, `@layer base` — before the Tailwind chunk, so `base`
+is registered before the statement is ever parsed. The order the built app
+actually gets is `base, components, properties, theme, mui, utilities`. Only
+the last position is load-bearing and it survives: `utilities` stays last, so
+a Tailwind utility still beats the reset without `!important`. The rest is
+inert while the application has no `mui` rules and `theme` holds only
+variables. `1-app/Providers.tsx` used to pin the declared order at runtime,
+through a MUI `GlobalStyles` that `injectFirst` put ahead of every stylesheet;
+that went with MUI, and nothing replaced it, because there is nothing left for
+it to order. Reintroducing a layered stylesheet means checking this again.
+
+`mui` is still named there because Storybook loads the same stylesheet. In
+Storybook the order is declared a second time, through Emotion's own cache,
+because `injectFirst` puts that cache ahead of `tailwind.css` and the first
+stylesheet to name a layer fixes its position. `StyledEngineProvider` also
+carries `enableCssLayer`, and that is the part `injectFirst` cannot replace:
+unlayered MUI declarations override layered Tailwind utilities regardless of
+insertion order, so without it no comparison would be against a fairly styled
+MUI component. Components and portals share the provider, so utilities override
+MUI defaults without `!important`.
 
 Tailwind Preflight is disabled and MUI's `CssBaseline` is gone, so
 `src/6-shared/ui/theme/styles.scss` is the document's entire reset: what is not
 declared there is not reset anywhere. It carries what `CssBaseline` did — the
 `box-sizing` inheritance, font smoothing, `text-size-adjust`, `strong`/`b` at
 weight 700, and a `body` with no margin, the page's colours and `body1`'s type —
-and it stays in the `base` layer so any MUI rule that remains still wins, which
-is what keeps `.MuiInputBase-input`'s `content-box` from being overridden into
-collapsing every text field. `color-scheme` is the one value `enableColorScheme`
+and it stays in the `base` layer, which is earlier than `mui`. The application
+has no MUI rules left for that to matter to; Storybook does, and it is what
+keeps `.MuiInputBase-input`'s `content-box` from being overridden into
+collapsing every reference text field. `color-scheme` is the one value `enableColorScheme`
 used to derive from the palette: the head script sets it together with the same
 `dark` class the Tailwind variant uses, so the two cannot disagree about which
 scheme the page is in.
@@ -97,7 +117,20 @@ between them is the `dark` class on the root rather than a re-render. Every
 value it emits gets a Tailwind counterpart in `src/tailwind.css` — a `--color-*`
 alias, a `--shadow-*` alias, or an `@utility` — in the same change that adds it. A theme variable with no
 counterpart forces `[box-shadow:var(--elevation-8)]` at the call site and
-quietly reintroduces arbitrary values. Elevations 1, 2, 4, 8, 10 and 16 are
+quietly reintroduces arbitrary values.
+
+`theme/tokens.test.ts` holds that rule in both directions, and knows none of
+the values it protects: every emitted token has a counterpart or appears in a
+short list of tokens read directly by a stylesheet, `tailwind.css` exposes no
+token the theme has stopped emitting — drop an elevation and its `@utility`
+survives as a rule that resolves to nothing — and `.dark` declares no name
+`:root` does not. The same principle is why `breakpoints.test.ts` reads the
+bound back out of a `down` query and checks that it falls short of the
+breakpoint it names, rather than spelling `899.95px` out: a test that names a
+value fails the first time the value is chosen differently, which is not a
+defect and not worth being told about.
+
+Elevations 1, 2, 4, 8, 10 and 16 are
 registered as `@utility` blocks; they are deliberately not also `@theme`
 entries, because Tailwind would emit both rules and only the later one would
 ever apply. `--input` is MUI's outlined field border — 23% of the colour that
@@ -808,31 +841,36 @@ and its action list makes a screen reader announce the same word three times.
 supplies colors, the input border, the icon colour, elevation 8/16 and the
 modal z-index through CSS variables.
 
-Icons live in `6-shared/ui/feather`, built by an owned `createFeatherIcon` that
-reproduces what MUI's `createSvgIcon` gave these glyphs: a `1em` box, the
-`fontSize` and `color` props, stroke from `currentColor`. The whole Feather set
-moved at once rather than one glyph at a time, so there is one factory instead
-of two. `6-shared/ui/Icons.tsx` re-exports it along with the three glyphs that
-have no Feather equivalent and still come from `@mui/icons-material`; import
-from `feather` directly when a module must stay off MUI. The directory is
-`feather/`, not `icons/`: `icons` and `Icons.tsx` are the same path on a
-case-insensitive filesystem, and the two would resolve to different modules on
-macOS and on CI.
+Every icon lives in `6-shared/ui/feather` and is imported from
+`6-shared/ui/Icons`, which re-exports the whole of it and is the only path any
+call site uses. The two were different things while the barrel mixed in
+`@mui/icons-material` glyphs and `feather` was the MUI-free half; with that
+gone they were two spellings of one module, and picking between them at a call
+site was a coin flip, so the direct `feather` imports were collapsed onto the
+barrel. Both factories there share one shell that reproduces what
+MUI's `createSvgIcon` gave these glyphs: a `1em` box, the `fontSize` and `color`
+props, paint from `currentColor`, and Material's own `data-testid`.
+`createFeatherIcon` strokes an outline at 1.5px with no fill, which is what the
+Feather set is; `createSolidIcon` fills the path, which is what Material does,
+and it draws the three glyphs — a sparkle, a restore-from-trash and a drag
+handle — the Feather set has no equivalent for. Keeping Material's outlines for
+those three is why they look unchanged after `@mui/icons-material` stopped being
+their source. The transaction toolbar's edit action used Material's
+`EditOutlined` in a menu whose every other glyph was Feather; it now uses the
+Feather `EditIcon` the rest of that menu is drawn in.
 
-`src/6-shared/ui/muiFree.test.ts` is what keeps that split honest. Reading a
-Feather glyph through the mixed `Icons` barrel compiles, looks identical at the
-call site, and quietly returns MUI to the bundle, so the test walks the whole
-import graph of the owned set and fails with the chain that reached MUI. The
-converted surfaces are checked on their own imports instead of transitively:
-shared infrastructure has its own migration step and does not make a surface
-itself an MUI consumer. Add a module to `OWNED` in that file when it is
-converted.
+The directory is `feather/`, not `icons/`: `icons` and `Icons.tsx` are the same
+path on a case-insensitive filesystem, and the two would resolve to different
+modules on macOS and on CI.
 
-Base UI is roughly 40-65 kB gzipped, and the current dependency graph contains
-both it and MUI. The owned set contains only surfaces that the application uses;
-MUI equivalents exist only in parity stories. `@mui/x-date-pickers` has no
-source imports but remains in the dependency graph, together with its current
-`pnpm.overrides` entry.
+Base UI is roughly 40-65 kB gzipped, and the application's graph now contains
+only it. `@mui/material`, `@emotion/react` and `@emotion/styled` are
+devDependencies, which is what they are: nothing but Storybook's parity stories
+builds against them. `@mui/icons-material`, `@mui/system` and
+`@mui/x-date-pickers` had no importer left at all and are uninstalled, and the
+`@base-ui/utils` `pnpm.overrides` entry went with them — `@base-ui/react` pins
+that version itself, so the override only ever mattered while a second MUI
+package asked for another one.
 
 Assignment dismissal via Escape/backdrop/swipe applies the draft, as do Enter,
 the submit button and quick actions. An unchanged value emits no command.

@@ -2,7 +2,7 @@ import { Button, IconButton } from '6-shared/ui/Button'
 import { useCallback, useState } from 'react'
 import { SnackbarNotice } from '6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
-import { CloseIcon } from '6-shared/ui/feather'
+import { CloseIcon } from '6-shared/ui/Icons'
 import { syncData } from '4-features/sync'
 import { useAppDispatch, useAppSelector } from 'store'
 import {

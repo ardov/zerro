@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { expect, userEvent, within } from 'storybook/test'
 import { InputAdornment, TextField } from '@mui/material'
 import { IconButton } from './Button'
-import { ArrowForwardIcon } from './feather'
+import { ArrowForwardIcon } from './Icons'
 import { AmountInput } from './AmountInput'
 
 const meta = {

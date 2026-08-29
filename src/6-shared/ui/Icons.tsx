@@ -1,12 +1,8 @@
-/** Barrel for the app's icons.
+/** Barrel for the app's icons, and the only path that imports one.
  *
- * The Feather set lives in `./feather` and is MUI-free; these three glyphs have
- * no Feather equivalent and still come from MUI's own icon package. Import
- * from `./feather` directly when a module must stay off MUI entirely. */
+ * It holds nothing of its own: the set lives in `./feather`, which is where a
+ * new glyph is defined. Reaching past this file used to mean something — the
+ * barrel mixed in glyphs from `@mui/icons-material` and `./feather` was the
+ * MUI-free half — and now it does not, so there is one door instead of two
+ * equivalent ones to pick between at every call site. */
 export * from './feather'
-
-export { default as AutoAwesomeIcon } from '@mui/icons-material/AutoAwesome'
-
-export { default as RestoreFromTrashIcon } from '@mui/icons-material/RestoreFromTrash'
-
-export { default as DragIndicatorIcon } from '@mui/icons-material/DragIndicator'

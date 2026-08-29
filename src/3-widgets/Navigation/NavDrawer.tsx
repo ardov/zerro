@@ -14,7 +14,7 @@ import {
   SyncAltIcon,
   WhatshotIcon,
   BarChartIcon,
-} from '6-shared/ui/feather'
+} from '6-shared/ui/Icons'
 import { Logo } from '6-shared/ui/Logo'
 import { useAppTheme } from '6-shared/ui/theme'
 

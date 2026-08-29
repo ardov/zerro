@@ -12,7 +12,7 @@ import { sub } from '6-shared/helpers/money'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { Amount } from '6-shared/ui/Amount'
 import { DataLine } from '3-widgets/DataLine'
-import { ArrowForwardIcon } from '6-shared/ui/feather'
+import { ArrowForwardIcon } from '6-shared/ui/Icons'
 
 import { useMonth } from '../../MonthProvider'
 import { useIsSmall } from '../shared/shared'

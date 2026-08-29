@@ -34,13 +34,14 @@ export type TIconProps = Omit<SVGProps<SVGSVGElement>, 'fontSize' | 'color'> & {
   titleAccess?: string
 }
 
-/** Builds a Feather-style icon component.
+/** The shell both factories share.
  *
- * The output matches what MUI's `createSvgIcon` produced for these glyphs —
- * `1em` box, `fontSize`/`color` props, stroke from `currentColor` — so call
- * sites did not have to change when the factory stopped being MUI's. */
-export function createFeatherIcon(path: ReactNode, displayName: string) {
-  function FeatherIcon({
+ * It matches what MUI's `createSvgIcon` produced — `1em` box, `fontSize` and
+ * `color` props, paint from `currentColor` — so call sites did not have to
+ * change when the factory stopped being MUI's. Only what goes inside the
+ * `<svg>` differs between an outline and a solid glyph. */
+function createIcon(displayName: string, drawing: ReactNode) {
+  function Icon({
     className,
     fontSize = 'medium',
     color = 'inherit',
@@ -63,18 +64,34 @@ export function createFeatherIcon(path: ReactNode, displayName: string) {
         {...props}
       >
         {titleAccess && <title>{titleAccess}</title>}
-        <g
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          {path}
-        </g>
+        {drawing}
       </svg>
     )
   }
-  FeatherIcon.displayName = displayName
-  return FeatherIcon
+  Icon.displayName = displayName
+  return Icon
+}
+
+/** Builds a Feather-style icon: an outline drawn with a 1.5px round stroke and
+ * no fill, which is how every glyph in the Feather set is described. */
+export function createFeatherIcon(path: ReactNode, displayName: string) {
+  return createIcon(
+    displayName,
+    <g
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {path}
+    </g>
+  )
+}
+
+/** Builds a solid icon: a filled silhouette, which is how Material draws the
+ * few glyphs the Feather set has no equivalent for. The `fill-current` on the
+ * shell paints it, so the path needs no attributes of its own. */
+export function createSolidIcon(path: ReactNode, displayName: string) {
+  return createIcon(displayName, path)
 }

@@ -54,20 +54,9 @@
   "browserslist": [
     "defaults"
   ],
-  "pnpm": {
-    "overrides": {
-      "@base-ui/utils": "0.3.2"
-    }
-  },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@dnd-kit/core": "^6.3.1",
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^9.2.0",
-    "@mui/material": "^9.2.0",
-    "@mui/system": "^9.2.0",
-    "@mui/x-date-pickers": "^9.10.0",
     "@reduxjs/toolkit": "^2.12.0",
     "@sentry/browser": "^10.65.0",
     "clsx": "^2.1.1",
@@ -96,8 +85,11 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@eslint/js": "^10.0.1",
     "@mdx-js/rollup": "^3.1.1",
+    "@mui/material": "^9.2.0",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

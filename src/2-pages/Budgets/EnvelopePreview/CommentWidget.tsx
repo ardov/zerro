@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { useState } from 'react'
 import { InputBase } from '6-shared/ui/InputBase'
-import { NotesIcon } from '6-shared/ui/feather'
+import { NotesIcon } from '6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from 'store'
 import { cardClass } from './shared'
 import { core } from 'zerro-core/redux'

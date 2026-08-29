@@ -10,7 +10,7 @@ import { Popover } from '6-shared/ui/Popover'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
-import { AddIcon, CloseIcon, FilterListIcon } from '6-shared/ui/feather'
+import { AddIcon, CloseIcon, FilterListIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 
 type Clause = core.transactions.TTransactionFilterClause

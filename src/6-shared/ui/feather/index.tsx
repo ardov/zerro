@@ -1,15 +1,17 @@
-/** Every Feather-style icon in the app, free of MUI.
+/** Every icon in the app.
  *
- * `6-shared/ui/Icons` re-exports these plus the handful of glyphs still taken
- * from `@mui/icons-material`; import from here when a module must not pull
- * MUI into its graph.
+ * Almost all of them are Feather outlines. The three at the bottom are solid
+ * Material silhouettes, kept in Material's own shape because the Feather set
+ * has nothing that reads as a sparkle, a restore-from-trash or a drag handle.
+ * `6-shared/ui/Icons` re-exports the whole module and is what call sites
+ * import from; nothing outside this directory names `feather` directly.
  *
  * The directory is `feather/`, not `icons/`: `icons` and the `Icons.tsx`
  * barrel are the same path on a case-insensitive filesystem, so the two would
  * resolve to different modules on macOS and on CI. */
-import { createFeatherIcon } from './createFeatherIcon'
+import { createFeatherIcon, createSolidIcon } from './createFeatherIcon'
 
-export { createFeatherIcon }
+export { createFeatherIcon, createSolidIcon }
 export type { TIconProps } from './createFeatherIcon'
 
 export const SyncIcon = createFeatherIcon(
@@ -375,4 +377,22 @@ export const TagIcon = createFeatherIcon(
     <line x1="7" y1="7" x2="7.01" y2="7"></line>
   </>,
   'tag'
+)
+
+/* The solid Material glyphs. Their `displayName` is Material's own, so each
+   one still renders the `data-testid` its `@mui/icons-material` original did. */
+
+export const AutoAwesomeIcon = createSolidIcon(
+  <path d="m19 9 1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25z" />,
+  'AutoAwesome'
+)
+
+export const RestoreFromTrashIcon = createSolidIcon(
+  <path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14zM6 7v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7zm8 7v4h-4v-4H8l4-4 4 4z" />,
+  'RestoreFromTrash'
+)
+
+export const DragIndicatorIcon = createSolidIcon(
+  <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2m-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2m0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2" />,
+  'DragIndicator'
 )

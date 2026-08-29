@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from 'react'
-import { CloseIcon } from './feather'
+import { CloseIcon } from './Icons'
 import { cn } from './shadcn/utils'
 
 export type ChipProps = Omit<

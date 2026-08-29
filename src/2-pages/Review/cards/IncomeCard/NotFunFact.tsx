@@ -6,7 +6,7 @@ import { Dialog } from '6-shared/ui/Dialog'
 import Balancer from 'react-wrap-balancer'
 import pluralize from '6-shared/helpers/pluralize'
 import type { TFxAmount } from '6-shared/types'
-import { HelpOutlineIcon } from '6-shared/ui/feather'
+import { HelpOutlineIcon } from '6-shared/ui/Icons'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { Amount } from '6-shared/ui/Amount'
 

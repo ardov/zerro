@@ -6,12 +6,12 @@ import type { FC } from 'react'
 import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
-import EditOutlined from '@mui/icons-material/EditOutlined'
 import { Chip } from '6-shared/ui/Chip'
 import { Menu, MenuItem } from '6-shared/ui/Menu'
 import { ListRowIcon, ListRowText } from '6-shared/ui/ListRow'
 import { Divider } from '6-shared/ui/Divider'
 import {
+  EditIcon,
   LocalOfferOutlinedIcon,
   DoneAllIcon,
   MoreVertIcon,
@@ -186,7 +186,7 @@ const Actions: FC<ActionsProps> = ({
               {actions.bulkEdit && (
                 <MenuItem onClick={() => setEditModalVisible(true)}>
                   <ListRowIcon>
-                    <EditOutlined />
+                    <EditIcon />
                   </ListRowIcon>
                   <ListRowText>{t('edit')}</ListRowText>
                 </MenuItem>

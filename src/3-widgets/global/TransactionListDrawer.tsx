@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SideDrawer } from '6-shared/ui/SideDrawer'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { CloseIcon } from '6-shared/ui/feather'
+import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
 import type { core } from 'zerro-core/redux'
 
