@@ -7,5 +7,5 @@
     "tools/**/*.ts",
     "vitest*.config.ts"
   ],
-  "ignoreDependencies": ["react-scan"]
+  "ignoreDependencies": ["react-scan", "tailwindcss"]
 }
