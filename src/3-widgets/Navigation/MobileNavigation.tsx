@@ -38,11 +38,11 @@ export const MobileNavigation: FC = () => {
           <button
             type="button"
             key={route.path}
-            aria-current={currentRoute?.path === route.path ? 'page' : undefined}
+            aria-current={
+              currentRoute?.path === route.path ? 'page' : undefined
+            }
             onClick={() => navigate(route.path)}
-            className={navigationActionClass(
-              currentRoute?.path === route.path
-            )}
+            className={navigationActionClass(currentRoute?.path === route.path)}
           >
             {route.icon}
             <span className="type-caption">{route.label}</span>

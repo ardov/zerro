@@ -2,10 +2,7 @@ import type { ComponentPropsWithRef, ReactNode } from 'react'
 import { Field } from '@base-ui/react/field'
 import { Input as InputPrimitive } from '@base-ui/react/input'
 import { cn } from './shadcn/utils'
-import {
-  GrowingTextarea,
-  inputPlaceholderClass,
-} from './GrowingTextarea'
+import { GrowingTextarea, inputPlaceholderClass } from './GrowingTextarea'
 import './OutlinedField.css'
 
 /** MUI's two outlined heights. They are the control's padding and nothing

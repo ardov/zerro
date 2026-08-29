@@ -29,18 +29,18 @@ export function OutboxRecoveryNotice() {
 
   return (
     <SnackbarNotice
-        severity="error"
-        title={t('outboxRecoveryTitle')}
-        action={
-          <Button color="inherit" size="small" onClick={confirmDiscard}>
-            {t('outboxRecoveryConfirm')}
-          </Button>
-        }
-      >
-        {t('outboxRecoveryDescription')}
-        <div className="mt-2 break-words font-mono type-caption">
-          {t('journalRecoveryDiagnostic')}: {reason}
-        </div>
+      severity="error"
+      title={t('outboxRecoveryTitle')}
+      action={
+        <Button color="inherit" size="small" onClick={confirmDiscard}>
+          {t('outboxRecoveryConfirm')}
+        </Button>
+      }
+    >
+      {t('outboxRecoveryDescription')}
+      <div className="mt-2 break-words font-mono type-caption">
+        {t('journalRecoveryDiagnostic')}: {reason}
+      </div>
     </SnackbarNotice>
   )
 }

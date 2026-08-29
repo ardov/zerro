@@ -45,34 +45,34 @@ function SnackbarNoticeContents(props: SnackbarNoticeProps) {
         )}
       >
         {toasts.map(toast => (
-            <Toast.Root
-              key={toast.id}
-              toast={toast}
-              role="alert"
-              swipeDirection={[]}
-              className={cn(
-                'relative w-full rounded-lg px-4 py-3 font-sans shadow-elevation-6 transition-[opacity,transform] duration-250 ease-in-out data-ending-style:-translate-y-2 data-ending-style:opacity-0 data-starting-style:-translate-y-2 data-starting-style:opacity-0',
-                props.severity === 'error' && 'bg-error text-error-foreground',
-                props.severity === 'warning' &&
-                  'bg-warning text-warning-foreground',
-                props.severity === 'info' && 'bg-info text-info-foreground'
-              )}
-            >
-              <Toast.Content className="flex items-start gap-3">
-                <div className="min-w-0 flex-1 type-body-sm">
-                  {props.title && (
-                    <Toast.Title className="m-0 mb-1 type-body font-medium" />
-                  )}
-                  {props.children}
-                </div>
-                {props.action && (
-                  <div className="flex shrink-0 items-center gap-1">
-                    {props.action}
-                  </div>
+          <Toast.Root
+            key={toast.id}
+            toast={toast}
+            role="alert"
+            swipeDirection={[]}
+            className={cn(
+              'relative w-full rounded-lg px-4 py-3 font-sans shadow-elevation-6 transition-[opacity,transform] duration-250 ease-in-out data-ending-style:-translate-y-2 data-ending-style:opacity-0 data-starting-style:-translate-y-2 data-starting-style:opacity-0',
+              props.severity === 'error' && 'bg-error text-error-foreground',
+              props.severity === 'warning' &&
+                'bg-warning text-warning-foreground',
+              props.severity === 'info' && 'bg-info text-info-foreground'
+            )}
+          >
+            <Toast.Content className="flex items-start gap-3">
+              <div className="min-w-0 flex-1 type-body-sm">
+                {props.title && (
+                  <Toast.Title className="m-0 mb-1 type-body font-medium" />
                 )}
-              </Toast.Content>
-            </Toast.Root>
-          ))}
+                {props.children}
+              </div>
+              {props.action && (
+                <div className="flex shrink-0 items-center gap-1">
+                  {props.action}
+                </div>
+              )}
+            </Toast.Content>
+          </Toast.Root>
+        ))}
       </Toast.Viewport>
     </Toast.Portal>
   )

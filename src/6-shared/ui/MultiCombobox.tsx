@@ -85,7 +85,9 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
           sideOffset={4}
           style={{ minWidth: 'var(--anchor-width)' }}
         >
-          <Combobox.Popup className={cn(popupSurfaceClass, '[--grow-from:0.95]')}>
+          <Combobox.Popup
+            className={cn(popupSurfaceClass, '[--grow-from:0.95]')}
+          >
             {props.emptyText && (
               <Combobox.Empty>
                 <div className="px-2 py-3 type-body-sm text-muted-foreground">

@@ -259,9 +259,7 @@ function FilterEditor(props: {
         <MultiCombobox
           label={t('account')}
           open={optionsOpen}
-          onOpenChange={open =>
-            open ? onOptionsOpen() : onOptionsClose()
-          }
+          onOpenChange={open => (open ? onOptionsOpen() : onOptionsClose())}
           options={Object.keys(accounts).map(value => ({
             value,
             label: accounts[value]?.title || value,
@@ -276,9 +274,7 @@ function FilterEditor(props: {
         <MultiCombobox
           label={t('category')}
           open={optionsOpen}
-          onOpenChange={open =>
-            open ? onOptionsOpen() : onOptionsClose()
-          }
+          onOpenChange={open => (open ? onOptionsOpen() : onOptionsClose())}
           options={Object.keys(tags).map(value => ({
             value,
             label: tags[value]?.name || value,
@@ -293,9 +289,7 @@ function FilterEditor(props: {
         <MultiCombobox
           label={t('transactionType')}
           open={optionsOpen}
-          onOpenChange={open =>
-            open ? onOptionsOpen() : onOptionsClose()
-          }
+          onOpenChange={open => (open ? onOptionsOpen() : onOptionsClose())}
           options={[
             core.transactions.TrFilterType.Income,
             core.transactions.TrFilterType.Outcome,

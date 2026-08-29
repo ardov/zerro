@@ -32,20 +32,20 @@ export const JournalRecoveryNotice = () => {
 
   return (
     <SnackbarNotice
-        severity="error"
-        title={t('journalRecoveryTitle')}
-        action={
-          <Button color="inherit" size="small" onClick={confirmReload}>
-            {t('journalRecoveryConfirm')}
-          </Button>
-        }
-      >
-        {t('journalRecoveryDescription')}
-        {recoveryReason && (
-          <div className="mt-2 break-words font-mono type-caption">
-            {t('journalRecoveryDiagnostic')}: {recoveryReason}
-          </div>
-        )}
+      severity="error"
+      title={t('journalRecoveryTitle')}
+      action={
+        <Button color="inherit" size="small" onClick={confirmReload}>
+          {t('journalRecoveryConfirm')}
+        </Button>
+      }
+    >
+      {t('journalRecoveryDescription')}
+      {recoveryReason && (
+        <div className="mt-2 break-words font-mono type-caption">
+          {t('journalRecoveryDiagnostic')}: {recoveryReason}
+        </div>
+      )}
     </SnackbarNotice>
   )
 }

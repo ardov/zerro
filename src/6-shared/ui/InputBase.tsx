@@ -1,9 +1,6 @@
 import type { ComponentPropsWithRef, ReactNode } from 'react'
 import { Input as InputPrimitive } from '@base-ui/react/input'
-import {
-  GrowingTextarea,
-  inputPlaceholderClass,
-} from './GrowingTextarea'
+import { GrowingTextarea, inputPlaceholderClass } from './GrowingTextarea'
 import { cn } from './shadcn/utils'
 
 export type InputBaseProps = Omit<
@@ -63,10 +60,7 @@ export function InputBase({
       {content}
     </label>
   ) : (
-    <div
-      data-slot="input-base"
-      className={rootClassName}
-    >
+    <div data-slot="input-base" className={rootClassName}>
       {content}
     </div>
   )

@@ -39,25 +39,25 @@ export const RestoredOutboxNotice = () => {
 
   return (
     <SnackbarNotice
-        severity="info"
-        title={t('restoredOutboxTitle')}
-        action={
-          <>
-            <Button color="inherit" size="small" onClick={handleSync}>
-              {t('sendChanges')}
-            </Button>
-            <IconButton
-              color="inherit"
-              size="small"
-              aria-label={t('dismissNotice')}
-              onClick={() => setDismissed(true)}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </>
-        }
-      >
-        {t('restoredOutboxDescription', { count: pendingCount })}
+      severity="info"
+      title={t('restoredOutboxTitle')}
+      action={
+        <>
+          <Button color="inherit" size="small" onClick={handleSync}>
+            {t('sendChanges')}
+          </Button>
+          <IconButton
+            color="inherit"
+            size="small"
+            aria-label={t('dismissNotice')}
+            onClick={() => setDismissed(true)}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </>
+      }
+    >
+      {t('restoredOutboxDescription', { count: pendingCount })}
     </SnackbarNotice>
   )
 }

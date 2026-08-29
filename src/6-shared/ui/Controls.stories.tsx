@@ -276,11 +276,15 @@ export const GrowingField: Story = {
     )
   },
   play: async ({ canvasElement }) => {
-    const field = within(canvasElement).getByRole('textbox', { name: 'Comment' })
+    const field = within(canvasElement).getByRole('textbox', {
+      name: 'Comment',
+    })
     const initialHeight = field.getBoundingClientRect().height
     await userEvent.type(field, '{Enter}Second line')
     await waitFor(() =>
-      expect(field.getBoundingClientRect().height).toBeGreaterThan(initialHeight)
+      expect(field.getBoundingClientRect().height).toBeGreaterThan(
+        initialHeight
+      )
     )
   },
 }
