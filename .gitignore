@@ -44,6 +44,3 @@ experiments/
 
 # private notes (separate repository, never published)
 /private/
-
-# ui parity snapshots
-/.ui-parity/
