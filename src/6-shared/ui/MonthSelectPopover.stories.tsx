@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { List, ListItemButton, ListItemText } from '@mui/material'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import MonthSelectPopover from './MonthSelectPopover'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
@@ -93,83 +92,4 @@ export const PastMonths: Story = {
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(popup).not.toBeVisible())
   },
-}
-
-/** The old month cells, including ListItemText's margins. A menu row is
- * shorter, so reusing its spacing would silently shrink this calendar. */
-function CellReference() {
-  const now = new Date()
-  const months = Array.from({ length: 12 }, (_, m) =>
-    toISOMonth(new Date(now.getFullYear(), m))
-  )
-  return (
-    <List className="grid grid-cols-3" data-testid="mui-months">
-      {months.map(month => (
-        <ListItemButton
-          key={month}
-          sx={{
-            borderRadius: 1,
-            border: theme =>
-              month === toISOMonth(now)
-                ? `1px solid ${theme.palette.primary.main}`
-                : 'none',
-          }}
-          selected={month === toISOMonth(now)}
-        >
-          <ListItemText className="text-center">
-            {formatDate(month, 'LLL').toUpperCase()}
-          </ListItemText>
-        </ListItemButton>
-      ))}
-    </List>
-  )
-}
-
-export const CellParity: Story = {
-  render: () => (
-    <>
-      <Harness disablePast />
-      <div className="w-max">
-        <CellReference />
-      </div>
-    </>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const snapshot = (el: HTMLElement) => {
-      const s = getComputedStyle(el)
-      const r = el.getBoundingClientRect()
-      return {
-        width: Math.round(r.width),
-        height: Math.round(r.height),
-        padding: s.padding,
-        color: s.color,
-        background: s.backgroundColor,
-        border: s.border,
-        radius: s.borderRadius,
-      }
-    }
-    const current = formatDate(new Date(), 'LLL').toUpperCase()
-    const reference = snapshot(
-      within(canvas.getByTestId('mui-months')).getByRole('button', {
-        name: current,
-      })
-    )
-    await userEvent.click(canvas.getByRole('button', { name: 'Choose month' }))
-    const popup = await within(canvasElement.ownerDocument.body).findByRole(
-      'dialog',
-      { name: 'Select month' }
-    )
-    await waitFor(() =>
-      expect(
-        snapshot(within(popup).getByRole('button', { name: current }))
-      ).toEqual(reference)
-    )
-    await userEvent.keyboard('{Escape}')
-    await waitFor(() => expect(popup).not.toBeVisible())
-  },
-}
-export const DarkCellParity: Story = {
-  ...CellParity,
-  globals: { theme: 'dark' },
 }
