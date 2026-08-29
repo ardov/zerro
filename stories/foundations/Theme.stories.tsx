@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Typography } from '@mui/material'
-import { useAppTheme } from '6-shared/ui/theme'
+import { getContrastText, useAppTheme } from '6-shared/ui/theme'
 import { Logo } from '6-shared/ui/Logo'
 
 const meta = {
@@ -39,7 +39,7 @@ function ThemeCatalog() {
             className="h-18 w-28 rounded-lg p-2"
             style={{
               backgroundColor: color,
-              color: theme.palette.getContrastText(color),
+              color: getContrastText(color),
             }}
           >
             <Typography variant="caption">{name}</Typography>

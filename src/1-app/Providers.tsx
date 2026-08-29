@@ -10,7 +10,7 @@ import type { AppThemeProviderProps } from '6-shared/ui/theme'
 export function Providers(props: {
   children: React.ReactNode
   store?: typeof store
-  theme?: Pick<AppThemeProviderProps, 'defaultMode' | 'storageManager'>
+  theme?: Pick<AppThemeProviderProps, 'defaultMode'>
 }) {
   return (
     <StyledEngineProvider injectFirst enableCssLayer>

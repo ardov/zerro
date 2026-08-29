@@ -2,16 +2,20 @@ import { createTheme } from '@mui/material/styles'
 import { blueGrey, blue, green, grey } from '@mui/material/colors'
 import { breakpoints } from './breakpoints'
 
+/** The MUI theme this app used to be built on, kept only so that the parity
+ * stories still have something to compare against.
+ *
+ * Nothing in the application reads it: the palette it resolved to is written
+ * out in `palette.ts` and reaches the page as the tokens in `tokens.ts`. An
+ * unthemed MUI component renders Roboto on a 4px radius, which would make
+ * every comparison fail for a reason that has nothing to do with the component
+ * under test — so the stories keep building one until they go, and they go
+ * with MUI itself. It is mounted in `.storybook/StoryProviders.tsx` and
+ * nowhere else. */
+
 const hoverOpacity = 0.04
 
-export const mainColors = {
-  lightBackgroundPaper: '#ffffff',
-  lightBackgroundDefault: grey[100],
-  darkBackgroundPaper: '#212121',
-  darkBackgroundDefault: '#121212',
-}
-
-export const appTheme = createTheme({
+export const storyTheme = createTheme({
   breakpoints: { values: { ...breakpoints } },
   colorSchemes: {
     light: {
@@ -24,10 +28,7 @@ export const appTheme = createTheme({
           hoverOpacity,
         },
         text: { disabled: `rgba(0, 0, 0, 0.38)` },
-        background: {
-          paper: mainColors.lightBackgroundPaper,
-          default: mainColors.lightBackgroundDefault,
-        },
+        background: { paper: '#ffffff', default: grey[100] },
       },
     },
     dark: {
@@ -40,10 +41,7 @@ export const appTheme = createTheme({
           hoverOpacity,
         },
         text: { disabled: `rgba(255, 255, 255, 0.38)` },
-        background: {
-          paper: mainColors.darkBackgroundPaper,
-          default: mainColors.darkBackgroundDefault,
-        },
+        background: { paper: '#212121', default: '#121212' },
       },
     },
   },

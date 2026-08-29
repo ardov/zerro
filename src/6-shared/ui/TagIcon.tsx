@@ -1,8 +1,6 @@
 import type { ComponentPropsWithoutRef } from 'react'
 import { clsx } from 'clsx'
-// `useTheme` is here for `getContrastText`, which is a colour calculation
-// rather than a control; it converts with the theme.
-import { useTheme } from '@mui/material'
+import { getContrastText } from './theme/color'
 import { Checkbox, type CheckboxProps } from './Checkbox'
 
 const isSvgUrl = (symbol: string): boolean => {
@@ -37,7 +35,6 @@ export function TagIcon(props: TagIconProps) {
     style,
     ...rest
   } = props
-  const theme = useTheme()
   const isInteractive = !!onCheckedChange
   const isSvg = isSvgUrl(symbol)
   const contentIsHidden = !!showCheckBox || !!checked
@@ -51,20 +48,24 @@ export function TagIcon(props: TagIconProps) {
         'group relative flex shrink-0 items-center justify-center rounded-full transition-transform duration-200 ease-in-out',
         size === 's' ? 'size-8' : 'size-10',
         color ? 'border' : 'border-0',
+        // Without a tag colour the icon is the card it sits on: the contrast
+        // calculation over `background.paper` lands on the card's own text
+        // colour in either scheme, so it is a token rather than a computation.
+        !color && 'bg-muted text-card-foreground',
         button
           ? 'cursor-pointer hover:scale-110 active:scale-100 active:duration-100'
           : 'cursor-auto',
         className
       )}
       style={{
-        color: theme.palette.getContrastText(
-          color || theme.palette.background.paper
-        ),
-        borderColor: color || undefined,
-        backgroundColor: color || theme.palette.action.hover,
-        backgroundImage: color
-          ? 'linear-gradient(-30deg, rgba(255,255,255,0.2), transparent)'
-          : undefined,
+        // A tag's colour is the user's, so this one has to be computed.
+        ...(color && {
+          color: getContrastText(color),
+          borderColor: color,
+          backgroundColor: color,
+          backgroundImage:
+            'linear-gradient(-30deg, rgba(255,255,255,0.2), transparent)',
+        }),
         ...style,
       }}
     >

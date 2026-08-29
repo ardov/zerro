@@ -3,6 +3,8 @@ import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { GlobalWidgets } from '1-app/GlobalWidgets'
 import { Providers } from '1-app/Providers'
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import { storyTheme } from '6-shared/ui/theme/storyTheme'
 import { PopoverManager } from '6-shared/historyPopovers'
 import { i18n } from '6-shared/localization'
 import { makeStoryStore, type StoryScenario } from 'stories/fixtures/storyStore'
@@ -69,18 +71,26 @@ export function StoryProviders(props: {
   }, [theme])
 
   return (
-    <Providers
-      store={store}
-      theme={{ defaultMode: theme, storageManager: null }}
-    >
-      {localeReady && (
-        <MemoryRouter key={`${route}:${locale}`} initialEntries={[route]}>
-          <PopoverManager>
-            {props.children}
-            {app?.globalWidgets && <GlobalWidgets />}
-          </PopoverManager>
-        </MemoryRouter>
-      )}
+    <Providers store={store} theme={{ defaultMode: theme }}>
+      {/* The app is off the MUI theme; the parity stories are not, because an
+          unthemed MUI component is Roboto on a 4px radius and would fail every
+          comparison for a reason that is not the component's. It is mounted
+          here rather than in `Providers` so that nothing the application ships
+          can reach it. Both halves are pinned to the story's own scheme. */}
+      <MuiThemeProvider
+        theme={storyTheme}
+        defaultMode={theme}
+        storageManager={null}
+      >
+        {localeReady && (
+          <MemoryRouter key={`${route}:${locale}`} initialEntries={[route]}>
+            <PopoverManager>
+              {props.children}
+              {app?.globalWidgets && <GlobalWidgets />}
+            </PopoverManager>
+          </MemoryRouter>
+        )}
+      </MuiThemeProvider>
     </Providers>
   )
 }

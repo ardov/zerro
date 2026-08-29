@@ -1,7 +1,15 @@
 # UI styling compatibility
 
-The application uses Tailwind utilities alongside MUI components and Emotion.
-The shared `Providers` component is used by both the application and Storybook.
+The application is styled with Tailwind utilities over its own palette. Emotion
+is gone from it, and MUI is down to four icon glyphs and the cascade-layer setup
+in `Providers`, which is shared by the application and Storybook.
+
+Storybook mounts one thing the application does not: `theme/storyTheme.ts`, the
+MUI theme the app used to be built on. The parity stories compare an owned
+component against the MUI one it replaced, and an unthemed MUI component renders
+Roboto on a 4px radius — every comparison would fail for a reason that is not
+the component's. It is mounted in `.storybook/StoryProviders.tsx` and nowhere
+else, and it leaves when those stories do.
 
 ## Cascade
 
@@ -73,10 +81,13 @@ properties are not spacing and must be checked individually.
 | `boxShadow: 2` / `4`      | `shadow-elevation-2` / `shadow-elevation-4` |
 | `zIndex: modal`           | `z-modal`                                   |
 
-Colors, radii, elevation shadows, and the modal stacking level are derived from
-the active MUI theme. Every value `AppThemeProvider` emits gets a Tailwind
-counterpart in `src/tailwind.css` — a `--color-*` alias, a `--shadow-*` alias,
-or an `@utility` — in the same change that adds it. A theme variable with no
+Colors, radii, elevation shadows, and the modal stacking level come from
+`src/6-shared/ui/theme/palette.ts`, which is the palette MUI's `createTheme`
+used to resolve at runtime, written out. `tokens.ts` turns it into the CSS
+custom properties the app is styled through, both schemes at once, so switching
+between them is the `dark` class on the root rather than a re-render. Every
+value it emits gets a Tailwind counterpart in `src/tailwind.css` — a `--color-*`
+alias, a `--shadow-*` alias, or an `@utility` — in the same change that adds it. A theme variable with no
 counterpart forces `[box-shadow:var(--elevation-8)]` at the call site and
 quietly reintroduces arbitrary values. Elevations 1, 2, 4, 8, 10 and 16 are
 registered as `@utility` blocks; they are deliberately not also `@theme`
@@ -94,9 +105,15 @@ rewritten as a literal in a class list. MUI's state fills are
 colour, and `createTheme` pins `hoverOpacity` itself, so writing
 `hover:bg-primary/4` would fork that number where no change to the theme could
 reach it. `--primary-hover`, `--primary-focus`, `--primary-selected` and
-`--primary-selected-hover` are composed in `AppThemeProvider` the way `--input`
-is; the last is the sum of the selected and hover opacities, which is how MUI
-stacks them. `--disabled-opacity` is `action.disabledOpacity` and is an
+`--primary-selected-hover` are composed in `tokens.ts` the way `--input` is; the
+last is the sum of the selected and hover opacities, which is how MUI stacks
+them. They are composed in TypeScript rather than as CSS `color-mix()`, because
+`alpha()` *replaces* a colour's alpha where `color-mix(…, transparent)`
+multiplies it — the fills built on `action.selected`, which is itself already
+transparent, would come out several times fainter. `color.ts` holds that
+function and `getContrastText`, and `color.test.ts` recomputes every
+`contrastText` in the palette to say the arithmetic still agrees with the values
+the palette was frozen from. `--disabled-opacity` is `action.disabledOpacity` and is an
 `@utility` (`opacity-disabled`) rather than a `--color-*` alias, because MUI
 dims a disabled menu item instead of recolouring it.
 `secondary` is the semantic selected-surface token, not MUI's secondary brand
@@ -136,11 +153,11 @@ necessarily win. Budget group rows, for example, override `items-center` with
 
 ## Breakpoints
 
-`src/6-shared/ui/theme/breakpoints.ts` is the single source. The MUI theme is
-built from that map, so `theme.breakpoints.down(...)` and the MUI-free
-`useBreakpointDown(...)` hook switch on the same pixel, including MUI's 0.05px
-subtraction. Every component switches through that hook; MUI's `useMediaQuery`
-is gone from the app. The queries that are not breakpoints at all — colour
+`src/6-shared/ui/theme/breakpoints.ts` is the single source, and now the only
+one: `useBreakpointDown(...)` is built from that map, and keeps MUI's 0.05px
+subtraction so a `down` query and the Tailwind variant of the same name cannot
+both match on the breakpoint pixel itself. Every component switches through
+that hook; MUI's `useMediaQuery` is gone from the app. The queries that are not breakpoints at all — colour
 scheme, the iPhone home bar — go through `useMediaQueryValue`, which is the
 store the breakpoint hook is built on. `src/tailwind.css` mirrors the same numbers because Tailwind cannot read
 TypeScript; that mirror is the one place a value has to be changed twice. It is

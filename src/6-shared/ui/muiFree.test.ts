@@ -31,7 +31,16 @@ const OWNED = [
   'src/6-shared/ui/SnackbarNotice.tsx',
   'src/6-shared/ui/SnackbarProvider.tsx',
   'src/6-shared/ui/SmartDialog.tsx',
+  'src/6-shared/ui/TagIcon.tsx',
   'src/6-shared/ui/feather/index.tsx',
+  // The theme itself. `storyTheme.ts` is deliberately not here: it builds the
+  // MUI theme the parity stories compare against, and goes with them.
+  'src/6-shared/ui/theme/index.tsx',
+  'src/6-shared/ui/theme/AppThemeProvider.tsx',
+  'src/6-shared/ui/theme/hooks.tsx',
+  'src/6-shared/ui/theme/palette.ts',
+  'src/6-shared/ui/theme/tokens.ts',
+  'src/6-shared/ui/theme/color.ts',
   'src/6-shared/hooks/useBreakpointDown.ts',
   'src/6-shared/hooks/useMediaQueryValue.ts',
   'src/6-shared/hooks/useHomeBar.ts',

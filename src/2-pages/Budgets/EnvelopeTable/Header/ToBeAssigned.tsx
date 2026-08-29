@@ -36,7 +36,7 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
   const isSmall = useIsSmall()
 
   const bg = theme.palette[msgType].main
-  const color = theme.palette.getContrastText(bg)
+  const color = theme.palette[msgType].contrastText
 
   return (
     <Tooltip arrow title={<TooltipContent />}>

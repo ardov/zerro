@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { useAppTheme } from '6-shared/ui/theme'
 import { zenmoney } from '6-shared/api/zenmoney'
 import { Logo } from '6-shared/ui/Logo'
@@ -27,19 +28,14 @@ export default function Auth() {
   setTimeout(() => setLogoIn(true), 300)
   const parseFiles = (fileList: FileList) => dispatch(loadBackup(fileList[0]))
 
-  const dragOverStyle = {
-    background: theme.palette.action.focus,
-    transform: 'scale(1.1)',
-    transition: `300ms ${theme.transitions.easing.easeInOut}`,
-  }
-  const defaultStyle = {
-    transform: 'scale(1)',
-    transition: `300ms ${theme.transitions.easing.easeInOut}`,
-  }
   return (
     <div
-      className="flex min-h-screen flex-col items-center justify-center gap-16 p-6"
-      style={isDragging ? dragOverStyle : defaultStyle}
+      className={cn(
+        'flex min-h-screen flex-col items-center justify-center gap-16 p-6 transition-all duration-300 ease-in-out',
+        // A backup can be dropped anywhere on this screen, and the whole of it
+        // leans in to say so.
+        isDragging ? 'scale-110 bg-action-focus' : 'scale-100'
+      )}
       onDragOver={e => {
         e.stopPropagation()
         e.preventDefault()

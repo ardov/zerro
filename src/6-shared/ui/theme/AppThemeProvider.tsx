@@ -1,199 +1,56 @@
-import type { FC } from 'react'
-import React from 'react'
-import { useLayoutEffect } from 'react'
-import { Global, css } from '@emotion/react'
-import type { Theme } from '@mui/material/styles'
-import { ThemeProvider, alpha } from '@mui/material/styles'
-import type { ThemeProviderProps } from '@mui/material/styles'
-import { appTheme } from './createTheme'
-import { fixOldTheme, useAppTheme, useColorScheme } from './hooks'
+import type { FC, ReactNode } from 'react'
+import { useLayoutEffect, useState } from 'react'
+import type { TColorSchemePreference } from './hooks'
+import {
+  forceColorScheme,
+  migrateStoredColorScheme,
+  useAppTheme,
+  useColorScheme,
+} from './hooks'
+import { themeTokensCss } from './tokens'
 
 import './styles.scss'
 
-fixOldTheme()
+migrateStoredColorScheme()
 
-const GlobalVariables = (props: { theme: Theme }) => {
-  const { palette, shape, shadows, zIndex } = props.theme
-  const styles = css`
-    :root {
-      --c-bg: ${palette.background.default};
-      --c-scrollbar: ${palette.divider};
-      --c-primary: ${palette.primary.main};
-
-      --background: ${palette.background.default};
-      --foreground: ${palette.text.primary};
-      --card: ${palette.background.paper};
-      --card-foreground: ${palette.text.primary};
-      --popover: ${palette.background.paper};
-      --popover-foreground: ${palette.text.primary};
-      /* MUI does not build the tooltip out of a palette colour: it is grey
-         700 at 92 per cent, over white type. */
-      --tooltip: ${alpha(palette.grey[700], 0.92)};
-      --tooltip-foreground: ${palette.common.white};
-      --primary: ${palette.primary.main};
-      --primary-foreground: ${palette.getContrastText(palette.primary.main)};
-      /* The state fills MUI paints a text button and a selected menu item
-         with. The theme already names these opacities — createTheme even
-         pins hoverOpacity itself — so they are composed here rather than
-         written out as \`bg-primary/4\` at each call site, where a change to
-         the theme would not reach them. Selected-and-hovered is the sum of
-         the two, the way MUI stacks them. */
-      --primary-hover: ${alpha(
-        palette.primary.main,
-        palette.action.hoverOpacity
-      )};
-      --primary-focus: ${alpha(
-        palette.primary.main,
-        palette.action.focusOpacity
-      )};
-      --primary-selected: ${alpha(
-        palette.primary.main,
-        palette.action.selectedOpacity
-      )};
-      --primary-selected-hover: ${alpha(
-        palette.primary.main,
-        palette.action.selectedOpacity + palette.action.hoverOpacity
-      )};
-      /* MUI dims a disabled menu item rather than recolouring it, so this is
-         an opacity and not a colour like --disabled-foreground. */
-      --disabled-opacity: ${palette.action.disabledOpacity};
-      /* The rest of what MUI's Button needs, and only for the variant and
-         colour pairs the app actually renders: text in primary, secondary and
-         inherit, contained in primary, outlined in error. */
-      --primary-dark: ${palette.primary.dark};
-      --interactive-hover: ${alpha(
-        palette.secondary.main,
-        palette.action.hoverOpacity
-      )};
-      --foreground-hover: ${alpha(
-        palette.text.primary,
-        palette.action.hoverOpacity
-      )};
-      --error-hover: ${alpha(palette.error.main, palette.action.hoverOpacity)};
-      --primary-outline: ${alpha(palette.primary.main, 0.5)};
-      --error-outline: ${alpha(palette.error.main, 0.5)};
-      --disabled-background: ${palette.action.disabledBackground};
-      --secondary: ${palette.action.selected};
-      --secondary-foreground: ${palette.text.primary};
-      --muted: ${palette.action.hover};
-      --muted-foreground: ${palette.text.secondary};
-      --accent: ${palette.action.hover};
-      --accent-foreground: ${palette.text.primary};
-      --action-focus: ${palette.action.focus};
-      --destructive: ${palette.error.main};
-      --destructive-foreground: ${palette.getContrastText(palette.error.main)};
-      --border: ${palette.divider};
-      /* The outlined field border is heavier than the divider, so --input is
-         a value of its own rather than an alias of --border. MUI's own
-         OutlinedInput builds it as 23% of the colour that sits on the
-         background, so build it the same way instead of pasting the two
-         literals that expression happens to produce today. */
-      --input: ${alpha(
-        palette.mode === 'light' ? palette.common.black : palette.common.white,
-        0.23
-      )};
-      --action-active: ${palette.action.active};
-      /* MUI disables a field's border with action.disabled and greys its text
-         with text.disabled. They hold the same value in the default palette,
-         so they are only distinguishable once one of them moves. */
-      --action-disabled: ${palette.action.disabled};
-      /* A chip's own three. Its fill is action.selected, which --secondary
-         already carries; these are the ones nothing else names: the tint a
-         clickable chip takes, the border MUI draws an outlined one with, and
-         the two states of the delete cross. */
-      --chip-hover: ${alpha(
-        palette.action.selected,
-        palette.action.selectedOpacity + palette.action.hoverOpacity
-      )};
-      --chip-primary-border: ${alpha(palette.primary.main, 0.7)};
-      /* A link's underline, which MUI draws in a fainter shade of the link
-         itself and hands back to the text colour on hover. */
-      --link-underline: ${alpha(palette.primary.main, 0.4)};
-      /* A switch, which MUI builds out of the scheme's extremes rather than
-         out of the palette: the thumb is white on light and grey 300 on dark,
-         and the track is the opposite colour at an opacity that also differs
-         by scheme. */
-      --switch-thumb: ${
-        palette.mode === 'light' ? palette.common.white : palette.grey[300]
-      };
-      --switch-track: ${
-        palette.mode === 'light' ? palette.common.black : palette.common.white
-      };
-      --switch-track-opacity: ${palette.mode === 'light' ? 0.38 : 0.3};
-      --chip-border: ${
-        palette.mode === 'light' ? palette.grey[400] : palette.grey[700]
-      };
-      --chip-delete: ${alpha(palette.text.primary, 0.26)};
-      --chip-delete-hover: ${alpha(palette.text.primary, 0.4)};
-      --ring: ${palette.primary.main};
-      --interactive: ${palette.secondary.main};
-      --interactive-foreground: ${palette.getContrastText(
-        palette.secondary.main
-      )};
-      --success: ${palette.success.main};
-      --success-foreground: ${palette.getContrastText(palette.success.main)};
-      --warning: ${palette.warning.main};
-      --warning-foreground: ${palette.getContrastText(palette.warning.main)};
-      --info: ${palette.info.main};
-      --info-foreground: ${palette.getContrastText(palette.info.main)};
-      --error: ${palette.error.main};
-      --error-foreground: ${palette.getContrastText(palette.error.main)};
-      --disabled-foreground: ${palette.text.disabled};
-      --radius: ${shape.borderRadius}px;
-      --elevation-1: ${shadows[1]};
-      --elevation-2: ${shadows[2]};
-      --elevation-4: ${shadows[4]};
-      --elevation-6: ${shadows[6]};
-      --elevation-8: ${shadows[8]};
-      --elevation-10: ${shadows[10]};
-      --elevation-16: ${shadows[16]};
-      --elevation-24: ${shadows[24]};
-      /* Owned overlays stack against MUI's modals, so the level comes from
-         the same theme MUI positions its own surfaces with. */
-      --z-modal: ${zIndex.modal};
-      --z-drawer: ${zIndex.drawer};
-      --z-tooltip: ${zIndex.tooltip};
-    }
-  `
-  return <Global styles={styles} />
+export type AppThemeProviderProps = {
+  /** Pins the scheme instead of reading the user's preference, and stops
+   * anything below from writing one. Stories render both schemes side by side
+   * and must not leave a choice behind in the browser. */
+  defaultMode?: TColorSchemePreference
+  children?: ReactNode
 }
 
-export type AppThemeProviderProps = Pick<
-  ThemeProviderProps,
-  'defaultMode' | 'storageManager'
-> & {
-  children?: React.ReactNode
-}
-
+/** Puts the palette on the page.
+ *
+ * There is no theme context: the tokens are one stylesheet carrying both
+ * schemes, and which of them applies is the `dark` class on the root. A
+ * component that needs a colour as a value rather than as a property reaches
+ * for `useAppTheme`. */
 export const AppThemeProvider: FC<AppThemeProviderProps> = props => {
-  const { mode } = useColorScheme()
-
-  return (
-    <ThemeProvider
-      theme={appTheme}
-      defaultMode={props.defaultMode ?? mode}
-      storageManager={props.storageManager}
-    >
-      <WithTheme />
-      {props.children}
-    </ThemeProvider>
-  )
-}
-
-const WithTheme: FC = () => {
-  const theme = useAppTheme()
-
-  useLayoutEffect(() => {
-    const root = document.documentElement
-    root.classList.toggle('dark', theme.palette.mode === 'dark')
-
-    return () => root.classList.remove('dark')
-  }, [theme.palette.mode])
+  // During the first render, before anything below has subscribed — a story
+  // that pins a scheme must not paint the other one first.
+  useState(() => forceColorScheme(props.defaultMode ?? null))
 
   return (
     <>
-      <meta name="theme-color" content={theme.palette.background.paper} />
-      <GlobalVariables theme={theme} />
+      <style>{themeTokensCss}</style>
+      <ColorSchemeClass />
+      {props.children}
     </>
   )
+}
+
+const ColorSchemeClass: FC = () => {
+  const { mode } = useColorScheme()
+  const { palette } = useAppTheme()
+
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('dark', mode === 'dark')
+
+    return () => root.classList.remove('dark')
+  }, [mode])
+
+  return <meta name="theme-color" content={palette.background.paper} />
 }

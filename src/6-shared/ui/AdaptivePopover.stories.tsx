@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Button, Paper, Typography } from '@mui/material'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { AdaptivePopover } from './AdaptivePopover'
-import { appTheme } from './theme/createTheme'
+import { zIndex } from './theme/palette'
 
 const meta = {
   title: 'UI/Adaptive popover',
@@ -81,7 +81,7 @@ const checkDismissal: Story['play'] = async ({ canvasElement }) => {
     document.querySelector<HTMLElement>(ADAPTIVE_BACKDROP)!
   )
   await expect(getComputedStyle(popup).boxShadow).not.toBe('none')
-  await expect(backdropStyle.zIndex).toBe(String(appTheme.zIndex.modal))
+  await expect(backdropStyle.zIndex).toBe(String(zIndex.modal))
   await expect(
     within(popup).getByRole('button', { name: 'Close' })
   ).toBeInTheDocument()

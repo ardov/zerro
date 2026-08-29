@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { appTheme } from './createTheme'
 import type { TBreakpoint, TBreakpointDown } from './breakpoints'
 import { breakpoints, mediaQueryDown } from './breakpoints'
 
@@ -14,22 +13,18 @@ const tailwind = readFileSync(
 )
 
 describe('breakpoints', () => {
-  it('is the source the MUI theme is built from', () => {
-    keys.forEach(key => {
-      expect(appTheme.breakpoints.values[key]).toBe(breakpoints[key])
-    })
-  })
-
-  // Owned components switch on `mediaQueryDown`, MUI components switch on
-  // `theme.breakpoints.down`. A drift here would leave the two libraries
-  // disagreeing about the viewport by a fraction of a pixel.
-  it('produces the same `down` query MUI does', () => {
-    const normalize = (query: string) => query.replace(/\s+/g, '')
-    downKeys.forEach(key => {
-      expect(normalize(appTheme.breakpoints.down(key))).toBe(
-        normalize(`@media ${mediaQueryDown(key)}`)
-      )
-    })
+  // A `down` query stops 0.05px short of the breakpoint rather than at it, so
+  // that `down('md')` and a `md:` utility cannot both match at 900px. This was
+  // MUI's arithmetic and used to be checked against MUI; with nothing left to
+  // compare against, the queries are written out, which is what catches the
+  // subtraction going missing.
+  it('stops a `down` query just short of the breakpoint', () => {
+    expect(downKeys.map(mediaQueryDown)).toEqual([
+      '(max-width: 599.95px)',
+      '(max-width: 899.95px)',
+      '(max-width: 1199.95px)',
+      '(max-width: 1535.95px)',
+    ])
   })
 
   // Tailwind cannot read TypeScript, so `src/tailwind.css` restates these
