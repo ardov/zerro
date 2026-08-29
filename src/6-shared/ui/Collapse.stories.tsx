@@ -44,10 +44,12 @@ export const Transition: Story = {
 
     await userEvent.click(canvas.getByRole('button', { name: 'Toggle' }))
     const ownedBox = panel()!
+    await waitFor(() =>
+      expect(
+        Math.round(ownedBox.getBoundingClientRect().height)
+      ).toBeGreaterThan(0)
+    )
     await settled(ownedBox)
-    await expect(
-      Math.round(ownedBox.getBoundingClientRect().height)
-    ).toBeGreaterThan(0)
 
     await userEvent.click(canvas.getByRole('button', { name: 'Toggle' }))
     await waitFor(() => expect(panel()).toBe(null))
