@@ -86,11 +86,8 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
     "@eslint/js": "^10.0.1",
     "@mdx-js/rollup": "^3.1.1",
-    "@mui/material": "^9.2.0",
     "@storybook/addon-a11y": "10.5.5",
     "@storybook/addon-docs": "10.5.5",
     "@storybook/addon-vitest": "10.5.5",
@@ -121,7 +118,6 @@
     "storybook": "10.5.5",
     "stylelint": "^17.14.0",
     "stylelint-config-recommended-scss": "17.0.1",
-    "tailwindcss": "^4.3.3",
     "tsx": "4.23.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.63.0",
