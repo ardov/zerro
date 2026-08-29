@@ -4,12 +4,20 @@ The application is styled with Tailwind utilities over its own palette. Emotion
 is gone from it, and MUI is down to four icon glyphs and the cascade-layer setup
 in `Providers`, which is shared by the application and Storybook.
 
+`public/theme-init.js` resolves the system or stored scheme as a blocking head
+script, before React and before the first paint. It owns the root `dark` class,
+the native `color-scheme`, the `zerro-color-scheme` preference and cross-tab
+updates. A missing preference follows the system; storage failures fall back to
+the current page without breaking rendering. The React hook only subscribes to
+that manager. Storybook loads the same manager but pins its selected scheme in
+a local provider, so changing a story never writes an application preference.
+
 Storybook mounts one thing the application does not: `theme/storyTheme.ts`, the
 MUI theme the app used to be built on. The parity stories compare an owned
 component against the MUI one it replaced, and an unthemed MUI component renders
 Roboto on a 4px radius — every comparison would fail for a reason that is not
 the component's. It is mounted in `.storybook/StoryProviders.tsx` and nowhere
-else, and it leaves when those stories do.
+else, so it is outside the production application graph.
 
 ## Cascade
 
@@ -33,9 +41,9 @@ weight 700, and a `body` with no margin, the page's colours and `body1`'s type �
 and it stays in the `base` layer so any MUI rule that remains still wins, which
 is what keeps `.MuiInputBase-input`'s `content-box` from being overridden into
 collapsing every text field. `color-scheme` is the one value `enableColorScheme`
-used to derive from the palette: it now keys off the same `dark` class the
-Tailwind variant does, so the two cannot disagree about which scheme the page is
-in.
+used to derive from the palette: the head script sets it together with the same
+`dark` class the Tailwind variant uses, so the two cannot disagree about which
+scheme the page is in.
 
 Every co-located component stylesheet wraps its rules in `@layer components`.
 An unlayered rule outranks the whole `mui` layer, and a stylesheet that is the
@@ -656,10 +664,10 @@ own colour, because at rest there is nothing to distinguish it from. The one
 control that is a button doing a link's job takes `linkClass` and brings its
 own button reset, which is what MUI's `component="button"` did.
 
-Those three added six tokens, all of them composed opacities that belong in
-`AppThemeProvider` rather than as `/70` at a call site: the tooltip's fill and
-type, the chip's hover, border, primary border and the two states of its
-delete cross, and the link's underline. Writing them as Tailwind opacity
+Those three added eight tokens, all of them composed opacities that belong in
+`tokens.ts` rather than as `/70` at a call site: the tooltip's fill and type,
+the chip's hover, border, primary border and the two states of its delete
+cross, and the link's underline. Writing them as Tailwind opacity
 modifiers would have been visually right and textually different — Tailwind
 mixes in `oklab` where MUI writes `rgba` — which is how the parity stories
 found them.
@@ -820,13 +828,11 @@ shared infrastructure has its own migration step and does not make a surface
 itself an MUI consumer. Add a module to `OWNED` in that file when it is
 converted.
 
-Base UI is roughly 40-65 kB gzipped, and while both libraries ship the app pays
-for MUI and Base UI at once. That is the budget for the coexistence period, not
-a permanent state: keep the owned set to surfaces that have actually been
-converted, and remove the MUI equivalent in the same change rather than leaving
-two implementations of one control. `@mui/x-date-pickers` still remains in the
-dependency graph only until package cleanup; its temporary `pnpm.overrides`
-entry goes with that final removal.
+Base UI is roughly 40-65 kB gzipped, and the current dependency graph contains
+both it and MUI. The owned set contains only surfaces that the application uses;
+MUI equivalents exist only in parity stories. `@mui/x-date-pickers` has no
+source imports but remains in the dependency graph, together with its current
+`pnpm.overrides` entry.
 
 Assignment dismissal via Escape/backdrop/swipe applies the draft, as do Enter,
 the submit button and quick actions. An unchanged value emits no command.

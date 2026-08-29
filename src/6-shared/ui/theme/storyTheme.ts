@@ -2,16 +2,15 @@ import { createTheme } from '@mui/material/styles'
 import { blueGrey, blue, green, grey } from '@mui/material/colors'
 import { breakpoints } from './breakpoints'
 
-/** The MUI theme this app used to be built on, kept only so that the parity
- * stories still have something to compare against.
+/** The MUI theme this app used to be built on, retained as the parity stories'
+ * reference implementation.
  *
  * Nothing in the application reads it: the palette it resolved to is written
  * out in `palette.ts` and reaches the page as the tokens in `tokens.ts`. An
  * unthemed MUI component renders Roboto on a 4px radius, which would make
  * every comparison fail for a reason that has nothing to do with the component
- * under test — so the stories keep building one until they go, and they go
- * with MUI itself. It is mounted in `.storybook/StoryProviders.tsx` and
- * nowhere else. */
+ * under test. It is mounted in `.storybook/StoryProviders.tsx` and nowhere
+ * else. */
 
 const hoverOpacity = 0.04
 

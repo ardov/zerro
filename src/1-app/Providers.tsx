@@ -18,10 +18,7 @@ export function Providers(props: {
       {/* Declare the order before Emotion inserts any MUI rules, including in portals. */}
       <GlobalStyles styles="@layer theme, base, mui, components, utilities;" />
       <Provider store={props.store || store}>
-        <AppThemeProvider
-          key={props.theme?.defaultMode ?? 'application-theme'}
-          {...props.theme}
-        >
+        <AppThemeProvider {...props.theme}>
           <SnackbarProvider>
             {/* One tooltip group for the whole app, so moving along a row of
                 icon buttons does not wait out the delay at every one. */}

@@ -1,56 +1,50 @@
 import type { FC, ReactNode } from 'react'
-import { useLayoutEffect, useState } from 'react'
-import type { TColorSchemePreference } from './hooks'
-import {
-  forceColorScheme,
-  migrateStoredColorScheme,
-  useAppTheme,
-  useColorScheme,
-} from './hooks'
+import { useLayoutEffect } from 'react'
+import type { TColorScheme } from './palette'
+import { ColorSchemeOverrideContext, useAppTheme } from './hooks'
 import { themeTokensCss } from './tokens'
 
 import './styles.scss'
 
-migrateStoredColorScheme()
-
 export type AppThemeProviderProps = {
-  /** Pins the scheme instead of reading the user's preference, and stops
-   * anything below from writing one. Stories render both schemes side by side
-   * and must not leave a choice behind in the browser. */
-  defaultMode?: TColorSchemePreference
+  /** Pins an isolated renderer to one scheme without changing the application
+   * preference. The application itself leaves this unset. */
+  defaultMode?: TColorScheme
   children?: ReactNode
 }
 
-/** Puts the palette on the page.
- *
- * There is no theme context: the tokens are one stylesheet carrying both
- * schemes, and which of them applies is the `dark` class on the root. A
- * component that needs a colour as a value rather than as a property reaches
- * for `useAppTheme`. */
+/** Provides palette values that cannot be expressed through CSS variables.
+ * The page-level theme manager owns the root class and storage; a pinned
+ * renderer temporarily mirrors its local scheme onto the root for CSS tokens. */
 export const AppThemeProvider: FC<AppThemeProviderProps> = props => {
-  // During the first render, before anything below has subscribed — a story
-  // that pins a scheme must not paint the other one first.
-  useState(() => forceColorScheme(props.defaultMode ?? null))
+  const override = props.defaultMode ?? null
 
   return (
-    <>
+    <ColorSchemeOverrideContext.Provider value={override}>
       <style>{themeTokensCss}</style>
-      <ColorSchemeClass />
+      <ColorSchemeMetadata pinned={override !== null} />
       {props.children}
-    </>
+    </ColorSchemeOverrideContext.Provider>
   )
 }
 
-const ColorSchemeClass: FC = () => {
-  const { mode } = useColorScheme()
+const ColorSchemeMetadata: FC<{ pinned: boolean }> = ({ pinned }) => {
   const { palette } = useAppTheme()
 
   useLayoutEffect(() => {
-    const root = document.documentElement
-    root.classList.toggle('dark', mode === 'dark')
+    if (!pinned) return
 
-    return () => root.classList.remove('dark')
-  }, [mode])
+    const root = document.documentElement
+    const wasDark = root.classList.contains('dark')
+    const previousColorScheme = root.style.colorScheme
+    root.classList.toggle('dark', palette.mode === 'dark')
+    root.style.colorScheme = palette.mode
+
+    return () => {
+      root.classList.toggle('dark', wasDark)
+      root.style.colorScheme = previousColorScheme
+    }
+  }, [palette.mode, pinned])
 
   return <meta name="theme-color" content={palette.background.paper} />
 }

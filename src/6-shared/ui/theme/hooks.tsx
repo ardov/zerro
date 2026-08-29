@@ -1,117 +1,50 @@
-import { useCallback, useMemo, useSyncExternalStore } from 'react'
-import { useMediaQueryValue } from '6-shared/hooks/useMediaQueryValue'
+import { createContext, useContext, useMemo, useSyncExternalStore } from 'react'
 import type { TColorScheme } from './palette'
 import { palettes } from './palette'
 
-/** What the user chose, which is not the same as which scheme is on screen:
- * `system` defers to the device and follows it as it changes. */
-export type TColorSchemePreference = TColorScheme | 'system'
-
-const STORAGE_KEY = 'zerro-color-scheme'
-/** The keys this preference has lived under: MUI's `useColorScheme` wrote
- * `mui-mode`, and something older wrote a JSON-quoted value to `theme`. */
-const LEGACY_KEYS = ['mui-mode', 'theme']
-
-const isPreference = (value: unknown): value is TColorSchemePreference =>
-  value === 'light' || value === 'dark' || value === 'system'
-
-function read(): TColorSchemePreference {
-  if (typeof localStorage === 'undefined') return 'system'
-  const stored = localStorage.getItem(STORAGE_KEY)
-  return isPreference(stored) ? stored : 'system'
+type ThemeManager = {
+  getTheme: () => TColorScheme
+  toggle: () => void
+  subscribe: (listener: () => void) => () => void
 }
 
-/** Moves the preference onto a key this app owns. MUI named the old one and
- * is on its way out; a user who has chosen a scheme should not have to choose
- * it again because of that. */
-export function migrateStoredColorScheme() {
-  if (typeof localStorage === 'undefined') return
-  if (localStorage.getItem(STORAGE_KEY)) return
-  for (const key of LEGACY_KEYS) {
-    const stored = localStorage.getItem(key)
-    if (!stored) continue
-    // The oldest of them holds a JSON string rather than a bare value.
-    const value = stored.startsWith('"') ? stored.slice(1, -1) : stored
-    if (isPreference(value)) {
-      localStorage.setItem(STORAGE_KEY, value)
-      return
-    }
+declare global {
+  interface Window {
+    /** Attached by public/theme-init.js, loaded before the application. */
+    themeManager?: ThemeManager
   }
 }
 
-/** One store for every caller, so that the settings row and the provider that
- * paints the page cannot hold different ideas of the current scheme. */
-const listeners = new Set<() => void>()
-let preference: TColorSchemePreference | null = null
-/** Set by the provider when a caller pins the scheme — stories do — in which
- * case nothing is read from or written to storage. */
-let forced: TColorSchemePreference | null = null
-
-const store = {
-  subscribe(listener: () => void) {
-    listeners.add(listener)
-    return () => {
-      listeners.delete(listener)
-    }
-  },
-  getSnapshot(): TColorSchemePreference {
-    if (forced) return forced
-    preference ??= read()
-    return preference
-  },
-}
-
-const emit = () => listeners.forEach(listener => listener())
-
-function setPreference(next: TColorSchemePreference) {
-  if (forced) return
-  preference = next
-  try {
-    localStorage.setItem(STORAGE_KEY, next)
-  } catch {
-    // A browser with storage turned off still gets the scheme it asked for,
-    // just not on its next visit.
+const getThemeManager = () => {
+  const manager = window.themeManager
+  if (!manager) {
+    throw new Error('No theme manager. Check if /theme-init.js is loaded.')
   }
-  emit()
+  return manager
 }
 
-/** Pins the scheme for everything below the provider, or releases it. */
-export function forceColorScheme(next: TColorSchemePreference | null) {
-  if (forced === next) return
-  forced = next
-  emit()
-}
+const subscribe = (listener: () => void) =>
+  getThemeManager().subscribe(listener)
+const getSnapshot = () => getThemeManager().getTheme()
+const getServerSnapshot = (): TColorScheme => 'light'
+const toggleTheme = () => getThemeManager().toggle()
+const ignoreToggle = () => {}
 
-const getServerSnapshot = (): TColorSchemePreference => 'system'
+/** A local override for isolated renderers such as Storybook. It never changes
+ * the application preference kept by the page-level theme manager. */
+export const ColorSchemeOverrideContext = createContext<TColorScheme | null>(
+  null
+)
 
-/**
- * The scheme on screen and a control that cycles it.
- *
- * The toggle collapses back to `system` whenever the scheme it would land on
- * is the one the device already asks for, so a user who never disagreed with
- * their device keeps following it.
- */
+/** The resolved scheme on screen and its reversible two-state toggle. */
 export function useColorScheme() {
-  const preference = useSyncExternalStore(
-    store.subscribe,
-    store.getSnapshot,
-    getServerSnapshot
-  )
-  const prefersDark = useMediaQueryValue('(prefers-color-scheme: dark)')
-  const systemScheme: TColorScheme = prefersDark ? 'dark' : 'light'
+  const override = useContext(ColorSchemeOverrideContext)
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
-  const toggle = useCallback(() => {
-    if (preference === 'system') {
-      setPreference(systemScheme === 'dark' ? 'light' : 'dark')
-      return
-    }
-    const next = preference === 'light' ? 'dark' : 'light'
-    setPreference(next === systemScheme ? 'system' : next)
-  }, [preference, systemScheme])
-
-  const mode: TColorScheme = preference === 'system' ? systemScheme : preference
-
-  return { mode, toggle }
+  return {
+    mode: override ?? theme,
+    toggle: override ? ignoreToggle : toggleTheme,
+  }
 }
 
 /** The palette for the scheme on screen.
