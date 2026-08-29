@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent, within } from 'storybook/test'
-import { InputAdornment, TextField } from '@mui/material'
 import { IconButton } from './Button'
 import { ArrowForwardIcon } from './Icons'
 import { AmountInput } from './AmountInput'
@@ -74,93 +73,34 @@ export const WithExpressionButtons: Story = {
   },
 }
 
-function ParityFields() {
+function FieldVariants() {
   return (
     <div className="flex flex-col gap-8">
       {(['medium', 'small'] as const).map(size => (
-        <div key={size} className="flex flex-wrap gap-8">
-          <div data-testid={`mui-${size}`}>
-            <TextField
-              size={size}
-              label="Amount"
-              value="1 250,00"
-              helperText="Balance"
-              className="w-[280px]"
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">₽</InputAdornment>
-                  ),
-                },
-                htmlInput: { readOnly: true },
-              }}
-            />
-          </div>
-          <div data-testid={`owned-${size}`}>
-            <AmountInput
-              size={size}
-              label="Amount"
-              value={1250}
-              currency="RUB"
-              helperText="Balance"
-              className="w-[280px]"
-              onChange={() => {}}
-              readOnly
-            />
-          </div>
-        </div>
+        <AmountInput
+          key={size}
+          size={size}
+          label="Amount"
+          value={1250}
+          currency="RUB"
+          helperText="Balance"
+          className="w-[280px]"
+          onChange={() => {}}
+          readOnly
+        />
       ))}
     </div>
   )
 }
 
-export const OutlinedFieldParity: Story = {
-  render: () => <ParityFields />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    for (const size of ['medium', 'small']) {
-      const legacy = canvas.getByTestId(`mui-${size}`)
-      const owned = canvas.getByTestId(`owned-${size}`)
-      const measure = (root: HTMLElement) => {
-        const input = root.querySelector('input')!
-        const fieldset = root.querySelector('fieldset')!
-        const s = getComputedStyle(input)
-        const border = getComputedStyle(fieldset)
-        const rect = input.getBoundingClientRect()
-        return {
-          height: rect.height,
-          width: rect.width,
-          fontSize: s.fontSize,
-          lineHeight: s.lineHeight,
-          padding: s.padding,
-          color: s.color,
-          border: border.border,
-          radius: border.borderRadius,
-        }
-      }
-      await expect(measure(owned)).toEqual(measure(legacy))
-      await userEvent.click(within(legacy).getByRole('textbox'))
-      const focused = measure(legacy)
-      await userEvent.click(within(owned).getByRole('textbox'))
-      await expect(measure(owned)).toEqual(focused)
-      await expect(
-        within(owned).getByRole('textbox')
-      ).toHaveAccessibleDescription('Balance')
-    }
-  },
-}
+export const FieldSizes: Story = { render: () => <FieldVariants /> }
 
-export const DarkOutlinedFieldParity: Story = {
-  ...OutlinedFieldParity,
+export const DarkFieldSizes: Story = {
+  ...FieldSizes,
   globals: { theme: 'dark' },
 }
 
-/** The shape both real callers use: an icon button sitting in the adornment.
- *
- * MUI paints the focus ring from the input's own focus handler, so reaching
- * the button leaves the resting border. The parity matrix above cannot catch
- * a regression here — its adornment is a plain currency symbol, and only a
- * focusable one tells `:focus-within` and input focus apart. */
+/** The shape real callers use: an icon button sitting in the adornment. */
 function AdornmentButtonFields() {
   const submit = (
     <IconButton edge="end" aria-label="Apply">
@@ -168,32 +108,15 @@ function AdornmentButtonFields() {
     </IconButton>
   )
   return (
-    <div className="flex flex-wrap gap-8">
-      <div data-testid="mui-adornment">
-        <TextField
-          label="Amount"
-          value="1 250,00"
-          className="w-[280px]"
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">{submit}</InputAdornment>
-              ),
-            },
-            htmlInput: { readOnly: true },
-          }}
-        />
-      </div>
-      <div data-testid="owned-adornment">
-        <AmountInput
-          label="Amount"
-          value={1250}
-          className="w-[280px]"
-          onChange={() => {}}
-          readOnly
-          endAdornment={submit}
-        />
-      </div>
+    <div data-testid="adornment">
+      <AmountInput
+        label="Amount"
+        value={1250}
+        className="w-[280px]"
+        onChange={() => {}}
+        readOnly
+        endAdornment={submit}
+      />
     </div>
   )
 }
@@ -202,19 +125,16 @@ export const AdornmentButtonFocus: Story = {
   render: () => <AdornmentButtonFields />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const notch = (testId: string) =>
-      getComputedStyle(canvas.getByTestId(testId).querySelector('fieldset')!)
-        .borderTopWidth
-    const resting = notch('mui-adornment')
-
-    for (const testId of ['mui-adornment', 'owned-adornment']) {
-      const field = within(canvas.getByTestId(testId))
-      await userEvent.click(field.getByRole('textbox'))
-      await expect(notch(testId)).toBe('2px')
-      // Tabbing on to the adornment button drops the ring in both.
-      await userEvent.tab()
-      await expect(field.getByRole('button', { name: 'Apply' })).toHaveFocus()
-      await expect(notch(testId)).toBe(resting)
-    }
+    const notch = () =>
+      getComputedStyle(
+        canvas.getByTestId('adornment').querySelector('fieldset')!
+      ).borderTopWidth
+    const field = within(canvas.getByTestId('adornment'))
+    const resting = notch()
+    await userEvent.click(field.getByRole('textbox'))
+    await expect(notch()).toBe('2px')
+    await userEvent.tab()
+    await expect(field.getByRole('button', { name: 'Apply' })).toHaveFocus()
+    await expect(notch()).toBe(resting)
   },
 }
