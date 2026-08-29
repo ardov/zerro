@@ -5,14 +5,14 @@ import { core } from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
 
-import { Divider } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import { Divider } from '6-shared/ui/Divider'
 import { useAppTheme } from '6-shared/ui/theme'
 import { sub } from '6-shared/helpers/money'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { Amount } from '6-shared/ui/Amount'
 import { DataLine } from '3-widgets/DataLine'
-import { ArrowForwardIcon } from '6-shared/ui/Icons'
+import { ArrowForwardIcon } from '6-shared/ui/feather'
 
 import { useMonth } from '../../MonthProvider'
 import { useIsSmall } from '../shared/shared'

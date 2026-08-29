@@ -9,7 +9,8 @@ import { CSSTransition } from 'react-transition-group'
 import EditOutlined from '@mui/icons-material/EditOutlined'
 import { Chip } from '6-shared/ui/Chip'
 import { Menu, MenuItem } from '6-shared/ui/Menu'
-import { ListRowDivider, ListRowIcon, ListRowText } from '6-shared/ui/ListRow'
+import { ListRowIcon, ListRowText } from '6-shared/ui/ListRow'
+import { Divider } from '6-shared/ui/Divider'
 import {
   LocalOfferOutlinedIcon,
   DoneAllIcon,
@@ -263,7 +264,7 @@ const Actions: FC<ActionsProps> = ({
               )}
 
               <div className="my-2">
-                <ListRowDivider />
+                <Divider />
               </div>
 
               <MenuItem onClick={handleCheckAll}>

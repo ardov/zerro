@@ -1,0 +1,27 @@
+@layer components {
+  /* The three staggered reveals on the login screen, which were MUI `Fade`s
+     with nothing but `in` and a `timeout`. Nothing ever fades them back out,
+     so this is an entrance animation rather than a transition on a state:
+     `both` holds the first frame before it starts and the last one after.
+     The duration is the call site's, the way `timeout` was. */
+  .auth-reveal {
+    animation: auth-reveal var(--auth-reveal-duration, 1000ms)
+      cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .auth-reveal {
+      animation: none;
+    }
+  }
+}
+
+@keyframes auth-reveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

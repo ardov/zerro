@@ -4,14 +4,10 @@ import type { TISODate, TTransaction, TTransactionId } from '6-shared/types'
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Fab, Zoom } from '@mui/material'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import {
-  DeleteIcon,
-  CloseIcon,
-  RestoreFromTrashIcon,
-} from '6-shared/ui/Icons'
+import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from '6-shared/ui/Icons'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { rateToWords } from '6-shared/helpers/money'
 import { formatDate, parseDate } from '6-shared/helpers/date'
@@ -327,11 +323,22 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = props => {
       style={{ transform: 'translateX(-50%)' }}
       className="sticky bottom-4 left-1/2 z-[200] mt-8 inline-block"
     >
-      <Zoom in={visible}>
-        <Fab variant="extended" color="primary" onClick={onSave}>
-          {t('btnSave')}
-        </Fab>
-      </Zoom>
+      {/* MUI's extended `Fab` under a `Zoom`: a pill at the contained button's
+          own colours, scaled out of the way rather than unmounted. Hidden it
+          is not a tab stop, which MUI's `Zoom` left it as. */}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={onSave}
+        className={cn(
+          'h-12 rounded-full px-4 transition-transform duration-225 ease-in-out',
+          visible ? 'scale-100' : 'scale-0'
+        )}
+        tabIndex={visible ? undefined : -1}
+        aria-hidden={!visible}
+      >
+        {t('btnSave')}
+      </Button>
     </div>
   )
 }

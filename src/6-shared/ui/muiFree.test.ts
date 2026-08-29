@@ -15,6 +15,7 @@ const OWNED = [
   'src/6-shared/ui/CircularProgress.tsx',
   'src/6-shared/ui/Collapse.tsx',
   'src/6-shared/ui/Dialog.tsx',
+  'src/6-shared/ui/Divider.tsx',
   'src/6-shared/ui/FloatingInput.tsx',
   'src/6-shared/ui/GrowingTextarea.tsx',
   'src/6-shared/ui/Menu.tsx',
@@ -85,6 +86,10 @@ const CONVERTED = [
   'src/3-widgets/Navigation/MobileNavigation.tsx',
   'src/3-widgets/RefreshButton.tsx',
   'src/3-widgets/transaction/TransactionList/GrouppedList.tsx',
+  'src/2-pages/Auth/index.tsx',
+  'src/2-pages/Budgets/EnvelopeTable/Header/ToBeAssigned.tsx',
+  'src/2-pages/Stats/WidgetCashflow/WidgetCashflow.tsx',
+  'src/6-shared/ui/ColorPickerPopover/colors.ts',
 ]
 
 /** The mixed barrel. It re-exports the MUI-free Feather set alongside the

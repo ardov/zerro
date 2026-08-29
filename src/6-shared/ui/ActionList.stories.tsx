@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, within } from 'storybook/test'
 import {
-  Divider,
+  Divider as MuiDivider,
   ListItemIcon,
   ListItemText,
   ListSubheader,
@@ -9,12 +9,8 @@ import {
   MenuList,
 } from '@mui/material'
 import { ActionList, ActionListItem } from './ActionList'
-import {
-  ListRowDivider,
-  ListRowIcon,
-  ListRowSubheader,
-  ListRowText,
-} from './ListRow'
+import { Divider } from './Divider'
+import { ListRowIcon, ListRowSubheader, ListRowText } from './ListRow'
 import { AddIcon } from './feather'
 
 const meta = { title: 'UI/Action list' } satisfies Meta
@@ -36,7 +32,7 @@ function Matrix() {
             </ListItemIcon>
             <ListItemText>Plain row</ListItemText>
           </MenuItem>
-          <Divider className="opacity-60" />
+          <MuiDivider className="opacity-60" />
           <MenuItem>
             <ListItemIcon>
               <AddIcon />
@@ -59,7 +55,7 @@ function Matrix() {
             </ListRowIcon>
             <ListRowText>Plain row</ListRowText>
           </ActionListItem>
-          <ListRowDivider className="opacity-60" />
+          <Divider className="opacity-60" />
           <ActionListItem>
             <ListRowIcon>
               <AddIcon />

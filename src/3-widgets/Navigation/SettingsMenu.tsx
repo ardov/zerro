@@ -23,11 +23,11 @@ import { Switch } from '6-shared/ui/Switch'
 import { ActionList, ActionListItem } from '6-shared/ui/ActionList'
 import {
   ListRowAction,
-  ListRowDivider,
   ListRowIcon,
   ListRowSubheader,
   ListRowText,
 } from '6-shared/ui/ListRow'
+import { Divider } from '6-shared/ui/Divider'
 import { track } from '6-shared/analytics'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import {
@@ -105,13 +105,13 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
           <ListRowText>{t('advancedSettings')}</ListRowText>
         </ActionListItem>
       )}
-      <ListRowDivider className="opacity-60" />
+      <Divider className="opacity-60" />
       <ListRowSubheader>{t('data')}</ListRowSubheader>
       <HistoryItem onClose={props.onClose} />
       <ExportCsvItem />
       <ExportJsonItem />
       <ImportBackupItem />
-      <ListRowDivider className="opacity-60" />
+      <Divider className="opacity-60" />
       <LangItem onClose={props.onClose} />
       <LogOutItem onClose={props.onClose} />
       <VersionItem onClose={props.onClose} />
@@ -286,7 +286,7 @@ function NavItems({ onClose }: ItemProps) {
         </ListRowIcon>
         <ListRowText>{t('donate')}</ListRowText>
       </ActionListItem>
-      <ListRowDivider className="opacity-60" />
+      <Divider className="opacity-60" />
     </>
   )
 }

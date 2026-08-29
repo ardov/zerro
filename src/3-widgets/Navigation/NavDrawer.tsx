@@ -4,12 +4,8 @@ import { useMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import RefreshButton from '3-widgets/RefreshButton'
 import { MenuButton } from './MenuButton'
-import {
-  ListRowDivider,
-  ListRowIcon,
-  ListRowText,
-  listItemClass,
-} from '6-shared/ui/ListRow'
+import { ListRowIcon, ListRowText, listItemClass } from '6-shared/ui/ListRow'
+import { Divider } from '6-shared/ui/Divider'
 import { cn } from '6-shared/ui/shadcn/utils'
 import {
   AccountBalanceIcon,
@@ -49,7 +45,7 @@ export default function NavigationDrawer() {
           </div>
 
           <div className="w-full py-6">
-            <ListRowDivider />
+            <Divider />
           </div>
 
           <div className="w-full px-2">
