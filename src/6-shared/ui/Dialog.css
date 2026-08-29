@@ -1,5 +1,5 @@
 @layer components {
-  /* MUI fades a dialog and its backdrop in together, and out slightly faster —
+  /* legacy UI fades a dialog and its backdrop in together, and out slightly faster —
      `enteringScreen` and `leavingScreen` from the same theme. Nothing grows or
      slides: a dialog is not anchored to anything to grow out of. */
   .owned-dialog {

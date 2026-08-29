@@ -65,7 +65,7 @@ export function HistoryPanel() {
     <SideDrawer
       open={displayProps.open}
       onClose={displayProps.onClose}
-      // MUI sized the paper through `slotProps`; the sheet takes a class, so
+      // legacy UI sized the paper through `slotProps`; the sheet takes a class, so
       // the breakpoint is the stylesheet's rather than a media-query hook's.
       className="w-full md:w-[380px]"
       aria-label={t('panelTitle')}

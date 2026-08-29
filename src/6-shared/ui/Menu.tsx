@@ -15,7 +15,7 @@ export type MenuProps = Pick<
   /** A point to open at instead, for a context menu that was opened by a
    * right click or a long press and has no element to hang off. */
   anchorPosition?: { left: number; top: number }
-  /** Which corner the menu grows from. MUI's default puts the menu's top-left
+  /** Which corner the menu grows from. legacy UI's default puts the menu's top-left
    * on the anchor's top-left; `top-end` is the transaction action bar, which
    * sits at the bottom of the screen and has to open upward. */
   placement?: 'bottom-start' | 'top-end'
@@ -26,7 +26,7 @@ export type MenuProps = Pick<
   children?: ReactNode
 }
 
-/** MUI's `Menu`: a popup with menu semantics, positioned against an element or
+/** legacy UI's `Menu`: a popup with menu semantics, positioned against an element or
  * a point.
  *
  * This is the counterpart to `ActionList`, which is a toolbar. A menu was

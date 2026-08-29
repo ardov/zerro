@@ -10,18 +10,18 @@ export type ChipProps = Omit<
   size?: 'medium' | 'small'
   variant?: 'filled' | 'outlined'
   color?: 'default' | 'primary'
-  /** Renders the trailing cross. MUI took the icon too, and one call site
+  /** Renders the trailing cross. legacy UI took the icon too, and one call site
    * replaces it. */
   onDelete?: () => void
   deleteIcon?: ReactNode
   ref?: Ref<HTMLDivElement>
 }
 
-/** MUI's `Chip`: a pill that labels something, sometimes with a cross that
+/** legacy UI's `Chip`: a pill that labels something, sometimes with a cross that
  * takes it away.
  *
  * A `div` rather than a button even when it has an `onClick`, because that is
- * what MUI rendered: a chip with a delete cross would otherwise be a button
+ * what legacy UI rendered: a chip with a delete cross would otherwise be a button
  * inside a button. Both roles are spelled out for assistive technology
  * instead. */
 export function Chip({
@@ -72,11 +72,11 @@ export function Chip({
         if (onClick && event.key === ' ') event.currentTarget.click()
       }}
       className={cn(
-        // Half the height, which MUI spells as `32 / 2` — a pill, but a
+        // Half the height, which legacy UI spells as `32 / 2` — a pill, but a
         // measurable one rather than the 9999px that `rounded-full` computes
         // to.
         'box-border inline-flex max-w-full cursor-[unset] items-center justify-center border-none p-0 align-middle font-sans whitespace-nowrap text-foreground outline-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-        // The radius and the root's type do not change with the size: MUI
+        // The radius and the root's type do not change with the size: legacy UI
         // puts the smaller type on the label instead.
         'rounded-2xl text-[0.8125rem]',
         small ? 'h-6' : 'h-8',
@@ -127,7 +127,7 @@ export function Chip({
             'inline-flex shrink-0 cursor-pointer items-center text-chip-delete hover:text-chip-delete-hover',
             // The cross hangs into the label's own padding, which is why the
             // right margin is negative. Being outlined does not change that —
-            // MUI's outlined margins belong to the leading icon, which this
+            // legacy UI's outlined margins belong to the leading icon, which this
             // chip has no call site for.
             small
               ? '-mr-1 ml-1 [&>svg]:size-4'

@@ -217,7 +217,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
             fullWidth
             size="small"
           />
-          {/* A native time input draws a picker button of its own, which MUI
+          {/* A native time input draws a picker button of its own, which legacy UI
               hid too. The field's own class lands on the frame, so the input
               is reached through it. */}
           <OutlinedField
@@ -323,9 +323,9 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = props => {
       style={{ transform: 'translateX(-50%)' }}
       className="sticky bottom-4 left-1/2 z-[200] mt-8 inline-block"
     >
-      {/* MUI's extended `Fab` under a `Zoom`: a pill at the contained button's
+      {/* legacy UI's extended `Fab` under a `Zoom`: a pill at the contained button's
           own colours, scaled out of the way rather than unmounted. Hidden it
-          is not a tab stop, which MUI's `Zoom` left it as. */}
+          is not a tab stop, which legacy UI's `Zoom` left it as. */}
       <Button
         variant="contained"
         color="primary"

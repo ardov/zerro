@@ -5,7 +5,7 @@ import { palettes } from './palette'
 describe('alpha', () => {
   it('replaces an alpha rather than multiplying it', () => {
     // The state fills are built on `action.selected`, which is already
-    // transparent. A mix would land at 0.08 × 0.12; MUI lands at 0.12, and so
+    // transparent. A mix would land at 0.08 × 0.12; legacy UI lands at 0.12, and so
     // does this. It is the difference between a visible row and an invisible
     // one.
     expect(alpha('rgba(0, 0, 0, 0.08)', 0.12)).toBe('rgba(0, 0, 0, 0.12)')
@@ -19,7 +19,7 @@ describe('alpha', () => {
 })
 
 describe('getContrastText', () => {
-  // Every `contrastText` in the palette was MUI's answer for that colour.
+  // Every `contrastText` in the palette was legacy UI's answer for that colour.
   // Recomputing them here is what says the function still agrees with the
   // values the palette was frozen from.
   it('reproduces every contrastText the palette carries', () => {

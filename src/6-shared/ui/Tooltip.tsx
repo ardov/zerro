@@ -3,7 +3,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip'
 import { cn } from './shadcn/utils'
 
-/** MUI's `enterDelay`. It is declared on every trigger as well as on the
+/** legacy UI's `enterDelay`. It is declared on every trigger as well as on the
  * shared provider, so a tooltip rendered outside the provider — a unit test,
  * an isolated render — opens on the same schedule. */
 const OPEN_DELAY = 300
@@ -13,7 +13,7 @@ const OPEN_DELAY = 300
  * Base UI groups the tooltips under a single provider: moving from one trigger
  * to the next inside the group's window opens the second instantly instead of
  * waiting out the delay again, which is what makes a row of icon buttons read
- * as one thing rather than as five that each have to be earned. MUI had no
+ * as one thing rather than as five that each have to be earned. legacy UI had no
  * grouping and made every tooltip wait; this is deliberately not that. */
 export function TooltipProvider(props: { children: ReactNode }) {
   return (
@@ -29,17 +29,17 @@ export type TooltipProps = {
   title?: ReactNode
   placement?: 'top' | 'bottom' | 'left' | 'right'
   arrow?: boolean
-  /** MUI's opt-out of a tooltip the pointer can move into. */
+  /** legacy UI's opt-out of a tooltip the pointer can move into. */
   disableInteractive?: boolean
   className?: string
   children: ReactElement
 }
 
-/** MUI's `Tooltip`: a dark label that appears 300ms after the pointer settles
+/** legacy UI's `Tooltip`: a dark label that appears 300ms after the pointer settles
  * on its child, 14px clear of it, under it unless asked otherwise.
  *
- * The type is the app's own 14px rather than MUI's 11px — that override was
- * the reason this file wrapped MUI in the first place, and it is now simply
+ * The type is the app's own 14px rather than legacy UI's 11px — that override was
+ * the reason this file wrapped legacy UI in the first place, and it is now simply
  * what the class says. */
 export function Tooltip({
   title,
@@ -111,7 +111,7 @@ function ActiveTooltip({
       disableHoverablePopup={disableInteractive}
     >
       <TooltipPrimitive.Trigger
-        // MUI named its child rather than describing it: a string title
+        // legacy UI named its child rather than describing it: a string title
         // became the child's `aria-label`, which is the only accessible
         // name every icon-only button in this app has. Base UI describes
         // instead, and describing an unnamed button leaves it unnamed.
@@ -139,7 +139,7 @@ function ActiveTooltip({
             data-slot="tooltip"
             className={cn(
               // 14px at the theme's own line height. The size is this app's override of
-              // MUI's 11px, and it was the only reason this file used to wrap MUI.
+              // legacy UI's 11px, and it was the only reason this file used to wrap legacy UI.
               'max-w-[300px] rounded-lg bg-tooltip px-2 py-1 text-center font-sans text-sm/[1.5] font-medium break-words text-tooltip-foreground',
               className
             )}
@@ -157,7 +157,7 @@ function ActiveTooltip({
   )
 }
 
-/** MUI's arrow is a square rotated 45° and half-hidden behind the tooltip,
+/** legacy UI's arrow is a square rotated 45° and half-hidden behind the tooltip,
  * which is why it is 1em across and 0.71em tall. */
 function ArrowShape() {
   return (

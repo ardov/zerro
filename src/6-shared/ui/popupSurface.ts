@@ -1,6 +1,6 @@
 import './popupSurface.css'
 
-/** The entrance MUI gives an anchored surface: it grows out of the corner it
+/** The entrance legacy UI gives an anchored surface: it grows out of the corner it
  * hangs off, and fades while it does.
  *
  * `--grow-from`, `--grow-duration` and `--grow-origin` tune it, so a surface
@@ -8,7 +8,7 @@ import './popupSurface.css'
  * transition again. */
 export const growSurfaceClass = 'owned-grow'
 
-/** The paper MUI drops out of a control. The menu and the select's list are
+/** The paper legacy UI drops out of a control. The menu and the select's list are
  * the same surface — same elevation, same radius, same 8px the rows sit in —
  * so it is described once, the way `listRowClass` describes their rows. */
 export const popupSurfaceClass = `${growSurfaceClass} max-h-[calc(100dvh-96px)] overflow-y-auto rounded-lg bg-popover py-2 text-popover-foreground shadow-elevation-8 outline-none`
@@ -24,12 +24,12 @@ export const popupPositioning = {
   className: 'z-modal',
 } as const
 
-/** MUI's `Popover` paper, which is the surface every anchored overlay of ours
+/** legacy UI's `Popover` paper, which is the surface every anchored overlay of ours
  * hangs off its anchor: `Popover` itself, and `AdaptivePopover` above the
  * mobile breakpoint.
  *
  * The 16px minimums, the clipped horizontal axis and the 32px the paper keeps
- * off the viewport are MUI's own — an anchored paper only ever grows
+ * off the viewport are legacy UI's own — an anchored paper only ever grows
  * downwards, so sideways overflow is a layout mistake rather than something
  * to scroll.
  *
@@ -48,7 +48,7 @@ export const drawerSurfaceClass = 'owned-drawer'
 /** The dim behind a drawer, which lifts as the drawer is swiped away. */
 export const drawerBackdropClass = 'owned-drawer-backdrop'
 
-/** MUI lays an anchored surface's top-left over the anchor's own. Base UI
+/** legacy UI lays an anchored surface's top-left over the anchor's own. Base UI
  * pushes it clear of the anchor instead, so the height comes back off. */
 export const overAnchor = ({ anchor }: { anchor: { height: number } }) =>
   -anchor.height

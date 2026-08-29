@@ -52,7 +52,7 @@ const Filter: FC<FilterProps> = ({
     null
   )
   const [editorOptionsOpen, setEditorOptionsOpen] = useState(false)
-  // The chip the editor hangs off. MUI took a function it could call after
+  // The chip the editor hangs off. legacy UI took a function it could call after
   // render; a value read out of the ref in the handler that opens the editor
   // is the same thing without reading a ref while rendering.
   const [editorAnchor, setEditorAnchor] = useState<HTMLElement | null>(null)

@@ -33,10 +33,10 @@ function getStore(query: string) {
 
 const getServerSnapshot = () => false
 
-/** Whether a media query matches, without MUI.
+/** Whether a media query matches, without legacy UI.
  *
  * For breakpoints reach for `useBreakpointDown` instead — it takes a key from
- * the one map MUI and Tailwind are also built from, so a component never
+ * the one map legacy UI and Tailwind are also built from, so a component never
  * spells a breakpoint out. This one is for the queries that are not
  * breakpoints at all: colour scheme, device metrics. */
 export function useMediaQueryValue(query: string) {

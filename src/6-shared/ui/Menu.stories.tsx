@@ -72,7 +72,7 @@ export const Anchored: Story = {
     // Menu semantics, unlike ActionList: this popup was opened by something
     // and can be dismissed.
     await expect(within(menu).getAllByRole('menuitem')).toHaveLength(3)
-    // MUI lays the menu's top-left over the anchor's.
+    // legacy UI lays the menu's top-left over the anchor's.
     const anchor = trigger.getBoundingClientRect()
     await waitFor(() =>
       expect(
@@ -110,7 +110,7 @@ export const KeyboardAndDismissal: Story = {
       expect(within(menu).getByRole('menuitem', { name: 'Beta' })).toHaveFocus()
     )
 
-    // A menu keeps its disabled rows reachable, unlike MUI's list, so they are
+    // A menu keeps its disabled rows reachable, unlike legacy UI's list, so they are
     // still announced. They are dimmed through `aria-disabled` rather than
     // `:disabled`: Base UI renders a menu row as a div, not a button.
     await userEvent.keyboard('{ArrowDown}')

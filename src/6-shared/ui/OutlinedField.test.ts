@@ -129,7 +129,7 @@ describe('outlined field border states', () => {
   // the entire mechanism — and it is the reason they are not Tailwind
   // `group-*` utilities, whose order Tailwind picks (it emits `focus-within`
   // before `hover`, which would drop the focus ring on a hovered field).
-  it('resolves in MUI order: hover, then focus, then error, then disabled', () => {
+  it('resolves in legacy UI order: hover, then focus, then error, then disabled', () => {
     const hover = positionOf(HOVER)
     const focus = positionOf(FOCUS)
     const error = positionOf(ERROR)

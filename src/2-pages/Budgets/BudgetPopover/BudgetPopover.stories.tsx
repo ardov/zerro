@@ -248,7 +248,7 @@ export const NestedDrawer: Story = {
     const input = await body.findByRole('textbox', { name: 'Assigned' })
     const child = input.closest('[role="dialog"]')!
     await waitFor(() => expect(input).toHaveFocus())
-    // The child no longer sits inside the parent's DOM. MUI's drawer needed
+    // The child no longer sits inside the parent's DOM. legacy UI's drawer needed
     // that — its focus trap could not know about a Base UI surface elsewhere
     // in the document — and now that both are Base UI, they layer themselves.
     // What has to hold is the behaviour the nesting bought: focus stays in

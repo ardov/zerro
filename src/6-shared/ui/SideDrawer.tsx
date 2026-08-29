@@ -9,11 +9,11 @@ export type SideDrawerProps = {
   open: boolean
   onClose?: () => void
   /** The edge it slides in from, and the edge it is swiped back out towards.
-   * MUI's `anchor`; every caller is `right` so far, and the two vertical
+   * legacy UI's `anchor`; every caller is `right` so far, and the two vertical
    * edges belong to `SmartDialog` and the adaptive popover, which round their
    * leading corners. */
   side?: 'left' | 'right'
-  /** The sheet's width. MUI sized the paper through `sx` or `slotProps`; the
+  /** The sheet's width. legacy UI sized the paper through `sx` or `slotProps`; the
    * height is always the full window, as it was there. */
   className?: string
   children?: ReactNode
@@ -21,11 +21,11 @@ export type SideDrawerProps = {
   'aria-labelledby'?: string
 }
 
-/** MUI's temporary `Drawer`: a full-height sheet off a side edge, over a
+/** legacy UI's temporary `Drawer`: a full-height sheet off a side edge, over a
  * dimmed page, dismissed by the backdrop, Escape or a swipe back towards its
  * own edge.
  *
- * Square rather than rounded — MUI kept the rounding for `SwipeableDrawer`,
+ * Square rather than rounded — legacy UI kept the rounding for `SwipeableDrawer`,
  * which this app only ever used off the bottom edge, where `SmartDialog`
  * still is. The swipe is Base UI's and cannot be turned off, only aimed: its
  * default is `down`, which on a full-height sheet fights the sheet's own
@@ -70,7 +70,7 @@ export function SideDrawer({
             finalFocus={finalFocus}
             className={cn(
               drawerSurfaceClass,
-              // MUI's paper, which is a flex column that scrolls as a whole.
+              // legacy UI's paper, which is a flex column that scrolls as a whole.
               'pointer-events-auto relative flex h-full flex-col overflow-y-auto bg-card text-card-foreground shadow-elevation-16 outline-none [--drawer-radius:0px]',
               className
             )}

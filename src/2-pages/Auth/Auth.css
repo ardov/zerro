@@ -1,5 +1,5 @@
 @layer components {
-  /* The three staggered reveals on the login screen, which were MUI `Fade`s
+  /* The three staggered reveals on the login screen, which were legacy UI `Fade`s
      with nothing but `in` and a `timeout`. Nothing ever fades them back out,
      so this is an entrance animation rather than a transition on a state:
      `both` holds the first frame before it starts and the last one after.

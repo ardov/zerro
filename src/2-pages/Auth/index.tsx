@@ -13,7 +13,7 @@ import { loadBackup, loadDemoData, logIn } from '4-features/authorization'
 
 import './Auth.css'
 
-/** What MUI's `Fade` took as `timeout`. */
+/** What legacy UI's `Fade` took as `timeout`. */
 const reveal = (ms: number) =>
   ({ '--auth-reveal-duration': `${ms}ms` }) as CSSProperties
 

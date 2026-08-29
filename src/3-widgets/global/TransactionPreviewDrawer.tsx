@@ -26,7 +26,7 @@ export const SmartTransactionPreview = () => {
     <SideDrawer
       onClose={onClose}
       open={open}
-      // MUI sized the paper through `sx`; the sheet takes it as a class.
+      // legacy UI sized the paper through `sx`; the sheet takes it as a class.
       className="w-screen sm:w-[360px]"
       aria-label={t('transaction')}
     >

@@ -35,7 +35,7 @@ export const Reciept: FC<RecieptProps> = ({ value, className }) => {
         <Collapse open={!showMore}>
           <button
             type="button"
-            // MUI's `component="button"`, which came with a reset so the
+            // legacy UI's `component="button"`, which came with a reset so the
             // control reads as text rather than as a control.
             className={`${linkClass} m-0 border-0 bg-transparent p-0 align-middle font-sans type-caption select-none`}
             onClick={() => setShowMore(true)}

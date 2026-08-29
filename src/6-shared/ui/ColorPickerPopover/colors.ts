@@ -8,8 +8,7 @@ export const zmColors = [
 ]
 
 /**
- * The picker's swatches: Material's accent shades, written out rather than
- * generated out of `@mui/material/colors`.
+ * The picker's swatches are written out as stable color values.
  *
  * One row per accent shade across six hues, and the two halves run their
  * shades in opposite directions — the warm hues darkest first, the cool ones

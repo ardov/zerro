@@ -8,7 +8,7 @@
 
 ;(() => {
   const STORAGE_KEY = 'zerro-color-scheme'
-  const LEGACY_KEYS = ['mui-mode', 'theme']
+  const LEGACY_KEYS = ['theme']
   const fallback = new Map()
 
   const storage = {

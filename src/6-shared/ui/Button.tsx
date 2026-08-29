@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Button as ButtonPrimitive } from '@base-ui/react/button'
 import { cn } from './shadcn/utils'
 
-/** MUI's ButtonBase reset, which is all `ButtonBase` ever contributed: a
+/** legacy UI's ButtonBase reset, which is all `ButtonBase` ever contributed: a
  * native button with every user agent decoration taken off it.
  *
  * It deliberately declares neither `padding` nor `border-width`: both are
@@ -19,9 +19,9 @@ const borders = {
   outlined: 'border border-solid',
 }
 
-/** MUI's `typography.button` under this theme.
+/** legacy UI's `typography.button` under this theme.
  *
- * No tracking: MUI's variants carry letter-spacing only while the theme keeps
+ * No tracking: legacy UI's variants carry letter-spacing only while the theme keeps
  * Roboto — `createTypography` drops it outright for any other family, and this
  * theme sets IBM Plex Sans. `type-overline` is missing its tracking for the
  * same reason. `textTransform: none` is the app's own override.
@@ -53,12 +53,12 @@ const geometry = {
 }
 
 /** Only the variant and colour pairs the app renders, and this table is the
- * contract. MUI offers every colour against every variant; carrying the ones
+ * contract. legacy UI offers every colour against every variant; carrying the ones
  * nothing uses would mean carrying their tokens, their disabled states and
  * their dark shades too.
  *
  * `Button.stories.tsx` builds its parity matrix by walking this object, so a
- * pair added here is compared against MUI without anyone remembering to list
+ * pair added here is compared against legacy UI without anyone remembering to list
  * it, and a pair a call site asks for but nothing implements falls back to the
  * variant's primary rather than rendering unstyled. */
 export const buttonPalettes = {
@@ -79,7 +79,7 @@ export const buttonPalettes = {
   },
 }
 
-/** MUI pulls a start icon back over the button's own padding, and a small
+/** legacy UI pulls a start icon back over the button's own padding, and a small
  * button has less of it to cancel. */
 const startIconOffset = { small: '-ml-0.5', medium: '-ml-1', large: '-ml-1' }
 
@@ -99,10 +99,9 @@ export type ButtonProps = Omit<ButtonPrimitive.Props, 'className' | 'color'> & {
   startIcon?: ReactNode
 }
 
-/** MUI's Button, for the surface this app uses.
+/** Button for the surface this app uses.
  *
- * Unlike MUI it shows a real focus ring. MUI leaves `.Mui-focusVisible`
- * unstyled and lets the ripple stand in for it, and there is no ripple here. */
+ * It shows a real focus ring instead of relying on a ripple. */
 export function Button({
   className,
   size = 'medium',
@@ -130,12 +129,8 @@ export function Button({
       {...rest}
     >
       {startIcon && (
-        /* No icon sizing here, deliberately. MUI shrinks a start icon to 20px
-           with `& > *:nth-of-type(1)`, but that rule sits in the `mui` layer
-           and every icon in this app carries a Tailwind size utility from the
-           later `utilities` layer — so MUI has never actually resized one of
-           these glyphs, and matching what the app renders means leaving the
-           icon at the size it declares. */
+        /* No icon sizing here: every icon carries its own Tailwind size utility,
+           so the glyph keeps the size it declares. */
         <span
           className={cn(
             'mr-2 inline-flex shrink-0 items-center',
@@ -150,12 +145,12 @@ export function Button({
   )
 }
 
-/** Padding, not a fixed box: MUI sizes an icon button by what it wraps, so a
+/** Padding, not a fixed box: legacy UI sizes an icon button by what it wraps, so a
  * larger glyph makes a larger button. */
 const iconGeometry = {
   small: 'p-[5px] text-[1.125rem]',
   // `text-[1.5rem]`, not `text-2xl`: the named size carries a line height with
-  // it, and MUI sets only the font size here.
+  // it, and legacy UI sets only the font size here.
   medium: 'p-2 text-[1.5rem]',
 }
 
@@ -165,7 +160,7 @@ const iconPalettes = {
   primary: 'text-primary hover:bg-primary-hover',
 }
 
-/** MUI pulls a small button back by 3px and a medium one by 12px, because the
+/** legacy UI pulls a small button back by 3px and a medium one by 12px, because the
  * padding it is cancelling differs. */
 const edges = {
   start: { small: '-ml-[3px]', medium: '-ml-3' },
@@ -180,7 +175,7 @@ export type IconButtonProps = Omit<
   size?: 'small' | 'medium'
   color?: keyof typeof iconPalettes
   /** Pulls the button back over the padding of the field or bar it sits in,
-   * the way MUI's `edge` does, so the icon lines up with the edge. */
+   * the way legacy UI's `edge` does, so the icon lines up with the edge. */
   edge?: 'start' | 'end'
 }
 
@@ -196,7 +191,7 @@ export function IconButton({
       data-slot="icon-button"
       className={cn(
         RESET,
-        // `rounded-[50%]`, not `rounded-full`: MUI's 50% turns a non-square
+        // `rounded-[50%]`, not `rounded-full`: legacy UI's 50% turns a non-square
         // icon button into an ellipse where `rounded-full` makes a stadium.
         'border-0 shrink-0 rounded-[50%] text-center transition-colors duration-150 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:bg-transparent disabled:text-action-disabled',
         iconGeometry[size],
@@ -214,7 +209,7 @@ export type ButtonBaseProps = Omit<ButtonPrimitive.Props, 'className'> & {
 }
 
 /** A native button with nothing on it, for call sites that bring their own
- * styling. This is MUI's `ButtonBase` minus the ripple. */
+ * styling. This is legacy UI's `ButtonBase` minus the ripple. */
 export function ButtonBase({ className, ...props }: ButtonBaseProps) {
   return (
     <ButtonPrimitive

@@ -13,7 +13,7 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-/** The two selects in this form are the reason this story exists. MUI's
+/** The two selects in this form are the reason this story exists. legacy UI's
  * `Select` reported through a synthetic event whose `target` had to be rebuilt
  * by hand so formik's `handleChange` could read `name` and `value`; the owned
  * one hands over the value and the form uses `setFieldValue`. Nothing else

@@ -14,7 +14,7 @@ export type RevealItem = {
   key: React.Key
   label: string
   value: number
-  /** Tailwind text colour utility, not a MUI palette path. */
+  /** Tailwind text colour utility, not a legacy UI palette path. */
   color: string
   onClick?: (e: React.MouseEvent<HTMLElement>) => void
   draggable?: {

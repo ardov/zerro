@@ -5,7 +5,7 @@ import { cn } from './shadcn/utils'
 import { GrowingTextarea, inputPlaceholderClass } from './GrowingTextarea'
 import './OutlinedField.css'
 
-/** MUI's two outlined heights. They are the control's padding and nothing
+/** legacy UI's two outlined heights. They are the control's padding and nothing
  * else — the notch, the label and the helper text are the same either way,
  * which is why the frame does not take this. */
 export type TFieldSize = 'small' | 'medium'
@@ -16,7 +16,7 @@ export type OutlinedFieldFrameProps = {
   startAdornment?: ReactNode
   endAdornment?: ReactNode
   fullWidth?: boolean
-  /** Which of MUI's two heights this is. The frame needs it because a label
+  /** Which of legacy UI's two heights this is. The frame needs it because a label
    * that is not floated rests on the control's padding. */
   size?: TFieldSize
   /** Keeps the label floated whatever the control is doing. Base UI reports a
@@ -30,13 +30,13 @@ export type OutlinedFieldFrameProps = {
 
 export type OutlinedFieldProps = Omit<ComponentPropsWithRef<'input'>, 'size'> &
   Omit<OutlinedFieldFrameProps, 'disabled'> & {
-    /** MUI's `multiline`: a textarea that grows with what is typed into it. */
+    /** legacy UI's `multiline`: a textarea that grows with what is typed into it. */
     multiline?: boolean
     /** How many lines it may grow to before it scrolls. */
     maxRows?: number
   }
 
-/** The padding MUI gives the control inside an outlined field. The adornments
+/** The padding legacy UI gives the control inside an outlined field. The adornments
  * sit outside it, so whichever side carries one loses its padding here and the
  * group takes it instead.
  *
@@ -141,10 +141,10 @@ export function OutlinedFieldFrame({
   )
 }
 
-/** MUI's outlined text field: a notched border with the label cut into it.
+/** legacy UI's outlined text field: a notched border with the label cut into it.
  *
  * The label rests inside the field and floats up into the notch once the field
- * is focused or filled, which is what MUI calls shrinking. Base UI's
+ * is focused or filled, which is what legacy UI calls shrinking. Base UI's
  * `Field.Root` reports both states as data attributes, so the two positions
  * are a stylesheet rule rather than React state.
  *

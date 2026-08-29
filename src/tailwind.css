@@ -9,7 +9,7 @@
   --spacing: 0.25rem;
   /* Mirrors `breakpoints` in src/6-shared/ui/theme/breakpoints.ts, which is
      the single source these values are derived from. Keep them in step.
-     Pixels, not rem: MUI and `useBreakpointDown` query pixels, and a rem
+     Pixels, not rem: legacy UI and `useBreakpointDown` query pixels, and a rem
      mirror would drift from them whenever the root font size is not 16px. */
   --breakpoint-sm: 600px;
   --breakpoint-md: 900px;
@@ -22,7 +22,7 @@
 }
 
 @theme inline {
-  /* The MUI theme's `typography.fontFamily`, verbatim. An extra fallback here
+  /* The legacy UI theme's `typography.fontFamily`, verbatim. An extra fallback here
      would show up on any element the two libraries both style. */
   --font-sans: 'IBM Plex Sans', sans-serif;
 
@@ -153,8 +153,8 @@
   box-shadow: var(--elevation-24);
 }
 
-/* Overlays that must stack against MUI modals during the migration. The
-   fallback is MUI's own default modal level, so the utility still stacks
+/* Overlays that must stack against legacy UI modals during the migration. The
+   fallback is legacy UI's own default modal level, so the utility still stacks
    where `AppThemeProvider` is not mounted (isolated stories, for example)
    instead of collapsing to `z-index: auto`. */
 @utility z-modal {
@@ -174,7 +174,7 @@
   z-index: var(--z-tooltip, 1500);
 }
 
-/* MUI's action.disabledOpacity. An `@utility` rather than a `--color-*` alias
+/* legacy UI's action.disabledOpacity. An `@utility` rather than a `--color-*` alias
    because it is an opacity, and the fallback keeps a disabled control dimmed
    where `AppThemeProvider` is not mounted. */
 @utility opacity-disabled {

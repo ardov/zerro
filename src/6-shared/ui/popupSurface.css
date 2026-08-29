@@ -1,5 +1,5 @@
 @layer components {
-  /* MUI grows an anchored surface out of the corner it hangs off. Three of
+  /* legacy UI grows an anchored surface out of the corner it hangs off. Three of
      them do it — the menu, the select's list and the adaptive popover — and
      they differ only in how far, how long and from where, so those are
      variables rather than three copies of the rule. The defaults are the

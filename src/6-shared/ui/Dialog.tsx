@@ -15,12 +15,12 @@ export type DialogProps = {
   'aria-labelledby'?: string
 }
 
-/** MUI's `Dialog`: a paper centred over a dimmed page, at most 600px wide and
+/** legacy UI's `Dialog`: a paper centred over a dimmed page, at most 600px wide and
  * never taller than the window less its margins.
  *
  * Base UI supplies the modal behaviour — the focus trap, the scroll lock,
  * Escape and the outside press — and `Viewport` is the flex box that centres
- * the paper, which is MUI's `container` under another name. */
+ * the paper, which is legacy UI's `container` under another name. */
 export function Dialog({
   open,
   onClose,
@@ -56,7 +56,7 @@ export function Dialog({
   )
 }
 
-/** The heading MUI renders as an `h2` in its `h6` size. Base UI's `Title` is
+/** The heading legacy UI renders as an `h2` in its `h6` size. Base UI's `Title` is
  * what labels the dialog for assistive technology, so it is that rather than a
  * styled heading of our own. */
 export function DialogTitle({
@@ -72,7 +72,7 @@ export function DialogTitle({
   )
 }
 
-/** The scrolling middle. MUI drops its top padding when a title sits above it,
+/** The scrolling middle. legacy UI drops its top padding when a title sits above it,
  * which is a sibling rule rather than something the caller passes. */
 export function DialogContent({
   className,
@@ -91,7 +91,7 @@ export function DialogContent({
 }
 
 /** Prose inside the content. Base UI's `Description` is what `aria-describedby`
- * points at, and MUI's `DialogContentText` is the same paragraph. */
+ * points at, and legacy UI's `DialogContentText` is the same paragraph. */
 export function DialogContentText({
   className,
   ...props

@@ -1,11 +1,11 @@
 @layer components {
-  /* MUI's `Collapse`: height from nothing to what the content needs, over the
+  /* legacy UI's `Collapse`: height from nothing to what the content needs, over the
      theme's standard 300ms. Height only — the content does not fade — and the
      box clips while it moves so the content does not spill past the edge it
      is growing from.
 
      Base UI measures the panel into `--collapsible-panel-height` and keeps it
-     up to date, which is what MUI's `height: auto` at rest bought: a child
+     up to date, which is what legacy UI's `height: auto` at rest bought: a child
      that grows on its own is followed rather than clipped. */
   .owned-collapse {
     height: var(--collapsible-panel-height);
@@ -15,7 +15,7 @@
       overflow 0s allow-discrete;
   }
 
-  /* MUI stops clipping once it has arrived, so a row's hover tint or a focus
+  /* legacy UI stops clipping once it has arrived, so a row's hover tint or a focus
      ring is not shaved off at the edge. `overflow` is a discrete property, so
      it flips rather than eases; the delay is what holds it until the height
      has finished, and it is declared here rather than on the base rule so it

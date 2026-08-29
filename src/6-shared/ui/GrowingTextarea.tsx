@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Input as InputPrimitive } from '@base-ui/react/input'
 import { cn } from './shadcn/utils'
 
-/** MUI dims a placeholder rather than recolouring it, and the two themes dim
+/** legacy UI dims a placeholder rather than recolouring it, and the two themes dim
  * it by different amounts. */
 export const inputPlaceholderClass =
   'placeholder:text-current placeholder:opacity-[0.42] placeholder:disabled:opacity-disabled dark:placeholder:opacity-50'

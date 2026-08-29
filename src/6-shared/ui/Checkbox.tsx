@@ -7,7 +7,7 @@ export type CheckboxProps = Omit<
   'className' | 'render'
 > & { className?: string }
 
-/** MUI's `Checkbox`: a 24px glyph in a round 42px hit area, unfilled until it
+/** legacy UI's `Checkbox`: a 24px glyph in a round 42px hit area, unfilled until it
  * is checked and in the primary colour once it is.
  *
  * The glyph is drawn here rather than imported. It is the control's own
@@ -35,7 +35,7 @@ export function Checkbox({ className, ...props }: CheckboxProps) {
   )
 }
 
-/** The two Material shapes MUI swapped between. The ticked one is not the
+/** The two Material shapes legacy UI swapped between. The ticked one is not the
  * empty one with a tick laid over it — it is a filled box with the tick cut
  * out of it — so they are two paths and only one is ever shown. Which one is
  * decided by the `data-checked` Base UI puts on the indicator around them. */
@@ -59,9 +59,9 @@ export type CheckboxFieldProps = Omit<CheckboxProps, 'className'> & {
   className?: string
 }
 
-/** MUI's `FormControlLabel` around a checkbox, which is the only control this
+/** legacy UI's `FormControlLabel` around a checkbox, which is the only control this
  * app ever put in one. The control's own padding is pulled back off the left
- * edge so the glyph lines up with the text above it, which is MUI's -11px. */
+ * edge so the glyph lines up with the text above it, which is legacy UI's -11px. */
 export function CheckboxField({
   label,
   className,

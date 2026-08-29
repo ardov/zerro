@@ -98,7 +98,7 @@ function HistoryRowItem({
     const toggle = () => dispatch(toggleHistoryRun(row.id))
     return (
       // The chevron is a sibling of the row, not a child of it: a `button` may
-      // not contain another one. MUI's `ListItemButton` was a `div` with
+      // not contain another one. legacy UI's `ListItemButton` was a `div` with
       // `role="button"`, which hid the nesting; a real button cannot.
       <div className="relative flex w-full min-w-0">
         <button

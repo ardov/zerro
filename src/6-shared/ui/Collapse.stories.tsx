@@ -71,7 +71,7 @@ export const InFlexColumn: Story = {
   },
 }
 
-/** MUI settles on `height: auto`, so a panel whose content grows while it is
+/** legacy UI settles on `height: auto`, so a panel whose content grows while it is
  * open follows it instead of clipping. Base UI keeps its measurement up to
  * date instead, and this is the story that says so. */
 export const GrowsWhileOpen: Story = {

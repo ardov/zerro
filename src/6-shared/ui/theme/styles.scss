@@ -1,20 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap');
 
-/* The document's whole reset. Tailwind's Preflight is not enabled and MUI's
+/* The document's whole reset. Tailwind's Preflight is not enabled and legacy UI's
    `CssBaseline` is gone, so nothing else zeroes a margin or paints the page —
    what is not here is not reset anywhere.
 
-   It belongs in `base` so MUI's own layered rules still win while any of them
-   remain, the way they did on specificity before MUI moved into a cascade
-   layer. An unlayered `* { box-sizing: inherit }` beats
-   `.MuiInputBase-input { box-sizing: content-box }` no matter how specific the
-   class selector is, which collapses every text field by its vertical
-   padding. */
+   It belongs in `base` so legacy UI's own layered rules still win while any of them
+   remain, the way they did on specificity before legacy UI moved into a cascade
+   layer. An unlayered `* { box-sizing: inherit }` wins over a layered field
+   rule no matter how specific its selector is, which collapses every text
+   field by its vertical padding. */
 @layer base {
   html {
     box-sizing: border-box;
     font-family: 'IBM Plex Sans', Arial, sans-serif;
-    /* Both halves of MUI's smoothing pair: WebKit thins the type, Gecko turns
+    /* Both halves of legacy UI's smoothing pair: WebKit thins the type, Gecko turns
        off subpixel rendering, and only together do the two engines agree. */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -47,7 +46,7 @@
     background-color: var(--background);
     color: var(--foreground);
     /* The theme's own family, without the `Arial` fallback above it: this is
-       the declaration every element MUI also styles inherits from. */
+       the declaration every element legacy UI also styles inherits from. */
     font-family: 'IBM Plex Sans', sans-serif;
     font-size: 1rem;
     font-weight: 400;

@@ -1,7 +1,7 @@
 import type { ReactNode, SVGProps } from 'react'
 import { cn } from '../shadcn/utils'
 
-/** MUI's `SvgIcon` sizes, in the rem values it uses. */
+/** legacy UI's `SvgIcon` sizes, in the rem values it uses. */
 const fontSizes = {
   inherit: 'text-[length:inherit]',
   small: 'text-[1.25rem]',
@@ -9,9 +9,9 @@ const fontSizes = {
   large: 'text-[2.1875rem]',
 }
 
-/** MUI's `SvgIcon` palette colors, mapped onto this app's tokens.
+/** legacy UI's `SvgIcon` palette colors, mapped onto this app's tokens.
  *
- * `secondary` is MUI's secondary brand color, which this app exposes as
+ * `secondary` is legacy UI's secondary brand color, which this app exposes as
  * `interactive` — `--secondary` is the selected-surface token and would be
  * the wrong thing to paint a glyph with. */
 const colors = {
@@ -36,9 +36,9 @@ export type TIconProps = Omit<SVGProps<SVGSVGElement>, 'fontSize' | 'color'> & {
 
 /** The shell both factories share.
  *
- * It matches what MUI's `createSvgIcon` produced — `1em` box, `fontSize` and
+ * It matches what legacy UI's `createSvgIcon` produced — `1em` box, `fontSize` and
  * `color` props, paint from `currentColor` — so call sites did not have to
- * change when the factory stopped being MUI's. Only what goes inside the
+ * change when the factory stopped being legacy UI's. Only what goes inside the
  * `<svg>` differs between an outline and a solid glyph. */
 function createIcon(displayName: string, drawing: ReactNode) {
   function Icon({

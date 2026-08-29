@@ -83,7 +83,7 @@ export const SmartEnvTransactionsDrawer = () => {
     <SideDrawer
       onClose={onClose}
       open={open}
-      // MUI sized the paper through `sx`; the sheet takes it as a class.
+      // legacy UI sized the paper through `sx`; the sheet takes it as a class.
       className="w-screen sm:w-[360px]"
       aria-label={title || t('transactions')}
     >

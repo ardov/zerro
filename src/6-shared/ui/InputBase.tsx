@@ -7,20 +7,20 @@ export type InputBaseProps = Omit<
   ComponentPropsWithRef<'input'>,
   'size' | 'children' | 'ref'
 > & {
-  /** MUI's `multiline`, which swapped the `input` for a `textarea`. */
+  /** legacy UI's `multiline`, which swapped the `input` for a `textarea`. */
   multiline?: boolean
-  /** MUI's `startAdornment`, which is a label rather than a decoration here:
+  /** legacy UI's `startAdornment`, which is a label rather than a decoration here:
    * clicking it focuses the field. */
   startAdornment?: ReactNode
   className?: string
 }
 
-/** MUI's `InputBase`: a field with none of the decoration `OutlinedField`
+/** legacy UI's `InputBase`: a field with none of the decoration `OutlinedField`
  * brings — no border, no notch, no label — for the two places that draw their
  * own surface around it.
  *
- * `className` sizes that surface, which is what MUI's `sx` on the root did;
- * the control inside keeps the type and the 4px/5px MUI gives it. */
+ * `className` sizes that surface, which is what legacy UI's `sx` on the root did;
+ * the control inside keeps the type and the 4px/5px legacy UI gives it. */
 export function InputBase({
   multiline,
   startAdornment,
@@ -49,7 +49,7 @@ export function InputBase({
     </>
   )
   const rootClassName = cn(
-    // `type-body` would be 16px on a 24px line; MUI's field is 16px on
+    // `type-body` would be 16px on a 24px line; legacy UI's field is 16px on
     // 1.4375em, which is the 23px every height under it is measured from.
     'relative inline-flex cursor-text items-center font-sans text-base leading-[1.4375] font-normal text-foreground',
     className

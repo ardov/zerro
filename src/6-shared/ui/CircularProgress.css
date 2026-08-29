@@ -1,5 +1,5 @@
 @layer components {
-  /* MUI's indeterminate spinner is two animations at once: the whole svg
+  /* legacy UI's indeterminate spinner is two animations at once: the whole svg
      turns at a constant rate while the arc it draws grows and shrinks. Doing
      it with one would either stutter or never close the loop. */
   .owned-spinner {

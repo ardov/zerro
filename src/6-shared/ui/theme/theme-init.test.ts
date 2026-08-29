@@ -136,11 +136,11 @@ describe('theme-init', () => {
 
   it('does not resurrect a legacy choice after returning to system', () => {
     const page = runThemeManager({
-      stored: { 'zerro-color-scheme': 'system', 'mui-mode': 'dark' },
+      stored: { 'zerro-color-scheme': 'system', theme: 'dark' },
     })
 
     expect(page.manager.getTheme()).toBe('light')
     expect(page.values.has('zerro-color-scheme')).toBe(false)
-    expect(page.values.has('mui-mode')).toBe(false)
+    expect(page.values.has('theme')).toBe(false)
   })
 })

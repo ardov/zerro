@@ -43,15 +43,15 @@ function paletteTokens(palette: TPalette) {
     '--popover': background.paper,
     '--popover-foreground': text.primary,
 
-    /* MUI does not build the tooltip out of a palette colour: it is grey 700
+    /* legacy UI does not build the tooltip out of a palette colour: it is grey 700
        at 92 per cent, over white type. */
     '--tooltip': alpha(grey[700], 0.92),
     '--tooltip-foreground': common.white,
 
     '--primary': palette.primary.main,
     '--primary-foreground': palette.primary.contrastText,
-    /* The state fills MUI paints a text button and a selected menu item with.
-       Selected-and-hovered is the sum of the two, the way MUI stacks them. */
+    /* The state fills legacy UI paints a text button and a selected menu item with.
+       Selected-and-hovered is the sum of the two, the way legacy UI stacks them. */
     '--primary-hover': alpha(palette.primary.main, action.hoverOpacity),
     '--primary-focus': alpha(palette.primary.main, action.focusOpacity),
     '--primary-selected': alpha(palette.primary.main, action.selectedOpacity),
@@ -59,10 +59,10 @@ function paletteTokens(palette: TPalette) {
       palette.primary.main,
       action.selectedOpacity + action.hoverOpacity
     ),
-    /* MUI dims a disabled menu item rather than recolouring it, so this is an
+    /* legacy UI dims a disabled menu item rather than recolouring it, so this is an
        opacity and not a colour like `--disabled-foreground`. */
     '--disabled-opacity': String(action.disabledOpacity),
-    /* The rest of what MUI's Button needs, and only for the variant and colour
+    /* The rest of what legacy UI's Button needs, and only for the variant and colour
        pairs the app actually renders. */
     '--primary-dark': palette.primary.dark,
     '--interactive-hover': alpha(palette.secondary.main, action.hoverOpacity),
@@ -83,12 +83,12 @@ function paletteTokens(palette: TPalette) {
     '--destructive-foreground': palette.error.contrastText,
     '--border': palette.divider,
     /* The outlined field's border is heavier than the divider, so this is a
-       value of its own rather than an alias of `--border`. MUI's own
+       value of its own rather than an alias of `--border`. legacy UI's own
        `OutlinedInput` builds it as 23% of the colour that sits on the
        background, so build it the same way. */
     '--input': alpha(isLight ? common.black : common.white, 0.23),
     '--action-active': action.active,
-    /* MUI disables a field's border with `action.disabled` and greys its text
+    /* legacy UI disables a field's border with `action.disabled` and greys its text
        with `text.disabled`. They hold the same value in the default palette,
        so they are only distinguishable once one of them moves. */
     '--action-disabled': action.disabled,
@@ -104,11 +104,11 @@ function paletteTokens(palette: TPalette) {
     '--chip-delete': alpha(text.primary, 0.26),
     '--chip-delete-hover': alpha(text.primary, 0.4),
 
-    /* A link's underline, which MUI draws in a fainter shade of the link
+    /* A link's underline, which legacy UI draws in a fainter shade of the link
        itself and hands back to the text colour on hover. */
     '--link-underline': alpha(palette.primary.main, 0.4),
 
-    /* A switch, which MUI builds out of the scheme's extremes rather than out
+    /* A switch, which legacy UI builds out of the scheme's extremes rather than out
        of the palette: the thumb is white on light and grey 300 on dark, and
        the track is the opposite colour at an opacity that also differs. */
     '--switch-thumb': isLight ? common.white : grey[300],
