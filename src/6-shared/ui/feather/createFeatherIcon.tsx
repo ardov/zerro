@@ -1,7 +1,7 @@
 import type { ReactNode, SVGProps } from 'react'
 import { cn } from '../shadcn/utils'
 
-/** legacy UI's `SvgIcon` sizes, in the rem values it uses. */
+/** Icon sizes in rem. */
 const fontSizes = {
   inherit: 'text-[length:inherit]',
   small: 'text-[1.25rem]',
@@ -9,9 +9,9 @@ const fontSizes = {
   large: 'text-[2.1875rem]',
 }
 
-/** legacy UI's `SvgIcon` palette colors, mapped onto this app's tokens.
+/** Icon colors mapped onto application tokens.
  *
- * `secondary` is legacy UI's secondary brand color, which this app exposes as
+ * `secondary` is the interactive brand color, exposed as
  * `interactive` — `--secondary` is the selected-surface token and would be
  * the wrong thing to paint a glyph with. */
 const colors = {
@@ -34,12 +34,9 @@ export type TIconProps = Omit<SVGProps<SVGSVGElement>, 'fontSize' | 'color'> & {
   titleAccess?: string
 }
 
-/** The shell both factories share.
- *
- * It matches what legacy UI's `createSvgIcon` produced — `1em` box, `fontSize` and
- * `color` props, paint from `currentColor` — so call sites did not have to
- * change when the factory stopped being legacy UI's. Only what goes inside the
- * `<svg>` differs between an outline and a solid glyph. */
+/** The shell both factories share: a `1em` box, size and color props, and paint
+ * from `currentColor`. Only the drawing differs between outline and solid
+ * glyphs. */
 function createIcon(displayName: string, drawing: ReactNode) {
   function Icon({
     className,
@@ -54,7 +51,6 @@ function createIcon(displayName: string, drawing: ReactNode) {
         aria-hidden={titleAccess ? undefined : true}
         role={titleAccess ? 'img' : undefined}
         viewBox="0 0 24 24"
-        data-testid={`${displayName}Icon`}
         className={cn(
           'inline-block size-[1em] shrink-0 fill-current select-none',
           fontSizes[fontSize],
@@ -89,7 +85,7 @@ export function createFeatherIcon(path: ReactNode, displayName: string) {
   )
 }
 
-/** Builds a solid icon: a filled silhouette, which is how Material draws the
+/** Builds a solid icon: a filled silhouette, which is how solid icons use the
  * few glyphs the Feather set has no equivalent for. The `fill-current` on the
  * shell paints it, so the path needs no attributes of its own. */
 export function createSolidIcon(path: ReactNode, displayName: string) {

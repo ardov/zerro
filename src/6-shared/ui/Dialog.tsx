@@ -15,12 +15,11 @@ export type DialogProps = {
   'aria-labelledby'?: string
 }
 
-/** legacy UI's `Dialog`: a paper centred over a dimmed page, at most 600px wide and
+/** A paper centered over a dimmed page, at most 600px wide and
  * never taller than the window less its margins.
  *
  * Base UI supplies the modal behaviour — the focus trap, the scroll lock,
- * Escape and the outside press — and `Viewport` is the flex box that centres
- * the paper, which is legacy UI's `container` under another name. */
+ * Escape and the outside press — and `Viewport` centers the paper. */
 export function Dialog({
   open,
   onClose,
@@ -37,14 +36,14 @@ export function Dialog({
       }}
     >
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Backdrop className="owned-dialog fixed inset-0 z-modal bg-black/50" />
+        <DialogPrimitive.Backdrop className="dialog-fade fixed inset-0 z-modal bg-black/50" />
         <DialogPrimitive.Viewport className="fixed inset-0 z-modal flex items-center justify-center">
           <DialogPrimitive.Popup
             {...props}
             finalFocus={finalFocus}
             data-slot="dialog"
             className={cn(
-              'owned-dialog relative m-8 flex max-h-[calc(100%-64px)] max-w-[600px] flex-col rounded-lg bg-card text-card-foreground shadow-elevation-24 outline-none',
+              'dialog-fade relative m-8 flex max-h-[calc(100%-64px)] max-w-[600px] flex-col rounded-lg bg-card text-card-foreground shadow-elevation-24 outline-none',
               className
             )}
           >
@@ -56,7 +55,7 @@ export function Dialog({
   )
 }
 
-/** The heading legacy UI renders as an `h2` in its `h6` size. Base UI's `Title` is
+/** An `h2` dialog heading. Base UI's `Title` is
  * what labels the dialog for assistive technology, so it is that rather than a
  * styled heading of our own. */
 export function DialogTitle({
@@ -72,7 +71,7 @@ export function DialogTitle({
   )
 }
 
-/** The scrolling middle. legacy UI drops its top padding when a title sits above it,
+/** The scrolling middle drops its top padding when a title sits above it,
  * which is a sibling rule rather than something the caller passes. */
 export function DialogContent({
   className,
@@ -90,8 +89,7 @@ export function DialogContent({
   )
 }
 
-/** Prose inside the content. Base UI's `Description` is what `aria-describedby`
- * points at, and legacy UI's `DialogContentText` is the same paragraph. */
+/** Prose inside the content and the target of `aria-describedby`. */
 export function DialogContentText({
   className,
   ...props

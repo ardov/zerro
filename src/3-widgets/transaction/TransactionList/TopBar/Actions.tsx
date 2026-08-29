@@ -2,10 +2,9 @@ import { IconButton } from '6-shared/ui/Button'
 import type { TTransaction } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
-import type { FC } from 'react'
-import React, { useRef, useState } from 'react'
+import type { FC, MouseEventHandler } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CSSTransition } from 'react-transition-group'
 import { Chip } from '6-shared/ui/Chip'
 import { Menu, MenuItem } from '6-shared/ui/Menu'
 import { ListRowIcon, ListRowText } from '6-shared/ui/ListRow'
@@ -45,14 +44,13 @@ const Actions: FC<ActionsProps> = ({
   const { t } = useTranslation('transactionActions')
   const dispatch = useAppDispatch()
   const allTransactions = useAppSelector(core.transactions.selectAll)
-  const actionsRef = useRef<HTMLDivElement>(null)
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)
   const [editModalVisible, setEditModalVisible] = useState(false)
 
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  const handleClick: React.MouseEventHandler = event =>
+  const handleClick: MouseEventHandler = event =>
     setAnchorEl(event.currentTarget)
   const closeMenu = () => setAnchorEl(null)
 
@@ -63,6 +61,7 @@ const Actions: FC<ActionsProps> = ({
   ) {
     setPrevChecked({ visible, checkedIds })
     if (visible) setIds(checkedIds)
+    else setAnchorEl(null)
   }
 
   const handleSetTag = (id: string) => {
@@ -124,158 +123,151 @@ const Actions: FC<ActionsProps> = ({
         style={{ transform: 'translateX(-50%)' }}
         className="absolute bottom-4 left-1/2 z-[1000]"
       >
-        <CSSTransition
-          nodeRef={actionsRef}
-          mountOnEnter
-          unmountOnExit
-          in={visible}
-          timeout={200}
-          classNames="actions-transition"
+        <div
+          data-visible={visible ? '' : undefined}
+          aria-hidden={!visible}
+          inert={!visible}
+          className="actions-transition flex items-center rounded-[60px] bg-info pl-2 shadow-elevation-4"
         >
-          <div
-            ref={actionsRef}
-            className="flex items-center rounded-[60px] bg-info pl-2 shadow-elevation-4"
-          >
-            <Chip
-              label={t('selected', { count: ids.length })}
-              onDelete={onUncheckAll}
-              variant="outlined"
+          <Chip
+            label={t('selected', { count: ids.length })}
+            onDelete={onUncheckAll}
+            variant="outlined"
+          />
+
+          <Tooltip title={t('deleteSelected')}>
+            <IconButton onClick={handleDelete}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+
+          {actions.setMainTag && (
+            <TagSelect2
+              onChange={handleSetTag}
+              trigger={
+                <Tooltip title={t('setCategory')}>
+                  <IconButton children={<LocalOfferOutlinedIcon />} />
+                </Tooltip>
+              }
             />
+          )}
 
-            <Tooltip title={t('deleteSelected')}>
-              <IconButton onClick={handleDelete}>
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
+          <Tooltip title={t('actions')}>
+            <IconButton
+              children={<MoreVertIcon />}
+              aria-haspopup="true"
+              onClick={handleClick}
+            />
+          </Tooltip>
 
-            {actions.setMainTag && (
-              <TagSelect2
-                onChange={handleSetTag}
-                trigger={
-                  <Tooltip title={t('setCategory')}>
-                    <IconButton children={<LocalOfferOutlinedIcon />} />
-                  </Tooltip>
-                }
-              />
+          <Menu
+            anchorEl={anchorEl}
+            open={visible && Boolean(anchorEl)}
+            onClose={closeMenu}
+            placement="top-end"
+            aria-label={t('actions')}
+          >
+            {actions.markViewed && (
+              <MenuItem onClick={handleMarkViewed}>
+                <ListRowIcon>
+                  <VisibilityIcon />
+                </ListRowIcon>
+                <ListRowText>{t('markViewed')}</ListRowText>
+              </MenuItem>
             )}
 
-            <Tooltip title={t('actions')}>
-              <IconButton
-                children={<MoreVertIcon />}
-                aria-haspopup="true"
-                onClick={handleClick}
-              />
-            </Tooltip>
-
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={closeMenu}
-              placement="top-end"
-              aria-label={t('actions')}
-            >
-              {actions.markViewed && (
-                <MenuItem onClick={handleMarkViewed}>
-                  <ListRowIcon>
-                    <VisibilityIcon />
-                  </ListRowIcon>
-                  <ListRowText>{t('markViewed')}</ListRowText>
-                </MenuItem>
-              )}
-
-              {actions.bulkEdit && (
-                <MenuItem onClick={() => setEditModalVisible(true)}>
-                  <ListRowIcon>
-                    <EditIcon />
-                  </ListRowIcon>
-                  <ListRowText>{t('edit')}</ListRowText>
-                </MenuItem>
-              )}
-
-              {actions.combineToOutcome && (
-                <MenuItem
-                  onClick={() => {
-                    dispatch(core.transactions.combineToOutcome(ids))
-                    track('transactions_combined', {
-                      result_type: 'outcome',
-                      source: 'bulk_toolbar',
-                    })
-                    onUncheckAll()
-                  }}
-                >
-                  <ListRowIcon>
-                    <MergeTypeIcon />
-                  </ListRowIcon>
-                  <ListRowText secondary={t('combineToOutcomeComment')}>
-                    {t('combineToOutcome')}
-                  </ListRowText>
-                </MenuItem>
-              )}
-
-              {actions.combineToIncome && (
-                <MenuItem
-                  onClick={() => {
-                    dispatch(core.transactions.combineToIncome(ids))
-                    track('transactions_combined', {
-                      result_type: 'income',
-                      source: 'bulk_toolbar',
-                    })
-                    onUncheckAll()
-                  }}
-                >
-                  <ListRowIcon>
-                    <MergeTypeIcon />
-                  </ListRowIcon>
-                  <ListRowText secondary={t('combineToIncomeComment')}>
-                    {t('combineToIncome')}
-                  </ListRowText>
-                </MenuItem>
-              )}
-
-              {actions.collapseTransactionsEasy && (
-                <MenuItem onClick={handleDelete}>
-                  <ListRowIcon>
-                    <MergeTypeIcon />
-                  </ListRowIcon>
-                  <ListRowText secondary={t('mergeTransactionsComment')}>
-                    {t('mergeTransactions')}
-                  </ListRowText>
-                </MenuItem>
-              )}
-
-              {actions.canMergeAsTransfer && (
-                <MenuItem
-                  onClick={() => {
-                    dispatch(core.transactions.mergeAsTransfer(ids))
-                    track('transactions_combined', {
-                      result_type: 'transfer',
-                      source: 'bulk_toolbar',
-                    })
-                    onUncheckAll()
-                  }}
-                >
-                  <ListRowIcon>
-                    <MergeTypeIcon />
-                  </ListRowIcon>
-                  <ListRowText secondary={t('mergeAsTransferComment')}>
-                    {t('mergeAsTransfer')}
-                  </ListRowText>
-                </MenuItem>
-              )}
-
-              <div className="my-2">
-                <Divider />
-              </div>
-
-              <MenuItem onClick={handleCheckAll}>
+            {actions.bulkEdit && (
+              <MenuItem onClick={() => setEditModalVisible(true)}>
                 <ListRowIcon>
-                  <DoneAllIcon />
+                  <EditIcon />
                 </ListRowIcon>
-                <ListRowText>{t('selectAll')}</ListRowText>
+                <ListRowText>{t('edit')}</ListRowText>
               </MenuItem>
-            </Menu>
-          </div>
-        </CSSTransition>
+            )}
+
+            {actions.combineToOutcome && (
+              <MenuItem
+                onClick={() => {
+                  dispatch(core.transactions.combineToOutcome(ids))
+                  track('transactions_combined', {
+                    result_type: 'outcome',
+                    source: 'bulk_toolbar',
+                  })
+                  onUncheckAll()
+                }}
+              >
+                <ListRowIcon>
+                  <MergeTypeIcon />
+                </ListRowIcon>
+                <ListRowText secondary={t('combineToOutcomeComment')}>
+                  {t('combineToOutcome')}
+                </ListRowText>
+              </MenuItem>
+            )}
+
+            {actions.combineToIncome && (
+              <MenuItem
+                onClick={() => {
+                  dispatch(core.transactions.combineToIncome(ids))
+                  track('transactions_combined', {
+                    result_type: 'income',
+                    source: 'bulk_toolbar',
+                  })
+                  onUncheckAll()
+                }}
+              >
+                <ListRowIcon>
+                  <MergeTypeIcon />
+                </ListRowIcon>
+                <ListRowText secondary={t('combineToIncomeComment')}>
+                  {t('combineToIncome')}
+                </ListRowText>
+              </MenuItem>
+            )}
+
+            {actions.collapseTransactionsEasy && (
+              <MenuItem onClick={handleDelete}>
+                <ListRowIcon>
+                  <MergeTypeIcon />
+                </ListRowIcon>
+                <ListRowText secondary={t('mergeTransactionsComment')}>
+                  {t('mergeTransactions')}
+                </ListRowText>
+              </MenuItem>
+            )}
+
+            {actions.canMergeAsTransfer && (
+              <MenuItem
+                onClick={() => {
+                  dispatch(core.transactions.mergeAsTransfer(ids))
+                  track('transactions_combined', {
+                    result_type: 'transfer',
+                    source: 'bulk_toolbar',
+                  })
+                  onUncheckAll()
+                }}
+              >
+                <ListRowIcon>
+                  <MergeTypeIcon />
+                </ListRowIcon>
+                <ListRowText secondary={t('mergeAsTransferComment')}>
+                  {t('mergeAsTransfer')}
+                </ListRowText>
+              </MenuItem>
+            )}
+
+            <div className="my-2">
+              <Divider />
+            </div>
+
+            <MenuItem onClick={handleCheckAll}>
+              <ListRowIcon>
+                <DoneAllIcon />
+              </ListRowIcon>
+              <ListRowText>{t('selectAll')}</ListRowText>
+            </MenuItem>
+          </Menu>
+        </div>
       </div>
     </>
   )

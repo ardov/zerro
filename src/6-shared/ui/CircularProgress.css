@@ -1,18 +1,18 @@
 @layer components {
-  /* legacy UI's indeterminate spinner is two animations at once: the whole svg
+  /* The indeterminate spinner uses two animations: the whole SVG
      turns at a constant rate while the arc it draws grows and shrinks. Doing
      it with one would either stutter or never close the loop. */
-  .owned-spinner {
-    animation: owned-spinner-rotate 1.4s linear infinite;
+  .circular-progress {
+    animation: circular-progress-rotate 1.4s linear infinite;
   }
 
-  .owned-spinner-arc {
+  .circular-progress-arc {
     stroke-dasharray: 80px, 200px;
     stroke-dashoffset: 0;
-    animation: owned-spinner-dash 1.4s ease-in-out infinite;
+    animation: circular-progress-dash 1.4s ease-in-out infinite;
   }
 
-  @keyframes owned-spinner-rotate {
+  @keyframes circular-progress-rotate {
     0% {
       transform: rotate(0deg);
     }
@@ -21,7 +21,7 @@
     }
   }
 
-  @keyframes owned-spinner-dash {
+  @keyframes circular-progress-dash {
     0% {
       stroke-dasharray: 1px, 200px;
       stroke-dashoffset: 0;

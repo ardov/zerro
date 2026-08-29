@@ -1,16 +1,15 @@
 import './popupSurface.css'
 
-/** The entrance legacy UI gives an anchored surface: it grows out of the corner it
+/** An anchored surface grows out of the corner it
  * hangs off, and fades while it does.
  *
  * `--grow-from`, `--grow-duration` and `--grow-origin` tune it, so a surface
  * that grows differently sets those next to the class instead of writing the
  * transition again. */
-export const growSurfaceClass = 'owned-grow'
+export const growSurfaceClass = 'popup-grow'
 
-/** The paper legacy UI drops out of a control. The menu and the select's list are
- * the same surface — same elevation, same radius, same 8px the rows sit in —
- * so it is described once, the way `listRowClass` describes their rows. */
+/** Shared paper for menus and select lists: their common elevation, radius and
+ * 8px row inset are described once. */
 export const popupSurfaceClass = `${growSurfaceClass} max-h-[calc(100dvh-96px)] overflow-y-auto rounded-lg bg-popover py-2 text-popover-foreground shadow-elevation-8 outline-none`
 
 /** What both of them hand the positioner. Only the side, the alignment and
@@ -24,12 +23,12 @@ export const popupPositioning = {
   className: 'z-modal',
 } as const
 
-/** legacy UI's `Popover` paper, which is the surface every anchored overlay of ours
- * hangs off its anchor: `Popover` itself, and `AdaptivePopover` above the
+/** The surface every anchored overlay hangs from its anchor: `Popover` itself
+ * and `AdaptivePopover` above the
  * mobile breakpoint.
  *
- * The 16px minimums, the clipped horizontal axis and the 32px the paper keeps
- * off the viewport are legacy UI's own — an anchored paper only ever grows
+ * The 16px minimums, clipped horizontal axis and 32px viewport margin keep the
+ * paper within the viewport. An anchored paper only grows
  * downwards, so sideways overflow is a layout mistake rather than something
  * to scroll.
  *
@@ -43,12 +42,11 @@ export const anchoredSurfaceClass = `${growSurfaceClass} [--grow-duration:225ms]
 /** A surface that slides in off an edge: the adaptive popover on a phone, and
  * `SmartDialog` on one. `--drawer-radius` rounds its leading corners, and the
  * `data-placement` on the popup decides which corners those are. */
-export const drawerSurfaceClass = 'owned-drawer'
+export const drawerSurfaceClass = 'drawer-slide'
 
 /** The dim behind a drawer, which lifts as the drawer is swiped away. */
-export const drawerBackdropClass = 'owned-drawer-backdrop'
+export const drawerBackdropClass = 'drawer-slide-backdrop'
 
-/** legacy UI lays an anchored surface's top-left over the anchor's own. Base UI
- * pushes it clear of the anchor instead, so the height comes back off. */
+/** Lay a surface's top-left over its anchor instead of beside it. */
 export const overAnchor = ({ anchor }: { anchor: { height: number } }) =>
   -anchor.height

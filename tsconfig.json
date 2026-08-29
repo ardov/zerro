@@ -27,7 +27,7 @@
     "src",
     "stories",
     ".storybook",
-    "typings/theme.d.ts",
+    "typings/react-redux.d.ts",
     "typings/vite-env.d.ts",
     "typings/i18n.d.ts"
   ]

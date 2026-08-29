@@ -39,7 +39,7 @@ export const Transition: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const host = canvas.getByTestId('collapse')
-    const panel = () => host.querySelector<HTMLElement>('.owned-collapse')
+    const panel = () => host.querySelector<HTMLElement>('.collapse-panel')
     await expect(panel()).toBe(null)
 
     await userEvent.click(canvas.getByRole('button', { name: 'Toggle' }))
@@ -71,9 +71,7 @@ export const InFlexColumn: Story = {
   },
 }
 
-/** legacy UI settles on `height: auto`, so a panel whose content grows while it is
- * open follows it instead of clipping. Base UI keeps its measurement up to
- * date instead, and this is the story that says so. */
+/** Verifies that a panel follows content that grows while it is open. */
 export const GrowsWhileOpen: Story = {
   render: function Render() {
     const [lines, setLines] = useState(1)
@@ -98,7 +96,7 @@ export const GrowsWhileOpen: Story = {
     const canvas = within(canvasElement)
     const panel = canvas
       .getByTestId('owned')
-      .querySelector<HTMLElement>('.owned-collapse')!
+      .querySelector<HTMLElement>('.collapse-panel')!
     const inner = panel.firstElementChild as HTMLElement
     await settled(panel)
     await userEvent.click(canvas.getByRole('button', { name: 'Add lines' }))

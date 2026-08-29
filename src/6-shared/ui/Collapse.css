@@ -1,13 +1,12 @@
 @layer components {
-  /* legacy UI's `Collapse`: height from nothing to what the content needs, over the
-     theme's standard 300ms. Height only — the content does not fade — and the
+  /* Animate height from zero to the measured content height over 300ms. The
+     content does not fade, and the
      box clips while it moves so the content does not spill past the edge it
      is growing from.
 
-     Base UI measures the panel into `--collapsible-panel-height` and keeps it
-     up to date, which is what legacy UI's `height: auto` at rest bought: a child
-     that grows on its own is followed rather than clipped. */
-  .owned-collapse {
+     Base UI keeps `--collapsible-panel-height` up to date so a child that grows
+     while open is followed rather than clipped. */
+  .collapse-panel {
     height: var(--collapsible-panel-height);
     overflow: hidden;
     transition:
@@ -15,27 +14,27 @@
       overflow 0s allow-discrete;
   }
 
-  /* legacy UI stops clipping once it has arrived, so a row's hover tint or a focus
+  /* Stop clipping once the panel has arrived so a row's hover tint or focus
      ring is not shaved off at the edge. `overflow` is a discrete property, so
      it flips rather than eases; the delay is what holds it until the height
      has finished, and it is declared here rather than on the base rule so it
      applies to opening only. Closing must clip from the first frame. */
-  .owned-collapse[data-open] {
+  .collapse-panel[data-open] {
     overflow: visible;
     transition:
       height 300ms cubic-bezier(0.4, 0, 0.2, 1),
       overflow 0s 300ms allow-discrete;
   }
 
-  .owned-collapse[data-starting-style],
-  .owned-collapse[data-ending-style] {
+  .collapse-panel[data-starting-style],
+  .collapse-panel[data-ending-style] {
     height: 0;
     overflow: hidden;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .owned-collapse,
-    .owned-collapse[data-open] {
+    .collapse-panel,
+    .collapse-panel[data-open] {
       transition: none;
     }
   }

@@ -1,8 +1,7 @@
 @layer components {
-  /* legacy UI fades a dialog and its backdrop in together, and out slightly faster —
-     `enteringScreen` and `leavingScreen` from the same theme. Nothing grows or
-     slides: a dialog is not anchored to anything to grow out of. */
-  .owned-dialog {
+  /* Fade the dialog and backdrop in together and out slightly faster. A dialog
+     is not anchored to a trigger, so it does not grow or slide. */
+  .dialog-fade {
     transition: opacity 225ms cubic-bezier(0.4, 0, 0.2, 1);
 
     &[data-starting-style],
@@ -16,7 +15,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .owned-dialog {
+    .dialog-fade {
       transition: none;
     }
   }

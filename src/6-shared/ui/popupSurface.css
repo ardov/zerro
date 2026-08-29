@@ -1,5 +1,5 @@
 @layer components {
-  /* legacy UI grows an anchored surface out of the corner it hangs off. Three of
+  /* Grow an anchored surface out of the corner it hangs from. Three of
      them do it — the menu, the select's list and the adaptive popover — and
      they differ only in how far, how long and from where, so those are
      variables rather than three copies of the rule. The defaults are the
@@ -8,7 +8,7 @@
      `transition-none` from a call site still wins: `utilities` is the later
      layer, which is how the filter bar chains a second surface off the menu
      without waiting. */
-  .owned-grow {
+  .popup-grow {
     transform-origin: var(--grow-origin, var(--transform-origin));
     transition:
       opacity var(--grow-duration, 150ms) ease,
@@ -22,7 +22,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .owned-grow {
+    .popup-grow {
       transition: none;
     }
   }
@@ -31,7 +31,7 @@
      them: the adaptive popover on a phone, and a dialog on a phone. They
      differ only in how round the leading corners are, so that is a variable
      and the placement decides which corners it lands on. */
-  .owned-drawer {
+  .drawer-slide {
     transform: translate(
       var(--drawer-swipe-movement-x, 0),
       var(--drawer-swipe-movement-y, 0)
@@ -74,7 +74,7 @@
 
   /* The dim behind it lifts with the swipe, so a half-dragged drawer is half
      as dark. */
-  .owned-drawer-backdrop {
+  .drawer-slide-backdrop {
     opacity: calc(1 - var(--drawer-swipe-progress, 0));
     transition: opacity 225ms ease;
 
@@ -85,8 +85,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .owned-drawer,
-    .owned-drawer-backdrop {
+    .drawer-slide,
+    .drawer-slide-backdrop {
       transition: none;
     }
   }

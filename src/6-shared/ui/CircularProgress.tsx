@@ -1,19 +1,19 @@
 import { cn } from './shadcn/utils'
 import './CircularProgress.css'
 
-/** legacy UI draws in a 44-unit box and shows the middle quarter of it, which is
+/** Draw in a 44-unit box and show the middle quarter of it, which is
  * why the circle's centre is at 44 rather than 22. */
 const BOX = 44
 const THICKNESS = 3.6
 
 export type CircularProgressProps = {
-  /** Pixels across. legacy UI's default. */
+  /** Size in pixels. */
   size?: number
   className?: string
   'aria-label'?: string
 }
 
-/** legacy UI's indeterminate `CircularProgress`: an arc in the primary colour that
+/** An indeterminate arc in the primary color that
  * turns and breathes at the same time. There is no determinate variant here,
  * because nothing in this app knows how far along it is. */
 export function CircularProgress({
@@ -26,7 +26,7 @@ export function CircularProgress({
       data-slot="circular-progress"
       role="progressbar"
       className={cn(
-        'owned-spinner inline-block shrink-0 text-primary',
+        'circular-progress inline-block shrink-0 text-primary',
         className
       )}
       style={{ width: size, height: size }}
@@ -34,7 +34,7 @@ export function CircularProgress({
     >
       <svg className="block" viewBox={`${BOX / 2} ${BOX / 2} ${BOX} ${BOX}`}>
         <circle
-          className="owned-spinner-arc"
+          className="circular-progress-arc"
           cx={BOX}
           cy={BOX}
           r={(BOX - THICKNESS) / 2}

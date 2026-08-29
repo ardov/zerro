@@ -1,25 +1,28 @@
 @layer components {
-  .actions-transition-enter {
+  .actions-transition {
     opacity: 0;
     transform: translateY(16px);
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 200ms ease-out,
+      transform 200ms ease-out,
+      visibility 0s linear 200ms;
   }
-  .actions-transition-enter-active {
+
+  .actions-transition[data-visible] {
     opacity: 1;
-    transform: translateY(0px);
-    transition: 200ms ease-out;
-    transition-property: opacity, transform;
+    transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
   }
-  .actions-transition-exit {
-    opacity: 1;
-    transform: translateY(0px);
-  }
-  .actions-transition-exit-active {
-    opacity: 0;
-    transform: translateY(16px);
-    transition: 200ms ease-out;
-    transition-property: opacity, transform;
-  }
-  .actions-transition-exit-done {
-    display: none;
+
+  @media (prefers-reduced-motion: reduce) {
+    .actions-transition,
+    .actions-transition[data-visible] {
+      transform: none;
+      transition-property: opacity, visibility;
+    }
   }
 }
