@@ -9,7 +9,7 @@ import type { TDateDraft, TISODate, TTransactionId } from '6-shared/types'
 import { toISODate } from '6-shared/helpers/date'
 import { SmartDialog } from '6-shared/ui/SmartDialog'
 import { registerPopover } from '6-shared/historyPopovers'
-import { OutlinedField } from '6-shared/ui/OutlinedField'
+import { Calendar } from '6-shared/ui/Calendar'
 import { useTranslation } from 'react-i18next'
 
 type GroupNode = {
@@ -267,25 +267,20 @@ const dateDialog = registerPopover<TDateDialogProps>('listSateDialog', {
 })
 
 const DateDialog = () => {
-  const { t } = useTranslation('transaction')
+  const { t } = useTranslation()
   const { extraProps, displayProps } = dateDialog.useProps()
   const { onChange, value, minDate, maxDate } = extraProps
   return (
-    <SmartDialog elKey={dateDialog.key}>
-      <div className="w-[280px] p-4">
-        <OutlinedField
+    <SmartDialog elKey={dateDialog.key} aria-label={t('selectDate')}>
+      <div className="flex justify-center p-2">
+        <Calendar
           autoFocus
-          type="date"
-          label={t('date')}
           value={value}
-          min={minDate}
-          max={maxDate}
-          fullWidth
-          onChange={event => {
-            const date = event.target.value
-            if (!date) return
+          minDate={minDate}
+          maxDate={maxDate}
+          onChange={date => {
             displayProps.onClose()
-            onChange(date as TISODate)
+            onChange(date)
           }}
         />
       </div>

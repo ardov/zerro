@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
-import { useId } from 'react'
 import { Select as SelectPrimitive } from '@base-ui/react/select'
-import { popoverStack } from '6-shared/historyPopovers'
+import { useStackedOpen } from '6-shared/historyPopovers'
 import { CheckIcon, ChevronDownIcon } from './Icons'
 import { listRowClass } from './ListRow'
 import { OutlinedFieldFrame, outlinedControlClass } from './OutlinedField'
@@ -101,16 +100,6 @@ export function MultiSelect<T extends string>(props: MultiSelectProps<T>) {
       <SelectField {...field} options={options} display={renderValue(value)} />
     </SelectPrimitive.Root>
   )
-}
-
-/** Puts the open list on the popover stack, so Back closes it rather than
- * leaving the page. Every select wants that and none of them is opened by
- * name, so the key is generated instead of being asked for at the call site —
- * all the stack needs is that no two live selects share one. */
-function useStackedOpen(): [boolean, (open: boolean) => void] {
-  const key = useId()
-  const [open, onOpen, onClose] = popoverStack.usePopoverState(key)
-  return [open, next => (next ? onOpen() : onClose())]
 }
 
 function SelectField<T extends string>({

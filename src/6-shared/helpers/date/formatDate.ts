@@ -33,15 +33,18 @@ export function formatTimeAgo(date: TDateDraft): string {
   const elapsed = Date.now() - d.getTime()
   if (elapsed < 0 || elapsed >= DAY)
     return formatDate(date, 'd MMM yyyy, HH:mm')
-  return formatDistanceToNow(d, { addSuffix: true, locale: getLocale() })
+  return formatDistanceToNow(d, { addSuffix: true, locale: getDateLocale() })
 }
 
-function getLocale() {
+/** The `date-fns` locale the interface is currently in. Read at call time
+ * rather than held, so a language change is one re-render away — the calendar
+ * reads it the same way this file's own formatting does. */
+export function getDateLocale() {
   return (i18n.resolvedLanguage || i18n.language) === 'ru' ? ru : en
 }
 
 export function formatDate(date: TDateDraft, template?: string): string {
-  const opts = { locale: getLocale() }
+  const opts = { locale: getDateLocale() }
   const d = parseDate(date)
   if (template) return format(d, template, opts)
   const thisYearDate = format(d, `d MMMM, EEEEEE`, opts)

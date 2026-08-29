@@ -607,11 +607,58 @@ displayed year is scoped to one opening, the way the focus target is: paging
 to another year and dismissing without choosing does not carry that year into
 the next opening.
 
+The day grid is `react-day-picker`, and it is the one control here that is not
+owned outright. What the library brings is the part that is tedious and easy to
+get subtly wrong — the month arithmetic, the roving focus the arrow keys walk
+the grid with, and the ARIA naming each cell — and none of what it brings is
+paint: its stylesheet is never loaded, every element that needs any is named
+in `Calendar`'s own `classNames`, and the three that are controls are swapped
+through `components` for `IconButton` and `ButtonBase`. An `rdp-*` class left
+in the markup is an element that needed none, and resolves to nothing.
+
+Two of its defaults are wrong here rather than merely plain. `labelDayButton`
+writes `Today, ` and `, selected` into the accessible name as English
+literals; the replacement names today in the app's own word for it and leaves
+the selection to the `aria-selected` the cell already carries. And the locale
+is the one `formatDate` reads — `getDateLocale` is now exported for it — so
+month names, weekday headers and day labels follow the language switcher
+without a provider, which is what `dateLocalization.tsx` used to be.
+
+`DatePicker` is that calendar under an `OutlinedField`, and the date can be
+typed as well as picked. The text half is deliberately not a `type="date"`
+input, because that control _is_ the browser's own calendar. What it gives up
+is segmented typing, so `parseDateInput` reads three numbers in the order the
+locale writes them whatever separates them: it accepts `3/9/27` where the
+pattern says `dd/MM/yyyy`, and rejects the 31st of a 30-day month rather than
+rolling it over into the 1st the way constructing that date would. A
+half-typed date is held as text and never reported — the field keeps the last
+whole date it had, says `invalidDate` under itself meanwhile, and reformats to
+the value it kept once focus leaves. An empty field is not yet wrong: nothing
+is being claimed by it, and blur puts the kept date back.
+
+What counts as a whole date is decided on the year. Two digits are one — `99`
+is 1999 and `26` is 2026, `strftime`'s split rather than always this century,
+because a ledger holds old records and few distant plans. Any other width is
+refused, and that is not fussiness: `toISODate` writes the year unpadded, so
+`202` — the state every keystroke of `2026` passes through — would come back
+as `202-08-15`, which `parseISO` reads as an invalid date and every
+`formatDate` throws on. Reporting one put it in the transaction and threw on
+the way out of the field.
+
+The calendar's open state goes on the popover stack through `useStackedOpen`,
+the same hook `Select` uses and for the same reason: on a phone this surface
+is a drawer, and the drawer under it is usually the transaction being edited,
+so Back has to close the calendar rather than the thing behind it. The hook
+moved out of `Select.tsx` to `historyPopovers` when the second caller arrived.
+
 Popover stories compare light/dark surface geometry, viewport-edge placement
 and the below-the-anchor centred variant against MUI. Month stories compare
-cell geometry and exercise date bounds. Dialog stories cover nested
-selects/calendars inside the owned `SideDrawer`, focus restoration, draft
-reset, and saving/removing a dated goal.
+cell geometry and exercise date bounds. Calendar stories exercise those bounds,
+the arrow keys walking the grid and the Russian caption; date picker stories
+cover typing, a date the calendar cannot land on, a year still being typed, a
+two-digit one, and picking from the calendar itself. Dialog stories cover nested selects/calendars inside the owned
+`SideDrawer`, focus restoration, draft reset, and saving/removing a dated
+goal.
 
 MUI's `Drawer` is gone from the app, modal and docked alike, and with it the
 last `.MuiDrawer-paper`. So are its list primitives — `List`, `ListItem`,
@@ -707,10 +754,12 @@ found them.
 
 MUI's `Collapse` is gone too — it was the only transition of MUI's this app
 ever used, at six call sites, every one of them `in` plus `unmountOnExit` and
-nothing else. The date pickers are gone too: transaction editing uses the
-native date control, and the grouped list opens that same bounded control in
-its existing `SmartDialog`. The native control is the smallest fit for both
-single-date interactions; no calendar overlay needs to be owned.
+nothing else. The date pickers came back rather than being replaced by
+nothing: `Calendar` and `DatePicker` are described above, and the native
+`type="date"` control they briefly stood on is gone from both call sites. It
+was the smallest fit and the wrong one — a native date control is a different
+calendar in every browser and the OS wheel on a phone, which is the one thing
+a picker here must not be.
 
 MUI's `Popover` is gone from the app. Its last four callers were the floating
 rename field, the colour picker, the tag list and the transaction filter's
@@ -822,7 +871,8 @@ select now.
 replaces, and a history-backed open state, which `Select` keeps: the open list
 goes on the popover stack, so Back closes it rather than leaving the page. The
 key is generated, because nothing opens a select by name and all the stack
-needs is that no two live selects share one.
+needs is that no two live selects share one. That is `useStackedOpen`, which
+`DatePicker` shares.
 `EnvelopeEditDialog.stories.tsx` covers the part nothing else does: that a
 picked value reaches the form.
 
