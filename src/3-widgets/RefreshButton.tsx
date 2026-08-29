@@ -1,18 +1,16 @@
 import { IconButton } from '6-shared/ui/Button'
-import type { FC } from 'react'
+import type { FC, ReactNode } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { SxProps } from '@mui/material'
-import { BottomNavigationAction } from '@mui/material'
 import { CircularProgress } from '6-shared/ui/CircularProgress'
-import Badge from '@mui/material/Badge'
 import {
   SyncIcon,
   SyncDisabledIcon,
   DoneIcon,
   WarningIcon,
-} from '6-shared/ui/Icons'
+} from '6-shared/ui/feather'
 import { Tooltip } from '6-shared/ui/Tooltip'
+import { cn } from '6-shared/ui/shadcn/utils'
 
 import { getChangedNum } from 'store/data'
 import { selectIsSyncPending, selectLastSyncResult } from 'store/sync'
@@ -24,7 +22,6 @@ type ButtonState = 'idle' | 'pending' | 'success' | 'fail'
 type RefreshButtonProps = {
   isMobile?: boolean
   className?: string
-  sx?: SxProps
 }
 
 const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
@@ -70,25 +67,36 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
   }
 
   return isMobile ? (
-    <BottomNavigationAction
-      label={t('refresh')}
-      value="refresh"
-      icon={
-        <Badge color="info" overlap="rectangular" badgeContent={changedNum}>
-          {components[state]}
-        </Badge>
-      }
+    <button
+      type="button"
+      aria-label={t('refresh')}
+      className={cn(rest.className, 'type-caption')}
       {...menuProps}
-      {...rest}
-    />
+    >
+      <SyncBadge count={changedNum}>{components[state]}</SyncBadge>
+      <span>{t('refresh')}</span>
+    </button>
   ) : (
     <Tooltip title={t('refreshData')}>
-      <Badge color="info" overlap="circular" badgeContent={changedNum}>
-        <IconButton {...menuProps} {...rest}>
+      <SyncBadge count={changedNum}>
+        <IconButton {...menuProps} className={rest.className}>
           {components[state]}
         </IconButton>
-      </Badge>
+      </SyncBadge>
     </Tooltip>
+  )
+}
+
+function SyncBadge(props: { count: number; children: ReactNode }) {
+  return (
+    <span className="relative inline-flex">
+      {props.children}
+      {props.count > 0 && (
+        <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full bg-info px-0.5 text-[0.625rem]/4 font-medium text-info-foreground">
+          {props.count > 99 ? '99+' : props.count}
+        </span>
+      )}
+    </span>
   )
 }
 

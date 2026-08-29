@@ -82,6 +82,8 @@ const CONVERTED = [
   'src/3-widgets/JournalRecoveryNotice.tsx',
   'src/3-widgets/History/RestoredOutboxNotice.tsx',
   'src/3-widgets/transaction/TransactionList/TopBar/Filter.tsx',
+  'src/3-widgets/Navigation/MobileNavigation.tsx',
+  'src/3-widgets/RefreshButton.tsx',
 ]
 
 /** The mixed barrel. It re-exports the MUI-free Feather set alongside the

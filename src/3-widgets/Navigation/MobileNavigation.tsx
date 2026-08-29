@@ -1,13 +1,12 @@
 import type { FC } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BottomNavigation, BottomNavigationAction } from '@mui/material'
 import {
   AccountBalanceIcon,
   BarChartIcon,
   SettingsIcon,
   SyncAltIcon,
-} from '6-shared/ui/Icons'
+} from '6-shared/ui/feather'
 import { useHomeBar } from '6-shared/hooks/useHomeBar'
 import RefreshButton from '3-widgets/RefreshButton'
 import { SettingsMenu, useSettingsMenu } from './SettingsMenu'
@@ -34,31 +33,41 @@ export const MobileNavigation: FC = () => {
       style={{ paddingBottom }}
     >
       <hr className="m-0 border-0 border-t border-border opacity-60" />
-      <BottomNavigation
-        value={currentRoute?.path}
-        onChange={(e, newValue) => {
-          if (newValue[0] === '/') navigate(newValue)
-        }}
-      >
+      <div className="flex min-h-14 items-stretch">
         {routes.map(route => (
-          <BottomNavigationAction
-            label={route.label}
-            value={route.path}
-            icon={route.icon}
+          <button
+            type="button"
             key={route.path}
-            className="min-w-8"
-          />
+            aria-current={currentRoute?.path === route.path ? 'page' : undefined}
+            onClick={() => navigate(route.path)}
+            className={navigationActionClass(
+              currentRoute?.path === route.path
+            )}
+          >
+            {route.icon}
+            <span className="type-caption">{route.label}</span>
+          </button>
         ))}
-        <BottomNavigationAction
-          label={t('settings')}
-          value="menu"
-          icon={<SettingsIcon />}
+        <button
+          type="button"
+          aria-label={t('settings')}
           onClick={openSettings}
-          className="min-w-8"
-        />
-        <RefreshButton isMobile={true} className="min-w-8" />
-      </BottomNavigation>
+          className={navigationActionClass(false)}
+        >
+          <SettingsIcon />
+          <span className="type-caption">{t('settings')}</span>
+        </button>
+        <RefreshButton isMobile className={navigationActionClass(false)} />
+      </div>
       <SettingsMenu showLinks />
     </nav>
   )
 }
+
+export const navigationActionClass = (selected: boolean) =>
+  [
+    'relative flex min-w-8 flex-1 flex-col items-center justify-center gap-0.5 border-0 bg-transparent px-1 py-1 font-sans text-action-active transition-colors hover:bg-accent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring',
+    selected && 'text-primary',
+  ]
+    .filter(Boolean)
+    .join(' ')
