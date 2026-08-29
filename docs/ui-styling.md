@@ -492,7 +492,7 @@ clear. `align` is the horizontal half of the same pair, and it also decides
 `--grow-origin`, since a surface grows out of the corner it hangs from — which
 is why that variable is set here rather than in the shared surface class.
 `onOpenComplete` is MUI's `slots.transition.onEntered`: the filter editor's
-`Autocomplete` measures its popper against the surface, so its options wait
+combobox measures its popup against the surface, so its options wait
 until the surface has stopped scaling.
 
 The paper itself is `anchoredSurfaceClass` in `popupSurface.ts`, next to the
@@ -616,13 +616,14 @@ transition: `Chip` in the history rows, `Link` in the receipt, and
 
 MUI's `Popover` is gone from the app. Its last four callers were the floating
 rename field, the colour picker, the tag list and the transaction filter's
-clause editor. Three of them are wholly MUI-free now; only the filter still
-holds MUI's `Autocomplete`, `Chip` and `InputBase`, so that one file keeps a
-direct MUI import and stays out of the owned list. The tag list's rows went
-with its surface, from `ListItemButton` to `ButtonBase` on `listItemClass`,
-so its keyboard tests moved off MUI's `Mui-selected` class and onto the
-`data-selected` attribute every owned row carries — the same highlight, named
-by the app rather than by MUI.
+clause editor. The filter's three multiple-value inputs are now the owned
+`MultiCombobox`: its input only narrows a fixed list, while the selected values
+remain chips that can be removed with the keyboard. That is a combobox rather
+than an autocomplete because typed text is never itself a filter value. The
+tag list's rows went with its surface, from `ListItemButton` to `ButtonBase` on
+`listItemClass`, so its keyboard tests moved off MUI's `Mui-selected` class and
+onto the `data-selected` attribute every owned row carries — the same
+highlight, named by the app rather than by MUI.
 
 `OutlinedField` is MUI's outlined text field: the notched border with the label
 cut into it. `Field.Root` from Base UI supplies the label and description

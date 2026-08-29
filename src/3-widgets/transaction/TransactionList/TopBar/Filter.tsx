@@ -2,17 +2,15 @@ import { IconButton } from '6-shared/ui/Button'
 import type { FC, MouseEvent } from 'react'
 import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-// The three `TextField`s left are Autocomplete's own input, which it hands
-// `params` to; they convert with it.
-import { Autocomplete, TextField } from '@mui/material'
 import { Chip } from '6-shared/ui/Chip'
 import { InputBase } from '6-shared/ui/InputBase'
 import { Menu, MenuItem } from '6-shared/ui/Menu'
+import { MultiCombobox } from '6-shared/ui/MultiCombobox'
 import { Popover } from '6-shared/ui/Popover'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
-import { AddIcon, CloseIcon, FilterListIcon } from '6-shared/ui/Icons'
+import { AddIcon, CloseIcon, FilterListIcon } from '6-shared/ui/feather'
 import { Tooltip } from '6-shared/ui/Tooltip'
 
 type Clause = core.transactions.TTransactionFilterClause
@@ -218,7 +216,7 @@ const Filter: FC<FilterProps> = ({
         onClose={closeEditor}
         // The editor drops out from under its chip rather than covering it.
         placement="below"
-        // `Autocomplete` measures its popper against the surface, so its
+        // The combobox measures its popup against the surface, so its
         // options wait until the surface has stopped scaling. Every path that
         // closes the editor clears the flag itself, so only the entrance
         // needs a hook here.
@@ -258,58 +256,55 @@ function FilterEditor(props: {
   switch (clause.kind) {
     case 'account':
       return (
-        <Autocomplete
-          multiple
+        <MultiCombobox
+          label={t('account')}
           open={optionsOpen}
-          onOpen={onOptionsOpen}
-          onClose={onOptionsClose}
-          disableCloseOnSelect
-          options={Object.keys(accounts)}
+          onOpenChange={open =>
+            open ? onOptionsOpen() : onOptionsClose()
+          }
+          options={Object.keys(accounts).map(value => ({
+            value,
+            label: accounts[value]?.title || value,
+          }))}
           value={clause.ids}
-          getOptionLabel={id => accounts[id]?.title || id}
-          onChange={(_, ids) => onChange({ ...clause, ids })}
-          renderInput={params => (
-            <TextField {...params} autoFocus label={t('account')} />
-          )}
+          onChange={ids => onChange({ ...clause, ids })}
+          autoFocus
         />
       )
     case 'tag':
       return (
-        <Autocomplete
-          multiple
+        <MultiCombobox
+          label={t('category')}
           open={optionsOpen}
-          onOpen={onOptionsOpen}
-          onClose={onOptionsClose}
-          disableCloseOnSelect
-          options={Object.keys(tags)}
+          onOpenChange={open =>
+            open ? onOptionsOpen() : onOptionsClose()
+          }
+          options={Object.keys(tags).map(value => ({
+            value,
+            label: tags[value]?.name || value,
+          }))}
           value={clause.ids}
-          getOptionLabel={id => tags[id]?.name || id}
-          onChange={(_, ids) => onChange({ ...clause, ids })}
-          renderInput={params => (
-            <TextField {...params} autoFocus label={t('category')} />
-          )}
+          onChange={ids => onChange({ ...clause, ids })}
+          autoFocus
         />
       )
     case 'type':
       return (
-        <Autocomplete
-          multiple
+        <MultiCombobox
+          label={t('transactionType')}
           open={optionsOpen}
-          onOpen={onOptionsOpen}
-          onClose={onOptionsClose}
-          disableCloseOnSelect
+          onOpenChange={open =>
+            open ? onOptionsOpen() : onOptionsClose()
+          }
           options={[
             core.transactions.TrFilterType.Income,
             core.transactions.TrFilterType.Outcome,
             core.transactions.TrFilterType.Transfer,
             core.transactions.TrFilterType.Debt,
-          ]}
+          ].map(value => ({ value, label: getTypeLabel(value, t) }))}
           value={clause.values}
-          getOptionLabel={value => getTypeLabel(value, t)}
-          onChange={(_, values) => onChange({ ...clause, values })}
-          renderInput={params => (
-            <TextField {...params} autoFocus label={t('transactionType')} />
-          )}
+          onChange={values => onChange({ ...clause, values })}
+          autoFocus
         />
       )
     case 'amount':
