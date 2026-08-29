@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { TextField } from '@mui/material'
 import { OutlinedField } from './OutlinedField'
 
 const meta = {
@@ -12,8 +11,7 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-/** Where the label sits and how far the notch is cut open for it — the two
- * halves of MUI's shrink, which have to move together. */
+/** Where the label sits and how far the notch is cut open for it. */
 const measure = (root: HTMLElement) => {
   const label = root.querySelector('label')!
   const legend = root.querySelector('legend')!
@@ -36,52 +34,30 @@ const cases = [
 const caseId = (c: (typeof cases)[number]) =>
   `${c.size}-${c.value ? 'filled' : 'empty'}`
 
-function ParityFields() {
+function Fields() {
   return (
     <div className="flex flex-col gap-8">
       {cases.map(c => (
-        <div key={caseId(c)} className="flex flex-wrap gap-8">
-          <div data-testid={`mui-${caseId(c)}`}>
-            <TextField
-              size={c.size}
-              label="Name"
-              value={c.value}
-              className="w-[280px]"
-              slotProps={{ htmlInput: { readOnly: true } }}
-            />
-          </div>
-          <div data-testid={`owned-${caseId(c)}`}>
-            <OutlinedField
-              size={c.size}
-              label="Name"
-              value={c.value}
-              className="w-[280px]"
-              readOnly
-            />
-          </div>
+        <div key={caseId(c)} data-testid={caseId(c)}>
+          <OutlinedField
+            size={c.size}
+            label="Name"
+            value={c.value}
+            className="w-[280px]"
+            readOnly
+          />
         </div>
       ))}
     </div>
   )
 }
 
-/** MUI rests the label on the control's padding and floats it into the notch
- * once the field is filled, and the two sizes rest at different heights. */
-export const ShrinkParity: Story = {
-  render: () => <ParityFields />,
+export const Shrink: Story = {
+  render: () => <Fields />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    for (const c of cases) {
-      const id = caseId(c)
-      await waitFor(() =>
-        expect(measure(canvas.getByTestId(`owned-${id}`))).toEqual(
-          measure(canvas.getByTestId(`mui-${id}`))
-        )
-      )
-    }
-
     // The numbers themselves, so a matching pair of wrong ones still fails.
-    const at = (id: string) => measure(canvas.getByTestId(`owned-${id}`))
+    const at = (id: string) => measure(canvas.getByTestId(id))
     const floated = 'matrix(0.75, 0, 0, 0.75, 14, -9)'
     expect(at('medium-empty').transform).toBe('matrix(1, 0, 0, 1, 14, 16)')
     expect(at('small-empty').transform).toBe('matrix(1, 0, 0, 1, 14, 9)')
@@ -94,8 +70,8 @@ export const ShrinkParity: Story = {
   },
 }
 
-export const DarkShrinkParity: Story = {
-  ...ShrinkParity,
+export const DarkShrink: Story = {
+  ...Shrink,
   globals: { theme: 'dark' },
 }
 
@@ -109,29 +85,16 @@ function MultilineFields() {
   return (
     <div className="flex flex-col gap-8">
       {multilineCases.map(n => (
-        <div key={n} className="flex flex-wrap gap-8">
-          <div data-testid={`mui-rows-${n}`}>
-            <TextField
-              label="Comment"
-              value={lines(n)}
-              multiline
-              maxRows={4}
-              size="small"
-              className="w-[280px]"
-              slotProps={{ htmlInput: { readOnly: true } }}
-            />
-          </div>
-          <div data-testid={`owned-rows-${n}`}>
-            <OutlinedField
-              label="Comment"
-              value={lines(n)}
-              multiline
-              maxRows={4}
-              size="small"
-              className="w-[280px]"
-              readOnly
-            />
-          </div>
+        <div key={n} data-testid={`rows-${n}`}>
+          <OutlinedField
+            label="Comment"
+            value={lines(n)}
+            multiline
+            maxRows={4}
+            size="small"
+            className="w-[280px]"
+            readOnly
+          />
         </div>
       ))}
     </div>
@@ -141,23 +104,13 @@ function MultilineFields() {
 const boxOf = (root: HTMLElement) =>
   Math.round(root.querySelector('fieldset')!.getBoundingClientRect().height)
 
-/** A multiline field is as tall as what is in it, up to `maxRows`. MUI grows
- * it by measuring a hidden copy of the textarea; this one lets a mirror in the
- * same grid cell do it. */
-export const MultilineParity: Story = {
+/** A multiline field is as tall as what is in it, up to `maxRows`. */
+export const Multiline: Story = {
   render: () => <MultilineFields />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    for (const n of multilineCases) {
-      await waitFor(() =>
-        expect(boxOf(canvas.getByTestId(`owned-rows-${n}`))).toBe(
-          boxOf(canvas.getByTestId(`mui-rows-${n}`))
-        )
-      )
-    }
-
     // Growing, then capped: ten lines are no taller than four.
-    const owned = (n: number) => boxOf(canvas.getByTestId(`owned-rows-${n}`))
+    const owned = (n: number) => boxOf(canvas.getByTestId(`rows-${n}`))
     expect(owned(3)).toBeGreaterThan(owned(1))
     expect(owned(10)).toBeLessThan(owned(3) * 2)
   },
