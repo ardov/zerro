@@ -110,9 +110,7 @@ function ThemeFoundation() {
           <h2 id="shape-heading" className="text-lg font-medium">
             Shape and typography
           </h2>
-          <p>
-            IBM Plex Sans · radius {String(radius)}px · Tailwind radius-lg
-          </p>
+          <p>IBM Plex Sans · radius {String(radius)}px · Tailwind radius-lg</p>
           <div className="h-12 rounded-lg border border-border bg-muted" />
         </section>
       </div>

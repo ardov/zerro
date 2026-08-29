@@ -26,7 +26,9 @@ function ThemeCatalog() {
       <Logo fill={theme.palette.primary.main} width={220} />
       <section>
         <h1 className="type-display font-sans">Typography</h1>
-        <h2 className="type-title font-sans">Envelope budgeting with clarity</h2>
+        <h2 className="type-title font-sans">
+          Envelope budgeting with clarity
+        </h2>
         <p className="type-body font-sans text-muted-foreground">
           Long labels, secondary text and monetary values should remain legible.
         </p>
