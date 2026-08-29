@@ -19,7 +19,6 @@ export default defineConfig({
       'clsx',
       'tailwind-merge',
       '@dnd-kit/core',
-      '@mui/material/Dialog',
       'formik',
       'react-wrap-balancer',
       'recharts',
