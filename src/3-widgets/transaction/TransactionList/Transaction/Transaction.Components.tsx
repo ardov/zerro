@@ -1,8 +1,8 @@
 import type { TTransaction } from '6-shared/types'
-import type { FC } from 'react'
+import type { FC, ReactNode } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import styled from '@emotion/styled'
+import { cn } from '6-shared/ui/shadcn/utils'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppSelector } from 'store'
@@ -282,91 +282,74 @@ const Payee: FC<{
 
 /** Styles */
 
-const SymbolWrapper = styled.div`
-  flex-shrink: 0;
-  position: relative;
-  align-self: center;
-`
-const NewIndicator = styled.div<{ viewed?: boolean }>`
-  position: absolute;
-  left: -2px;
-  top: -1px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: ${p => p.theme.palette.error.main};
-  border: solid 2px ${p => p.theme.palette.background.paper};
-  transform: scale(${p => (p.viewed ? 0 : 1)});
-  opacity: ${p => (p.viewed ? 0 : 1)};
-  transition: 200ms;
-`
-const Reciept = styled.div`
-  font-size: ${16 / 16}rem;
-  text-shadow: 0 0 2px ${p => p.theme.palette.background.paper};
-  color: black;
-  position: absolute;
-  right: -6px;
-  bottom: -3px;
-`
+const SymbolWrapper: FC<HTMLDivProps> = props => (
+  <div {...props} className="relative shrink-0 self-center" />
+)
 
-const TagsWrapper = styled.div`
-  > :not(:first-of-type) {
-    margin-left: 8px;
-    color: ${p => p.theme.palette.text.disabled};
-  }
-`
-const NoCategory = styled.span`
-  color: ${p => p.theme.palette.error.main};
-`
+/** The dot on a transaction nobody has looked at yet. It is scaled away
+ * rather than unmounted, so that viewing one is animated. */
+const NewIndicator: FC<{ viewed?: boolean }> = ({ viewed }) => (
+  <div
+    className={cn(
+      'absolute -top-px -left-0.5 h-3 w-3 scale-100 rounded-full border-2 border-solid border-card bg-error opacity-100 transition-all duration-200',
+      viewed && 'scale-0 opacity-0'
+    )}
+  />
+)
 
-const AmountsWrapper = styled.div<{
-  type: 'income' | 'outcome' | 'transfer'
-}>`
-  color: ${p =>
-    p.type === 'income'
-      ? p.theme.palette.success.main
-      : p.type === 'transfer'
-        ? p.theme.palette.text.secondary
-        : p.theme.palette.text.primary};
+/* `text-[1rem]`, not `text-base`: the named size carries a line height with
+   it, and this only ever set the size. */
+const Reciept: FC<{ children: ReactNode }> = ({ children }) => (
+  <div className="absolute -right-1.5 -bottom-[3px] text-[1rem] text-black [text-shadow:0_0_2px_var(--card)]">
+    {children}
+  </div>
+)
 
-  [color='textSecondary'] &[type='transfer'] {
-    max-width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
+const TagsWrapper: FC<HTMLDivProps> = ({ className, ...props }) => (
+  <div
+    {...props}
+    className={cn(
+      '[&>:not(:first-of-type)]:ml-2 [&>:not(:first-of-type)]:text-disabled-foreground',
+      className
+    )}
+  />
+)
 
-  > :not(:first-of-type):before {
-    content: '${p => (p.type === 'transfer' ? '→' : '')}';
-    margin: 0 4px;
-  }
-`
+const NoCategory: FC<{ children: ReactNode }> = ({ children }) => (
+  <span className="text-error">{children}</span>
+)
 
-const InfoWrapper = styled.div`
-  > :not(:first-of-type) {
-    margin-left: 8px;
-  }
-`
+const amountColors = {
+  income: 'text-success',
+  transfer: 'text-muted-foreground',
+  outcome: 'text-foreground',
+}
 
-const PayeeWrapper = styled.span`
-  position: relative;
+/** The amounts and, on a transfer, the arrow between them. `data-type` is what
+ * `Transaction.css` puts that arrow in; it was a `type` attribute, which is
+ * not one a `div` has. */
+const AmountsWrapper: FC<
+  HTMLDivProps & { type: 'income' | 'outcome' | 'transfer' }
+> = ({ type, className, ...props }) => (
+  <div
+    {...props}
+    data-type={type}
+    className={cn('transaction-amounts', amountColors[type], className)}
+  />
+)
 
-  :hover {
-    color: ${p => p.theme.palette.text.primary};
-  }
-  ::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background-color: currentColor;
-    opacity: 0.2;
-    z-index: 2;
-    transition: 0.16s;
-  }
-`
+const InfoWrapper: FC<HTMLDivProps> = props => (
+  <div {...props} className="[&>:not(:first-of-type)]:ml-2" />
+)
+
+/** A payee, underlined by a rule of its own rather than by
+ * `text-decoration`, so that it can be fainter than the text above it. */
+const PayeeWrapper: FC<React.HTMLAttributes<HTMLSpanElement>> = props => (
+  <span
+    {...props}
+    className="relative hover:text-foreground after:absolute after:inset-x-0 after:bottom-0 after:z-[2] after:h-px after:bg-current after:opacity-20 after:transition-all after:duration-150 after:content-['']"
+  />
+)
 type ExchangeRateProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
   HTMLDivElement

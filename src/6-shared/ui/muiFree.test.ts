@@ -90,6 +90,9 @@ const CONVERTED = [
   'src/2-pages/Budgets/EnvelopeTable/Header/ToBeAssigned.tsx',
   'src/2-pages/Stats/WidgetCashflow/WidgetCashflow.tsx',
   'src/6-shared/ui/ColorPickerPopover/colors.ts',
+  'src/3-widgets/transaction/TransactionList/Transaction/Transaction.tsx',
+  'src/3-widgets/transaction/TransactionList/Transaction/Transaction.Components.tsx',
+  'src/3-widgets/transaction/TransactionPreview/Map.tsx',
 ]
 
 /** The mixed barrel. It re-exports the MUI-free Feather set alongside the

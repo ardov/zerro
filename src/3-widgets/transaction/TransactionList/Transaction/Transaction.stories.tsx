@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { ComponentProps } from 'react'
-import { Typography } from '@mui/material'
 import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 import { Transaction } from './Transaction'
@@ -30,9 +29,9 @@ export const Showcase: Story = {
     const ids = Object.keys(transactions).slice(0, 8)
     return (
       <div className="flex w-[560px] max-w-full flex-col gap-1">
-        <Typography variant="caption" color="text.secondary">
+        <p className="m-0 type-caption text-muted-foreground">
           Generated demo operations
-        </Typography>
+        </p>
         {ids.map((id, index) => (
           <Transaction
             key={id}

@@ -88,6 +88,7 @@ export default function Auth() {
         <div className="auth-reveal mt-4" style={reveal(3000)}>
           <Button
             render={<RouterLink to="/about" />}
+            nativeButton={false}
             variant="text"
             color="primary"
             size="large"
