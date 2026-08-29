@@ -1,9 +1,9 @@
 # UI styling compatibility
 
-The application is styled with Tailwind utilities over its own palette. Neither
-MUI nor Emotion is reachable from it any more: `src/muiFree.test.ts` walks the
-whole module graph from `src/index.tsx` and fails on the first `@mui/*` or
-`@emotion/*` specifier it finds, naming the import chain that reached it.
+The application is styled with Tailwind utilities over its own palette.
+`src/muiFree.test.ts` scans application and development-tooling source trees
+for `@mui/*` and `@emotion/*` specifiers and verifies that neither dependency
+is declared in `package.json`.
 
 `public/theme-init.js` resolves the system or stored scheme as a blocking head
 script, before React and before the first paint. It owns the root `dark` class,
@@ -13,62 +13,41 @@ the current page without breaking rendering. The React hook only subscribes to
 that manager. Storybook loads the same manager but pins its selected scheme in
 a local provider, so changing a story never writes an application preference.
 
-Storybook is where MUI still runs. The parity stories compare an owned component
-against the MUI one it replaced, so `.storybook/StoryProviders.tsx` mounts two
-things the application does not: `theme/storyTheme.ts`, the MUI theme the app
-used to be built on — an unthemed MUI component renders Roboto on a 4px radius,
-and every comparison would fail for a reason that is not the component's — and
-`StyledEngineProvider`, described below. Both sit there rather than in
-`1-app/Providers.tsx` so that nothing the application ships can reach them.
+Storybook uses the same application providers, router, popover manager, locale,
+and selected color scheme as the app. Its stories are owned-component previews
+and behavior checks rather than geometry comparisons against a legacy library.
 
 ## Cascade
 
 The layer order is declared in the Tailwind entry point:
 
 ```css
-@layer theme, base, mui, components, utilities;
+@layer theme, base, components, utilities;
 ```
 
 That statement is the intent, not literally what the browser registers. Vite
 splits the CSS into chunks, and `dist/index.html` links the one holding
 `styles.scss` — that is, `@layer base` — before the Tailwind chunk, so `base`
 is registered before the statement is ever parsed. The order the built app
-actually gets is `base, components, properties, theme, mui, utilities`. Only
+actually gets is `base, components, properties, theme, utilities`. Only
 the last position is load-bearing and it survives: `utilities` stays last, so
 a Tailwind utility still beats the reset without `!important`. The rest is
-inert while the application has no `mui` rules and `theme` holds only
-variables. `1-app/Providers.tsx` used to pin the declared order at runtime,
-through a MUI `GlobalStyles` that `injectFirst` put ahead of every stylesheet;
-that went with MUI, and nothing replaced it, because there is nothing left for
-it to order. Reintroducing a layered stylesheet means checking this again.
-
-`mui` is still named there because Storybook loads the same stylesheet. In
-Storybook the order is declared a second time, through Emotion's own cache,
-because `injectFirst` puts that cache ahead of `tailwind.css` and the first
-stylesheet to name a layer fixes its position. `StyledEngineProvider` also
-carries `enableCssLayer`, and that is the part `injectFirst` cannot replace:
-unlayered MUI declarations override layered Tailwind utilities regardless of
-insertion order, so without it no comparison would be against a fairly styled
-MUI component. Components and portals share the provider, so utilities override
-MUI defaults without `!important`.
+inert while `theme` holds only variables. Reintroducing a layered stylesheet
+means checking this order again.
 
 Tailwind Preflight is disabled and MUI's `CssBaseline` is gone, so
 `src/6-shared/ui/theme/styles.scss` is the document's entire reset: what is not
 declared there is not reset anywhere. It carries what `CssBaseline` did — the
 `box-sizing` inheritance, font smoothing, `text-size-adjust`, `strong`/`b` at
 weight 700, and a `body` with no margin, the page's colours and `body1`'s type —
-and it stays in the `base` layer, which is earlier than `mui`. The application
-has no MUI rules left for that to matter to; Storybook does, and it is what
-keeps `.MuiInputBase-input`'s `content-box` from being overridden into
-collapsing every reference text field. `color-scheme` is the one value `enableColorScheme`
-used to derive from the palette: the head script sets it together with the same
+and it stays in the `base` layer. The head script sets `color-scheme` together
+with the same
 `dark` class the Tailwind variant uses, so the two cannot disagree about which
 scheme the page is in.
 
 Every co-located component stylesheet wraps its rules in `@layer components`.
-An unlayered rule outranks the whole `mui` layer, and a stylesheet that is the
-first to declare a layer name registers that layer's position, so unlayered or
-ad-hoc-layer CSS makes the order depend on module load order.
+A stylesheet that is the first to declare a layer name registers that layer's
+position, so ad-hoc-layer CSS makes the order depend on module load order.
 
 `components` is an earlier layer than `utilities`, so a rule in a co-located
 stylesheet cannot outrank a Tailwind utility however specific it is. Whenever a
@@ -913,14 +892,9 @@ The directory is `feather/`, not `icons/`: `icons` and `Icons.tsx` are the same
 path on a case-insensitive filesystem, and the two would resolve to different
 modules on macOS and on CI.
 
-Base UI is roughly 40-65 kB gzipped, and the application's graph now contains
-only it. `@mui/material`, `@emotion/react` and `@emotion/styled` are
-devDependencies, which is what they are: nothing but Storybook's parity stories
-builds against them. `@mui/icons-material`, `@mui/system` and
-`@mui/x-date-pickers` had no importer left at all and are uninstalled, and the
-`@base-ui/utils` `pnpm.overrides` entry went with them — `@base-ui/react` pins
-that version itself, so the override only ever mattered while a second MUI
-package asked for another one.
+Base UI is roughly 40-65 kB gzipped, and it is the application's only UI
+primitive dependency. MUI, Emotion, and the former parity-only packages are not
+declared in the project.
 
 Assignment dismissal via Escape/backdrop/swipe applies the draft, as do Enter,
 the submit button and quick actions. An unchanged value emits no command.
@@ -928,24 +902,15 @@ Browser Back changes history without invoking that apply callback; Forward
 restores the retained draft. Expression parsing and financial calculations are
 unchanged.
 
-The AmountInput stories compare outlined-field geometry and computed styles
-against MUI in both sizes and themes. They cannot cover hover, because
-synthetic pointer events do not set CSS `:hover`; the border's state
-precedence and its weights are pinned by `OutlinedField.test.ts` instead. The
-parity matrix uses a plain currency symbol for its adornment, which cannot tell
-input focus and `:focus-within` apart, so `AdornmentButtonFocus` runs the same
-comparison with a focusable adornment and checks the border against MUI on both
-sides of a Tab. AdaptivePopover and
-assignment stories cover dismissal, focus, scroll lock, keyboard/typeahead,
-899/900px behavior, synthetic touch swipe, nested MUI drawers, history and
-foreign-currency helper text. Existing dialog/transaction stories exercise the shared input's callers;
-settings stories cover a MUI confirmation above the new overlay.
+The AmountInput stories cover parsing, commit behavior, size variants, and a
+focusable adornment. Synthetic pointer events do not set CSS `:hover`, so the
+border state precedence and weights are pinned by `OutlinedField.test.ts`.
+AdaptivePopover and assignment stories cover dismissal, focus, scroll lock,
+keyboard/typeahead, 899/900px behavior, synthetic touch swipe, nested drawers,
+history and foreign-currency helper text.
 
 ### Static compatibility
 
-`stories/foundation/MuiTailwindInterop.stories.tsx` checks actual computed styles
-for MUI/Tailwind coexistence, typography recipes, static Paper surfaces, icon
-centering, and budget row alignment.
 `ActivityStats.stories.tsx` checks the real income, expense, and transfer cards
 with deterministic data in both themes.
 The `ButtonTypography` story checks that a recipe inside a `ButtonBase` keeps
@@ -955,18 +920,9 @@ checks that a converted paragraph resets its user agent margins.
 against `text-muted-foreground` and `text-error` in both themes.
 `InheritedWeight` checks that a recipe inside a `font-medium` container keeps
 the weight its MUI variant declares.
-The typography matrix compares every implemented recipe against its themed MUI
-Typography variant in light and dark mode. Dedicated 899px and 900px stories
-check both sides of the `md` breakpoint; the surface matrix compares default,
-square, outlined, and elevation-10 contracts in both themes.
+Dedicated 899px and 900px stories check both sides of the `md` breakpoint; the
+surface stories cover the app's supported static variants in both themes.
 
 Run these with `pnpm test:storybook`. Rendering a story or passing TypeScript
-alone does not establish visual parity; affected application routes also need
+alone does not establish behavior; affected application routes also need
 desktop/mobile and interaction checks.
-
-`tools/ui-parity` compares a running route against the same route served from a
-worktree of the last pre-Tailwind commit, over every text run and painted box on
-the page. Stories cover contracts that are known; the harness is what finds the
-properties nobody thought to check.
-
-See the [MUI Tailwind v4 integration guide](https://mui.com/material-ui/integrations/tailwindcss/tailwindcss-v4/).
