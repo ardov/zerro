@@ -15,8 +15,19 @@ before Emotion's rules and in the Tailwind entry point:
 `injectFirst` alone is insufficient: unlayered MUI declarations override layered
 Tailwind utilities regardless of stylesheet insertion order. Components and
 portals use the same provider so utilities override MUI defaults without
-`!important`. Tailwind Preflight remains disabled; MUI `CssBaseline` supplies
-the reset.
+`!important`.
+
+Tailwind Preflight is disabled and MUI's `CssBaseline` is gone, so
+`src/6-shared/ui/theme/styles.scss` is the document's entire reset: what is not
+declared there is not reset anywhere. It carries what `CssBaseline` did — the
+`box-sizing` inheritance, font smoothing, `text-size-adjust`, `strong`/`b` at
+weight 700, and a `body` with no margin, the page's colours and `body1`'s type —
+and it stays in the `base` layer so any MUI rule that remains still wins, which
+is what keeps `.MuiInputBase-input`'s `content-box` from being overridden into
+collapsing every text field. `color-scheme` is the one value `enableColorScheme`
+used to derive from the palette: it now keys off the same `dark` class the
+Tailwind variant does, so the two cannot disagree about which scheme the page is
+in.
 
 Every co-located component stylesheet wraps its rules in `@layer components`.
 An unlayered rule outranks the whole `mui` layer, and a stylesheet that is the

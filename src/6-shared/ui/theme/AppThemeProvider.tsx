@@ -2,7 +2,6 @@ import type { FC } from 'react'
 import React from 'react'
 import { useLayoutEffect } from 'react'
 import { Global, css } from '@emotion/react'
-import CssBaseline from '@mui/material/CssBaseline'
 import type { Theme } from '@mui/material/styles'
 import { ThemeProvider, alpha } from '@mui/material/styles'
 import type { ThemeProviderProps } from '@mui/material/styles'
@@ -194,7 +193,6 @@ const WithTheme: FC = () => {
   return (
     <>
       <meta name="theme-color" content={theme.palette.background.paper} />
-      <CssBaseline enableColorScheme />
       <GlobalVariables theme={theme} />
     </>
   )
