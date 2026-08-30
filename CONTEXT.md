@@ -15,6 +15,20 @@ _Avoid_: Server cache, raw data
 The canonical state together with the root user's unsent command outbox.
 _Avoid_: Local database, account cache
 
+**Backup**:
+A complete file exported by Zerro from canonical state.
+_Avoid_: Export file, snapshot
+
+**Restore**:
+Setting the replica to the state described by a backup or a retained history
+point through an undoable command.
+_Avoid_: Import, migration
+
+**Foreign backup**:
+A complete backup whose root user differs from the signed-in root user. It is
+importable, but user-owned entities are rebuilt with new identifiers.
+_Avoid_: Foreign import, migration
+
 **Canonical journal**:
 The retained linear history of canonical states, beginning at a checkpoint and
 continuing through server transitions.

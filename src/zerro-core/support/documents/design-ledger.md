@@ -291,8 +291,12 @@ settled rules:
 - Export reads `state.data.base`, so pending local commands are never part of a
   backup. When the outbox is not empty, export says so and lets the user cancel
   or download anyway; it never triggers a sync to make the file complete.
-- Import is same-account only. Cross-account migration is a separate feature and
-  must never be inferred from a structurally valid file.
+- A complete backup whose root user differs from the signed-in root user is a
+  foreign backup, not an incompatibility. Compatibility reports it as
+  `{ ok: true, foreign: true }`, and the confirmation warns that accounts,
+  categories, and merchants will be created anew with new identifiers. The
+  restore remains one ordinary undoable command in the outbox; a structurally
+  valid foreign backup is never silently imported.
 - Read-only dictionaries — `instrument`, `country`, `company` — are validated
   but never written, and user billing and subscription fields are never
   restored.

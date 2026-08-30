@@ -6,14 +6,16 @@ import {
 } from '../../domain/zenmoney'
 
 export type TBackupCompatibilityResult =
-  | { ok: true }
+  | { ok: true; foreign: boolean }
   | { ok: false; reason: 'incompatibleBackup' | 'invalidCurrentState' }
 
 /**
  * Checks whether a structurally valid full backup can be restored into this
  * account. It deliberately does not compare writable data: restore is meant
- * to change that data. Read-only dictionary identities and root identity must
- * already exist locally instead of being silently adopted from another user.
+ * to change that data. Read-only dictionary identities must already exist
+ * locally instead of being silently adopted from another user. A root-user
+ * mismatch is reported as a foreign backup rather than a compatibility
+ * failure.
  */
 export function checkBackupCompatibility(
   current: TDataStore,
@@ -35,7 +37,10 @@ export function checkBackupCompatibility(
 
   const currentRoot = getRootUser(current.user)
   const backupRoot = getRootUser(backup.user)
-  if (!currentRoot || !backupRoot || currentRoot.id !== backupRoot.id) {
+  if (!currentRoot) {
+    return { ok: false, reason: 'invalidCurrentState' }
+  }
+  if (!backupRoot) {
     return { ok: false, reason: 'incompatibleBackup' }
   }
 
@@ -79,5 +84,5 @@ export function checkBackupCompatibility(
     return { ok: false, reason: 'incompatibleBackup' }
   }
 
-  return { ok: true }
+  return { ok: true, foreign: currentRoot.id !== backupRoot.id }
 }

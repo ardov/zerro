@@ -33,6 +33,7 @@ import {
 type TPending = {
   store: TDataStore
   summary: core.restore.TStoreDiffSummary
+  foreign: boolean
 }
 
 /**
@@ -102,7 +103,11 @@ export function ImportBackupItem() {
         snackbar({ message: t('importNoChanges') })
         return
       }
-      setPending({ store: parsed.store, summary })
+      setPending({
+        store: parsed.store,
+        summary,
+        foreign: compatibility.foreign,
+      })
     },
     [confirmReload, dispatch, snackbar, t]
   )
@@ -144,6 +149,14 @@ export function ImportBackupItem() {
       <Dialog open={!!pending} onClose={() => setPending(null)}>
         <DialogTitle>{t('importTitle')}</DialogTitle>
         <DialogContent>
+          {pending?.foreign && (
+            <div
+              role="alert"
+              className="mb-4 rounded-lg border border-error-outline bg-error-light p-3"
+            >
+              <p className="m-0 type-body-sm">{t('importForeignWarning')}</p>
+            </div>
+          )}
           <DialogContentText>{t('importWarning')}</DialogContentText>
           <div className="mt-4 flex flex-col gap-1">
             {entityLabelKeys.map(([key, labelKey]) => {

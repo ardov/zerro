@@ -21,7 +21,8 @@ import {
   previewBackup,
 } from './importBackup'
 
-vi.mock('6-shared/analytics', () => ({ track: () => {} }))
+const { trackMock } = vi.hoisted(() => ({ trackMock: vi.fn() }))
+vi.mock('6-shared/analytics', () => ({ track: trackMock }))
 
 const RESTORE_UUID = 'fresh-restore-id'
 vi.mock('uuid', () => ({ v1: () => RESTORE_UUID }))
@@ -41,7 +42,10 @@ const backupCollectionKeys = [
   'transaction',
 ]
 
-function makeSnapshot(patch: Partial<TDataStore> = {}): TDataStore {
+function makeSnapshot(
+  patch: Partial<TDataStore> = {},
+  debtId = 'debt'
+): TDataStore {
   const { account, ...rest } = patch
   return makeStore({
     instrument: {
@@ -54,7 +58,11 @@ function makeSnapshot(patch: Partial<TDataStore> = {}): TDataStore {
     user: { 1: rootUser },
     ...rest,
     account: {
-      debt: makeAccount({ id: 'debt', type: AccountType.Debt, title: 'Debt' }),
+      [debtId]: makeAccount({
+        id: debtId,
+        type: AccountType.Debt,
+        title: 'Debt',
+      }),
       ...(account ?? {}),
     },
   })
@@ -355,23 +363,61 @@ describe('importBackup', () => {
     expect(runner.commands()).toHaveLength(2)
   })
 
-  it('rejects a structurally valid backup from another account', () => {
-    const foreign = makeSnapshot({
-      user: {
-        2: makeUser({ id: 2, parent: null, currency: 2 }),
+  it('imports a structurally valid backup from another account', () => {
+    const foreign = makeSnapshot(
+      {
+        user: {
+          2: makeUser({ id: 2, parent: null, currency: 2 }),
+        },
+        account: {
+          cash: makeAccount({ id: 'backupCash', title: 'Cash' }),
+        },
+        transaction: {
+          debtTransfer: makeTransaction({
+            id: 'debtTransfer',
+            incomeAccount: 'debt',
+            outcomeAccount: 'backupCash',
+            income: 25,
+            outcome: 25,
+          }),
+        },
       },
-    })
-    const runner = makeThunkRunner(makeTestRootState(drifted))
+      'debt'
+    )
+    const current = makeSnapshot(
+      {
+        account: {
+          cash: makeAccount({ id: 'currentCash', title: 'Old cash' }),
+        },
+      },
+      'currentDebt'
+    )
+    const runner = makeThunkRunner(makeTestRootState(current))
 
     expect(runner.dispatch(checkBackupCompatibility(foreign))).toEqual({
-      ok: false,
-      reason: 'incompatibleBackup',
+      ok: true,
+      foreign: true,
     })
     expect(runner.dispatch(importBackup(foreign))).toEqual({
-      ok: false,
-      reason: 'incompatibleBackup',
+      ok: true,
+      applied: true,
     })
-    expect(runner.commands()).toEqual([])
+    expect(runner.commands()).toHaveLength(1)
+    expect(runner.state().data.current.account.currentDebt).toBeDefined()
+    expect(runner.state().data.current.account[RESTORE_UUID]).toMatchObject({
+      title: 'Cash',
+    })
+    expect(runner.state().data.current.transaction[RESTORE_UUID]).toMatchObject(
+      {
+        incomeAccount: 'currentDebt',
+        outcomeAccount: RESTORE_UUID,
+        income: 25,
+        outcome: 25,
+      }
+    )
+    expect(trackMock).toHaveBeenLastCalledWith('data_backup_imported', {
+      foreign: true,
+    })
   })
 
   it('restores root-user currency when its instrument is available locally', () => {
@@ -384,6 +430,7 @@ describe('importBackup', () => {
 
     expect(runner.dispatch(checkBackupCompatibility(currencyBackup))).toEqual({
       ok: true,
+      foreign: false,
     })
     expect(runner.dispatch(importBackup(currencyBackup))).toEqual({
       ok: true,

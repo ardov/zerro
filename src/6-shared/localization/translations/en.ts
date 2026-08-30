@@ -468,6 +468,8 @@ export const en: typeof ru = {
     exportPendingConfirm: 'Download anyway',
     restoreFromBackup: 'Restore from backup',
     importTitle: 'Restore from backup',
+    importForeignWarning:
+      'This file is from another account. Accounts, categories and merchants will be created anew with new identifiers.',
     importWarning:
       'Your data will be set to what the file describes. Anything changed since the backup is overwritten. The change goes to the queue, so you can undo it before syncing.',
     importCreated: 'create {{n}}',
@@ -480,7 +482,7 @@ export const en: typeof ru = {
     importError_unreadable: 'Could not read the file',
     importError_notABackup: 'This does not look like a Zerro backup',
     importError_incompatibleBackup:
-      'This backup belongs to a different account or needs unavailable reference data',
+      'This backup needs reference data that is not available in your account',
     invalidCurrentStateTitle: 'Local data cannot be restored safely',
     invalidCurrentStateDescription:
       'Your local data is inconsistent. Reloading data will discard unsynchronized changes and local history, then download the canonical state again.',

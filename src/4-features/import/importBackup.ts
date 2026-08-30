@@ -45,7 +45,7 @@ export function importBackup(
 
     const applied = dispatch(core.restore.apply(backup))
     if (applied) {
-      track('data_backup_imported', {})
+      track('data_backup_imported', { foreign: compatibility.foreign })
     }
     return { ok: true, applied }
   }
