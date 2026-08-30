@@ -367,14 +367,27 @@ describe('importBackup', () => {
     const foreign = makeSnapshot(
       {
         user: {
-          2: makeUser({ id: 2, parent: null, currency: 2 }),
+          2: makeUser({
+            id: 2,
+            parent: null,
+            currency: 1,
+            monthStartDay: 15,
+            paidTill: 999,
+            subscription: 'foreign-plan',
+            subscriptionRenewalDate: 'foreign-date',
+          }),
         },
         account: {
-          cash: makeAccount({ id: 'backupCash', title: 'Cash' }),
+          cash: makeAccount({
+            id: 'backupCash',
+            title: 'Cash',
+            user: 2,
+          }),
         },
         transaction: {
           debtTransfer: makeTransaction({
             id: 'debtTransfer',
+            user: 2,
             incomeAccount: 'debt',
             outcomeAccount: 'backupCash',
             income: 25,
@@ -386,6 +399,17 @@ describe('importBackup', () => {
     )
     const current = makeSnapshot(
       {
+        user: {
+          1: makeUser({
+            id: 1,
+            parent: null,
+            currency: 2,
+            monthStartDay: 1,
+            paidTill: 123,
+            subscription: 'current-plan',
+            subscriptionRenewalDate: 'current-date',
+          }),
+        },
         account: {
           cash: makeAccount({ id: 'currentCash', title: 'Old cash' }),
         },
@@ -403,12 +427,33 @@ describe('importBackup', () => {
       applied: true,
     })
     expect(runner.commands()).toHaveLength(1)
+    expect(runner.commands()[0]).toEqual(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          patch: expect.objectContaining({
+            user: [{ id: 1, currency: 1, monthStartDay: 15 }],
+          }),
+        }),
+      })
+    )
+    expect(runner.state().data.current.user).toEqual({
+      1: expect.objectContaining({
+        id: 1,
+        currency: 1,
+        monthStartDay: 15,
+        paidTill: 123,
+        subscription: 'current-plan',
+        subscriptionRenewalDate: 'current-date',
+      }),
+    })
     expect(runner.state().data.current.account.currentDebt).toBeDefined()
     expect(runner.state().data.current.account[RESTORE_UUID]).toMatchObject({
       title: 'Cash',
+      user: 1,
     })
     expect(runner.state().data.current.transaction[RESTORE_UUID]).toMatchObject(
       {
+        user: 1,
         incomeAccount: 'currentDebt',
         outcomeAccount: RESTORE_UUID,
         income: 25,
@@ -420,10 +465,15 @@ describe('importBackup', () => {
     })
   })
 
-  it('restores root-user currency when its instrument is available locally', () => {
+  it('restores root-user currency and month start when available locally', () => {
     const currencyBackup = makeSnapshot({
       user: {
-        1: makeUser({ id: 1, parent: null, currency: 1 }),
+        1: makeUser({
+          id: 1,
+          parent: null,
+          currency: 1,
+          monthStartDay: 15,
+        }),
       },
     })
     const runner = makeThunkRunner(makeTestRootState(makeSnapshot()))
@@ -437,6 +487,7 @@ describe('importBackup', () => {
       applied: true,
     })
     expect(runner.state().data.current.user[1].currency).toBe(1)
+    expect(runner.state().data.current.user[1].monthStartDay).toBe(15)
   })
 
   it('rejects a backup that needs a missing read-only instrument', () => {

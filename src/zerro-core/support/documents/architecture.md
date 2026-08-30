@@ -55,21 +55,25 @@ type Command = {
 }
 
 type IntentPatch = {
+  user?: UserPatch[]
   account?: AccountPatch[]
   merchant?: MerchantPatch[]
   tag?: TagPatch[]
   budget?: BudgetPatch[]
   reminder?: ReminderPatch[]
+  reminderMarker?: ReminderMarkerPatch[]
   transaction?: TransactionPatch[]
   deletion?: DeleteIntent[]
 }
 ```
 
 This list is closed. Reference and server-owned families such as instruments,
-countries, companies, users, and reminder markers are not command intent. The
-issue and persistence boundaries reject them instead of implicitly inheriting
-every `TNormalizedPatch` member. There is no outbox-entry wrapper, entry id, durable
-command union, or persisted materialized patch.
+countries, and companies are not command intent. Users and reminder markers are
+command intent only through their explicitly writable fields; user intent is an
+update to the signed-in root user, and billing and subscription fields remain
+excluded. The issue and persistence boundaries reject other `TNormalizedPatch`
+members instead of implicitly inheriting them. There is no outbox-entry wrapper,
+entry id, durable command union, or persisted materialized patch.
 
 Entity patch types live beside their entity types and document locally writable
 fields through `EntityPatch<TEntity, TWritableFields>`. The helper makes `id`

@@ -10,6 +10,7 @@ import {
   AccountType,
   accountWritableFields,
   budgetWritableFields,
+  getRootUser,
   intentEntityKeys,
   isSameEntityFieldValue,
   merchantWritableFields,
@@ -224,6 +225,7 @@ export function buildRestorePlan(
   const mappings: TRestoreIdMappings = {}
   const removalContext: TRemovalContext = { deletedAccountIds: new Set() }
 
+  seedRootUserMapping(current, desired, mappings)
   seedDebtAccountMapping(current, desired, mappings)
 
   entityRows.forEach(row => {
@@ -362,6 +364,20 @@ export function buildRestorePlan(
 
   if (deletion.length) patch.deletion = deletion
   return { patch, mappings }
+}
+
+function seedRootUserMapping(
+  current: TDataStore,
+  desired: TDataStore,
+  mappings: TRestoreIdMappings
+): void {
+  const currentRoot = getRootUser(current.user)
+  const desiredRoot = getRootUser(desired.user)
+  if (!currentRoot || !desiredRoot) return
+
+  mappings.user = {
+    [String(desiredRoot.id)]: currentRoot.id,
+  }
 }
 
 function seedDebtAccountMapping(
