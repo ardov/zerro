@@ -1,23 +1,17 @@
 import type { ReactNode } from 'react'
-import { useEffect, useMemo, useSyncExternalStore } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { GlobalWidgets } from '1-app/GlobalWidgets'
 import { Providers } from '1-app/Providers'
 import { OverlayHost } from '6-shared/overlays'
 import { i18n } from '6-shared/localization'
+import { SnackbarProvider } from '6-shared/ui/SnackbarProvider'
+import { AppThemeProvider } from '6-shared/ui/theme'
+import { TooltipProvider } from '6-shared/ui/Tooltip'
 import { makeStoryStore, type StoryScenario } from 'stories/fixtures/storyStore'
 
 type ThemeMode = 'light' | 'dark'
 type Locale = 'en' | 'ru'
-
-function subscribeToLanguage(listener: () => void) {
-  i18n.on('languageChanged', listener)
-  return () => i18n.off('languageChanged', listener)
-}
-
-function getCurrentLanguage() {
-  return (i18n.resolvedLanguage || i18n.language).split('-')[0]
-}
 
 export type AppStoryParameters = {
   app?: {
@@ -44,40 +38,57 @@ export function StoryProviders(props: {
   const app = context.parameters.app
   const scenario = app?.scenario || 'demo'
   const store = useMemo(() => makeStoryStore(scenario), [scenario])
-  const theme = context.globals.theme || 'light'
-  const locale = context.globals.locale || 'en'
-  const route = app?.route || '/'
-  const currentLocale = useSyncExternalStore(
-    subscribeToLanguage,
-    getCurrentLanguage,
-    getCurrentLanguage
-  )
-  const localeReady = currentLocale === locale
-
-  useEffect(() => {
-    if (!localeReady) void i18n.changeLanguage(locale)
-  }, [locale, localeReady])
-
-  useEffect(() => {
-    document.documentElement.dataset.zerroStorybookTheme = theme
-    if (window.parent !== window) {
-      window.parent.postMessage(
-        { type: 'zerro-storybook-theme', theme },
-        window.location.origin
-      )
-    }
-  }, [theme])
 
   return (
-    <Providers store={store} theme={{ defaultMode: theme }}>
-      {localeReady && (
-        <MemoryRouter key={`${route}:${locale}`} initialEntries={[route]}>
-          <OverlayHost>
-            {props.children}
-            {app?.globalWidgets && <GlobalWidgets />}
-          </OverlayHost>
-        </MemoryRouter>
-      )}
+    <Providers store={store} theme={{ defaultMode: getTheme(context) }}>
+      <StoryRouter context={context}>
+        {props.children}
+        {app?.globalWidgets && <GlobalWidgets />}
+      </StoryRouter>
     </Providers>
   )
+}
+
+/** The Library uses the same rendering environment as the application without
+ * smuggling Redux into reusable components. App Scenarios keep the full store
+ * adapter above; a Bench that needs it is a layering leak, not a decorator
+ * requirement. */
+export function LibraryStoryProviders(props: {
+  children: ReactNode
+  context: StoryContextLike
+}) {
+  return (
+    <AppThemeProvider defaultMode={getTheme(props.context)}>
+      <SnackbarProvider>
+        <TooltipProvider>
+          <StoryRouter context={props.context}>{props.children}</StoryRouter>
+        </TooltipProvider>
+      </SnackbarProvider>
+    </AppThemeProvider>
+  )
+}
+
+function StoryRouter(props: {
+  children: ReactNode
+  context: StoryContextLike
+}) {
+  const locale = props.context.globals.locale || 'en'
+  const route = props.context.parameters.app?.route || '/'
+
+  // Both resource bundles are imported synchronously. Updating before paint
+  // keeps the toolbar responsive without blanking the canvas or remounting the
+  // router and its Scenario state.
+  useLayoutEffect(() => {
+    void i18n.changeLanguage(locale)
+  }, [locale])
+
+  return (
+    <MemoryRouter initialEntries={[route]}>
+      <OverlayHost>{props.children}</OverlayHost>
+    </MemoryRouter>
+  )
+}
+
+function getTheme(context: StoryContextLike): ThemeMode {
+  return context.globals.theme || 'light'
 }

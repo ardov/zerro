@@ -7,27 +7,3 @@ body,
 body {
   margin: 0;
 }
-
-html[data-zerro-storybook-theme='dark'] .sb-wrapper,
-html[data-zerro-storybook-theme='dark'] .sb-previewBlock,
-html[data-zerro-storybook-theme='dark'] .sb-argstableBlock,
-html[data-zerro-storybook-theme='dark'] .sb-argstableBlock td,
-html[data-zerro-storybook-theme='dark'] .sb-argstableBlock th,
-html[data-zerro-storybook-theme='dark'] .sbdocs,
-html[data-zerro-storybook-theme='dark'] .sbdocs-wrapper,
-html[data-zerro-storybook-theme='dark'] .sbdocs-preview,
-html[data-zerro-storybook-theme='dark'] .sbdocs-preview > div,
-html[data-zerro-storybook-theme='dark'] .sbdocs table,
-html[data-zerro-storybook-theme='dark'] .sbdocs td,
-html[data-zerro-storybook-theme='dark'] .sbdocs th {
-  background-color: #121212 !important;
-  color: #fff !important;
-}
-
-html[data-zerro-storybook-theme='dark'] .sbdocs-content > :not(.sbdocs-preview),
-html[data-zerro-storybook-theme='dark']
-  .sbdocs-content
-  > :not(.sbdocs-preview)
-  * {
-  color: #fff !important;
-}

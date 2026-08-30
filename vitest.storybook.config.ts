@@ -6,20 +6,26 @@ import viteConfig from './vite.storybook.config'
 export default mergeConfig(
   viteConfig,
   defineConfig({
-    plugins: [
-      storybookTest({
-        configDir: '.storybook',
-      }),
-    ],
     test: {
-      name: 'storybook',
-      browser: {
-        enabled: true,
-        provider: playwright(),
-        headless: true,
-        instances: [{ browser: 'chromium' }],
-      },
-      setupFiles: ['./.storybook/vitest.setup.ts'],
+      projects: ['light', 'dark'].map(theme => ({
+        extends: true,
+        plugins: [
+          storybookTest({
+            configDir: '.storybook',
+            initialGlobals: { theme },
+          }),
+        ],
+        test: {
+          name: `storybook-${theme}`,
+          browser: {
+            enabled: true,
+            provider: playwright(),
+            headless: true,
+            instances: [{ browser: 'chromium' }],
+          },
+          setupFiles: ['./.storybook/vitest.setup.ts'],
+        },
+      })),
     },
   })
 )

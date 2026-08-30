@@ -38,6 +38,7 @@ i18n.use(initReactI18next).init({
   defaultNS,
   // lng: 'dev',
   lng: detectBestLanguage(languges),
+  initAsync: false,
   debug: isProduction,
   fallbackLng: ['en', 'ru', 'dev'],
   interpolation: {

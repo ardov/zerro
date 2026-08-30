@@ -1,6 +1,10 @@
 import type { Decorator, Preview } from '@storybook/react-vite'
 import { INITIAL_VIEWPORTS } from 'storybook/viewport'
-import { StoryProviders } from './StoryProviders'
+import {
+  LibraryStoryProviders,
+  StoryProviders,
+  type AppStoryParameters,
+} from './StoryProviders'
 import './tailwind.css'
 import './preview.css'
 
@@ -18,14 +22,21 @@ const viewports = {
   },
 }
 
-const withAppProviders: Decorator = (Story, context) => (
-  <StoryProviders context={context}>
-    <Story />
-  </StoryProviders>
-)
+const withStoryProviders: Decorator = (Story, context) => {
+  const props = { context: context as typeof context & AppStoryParameters }
+  return context.parameters.app ? (
+    <StoryProviders {...props}>
+      <Story />
+    </StoryProviders>
+  ) : (
+    <LibraryStoryProviders {...props}>
+      <Story />
+    </LibraryStoryProviders>
+  )
+}
 
 const preview: Preview = {
-  decorators: [withAppProviders],
+  decorators: [withStoryProviders],
   parameters: {
     controls: {
       matchers: {
@@ -66,7 +77,6 @@ const preview: Preview = {
     theme: 'light',
     locale: 'en',
   },
-  tags: ['autodocs'],
 }
 
 export default preview
