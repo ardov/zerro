@@ -1,0 +1,93 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - core-next
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      ui_relevant: ${{ steps.changes.outputs.ui_relevant }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect UI-relevant changes
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          ui_relevant=false
+
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
+            ui_relevant=true
+          else
+            while IFS= read -r -d '' changed_path; do
+              case "$changed_path" in
+                src/*|stories/*|.storybook/*|public/*|typings/*|vite.config.ts|vite.storybook.config.ts|vitest.storybook.config.ts|tsconfig.json|tsconfig.node.json|.nvmrc|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.github/workflows/verify.yml)
+                  ui_relevant=true
+                  break
+                  ;;
+              esac
+            done < <(git diff --name-only -z "$BASE_SHA" "$GITHUB_SHA")
+          fi
+
+          echo "ui_relevant=$ui_relevant" >> "$GITHUB_OUTPUT"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run baseline verification
+        run: pnpm verify
+
+  verify-ui:
+    name: UI
+    needs: verify
+    if: needs.verify.outputs.ui_relevant == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run UI verification
+        run: pnpm verify:ui

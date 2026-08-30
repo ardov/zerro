@@ -7,6 +7,9 @@ export default mergeConfig(
   viteConfig,
   defineConfig({
     test: {
+      // Unbounded browser workers contend for CPU and make timed transitions
+      // both slower and flaky on high-core machines.
+      maxWorkers: 4,
       projects: ['light', 'dark'].map(theme => ({
         extends: true,
         plugins: [

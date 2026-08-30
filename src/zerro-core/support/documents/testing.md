@@ -94,9 +94,11 @@ During implementation, run only the focused tests that protect the changed
 contract. Do not repeat a successful check while its relevant source, test, and
 configuration files are unchanged.
 
-Run TypeScript and any required broad checks once before handing off the
-completed slice. Run the default full Vitest suite only for changes whose row in
-the verification matrix requires it.
+Run `pnpm verify` once before handing off a completed code slice. It includes
+TypeScript and the correctly scoped full unit suite. The matrix still determines
+which focused regressions and manual evidence are required in addition to that
+baseline. Documentation-only changes may use the narrower route in
+`docs/agents/verification.md`.
 
 Run ESLint and Prettier against touched files during the loop. Prefer Vitest's
 compact agent output: `--reporter=agent --silent=passed-only`.
@@ -116,12 +118,9 @@ Knip output is evidence for an audit, not automatic deletion authority.
 ## Commands
 
 ```bash
-pnpm exec vitest run path/to/test.ts
-pnpm exec tsc --noEmit
-pnpm exec vitest run
-pnpm exec eslint src/zerro-core
-pnpm exec prettier --check "src/zerro-core/**/*.{ts,tsx,json,md}"
-git diff --check
+pnpm exec vitest run path/to/test.ts --reporter=agent --silent=passed-only
+pnpm test:related path/to/source.ts
+pnpm verify
 ```
 
 State which layer protects the changed contract; the existence of a harness is

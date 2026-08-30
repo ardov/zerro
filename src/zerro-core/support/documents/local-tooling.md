@@ -676,14 +676,12 @@ Before handing off a slice:
 
 ```bash
 pnpm exec vitest run <focused tests> --reporter=agent --silent=passed-only
-pnpm typecheck
-pnpm exec eslint <touched ts files> --max-warnings 0
-pnpm exec prettier --check "<touched files>"
-git diff --check
+pnpm verify
 ```
 
-Run the default parallel suite only when the testing matrix requires it. Do
-not repeatedly rerun successful broad gates while their inputs are unchanged.
+The focused test proves the changed tool contract; `verify` supplies the shared
+repository handoff baseline. Do not repeatedly rerun successful broad gates
+while their inputs are unchanged.
 
 ## Continuation protocol for future agents
 

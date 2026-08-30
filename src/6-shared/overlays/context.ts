@@ -27,8 +27,7 @@ export const OverlayStateContext = createContext<OverlayState>({
 
 export function useOverlayMethods() {
   const methods = useContext(OverlayMethodsContext)
-  if (!methods)
-    throw new Error('Overlays are used outside of <OverlayHost>')
+  if (!methods) throw new Error('Overlays are used outside of <OverlayHost>')
   return methods
 }
 

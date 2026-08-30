@@ -208,14 +208,12 @@ switches at `md`.
 Useful checks:
 
 ```sh
-pnpm lint:js
-pnpm lint:css
-pnpm typecheck
-pnpm knip
-pnpm build
-pnpm build-storybook
-pnpm test:storybook
+pnpm verify
+pnpm verify:ui
+pnpm verify:all
 ```
 
-Run the focused component or theme tests while developing, then choose the
-broader checks in proportion to the affected surface.
+Run focused component or theme tests while developing. `verify:ui` is the
+additional app/Storybook gate after the baseline `verify`; `verify:all` composes
+both and adds the dependency audit. The routing matrix lives in
+`docs/agents/verification.md`.

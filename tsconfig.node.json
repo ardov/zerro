@@ -8,7 +8,9 @@
     "types": ["node"],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.cache/tsconfig.node.tsbuildinfo"
   },
   "include": [
     "vite.config.ts",

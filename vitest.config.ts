@@ -7,6 +7,11 @@ export default mergeConfig(
     test: {
       globals: true,
       environment: 'happy-dom',
+      pool: 'threads',
+      include: [
+        'src/**/*.{test,spec}.{ts,tsx}',
+        'tools/**/*.{test,spec}.{ts,tsx}',
+      ],
     },
   })
 )
