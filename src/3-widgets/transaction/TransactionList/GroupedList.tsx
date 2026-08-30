@@ -43,7 +43,7 @@ const findTopIndex = (offsets: number[], scrollTop: number) => {
   return lo
 }
 
-type GrouppedListProps = {
+type GroupedListProps = {
   groups: GroupNode[]
   renderTransaction: (id: TTransactionId) => React.ReactNode
   initialDate?: TDateDraft
@@ -51,7 +51,7 @@ type GrouppedListProps = {
   onTopDateChange?: (date: TISODate) => void
 }
 
-export const GrouppedList: FC<GrouppedListProps> = props => {
+export const GroupedList: FC<GroupedListProps> = props => {
   const {
     groups,
     renderTransaction,
@@ -219,7 +219,7 @@ const Day = (props: RowComponentProps<DayData>): React.ReactElement => {
   const group = groups[index]
   return (
     <div style={{ ...groupStyle, ...style }}>
-      {/* Sticky is handled by the overlay header in GrouppedList, because
+      {/* Sticky is handled by the overlay header in GroupedList, because
           react-window's row transform breaks native `position: sticky`. */}
       <ListRowSubheader onClick={() => onDateClick(group.date)}>
         {formatDate(group.date)}

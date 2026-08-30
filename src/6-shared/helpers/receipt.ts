@@ -1,14 +1,14 @@
 import type { TDateDraft } from '6-shared/types'
 import { isValidDate, parseDate } from './date'
 
-interface TReciept {
+interface TReceipt {
   /** Timestamp */
   t: Date
   /** Amount */
   s: number
   /**  */
   fn: string
-  /** Reciept number */
+  /** Receipt number */
   i: string
   /**  */
   fp: string
@@ -16,16 +16,16 @@ interface TReciept {
   n: string
 }
 
-// Reciept string looks like this
+// Receipt string looks like this
 // t=20211028T1636&s=1299.00&fn=9287440301110113&i=19313&fp=1992968429&n=1
 
-/** Parses reciept string */
-export function parseReceipt(string: string): TReciept | null {
+/** Parses receipt string */
+export function parseReceipt(string: string): TReceipt | null {
   try {
     return parseReceiptUnsafe(string)
   } catch (e) {
-    console.error('Error parsing reciept', e)
-    console.error('Reciept:', string)
+    console.error('Error parsing receipt', e)
+    console.error('Receipt:', string)
     return null
   }
 }
@@ -41,11 +41,11 @@ function stringToObject(str: string) {
   )
 }
 
-function parseReceiptUnsafe(string: string): TReciept {
+function parseReceiptUnsafe(string: string): TReceipt {
   const obj = stringToObject(string)
   const date = parseDate(obj.t as TDateDraft)
   if (!isValidDate(date) || isNaN(+obj.s)) {
-    throw new Error('Unknown reciept format')
+    throw new Error('Unknown receipt format')
   }
   return {
     t: date,
@@ -54,5 +54,5 @@ function parseReceiptUnsafe(string: string): TReciept {
     i: obj.i || '',
     fp: obj.fp || '',
     n: obj.n || '',
-  } as TReciept
+  } as TReceipt
 }

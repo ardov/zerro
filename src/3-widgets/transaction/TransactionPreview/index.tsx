@@ -20,7 +20,7 @@ import { core } from 'zerro-core/redux'
 
 import { TagList } from '../TagSelect/TagList'
 
-import { Reciept } from './Reciept'
+import { Receipt } from './Receipt'
 import { Map } from './Map'
 
 /**
@@ -246,7 +246,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           fullWidth
           size="small"
         />
-        <Reciept value={qrCode} />
+        <Receipt value={qrCode} />
         <Map longitude={longitude} latitude={latitude} />
 
         <div className="flex flex-col gap-2 type-caption text-muted-foreground">

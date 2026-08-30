@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 
 const waitBeforeContextMenu = 500
 const cooldownAfterContextMenu = 800
-const moveTreshold = 10
+const moveThreshold = 10
 
 // Styles to prevent selection on touch devices
 const style: React.CSSProperties = {
@@ -13,15 +13,15 @@ const style: React.CSSProperties = {
 
 /**
  * Hook to handle contextmenu event on all devices including iOS.
- * - Note that onClick event shoul also be handled by this hook.
+ * - Note that onClick event should also be handled by this hook.
  * - Note that onContextMenu receives both mouseEvent and touchEvent.
  */
 export function useContextMenu(props: {
   onContextMenu?: (event: React.MouseEvent | React.TouchEvent) => void
   onClick?: (event: React.MouseEvent) => void
-  treshold?: number
+  threshold?: number
 }) {
-  const treshold = props.treshold || waitBeforeContextMenu
+  const threshold = props.threshold || waitBeforeContextMenu
   const contextMenuCb = useRef(props.onContextMenu)
   const onClickCb = useRef(props.onClick)
   useEffect(() => {
@@ -61,14 +61,14 @@ export function useContextMenu(props: {
       timer = setTimeout(() => {
         lastCalledContext = Date.now()
         contextMenuCb.current?.(event)
-      }, treshold)
+      }, threshold)
     }
 
     // Handle touch move
     const onTouchMove = (event: React.TouchEvent) => {
       const dx = event.touches[0].clientX - clientX
       const dy = event.touches[0].clientY - clientY
-      if (dx * dx + dy * dy > moveTreshold * moveTreshold) clear()
+      if (dx * dx + dy * dy > moveThreshold * moveThreshold) clear()
     }
 
     // Handle touch end
@@ -99,7 +99,7 @@ export function useContextMenu(props: {
       onClick,
       style,
     }
-  }, [treshold])
+  }, [threshold])
 
   return propsToPass
 }

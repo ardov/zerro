@@ -15,7 +15,7 @@ import { useDebounce } from '6-shared/hooks/useDebounce'
 
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
-import { GrouppedList } from './GrouppedList'
+import { GroupedList } from './GroupedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
@@ -210,7 +210,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
         <div className="grow">
           {groups.length ? (
-            <GrouppedList
+            <GroupedList
               {...{
                 groups,
                 renderTransaction,

@@ -22,7 +22,7 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
   const displayMedianWage = toDisplay({ RUB: MEDIAN_WAGE_RUB })
   const rate = Math.round(monthlyIncome / displayMedianWage)
 
-  // Shown when income in rubbles is greater than median wage and total monthly incom is greater than median wage
+  // Shown when income in rubles is greater than median wage and total monthly income is greater than median wage
   if (rubIncome < MEDIAN_WAGE_RUB || rate < 1) return null
 
   return (

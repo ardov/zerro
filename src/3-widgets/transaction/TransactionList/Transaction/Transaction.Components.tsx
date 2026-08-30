@@ -47,7 +47,7 @@ export const Symbol: FC<SymbolProps> = ({
         size="m"
       />
       <NewIndicator viewed={core.transactions.isViewed(tr)} />
-      {tr.qrCode && <Reciept>🧾</Reciept>}
+      {tr.qrCode && <Receipt>🧾</Receipt>}
     </SymbolWrapper>
   )
 
@@ -299,7 +299,7 @@ const NewIndicator: FC<{ viewed?: boolean }> = ({ viewed }) => (
 
 /* `text-[1rem]`, not `text-base`: the named size carries a line height with
    it, and this only ever set the size. */
-const Reciept: FC<{ children: ReactNode }> = ({ children }) => (
+const Receipt: FC<{ children: ReactNode }> = ({ children }) => (
   <div className="absolute -right-1.5 -bottom-[3px] text-[1rem] text-black [text-shadow:0_0_2px_var(--card)]">
     {children}
   </div>

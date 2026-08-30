@@ -11,7 +11,7 @@ import { core } from 'zerro-core/redux'
 
 // import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
-import { VisibilitySelect } from './VisidilitySelect'
+import { VisibilitySelect } from './VisibilitySelect'
 import { defineScreen, useAsk } from '6-shared/overlays'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'

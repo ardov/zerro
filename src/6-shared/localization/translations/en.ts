@@ -434,7 +434,7 @@ export const en: typeof ru = {
     },
   },
 
-  reciept: {
+  receipt: {
     unknown: 'Unknown receipt format 🤷🏻‍♂️',
     sum: 'Amount',
     date: 'Date',

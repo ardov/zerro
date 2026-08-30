@@ -10,13 +10,13 @@ import { formatMoney } from '6-shared/helpers/money'
 import { formatDate } from '6-shared/helpers/date'
 import { parseReceipt } from '6-shared/helpers/receipt'
 
-interface RecieptProps {
+interface ReceiptProps {
   value?: string | null
   className?: string
 }
 
-export const Reciept: FC<RecieptProps> = ({ value, className }) => {
-  const { t } = useTranslation('reciept')
+export const Receipt: FC<ReceiptProps> = ({ value, className }) => {
+  const { t } = useTranslation('receipt')
   const [showMore, setShowMore] = useState(false)
   const theme = useAppTheme()
   if (!value) return null
