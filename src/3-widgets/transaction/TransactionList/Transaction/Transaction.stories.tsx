@@ -7,8 +7,9 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { useTransactionPreview } from '3-widgets/global/TransactionPreviewDrawer'
 
 const meta = {
-  title: 'Finance/Transaction',
+  title: 'App/Transactions/Transaction',
   component: Transaction,
+  tags: ['autodocs'],
   parameters: {
     layout: 'centered',
     // Not `/transactions`: that page lays the preview screen out as a column

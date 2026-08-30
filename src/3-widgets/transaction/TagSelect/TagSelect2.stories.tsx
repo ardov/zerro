@@ -3,7 +3,8 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { TagSelect2 } from './TagSelect2'
 
 const meta = {
-  title: 'Transactions/Tag select',
+  title: 'App/Transactions/TagSelect',
+  tags: ['autodocs'],
   parameters: { layout: 'centered', app: { scenario: 'demo' } },
 } satisfies Meta
 export default meta
@@ -25,9 +26,4 @@ export const Interaction: Story = {
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(popup).not.toBeVisible())
   },
-}
-
-export const DarkInteraction: Story = {
-  ...Interaction,
-  globals: { theme: 'dark' },
 }

@@ -4,12 +4,20 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { OutlinedField } from './OutlinedField'
 
 const meta = {
-  title: 'UI/OutlinedField',
+  title: 'Library/Input/OutlinedField',
+  component: OutlinedField,
+  tags: ['autodocs'],
   parameters: { layout: 'centered' },
-} satisfies Meta
+  args: {
+    className: 'w-[280px]',
+    label: 'Name',
+    onChange: () => {},
+    value: '',
+  },
+} satisfies Meta<typeof OutlinedField>
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 /** Where the label sits and how far the notch is cut open for it. */
 const measure = (root: HTMLElement) => {
@@ -52,7 +60,11 @@ function Fields() {
   )
 }
 
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
+
 export const Shrink: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Fields />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -68,11 +80,6 @@ export const Shrink: Story = {
     expect(at('medium-empty').notch).toBe('0.01px')
     expect(parseFloat(at('medium-filled').notch)).toBeGreaterThan(1)
   },
-}
-
-export const DarkShrink: Story = {
-  ...Shrink,
-  globals: { theme: 'dark' },
 }
 
 const lines = (n: number) =>
@@ -106,6 +113,7 @@ const boxOf = (root: HTMLElement) =>
 
 /** A multiline field is as tall as what is in it, up to `maxRows`. */
 export const Multiline: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <MultilineFields />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -135,6 +143,7 @@ function GrowingField() {
 /** The mirror is what makes the field grow, so it has to keep up with typing
  * and stop at `maxRows`. */
 export const GrowsWhileTyping: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <GrowingField />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -170,6 +179,7 @@ function EmptyField() {
 /** Focus floats the label off an empty field, and blurring an empty one drops
  * it back — the state a field that can be cleared spends its time in. */
 export const FloatsOnFocus: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <EmptyField />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

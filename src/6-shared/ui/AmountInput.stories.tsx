@@ -6,13 +6,22 @@ import { ArrowForwardIcon } from './Icons'
 import { AmountInput } from './AmountInput'
 
 const meta = {
-  title: 'UI/AmountInput',
+  title: 'Library/Input/AmountInput',
   component: AmountInput,
+  tags: ['autodocs'],
   parameters: { layout: 'centered' },
+  args: {
+    className: 'w-[280px]',
+    currency: 'RUB',
+    label: 'Amount',
+    onChange: () => {},
+    onEnter: () => {},
+    value: 1250,
+  },
 } satisfies Meta<typeof AmountInput>
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 function ControlledInput(props: { signButtons?: boolean | 'auto' }) {
   const [value, setValue] = useState(1250)
@@ -36,7 +45,11 @@ function ControlledInput(props: { signButtons?: boolean | 'auto' }) {
   )
 }
 
-export const Default: Story = {
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
+
+export const ExpressionInput: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <ControlledInput />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -59,6 +72,7 @@ export const Default: Story = {
 }
 
 export const WithExpressionButtons: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <ControlledInput signButtons />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -93,11 +107,9 @@ function FieldVariants() {
   )
 }
 
-export const FieldSizes: Story = { render: () => <FieldVariants /> }
-
-export const DarkFieldSizes: Story = {
-  ...FieldSizes,
-  globals: { theme: 'dark' },
+export const Showcase: Story = {
+  tags: ['!test'],
+  render: () => <FieldVariants />,
 }
 
 /** The shape real callers use: an icon button sitting in the adornment. */
@@ -122,6 +134,7 @@ function AdornmentButtonFields() {
 }
 
 export const AdornmentButtonFocus: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <AdornmentButtonFields />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

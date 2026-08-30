@@ -4,14 +4,25 @@ import { Divider } from './Divider'
 import { ListRowIcon, ListRowSubheader, ListRowText } from './ListRow'
 import { AddIcon } from './Icons'
 
-const meta = { title: 'UI/Action list' } satisfies Meta
+const meta = {
+  title: 'Library/Display/ActionList',
+  component: ActionList,
+  tags: ['autodocs'],
+  args: {
+    'aria-label': 'Actions',
+    children: <ActionListItem>Plain row</ActionListItem>,
+  },
+} satisfies Meta<typeof ActionList>
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
+
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
 
 /** The shapes `SettingsMenu` is built from: a plain row, a row with a trailing
  * control, and a row whose label wraps onto a second line. */
-function Showcase() {
+function VariantShowcase() {
   return (
     <div className="w-[320px] bg-card">
       <ActionList aria-label="Actions">
@@ -39,6 +50,7 @@ function Showcase() {
   )
 }
 
-export const Default: Story = { render: () => <Showcase /> }
-
-export const Dark: Story = { ...Default, globals: { theme: 'dark' } }
+export const Showcase: Story = {
+  tags: ['!test'],
+  render: () => <VariantShowcase />,
+}

@@ -6,18 +6,21 @@ import { Button } from './Button'
 import { zIndex } from './theme/palette'
 
 const meta = {
-  title: 'UI/Adaptive popover',
+  title: 'Library/Overlays/AdaptivePopover',
   component: AdaptivePopover,
+  tags: ['autodocs'],
   parameters: {
     layout: 'centered',
-    app: { scenario: 'demo' },
   },
+  args: { drawerSide: 'bottom' },
 } satisfies Meta<typeof AdaptivePopover>
 
 export default meta
 type Story = StoryObj
 
-function PopoverHarness(props: { drawerSide?: 'top' | 'bottom' }) {
+function PopoverHarness(props: {
+  drawerSide?: 'left' | 'right' | 'top' | 'bottom'
+}) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const open = Boolean(anchorEl)
   return (
@@ -109,18 +112,33 @@ const checkDismissal: Story['play'] = async ({ canvasElement }) => {
   ).toBe(true)
 }
 
+/** One component instance, with its visual props supplied by Args. */
+export const Bench: Story = {
+  render: args => (
+    <PopoverHarness
+      drawerSide={
+        (args as { drawerSide?: 'left' | 'right' | 'top' | 'bottom' })
+          .drawerSide
+      }
+    />
+  ),
+}
+
 export const Desktop: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <PopoverHarness />,
   play: checkDismissal,
 }
 
 export const MobileDrawer: Story = {
+  tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
   render: () => <PopoverHarness />,
   play: checkDismissal,
 }
 
 export const MobileTopDrawer: Story = {
+  tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
   render: () => <PopoverHarness drawerSide="top" />,
   play: checkDismissal,
@@ -128,6 +146,7 @@ export const MobileTopDrawer: Story = {
 
 export const MobileSwipe: Story = {
   ...MobileTopDrawer,
+  tags: ['!dev', '!autodocs'],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)

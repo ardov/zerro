@@ -1,15 +1,27 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { MultiSelect, Select } from './Select'
+import { Select } from './Select'
 
 const meta = {
-  title: 'UI/Select',
-  parameters: { app: { scenario: 'demo' } },
-} satisfies Meta
+  title: 'Library/Input/Select',
+  component: Select,
+  tags: ['autodocs'],
+  args: {
+    className: 'w-[240px]',
+    label: 'Visibility',
+    onChange: () => {},
+    options: [
+      { value: 'auto', label: 'Auto' },
+      { value: 'visible', label: 'Visible' },
+      { value: 'hidden', label: 'Hidden' },
+    ],
+    value: 'auto',
+  },
+} satisfies Meta<typeof Select>
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 const options = [
   { value: 'auto', label: 'Auto' },
@@ -33,24 +45,16 @@ function Harness() {
   )
 }
 
-function MultiHarness() {
-  const [value, setValue] = useState<string[]>([])
-  return (
-    <div className="p-[200px]">
-      <MultiSelect
-        label="Tags"
-        value={value}
-        onChange={setValue}
-        options={options}
-        renderValue={v => `${v.length} selected`}
-        className="w-[240px]"
-      />
-      <output data-testid="value">{value.join(',')}</output>
-    </div>
-  )
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
+
+export const Showcase: Story = {
+  tags: ['!test'],
+  render: () => <OutlinedField />,
 }
 
 export const Picking: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -71,25 +75,6 @@ export const Picking: Story = {
     await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
     await expect(trigger).toHaveTextContent('Hidden')
     await waitFor(() => expect(trigger).toHaveFocus())
-  },
-}
-
-export const MultipleValues: Story = {
-  render: () => <MultiHarness />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const body = within(canvasElement.ownerDocument.body)
-    const trigger = canvas.getByRole('combobox', { name: /Tags/ })
-    await userEvent.click(trigger)
-    const list = await body.findByRole('listbox')
-
-    // Picking does not close a multiple select, so a second value can follow.
-    await userEvent.click(within(list).getByRole('option', { name: 'Auto' }))
-    await userEvent.click(within(list).getByRole('option', { name: 'Hidden' }))
-    await waitFor(() =>
-      expect(canvas.getByTestId('value')).toHaveTextContent('auto,hidden')
-    )
-    await expect(trigger).toHaveTextContent('2 selected')
   },
 }
 
@@ -115,6 +100,7 @@ function DescribedHarness() {
 }
 
 export const SecondLine: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <DescribedHarness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -143,11 +129,4 @@ function OutlinedField() {
       />
     </div>
   )
-}
-
-export const Outlined: Story = { render: () => <OutlinedField /> }
-
-export const DarkOutlined: Story = {
-  ...Outlined,
-  globals: { theme: 'dark' },
 }

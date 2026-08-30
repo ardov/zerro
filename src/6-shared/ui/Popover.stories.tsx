@@ -4,18 +4,26 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { Popover } from './Popover'
 
 const meta = {
-  title: 'UI/Popover',
+  title: 'Library/Overlays/Popover',
+  component: Popover,
+  tags: ['autodocs'],
   parameters: { layout: 'fullscreen' },
-} satisfies Meta
+  args: {
+    'aria-label': 'Draft popup',
+    onClose: () => {},
+    open: false,
+    placement: 'over',
+  },
+} satisfies Meta<typeof Popover>
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 function Harness({
   edge = false,
-  below = false,
+  placement = 'over',
 }: {
   edge?: boolean
-  below?: boolean
+  placement?: 'below' | 'over'
 }) {
   const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
   const [open, setOpen] = useState(false)
@@ -38,8 +46,8 @@ function Harness({
         open={open}
         anchorEl={anchor}
         onClose={close}
-        placement={below ? 'below' : 'over'}
-        align={below ? 'center' : 'start'}
+        placement={placement}
+        align={placement === 'below' ? 'center' : 'start'}
         aria-label="Draft popup"
       >
         {content}
@@ -61,27 +69,40 @@ const checkPopup: Story['play'] = async ({ canvasElement }) => {
   await waitFor(() => expect(trigger).toHaveFocus())
 }
 
-export const Default: Story = { render: () => <Harness />, play: checkPopup }
-export const Dark: Story = { ...Default, globals: { theme: 'dark' } }
+/** One component instance, with its visual props supplied by Args. */
+export const Bench: Story = {
+  render: args => <Harness placement={args.placement} />,
+}
+
+export const Default: Story = {
+  tags: ['!dev', '!autodocs'],
+  render: () => <Harness />,
+  play: checkPopup,
+}
 export const ViewportEdge: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness edge />,
   play: checkPopup,
 }
 export const MobileViewportEdge: Story = {
   ...ViewportEdge,
+  tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
 }
 /** The filter editor and the tag list drop clear of their anchor instead of
  * covering it, and the tag list centres itself under it. */
 export const BelowCentered: Story = {
-  render: () => <Harness below />,
+  tags: ['!dev', '!autodocs'],
+  render: () => <Harness placement="below" />,
   play: checkPopup,
 }
 export const MobileBelowCentered: Story = {
   ...BelowCentered,
+  tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
 }
 export const Dismissal: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

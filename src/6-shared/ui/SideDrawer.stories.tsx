@@ -4,15 +4,18 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { SideDrawer } from './SideDrawer'
 
 const meta = {
-  title: 'UI/Side drawer',
+  title: 'Library/Overlays/SideDrawer',
+  component: SideDrawer,
+  tags: ['autodocs'],
   parameters: { layout: 'fullscreen' },
-} satisfies Meta
+  args: { 'aria-label': 'Notes', onClose: () => {}, open: false },
+} satisfies Meta<typeof SideDrawer>
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 const sheet = 'w-screen sm:w-[360px]'
 
-function Harness() {
+function Harness({ className = sheet }: { className?: string }) {
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
   const content = (
@@ -27,7 +30,7 @@ function Harness() {
       <SideDrawer
         open={open}
         onClose={close}
-        className={sheet}
+        className={className}
         aria-label="Notes"
       >
         {content}
@@ -54,15 +57,25 @@ const checkDrawer: Story['play'] = async ({ canvasElement }) => {
   await waitFor(() => expect(trigger).toHaveFocus())
 }
 
-export const Default: Story = { render: () => <Harness />, play: checkDrawer }
-export const Dark: Story = { ...Default, globals: { theme: 'dark' } }
+/** One component instance, with its visual props supplied by Args. */
+export const Bench: Story = {
+  render: args => <Harness className={args.className} />,
+}
+
+export const Default: Story = {
+  tags: ['!dev', '!autodocs'],
+  render: () => <Harness />,
+  play: checkDrawer,
+}
 export const Mobile: Story = {
   ...Default,
+  tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
 }
 
 /** Modal behaviour: a focus trap, a scroll lock, and backdrop dismissal. */
 export const Dismissal: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

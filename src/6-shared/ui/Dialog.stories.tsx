@@ -10,12 +10,26 @@ import {
 } from './Dialog'
 
 const meta = {
-  title: 'UI/Dialog',
+  title: 'Library/Overlays/Dialog',
+  component: Dialog,
+  tags: ['autodocs'],
   parameters: { layout: 'centered' },
-} satisfies Meta
+  args: {
+    children: (
+      <>
+        <DialogTitle>Delete this operation?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Dialog content</DialogContentText>
+        </DialogContent>
+      </>
+    ),
+    onClose: () => {},
+    open: true,
+  },
+} satisfies Meta<typeof Dialog>
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 const title = 'Delete this operation?'
 const description =
@@ -56,7 +70,11 @@ function Harness() {
   )
 }
 
-export const Default: Story = {
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
+
+export const Dismissal: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -72,13 +90,9 @@ export const Default: Story = {
   },
 }
 
-export const Dark: Story = {
-  ...Default,
-  globals: { theme: 'dark' },
-}
-
 /** Dialog dismissal includes Escape and backdrop clicks. */
-export const Dismissal: Story = {
+export const EscapeAndBackdropDismissal: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

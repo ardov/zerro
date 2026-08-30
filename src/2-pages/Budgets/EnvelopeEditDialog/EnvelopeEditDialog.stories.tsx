@@ -6,7 +6,8 @@ import { MonthProvider } from '../MonthProvider'
 import { EnvelopeEditDialog, useEditDialog } from './EnvelopeEditDialog'
 
 const meta = {
-  title: 'Budget/Envelope edit dialog',
+  title: 'App/Budgets/EnvelopeEditDialog',
+  tags: ['autodocs'],
   parameters: { app: { scenario: 'demo', route: '/budget' } },
 } satisfies Meta
 

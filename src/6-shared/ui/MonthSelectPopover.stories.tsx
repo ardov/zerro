@@ -6,11 +6,20 @@ import { formatDate, toISOMonth } from '6-shared/helpers/date'
 import type { TISOMonth } from '6-shared/types'
 
 const meta = {
-  title: 'UI/Month select',
+  title: 'Library/Input/MonthSelect',
+  component: MonthSelectPopover,
+  tags: ['autodocs'],
   parameters: { layout: 'centered' },
-} satisfies Meta
+  args: {
+    disablePast: false,
+    onChange: () => {},
+    onClose: () => {},
+    open: false,
+    value: '2030-06',
+  },
+} satisfies Meta<typeof MonthSelectPopover>
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 function Harness({ disablePast = false }: { disablePast?: boolean }) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
@@ -38,7 +47,13 @@ function Harness({ disablePast = false }: { disablePast?: boolean }) {
   )
 }
 
+/** One component instance, with its visual props supplied by Args. */
+export const Bench: Story = {
+  render: args => <Harness disablePast={args.disablePast} />,
+}
+
 export const BoundsAndKeyboard: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -74,6 +89,7 @@ export const BoundsAndKeyboard: Story = {
 }
 
 export const PastMonths: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness disablePast />,
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body)

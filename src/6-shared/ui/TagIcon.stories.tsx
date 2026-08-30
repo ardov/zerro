@@ -1,17 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useState } from 'react'
 import { TagIcon } from './TagIcon'
 
 const meta = {
-  title: 'UI/TagIcon',
+  title: 'Library/Display/TagIcon',
   component: TagIcon,
+  tags: ['autodocs'],
   parameters: { layout: 'centered' },
+  args: { color: '#e53935', size: 'm', symbol: '🍎' },
 } satisfies Meta<typeof TagIcon>
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
-export const EmojiVariants: Story = {
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
+
+export const Showcase: Story = {
+  tags: ['!test'],
   render: () => (
     <div className="flex gap-2">
       <TagIcon symbol="🍎" color="#e53935" size="s" />
@@ -19,23 +24,4 @@ export const EmojiVariants: Story = {
       <TagIcon symbol="💼" size="m" button />
     </div>
   ),
-}
-
-export const Selectable: Story = {
-  render: () => {
-    const SelectableIcon = () => {
-      const [checked, setChecked] = useState(false)
-      return (
-        <TagIcon
-          symbol="🍲"
-          color="#fb8c00"
-          size="m"
-          showCheckBox
-          checked={checked}
-          onCheckedChange={setChecked}
-        />
-      )
-    }
-    return <SelectableIcon />
-  },
 }

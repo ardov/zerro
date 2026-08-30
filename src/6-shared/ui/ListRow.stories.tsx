@@ -8,11 +8,16 @@ import {
 } from './ListRow'
 
 const meta = {
-  title: 'UI/List rows',
+  title: 'Library/Display/ListRow',
+  component: ListRows,
+  tags: ['autodocs'],
   parameters: { layout: 'padded' },
-} satisfies Meta
+  args: {
+    children: <button className={listItemClass}>Row label</button>,
+  },
+} satisfies Meta<typeof ListRows>
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 function ListPreview({
   dense,
@@ -34,10 +39,16 @@ function ListPreview({
   )
 }
 
-export const Regular: Story = { render: () => <ListPreview /> }
-export const Dense: Story = { render: () => <ListPreview dense /> }
-export const DarkDense: Story = { ...Dense, globals: { theme: 'dark' } }
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
 
-export const NoPadding: Story = {
-  render: () => <ListPreview disablePadding />,
+export const Showcase: Story = {
+  tags: ['!test'],
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <ListPreview />
+      <ListPreview dense />
+      <ListPreview disablePadding />
+    </div>
+  ),
 }

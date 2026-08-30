@@ -3,11 +3,14 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { Tooltip } from './Tooltip'
 
 const meta = {
-  title: 'UI/Tooltip',
+  title: 'Library/Overlays/Tooltip',
+  component: Tooltip,
+  tags: ['autodocs'],
   parameters: { layout: 'centered' },
-} satisfies Meta
+  args: { children: <button>Tooltip trigger</button>, title: 'A label' },
+} satisfies Meta<typeof Tooltip>
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 function Harness({ placement }: { placement?: 'top' | 'bottom' }) {
   return (
@@ -36,12 +39,19 @@ const checkTooltip: Story['play'] = async ({ canvasElement }) => {
   )
 }
 
-export const Default: Story = { render: () => <Harness />, play: checkTooltip }
-export const Dark: Story = { ...Default, globals: { theme: 'dark' } }
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
+
+export const Default: Story = {
+  tags: ['!dev', '!autodocs'],
+  render: () => <Harness />,
+  play: checkTooltip,
+}
 
 /** Nothing at all without a title, so a call site can pass a value that may
  * be empty and not branch around it. */
 export const NoTitle: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => (
     <Tooltip title={undefined}>
       <button>Bare</button>
@@ -57,6 +67,7 @@ export const NoTitle: Story = {
 
 /** An icon-only trigger receives its accessible name from the tooltip. */
 export const NamesItsChild: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => (
     <Tooltip title="Settings">
       <button data-testid="owned">

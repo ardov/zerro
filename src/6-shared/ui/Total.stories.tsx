@@ -3,12 +3,15 @@ import { expect, within } from 'storybook/test'
 import { Total } from './Total'
 
 const meta = {
-  title: 'UI/Total',
+  title: 'Library/Display/Total',
+  component: Total,
+  tags: ['autodocs'],
   parameters: { layout: 'centered' },
-} satisfies Meta
+  args: { currency: 'RUB', title: 'Available', value: 1200 },
+} satisfies Meta<typeof Total>
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 // The amount colors are deliberate and reflect the semantic states described
 // by the component props.
@@ -58,13 +61,16 @@ const checkAmountColors: Story['play'] = async ({ canvasElement }) => {
   await expect(titleOf('negative')).toBe(referenceOf('ref-muted'))
 }
 
-export const AmountColorsLight: Story = {
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
+
+export const Showcase: Story = {
+  tags: ['!test'],
   render: AmountStates,
-  play: checkAmountColors,
 }
 
-export const AmountColorsDark: Story = {
-  globals: { theme: 'dark' },
+export const AmountColors: Story = {
+  tags: ['!dev', '!autodocs'],
   render: AmountStates,
   play: checkAmountColors,
 }

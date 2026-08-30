@@ -3,7 +3,8 @@ import NavigationDrawer from './NavDrawer'
 import { MobileNavigation } from './MobileNavigation'
 
 const meta = {
-  title: 'Navigation/Shell',
+  title: 'App/Navigation',
+  tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     app: { scenario: 'demo', globalWidgets: true },

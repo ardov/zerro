@@ -5,11 +5,22 @@ import type { TISODate } from '6-shared/types'
 import { DatePicker } from './DatePicker'
 
 const meta = {
-  title: 'UI/Date picker',
+  title: 'Library/Input/DatePicker',
+  component: DatePicker,
+  tags: ['autodocs'],
   parameters: { layout: 'centered' },
-} satisfies Meta
+  args: {
+    fullWidth: true,
+    label: 'Date',
+    onChange: () => {},
+    value: '2026-08-15',
+  },
+} satisfies Meta<typeof DatePicker>
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
+
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
 
 function Harness() {
   const [value, setValue] = useState<TISODate>('2026-08-15')
@@ -22,6 +33,7 @@ function Harness() {
 }
 
 export const Typing: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -49,6 +61,7 @@ export const Typing: Story = {
 }
 
 export const ImpossibleDate: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -70,6 +83,7 @@ export const ImpossibleDate: Story = {
  * it would hand the field back `202-08-15`, which `parseISO` reads as an
  * invalid date and `format` throws on — leaving the field was where it threw. */
 export const HalfTypedYear: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -103,6 +117,7 @@ export const HalfTypedYear: Story = {
 /** Two digits are a whole year, and which century they mean is the split
  * `strftime` uses: a ledger holds old records and few distant plans. */
 export const TwoDigitYear: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -118,6 +133,7 @@ export const TwoDigitYear: Story = {
 }
 
 export const PickingFromTheCalendar: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

@@ -3,8 +3,9 @@ import { MenuButton } from './MenuButton'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
 const meta = {
-  title: 'Navigation/Settings menu',
+  title: 'App/Navigation/SettingsMenu',
   component: MenuButton,
+  tags: ['autodocs'],
   parameters: {
     layout: 'centered',
     app: { scenario: 'demo', globalWidgets: true },

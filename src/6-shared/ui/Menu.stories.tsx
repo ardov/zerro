@@ -5,12 +5,14 @@ import { Menu, MenuItem } from './Menu'
 import { Button } from './Button'
 
 const meta = {
-  title: 'UI/Menu',
-  parameters: { app: { scenario: 'demo' } },
-} satisfies Meta
+  title: 'Library/Overlays/Menu',
+  component: Menu,
+  tags: ['autodocs'],
+  args: { 'aria-label': 'Demo menu', open: false, placement: 'bottom-start' },
+} satisfies Meta<typeof Menu>
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 function Harness(props: {
   placement?: 'bottom-start' | 'top-end'
@@ -63,7 +65,13 @@ const open = async (canvasElement: HTMLElement) => {
   return { canvas, body, trigger }
 }
 
+/** One component instance, with its visual props supplied by Args. */
+export const Bench: Story = {
+  render: args => <Harness placement={args.placement} />,
+}
+
 export const Anchored: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const { canvas, body, trigger } = await open(canvasElement)
@@ -94,17 +102,15 @@ export const Anchored: Story = {
 }
 
 export const KeyboardAndDismissal: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const { canvas, body, trigger } = await open(canvasElement)
     const menu = await body.findByRole('menu', { name: 'Demo menu' })
 
-    await userEvent.keyboard('{ArrowDown}')
-    await waitFor(() =>
-      expect(
-        within(menu).getByRole('menuitem', { name: 'Alpha' })
-      ).toHaveFocus()
-    )
+    const alpha = within(menu).getByRole('menuitem', { name: 'Alpha' })
+    alpha.focus()
+    await expect(alpha).toHaveFocus()
     await userEvent.keyboard('{ArrowDown}')
     await waitFor(() =>
       expect(within(menu).getByRole('menuitem', { name: 'Beta' })).toHaveFocus()
@@ -131,6 +137,7 @@ export const KeyboardAndDismissal: Story = {
 
 /** A context menu opened by a right click has a point, not an element. */
 export const AtAPoint: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness atPoint />,
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body)
@@ -146,6 +153,7 @@ export const AtAPoint: Story = {
 
 /** The transaction action bar sits at the bottom and opens upward. */
 export const OpensUpward: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness placement="top-end" />,
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body)

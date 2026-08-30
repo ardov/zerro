@@ -4,11 +4,17 @@ import { expect, userEvent, within } from 'storybook/test'
 import { Chip } from './Chip'
 
 const meta = {
-  title: 'UI/Chip',
+  title: 'Library/Display/Chip',
+  component: Chip,
+  tags: ['autodocs'],
   parameters: { layout: 'padded' },
-} satisfies Meta
+  args: { label: 'Category' },
+} satisfies Meta<typeof Chip>
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
+
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
 
 type Variant = {
   name: string
@@ -30,7 +36,7 @@ const variants: Variant[] = [
   { name: 'Deletable outlined', variant: 'outlined', deletable: true },
 ]
 
-function Showcase() {
+function VariantShowcase() {
   return (
     <div className="flex flex-col items-start gap-2">
       {variants.map(v => (
@@ -47,11 +53,14 @@ function Showcase() {
   )
 }
 
-export const Default: Story = { render: () => <Showcase /> }
-export const Dark: Story = { ...Default, globals: { theme: 'dark' } }
+export const Showcase: Story = {
+  tags: ['!test'],
+  render: () => <VariantShowcase />,
+}
 
 /** A deletable chip is focusable without pretending that it is a button. */
 export const KeyboardDelete: Story = {
+  tags: ['!dev', '!autodocs'],
   render: function Render() {
     const [present, setPresent] = useState(true)
     return present ? (

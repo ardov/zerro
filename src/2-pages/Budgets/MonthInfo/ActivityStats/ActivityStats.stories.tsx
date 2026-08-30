@@ -3,8 +3,9 @@ import { expect, within } from 'storybook/test'
 import { ActivityStats } from './ActivityStats'
 
 const meta = {
-  title: 'Finance/Monthly activity',
+  title: 'App/Budgets/MonthlyActivity',
   component: ActivityStats,
+  tags: ['autodocs'],
   parameters: {
     layout: 'centered',
     app: { scenario: 'off-budget-transfers', route: '/budget' },
@@ -37,5 +38,3 @@ export const Light: Story = {
     }
   },
 }
-
-export const Dark: Story = { ...Light, globals: { theme: 'dark' } }

@@ -3,8 +3,9 @@ import AccountList from './AccountList'
 import { DebtorList } from '3-widgets/DebtorList'
 
 const meta = {
-  title: 'Finance/Accounts',
+  title: 'App/Accounts',
   component: AccountList,
+  tags: ['autodocs'],
   parameters: {
     layout: 'centered',
     app: { scenario: 'demo', globalWidgets: true, route: '/accounts' },

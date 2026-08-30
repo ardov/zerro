@@ -9,7 +9,8 @@ import { useNavigate } from 'react-router-dom'
 import { SideContent, useSideContent } from '../SideContent'
 
 const meta = {
-  title: 'Budget/Assignment popover',
+  title: 'App/Budgets/BudgetPopover',
+  tags: ['autodocs'],
   parameters: { app: { scenario: 'demo', route: '/budget' } },
 } satisfies Meta
 
@@ -171,11 +172,6 @@ export const Desktop: Story = {
 export const Mobile: Story = {
   ...Desktop,
   globals: { viewport: { value: 'iphone13' } },
-}
-
-export const Dark: Story = {
-  ...Desktop,
-  globals: { theme: 'dark' },
 }
 
 export const BelowBreakpoint: Story = {

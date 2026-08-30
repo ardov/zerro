@@ -4,6 +4,7 @@ import { Logo } from '6-shared/ui/Logo'
 
 const meta = {
   title: 'Foundations/Theme',
+  tags: ['autodocs'],
   parameters: { layout: 'fullscreen' },
 } satisfies Meta
 

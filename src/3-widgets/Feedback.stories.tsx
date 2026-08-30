@@ -4,7 +4,8 @@ import { PersistenceWarningNotice } from './PersistenceWarningNotice'
 import { ErrorMessage } from './ErrorBoundary/ErrorMessage'
 
 const meta = {
-  title: 'Feedback/Messages',
+  title: 'App/Feedback',
+  tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     app: { scenario: 'demo', globalWidgets: true },

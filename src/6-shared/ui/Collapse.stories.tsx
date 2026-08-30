@@ -3,19 +3,22 @@ import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { Collapse } from './Collapse'
 
-const meta = {
-  title: 'UI/Collapse',
-  parameters: { layout: 'padded' },
-} satisfies Meta
-export default meta
-type Story = StoryObj
-
 const content = (
   <div className="w-[280px] p-4">
     <p className="m-0">A paragraph that is tall enough to measure.</p>
     <p className="m-0">And a second one under it.</p>
   </div>
 )
+
+const meta = {
+  title: 'Library/Display/Collapse',
+  component: Collapse,
+  tags: ['autodocs'],
+  parameters: { layout: 'padded' },
+  args: { children: content, open: true },
+} satisfies Meta<typeof Collapse>
+export default meta
+type Story = StoryObj<typeof meta>
 
 function Harness() {
   const [open, setOpen] = useState(false)
@@ -34,7 +37,11 @@ const settled = (el: HTMLElement) =>
     expect(el.getAnimations().some(a => a.playState === 'running')).toBe(false)
   )
 
+/** One component instance, entirely controlled by the Args panel. */
+export const Bench: Story = {}
+
 export const Transition: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -58,6 +65,7 @@ export const Transition: Story = {
 
 /** The root is layout-transparent inside a flex column. */
 export const InFlexColumn: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => (
     <div className="flex w-[280px] flex-col gap-2" data-testid="column">
       <div className="h-6 bg-accent">Above</div>
@@ -73,6 +81,7 @@ export const InFlexColumn: Story = {
 
 /** Verifies that a panel follows content that grows while it is open. */
 export const GrowsWhileOpen: Story = {
+  tags: ['!dev', '!autodocs'],
   render: function Render() {
     const [lines, setLines] = useState(1)
     return (

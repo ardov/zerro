@@ -1,56 +1,26 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useAsk } from '6-shared/overlays'
-import { Confirm } from './Confirm'
-import { useSnackbar } from './SnackbarProvider'
-import { Button } from './Button'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { core } from 'zerro-core/redux'
-import { useAppSelector } from 'store'
-import { MonthProvider, useMonth } from '2-pages/Budgets/MonthProvider'
-import { GoalPopover } from '2-pages/Budgets/GoalPopover/GoalPopover'
-import { MoveMoneyModal } from '4-features/moveMoney/MoveMoneyModal'
-import { SideContent, useSideContent } from '2-pages/Budgets/SideContent'
-import { useGoalPopover } from '2-pages/Budgets/GoalPopover'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
+import { MonthProvider, useMonth } from '2-pages/Budgets/MonthProvider'
+import { SideContent, useSideContent } from '2-pages/Budgets/SideContent'
+import { useGoalPopover } from './Context'
+import { GoalPopover } from './GoalPopover'
+import { useAppSelector } from 'store'
 
 const meta = {
-  title: 'UI/Dialogs and feedback',
+  title: 'App/Budgets/GoalPopover',
+  component: GoalPopover,
+  tags: ['autodocs'],
   parameters: {
-    layout: 'centered',
     app: { scenario: 'demo', globalWidgets: true },
+    layout: 'centered',
   },
-} satisfies Meta
+} satisfies Meta<typeof GoalPopover>
 
 export default meta
 type Story = StoryObj
-
-function DialogTriggers() {
-  const ask = useAsk()
-  const confirm = () =>
-    ask(
-      <Confirm
-        title="Delete this operation?"
-        description="This story demonstrates the application confirmation dialog."
-        okText="Delete"
-        cancelText="Cancel"
-      />
-    )
-  const showSnackbar = useSnackbar()
-
-  return (
-    <div className="flex gap-2">
-      <Button variant="contained" onClick={confirm}>
-        Open confirmation
-      </Button>
-      <Button onClick={() => showSnackbar({ message: 'Saved in the story' })}>
-        Show snackbar
-      </Button>
-    </div>
-  )
-}
-
-export const Interactive: Story = { render: () => <DialogTriggers /> }
 
 function MonthConfirmationHarness() {
   const openSide = useSideContent()
@@ -64,9 +34,10 @@ function MonthConfirmationHarness() {
   )
 }
 
-/** The confirmation lives in GlobalWidgets, outside the drawer's React
- * tree. Both responsive variants must keep focus and dismiss only themselves. */
+/** The confirmation lives in GlobalWidgets, outside the drawer's React tree.
+ * Both responsive variants must keep focus and dismiss only themselves. */
 export const ConfirmFromDrawer: Story = {
+  tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'zerro900' } },
   render: () => (
     <MonthProvider>
@@ -125,10 +96,11 @@ export const ConfirmFromDrawer: Story = {
 
 export const ConfirmFromMobileDrawer: Story = {
   ...ConfirmFromDrawer,
+  tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
 }
 
-function AmountDialogHarness({ kind }: { kind: 'goal' | 'move' }) {
+function GoalAmountHarness() {
   const [month] = useMonth()
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const id = Object.values(useAppSelector(core.envelopes.selectAll)).find(
@@ -141,60 +113,40 @@ function AmountDialogHarness({ kind }: { kind: 'goal' | 'move' }) {
         Open amount editor
       </button>
       <output data-testid="commands">{commands}</output>
-      {kind === 'goal' ? (
-        <GoalPopover
-          id={id}
-          month={month}
-          open={!!anchor}
-          anchorEl={anchor}
-          onClose={() => setAnchor(null)}
-        />
-      ) : (
-        <MoveMoneyModal
-          month={month}
-          source="toBeAssigned"
-          destination={id}
-          open={!!anchor}
-          onClose={() => setAnchor(null)}
-        />
-      )}
+      <GoalPopover
+        id={id}
+        month={month}
+        open={!!anchor}
+        anchorEl={anchor}
+        onClose={() => setAnchor(null)}
+      />
     </>
   )
 }
 
-const checkAmountDialog: Story['play'] = async ({ canvasElement }) => {
-  const canvas = within(canvasElement)
-  const body = within(canvasElement.ownerDocument.body)
-  const commands = Number(canvas.getByTestId('commands').textContent)
-  await userEvent.click(
-    canvas.getByRole('button', { name: 'Open amount editor' })
-  )
-  const input = await body.findByPlaceholderText('0')
-  await userEvent.click(input)
-  await userEvent.clear(input)
-  await userEvent.type(input, '25,5+4.5{Enter}')
-  await waitFor(() => expect(input).not.toBeVisible())
-  await expect(Number(canvas.getByTestId('commands').textContent)).toBe(
-    commands + 1
-  )
-}
-
 export const GoalAmountRegression: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => (
     <MonthProvider>
-      <AmountDialogHarness kind="goal" />
+      <GoalAmountHarness />
     </MonthProvider>
   ),
-  play: checkAmountDialog,
-}
-
-export const MoveMoneyAmountRegression: Story = {
-  render: () => (
-    <MonthProvider>
-      <AmountDialogHarness kind="move" />
-    </MonthProvider>
-  ),
-  play: checkAmountDialog,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const commands = Number(canvas.getByTestId('commands').textContent)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Open amount editor' })
+    )
+    const input = await body.findByPlaceholderText('0')
+    await userEvent.click(input)
+    await userEvent.clear(input)
+    await userEvent.type(input, '25,5+4.5{Enter}')
+    await waitFor(() => expect(input).not.toBeVisible())
+    await expect(Number(canvas.getByTestId('commands').textContent)).toBe(
+      commands + 1
+    )
+  },
 }
 
 function GoalDraftHarness({ inDrawer = false }: { inDrawer?: boolean }) {
@@ -226,6 +178,7 @@ function GoalDraftHarness({ inDrawer = false }: { inDrawer?: boolean }) {
 /** Exercise the registered, keyed form: an ordinary component harness cannot
  * catch stale drafts across openings or history-driven dismissal. */
 export const GoalDraftAndNestedMonth: Story = {
+  tags: ['!dev', '!autodocs'],
   render: () => (
     <MonthProvider>
       <GoalDraftHarness />
@@ -326,10 +279,12 @@ export const GoalDraftAndNestedMonth: Story = {
 
 export const MobileGoalDraftAndNestedMonth: Story = {
   ...GoalDraftAndNestedMonth,
+  tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
 }
 
 export const GoalInsideDrawer: Story = {
+  tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'zerro900' } },
   render: () => (
     <MonthProvider>
@@ -384,5 +339,6 @@ export const GoalInsideDrawer: Story = {
 
 export const MobileGoalInsideDrawer: Story = {
   ...GoalInsideDrawer,
+  tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
 }

@@ -50,6 +50,54 @@ const preview: Preview = {
     viewport: {
       options: viewports,
     },
+    options: {
+      storySort: {
+        order: [
+          'Library',
+          {
+            Input: [
+              'Button',
+              'IconButton',
+              'Checkbox',
+              'Switch',
+              'InputBase',
+              'OutlinedField',
+              'AmountInput',
+              'Select',
+              'MultiSelect',
+              'DatePicker',
+              'Calendar',
+              'MonthSelect',
+            ],
+            Overlays: [
+              'Popover',
+              'AdaptivePopover',
+              'SideDrawer',
+              'Dialog',
+              'Menu',
+              'Tooltip',
+              'Confirm',
+              'Snackbar',
+            ],
+            Display: [
+              'Amount',
+              'Total',
+              'Chip',
+              'TagIcon',
+              'Link',
+              'PercentBar',
+              'RadialProgress',
+              'CircularProgress',
+              'ListRow',
+              'ActionList',
+              'Collapse',
+            ],
+          },
+          'App',
+          'Foundations',
+        ],
+      },
+    },
   },
   globalTypes: {
     theme: {

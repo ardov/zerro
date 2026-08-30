@@ -4,8 +4,9 @@ import { core } from 'zerro-core/redux'
 import Filter from './Filter'
 
 const meta = {
-  title: 'Finance/Transaction filter',
+  title: 'App/Transactions/Filter',
   component: Filter,
+  tags: ['autodocs'],
   parameters: {
     layout: 'centered',
     app: { scenario: 'demo', route: '/transactions' },
