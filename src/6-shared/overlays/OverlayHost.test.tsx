@@ -68,6 +68,63 @@ describe('usePopup', () => {
   })
 })
 
+describe('one popup handing over to another', () => {
+  /** The filter bar: a menu picks a filter, and the editor for it opens as
+   * the menu goes. The second one opens before the step that closes the first
+   * has landed. */
+  function Handover() {
+    const [menuOpen, setMenuOpen] = usePopup()
+    const [editorOpen, setEditorOpen] = usePopup()
+    return (
+      <>
+        <button onClick={() => setMenuOpen(true)}>open menu</button>
+        {menuOpen && (
+          <button
+            onClick={() => {
+              setMenuOpen(false)
+              setEditorOpen(true)
+            }}
+          >
+            pick a filter
+          </button>
+        )}
+        {editorOpen && <div>editor</div>}
+      </>
+    )
+  }
+
+  it('leaves the second one open', async () => {
+    const user = userEvent.setup()
+    render(
+      <App>
+        <Handover />
+      </App>
+    )
+
+    await user.click(screen.getByText('open menu'))
+    await user.click(screen.getByText('pick a filter'))
+    expect(screen.getByText('editor')).toBeTruthy()
+  })
+
+  it('gives it a slot of its own, so Back closes it', async () => {
+    const user = userEvent.setup()
+    render(
+      <App>
+        <Handover />
+      </App>
+    )
+
+    await user.click(screen.getByText('open menu'))
+    await user.click(screen.getByText('pick a filter'))
+    expect(screen.getByText('editor')).toBeTruthy()
+
+    await user.click(screen.getByText('back'))
+    expect(screen.queryByText('editor')).toBeNull()
+    // Still here: the page itself was never left.
+    expect(screen.getByText('open menu')).toBeTruthy()
+  })
+})
+
 describe('useAsk', () => {
   function Confirm() {
     const { open, answer } = useAsked<boolean>()

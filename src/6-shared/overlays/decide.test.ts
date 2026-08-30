@@ -1,41 +1,82 @@
 import { describe, expect, it } from 'vitest'
-import type { OverlayAction, OverlayEntry } from './decide'
+import type { Decision, HistoryOp, OverlayAction, OverlayEntry } from './decide'
 import { decide } from './decide'
+
+/** No decision to carry out. */
+const nothing: Decision = { history: { kind: 'none' }, dismiss: 0 }
 
 /** A history stack plus the app's live popup layers, driven exactly the way
  * `OverlayHost` drives them. Scenarios below read as a person's session:
  * open, press Back, reload. */
-function session(initial: OverlayEntry = {}) {
+function session(
+  initial: OverlayEntry = {},
+  /** Hold every step the way a browser does, until `land` is called. A real
+   * one takes several frames over it, which is long enough for a surface to
+   * open in the meantime. */
+  { holdSteps = false } = {}
+) {
   const entries: OverlayEntry[] = [initial]
   let idx = 0
   let live = 0
+  let held: number | null = null
+  /** Actions `decide` told us to hold until the step has landed. */
+  const pending: OverlayAction[] = []
 
   function entry() {
     return entries[idx]
   }
 
-  function ask(action: OverlayAction) {
-    const decision = decide(entry(), { popups: live }, action)
+  function layers() {
+    return { popups: live, stepping: held !== null }
+  }
+
+  function ask(action: OverlayAction): Decision {
+    const decision = decide(entry(), layers(), action)
+    // The host holds what it is told to hold and asks again on the landing.
+    if (decision.defer) {
+      pending.push(action)
+      return decision
+    }
     live -= decision.dismiss
-    const op = decision.history
+    carry(decision.history)
+    return decision
+  }
+
+  function carry(op: HistoryOp) {
     if (op.kind === 'push') {
       entries.splice(idx + 1)
       entries.push(op.entry)
       idx++
     }
     if (op.kind === 'replace') entries[idx] = op.entry
-    if (op.kind === 'go') idx += op.delta
-    if (op.kind === 'go') settle()
-    return decision
+    if (op.kind === 'go') {
+      held = op.delta
+      if (!holdSteps) land()
+    }
   }
 
-  /** What the host's effect does on every landing: reconcile until still. */
+  /** The step the browser was asked for, arriving. */
+  function land() {
+    if (held === null) return
+    idx += held
+    held = null
+    settle()
+  }
+
+  /** What the host's effect does on every landing: carry out what was held,
+   * then reconcile until still. */
   function settle() {
     for (let guard = 0; guard < 10; guard++) {
-      const decision = decide(entry(), { popups: live }, { kind: 'arrive' })
+      if (pending.length) {
+        ask(pending.shift() as OverlayAction)
+        if (held !== null) return
+        continue
+      }
+      const decision = decide(entry(), layers(), { kind: 'arrive' })
       live -= decision.dismiss
-      if (decision.history.kind !== 'go') return
-      idx += decision.history.delta
+      if (decision.history.kind === 'none') return
+      carry(decision.history)
+      if (held !== null) return
     }
     throw new Error('arrive did not settle')
   }
@@ -62,12 +103,15 @@ function session(initial: OverlayEntry = {}) {
     },
     closePopup() {
       // The host closes a layer by id and ignores one already dismissed.
-      if (live === 0) return { history: { kind: 'none' }, dismiss: 0 } as const
+      if (live === 0) return nothing
       live--
       return ask({ kind: 'closePopup' })
     },
+    /** The step the browser was asked for, arriving. */
+    land,
     /** The browser's Back button. */
     back() {
+      if (idx === 0) throw new Error('Back would have left the app')
       idx--
       settle()
     },
@@ -216,6 +260,84 @@ describe('R2 — closing is returning to the previous address', () => {
     expect(s.live).toBe(0)
     const decision = s.closePopup()
     expect(decision.history).toEqual({ kind: 'none' })
+  })
+})
+
+describe('one surface handing over to another, while the step is in flight', () => {
+  it('keeps the popup that opened before the step landed', () => {
+    const s = session({}, { holdSteps: true })
+    s.openPopup() // the filter bar's menu
+    s.closePopup() // a filter is picked, so the menu closes
+    s.openPopup() // and the clause editor opens in its place
+    expect(s.live).toBe(1)
+
+    s.land()
+    // The editor is still open, and it has a slot of its own to be closed by.
+    expect(s.live).toBe(1)
+    expect(s.entry.slots).toBe(1)
+  })
+
+  it('leaves Back closing the popup rather than the page', () => {
+    const s = session({}, { holdSteps: true })
+    s.openPopup()
+    s.closePopup()
+    s.openPopup()
+    s.land()
+
+    s.back()
+    expect(s.live).toBe(0)
+    expect(s.depth).toBe(0)
+  })
+
+  it('settles to nothing when no popup took the place of the menu', () => {
+    const s = session({}, { holdSteps: true })
+    s.openPopup()
+    s.closePopup()
+    s.land()
+    expect(s.live).toBe(0)
+    expect(s.depth).toBe(0)
+    expect(s.entry.slots ?? 0).toBe(0)
+  })
+
+  it('gives each popup of a pile-up a Back press of its own', () => {
+    const s = session({}, { holdSteps: true })
+    s.openPopup()
+    s.closePopup()
+    s.openPopup() // both open in the window the step is in flight for
+    s.openPopup()
+    s.land()
+    expect(s.live).toBe(2)
+
+    s.back()
+    expect(s.live).toBe(1)
+    s.back()
+    expect(s.live).toBe(0)
+    expect(s.depth).toBe(0)
+  })
+
+  it('keeps a screen that opened as the popup stepped off', () => {
+    const s = session({}, { holdSteps: true })
+    s.openPopup() // the settings menu
+    s.closePopup()
+    s.openScreen('historyPanel', true)
+    s.land()
+    // Decided against the entry we landed on, not the one being stepped off,
+    // so the screen is on the address rather than gone with the slot.
+    expect(s.screens).toEqual({ historyPanel: true })
+    expect(s.depth).toBe(1)
+
+    s.back()
+    expect(s.screens).toEqual({})
+    expect(s.depth).toBe(0)
+  })
+
+  it('holds the action rather than answering it, while the step is in flight', () => {
+    const s = session({}, { holdSteps: true })
+    s.openPopup()
+    const decision = s.closePopup() // steps off the slot
+    expect(decision.history).toEqual({ kind: 'go', delta: -1 })
+    expect(s.openPopup().defer).toBe(true)
+    expect(s.openScreen('tr', 'a').defer).toBe(true)
   })
 })
 

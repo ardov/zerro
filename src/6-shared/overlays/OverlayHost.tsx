@@ -1,8 +1,8 @@
 import type { ReactElement, ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Location } from 'react-router-dom'
-import { useLocation, useNavigate } from 'react-router-dom'
-import type { HistoryOp, OverlayEntry } from './decide'
+import { useLocation, useNavigate, useNavigationType } from 'react-router-dom'
+import type { HistoryOp, OverlayAction, OverlayEntry } from './decide'
 import { decide } from './decide'
 import type { OverlayMethods, OverlayState } from './context'
 import {
@@ -44,6 +44,7 @@ let askCounter = 0
 export function OverlayHost({ children }: { children: ReactNode }) {
   const location = useLocation()
   const navigate = useNavigate()
+  const navigationType = useNavigationType()
 
   const [live, setLive] = useState<readonly string[]>([])
   const [asks, setAsks] = useState<readonly AskLayer[]>([])
@@ -52,6 +53,15 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   const asksRef = useRef(asks)
   const locationRef = useRef(location)
   const timersRef = useRef(new Set<ReturnType<typeof setTimeout>>())
+
+  // The step we have asked for and not seen land yet, held as its own mark
+  // rather than a flag: a stuck step that wakes up to find a later one in
+  // flight must recognise that the pending step is no longer its own.
+  const stepRef = useRef<object | null>(null)
+
+  // Actions asked for while that step was in flight. They are held rather than
+  // answered, and asked again on the landing — see `decide`.
+  const pendingRef = useRef<OverlayAction[]>([])
 
   const entry = useMemo(() => readEntry(location), [location])
 
@@ -68,18 +78,53 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     entryRef.current = entry
   }, [location, entry])
 
+  /** Writes an entry at the address we are on, which is the only thing an
+   * overlay ever changes about it. */
+  const write = useCallback(
+    (next: OverlayEntry, replace: boolean) => {
+      const { pathname, search, hash } = locationRef.current
+      navigate(pathname + search + hash, {
+        state: withEntry(locationRef.current.state, next),
+        replace,
+      })
+      entryRef.current = next
+    },
+    [navigate]
+  )
+
+  /** Asks the browser for a history step and waits for it. A step is the one
+   * thing here we cannot do ourselves: it lands when the browser says so,
+   * which is a good few frames later, and until then this marks the stack as
+   * not to be written on. */
+  const step = useCallback(
+    (delta: number) => {
+      const mark = {}
+      stepRef.current = mark
+      navigate(delta)
+      const timer = setTimeout(() => {
+        timersRef.current.delete(timer)
+        // Ours landed, or a later step took its place: either way the stack is
+        // no longer this step's to speak for.
+        if (stepRef.current !== mark) return
+        // The step did not happen. Clear the mark instead of leaving behind a
+        // Back press that would do nothing, and let the stack be written on
+        // again. The replace lands like any other arrival, which is where
+        // anything held in the meantime gets asked again.
+        stepRef.current = null
+        write({ ...entryRef.current, slots: 0 }, true)
+      }, STUCK_MS)
+      timersRef.current.add(timer)
+    },
+    [navigate, write]
+  )
+
   const applyOp = useCallback(
     (op: HistoryOp) => {
       if (op.kind === 'none') return
-      if (op.kind === 'go') return navigate(op.delta)
-      const { pathname, search, hash } = locationRef.current
-      navigate(pathname + search + hash, {
-        state: withEntry(locationRef.current.state, op.entry),
-        replace: op.kind === 'replace',
-      })
-      entryRef.current = op.entry
+      if (op.kind === 'go') return step(op.delta)
+      write(op.entry, op.kind === 'replace')
     },
-    [navigate]
+    [step, write]
   )
 
   /** Settles one asked layer: the promise is answered now, the surface stays
@@ -113,20 +158,41 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     [settleAsk]
   )
 
+  /** Puts one action to `decide` — against the entry as we believe it to be,
+   * and the layers alive right now — and carries out the answer. The single
+   * way anything here reaches history: what a step in flight forbids, what a
+   * mistaken call earns, and what each answer costs memory are all settled in
+   * one place, for every action alike. */
+  const perform = useCallback(
+    (action: OverlayAction) => {
+      const decision = decide(
+        entryRef.current,
+        { popups: liveRef.current.length, stepping: !!stepRef.current },
+        action
+      )
+      if (decision.complaint) {
+        if (import.meta.env.DEV)
+          console.error(`[overlays] ${decision.complaint}`)
+        return
+      }
+      if (decision.defer) {
+        pendingRef.current.push(action)
+        return
+      }
+      dismiss(decision.dismiss)
+      applyOp(decision.history)
+    },
+    [applyOp, dismiss]
+  )
+
   const openPopup = useCallback(
     (id: string) => {
       if (liveRef.current.includes(id)) return
       liveRef.current = [...liveRef.current, id]
       setLive(liveRef.current)
-      applyOp(
-        decide(
-          entryRef.current,
-          { popups: liveRef.current.length },
-          { kind: 'openPopup' }
-        ).history
-      )
+      perform({ kind: 'openPopup' })
     },
-    [applyOp]
+    [perform]
   )
 
   const closePopup = useCallback(
@@ -135,15 +201,9 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       liveRef.current = liveRef.current.filter(one => one !== id)
       setLive(liveRef.current)
       settleAsk(id, undefined)
-      applyOp(
-        decide(
-          entryRef.current,
-          { popups: liveRef.current.length },
-          { kind: 'closePopup' }
-        ).history
-      )
+      perform({ kind: 'closePopup' })
     },
-    [applyOp, settleAsk]
+    [perform, settleAsk]
   )
 
   const answer = useCallback(
@@ -170,67 +230,36 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   )
 
   const openScreen = useCallback(
-    (name: string, value: unknown, instead?: boolean) => {
-      const decision = decide(
-        entryRef.current,
-        { popups: liveRef.current.length },
-        { kind: 'openScreen', name, value, instead }
-      )
-      dismiss(decision.dismiss)
-      applyOp(decision.history)
-    },
-    [applyOp, dismiss]
+    (name: string, value: unknown, instead?: boolean) =>
+      perform({ kind: 'openScreen', name, value, instead }),
+    [perform]
   )
 
   const closeScreen = useCallback(
-    (name: string) => {
-      const decision = decide(
-        entryRef.current,
-        { popups: liveRef.current.length },
-        { kind: 'closeScreen', name }
-      )
-      if (decision.complaint) {
-        if (import.meta.env.DEV)
-          console.error(`[overlays] ${decision.complaint}`)
-        return
-      }
-      dismiss(decision.dismiss)
-      applyOp(decision.history)
-    },
-    [applyOp, dismiss]
+    (name: string) => perform({ kind: 'closeScreen', name }),
+    [perform]
   )
 
   // Landing on an entry — mounted, navigated, went back, reloaded — is the one
   // moment history and memory can disagree, so it is the one moment they are
   // brought back together.
   useEffect(() => {
-    const timers = timersRef.current
-    const decision = decide(
-      entryRef.current,
-      { popups: liveRef.current.length },
-      { kind: 'arrive' }
-    )
-    dismiss(decision.dismiss)
-    const op = decision.history
-    if (op.kind !== 'go') return
-    const from = locationRef.current.key
-    navigate(op.delta)
-    const timer = setTimeout(() => {
-      timersRef.current.delete(timer)
-      if (locationRef.current.key !== from) return
-      // The step did not happen. Clear the mark instead of leaving behind a
-      // Back press that would do nothing.
-      applyOp({
-        kind: 'replace',
-        entry: { ...entryRef.current, slots: 0 },
-      })
-    }, STUCK_MS)
-    timers.add(timer)
-    return () => {
-      timers.delete(timer)
-      clearTimeout(timer)
+    // The step we asked for, arriving. It is a POP, which is what tells it
+    // apart from a page navigated to while it was in flight — that one leaves
+    // the step pending, and the stuck timer has the last word on it.
+    if (navigationType === 'POP') stepRef.current = null
+    // What was held while the step was in flight is asked again here, against
+    // the entry we have actually landed on. Each answer writes its own entry,
+    // so popups that piled up in that window still get one Back apiece.
+    while (!stepRef.current) {
+      const held = pendingRef.current.shift()
+      if (!held) break
+      perform(held)
     }
-  }, [location.key, dismiss, navigate, applyOp])
+    // Reconcile only once the stack is ours again: an answer that stepped has
+    // left history mid-move, and there is nothing to compare it against yet.
+    if (!stepRef.current) perform({ kind: 'arrive' })
+  }, [location.key, navigationType, perform])
 
   // Nothing is left waiting on an answer that can no longer come.
   useEffect(() => {

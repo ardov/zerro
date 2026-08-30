@@ -35,7 +35,13 @@ export type OverlayEntry = {
 
 /** The overlays actually alive in memory. Screens are not here: they are read
  * back from the entry, which is the whole point of them. */
-export type LiveLayers = { popups: number }
+export type LiveLayers = {
+  popups: number
+  /** A step we asked for has not landed yet. The browser takes one when it is
+   * ready, a good few frames later, so until then the entry we are on is not
+   * the entry we are going to be on. */
+  stepping?: boolean
+}
 
 export type OverlayAction =
   | {
@@ -62,6 +68,9 @@ export type Decision = {
   history: HistoryOp
   /** How many live popup layers the host must drop from memory. */
   dismiss: number
+  /** There is no answering this until the step in flight has landed. The host
+   * holds the action and asks again then. */
+  defer?: boolean
   /** Set when the call was a programming error rather than a thing to do. */
   complaint?: string
 }
@@ -75,6 +84,20 @@ export function decide(
 ): Decision {
   const screens = entry.screens ?? {}
   const slots = entry.slots ?? 0
+
+  // Nothing may be written on the stack while a step we asked for is in
+  // flight. The entry underneath is the one the step is leaving, so anything
+  // written on it goes down with it — and the landing, finding more alive than
+  // the stack holds, would read the shortfall as a Back press and close the
+  // surface the moment it appeared. That is the filter bar's menu handing over
+  // to the clause editor: the editor opens a frame after the menu asked to
+  // step off its own slot, and a good few frames before that lands.
+  //
+  // So the action waits for the landing, where it is asked against the entry
+  // we are actually on and answered normally. `arrive` is the landing itself
+  // and is never held.
+  if (live.stepping && action.kind !== 'arrive')
+    return { ...nothing, defer: true }
 
   switch (action.kind) {
     case 'openScreen': {
