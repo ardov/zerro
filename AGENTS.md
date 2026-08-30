@@ -19,14 +19,20 @@ anyone reading the repository on GitHub. Name the file as plain text instead,
 with its section, and say it is not part of this repository.
 
 `git` from the checkout root commits to the **public** repository. Commit
-private notes with `git -C private …`. Never move a file out of `private/`
-unless asked to. See `private/README.md`.
+private notes with `git -C private …`. Write to `private/` and commit there
+freely, without asking: it is a private notebook whose history is cheap to
+rewrite. That standing permission covers the private repository only — a commit
+to the public repository is still the maintainer's call. Never move a file out
+of `private/` unless asked to. See `private/README.md`.
 
 ## Agent skills
 
 ### Issue tracker
 
-Issues live as Markdown files under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+Issues and specs live as Markdown files under `private/work/<feature-slug>/`, in
+the private repository — they state intent. `.scratch/` is for throwaway files
+only. See `docs/agents/issue-tracker.md`, including how to resolve the path from
+a worktree.
 
 ### Triage labels
 

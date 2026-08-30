@@ -30,23 +30,35 @@ jobs:
       - name: Detect UI-relevant changes
         id: changes
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
         run: |
+          comparison_base="${PR_BASE_SHA:-$PUSH_BASE_SHA}"
           ui_relevant=false
 
-          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
+          if [[ -z "$comparison_base" || "$comparison_base" =~ ^0+$ ]]; then
+            comparison_base="$(git hash-object -t tree /dev/null)"
             ui_relevant=true
           else
             while IFS= read -r -d '' changed_path; do
               case "$changed_path" in
-                src/*|stories/*|.storybook/*|public/*|typings/*|vite.config.ts|vite.storybook.config.ts|vitest.storybook.config.ts|tsconfig.json|tsconfig.node.json|.nvmrc|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.github/workflows/verify.yml)
+                src/* | stories/* | .storybook/* | public/* | typings/* | \
+                  vite.config.ts | vite.storybook.config.ts | \
+                  vitest.storybook.config.ts | tsconfig.json | \
+                  tsconfig.node.json | .nvmrc | package.json | \
+                  pnpm-lock.yaml | pnpm-workspace.yaml | \
+                  .github/workflows/verify.yml)
                   ui_relevant=true
                   break
                   ;;
               esac
-            done < <(git diff --name-only -z "$BASE_SHA" "$GITHUB_SHA")
+            done < <(
+              git diff --no-renames --name-only -z \
+                "$comparison_base" "$GITHUB_SHA"
+            )
           fi
 
+          echo "base_sha=$comparison_base" >> "$GITHUB_OUTPUT"
           echo "ui_relevant=$ui_relevant" >> "$GITHUB_OUTPUT"
 
       - name: Set up pnpm
@@ -63,6 +75,8 @@ jobs:
 
       - name: Run baseline verification
         run: pnpm verify
+        env:
+          VERIFY_BASE_SHA: ${{ steps.changes.outputs.base_sha }}
 
   verify-ui:
     name: UI

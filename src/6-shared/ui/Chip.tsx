@@ -122,12 +122,14 @@ export function Chip({
           className={cn(
             'inline-flex shrink-0 cursor-pointer items-center text-chip-delete hover:text-chip-delete-hover',
             // The cross hangs into the label's own padding, which is why the
-            // right margin is negative. Being outlined does not change that —
-            // outlined margins belong to the leading icon, which this
-            // chip has no call site for.
+            // left margin is negative; the right one is the gap it keeps from
+            // the pill's edge.
             small
-              ? '-mr-1 ml-1 [&>svg]:size-4'
-              : '-mr-1.5 ml-[5px] [&>svg]:size-[22px]'
+              ? '-ml-1 mr-1 [&>svg]:size-4'
+              : '-ml-1.5 mr-[5px] [&>svg]:size-[22px]',
+            // An outlined chip carries a border on that edge, so the cross
+            // gives a pixel back — the same pixel the label gives back above.
+            variant === 'outlined' && small && 'mr-[3px]'
           )}
         >
           {deleteIcon ?? <CloseIcon />}

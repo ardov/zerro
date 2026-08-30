@@ -60,7 +60,7 @@ export default function NavigationDrawer() {
 
           <div className="sticky inset-x-0 bottom-0 z-[5] mt-auto flex w-full shrink-0 flex-row items-center bg-card px-6 pb-4 pt-2">
             <Logo fill={theme.palette.primary.main} width="100" />
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center">
               <RefreshButton />
               <MenuButton edge="end" />
             </div>

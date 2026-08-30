@@ -41,6 +41,10 @@ smoke. Do not repeat a successful broad gate while its inputs are unchanged.
 | Cross-cutting or dependency change       | Focused tests, then `pnpm verify:all`                  |
 | Replica persistence or sync              | `pnpm verify` plus the policy-required manual smoke    |
 
+The formatting commands enumerate tracked public files. Generated files and
+lockfiles listed in `.prettierignore` are outside that formatting surface, and
+untracked working files cannot make the shared gate fail.
+
 Area-specific policies can require more evidence, never less:
 
 - `src/zerro-core/support/documents/testing.md` — Core contracts and broad-test
