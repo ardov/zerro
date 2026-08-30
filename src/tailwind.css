@@ -21,6 +21,58 @@
   --breakpoint-2xl: initial;
 }
 
+/* What does not change with the colour scheme, and so has no reason to be
+   generated: a scheme-independent constant is the same in both blocks the
+   theme emits, and emitting it from TypeScript only made it arrive when
+   `AppThemeProvider` mounted. Declared here it is simply always on the page,
+   which is why none of the utilities below carry a fallback.
+
+   `:root` rather than `@theme`, because a `@theme` variable nothing resolves
+   through a Tailwind utility name is pruned from the output. */
+@layer base {
+  :root {
+    /* `shape.borderRadius`, in pixels. */
+    --radius: 8px;
+
+    /* Elevation shadows for raised surfaces. */
+    --elevation-1:
+      0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+      0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+    --elevation-2:
+      0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+      0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+    --elevation-4:
+      0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+      0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+    --elevation-6:
+      0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14),
+      0px 1px 18px 0px rgba(0, 0, 0, 0.12);
+    --elevation-8:
+      0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+      0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+    --elevation-10:
+      0px 6px 6px -3px rgba(0, 0, 0, 0.2),
+      0px 10px 14px 1px rgba(0, 0, 0, 0.14),
+      0px 4px 18px 3px rgba(0, 0, 0, 0.12);
+    --elevation-16:
+      0px 8px 10px -5px rgba(0, 0, 0, 0.2),
+      0px 16px 24px 2px rgba(0, 0, 0, 0.14),
+      0px 6px 30px 5px rgba(0, 0, 0, 0.12);
+    --elevation-24:
+      0px 11px 15px -7px rgba(0, 0, 0, 0.2),
+      0px 24px 38px 3px rgba(0, 0, 0, 0.14),
+      0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+
+    /* Stacking levels. A tooltip sits above every overlay, including the modal
+       ones it can be opened from inside; the docked navigation panel is fixed
+       and so has to sit above the page it reserves room in, but under every
+       overlay. */
+    --z-drawer: 1200;
+    --z-modal: 1300;
+    --z-tooltip: 1500;
+  }
+}
+
 @theme inline {
   /* The application font family. */
   --font-sans: 'IBM Plex Sans', sans-serif;
@@ -38,6 +90,10 @@
   --color-primary-selected: var(--primary-selected);
   --color-primary-selected-hover: var(--primary-selected-hover);
   --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-success-light: var(--success-light);
+  --color-error-light: var(--error-light);
+  --color-error-dark: var(--error-dark);
   --color-interactive-hover: var(--interactive-hover);
   --color-foreground-hover: var(--foreground-hover);
   --color-error-hover: var(--error-hover);
@@ -158,29 +214,21 @@
   box-shadow: var(--elevation-24);
 }
 
-/* Modal stacking level. The fallback keeps the utility working
-   where `AppThemeProvider` is not mounted (isolated stories, for example)
-   instead of collapsing to `z-index: auto`. */
 @utility z-modal {
-  z-index: var(--z-modal, 1300);
+  z-index: var(--z-modal);
 }
 
-/* The docked navigation panel, which is fixed and therefore has to sit above
-   the page it reserves room in — but under every overlay. Same fallback
-   reasoning as `z-modal`. */
 @utility z-drawer {
-  z-index: var(--z-drawer, 1200);
+  z-index: var(--z-drawer);
 }
 
-/* A tooltip sits above every overlay, including the modal ones it can be
-   opened from inside. Same fallback reasoning as `z-modal`. */
 @utility z-tooltip {
-  z-index: var(--z-tooltip, 1500);
+  z-index: var(--z-tooltip);
 }
 
-/* An `@utility` rather than a `--color-*` alias
-   because it is an opacity, and the fallback keeps a disabled control dimmed
-   where `AppThemeProvider` is not mounted. */
+/* An `@utility` rather than a `--color-*` alias because it is an opacity and
+   not a colour. It keeps its fallback: unlike the stacking levels above it is
+   a palette value, so it still arrives with `AppThemeProvider`. */
 @utility opacity-disabled {
   opacity: var(--disabled-opacity, 0.38);
 }

@@ -5,7 +5,6 @@ import { linkClass } from '6-shared/ui/Link'
 import { Collapse } from '6-shared/ui/Collapse'
 import { cn } from '6-shared/ui/shadcn/utils'
 import { QRCodeSVG as QRCode } from 'qrcode.react'
-import { useAppTheme } from '6-shared/ui/theme'
 import { formatMoney } from '6-shared/helpers/money'
 import { formatDate } from '6-shared/helpers/date'
 import { parseReceipt } from '6-shared/helpers/receipt'
@@ -18,7 +17,6 @@ interface ReceiptProps {
 export const Receipt: FC<ReceiptProps> = ({ value, className }) => {
   const { t } = useTranslation('receipt')
   const [showMore, setShowMore] = useState(false)
-  const theme = useAppTheme()
   if (!value) return null
 
   const parsed = parseReceipt(value)
@@ -62,8 +60,8 @@ export const Receipt: FC<ReceiptProps> = ({ value, className }) => {
       <div className="ml-auto">
         <QRCode
           value={value}
-          bgColor={theme.palette.background.paper}
-          fgColor={theme.palette.text.primary}
+          bgColor="var(--card)"
+          fgColor="var(--foreground)"
           includeMargin
         />
       </div>

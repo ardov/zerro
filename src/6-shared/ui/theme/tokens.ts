@@ -1,5 +1,5 @@
 import type { TPalette } from './palette'
-import { elevations, palettes, radius, zIndex } from './palette'
+import { palettes } from './palette'
 import { alpha } from './color'
 
 /** The CSS custom properties the whole app is styled through, and the only
@@ -25,7 +25,7 @@ import { alpha } from './color'
  * there either way.
  *
  * Every name here needs a counterpart in `src/tailwind.css`, a `--color-*`
- * alias or an `@utility`, or it forces `[box-shadow:var(--elevation-8)]` at
+ * alias or an `@utility`, or it forces `[background:var(--chip-hover)]` at
  * the call site and quietly brings arbitrary values back. */
 function paletteTokens(palette: TPalette) {
   const { action, background, common, grey, text } = palette
@@ -61,6 +61,13 @@ function paletteTokens(palette: TPalette) {
     /* The remaining Button colors, only for the variant and color
        pairs the app actually renders. */
     '--primary-dark': palette.primary.dark,
+    /* The lighter and darker shades charts use to separate sub-series that
+       share a meaning: saved funds against budgeted ones, debts owed against
+       debts on an account. Only the shades something reads are emitted. */
+    '--primary-light': palette.primary.light,
+    '--success-light': palette.success.light,
+    '--error-light': palette.error.light,
+    '--error-dark': palette.error.dark,
     '--interactive-hover': alpha(palette.secondary.main, action.hoverOpacity),
     '--foreground-hover': alpha(text.primary, action.hoverOpacity),
     '--error-hover': alpha(palette.error.main, action.hoverOpacity),
@@ -125,20 +132,6 @@ function paletteTokens(palette: TPalette) {
   }
 }
 
-/** What does not change with the scheme. */
-const staticTokens = {
-  '--radius': `${radius}px`,
-  ...Object.fromEntries(
-    Object.entries(elevations).map(([level, shadow]) => [
-      `--elevation-${level}`,
-      shadow,
-    ])
-  ),
-  '--z-modal': String(zIndex.modal),
-  '--z-drawer': String(zIndex.drawer),
-  '--z-tooltip': String(zIndex.tooltip),
-}
-
 const declarations = (tokens: Record<string, string>) =>
   Object.entries(tokens)
     .map(([name, value]) => `${name}: ${value};`)
@@ -149,6 +142,6 @@ const declarations = (tokens: Record<string, string>) =>
  * `.dark` overrides it — the same class the Tailwind `dark` variant keys off,
  * and the same one `color-scheme` follows in `styles.scss`. */
 export const themeTokensCss = [
-  `:root{${declarations({ ...staticTokens, ...paletteTokens(palettes.light) })}}`,
+  `:root{${declarations(paletteTokens(palettes.light))}}`,
   `:root.dark{${declarations(paletteTokens(palettes.dark))}}`,
 ].join('')

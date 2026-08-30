@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { cn } from '6-shared/ui/shadcn/utils'
-import { useAppTheme } from '6-shared/ui/theme'
 import { zenmoney } from '6-shared/api/zenmoney'
 import { Logo } from '6-shared/ui/Logo'
 
@@ -22,7 +21,6 @@ zenmoney.processAuthCode()
 export default function Auth() {
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const theme = useAppTheme()
   const [logoIn, setLogoIn] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   setTimeout(() => setLogoIn(true), 300)
@@ -56,7 +54,7 @@ export default function Auth() {
         parseFiles(e?.dataTransfer?.files)
       }}
     >
-      <Logo width="200" fill={theme.palette.primary.main} visible={logoIn} />
+      <Logo width="200" fill="var(--primary)" visible={logoIn} />
       <div className="flex flex-col items-center justify-center gap-6">
         <Button
           className="auth-reveal"

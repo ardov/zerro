@@ -16,7 +16,6 @@ import {
   BarChartIcon,
 } from '6-shared/ui/Icons'
 import { Logo } from '6-shared/ui/Logo'
-import { useAppTheme } from '6-shared/ui/theme'
 
 import AccountList from '3-widgets/account/AccountList'
 import { DebtorList } from '3-widgets/DebtorList'
@@ -31,8 +30,6 @@ import { useTranslation } from 'react-i18next'
  * Its scrollbar is hidden. The panel scrolls, but a permanent gutter down the
  * side of the navigation is noise. */
 export default function NavigationDrawer() {
-  const theme = useAppTheme()
-
   return (
     // The spacer. It takes no `className`: the two boxes want opposite things
     // from one, and a caller styling "the drawer" would land on this one and
@@ -59,7 +56,7 @@ export default function NavigationDrawer() {
           <div className="h-16 w-full shrink-0" />
 
           <div className="sticky inset-x-0 bottom-0 z-[5] mt-auto flex w-full shrink-0 flex-row items-center bg-card px-6 pb-4 pt-2">
-            <Logo fill={theme.palette.primary.main} width="100" />
+            <Logo fill="var(--primary)" width="100" />
             <div className="ml-auto flex items-center">
               <RefreshButton />
               <MenuButton edge="end" />

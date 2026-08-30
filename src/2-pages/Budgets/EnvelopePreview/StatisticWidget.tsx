@@ -12,7 +12,6 @@ import {
   ReferenceDot,
 } from 'recharts'
 import { useTranslation } from 'react-i18next'
-import { useAppTheme } from '6-shared/ui/theme'
 import type { TFxCode, TISOMonth } from '6-shared/types'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
 import { getAverage } from '6-shared/helpers/money/currencyHelpers'
@@ -109,9 +108,8 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
 }) => {
   const { t } = useTranslation('budgets', { keyPrefix: 'statisticWidget' })
   const [month, setMonth] = useMonth()
-  const theme = useAppTheme()
-  const positiveColor = theme.palette.info.main
-  const negativeColor = theme.palette.error.main
+  const positiveColor = 'var(--info)'
+  const negativeColor = 'var(--error)'
 
   const [metric, setMetric] = useState<statisticsValue>(
     statisticsValue.avgExpenses

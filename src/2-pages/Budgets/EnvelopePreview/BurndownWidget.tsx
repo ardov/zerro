@@ -8,7 +8,6 @@ import { useAppSelector } from 'store'
 import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import { formatDate, getMonthLength, toISODate } from '6-shared/helpers/date'
-import { useAppTheme } from '6-shared/ui/theme'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
 import type { TFxAmount, TISODate, TISOMonth } from '6-shared/types'
 import { addFxAmount, round } from '6-shared/helpers/money'
@@ -63,7 +62,6 @@ type ChartProps = {
 export function ChangesChart(props: ChartProps) {
   const { id, month } = props
   const trend = useDoubleTrend(month, id)
-  const theme = useAppTheme()
 
   return (
     <ResponsiveContainer>
@@ -75,7 +73,7 @@ export function ChangesChart(props: ChartProps) {
           type="monotone"
           dataKey="balance"
           dot={false}
-          stroke={theme.palette.primary.main}
+          stroke="var(--primary)"
           strokeWidth={2}
           isAnimationActive={false}
         />
@@ -83,7 +81,7 @@ export function ChangesChart(props: ChartProps) {
           type="monotone"
           dataKey="prevBalance"
           dot={false}
-          stroke={theme.palette.primary.main}
+          stroke="var(--primary)"
           strokeWidth={0.5}
           strokeDasharray="2 3"
           isAnimationActive={false}
@@ -93,7 +91,7 @@ export function ChangesChart(props: ChartProps) {
           type="monotone"
           dataKey="burndown"
           dot={false}
-          fill={theme.palette.primary.main}
+          fill="var(--primary)"
           fillOpacity={0.1}
           strokeWidth={0}
           isAnimationActive={false}

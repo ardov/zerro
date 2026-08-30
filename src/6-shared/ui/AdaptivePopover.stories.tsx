@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { AdaptivePopover } from './AdaptivePopover'
 import { Button } from './Button'
-import { zIndex } from './theme/palette'
 
 const meta = {
   title: 'Library/Overlays/AdaptivePopover',
@@ -84,7 +83,13 @@ const checkDismissal: Story['play'] = async ({ canvasElement }) => {
     document.querySelector<HTMLElement>(ADAPTIVE_BACKDROP)!
   )
   await expect(getComputedStyle(popup).boxShadow).not.toBe('none')
-  await expect(backdropStyle.zIndex).toBe(String(zIndex.modal))
+  // Read back off the root rather than restated here, so the assertion still
+  // names the token and not a number that can drift from it.
+  await expect(backdropStyle.zIndex).toBe(
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--z-modal')
+      .trim()
+  )
   await expect(
     within(popup).getByRole('button', { name: 'Close' })
   ).toBeInTheDocument()

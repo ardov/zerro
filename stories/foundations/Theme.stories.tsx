@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { getContrastText, useAppTheme } from '6-shared/ui/theme'
 import { Logo } from '6-shared/ui/Logo'
 
 const meta = {
@@ -11,20 +10,22 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-function ThemeCatalog() {
-  const theme = useAppTheme()
-  const colors = [
-    ['primary', theme.palette.primary.main],
-    ['secondary', theme.palette.secondary.main],
-    ['success', theme.palette.success.main],
-    ['warning', theme.palette.warning.main],
-    ['error', theme.palette.error.main],
-    ['background', theme.palette.background.default],
-  ] as const
+/** Each swatch is a token and the token written to sit on it, which is the
+ * pairing the app actually renders — not a contrast recomputed for the
+ * catalogue and able to disagree with it. */
+const colors = [
+  ['primary', 'var(--primary)', 'var(--primary-foreground)'],
+  ['secondary', 'var(--interactive)', 'var(--interactive-foreground)'],
+  ['success', 'var(--success)', 'var(--success-foreground)'],
+  ['warning', 'var(--warning)', 'var(--warning-foreground)'],
+  ['error', 'var(--error)', 'var(--error-foreground)'],
+  ['background', 'var(--background)', 'var(--foreground)'],
+] as const
 
+function ThemeCatalog() {
   return (
     <main className="grid gap-6 p-8">
-      <Logo fill={theme.palette.primary.main} width={220} />
+      <Logo fill="var(--primary)" width={220} />
       <section>
         <h1 className="type-display font-sans">Typography</h1>
         <h2 className="type-title font-sans">
@@ -35,14 +36,11 @@ function ThemeCatalog() {
         </p>
       </section>
       <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-        {colors.map(([name, color]) => (
+        {colors.map(([name, background, foreground]) => (
           <li
             key={name}
             className="h-18 w-28 rounded-lg p-2"
-            style={{
-              backgroundColor: color,
-              color: getContrastText(color),
-            }}
+            style={{ backgroundColor: background, color: foreground }}
           >
             <span className="type-caption font-sans">{name}</span>
           </li>

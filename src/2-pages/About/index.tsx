@@ -2,7 +2,6 @@ import type { MDXComponents } from 'mdx/types'
 
 import { Route, Routes } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { useAppTheme } from '6-shared/ui/theme'
 import { Logo } from '6-shared/ui/Logo'
 import { LangSwitcher } from '6-shared/localization'
 import { ScrollToTop, TextLink } from './Components'
@@ -60,12 +59,11 @@ export default function Main() {
 }
 
 const Header = () => {
-  const theme = useAppTheme()
   return (
     <header className="sticky inset-x-0 top-0 z-[100] flex flex-col items-center p-2">
       <Link to="/">
         <div className="rounded-3xl bg-background px-6 py-2 leading-[0]">
-          <Logo fill={theme.palette.primary.main} width="100" />
+          <Logo fill="var(--primary)" width="100" />
         </div>
       </Link>
     </header>

@@ -1,5 +1,4 @@
 import type { FC } from 'react'
-import { useAppTheme } from '6-shared/ui/theme'
 import { round } from '6-shared/helpers/money'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { getTaxes } from './getTaxesByIncome'
@@ -10,10 +9,8 @@ type TaxesChartProps = {
 }
 
 export const TaxesChart: FC<TaxesChartProps> = ({ income, outcome }) => {
-  const theme = useAppTheme()
-
-  const primaryColor = theme.palette.primary.main // theme.palette.success.light
-  const taxesColor = theme.palette.error.light
+  const primaryColor = 'var(--primary)'
+  const taxesColor = 'var(--error-light)'
 
   const taxes = getTaxes(income, outcome).sort((a, b) => b.value - a.value)
   const totalTaxes = taxes.reduce((sum, t) => round(sum + t.value), 0)
@@ -58,7 +55,7 @@ export const TaxesChart: FC<TaxesChartProps> = ({ income, outcome }) => {
               <Cell
                 key={`cell-${index}`}
                 fill={index === 0 ? primaryColor : taxesColor}
-                stroke={theme.palette.background.default}
+                stroke="var(--background)"
                 opacity={index < 2 ? 1 : 0.5}
               />
             ))}
@@ -78,7 +75,7 @@ export const TaxesChart: FC<TaxesChartProps> = ({ income, outcome }) => {
               <Cell
                 key={`cell-${index}`}
                 fill={index === 0 ? primaryColor : taxesColor}
-                stroke={theme.palette.background.default}
+                stroke="var(--background)"
                 opacity={index < 2 ? 1 : 0.5}
               />
             ))}

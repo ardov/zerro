@@ -7,7 +7,6 @@ import { useAppSelector } from 'store'
 
 import { useTranslation } from 'react-i18next'
 import { Divider } from '6-shared/ui/Divider'
-import { useAppTheme } from '6-shared/ui/theme'
 import { sub } from '6-shared/helpers/money'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { Amount } from '6-shared/ui/Amount'
@@ -32,11 +31,10 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
     TooltipContent,
   } = useTotalsModel()
 
-  const theme = useAppTheme()
   const isSmall = useIsSmall()
 
-  const bg = theme.palette[msgType].main
-  const color = theme.palette[msgType].contrastText
+  const bg = `var(--${msgType})`
+  const color = `var(--${msgType}-foreground)`
 
   return (
     <Tooltip arrow title={<TooltipContent />}>

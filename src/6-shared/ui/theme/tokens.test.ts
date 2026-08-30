@@ -85,11 +85,14 @@ describe('theme tokens and their Tailwind counterparts', () => {
   })
 
   it('declares the same names in both schemes', () => {
-    // `.dark` overrides what the scheme changes and nothing else, so a name
-    // only it declares is either a typo or a token that light mode cannot
-    // read. What light declares alone is the scheme-independent part —
-    // radius, elevations, stacking levels — and that is expected.
+    // Everything the theme emits is a palette value now, and a palette value
+    // belongs to both schemes or to neither: a name only one of them declares
+    // is a typo, or a token the other scheme cannot read. The check runs both
+    // ways because the scheme-independent constants that used to make it
+    // one-way — radius, elevations, stacking levels — are declared in
+    // `tailwind.css` instead, where they do not depend on a mounted provider.
     expect(dark.filter(token => !light.includes(token))).toEqual([])
+    expect(light.filter(token => !dark.includes(token))).toEqual([])
     expect(dark.length).toBeGreaterThan(0)
   })
 })

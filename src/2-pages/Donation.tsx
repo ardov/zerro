@@ -1,7 +1,6 @@
 import type { FC, ReactElement } from 'react'
 import { Link } from '6-shared/ui/Link'
 import { useTranslation } from 'react-i18next'
-import { useAppTheme } from '6-shared/ui/theme'
 
 export default function Donation() {
   const { t } = useTranslation('donation')
@@ -68,8 +67,6 @@ const LinkCard: FC<LinkCardProps> = props => {
 }
 
 function PatreonLogo() {
-  const theme = useAppTheme()
-  const isDark = theme.palette.mode === 'dark'
   return (
     <svg
       width="48"
@@ -83,7 +80,7 @@ function PatreonLogo() {
         y="7"
         width="6"
         height="34"
-        fill={isDark ? '#ffffff' : '#052A49'}
+        className="fill-[#052A49] dark:fill-white"
       />
       <circle cx="29" cy="20" r="13" fill="#F96753" />
     </svg>
@@ -91,9 +88,6 @@ function PatreonLogo() {
 }
 
 function CardLogo() {
-  const theme = useAppTheme()
-  const mainColor = theme.palette.primary.main
-  const secondaryColor = theme.palette.warning.main
   return (
     <svg
       width="48"
@@ -105,19 +99,18 @@ function CardLogo() {
     >
       <path
         d="M6 19H42V33C42 35.2091 40.2091 37 38 37H10C7.79086 37 6 35.2091 6 33V19Z"
-        fill={mainColor}
+        className="fill-primary"
       />
       <path
         d="M6 15C6 12.7909 7.79086 11 10 11H38C40.2091 11 42 12.7909 42 15V19H6V15Z"
-        fill={secondaryColor}
+        className="fill-warning"
       />
-      <circle cx="35.5" cy="30.5" r="3.5" fill={secondaryColor} />
+      <circle cx="35.5" cy="30.5" r="3.5" className="fill-warning" />
       <circle
         cx="29.5"
         cy="30.5"
         r="4"
-        fill={secondaryColor}
-        stroke={mainColor}
+        className="fill-warning stroke-primary"
       />
     </svg>
   )

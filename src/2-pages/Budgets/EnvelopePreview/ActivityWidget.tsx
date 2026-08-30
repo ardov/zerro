@@ -7,7 +7,6 @@ import { core } from 'zerro-core/redux'
 
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { useTranslation } from 'react-i18next'
-import { useAppTheme } from '6-shared/ui/theme'
 import type { TFxAmount, TISOMonth } from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
 
@@ -64,10 +63,9 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
     setHighlighted(month)
   }
 
-  const theme = useAppTheme()
-  const activityColor = theme.palette.info.main
-  const budgetLineColor = theme.palette.background.default
-  const startingAmountColor = theme.palette.primary.main
+  const activityColor = 'var(--info)'
+  const budgetLineColor = 'var(--background)'
+  const startingAmountColor = 'var(--primary)'
 
   return (
     <div

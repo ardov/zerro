@@ -12,7 +12,6 @@ import {
   CartesianGrid,
 } from 'recharts'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { useAppTheme } from '6-shared/ui/theme'
 import { formatMoney } from '6-shared/helpers/money'
 import { formatDate, parseDate } from '6-shared/helpers/date'
 import type { TISODate } from '6-shared/types'
@@ -44,16 +43,15 @@ function formatSavingsRate(savingsRate: number) {
 export function WidgetCashflow(props: WidgetCashflowProps) {
   const { t } = useTranslation('analytics')
   const { period, onTogglePeriod } = props
-  const theme = useAppTheme()
   const points = useCashFlow(period)
 
   const { income, outcome } = summarizeCashflow(points)
   const netIncome = income - outcome
   const savingsRate = income > 0 ? netIncome / income : 0
 
-  const colorIncome = theme.palette.success.main
-  const colorOutcome = theme.palette.error.main
-  const colorAxisText = theme.palette.text.disabled
+  const colorIncome = 'var(--success)'
+  const colorOutcome = 'var(--error)'
+  const colorAxisText = 'var(--disabled-foreground)'
 
   return (
     <div className="surface-card shadow-elevation-1">
@@ -62,7 +60,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
           {t('incomesAndOutcomes')}{' '}
           <span
             style={{
-              color: theme.palette.secondary.main,
+              color: 'var(--interactive)',
               cursor: 'pointer',
               whiteSpace: 'nowrap',
             }}
@@ -198,10 +196,8 @@ function tickFormatter(date: TISODate) {
 function Summary(props: { income: number; outcome: number }) {
   const { income, outcome } = props
   const { t } = useTranslation('analytics')
-  const theme = useAppTheme()
 
-  const color =
-    income >= outcome ? theme.palette.success.main : theme.palette.error.main
+  const color = income >= outcome ? 'var(--success)' : 'var(--error)'
   const netIncome = income - outcome
 
   const tooltip = (

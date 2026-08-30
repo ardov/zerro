@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import { Collapse } from '6-shared/ui/Collapse'
 import { ListRows, ListRowSubheader } from '6-shared/ui/ListRow'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
-import { useAppTheme } from '6-shared/ui/theme'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
 import type { TAccountId, TISODate, TFxAmount } from '6-shared/types'
 import { Amount } from '6-shared/ui/Amount'
@@ -165,7 +164,6 @@ type AccTrendProps = {
 
 const AccountHistoryWidget: FC<AccTrendProps> = memo(
   ({ id, period, onClick }) => {
-    const theme = useAppTheme()
     const acc = core.accounts.usePopulated()[id]
     const data = useAccountHistory(id, period)
 
@@ -240,12 +238,12 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
                 <linearGradient id={colorId} x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset={offset}
-                    stopColor={theme.palette.primary.main}
+                    stopColor="var(--primary)"
                     stopOpacity={0.2}
                   />
                   <stop
                     offset={offset}
-                    stopColor={theme.palette.error.main}
+                    stopColor="var(--error)"
                     stopOpacity={0.3}
                   />
                 </linearGradient>

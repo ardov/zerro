@@ -1,6 +1,5 @@
-import { createContext, useContext, useMemo, useSyncExternalStore } from 'react'
+import { createContext, useContext, useSyncExternalStore } from 'react'
 import type { TColorScheme } from './palette'
-import { palettes } from './palette'
 
 type ThemeManager = {
   getTheme: () => TColorScheme
@@ -45,15 +44,4 @@ export function useColorScheme() {
     mode: override ?? theme,
     toggle: override ? ignoreToggle : toggleTheme,
   }
-}
-
-/** The palette for the scheme on screen.
- *
- * It is a palette rather than a theme: spacing, breakpoints, typography and
- * shadows are either Tailwind tokens
- * or `breakpoints.ts`. What is left is the colours a chart or an SVG has to be
- * handed as a value, because a CSS variable cannot reach a `stroke` attribute. */
-export function useAppTheme() {
-  const { mode } = useColorScheme()
-  return useMemo(() => ({ palette: palettes[mode] }), [mode])
 }

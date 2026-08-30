@@ -13,7 +13,6 @@ import {
   ReferenceLine,
 } from 'recharts'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { useAppTheme } from '6-shared/ui/theme'
 import { round } from '6-shared/helpers/money'
 import { formatDate, GroupBy } from '6-shared/helpers/date'
 
@@ -27,6 +26,18 @@ import { useAverageExpenses } from './useAverageExpenses'
 type Point = TNetWorthPoint & { total: number }
 type TDataKey = keyof Omit<Point, 'date'>
 
+/** The series colours, as tokens rather than palette values: a chart repaints
+ * with the colour scheme through the cascade, without re-rendering. The paired
+ * shades are what separates two series that share a meaning. */
+const colors: Record<TDataKey, string> = {
+  lented: 'var(--success-light)',
+  debts: 'var(--error-light)',
+  accountDebts: 'var(--error-dark)',
+  fundsInBudget: 'var(--primary-dark)',
+  fundsSaving: 'var(--primary-light)',
+  total: 'var(--info)',
+}
+
 type WidgetNetWorthProps = {
   period: Period
   onTogglePeriod: () => void
@@ -35,7 +46,6 @@ type WidgetNetWorthProps = {
 export function WidgetNetWorth(props: WidgetNetWorthProps) {
   const { period, onTogglePeriod } = props
   const { t } = useTranslation('analytics')
-  const theme = useAppTheme()
   const balances = useNetWorth(period, GroupBy.Month)
 
   const [visibleParts, setVisibleParts] = useState<Array<TDataKey>>([
@@ -61,15 +71,6 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
     )
     return { ...b, total }
   })
-
-  const colors = {
-    lented: theme.palette.success.light,
-    debts: theme.palette.error.light,
-    accountDebts: theme.palette.error.dark,
-    fundsInBudget: theme.palette.primary.dark,
-    fundsSaving: theme.palette.primary.light,
-    total: theme.palette.info.main,
-  }
 
   const names = {
     lented: t('netWorth.lented'),
@@ -112,7 +113,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
         <h2 className="m-0 type-title-lg">
           {t('netWorth.title')}{' '}
           <span
-            style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
+            style={{ color: 'var(--interactive)', cursor: 'pointer' }}
             onClick={onTogglePeriod}
           >
             <PeriodTitle period={period} />
@@ -134,7 +135,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
             <YAxis type="number" domain={['dataMin', 'dataMax']} hide />
             <RechartsTooltip content={<CustomTooltip />} />
             {visibleParts.length > 0 && (
-              <ReferenceLine y={0} stroke={theme.palette.divider} />
+              <ReferenceLine y={0} stroke="var(--border)" />
             )}
 
             {makeBar('debts')}
