@@ -469,7 +469,7 @@ export const en: typeof ru = {
     restoreFromBackup: 'Restore from backup',
     importTitle: 'Restore from backup',
     importWarning:
-      'Your data will be set to what the file describes. Anything changed since the backup is overwritten. Deleted transactions do not come back, and accounts, categories, and merchants are never removed. The change goes to the queue, so you can undo it before syncing.',
+      'Your data will be set to what the file describes. Anything changed since the backup is overwritten. The change goes to the queue, so you can undo it before syncing.',
     importCreated: 'create {{n}}',
     importUpdated: 'change {{n}}',
     importRemoved: 'remove {{n}}',

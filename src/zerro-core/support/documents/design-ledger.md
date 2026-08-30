@@ -244,6 +244,24 @@ point. What is still open is listed in
   return under their old ID, and a desired live transaction with no semantic
   replacement gets a fresh ID — so repeating a restore converges instead of
   producing a second command.
+- Accounts are exempt from the semantic match above: a backup account is
+  reconciled to a live account only when their IDs are equal, never by
+  resemblance. Reusing a resembling account forces every operation inside it
+  to be removed one at a time as a soft delete, and a soft delete is a
+  permanent server-side ratchet, so the account would survive forever carrying
+  struck-through rows; deleting it instead hard-purges the operations wholly
+  contained in it, which is observed server behaviour. This is a global rule,
+  not a foreign-import special case, and it knowingly weakens the convergence
+  promise above: a restore converges only where identifiers match, which is
+  every ordinary same-account restore. It does not converge for an account
+  whose ID is absent, so repeating a restore that creates accounts rebuilds
+  rather than converges.
+- An operation whose both legs sit on accounts a restore is deleting carries no
+  soft delete of its own — the account deletion already purges it, and a
+  redundant soft delete would both bloat the push and leave the local replica
+  holding a tombstone the server does not have. An operation with a surviving
+  leg is still removed explicitly, which includes every debt operation, since
+  the debt account singleton above is never removed.
 - A restore removes a row the way that entity type is removed at all: soft
   delete for transactions, zeroing for budgets, a real `deletion` for accounts,
   merchants, tags, reminders, and reminder markers, and nothing for the user

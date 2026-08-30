@@ -43,6 +43,11 @@ type TReference = {
   many?: boolean
 }
 
+/** What the current pass of the planner has already committed to deleting. */
+type TRemovalContext = {
+  deletedAccountIds: Set<string>
+}
+
 type TEntityRow = {
   key: TIntentEntityKey
   writableFields: readonly string[]
@@ -54,10 +59,21 @@ type TEntityRow = {
   skip?: (row: TRow) => boolean
   isAbsent?: (row: TRow) => boolean
   immutableFields?: readonly string[]
-  skipRemoval?: (row: TRow, current: TDataStore) => boolean
+  skipRemoval?: (
+    row: TRow,
+    current: TDataStore,
+    context: TRemovalContext
+  ) => boolean
   references?: readonly TReference[]
   generatedId?: boolean
   remap?: (row: TRow, mappings: TRestoreIdMappings) => TRow
+  /**
+   * Reused only where the backup names the live id, never on resemblance.
+   * Reusing a resembling account forces every operation inside it to be
+   * removed one at a time as a soft delete — a permanent server-side ratchet.
+   * Deletion hard-purges them instead, which is observed server behaviour.
+   */
+  matchByIdOnly?: boolean
 }
 
 /** Dependency order: every rewritten reference is mapped before it is used. */
@@ -78,6 +94,7 @@ const entityRows: readonly TEntityRow[] = [
     // no-op, so predicting its removal would make current lie until sync.
     skipRemoval: row => row.type === AccountType.Debt,
     generatedId: true,
+    matchByIdOnly: true,
   },
   {
     key: 'merchant',
@@ -140,6 +157,9 @@ const entityRows: readonly TEntityRow[] = [
     removal: 'softDelete',
     generatedId: true,
     skip: row => row.deleted === true,
+    // See `bothLegsInsideDeletedAccounts` for why this is skipped.
+    skipRemoval: (row, _current, context) =>
+      bothLegsInsideDeletedAccounts(row, context),
     references: [
       { field: 'incomeAccount', key: 'account' },
       { field: 'outcomeAccount', key: 'account' },
@@ -202,6 +222,7 @@ export function buildRestorePlan(
   const patchByKey = patch as Record<string, unknown>
   const deletion: TDeletionIntent[] = []
   const mappings: TRestoreIdMappings = {}
+  const removalContext: TRemovalContext = { deletedAccountIds: new Set() }
 
   seedDebtAccountMapping(current, desired, mappings)
 
@@ -272,20 +293,26 @@ export function buildRestorePlan(
     })
 
     // Exact semantic matches are a multiset: each live current candidate is
-    // consumed at most once, so duplicate imported operations retain cardinality.
+    // consumed at most once, so duplicate imported operations retain
+    // cardinality. Skipped entirely for a row matched by id alone — see
+    // `matchByIdOnly`.
     const candidatesByFingerprint = new Map<string, TRow[]>()
-    activeCurrent.forEach(entity => {
-      if (consumedCurrent.has(String(entity.id))) return
-      const fingerprint = entityFingerprint(row, entity)
-      const candidates = candidatesByFingerprint.get(fingerprint) ?? []
-      candidates.push(entity)
-      candidatesByFingerprint.set(fingerprint, candidates)
-    })
+    if (!row.matchByIdOnly) {
+      activeCurrent.forEach(entity => {
+        if (consumedCurrent.has(String(entity.id))) return
+        const fingerprint = entityFingerprint(row, entity)
+        const candidates = candidatesByFingerprint.get(fingerprint) ?? []
+        candidates.push(entity)
+        candidatesByFingerprint.set(fingerprint, candidates)
+      })
+    }
 
     activeDesired.forEach(rawDesired => {
       const desiredId = String(rawDesired.id)
       if (isAbsent(row, rawDesired) || mappedDesired.has(desiredId)) return
       const desiredEntity = remapEntity(row, rawDesired, mappings)
+      // Empty whenever `matchByIdOnly` skipped populating it above, so this
+      // lookup never matches — no separate guard needed here.
       const candidates = candidatesByFingerprint.get(
         entityFingerprint(row, desiredEntity)
       )
@@ -320,7 +347,12 @@ export function buildRestorePlan(
 
     activeCurrent.forEach(before => {
       if (consumedCurrent.has(String(before.id))) return
-      if (row.skipRemoval?.(before, current)) return
+      if (row.skipRemoval?.(before, current, removalContext)) return
+      // Recorded before transaction removal is decided below, since account
+      // is processed first and a transaction's own removal depends on it.
+      if (row.key === 'account') {
+        removalContext.deletedAccountIds.add(String(before.id))
+      }
       const removal = removalIntent(row, before, deletion)
       if (removal) intents.push(removal)
     })
@@ -438,6 +470,30 @@ function accountTypeOf(
   id: string | null
 ): AccountType | undefined {
   return id === null ? undefined : store.account[id]?.type
+}
+
+/**
+ * Whether a transaction's own removal would be redundant: both of its legs
+ * sit on accounts this same plan is already deleting, so the account
+ * deletion's cascade purges it without help. A leg that survives — including
+ * every debt leg, since the debt account is never deleted — still needs the
+ * transaction removed explicitly.
+ */
+function bothLegsInsideDeletedAccounts(
+  transaction: TRow,
+  context: TRemovalContext
+): boolean {
+  return (
+    legInsideDeletedAccount(transaction.incomeAccount, context) &&
+    legInsideDeletedAccount(transaction.outcomeAccount, context)
+  )
+}
+
+function legInsideDeletedAccount(
+  leg: unknown,
+  context: TRemovalContext
+): boolean {
+  return leg !== null && context.deletedAccountIds.has(String(leg))
 }
 
 function mapId(

@@ -319,7 +319,7 @@ describe('importBackup', () => {
     expect(runner.commands()).toEqual([])
   })
 
-  it('allocates fresh ids at confirm time and converges on the next import', () => {
+  it('allocates fresh ids at confirm time and rebuilds rather than converges on a repeat import', () => {
     const recreated = makeSnapshot({
       account: { backupAccount: makeAccount({ id: 'backupAccount' }) },
       transaction: {
@@ -345,11 +345,14 @@ describe('importBackup', () => {
       outcome: 42,
     })
 
+    // The restored account never carries the backup's own id, so a repeat
+    // import cannot recognise it as already restored — it rebuilds instead
+    // of converging, per the account identity rule.
     expect(runner.dispatch(importBackup(recreated))).toEqual({
       ok: true,
-      applied: false,
+      applied: true,
     })
-    expect(runner.commands()).toHaveLength(1)
+    expect(runner.commands()).toHaveLength(2)
   })
 
   it('rejects a structurally valid backup from another account', () => {

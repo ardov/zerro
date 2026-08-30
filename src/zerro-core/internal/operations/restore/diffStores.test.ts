@@ -402,6 +402,108 @@ describe('diffStores and the deletion ratchet', () => {
   })
 })
 
+describe('diffStores and account deletion cascades', () => {
+  it('does not soft-delete an operation whose both legs sit inside accounts being deleted', () => {
+    const current = makeSnapshot({
+      account: {
+        from: makeAccount({ id: 'from' }),
+        to: makeAccount({ id: 'to' }),
+      },
+      transaction: {
+        transfer: makeTransaction({
+          id: 'transfer',
+          incomeAccount: 'to',
+          outcomeAccount: 'from',
+          income: 10,
+          outcome: 10,
+        }),
+      },
+    })
+    const desired = makeSnapshot()
+
+    const patch = diffStores(current, desired)
+    expect(patch.deletion).toEqual(
+      expect.arrayContaining([
+        { id: 'from', object: 'account' },
+        { id: 'to', object: 'account' },
+      ])
+    )
+    // The account deletions above already hard-purge it; a soft delete on
+    // top would bloat the push and leave a tombstone the server never has.
+    expect(patch.transaction).toBeUndefined()
+
+    // The skipped removal must not leave a dangling row behind: the account
+    // deletion's own cascade has to be what actually purges it.
+    const restored = applyDiff(current, desired)
+    expect(restored.account).toEqual({})
+    expect(restored.transaction.transfer).toBeUndefined()
+  })
+
+  it('still soft-deletes an operation with one leg on a surviving account', () => {
+    const current = makeSnapshot({
+      account: {
+        gone: makeAccount({ id: 'gone' }),
+        stays: makeAccount({ id: 'stays' }),
+      },
+      transaction: {
+        mixed: makeTransaction({
+          id: 'mixed',
+          incomeAccount: 'stays',
+          outcomeAccount: 'gone',
+          income: 10,
+          outcome: 10,
+        }),
+      },
+    })
+    const desired = makeSnapshot({
+      account: { stays: makeAccount({ id: 'stays' }) },
+    })
+
+    const patch = diffStores(current, desired)
+    expect(patch.deletion).toEqual([{ id: 'gone', object: 'account' }])
+    expect(patch.transaction).toEqual([{ id: 'mixed', deleted: true }])
+
+    // Balance shifts as a side effect of the soft delete — already covered
+    // elsewhere — so only presence is asserted here, not the exact balance.
+    const restored = applyDiff(current, desired)
+    expect(restored.account.gone).toBeUndefined()
+    expect(restored.account.stays).toBeDefined()
+    expect(restored.transaction.mixed.deleted).toBe(true)
+  })
+
+  it('still soft-deletes a debt operation even though its other leg is being deleted', () => {
+    const current = makeSnapshot({
+      account: {
+        debt: makeAccount({ id: 'debt', type: AccountType.Debt }),
+        gone: makeAccount({ id: 'gone' }),
+      },
+      transaction: {
+        debtTransfer: makeTransaction({
+          id: 'debtTransfer',
+          incomeAccount: 'debt',
+          outcomeAccount: 'gone',
+          income: 10,
+          outcome: 10,
+        }),
+      },
+    })
+    const desired = makeSnapshot({
+      account: { debt: makeAccount({ id: 'debt', type: AccountType.Debt }) },
+    })
+
+    const patch = diffStores(current, desired)
+    // The debt account is a protected singleton that never appears among
+    // deletions, so a debt operation always keeps its explicit removal.
+    expect(patch.deletion).toEqual([{ id: 'gone', object: 'account' }])
+    expect(patch.transaction).toEqual([{ id: 'debtTransfer', deleted: true }])
+
+    const restored = applyDiff(current, desired)
+    expect(restored.account.gone).toBeUndefined()
+    expect(restored.account.debt).toBeDefined()
+    expect(restored.transaction.debtTransfer.deleted).toBe(true)
+  })
+})
+
 describe('restore reconciliation', () => {
   const allocateId = (key: string, id: string) => `fresh:${key}:${id}`
 
@@ -444,19 +546,57 @@ describe('restore reconciliation', () => {
     })
 
     const plan = buildRestorePlan(current, desired, { allocateId })
+    // The account never matches on resemblance, even sharing every field
+    // with the live one — only the tag does, per the account identity rule.
     expect(plan.mappings).toMatchObject({
-      account: { backupAccount: 'liveAccount' },
+      account: { backupAccount: 'fresh:account:backupAccount' },
       tag: { backupTag: 'liveTag' },
       transaction: { backupTransaction: 'fresh:transaction:backupTransaction' },
     })
+    expect(plan.patch.account).toEqual([
+      expect.objectContaining({
+        id: 'fresh:account:backupAccount',
+        title: 'Cash',
+      }),
+    ])
     expect(plan.patch.transaction).toEqual([
       expect.objectContaining({
         id: 'fresh:transaction:backupTransaction',
-        incomeAccount: 'liveAccount',
-        outcomeAccount: 'liveAccount',
+        incomeAccount: 'fresh:account:backupAccount',
+        outcomeAccount: 'fresh:account:backupAccount',
         tag: ['liveTag'],
       }),
     ])
+    expect(plan.patch.deletion).toContainEqual({
+      id: 'liveAccount',
+      object: 'account',
+    })
+  })
+
+  it('never reconciles an account to a live account that merely resembles it', () => {
+    const current = makeSnapshot({
+      account: {
+        live: makeAccount({ id: 'live', title: 'Cash', balance: 100 }),
+      },
+    })
+    const desired = makeSnapshot({
+      account: {
+        backup: makeAccount({ id: 'backup', title: 'Cash', balance: 100 }),
+      },
+    })
+
+    const plan = buildRestorePlan(current, desired, { allocateId })
+    expect(plan.mappings.account).toEqual({ backup: 'fresh:account:backup' })
+    expect(plan.patch.account).toEqual([
+      expect.objectContaining({ id: 'fresh:account:backup', title: 'Cash' }),
+    ])
+    expect(plan.patch.deletion).toEqual([{ id: 'live', object: 'account' }])
+
+    const restored = applyDiff(current, desired)
+    expect(restored.account.live).toBeUndefined()
+    expect(restored.account['restored:account:backup']).toMatchObject({
+      title: 'Cash',
+    })
   })
 
   it('replaces a transaction when immutable created differs and then converges', () => {
@@ -541,7 +681,15 @@ describe('restore reconciliation', () => {
       },
     })
 
-    const restored = applyDiff(makeSnapshot(), desired)
+    // The account keeps the backup's own id — the ordinary same-account case
+    // the identity rule leaves unchanged — so its convergence on replay does
+    // not depend on the account matching rule under test elsewhere.
+    const current = makeSnapshot({
+      account: {
+        account: makeAccount({ id: 'account', title: 'Placeholder' }),
+      },
+    })
+    const restored = applyDiff(current, desired)
 
     expect(buildRestorePlan(restored, desired, { allocateId }).patch).toEqual(
       {}
