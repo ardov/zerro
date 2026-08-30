@@ -29,9 +29,15 @@ import {
 import { isZerroDataAccount } from '../../domain/zerro/accounts'
 import {
   hiddenDataSummaryKeys,
+  HiddenDataType,
   parseHiddenDataComment,
   type THiddenDataSummaryKey,
 } from '../../domain/zerro/hidden-data'
+import {
+  EnvType,
+  envId,
+  type TEnvelopeId,
+} from '../../domain/zerro/envelope-id'
 
 type TId = string | number
 type TRow = { id: TId; [field: string]: unknown }
@@ -134,6 +140,10 @@ const entityRows: readonly TEntityRow[] = [
       { field: 'tag', key: 'tag', many: true },
       { field: 'merchant', key: 'merchant' },
     ],
+    remap: (row, mappings) => ({
+      ...row,
+      comment: remapHiddenDataComment(row.comment, mappings),
+    }),
   },
   {
     key: 'reminderMarker',
@@ -473,6 +483,109 @@ function remapEntity(
     }
   })
   return row.remap ? row.remap(remapped, mappings) : remapped
+}
+
+/**
+ * Rewrites Zerro-owned payload keys after their ZenMoney entities receive new
+ * ids. Unknown and unreadable comments remain untouched: the reminder is
+ * still part of the backup even if this version cannot interpret its payload.
+ */
+function remapHiddenDataComment(
+  comment: unknown,
+  mappings: TRestoreIdMappings
+): unknown {
+  if (typeof comment !== 'string') return comment
+  const hidden = parseHiddenDataComment(comment)
+  if (!hidden) return comment
+
+  const remapped =
+    hidden.type === HiddenDataType.Budgets ||
+    hidden.type === HiddenDataType.Goals
+      ? remapEnvelopePayload(hidden.payload, mappings)
+      : hidden.type === HiddenDataType.EnvelopeMeta
+        ? remapEnvelopeMetadata(hidden.payload, mappings)
+        : null
+
+  if (!remapped?.changed) return comment
+  return JSON.stringify({ ...hidden, payload: remapped.payload })
+}
+
+function remapEnvelopePayload(
+  payload: unknown,
+  mappings: TRestoreIdMappings
+): { payload: unknown; changed: boolean } {
+  if (!isObjectRecord(payload)) return { payload, changed: false }
+
+  let changed = false
+  const entries = Object.entries(payload).map(([id, value]) => {
+    const remapped = remapEnvelopeId(id, mappings)
+    changed ||= remapped.changed
+    return [remapped.id, value] as const
+  })
+  return { payload: Object.fromEntries(entries), changed }
+}
+
+function remapEnvelopeMetadata(
+  payload: unknown,
+  mappings: TRestoreIdMappings
+): { payload: unknown; changed: boolean } {
+  if (!isObjectRecord(payload)) return { payload, changed: false }
+
+  let changed = false
+  const entries = Object.entries(payload).map(([key, value]) => {
+    const remappedKey = remapEnvelopeId(key, mappings)
+    const metadata = remapEnvelopeMetadataEntry(value, mappings)
+    changed ||= remappedKey.changed || metadata.changed
+    return [remappedKey.id, metadata.value] as const
+  })
+  return { payload: Object.fromEntries(entries), changed }
+}
+
+function remapEnvelopeMetadataEntry(
+  value: unknown,
+  mappings: TRestoreIdMappings
+): { value: unknown; changed: boolean } {
+  if (!isObjectRecord(value)) return { value, changed: false }
+
+  const id = remapEnvelopeId(value.id, mappings)
+  const parent = remapEnvelopeId(value.parent, mappings)
+  if (!id.changed && !parent.changed) return { value, changed: false }
+  return {
+    value: {
+      ...value,
+      ...(id.changed ? { id: id.id } : {}),
+      ...(parent.changed ? { parent: parent.id } : {}),
+    },
+    changed: true,
+  }
+}
+
+function remapEnvelopeId(
+  id: unknown,
+  mappings: TRestoreIdMappings
+): { id: unknown; changed: boolean } {
+  if (typeof id !== 'string') return { id, changed: false }
+  const parsed = envId.parse(id as TEnvelopeId)
+  const entityKey =
+    parsed.type === EnvType.Tag
+      ? 'tag'
+      : parsed.type === EnvType.Account
+        ? 'account'
+        : parsed.type === EnvType.Merchant
+          ? 'merchant'
+          : null
+  if (!entityKey) return { id, changed: false }
+
+  const mapped = mapId(mappings, entityKey, parsed.id)
+  if (mapped === parsed.id) return { id, changed: false }
+  return {
+    id: envId.get(parsed.type, mapped === null ? null : String(mapped)),
+    changed: true,
+  }
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
 }
 
 /**

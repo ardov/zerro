@@ -7,10 +7,19 @@ import { makeTestRootState } from 'store/testing'
 import { applyPatch } from 'zerro-core/internal/domain/zenmoney'
 import { materializeCommand } from 'zerro-core/internal/operations/materialization'
 import { AccountType } from 'zerro-core/internal/domain/zenmoney/entities/accounts'
+import { ZERRO_DATA_ACCOUNT_NAME } from 'zerro-core/constants'
+import { getEnvBudgets } from 'zerro-core/internal/domain/zerro/budgets/read'
+import { EnvType, envId } from 'zerro-core/internal/domain/zerro/envelope-id'
+import { getEnvelopeMeta } from 'zerro-core/internal/domain/zerro/envelope-meta'
+import { getRawGoals } from 'zerro-core/internal/domain/zerro/goals/read'
+import { HiddenDataType } from 'zerro-core/internal/domain/zerro/hidden-data'
 import {
   makeAccount,
   makeInstrument,
+  makeMerchant,
+  makeReminder,
   makeStore,
+  makeTag,
   makeTransaction,
   makeUser,
 } from 'zerro-core/support/testing/zenmoneyTestData'
@@ -21,11 +30,14 @@ import {
   previewBackup,
 } from './importBackup'
 
-const { trackMock } = vi.hoisted(() => ({ trackMock: vi.fn() }))
+const { trackMock, uuidMock } = vi.hoisted(() => ({
+  trackMock: vi.fn(),
+  uuidMock: vi.fn(() => 'fresh-restore-id'),
+}))
 vi.mock('6-shared/analytics', () => ({ track: trackMock }))
 
 const RESTORE_UUID = 'fresh-restore-id'
-vi.mock('uuid', () => ({ v1: () => RESTORE_UUID }))
+vi.mock('uuid', () => ({ v1: uuidMock }))
 
 const rootUser = makeUser({ id: 1, parent: null, currency: 2 })
 const backupCollectionKeys = [
@@ -327,6 +339,40 @@ describe('importBackup', () => {
     expect(runner.commands()).toEqual([])
   })
 
+  it('keeps same-account hidden-data comments unchanged', () => {
+    const comment =
+      '{ "type": "budgets", "month": "2026-08", "payload": { "tag#food": 100 } }'
+    const backup = makeSnapshot({
+      account: {
+        data: makeAccount({ id: 'data', title: ZERRO_DATA_ACCOUNT_NAME }),
+      },
+      tag: { food: makeTag({ id: 'food', title: 'Food' }) },
+      reminder: {
+        budgets: makeReminder({
+          id: 'budgets',
+          incomeAccount: 'data',
+          outcomeAccount: 'data',
+          comment,
+        }),
+      },
+    })
+    const current = makeSnapshot({
+      account: {
+        data: makeAccount({ id: 'data', title: ZERRO_DATA_ACCOUNT_NAME }),
+      },
+      tag: { food: makeTag({ id: 'food', title: 'Food' }) },
+    })
+    const runner = makeThunkRunner(makeTestRootState(current))
+
+    expect(runner.dispatch(importBackup(backup))).toEqual({
+      ok: true,
+      applied: true,
+    })
+    expect(runner.state().data.current.reminder[RESTORE_UUID].comment).toBe(
+      comment
+    )
+  })
+
   it('allocates fresh ids at confirm time and rebuilds rather than converges on a repeat import', () => {
     const recreated = makeSnapshot({
       account: { backupAccount: makeAccount({ id: 'backupAccount' }) },
@@ -463,6 +509,209 @@ describe('importBackup', () => {
     expect(trackMock).toHaveBeenLastCalledWith('data_backup_imported', {
       foreign: true,
     })
+  })
+
+  it('moves hidden envelope state onto newly created foreign entities', () => {
+    let nextId = 0
+    uuidMock.mockImplementation(() => `fresh-${++nextId}`)
+    const foreignCash = 'foreign-cash'
+    const foreignData = 'foreign-data'
+    const foreignTag = 'foreign-tag'
+    const foreignMerchant = 'foreign-merchant'
+    const tagEnvelope = envId.get(EnvType.Tag, foreignTag)
+    const accountEnvelope = envId.get(EnvType.Account, foreignCash)
+    const merchantEnvelope = envId.get(EnvType.Merchant, foreignMerchant)
+    const payeeEnvelope = envId.get(EnvType.Payee, 'Coffee shop')
+    const dataReminder = (id: string, type: HiddenDataType, payload: unknown) =>
+      makeReminder({
+        id,
+        user: 2,
+        incomeAccount: foreignData,
+        outcomeAccount: foreignData,
+        comment: JSON.stringify({
+          type,
+          ...(type === HiddenDataType.Budgets || type === HiddenDataType.Goals
+            ? { month: '2026-08' }
+            : {}),
+          payload,
+        }),
+      })
+    const foreign = makeSnapshot({
+      user: { 2: makeUser({ id: 2, parent: null, currency: 1 }) },
+      account: {
+        [foreignCash]: makeAccount({ id: foreignCash, user: 2, title: 'Cash' }),
+        [foreignData]: makeAccount({
+          id: foreignData,
+          user: 2,
+          title: ZERRO_DATA_ACCOUNT_NAME,
+        }),
+      },
+      tag: {
+        [foreignTag]: makeTag({
+          id: foreignTag,
+          user: 2,
+          title: 'Food',
+          color: 0x65a30d,
+        }),
+      },
+      merchant: {
+        [foreignMerchant]: makeMerchant({
+          id: foreignMerchant,
+          user: 2,
+          title: 'Market',
+        }),
+      },
+      reminder: {
+        budgets: dataReminder('budgets', HiddenDataType.Budgets, {
+          [tagEnvelope]: 100,
+          [accountEnvelope]: 200,
+          [merchantEnvelope]: 300,
+          [payeeEnvelope]: 400,
+        }),
+        goals: dataReminder('goals', HiddenDataType.Goals, {
+          [tagEnvelope]: { type: 'monthly', amount: 100 },
+          [accountEnvelope]: { type: 'monthly', amount: 200 },
+          [merchantEnvelope]: { type: 'monthly', amount: 300 },
+          [payeeEnvelope]: { type: 'monthly', amount: 400 },
+        }),
+        envelopeMeta: dataReminder(
+          'envelope-meta',
+          HiddenDataType.EnvelopeMeta,
+          {
+            [tagEnvelope]: {
+              id: tagEnvelope,
+              group: 'Expenses',
+              index: 3,
+              visibility: 'hidden',
+              parent: accountEnvelope,
+              comment: 'Food budget',
+              keepIncome: true,
+            },
+            [accountEnvelope]: {
+              id: accountEnvelope,
+              parent: merchantEnvelope,
+            },
+            [merchantEnvelope]: {
+              id: merchantEnvelope,
+              parent: tagEnvelope,
+            },
+            [payeeEnvelope]: { id: payeeEnvelope },
+          }
+        ),
+        fxRates: dataReminder('fx-rates', HiddenDataType.FxRates, {
+          USD: { rate: 1 },
+        }),
+        userSettings: dataReminder(
+          'user-settings',
+          HiddenDataType.UserSettings,
+          { emojiIcons: true }
+        ),
+        unreadable: makeReminder({
+          id: 'unreadable',
+          user: 2,
+          incomeAccount: foreignData,
+          outcomeAccount: foreignData,
+          comment: 'not hidden data',
+        }),
+      },
+    })
+    const runner = makeThunkRunner(makeTestRootState(makeSnapshot()))
+
+    expect(() => runner.dispatch(previewBackup(foreign))).not.toThrow()
+    expect(runner.dispatch(importBackup(foreign))).toEqual({
+      ok: true,
+      applied: true,
+    })
+
+    const restored = runner.state().data.current
+    const restoredTag = Object.values(restored.tag).find(
+      tag => tag.title === 'Food'
+    )
+    const restoredCash = Object.values(restored.account).find(
+      account => account.title === 'Cash'
+    )
+    const restoredMerchant = Object.values(restored.merchant).find(
+      merchant => merchant.title === 'Market'
+    )
+    expect(restoredTag).toBeDefined()
+    expect(restoredCash).toBeDefined()
+    expect(restoredMerchant).toBeDefined()
+    if (!restoredTag || !restoredCash || !restoredMerchant) return
+    expect(restoredTag.color).toBe(0x65a30d)
+
+    const restoredTagEnvelope = envId.get(EnvType.Tag, restoredTag.id)
+    const restoredAccountEnvelope = envId.get(EnvType.Account, restoredCash.id)
+    const restoredMerchantEnvelope = envId.get(
+      EnvType.Merchant,
+      restoredMerchant.id
+    )
+    const budgets = getEnvBudgets(restored.reminder)
+    const goals = getRawGoals(restored.reminder)
+    const metadata = getEnvelopeMeta(restored.reminder)
+
+    expect(budgets).toEqual({
+      '2026-08': {
+        [restoredTagEnvelope]: 100,
+        [restoredAccountEnvelope]: 200,
+        [restoredMerchantEnvelope]: 300,
+        [payeeEnvelope]: 400,
+      },
+    })
+    expect(goals).toEqual({
+      '2026-08': {
+        [restoredTagEnvelope]: { type: 'monthly', amount: 100 },
+        [restoredAccountEnvelope]: { type: 'monthly', amount: 200 },
+        [restoredMerchantEnvelope]: { type: 'monthly', amount: 300 },
+        [payeeEnvelope]: { type: 'monthly', amount: 400 },
+      },
+    })
+    expect(metadata).toMatchObject({
+      [restoredTagEnvelope]: {
+        id: restoredTagEnvelope,
+        group: 'Expenses',
+        index: 3,
+        visibility: 'hidden',
+        parent: restoredAccountEnvelope,
+        comment: 'Food budget',
+        keepIncome: true,
+      },
+      [restoredAccountEnvelope]: {
+        id: restoredAccountEnvelope,
+        parent: restoredMerchantEnvelope,
+      },
+      [restoredMerchantEnvelope]: {
+        id: restoredMerchantEnvelope,
+        parent: restoredTagEnvelope,
+      },
+      [payeeEnvelope]: { id: payeeEnvelope },
+    })
+    expect(
+      Object.values(restored.reminder).find(reminder =>
+        reminder.comment?.includes(HiddenDataType.FxRates)
+      )?.comment
+    ).toBe(
+      JSON.stringify({
+        type: HiddenDataType.FxRates,
+        payload: { USD: { rate: 1 } },
+      })
+    )
+    expect(
+      Object.values(restored.reminder).find(reminder =>
+        reminder.comment?.includes(HiddenDataType.UserSettings)
+      )?.comment
+    ).toBe(
+      JSON.stringify({
+        type: HiddenDataType.UserSettings,
+        payload: { emojiIcons: true },
+      })
+    )
+    expect(
+      Object.values(restored.reminder).find(
+        reminder => reminder.comment === 'not hidden data'
+      )?.comment
+    ).toBe('not hidden data')
+
+    uuidMock.mockReturnValue(RESTORE_UUID)
   })
 
   it('restores root-user currency and month start when available locally', () => {
