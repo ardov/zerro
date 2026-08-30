@@ -13,6 +13,13 @@ import { useOverlayMethods, useOverlayState } from './context'
  * the browser's address bar is a later, separate change per screen, and only
  * where a shareable link is worth having. */
 export function defineScreen<T>(name: string) {
+  // Open screens are held in one object and their order is that object's key
+  // order, which puts integer-like keys first whatever the insertion order.
+  // Such a name would silently sink to the bottom of the stack, so it is
+  // refused outright rather than debugged later.
+  if (import.meta.env.DEV && String(Number(name)) === name)
+    throw new Error(`Screen name "${name}" must not read as a number`)
+
   /** Like `useState`, except the state lives in the address: `set(null)`
    * closes, Back does the same, and a reload loses nothing. */
   function use(): [T | undefined, (value: T | null) => void] {

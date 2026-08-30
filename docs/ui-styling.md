@@ -146,7 +146,7 @@ Important groups include:
 - Feedback: `Checkbox`, `Switch`, `Chip`, `Tooltip`, `CircularProgress`,
   `SnackbarProvider`, and `SnackbarNotice` own their complete visual state.
 - Disclosure and overlays: `Collapse`, `Dialog`, `SideDrawer`, `Popover`,
-  `AdaptivePopover`, `SmartDialog`, and `SmartConfirm` own focus, dismissal,
+  `AdaptivePopover`, `AdaptiveDialog`, and `Confirm` own focus, dismissal,
   transition and portal behavior.
 
 Prefer native semantics. Interactive rows and links should remain real buttons
@@ -159,10 +159,16 @@ Overlay components portal to the document body and share the stacking tokens
 keep isolated stories correctly layered even before theme tokens are mounted.
 
 `Popover` and `Menu` position against an element or virtual anchor and use the
-shared popup-surface geometry. `SideDrawer` is a modal sheet. `NavDrawer` is the
-separate docked navigation layout. `AdaptivePopover` selects the appropriate
-surface for the current viewport without changing the caller's open-state
-contract.
+shared surface geometry in `overlaySurface`. `SideDrawer` is a modal sheet.
+`NavDrawer` is the separate docked navigation layout. `AdaptivePopover` and
+`AdaptiveDialog` select the appropriate surface for the current viewport
+without changing the caller's open-state contract.
+
+Every one of them takes `open` and `onClose` and owns neither. Openness belongs
+to `6-shared/overlays`, which is the only place that touches browser history:
+`usePopup` for a surface with its own trigger, `useAsk` for one that is asked a
+question, `defineScreen` for one a person can come back to. A surface that
+holds its own `useState` for openness is a Back press that leaves the page.
 
 When an overlay opens another overlay, preserve the opener's history and focus
 contract: closing the child returns focus to the child trigger; closing the

@@ -10,7 +10,7 @@ export type SideDrawerProps = {
   onClose?: () => void
   /** The edge it slides in from and is swiped back out towards. Every caller
    * is `right` so far; the two vertical
-   * edges belong to `SmartDialog` and the adaptive popover, which round their
+   * edges belong to `AdaptiveDialog` and the adaptive popover, which round their
    * leading corners. */
   side?: 'left' | 'right'
   /** The sheet's width. Its height is always the full viewport. */

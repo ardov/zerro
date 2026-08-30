@@ -1,12 +1,14 @@
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
 import { TransactionList } from '3-widgets/transaction/TransactionList'
-import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import {
   TrEmptyState,
   TransactionPreview,
 } from '3-widgets/transaction/TransactionPreview'
-import { transactionScreen } from '3-widgets/global/TransactionPreviewDrawer'
+import {
+  transactionScreen,
+  useTransactionScreenDocked,
+} from '3-widgets/global/TransactionPreviewDrawer'
 import type { TTransactionId } from '6-shared/types'
 import { track } from '6-shared/analytics'
 import { useTranslation } from 'react-i18next'
@@ -15,7 +17,7 @@ import { useTransactionsPageView } from './useTransactionsPageView'
 
 export default function TransactionsView() {
   const { t } = useTranslation('transactions')
-  const isMobile = useBreakpointDown('md')
+  const docked = useTransactionScreenDocked()
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const view = useTransactionsPageView()
   // The same screen the drawer shows elsewhere. On a phone the drawer draws
@@ -50,7 +52,7 @@ export default function TransactionsView() {
           </div>
         </div>
 
-        {!isMobile && (
+        {docked && (
           <div className="w-[360px] shrink-0 overflow-auto bg-card">
             <DockedPreview onSelectSimilar={setCheckedDate} />
           </div>

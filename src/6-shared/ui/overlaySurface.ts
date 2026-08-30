@@ -40,7 +40,7 @@ export const popupPositioning = {
 export const anchoredSurfaceClass = `${growSurfaceClass} [--grow-duration:225ms] [--grow-from:0.9] min-h-4 min-w-4 max-h-[calc(100dvh-32px)] overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-elevation-8 outline-none`
 
 /** A surface that slides in off an edge: the adaptive popover on a phone, and
- * `SmartDialog` on one. `--drawer-radius` rounds its leading corners, and the
+ * `AdaptiveDialog` on one. `--drawer-radius` rounds its leading corners, and the
  * `data-placement` on the popup decides which corners those are. */
 export const drawerSurfaceClass = 'drawer-slide'
 

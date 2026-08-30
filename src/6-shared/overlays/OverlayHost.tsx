@@ -11,10 +11,13 @@ import {
   OverlayStateContext,
 } from './context'
 
-/** How long an answered surface stays mounted so it can animate out. The
- * answer itself is handed over at once — the animation must start on the press
- * rather than after the browser replies. */
-const EXIT_MS = 400
+/** How long an answered surface is given before it is taken off the page.
+ *
+ * A ceiling rather than a duration: the exits themselves are timed in CSS
+ * (`overlaySurface.css`, `Dialog.css` — the longest is 225ms), and this only
+ * has to outlast them. The answer is handed over at once either way, so the
+ * animation starts on the press rather than after the browser replies. */
+const EXIT_CEILING_MS = 400
 
 /** How long to wait for a history step before deciding the browser refused it.
  * A slot is always laid over something, so the step is safe; this only catches
@@ -93,7 +96,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       timersRef.current.delete(timer)
       asksRef.current = asksRef.current.filter(one => one.id !== id)
       setAsks(asksRef.current)
-    }, EXIT_MS)
+    }, EXIT_CEILING_MS)
     timersRef.current.add(timer)
   }, [])
 
@@ -187,7 +190,8 @@ export function OverlayHost({ children }: { children: ReactNode }) {
         { kind: 'closeScreen', name }
       )
       if (decision.complaint) {
-        if (import.meta.env.DEV) console.error(`[overlays] ${decision.complaint}`)
+        if (import.meta.env.DEV)
+          console.error(`[overlays] ${decision.complaint}`)
         return
       }
       dismiss(decision.dismiss)
@@ -218,7 +222,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       // Back press that would do nothing.
       applyOp({
         kind: 'replace',
-        entry: { ...entryRef.current, popups: 0 },
+        entry: { ...entryRef.current, slots: 0 },
       })
     }, STUCK_MS)
     timers.add(timer)

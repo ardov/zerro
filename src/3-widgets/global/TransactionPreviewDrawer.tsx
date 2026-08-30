@@ -1,6 +1,8 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAppSelector } from 'store'
+import { core } from 'zerro-core/redux'
 import { SideDrawer } from '6-shared/ui/SideDrawer'
 import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import { defineScreen } from '6-shared/overlays'
@@ -17,9 +19,20 @@ export const transactionScreen = defineScreen<TTransactionId>('transaction')
 
 export const useTransactionPreview = () => transactionScreen.useOpen()
 
-/** The transactions page lays this same screen out as a column of its own at
- * desktop width, so the drawer steps aside there rather than covering it. */
-function useDockedElsewhere() {
+/** True once the address names a transaction the replica no longer holds. */
+function useTransactionGone(id: string | undefined) {
+  const transactions = useAppSelector(core.transactions.selectAll)
+  return !!id && !transactions[id]
+}
+
+/** Whether this screen is being laid out as a column in the page rather than
+ * drawn over it.
+ *
+ * One fact read from both sides: the transactions page asks it to decide
+ * whether to draw its column, and the drawer asks it to decide whether to
+ * stand aside. Keeping it in one place is what stops the two from disagreeing
+ * and showing the transaction twice, or not at all. */
+export function useTransactionScreenDocked() {
   const isNarrow = useBreakpointDown('md')
   const { pathname } = useLocation()
   return !isNarrow && pathname.startsWith('/transactions')
@@ -30,7 +43,16 @@ export const TransactionPreviewDrawer = () => {
   const [id, setId] = transactionScreen.use()
   const openOther = transactionScreen.useOpen()
   const onClose = useCallback(() => setId(null), [setId])
-  const docked = useDockedElsewhere()
+  const docked = useTransactionScreenDocked()
+  const gone = useTransactionGone(id)
+
+  // Deleting the transaction from inside this screen, or a sync taking it
+  // away, leaves the address naming something that no longer exists. It closes
+  // itself rather than sitting there empty — telling a person the thing they
+  // just deleted is missing would be no kindness.
+  useEffect(() => {
+    if (gone) setId(null)
+  }, [gone, setId])
 
   if (docked) return null
 

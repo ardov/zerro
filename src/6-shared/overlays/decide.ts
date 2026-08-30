@@ -14,11 +14,19 @@
  * Router keeps in `history.state` — so it survives a reload. */
 export type OverlayEntry = {
   /** Open screens and the values that describe them, in opening order: the
-   * last one is on top. */
+   * last one is on top.
+   *
+   * The order is the object's own key order, which is why `defineScreen`
+   * refuses an integer-like name — those would sort themselves to the front
+   * and quietly become "the bottom screen". */
   screens?: Record<string, unknown>
-  /** How many popup slots have piled up on this entry. A slot changes no
-   * address; it exists to absorb one Back press. */
-  popups?: number
+  /** How many slots have piled up on this entry. A slot is the entry a popup
+   * adds: it changes no address, and exists to absorb one Back press.
+   *
+   * Named for what it counts rather than for what put it there — `live.popups`
+   * is the other half of every comparison below, and the two must not read
+   * alike. */
+  slots?: number
   /** We pushed this entry ourselves. A first entry of a session — a typed
    * address, a shared link — has no state at all, and closing an overlay there
    * must not step out of the app. */
@@ -66,7 +74,7 @@ export function decide(
   action: OverlayAction
 ): Decision {
   const screens = entry.screens ?? {}
-  const slots = entry.popups ?? 0
+  const slots = entry.slots ?? 0
 
   switch (action.kind) {
     case 'openScreen': {
@@ -76,11 +84,25 @@ export function decide(
       // Three ways it does not: the screen replaces itself (one transaction
       // handing over to the next), it takes over from a popup (the settings
       // menu opening the history panel), or the caller says so outright.
-      const handover = !!action.instead || action.name in screens || slots > 0
+      // `instead` only means something when there is a screen to take the
+      // place of. With none open it would replace the page's own entry, and
+      // Back would then leave the app.
+      const handover =
+        (!!action.instead && Object.keys(screens).length > 0) ||
+        action.name in screens ||
+        slots > 0
       return {
         history: {
           kind: handover ? 'replace' : 'push',
-          entry: { screens: next, popups: 0, ours: true },
+          // A push is ours by definition. A replace leaves the entry as it
+          // found it: replacing on an entry we never pushed does not make one
+          // behind it appear, and claiming otherwise would send the next close
+          // stepping out of the app.
+          entry: {
+            screens: next,
+            slots: 0,
+            ours: handover ? entry.ours : true,
+          },
         },
         dismiss: live.popups,
       }
@@ -109,7 +131,7 @@ export function decide(
       return {
         history: {
           kind: 'replace',
-          entry: { screens: next, popups: 0, ours: entry.ours },
+          entry: { screens: next, slots: 0, ours: entry.ours },
         },
         dismiss: live.popups,
       }
@@ -119,7 +141,7 @@ export function decide(
       return {
         history: {
           kind: 'push',
-          entry: { screens, popups: slots + 1, ours: true },
+          entry: { screens, slots: slots + 1, ours: true },
         },
         dismiss: 0,
       }

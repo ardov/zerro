@@ -137,7 +137,7 @@ describe('R1 — a history entry for each overlay that is open', () => {
     s.openScreen('env', 'abc')
     s.openPopup()
     expect(s.depth).toBe(2)
-    expect(s.entry.popups).toBe(1)
+    expect(s.entry.slots).toBe(1)
     expect(s.screens).toEqual({ env: 'abc' })
   })
 
@@ -146,7 +146,7 @@ describe('R1 — a history entry for each overlay that is open', () => {
     s.openPopup()
     s.openPopup()
     expect(s.depth).toBe(2)
-    expect(s.entry.popups).toBe(2)
+    expect(s.entry.slots).toBe(2)
   })
 })
 
@@ -158,7 +158,7 @@ describe('R1 — a screen opened from a popup takes its place', () => {
     expect(decision.dismiss).toBe(1)
     expect(s.live).toBe(0)
     expect(s.depth).toBe(1)
-    expect(s.entry.popups).toBe(0)
+    expect(s.entry.slots).toBe(0)
     expect(s.screens).toEqual({ history: true })
   })
 
@@ -234,7 +234,7 @@ describe('R5 — no Back press does nothing', () => {
     s.openPopup()
     s.back()
     expect(s.live).toBe(1)
-    expect(s.entry.popups).toBe(1)
+    expect(s.entry.slots).toBe(1)
   })
 
   it('closes the popup before the screen it sits on', () => {
@@ -254,7 +254,7 @@ describe('R5 — no Back press does nothing', () => {
     s.reload()
     expect(s.live).toBe(0)
     expect(s.depth).toBe(0)
-    expect(s.entry.popups ?? 0).toBe(0)
+    expect(s.entry.slots ?? 0).toBe(0)
   })
 
   it('unwinds two stacked slots in one step after a reload', () => {
@@ -264,9 +264,13 @@ describe('R5 — no Back press does nothing', () => {
     s.reload()
     expect(s.depth).toBe(0)
     // One step, not a cascade of single ones.
-    const cold = decide({ popups: 2, ours: true }, { popups: 0 }, {
-      kind: 'arrive',
-    })
+    const cold = decide(
+      { slots: 2, ours: true },
+      { popups: 0 },
+      {
+        kind: 'arrive',
+      }
+    )
     expect(cold.history).toEqual({ kind: 'go', delta: -2 })
   })
 
@@ -292,10 +296,51 @@ describe('R5 — no Back press does nothing', () => {
     s.openPopup()
     s.closePopup()
     // Forward onto the slot we just left, with nothing alive behind it.
-    const decision = decide({ popups: 1, ours: true }, { popups: 0 }, {
-      kind: 'arrive',
-    })
+    const decision = decide(
+      { slots: 1, ours: true },
+      { popups: 0 },
+      {
+        kind: 'arrive',
+      }
+    )
     expect(decision.history).toEqual({ kind: 'go', delta: -1 })
+  })
+})
+
+describe('an entry we never pushed stays that way', () => {
+  it('does not claim a replaced cold entry as ours', () => {
+    const cold = { screens: { tr: 'a' }, ours: false }
+    const decision = decide(
+      cold,
+      { popups: 0 },
+      {
+        kind: 'openScreen',
+        name: 'tr',
+        value: 'b',
+      }
+    )
+    expect(decision.history).toEqual({
+      kind: 'replace',
+      entry: { screens: { tr: 'b' }, slots: 0, ours: false },
+    })
+  })
+
+  it('still closes by replacing rather than stepping out of the app', () => {
+    const s = session({ screens: { tr: 'a' } })
+    s.openScreen('tr', 'b')
+    const decision = s.closeScreen('tr')
+    expect(decision.history.kind).toBe('replace')
+    expect(s.depth).toBe(0)
+    expect(s.screens).toEqual({})
+  })
+
+  it('pushes an "instead" open when there is no screen to take over from', () => {
+    const s = session()
+    s.openScreen('envTx', { id: 'abc' }, true)
+    expect(s.depth).toBe(1)
+    s.back()
+    expect(s.screens).toEqual({})
+    expect(s.depth).toBe(0)
   })
 })
 

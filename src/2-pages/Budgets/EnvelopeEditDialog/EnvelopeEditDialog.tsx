@@ -3,7 +3,6 @@ import type { FC, MouseEvent } from 'react'
 import { shallowEqual } from 'react-redux'
 import { useFormik } from 'formik'
 import { CheckboxField } from '6-shared/ui/Checkbox'
-import type { DialogProps } from '6-shared/ui/Dialog'
 import { Dialog, DialogContent, DialogTitle } from '6-shared/ui/Dialog'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
 import { ColorPicker } from '6-shared/ui/ColorPickerPopover'
@@ -36,18 +35,16 @@ export const EnvelopeEditDialog: FC = () => {
     // whichever envelope the address names.
     <EnvelopeEditDialogForm
       key={envelope.id}
-      displayProps={{ open: true, onClose: close }}
       envelope={envelope}
-      close={close}
+      onClose={close}
     />
   )
 }
 
 const EnvelopeEditDialogForm: FC<{
-  displayProps: DialogProps
   envelope: core.envelopes.TPresentedEnvelope
-  close: () => void
-}> = ({ displayProps, envelope, close }) => {
+  onClose: () => void
+}> = ({ envelope, onClose }) => {
   const dispatch = useAppDispatch()
   const { t } = useTranslation('envelopeEditDialog')
   const id = envelope.id
@@ -72,7 +69,7 @@ const EnvelopeEditDialogForm: FC<{
       }
     },
     onSubmit: values => {
-      close()
+      onClose()
       dispatch(
         core.envelopes.updateSettings({
           id,
@@ -89,10 +86,11 @@ const EnvelopeEditDialogForm: FC<{
 
   return (
     <Dialog
-      {...displayProps}
+      open
       onClose={() => {
-        // TODO: with back button it closes anyway, maybe we can prevent it somehow
-        if (shallowEqual(values, initialValues)) close()
+        // A dismissal with unsaved edits is ignored; Back closes it regardless,
+        // which is the one closing path there is.
+        if (shallowEqual(values, initialValues)) onClose()
       }}
     >
       <DialogTitle>{t('titleEdit')}</DialogTitle>
@@ -140,7 +138,7 @@ const EnvelopeEditDialogForm: FC<{
           <Button type="submit" size="large" variant="contained">
             {t('btnSave')}
           </Button>
-          <Button onClick={close} size="large">
+          <Button onClick={onClose} size="large">
             {t('btnCancel')}
           </Button>
         </form>
