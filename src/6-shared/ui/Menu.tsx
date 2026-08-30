@@ -1,7 +1,11 @@
 import type { HTMLAttributes, ReactNode } from 'react'
 import { Menu as MenuPrimitive } from '@base-ui/react/menu'
 import { listRowClass } from './ListRow'
-import { overAnchor, popupPositioning, popupSurfaceClass } from './popupSurface'
+import {
+  overAnchor,
+  popupPositioning,
+  overlaySurfaceClass,
+} from './overlaySurface'
 import { cn } from './shadcn/utils'
 
 export type MenuProps = Pick<
@@ -34,8 +38,8 @@ export type MenuProps = Pick<
  * it does not deliver here. Base UI supplies the focus trap, the arrows,
  * typeahead and dismissal.
  *
- * History, not this component, decides whether the menu is open: every caller
- * registers through `historyPopovers`. */
+ * Openness belongs to the caller, which for a menu means the overlay stack —
+ * so Back closes it rather than leaving the page. */
 export function Menu({
   open,
   onClose,
@@ -77,7 +81,7 @@ export function Menu({
           <MenuPrimitive.Popup
             {...props}
             data-slot="menu"
-            className={cn(popupSurfaceClass, 'min-w-[112px]', className)}
+            className={cn(overlaySurfaceClass, 'min-w-[112px]', className)}
           >
             {children}
           </MenuPrimitive.Popup>

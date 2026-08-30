@@ -5,25 +5,24 @@ import { memo, useCallback } from 'react'
 import { SideDrawer } from '6-shared/ui/SideDrawer'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
-import { registerPopover } from '6-shared/historyPopovers'
+import { defineScreen } from '6-shared/overlays'
 
 type TDrawerId = core.envelopes.TEnvelopeId | 'overview'
 
-const sideDrawer = registerPopover<{ id: TDrawerId }>('sideContent', {
-  id: 'overview',
-})
+/** A screen: the envelope it shows — or the month overview — is an id, so it
+ * comes back from Back, Forward and a reload. */
+const envelopeScreen = defineScreen<TDrawerId>('envelope')
 
-export const useSideContent = () => {
-  const { open } = sideDrawer.useMethods()
-  return useCallback((id: TDrawerId) => open({ id }), [open])
-}
+export const useSideContent = () => envelopeScreen.useOpen()
 
 export const SideContent: FC<{ docked?: boolean; width: number }> = props => {
-  const drawer = sideDrawer.useProps()
+  const [id, setId] = envelopeScreen.use()
+  const onClose = useCallback(() => setId(null), [setId])
   return (
     <MemoSideDrawer
-      {...drawer.displayProps}
-      {...drawer.extraProps}
+      open={!!id}
+      onClose={onClose}
+      id={id}
       docked={props.docked}
       width={props.width}
     />

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Drawer } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
 import { useOverlayFocus } from './useOverlayFocus'
-import { drawerBackdropClass, drawerSurfaceClass } from './popupSurface'
+import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'
 import { cn } from './shadcn/utils'
 
 export type SideDrawerProps = {

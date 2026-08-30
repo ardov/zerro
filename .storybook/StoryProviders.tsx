@@ -3,7 +3,7 @@ import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { GlobalWidgets } from '1-app/GlobalWidgets'
 import { Providers } from '1-app/Providers'
-import { PopoverManager } from '6-shared/historyPopovers'
+import { OverlayHost } from '6-shared/overlays'
 import { i18n } from '6-shared/localization'
 import { makeStoryStore, type StoryScenario } from 'stories/fixtures/storyStore'
 
@@ -72,10 +72,10 @@ export function StoryProviders(props: {
     <Providers store={store} theme={{ defaultMode: theme }}>
       {localeReady && (
         <MemoryRouter key={`${route}:${locale}`} initialEntries={[route]}>
-          <PopoverManager>
+          <OverlayHost>
             {props.children}
             {app?.globalWidgets && <GlobalWidgets />}
-          </PopoverManager>
+          </OverlayHost>
         </MemoryRouter>
       )}
     </Providers>

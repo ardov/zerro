@@ -12,7 +12,8 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 
 import { DisplayAmount } from '3-widgets/DisplayAmount'
 import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
-import { useAccountContextMenu } from '3-widgets/global/AccountContextMenu'
+import { AccountMenu } from '3-widgets/global/AccountContextMenu'
+import { useAsk } from '6-shared/overlays'
 import { useContextMenu } from '6-shared/hooks/useContextMenu'
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
@@ -23,10 +24,10 @@ export const Account: FC<
   >
 > = ({ account, className, ...rest }) => {
   const transactionDrawer = useTransactionDrawer()
-  const openContextMenu = useAccountContextMenu()
+  const ask = useAsk()
   const showTransactions = useCallback(
     () =>
-      transactionDrawer.open({
+      transactionDrawer({
         title: account.title,
         initialQuery: {
           clauses: [{ kind: 'account', ids: [account.id] }],
@@ -36,7 +37,7 @@ export const Account: FC<
   )
   const propsToPass = useContextMenu({
     onContextMenu: e =>
-      openContextMenu({ id: account.id }, getEventPosition(e)),
+      ask(<AccountMenu id={account.id} anchorPosition={getEventPosition(e)} />),
     onClick: showTransactions,
   })
   return (

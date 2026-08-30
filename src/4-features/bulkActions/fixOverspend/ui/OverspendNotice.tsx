@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next'
 import type { TISOMonth } from '6-shared/types'
 import { WarningIcon } from '6-shared/ui/Icons'
 import { isZero } from '6-shared/helpers/money'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useAsk } from '6-shared/overlays'
+import { Confirm } from '6-shared/ui/Confirm'
 import { useAppDispatch, useAppSelector } from 'store'
 import { DisplayAmount } from '3-widgets/DisplayAmount'
 import { fixOverspends as fixAllOverspends } from '../model/fixOverspends'
@@ -15,12 +16,18 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const { t } = useTranslation('overspendNotice')
   const dispatch = useAppDispatch()
   const { overspend } = useAppSelector(core.months.selectTotals)[month]
-  const fixOverspends = useConfirm({
-    onOk: () => dispatch(fixAllOverspends(month)),
-    title: t('confirm.title'),
-    okText: t('confirm.okText'),
-    cancelText: t('confirm.cancelText'),
-  })
+  const ask = useAsk()
+  const fixOverspends = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('confirm.title')}
+        okText={t('confirm.okText')}
+        cancelText={t('confirm.cancelText')}
+      />
+    )
+    if (!confirmed) return
+    dispatch(fixAllOverspends(month))
+  }
 
   if (isZero(overspend)) return null
 

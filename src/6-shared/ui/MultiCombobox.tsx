@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { CheckIcon, ChevronDownIcon, CloseIcon } from './Icons'
 import { listRowClass } from './ListRow'
 import { OutlinedFieldFrame } from './OutlinedField'
-import { popupPositioning, popupSurfaceClass } from './popupSurface'
+import { popupPositioning, overlaySurfaceClass } from './overlaySurface'
 import { cn } from './shadcn/utils'
 
 export type MultiComboboxOption<T extends string> = {
@@ -88,7 +88,7 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
           style={{ minWidth: 'var(--anchor-width)' }}
         >
           <Combobox.Popup
-            className={cn(popupSurfaceClass, '[--grow-from:0.95]')}
+            className={cn(overlaySurfaceClass, '[--grow-from:0.95]')}
           >
             {props.emptyText && (
               <Combobox.Empty>

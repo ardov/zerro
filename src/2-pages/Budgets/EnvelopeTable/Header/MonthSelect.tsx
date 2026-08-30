@@ -9,6 +9,7 @@ import { ChevronRightIcon, ChevronLeftIcon } from '6-shared/ui/Icons'
 import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
 import { formatDate } from '6-shared/helpers/date'
 import { nextMonth, prevMonth } from '6-shared/helpers/date'
+import { usePopup } from '6-shared/overlays'
 
 import { useMonth } from '../../MonthProvider'
 
@@ -19,6 +20,9 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
   const last = list[list.length - 1]
 
   const paperRef = useRef(null)
+  // On the overlay stack, so Back closes the month list rather than leaving
+  // the page. The anchor is plain state beside it.
+  const [open, setOpen] = usePopup()
   const [anchorEl, setAnchorEl] = useState(null)
 
   const prevMonthDate = month > first ? prevMonth(month) : null
@@ -27,11 +31,11 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
   const isLast = !nextMonthDate
   const goPrevMonth = () => prevMonthDate && setMonth(prevMonthDate)
   const goNextMonth = () => nextMonthDate && setMonth(nextMonthDate)
-  const openPopover = useCallback(
-    () => setAnchorEl(paperRef.current),
-    [setAnchorEl]
-  )
-  const closePopover = useCallback(() => setAnchorEl(null), [setAnchorEl])
+  const openPopover = useCallback(() => {
+    setAnchorEl(paperRef.current)
+    setOpen(true)
+  }, [setOpen])
+  const closePopover = useCallback(() => setOpen(false), [setOpen])
   const handleChange = useCallback(
     (date: TISOMonth) => {
       closePopover()
@@ -68,7 +72,7 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
       </div>
 
       <MonthSelectPopover
-        open={!!anchorEl}
+        open={open}
         anchorEl={anchorEl}
         onClose={closePopover}
         value={month}

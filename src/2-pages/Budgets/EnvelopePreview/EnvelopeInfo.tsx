@@ -125,7 +125,7 @@ export function EnvelopeInfo(props: {
             'text-inherit transition-colors duration-200 hover:text-foreground'
           )}
           onClick={() => {
-            transactionDrawer.open({
+            transactionDrawer({
               envelopeConditions: {
                 id,
                 month,

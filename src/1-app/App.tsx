@@ -15,7 +15,7 @@ import {
   setAnalyticsUser,
   trackPageView,
 } from '6-shared/analytics'
-import { PopoverManager } from '6-shared/historyPopovers'
+import { OverlayHost } from '6-shared/overlays'
 import { useAppSelector } from 'store'
 import { getLoginState } from 'store/token'
 import { getLastSyncTime } from 'store/data/selectors'
@@ -89,7 +89,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AnalyticsNavigation />
-      <PopoverManager>
+      <OverlayHost>
         <RegularSyncHandler />
         {isLoggedIn && hasData && <HistoryShortcuts />}
         <Layout isLoggedIn={isLoggedIn} hasData={hasData}>
@@ -100,7 +100,7 @@ export default function App() {
           </ErrorBoundary>
         </Layout>
         <GlobalWidgets />
-      </PopoverManager>
+      </OverlayHost>
     </BrowserRouter>
   )
 }

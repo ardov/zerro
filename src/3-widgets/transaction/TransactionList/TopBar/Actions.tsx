@@ -3,7 +3,7 @@ import type { TTransaction } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
 import type { FC, MouseEventHandler } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Chip } from '6-shared/ui/Chip'
 import { Menu, MenuItem } from '6-shared/ui/Menu'
@@ -21,7 +21,8 @@ import {
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { addFxAmount, createFxAmount } from '6-shared/helpers/money'
 import { track } from '6-shared/analytics'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useAsk, usePopup } from '6-shared/overlays'
+import { Confirm } from '6-shared/ui/Confirm'
 import { useAppDispatch, useAppSelector } from 'store'
 
 import { TagSelect2 } from '../../TagSelect/TagSelect2'
@@ -47,12 +48,17 @@ const Actions: FC<ActionsProps> = ({
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)
-  const [editModalVisible, setEditModalVisible] = useState(false)
+  // Both are on the overlay stack, so Back closes the dialog or the menu
+  // instead of leaving the page — which is what it used to do here.
+  const [menuOpen, setMenuOpen] = usePopup()
+  const [editOpen, setEditOpen] = usePopup()
 
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  const handleClick: MouseEventHandler = event =>
+  const handleClick: MouseEventHandler = event => {
     setAnchorEl(event.currentTarget)
-  const closeMenu = () => setAnchorEl(null)
+    setMenuOpen(true)
+  }
+  const closeMenu = () => setMenuOpen(false)
 
   const [prevChecked, setPrevChecked] = useState({ visible, checkedIds })
   if (
@@ -61,8 +67,13 @@ const Actions: FC<ActionsProps> = ({
   ) {
     setPrevChecked({ visible, checkedIds })
     if (visible) setIds(checkedIds)
-    else setAnchorEl(null)
   }
+
+  // The bar going away takes its menu with it. Closing one is a history step,
+  // so it cannot happen during render.
+  useEffect(() => {
+    if (!visible) setMenuOpen(false)
+  }, [visible, setMenuOpen])
 
   const handleSetTag = (id: string) => {
     if (!id || id === 'null')
@@ -76,20 +87,21 @@ const Actions: FC<ActionsProps> = ({
     onUncheckAll()
   }
 
-  const handleDelete = useConfirm({
-    title: t('delete', { count: ids.length }),
-    okText: t('deleteBtn'),
-    cancelText: t('cancelDeletion'),
-    onOk: () => {
-      dispatch(core.transactions.remove(checkedIds))
-      track('transaction_deleted', {
-        mode: 'bulk',
-        source: 'bulk_toolbar',
-      })
-      closeMenu()
-      onUncheckAll()
-    },
-  })
+  const ask = useAsk()
+  const handleDelete = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('delete', { count: ids.length })}
+        okText={t('deleteBtn')}
+        cancelText={t('cancelDeletion')}
+      />
+    )
+    if (!confirmed) return
+    dispatch(core.transactions.remove(checkedIds))
+    track('transaction_deleted', { mode: 'bulk', source: 'bulk_toolbar' })
+    closeMenu()
+    onUncheckAll()
+  }
 
   const handleCheckAll = () => {
     onCheckAll()
@@ -111,13 +123,13 @@ const Actions: FC<ActionsProps> = ({
     <>
       <BulkEditModal
         ids={checkedIds}
-        onClose={() => setEditModalVisible(false)}
+        onClose={() => setEditOpen(false)}
         onApply={() => {
-          setEditModalVisible(false)
+          setEditOpen(false)
           closeMenu()
           onUncheckAll()
         }}
-        open={editModalVisible}
+        open={editOpen}
       />
       <div
         style={{ transform: 'translateX(-50%)' }}
@@ -162,7 +174,7 @@ const Actions: FC<ActionsProps> = ({
 
           <Menu
             anchorEl={anchorEl}
-            open={visible && Boolean(anchorEl)}
+            open={visible && menuOpen}
             onClose={closeMenu}
             placement="top-end"
             aria-label={t('actions')}
@@ -177,7 +189,7 @@ const Actions: FC<ActionsProps> = ({
             )}
 
             {actions.bulkEdit && (
-              <MenuItem onClick={() => setEditModalVisible(true)}>
+              <MenuItem onClick={() => setEditOpen(true)}>
                 <ListRowIcon>
                   <EditIcon />
                 </ListRowIcon>

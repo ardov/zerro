@@ -10,7 +10,8 @@ import { RadialProgress } from '6-shared/ui/RadialProgress'
 import { useAppDispatch, useAppSelector } from 'store'
 
 import { fillGoals } from '../model/fillGoals'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useAsk } from '6-shared/overlays'
+import { Confirm } from '6-shared/ui/Confirm'
 import { useTranslation } from 'react-i18next'
 
 type TGoalsProgressProps = ButtonBaseProps & {
@@ -29,13 +30,19 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const totalProgress = useAppSelector(core.goals.selectTotals)[month]
   const formatSum = (sum: number) => formatMoney(sum, currency)
 
-  const completeAll = useConfirm({
-    onOk: () => dispatch(fillGoals(month)),
-    title: t('completeAll.title'),
-    description: t('completeAll.description'),
-    okText: t('completeAll.okText'),
-    cancelText: t('completeAll.cancelText'),
-  })
+  const ask = useAsk()
+  const completeAll = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('completeAll.title')}
+        description={t('completeAll.description')}
+        okText={t('completeAll.okText')}
+        cancelText={t('completeAll.cancelText')}
+      />
+    )
+    if (!confirmed) return
+    dispatch(fillGoals(month))
+  }
 
   // No goals
   if (!totalProgress || totalProgress.goalsCount === 0) return null

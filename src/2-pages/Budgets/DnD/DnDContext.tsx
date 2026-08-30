@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom'
 import type { FC, ReactNode } from 'react'
 import { useEffect, useState } from 'react'
+import { usePopup } from '6-shared/overlays'
 import { useCallback } from 'react'
 import type { DragEndEvent } from '@dnd-kit/core'
 import {
@@ -14,7 +15,6 @@ import {
   KeyboardSensor,
 } from '@dnd-kit/core'
 import { useTranslation } from 'react-i18next'
-import { useToggle } from '6-shared/hooks/useToggle'
 import { useAppDispatch, useAppSelector } from 'store/index'
 import { core } from 'zerro-core/redux'
 
@@ -47,7 +47,9 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   const [moneyDestination, setMoneyDestination] = useState<
     core.envelopes.TEnvelopeId | 'toBeAssigned'
   >('toBeAssigned')
-  const [isOpen, toggleOpen] = useToggle()
+  // On the overlay stack, so Back closes the move-money dialog rather than
+  // leaving the budget page.
+  const [isOpen, setMoveOpen] = usePopup()
 
   const onDragEnd = useCallback(
     (e: DragEndEvent) => {
@@ -58,7 +60,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
       if (dataType === DragTypes.amount && active.id !== over.id) {
         setMoneySource(active.id)
         setMoneyDestination(over.id)
-        toggleOpen()
+        setMoveOpen(true)
       }
 
       if (
@@ -69,7 +71,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
         dispatch(assignNewGroup(active.id))
       }
     },
-    [dispatch, month, toggleOpen]
+    [dispatch, month, setMoveOpen]
   )
 
   return (
@@ -88,7 +90,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
         month={month}
         source={moneySource}
         destination={moneyDestination}
-        onClose={toggleOpen}
+        onClose={() => setMoveOpen(false)}
       />
     </DndContext>
   )

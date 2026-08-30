@@ -3,7 +3,8 @@ import { useCallback } from 'react'
 import { SnackbarNotice } from '6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
 import { discardCorruptOutbox } from '4-features/localData'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useAsk } from '6-shared/overlays'
+import { Confirm } from '6-shared/ui/Confirm'
 import { useAppDispatch, useAppSelector } from 'store'
 import { getOutboxRecoveryReason } from 'store/data'
 
@@ -18,12 +19,18 @@ export function OutboxRecoveryNotice() {
       console.error('Failed to discard corrupt local changes', error)
     )
   }, [dispatch])
-  const confirmDiscard = useConfirm({
-    title: t('outboxRecoveryTitle'),
-    description: t('outboxRecoveryDescription'),
-    okText: t('outboxRecoveryConfirm'),
-    onOk: handleDiscard,
-  })
+  const ask = useAsk()
+  const confirmDiscard = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('outboxRecoveryTitle')}
+        description={t('outboxRecoveryDescription')}
+        okText={t('outboxRecoveryConfirm')}
+      />
+    )
+    if (!confirmed) return
+    handleDiscard()
+  }
 
   if (!reason) return null
 

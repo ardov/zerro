@@ -9,7 +9,9 @@ import { TableRow, useIsSmall } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
 import { ToBeAssigned } from './ToBeAssigned'
 import { useColumns } from '../models/useMetric'
-import { useTableMenu, TableMenu } from './TableMenu'
+import type { TableMenuChoice } from './TableMenu'
+import { TableMenu } from './TableMenu'
+import { useAsk } from '6-shared/overlays'
 
 type HeaderProps = {
   month: TISOMonth
@@ -40,12 +42,18 @@ export const Header: FC<HeaderProps> = props => {
   } = props
   const { t } = useTranslation('common')
   const isSmall = useIsSmall()
-  const openOnClick = useTableMenu({
-    isAllShown,
-    isReordering,
-    onShowAllToggle,
-    onReorderModeToggle,
-  })
+  const ask = useAsk()
+  const openOnClick = async (e: React.MouseEvent) => {
+    const choice = await ask<TableMenuChoice>(
+      <TableMenu
+        isAllShown={isAllShown}
+        isReordering={isReordering}
+        anchorEl={e.currentTarget}
+      />
+    )
+    if (choice === 'showAllToggle') onShowAllToggle()
+    if (choice === 'reorderModeToggle') onReorderModeToggle()
+  }
 
   const { nextColumn } = useColumns()
 
@@ -85,7 +93,6 @@ export const Header: FC<HeaderProps> = props => {
           goal={null}
         />
       </div>
-      <TableMenu />
     </>
   )
 }

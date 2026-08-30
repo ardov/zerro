@@ -1,1 +1,1 @@
-export { useGoalPopover, SmartGoalPopover } from './Context'
+export { useGoalPopover } from './Context'

@@ -1,61 +1,48 @@
 import { Button } from '6-shared/ui/Button'
 import type { ChangeEvent, FC } from 'react'
-import React, { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Popover, type PopoverProps } from '6-shared/ui/Popover'
+import { Popover } from '6-shared/ui/Popover'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
 import './styles.scss'
 import { zmColors, colors } from './colors'
 import { isHEX } from '6-shared/helpers/color'
-import { registerPopover } from '6-shared/historyPopovers'
+import { useAsked } from '6-shared/overlays'
 
 export type ColorPickerProps = {
   value?: string | null
-  onColorChange?: (value: string | null) => void
+  anchorEl?: Element | null
 }
 
-const colorPicker = registerPopover<ColorPickerProps, PopoverProps>(
-  'colorPicker',
-  {}
-)
-
-export const useColorPicker = (
-  value: ColorPickerProps['value'],
-  onColorChange: ColorPickerProps['onColorChange']
-) => {
-  const { open } = colorPicker.useMethods()
-  return useCallback(
-    (e: React.MouseEvent) => {
-      open({ value, onColorChange }, { anchorEl: e.currentTarget })
-    },
-    [onColorChange, open, value]
-  )
-}
-
-export const ColorPicker: FC = () => {
+/** «Which colour?», asked of a person. Handed to `ask`:
+ *
+ * ```tsx
+ * const color = await ask<string | null>(<ColorPicker value={colorHex} />)
+ * if (color !== undefined) setColor(color)
+ * ```
+ *
+ * A colour answers itself, «remove colour» answers `null`, and walking away
+ * answers nothing — so `undefined` and «no colour» stay distinguishable. */
+export const ColorPicker: FC<ColorPickerProps> = ({ value, anchorEl }) => {
   const { t } = useTranslation('envelopeEditDialog')
-  const popover = colorPicker.useProps()
-  const { value, onColorChange } = popover.extraProps
+  const { open, answer } = useAsked<string | null>()
+  // Opened fresh for every question, so the field starts from the value it was
+  // asked about and needs no syncing back to it.
   const [custom, setCustom] = useState(value || '')
+
   const handleColorClick = (color?: string | null) => {
-    if (isSameColor(value, color) || color === null) {
-      onColorChange?.(null)
-      popover.close()
-      return
-    }
+    if (isSameColor(value, color) || color === null) return answer(null)
     if (!isHEX(color)) return
-    setCustom(color)
-    onColorChange?.(color)
-    popover.close()
-  }
-  const [prevValue, setPrevValue] = useState(value)
-  if (prevValue !== value) {
-    setPrevValue(value)
-    setCustom(value || '')
+    answer(color)
   }
 
   return (
-    <Popover aria-label={t('color')} {...popover.displayProps}>
+    <Popover
+      aria-label={t('color')}
+      open={open}
+      onClose={() => answer()}
+      anchorEl={anchorEl}
+    >
       <div className="flex flex-col gap-4 p-4">
         <div className="grid grid-cols-6">
           {zmColors.map(color => (

@@ -9,13 +9,14 @@ import {
 } from '6-shared/ui/Icons'
 import { useHomeBar } from '6-shared/hooks/useHomeBar'
 import RefreshButton from '3-widgets/RefreshButton'
-import { SettingsMenu, useSettingsMenu } from './SettingsMenu'
+import { useAsk } from '6-shared/overlays'
+import { SettingsMenu } from './SettingsMenu'
 
 export const MobileNavigation: FC = () => {
   const { t } = useTranslation('navigation')
   const path = useLocation().pathname
   const navigate = useNavigate()
-  const openSettings = useSettingsMenu()
+  const ask = useAsk()
 
   const hasHomeBar = useHomeBar()
   const paddingBottom = hasHomeBar ? '20px' : '0px'
@@ -51,7 +52,9 @@ export const MobileNavigation: FC = () => {
         <button
           type="button"
           aria-label={t('settings')}
-          onClick={openSettings}
+          onClick={e =>
+            ask(<SettingsMenu showLinks anchorEl={e.currentTarget} />)
+          }
           className={navigationActionClass(false)}
         >
           <SettingsIcon />
@@ -59,7 +62,6 @@ export const MobileNavigation: FC = () => {
         </button>
         <RefreshButton isMobile className={navigationActionClass(false)} />
       </div>
-      <SettingsMenu showLinks />
     </nav>
   )
 }

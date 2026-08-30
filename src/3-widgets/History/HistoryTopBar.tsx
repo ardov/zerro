@@ -21,7 +21,7 @@ import {
   selectSelectedHistoryPoint,
   selectSelectedHistoryTime,
 } from 'store/history'
-import { historyPanelPopover } from './HistoryPanel'
+import { historyPanelScreen } from './HistoryPanel'
 import { useRestoreSelectedPoint } from './useRestoreSelectedPoint'
 
 /**
@@ -50,8 +50,7 @@ export function HistoryTopBar() {
   const time = useAppSelector(selectSelectedHistoryTime)
   const step = useAppSelector(selectHistoryStep)
   const { canRestore, restore } = useRestoreSelectedPoint()
-  const { displayProps: panel, open: openPanel } =
-    historyPanelPopover.useProps()
+  const [panelOpen, setPanelOpen] = historyPanelScreen.use()
 
   // Escape leaves history. With ✕ it is the only way out, and both sit still.
   useEffect(() => {
@@ -73,7 +72,7 @@ export function HistoryTopBar() {
 
   // A null selection is the head of the list: live data under another name.
   const atHead = point === null
-  const compact = panel.open
+  const compact = !!panelOpen
 
   const label = missing
     ? t('pointUnavailable')
@@ -122,7 +121,7 @@ export function HistoryTopBar() {
           <>
             <IconButton
               size="small"
-              onClick={() => openPanel({})}
+              onClick={() => setPanelOpen(true)}
               aria-label={t('openPanel')}
             >
               <HistoryIcon fontSize="small" />

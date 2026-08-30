@@ -1,11 +1,15 @@
 import type { ReactNode } from 'react'
 import { Select as SelectPrimitive } from '@base-ui/react/select'
-import { useStackedOpen } from '6-shared/historyPopovers'
+import { usePopup } from '6-shared/overlays'
 import { CheckIcon, ChevronDownIcon } from './Icons'
 import { listRowClass } from './ListRow'
 import { OutlinedFieldFrame, outlinedControlClass } from './OutlinedField'
 import type { OutlinedFieldFrameProps, TFieldSize } from './OutlinedField'
-import { overAnchor, popupPositioning, popupSurfaceClass } from './popupSurface'
+import {
+  overAnchor,
+  popupPositioning,
+  overlaySurfaceClass,
+} from './overlaySurface'
 import { cn } from './shadcn/utils'
 
 /** One row of the list.
@@ -60,7 +64,7 @@ export type MultiSelectProps<T extends string> = TFieldProps & {
  * `setFieldValue` for exactly this. */
 export function Select<T extends string>(props: SelectProps<T>) {
   const { value, onChange, options, ...field } = props
-  const [open, onOpenChange] = useStackedOpen()
+  const [open, onOpenChange] = usePopup()
   return (
     <SelectPrimitive.Root
       items={options}
@@ -86,7 +90,7 @@ export function Select<T extends string>(props: SelectProps<T>) {
  * summary of its own. */
 export function MultiSelect<T extends string>(props: MultiSelectProps<T>) {
   const { value, onChange, options, renderValue, ...field } = props
-  const [open, onOpenChange] = useStackedOpen()
+  const [open, onOpenChange] = usePopup()
   return (
     <SelectPrimitive.Root
       multiple
@@ -139,7 +143,7 @@ function SelectField<T extends string>({
           {/* A list grows less than a menu: it opens over the field, so a
               deeper scale reads as the field jumping. */}
           <SelectPrimitive.Popup
-            className={cn(popupSurfaceClass, '[--grow-from:0.95]')}
+            className={cn(overlaySurfaceClass, '[--grow-from:0.95]')}
           >
             {options.map(option => (
               <SelectPrimitive.Item

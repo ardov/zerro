@@ -9,7 +9,7 @@ import {
   parseDateInput,
   toISODate,
 } from '6-shared/helpers/date'
-import { useStackedOpen } from '6-shared/historyPopovers'
+import { usePopup } from '6-shared/overlays'
 import type { TDateDraft, TISODate } from '6-shared/types'
 import { AdaptivePopover } from './AdaptivePopover'
 import { IconButton } from './Button'
@@ -63,7 +63,7 @@ export function DatePicker({
   // On the stack rather than in state of its own, so Back closes the calendar
   // instead of the drawer it was opened from. On a phone this surface *is* a
   // drawer, and the one under it is usually the transaction being edited.
-  const [open, setOpen] = useStackedOpen()
+  const [open, setOpen] = usePopup()
   // What the field shows, which is the value until someone types something
   // else into it. Both of the things it is derived from are held beside it,
   // so a value or a language arriving from outside replaces the text and a

@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { SideDrawer } from '6-shared/ui/SideDrawer'
 import { useTranslation } from 'react-i18next'
 import { CloseIcon, HistoryIcon } from '6-shared/ui/Icons'
-import { registerPopover } from '6-shared/historyPopovers'
+import { defineScreen } from '6-shared/overlays'
 import { useAppDispatch, useAppSelector } from 'store'
 import {
   selectHistoryRows,
@@ -28,21 +28,17 @@ import { HistoryRowList } from './HistoryRowList'
  * layout to its narrower form, so the budget table collapsed to bare icons
  * behind a horizontal scrollbar. Overlaying costs nothing that was working.
  */
-export const historyPanelPopover = registerPopover<object, object>(
-  'historyPanel',
-  {}
-)
-
-/** Opens the panel from a menu, taking the screen over from it in one step. */
-export function useHistoryPanelFromMenu() {
-  const { openReplacing } = historyPanelPopover.useMethods()
-  return () => openReplacing({})
-}
+/** A screen: it holds nothing but its own presence, and comes back from Back,
+ * Forward and a reload alike. Opening it from the settings menu takes the
+ * menu's place rather than stacking on it — a screen opened while popups are
+ * alive replaces them, so nothing here has to say so. */
+export const historyPanelScreen = defineScreen<true>('historyPanel')
 
 export function HistoryPanel() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()
-  const { displayProps } = historyPanelPopover.useProps()
+  const [opened, setOpened] = historyPanelScreen.use()
+  const open = !!opened
   const rows = useAppSelector(selectHistoryRows)
   const canLoadOlder = useAppSelector(selectCanLoadOlderHistory)
   const pageStatus = useAppSelector(selectHistoryPageStatus)
@@ -52,10 +48,10 @@ export function HistoryPanel() {
   const head = useAppSelector(selectHistoryHeadPoint)
 
   useEffect(() => {
-    if (displayProps.open && pageStatus === 'idle') {
+    if (open && pageStatus === 'idle') {
       void dispatch(loadHistoryPage({ replace: true }))
     }
-  }, [dispatch, displayProps.open, pageStatus])
+  }, [dispatch, open, pageStatus])
 
   const select = (point: THistoryPointRef) => {
     void dispatch(selectHistoryPoint(point))
@@ -63,8 +59,8 @@ export function HistoryPanel() {
 
   return (
     <SideDrawer
-      open={displayProps.open}
-      onClose={displayProps.onClose}
+      open={open}
+      onClose={() => setOpened(null)}
       // The sheet width is responsive in CSS, so no media-query hook is needed.
       className="w-full md:w-[380px]"
       aria-label={t('panelTitle')}
@@ -73,7 +69,7 @@ export function HistoryPanel() {
         <h2 className="m-0 type-title">{t('panelTitle')}</h2>
         <IconButton
           size="small"
-          onClick={displayProps.onClose}
+          onClick={() => setOpened(null)}
           aria-label={t('closePanel')}
         >
           <CloseIcon fontSize="small" />

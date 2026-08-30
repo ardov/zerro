@@ -6,17 +6,20 @@ import { Provider } from 'react-redux'
 import { describe, expect, it, vi } from 'vitest'
 import dataReducer from 'store/data'
 
-const { confirmMock } = vi.hoisted(() => ({
-  confirmMock: vi.fn(),
+const { askMock } = vi.hoisted(() => ({
+  askMock: vi.fn(async () => undefined),
 }))
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
-vi.mock('6-shared/ui/SmartConfirm', () => ({
-  useConfirm: () => confirmMock,
+vi.mock('6-shared/overlays', () => ({
+  useAsk: () => askMock,
+  useAsked: () => ({ open: false, answer: () => {} }),
 }))
+
+vi.mock('6-shared/ui/Confirm', () => ({ Confirm: () => null }))
 
 vi.mock('4-features/localData', () => ({
   discardCorruptOutbox: () => ({ type: 'outbox/discard' }),
@@ -55,6 +58,6 @@ describe('OutboxRecoveryNotice', () => {
     await userEvent.click(
       screen.getByRole('button', { name: 'outboxRecoveryConfirm' })
     )
-    expect(confirmMock).toHaveBeenCalledOnce()
+    expect(askMock).toHaveBeenCalledOnce()
   })
 })

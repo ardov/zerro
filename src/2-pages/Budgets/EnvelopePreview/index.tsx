@@ -1,12 +1,13 @@
 import { ButtonBase, IconButton } from '6-shared/ui/Button'
-import type { FC } from 'react'
+import type { FC, MouseEvent } from 'react'
 import { useCallback } from 'react'
 import { cn } from '6-shared/ui/shadcn/utils'
 import { useTranslation } from 'react-i18next'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from '6-shared/ui/Icons'
-import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
+import { ColorPicker } from '6-shared/ui/ColorPickerPopover'
+import { useAsk } from '6-shared/overlays'
 import { track } from '6-shared/analytics'
 // import { usePopover } from '@shared/ui/PopoverManager'
 
@@ -86,14 +87,18 @@ const Header: FC<{
   const { t } = useTranslation('common')
   const openEditDialog = useEditDialog()
   const dispatch = useAppDispatch()
-  const handleColorChange = useCallback(
-    (hex?: string | null) => {
+  const ask = useAsk()
+  const openColorPicker = useCallback(
+    async (e: MouseEvent<HTMLElement>) => {
+      const hex = await ask<string | null>(
+        <ColorPicker value={color} anchorEl={e.currentTarget} />
+      )
+      if (hex === undefined) return
       track('envelope_color_changed', {})
-      dispatch(core.envelopes.setColor(envelope.id, hex ?? null))
+      dispatch(core.envelopes.setColor(envelope.id, hex))
     },
-    [dispatch, envelope.id]
+    [ask, color, dispatch, envelope.id]
   )
-  const openColorPicker = useColorPicker(color, handleColorChange)
   return (
     <header className="sticky top-0 z-[5] flex items-center bg-card px-6 py-2">
       <div className="flex min-w-0 grow items-center">
@@ -109,14 +114,13 @@ const Header: FC<{
       </div>
       <Tooltip title={t('edit')}>
         <IconButton
-          onClick={() => openEditDialog({ envelope })}
+          onClick={() => openEditDialog(envelope.id)}
           children={<EditIcon />}
         />
       </Tooltip>
       <Tooltip title={t('close')}>
         <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
       </Tooltip>
-      <ColorPicker />
       <EnvelopeEditDialog />
     </header>
   )

@@ -7,7 +7,7 @@ import {
   anchoredSurfaceClass,
   overAnchor,
   popupPositioning,
-} from './popupSurface'
+} from './overlaySurface'
 import { cn } from './shadcn/utils'
 
 /** A surface grows out of the corner selected by its alignment. */
@@ -27,6 +27,10 @@ export type PopoverProps = Pick<
    * against the surface — an `Autocomplete`'s popper — cannot position
    * against one that is still scaling. */
   onOpenComplete?: () => void
+  /** Runs once the exit has finished, however the surface was closed — a
+   * dismissal or Back both flip `open`, so tidy-up that used to hang off a
+   * click handler belongs here instead. */
+  onCloseComplete?: () => void
   /** Positioning anchor, which need not be the button that opened the popup. */
   anchorEl?: Element | null
   /** Vertical placement: `over` lays
@@ -44,6 +48,7 @@ export function Popover({
   open,
   onClose,
   onOpenComplete,
+  onCloseComplete,
   anchorEl,
   placement = 'over',
   align = 'start',
@@ -69,6 +74,7 @@ export function Popover({
       }}
       onOpenChangeComplete={next => {
         if (next) onOpenComplete?.()
+        else onCloseComplete?.()
       }}
       modal
     >

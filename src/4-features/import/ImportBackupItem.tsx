@@ -21,7 +21,8 @@ import { useAppDispatch } from 'store'
 import { resetData } from 'store/data'
 import type { core } from 'zerro-core/redux'
 import { clearLocalData } from '4-features/localData'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useAsk } from '6-shared/overlays'
+import { Confirm } from '6-shared/ui/Confirm'
 
 import {
   checkBackupCompatibility,
@@ -52,12 +53,18 @@ export function ImportBackupItem() {
     await dispatch(clearLocalData())
     window.location.reload()
   }, [dispatch])
-  const confirmReload = useConfirm({
-    title: t('invalidCurrentStateTitle'),
-    description: t('invalidCurrentStateDescription'),
-    okText: t('invalidCurrentStateConfirm'),
-    onOk: reloadData,
-  })
+  const ask = useAsk()
+  const confirmReload = useCallback(async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('invalidCurrentStateTitle')}
+        description={t('invalidCurrentStateDescription')}
+        okText={t('invalidCurrentStateConfirm')}
+      />
+    )
+    if (!confirmed) return
+    reloadData()
+  }, [ask, reloadData, t])
 
   const handleFile = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {

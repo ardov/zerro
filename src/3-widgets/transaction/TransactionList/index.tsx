@@ -19,7 +19,9 @@ import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
-import { useTrContextMenu } from '3-widgets/global/TrContextMenu'
+import type { TransactionMenuChoice } from '3-widgets/global/TrContextMenu'
+import { TransactionMenu } from '3-widgets/global/TrContextMenu'
+import { useAsk } from '6-shared/overlays'
 import { useAppDispatch, useAppSelector } from 'store'
 
 export type TTransactionListProps = {
@@ -125,7 +127,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     [dispatch, trList]
   )
 
-  const openContextMenu = useTrContextMenu()
+  const ask = useAsk()
 
   const [prevCheckedDate, setPrevCheckedDate] = useState(checkedDate)
   if (prevCheckedDate !== checkedDate) {
@@ -147,12 +149,14 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   }, [trList])
 
   const onContextMenu = useCallback(
-    (e: React.MouseEvent | React.TouchEvent, id: TTransactionId) =>
-      openContextMenu(
-        { id, onSelectSimilar, onMarkOlderViewed },
-        getEventPosition(e)
-      ),
-    [openContextMenu, onSelectSimilar, onMarkOlderViewed]
+    async (e: React.MouseEvent | React.TouchEvent, id: TTransactionId) => {
+      const choice = await ask<TransactionMenuChoice>(
+        <TransactionMenu id={id} inList anchorPosition={getEventPosition(e)} />
+      )
+      if (choice?.kind === 'selectSimilar') onSelectSimilar(choice.changed)
+      if (choice?.kind === 'markOlderViewed') onMarkOlderViewed(id)
+    },
+    [ask, onSelectSimilar, onMarkOlderViewed]
   )
 
   const checkedSet = useMemo(() => new Set(checked), [checked])

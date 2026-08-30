@@ -1,43 +1,43 @@
 import { Button, ButtonBase } from '6-shared/ui/Button'
-import type { FC } from 'react'
+import type { FC, MouseEvent } from 'react'
 import { shallowEqual } from 'react-redux'
 import { useFormik } from 'formik'
 import { CheckboxField } from '6-shared/ui/Checkbox'
 import type { DialogProps } from '6-shared/ui/Dialog'
 import { Dialog, DialogContent, DialogTitle } from '6-shared/ui/Dialog'
 import { OutlinedField } from '6-shared/ui/OutlinedField'
-import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
-import { useAppDispatch } from 'store'
+import { ColorPicker } from '6-shared/ui/ColorPickerPopover'
+import { useAppDispatch, useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 // import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
-import { registerPopover } from '6-shared/historyPopovers'
+import { defineScreen, useAsk } from '6-shared/overlays'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
-const editDialog = registerPopover<
-  { envelope?: core.envelopes.TPresentedEnvelope },
-  DialogProps
->('envelopeEditDialog', {})
+/** A screen: the envelope it edits is an id, and the envelope itself is looked
+ * up from it — so the dialog comes back from Back, Forward and a reload. */
+const envelopeEditScreen =
+  defineScreen<core.envelopes.TEnvelopeId>('envelopeEdit')
 
-export const useEditDialog = () => {
-  const { open } = editDialog.useMethods()
-  return open
-}
+export const useEditDialog = () => envelopeEditScreen.useOpen()
 
 export const EnvelopeEditDialog: FC = () => {
-  const { displayProps, extraProps, close, instanceKey } = editDialog.useProps()
-  if (!extraProps.envelope) return null
+  const [id, setId] = envelopeEditScreen.use()
+  const envelopes = useAppSelector(core.envelopes.selectAll)
+  const close = useCallback(() => setId(null), [setId])
+  const envelope = id ? envelopes[id] : undefined
+  if (!envelope) return null
 
   return (
-    // A fresh form on every opening: the draft is Formik's, and it starts from
-    // whichever envelope this opening carries. The key used to be handed to
-    // the dialog through `displayProps`, which React 19 warns about.
+    // A fresh form per envelope: the draft is Formik's, and it starts from
+    // whichever envelope the address names.
     <EnvelopeEditDialogForm
-      key={instanceKey}
-      displayProps={displayProps}
-      envelope={extraProps.envelope}
+      key={envelope.id}
+      displayProps={{ open: true, onClose: close }}
+      envelope={envelope}
       close={close}
     />
   )
@@ -155,15 +155,19 @@ type ColorProps = {
 }
 
 const Color: FC<ColorProps> = ({ value, onChange }) => {
-  const open = useColorPicker(value, onChange)
+  const ask = useAsk()
+  const pick = async (e: MouseEvent<HTMLElement>) => {
+    const color = await ask<string | null>(
+      <ColorPicker value={value} anchorEl={e.currentTarget} />
+    )
+    // `null` is "no colour"; nothing at all means the question went unanswered.
+    if (color !== undefined) onChange(color)
+  }
   return (
-    <>
-      <ButtonBase
-        onClick={open}
-        style={{ backgroundColor: value ?? undefined }}
-        className="size-6 rounded-[50%] [box-shadow:inset_0_0_0_1px_rgba(0,0,0,.1)]"
-      />
-      <ColorPicker />
-    </>
+    <ButtonBase
+      onClick={pick}
+      style={{ backgroundColor: value ?? undefined }}
+      className="size-6 rounded-[50%] [box-shadow:inset_0_0_0_1px_rgba(0,0,0,.1)]"
+    />
   )
 }

@@ -5,6 +5,8 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { Provider } from 'react-redux'
+import { MemoryRouter } from 'react-router-dom'
+import { OverlayHost } from '6-shared/overlays'
 import { rootReducer } from 'store/rootReducer'
 import { makeTestRootState } from 'store/testing'
 import { makeStore } from 'zerro-core/support/testing/zenmoneyTestData'
@@ -72,7 +74,14 @@ describe('TagSelect2 keyboard navigation', () => {
   })
 
   const mount = (component: React.ReactElement) =>
-    render(<Provider store={store}>{component}</Provider>)
+    render(
+      <Provider store={store}>
+        {/* The list lives on the overlay stack, so Back closes it. */}
+        <MemoryRouter>
+          <OverlayHost>{component}</OverlayHost>
+        </MemoryRouter>
+      </Provider>
+    )
 
   async function popoverOpened() {
     const button = screen.getByRole('button')

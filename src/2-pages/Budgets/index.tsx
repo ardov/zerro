@@ -14,8 +14,6 @@ import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer
 import { MonthProvider, useMonth } from './MonthProvider'
 import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnD/DnDContext'
-import { SmartBudgetPopover } from './BudgetPopover'
-import { SmartGoalPopover } from './GoalPopover'
 import { SideContent, useSideContent } from './SideContent'
 
 export default function WithMonth() {
@@ -36,7 +34,7 @@ function Budgets() {
 
   const openTransactions = useCallback(
     (opts: { id: core.envelopes.TEnvelopeId; isExact?: boolean }) =>
-      transactionDrawer.open({
+      transactionDrawer({
         envelopeConditions: {
           id: opts.id,
           month,
@@ -69,9 +67,6 @@ function Budgets() {
       <DnDContext>
         <BudgetLayout mainContent={mainContent} />
       </DnDContext>
-
-      <SmartGoalPopover />
-      <SmartBudgetPopover />
     </>
   )
 }

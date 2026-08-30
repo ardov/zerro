@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useAsk } from '6-shared/overlays'
+import { Confirm } from '6-shared/ui/Confirm'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import { useAppDispatch, useAppSelector } from 'store'
 import { restoreOutboxPosition } from 'store/data'
@@ -31,12 +32,18 @@ export function useRestoreSelectedPoint() {
     dispatch(exitHistoryBrowsing())
     snackbar({ message: applied ? t('restoreApplied') : t('restoreNoChanges') })
   }
-  const confirmRestoreServer = useConfirm({
-    title: t('restorePoint'),
-    description: t('restoreServerDescription'),
-    okText: t('restorePoint'),
-    onOk: restoreServer,
-  })
+  const ask = useAsk()
+  const confirmRestoreServer = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('restorePoint')}
+        description={t('restoreServerDescription')}
+        okText={t('restorePoint')}
+      />
+    )
+    if (!confirmed) return
+    restoreServer()
+  }
 
   return {
     /** `data` is the single readiness signal: a local point out of range and a

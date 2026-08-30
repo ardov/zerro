@@ -13,6 +13,7 @@ import type { Modify, TDateDraft, TISOMonth } from '6-shared/types'
 
 import { useAppDispatch, useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
+import { usePopup } from '6-shared/overlays'
 
 export type TGoalPopoverProps = Modify<
   PopoverProps,
@@ -37,11 +38,14 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const [rawValue, setRawValue] = useState(getInput(goal?.amount))
   const [endDate, setEndDate] = useState<core.goals.TGoal['end']>(goal?.end)
 
+  // On the overlay stack, so Back closes the month list rather than the goal
+  // popover underneath it.
+  const [monthOpen, setMonthOpen] = usePopup()
   const [monthPopoverAnchor, setMonthPopoverAnchor] =
     useState<(typeof props)['anchorEl']>(null)
   if (!id || !month) return null
 
-  const closeMonthPopover = () => setMonthPopoverAnchor(null)
+  const closeMonthPopover = () => setMonthOpen(false)
   const handleDateChange = (date?: TDateDraft) => {
     closeMonthPopover()
     setEndDate(date ? toISODate(date) : undefined)
@@ -133,7 +137,10 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
               // The calendar hangs off this button, not off whatever opened
               // the goal: it is a nested surface, and it lands over its own
               // control rather than over the form it belongs to.
-              onClick={event => setMonthPopoverAnchor(event.currentTarget)}
+              onClick={event => {
+                setMonthPopoverAnchor(event.currentTarget)
+                setMonthOpen(true)
+              }}
               fullWidth={!endDate}
             >
               {endDate
@@ -156,7 +163,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
         )}
       </div>
       <MonthSelectPopover
-        open={!!monthPopoverAnchor}
+        open={monthOpen}
         anchorEl={monthPopoverAnchor}
         onClose={closeMonthPopover}
         onChange={handleDateChange}

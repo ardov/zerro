@@ -26,7 +26,7 @@ function EditHarness() {
   const envelope = Object.values(envelopes).find(e => e.name === 'Food')!
   return (
     <>
-      <button type="button" onClick={() => open({ envelope })}>
+      <button type="button" onClick={() => open(envelope.id)}>
         Edit envelope
       </button>
       <EnvelopeEditDialog />

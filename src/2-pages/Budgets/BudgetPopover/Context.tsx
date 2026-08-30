@@ -4,35 +4,34 @@ import { useCallback } from 'react'
 
 import { useMonth } from '../MonthProvider'
 import { BudgetPopover } from './BudgetPopover'
-import { registerPopover } from '6-shared/historyPopovers'
+import { useAsk, useAsked } from '6-shared/overlays'
 import type { TISOMonth } from '6-shared/types'
-import type { AdaptivePopoverProps } from '6-shared/ui/AdaptivePopover'
 
-const budgetPopover = registerPopover<
-  { id?: core.envelopes.TEnvelopeId; month?: TISOMonth },
-  AdaptivePopoverProps
->('budgetPopover', {})
-
+/** A popup, not a screen: this is small editing, like a select. Back closes
+ * it, and there is nothing to come back to. */
 export const useBudgetPopover = () => {
   const [month] = useMonth()
-  const { open } = budgetPopover.useMethods()
-  const openPopover = useCallback(
+  const ask = useAsk()
+  return useCallback(
     (id: core.envelopes.TEnvelopeId, anchorEl?: Element) =>
-      open({ id, month }, { anchorEl }),
-    [month, open]
+      ask(<AskedBudgetPopover id={id} month={month} anchorEl={anchorEl} />),
+    [ask, month]
   )
-  return openPopover
 }
 
-export const SmartBudgetPopover: FC = () => {
-  const popover = budgetPopover.useProps()
-  const { month, id } = popover.extraProps
-  if (!month || !id) return null
-  // Keyed by the opening, so each one starts from a fresh draft amount.
+const AskedBudgetPopover: FC<{
+  id: core.envelopes.TEnvelopeId
+  month: TISOMonth
+  anchorEl?: Element | null
+}> = ({ id, month, anchorEl }) => {
+  const { open, answer } = useAsked<void>()
+  // Built at the moment of the question, so the draft amount starts fresh
+  // without a key to force it.
   return (
     <BudgetPopover
-      key={popover.instanceKey}
-      {...popover.displayProps}
+      open={open}
+      onClose={() => answer()}
+      anchorEl={anchorEl}
       month={month}
       id={id}
     />

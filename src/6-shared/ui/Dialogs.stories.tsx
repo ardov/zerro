@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useConfirm } from './SmartConfirm'
+import { useAsk } from '6-shared/overlays'
+import { Confirm } from './Confirm'
 import { useSnackbar } from './SnackbarProvider'
 import { Button } from './Button'
 import { useState } from 'react'
@@ -10,7 +11,7 @@ import { MonthProvider, useMonth } from '2-pages/Budgets/MonthProvider'
 import { GoalPopover } from '2-pages/Budgets/GoalPopover/GoalPopover'
 import { MoveMoneyModal } from '4-features/moveMoney/MoveMoneyModal'
 import { SideContent, useSideContent } from '2-pages/Budgets/SideContent'
-import { SmartGoalPopover, useGoalPopover } from '2-pages/Budgets/GoalPopover'
+import { useGoalPopover } from '2-pages/Budgets/GoalPopover'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
 
 const meta = {
@@ -25,13 +26,16 @@ export default meta
 type Story = StoryObj
 
 function DialogTriggers() {
-  const confirm = useConfirm({
-    title: 'Delete this operation?',
-    description: 'This story demonstrates the application confirmation dialog.',
-    okText: 'Delete',
-    cancelText: 'Cancel',
-    onOk: () => undefined,
-  })
+  const ask = useAsk()
+  const confirm = () =>
+    ask(
+      <Confirm
+        title="Delete this operation?"
+        description="This story demonstrates the application confirmation dialog."
+        okText="Delete"
+        cancelText="Cancel"
+      />
+    )
   const showSnackbar = useSnackbar()
 
   return (
@@ -214,7 +218,6 @@ function GoalDraftHarness({ inDrawer = false }: { inDrawer?: boolean }) {
       <output className="sr-only" data-testid="saved-goal">
         {JSON.stringify(goal ?? null)}
       </output>
-      <SmartGoalPopover />
       {inDrawer && <SideContent width={360} />}
     </>
   )

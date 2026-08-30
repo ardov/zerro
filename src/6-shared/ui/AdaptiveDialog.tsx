@@ -2,17 +2,14 @@ import type { ReactNode } from 'react'
 import { Drawer } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
 import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
-import { popoverStack } from '6-shared/historyPopovers'
 import { Dialog } from './Dialog'
 import { useOverlayFocus } from './useOverlayFocus'
-import { drawerBackdropClass, drawerSurfaceClass } from './popupSurface'
+import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'
 import { cn } from './shadcn/utils'
 
-export type TSmartDialogProps = {
-  /** Its place on the popover stack, so Back closes it rather than leaving the
-   * page. Unlike a select's, this key is written down: `registerPopover` hands
-   * out the same one to whatever opens the dialog. */
-  elKey: string
+export type AdaptiveDialogProps = {
+  open: boolean
+  onClose: () => void
   className?: string
   children?: ReactNode
   'aria-label'?: string
@@ -20,16 +17,16 @@ export type TSmartDialogProps = {
 
 /** A dialog on desktop and a bottom drawer on a phone.
  *
- * Only history closes it: `onClose` pops the stack entry, and the open state
- * comes back from the stack rather than from state of its own. */
-export function SmartDialog({
-  elKey,
+ * Openness belongs to the caller, which for every one of them today means the
+ * overlay stack — so Back closes this surface rather than leaving the page. */
+export function AdaptiveDialog({
+  open,
+  onClose,
   className,
   children,
   ...props
-}: TSmartDialogProps) {
+}: AdaptiveDialogProps) {
   const { t } = useTranslation()
-  const [open, , onClose] = popoverStack.usePopoverState(elKey)
   const isMobile = useBreakpointDown('sm')
   const { finalFocus } = useOverlayFocus(open)
 

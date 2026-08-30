@@ -1,4 +1,4 @@
-import './popupSurface.css'
+import './overlaySurface.css'
 
 /** An anchored surface grows out of the corner it
  * hangs off, and fades while it does.
@@ -10,7 +10,7 @@ export const growSurfaceClass = 'popup-grow'
 
 /** Shared paper for menus and select lists: their common elevation, radius and
  * 8px row inset are described once. */
-export const popupSurfaceClass = `${growSurfaceClass} max-h-[calc(100dvh-96px)] overflow-y-auto rounded-lg bg-popover py-2 text-popover-foreground shadow-elevation-8 outline-none`
+export const overlaySurfaceClass = `${growSurfaceClass} max-h-[calc(100dvh-96px)] overflow-y-auto rounded-lg bg-popover py-2 text-popover-foreground shadow-elevation-8 outline-none`
 
 /** What both of them hand the positioner. Only the side, the alignment and
  * the offset are the caller's, because those are what makes a menu a menu. */

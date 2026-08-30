@@ -12,6 +12,7 @@ import { TagIcon } from '6-shared/ui/TagIcon'
 import type { Modify } from '6-shared/types'
 import { useTranslation } from 'react-i18next'
 import { core } from 'zerro-core/redux'
+import { usePopup } from '6-shared/overlays'
 
 type TTagPopulated = core.tags.TTagPopulated
 type TagTreeNode = Modify<TTagPopulated, { children: TTagPopulated[] }>
@@ -47,14 +48,19 @@ type TagSelectProps = {
 
 export const TagSelect2: FC<TagSelectProps> = props => {
   const { onChange, trigger, value, exclude, tagType } = props
+  // Openness is on the overlay stack so Back closes the list; the anchor is
+  // resolved when opening, so render never reads a mutable ref.
+  const [open, setOpen] = usePopup()
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  const handleClick: React.MouseEventHandler = e => setAnchorEl(e.currentTarget)
-  const handleClose = () => setAnchorEl(null)
+  const handleClick: React.MouseEventHandler = e => {
+    setAnchorEl(e.currentTarget)
+    setOpen(true)
+  }
+  const handleClose = () => setOpen(false)
   const handleTagSelect = (id: string) => {
-    setAnchorEl(null)
+    setOpen(false)
     onChange(id)
   }
-  const open = Boolean(anchorEl)
 
   return (
     <>

@@ -1,6 +1,7 @@
 import { IconButton } from '6-shared/ui/Button'
 import type { FC, MouseEvent } from 'react'
 import { useMemo, useRef, useState } from 'react'
+import { usePopup } from '6-shared/overlays'
 import { useTranslation } from 'react-i18next'
 import { Chip } from '6-shared/ui/Chip'
 import { InputBase } from '6-shared/ui/InputBase'
@@ -47,6 +48,10 @@ const Filter: FC<FilterProps> = ({
     {}
   )
   const pendingEditingKind = useRef<EditableFilterKind | null>(null)
+  // Both surfaces sit on the overlay stack, so Back closes the one on top
+  // rather than leaving the page. The anchors stay plain state beside them.
+  const [menuOpen, setMenuOpen] = usePopup()
+  const [editorOpen, setEditorOpen] = usePopup()
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
   const [editingKind, setEditingKind] = useState<EditableFilterKind | null>(
     null
@@ -73,15 +78,14 @@ const Filter: FC<FilterProps> = ({
 
   const openAddMenu = (event: MouseEvent<HTMLElement>) => {
     pendingEditingKind.current = null
-    setEditorOptionsOpen(false)
-    setEditingKind(null)
     setMenuAnchor(event.currentTarget)
+    setMenuOpen(true)
   }
 
   const chooseKind = (kind: AddableFilterKind) => {
     upsertClause(makeDefaultClause(kind))
     pendingEditingKind.current = isEditableKind(kind) ? kind : null
-    setMenuAnchor(null)
+    setMenuOpen(false)
   }
 
   const openPendingEditor = () => {
@@ -92,6 +96,7 @@ const Filter: FC<FilterProps> = ({
     setEditorOptionsOpen(false)
     setEditorAnchor(chipRefs.current[kind] || null)
     setEditingKind(kind)
+    setEditorOpen(true)
   }
 
   const openEditor = (clause: Clause) => {
@@ -99,10 +104,16 @@ const Filter: FC<FilterProps> = ({
       setEditorOptionsOpen(false)
       setEditorAnchor(chipRefs.current[clause.kind] || null)
       setEditingKind(clause.kind)
+      setEditorOpen(true)
     }
   }
 
-  const closeEditor = () => {
+  // The editor has one closing path: the stack. Back does not go through a
+  // click handler, so the tidy-up runs when the surface has finished leaving,
+  // whichever way it was closed.
+  const finishEditing = () => {
+    setEditorOptionsOpen(false)
+    setEditingKind(null)
     if (editingClause && isEmptyClause(editingClause)) {
       onQueryChange({
         clauses: query.clauses.filter(
@@ -110,15 +121,10 @@ const Filter: FC<FilterProps> = ({
         ),
       })
     }
-    setEditorOptionsOpen(false)
-    setEditingKind(null)
   }
 
   const removeClause = (clause: Clause) => {
-    if (editingKind === clause.kind) {
-      setEditorOptionsOpen(false)
-      setEditingKind(null)
-    }
+    if (editingKind === clause.kind) setEditorOpen(false)
     onQueryChange({
       clauses: query.clauses.filter(item => item !== clause),
     })
@@ -192,8 +198,8 @@ const Filter: FC<FilterProps> = ({
 
       <Menu
         anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={() => setMenuAnchor(null)}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
         onCloseComplete={openPendingEditor}
         // The clause editor opens the moment this menu is gone, so the menu
         // does not animate out. `utilities` is the later layer, so this beats
@@ -210,8 +216,9 @@ const Filter: FC<FilterProps> = ({
 
       <Popover
         anchorEl={editorAnchor}
-        open={Boolean(editingClause)}
-        onClose={closeEditor}
+        open={editorOpen}
+        onClose={() => setEditorOpen(false)}
+        onCloseComplete={finishEditing}
         // The editor drops out from under its chip rather than covering it.
         placement="below"
         // The combobox measures its popup against the surface, so its

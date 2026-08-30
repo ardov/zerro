@@ -4,7 +4,7 @@ import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
 import { Popover, type PopoverProps } from './Popover'
 import { useOverlayFocus } from './useOverlayFocus'
 import { cn } from './shadcn/utils'
-import { drawerBackdropClass, drawerSurfaceClass } from './popupSurface'
+import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'
 
 /** Base UI names the vertical swipe directions `up`/`down`, so the edge a
  * drawer sits on does not spell its own swipe direction. */

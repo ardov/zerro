@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { SideDrawer } from '6-shared/ui/SideDrawer'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
-import { registerPopover } from '6-shared/historyPopovers'
+import { defineScreen } from '6-shared/overlays'
 import { core } from 'zerro-core/redux'
 
 import type { TTransactionListProps } from '../transaction/TransactionList'
@@ -25,19 +25,22 @@ export type EnvTransactionsDrawerProps = {
   envelopeConditions: TEnvConditions
 }
 
-const trDrawerHooks = registerPopover(
-  'envelope-transactions-drawer',
-  {} as EnvTransactionsDrawerProps
+/** A screen: everything it shows is described by the conditions it was opened
+ * with, and those are plain data already. */
+const envelopeTransactionsScreen = defineScreen<EnvTransactionsDrawerProps>(
+  'envelopeTransactions'
 )
 
-export const useEnvTransactionsDrawer = trDrawerHooks.useMethods
+export const useEnvTransactionsDrawer = () =>
+  envelopeTransactionsScreen.useOpen()
 
-export const SmartEnvTransactionsDrawer = () => {
+export const EnvTransactionsDrawer = () => {
   const { t } = useTranslation('common')
-  const drawer = trDrawerHooks.useProps()
-  const trPreview = useTransactionPreview()
-  const { title, envelopeConditions, initialDate } = drawer.extraProps
-  const { onClose, open } = drawer.displayProps
+  const [value, setValue] = envelopeTransactionsScreen.use()
+  const showTransaction = useTransactionPreview()
+  const onClose = useCallback(() => setValue(null), [setValue])
+  const { title, envelopeConditions, initialDate } = value ?? {}
+
   const initialQuery = useMemo<core.transactions.TTransactionQuery>(() => {
     if (!envelopeConditions) return { clauses: [] }
 
@@ -63,26 +66,10 @@ export const SmartEnvTransactionsDrawer = () => {
     }
   }, [envelopeConditions])
 
-  const showTransaction = useCallback(
-    function show(id: string) {
-      trPreview.open({
-        id,
-        onOpenOther: (id: string) => {
-          trPreview.close()
-          show(id)
-        },
-        onSelectSimilar: () => {
-          // TODO: implement
-        },
-      })
-    },
-    [trPreview]
-  )
-
   return (
     <SideDrawer
       onClose={onClose}
-      open={open}
+      open={!!value}
       // Full-width on phones, fixed-width from the small breakpoint.
       className="w-screen sm:w-[360px]"
       aria-label={title || t('transactions')}

@@ -27,7 +27,7 @@ export default function Review() {
   const trDrawer = useTransactionDrawer()
 
   function showTransactions(list: TTransaction[]) {
-    trDrawer.open({ transactions: list })
+    trDrawer({ ids: list.map(transaction => transaction.id) })
   }
 
   return (

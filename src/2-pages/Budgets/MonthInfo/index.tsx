@@ -23,7 +23,8 @@ import { ActivityStats } from './ActivityStats'
 import { core } from 'zerro-core/redux'
 
 import { fillGoals } from '4-features/bulkActions/fillGoals'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useAsk } from '6-shared/overlays'
+import { Confirm } from '6-shared/ui/Confirm'
 import { useTranslation } from 'react-i18next'
 
 type MonthInfoProps = HTMLAttributes<HTMLDivElement> & { onClose: () => void }
@@ -40,28 +41,45 @@ export const MonthInfo: FC<MonthInfoProps> = ({
 
   const dispatch = useAppDispatch()
 
-  const copyAllBudgets = useConfirm({
-    onOk: () => dispatch(copyPreviousBudget(month)),
-    title: t('copyAllBudgets.title'),
-    description: t('copyAllBudgets.description'),
-    okText: t('copyAllBudgets.okText'),
-    cancelText: t('copyAllBudgets.cancelText'),
-  })
+  const ask = useAsk()
 
-  const fixOverspends = useConfirm({
-    onOk: () => dispatch(fixAllOverspends(month)),
-    title: t('fixOverspends.title'),
-    okText: t('fixOverspends.okText'),
-    cancelText: t('fixOverspends.cancelText'),
-  })
+  const copyAllBudgets = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('copyAllBudgets.title')}
+        description={t('copyAllBudgets.description')}
+        okText={t('copyAllBudgets.okText')}
+        cancelText={t('copyAllBudgets.cancelText')}
+      />
+    )
+    if (!confirmed) return
+    dispatch(copyPreviousBudget(month))
+  }
 
-  const startAgain = useConfirm({
-    onOk: () => dispatch(startFresh(month)),
-    title: t('startAgain.title'),
-    description: t('startAgain.description'),
-    okText: t('startAgain.okText'),
-    cancelText: t('startAgain.cancelText'),
-  })
+  const fixOverspends = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('fixOverspends.title')}
+        okText={t('fixOverspends.okText')}
+        cancelText={t('fixOverspends.cancelText')}
+      />
+    )
+    if (!confirmed) return
+    dispatch(fixAllOverspends(month))
+  }
+
+  const startAgain = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('startAgain.title')}
+        description={t('startAgain.description')}
+        okText={t('startAgain.okText')}
+        cancelText={t('startAgain.cancelText')}
+      />
+    )
+    if (!confirmed) return
+    dispatch(startFresh(month))
+  }
 
   return (
     <div {...rest} className={cn('min-h-screen', className)}>
@@ -126,13 +144,19 @@ function GoalAction(props: { month: TISOMonth }) {
   ]
   const canComplete = progress < 1 && goalsCount > 0
 
-  const completeAll = useConfirm({
-    onOk: () => dispatch(fillGoals(month)),
-    title: t('title'),
-    description: t('description'),
-    okText: t('okText'),
-    cancelText: t('cancelText'),
-  })
+  const ask = useAsk()
+  const completeAll = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('title')}
+        description={t('description')}
+        okText={t('okText')}
+        cancelText={t('cancelText')}
+      />
+    )
+    if (!confirmed) return
+    dispatch(fillGoals(month))
+  }
 
   if (!canComplete) return null
 

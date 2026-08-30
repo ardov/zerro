@@ -4,36 +4,34 @@ import { useCallback } from 'react'
 import { useMonth } from '../MonthProvider'
 
 import { GoalPopover } from './GoalPopover'
-import { registerPopover } from '6-shared/historyPopovers'
+import { useAsk, useAsked } from '6-shared/overlays'
 import type { TISOMonth } from '6-shared/types'
-import type { PopoverProps } from '6-shared/ui/Popover'
 
-const goalPopover = registerPopover<
-  { id?: core.envelopes.TEnvelopeId; month?: TISOMonth },
-  PopoverProps
->('goalPopover', {})
-
+/** A popup, not a screen: this is small editing, like a select. Back closes
+ * it, and there is nothing to come back to. */
 export const useGoalPopover = () => {
   const [month] = useMonth()
-  const { open } = goalPopover.useMethods()
-  const openPopover = useCallback(
+  const ask = useAsk()
+  return useCallback(
     (id: core.envelopes.TEnvelopeId, anchorEl?: Element) =>
-      open({ id, month }, { anchorEl }),
-    [month, open]
+      ask(<AskedGoalPopover id={id} month={month} anchorEl={anchorEl} />),
+    [ask, month]
   )
-  return openPopover
 }
 
-export const SmartGoalPopover: FC = () => {
-  const popover = goalPopover.useProps()
-  const { month, id } = popover.extraProps
-  if (!month || !id) return null
-  // Keyed by the opening, so each one starts from a fresh draft.
+const AskedGoalPopover: FC<{
+  id: core.envelopes.TEnvelopeId
+  month: TISOMonth
+  anchorEl?: Element | null
+}> = ({ id, month, anchorEl }) => {
+  const { open, answer } = useAsked<void>()
   return (
     <GoalPopover
-      key={popover.instanceKey}
-      {...popover.displayProps}
-      {...{ month, id }}
+      open={open}
+      onClose={() => answer()}
+      anchorEl={anchorEl}
+      month={month}
+      id={id}
     />
   )
 }

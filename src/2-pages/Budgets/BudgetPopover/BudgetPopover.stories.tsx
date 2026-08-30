@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { useEffect } from 'react'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 import { MonthProvider, useMonth } from '../MonthProvider'
-import { SmartBudgetPopover, useBudgetPopover } from './Context'
+import { useBudgetPopover } from './Context'
 import { useNavigate } from 'react-router-dom'
 import { SideContent, useSideContent } from '../SideContent'
 
@@ -29,15 +30,22 @@ function AssignmentHarness() {
   )!.id
   const envelope = metrics[id]
 
+  // On `window`, not on this element: the popover is drawn by the overlay
+  // host, which is above this harness in the tree, so its keystrokes never
+  // pass through here.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!event.altKey || !['ArrowLeft', 'ArrowRight'].includes(event.key))
+        return
+      event.preventDefault()
+      navigate(event.key === 'ArrowLeft' ? -1 : 1)
+    }
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => window.removeEventListener('keydown', onKeyDown, true)
+  }, [navigate])
+
   return (
-    <div
-      onKeyDownCapture={event => {
-        if (event.altKey && ['ArrowLeft', 'ArrowRight'].includes(event.key)) {
-          event.preventDefault()
-          navigate(event.key === 'ArrowLeft' ? -1 : 1)
-        }
-      }}
-    >
+    <div>
       <button type="button" onClick={event => open(id, event.currentTarget)}>
         Assign budget
       </button>
@@ -48,7 +56,6 @@ function AssignmentHarness() {
       <button type="button" onClick={() => setCurrency('USD')}>
         Display USD
       </button>
-      <SmartBudgetPopover />
     </div>
   )
 }
@@ -181,6 +188,10 @@ export const AtBreakpoint: Story = {
   globals: { viewport: { value: 'zerro900' } },
 }
 
+/** Back closes the popover and commits nothing, and Forward does not bring it
+ * back: this is a popup, not a screen — the draft lived in memory and Back
+ * ended it. Coming back to a half-typed amount was the old behaviour, and it
+ * was one of the defects, not a feature. */
 export const HistoryDraft: Story = {
   ...Desktop,
   play: async ({ canvasElement }) => {
@@ -199,12 +210,11 @@ export const HistoryDraft: Story = {
     await expect(canvas.getByTestId('commands').textContent).toBe(commands)
     await waitFor(() => expect(trigger).toHaveFocus())
     await userEvent.keyboard('{Alt>}{ArrowRight}{/Alt}')
-    const restored = await body.findByRole('textbox', { name: 'Assigned' })
-    await expect(restored).toHaveValue('123')
-    await userEvent.keyboard('{Escape}')
     await waitFor(() =>
-      expect(canvas.getByTestId('assigned')).toHaveTextContent(/^123$/)
+      expect(body.queryByRole('textbox', { name: 'Assigned' })).toBeNull()
     )
+    await expect(canvas.getByTestId('assigned').textContent).toBe(assigned)
+    await expect(canvas.getByTestId('commands').textContent).toBe(commands)
   },
 }
 
@@ -224,7 +234,6 @@ function NestedAssignmentHarness() {
         Open category details
       </button>
       <SideContent width={360} />
-      <SmartBudgetPopover />
     </>
   )
 }

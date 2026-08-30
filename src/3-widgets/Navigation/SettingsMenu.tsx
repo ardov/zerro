@@ -30,10 +30,7 @@ import {
 import { Divider } from '6-shared/ui/Divider'
 import { track } from '6-shared/analytics'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
-import {
-  AdaptivePopover,
-  type AdaptivePopoverProps,
-} from '6-shared/ui/AdaptivePopover'
+import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
 import { appVersion } from '6-shared/config'
 
 import { useAppDispatch, useAppSelector } from 'store'
@@ -41,42 +38,34 @@ import { useAppDispatch, useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
-import { useHistoryPanelFromMenu } from '3-widgets/History/HistoryPanel'
+import { historyPanelScreen } from '3-widgets/History/HistoryPanel'
 import { logOut } from '4-features/authorization'
 import { exportCSV } from '4-features/export/exportCSV'
 import { exportJSON } from '4-features/export/exportJSON'
 import { ImportBackupItem } from '4-features/import/ImportBackupItem'
 import { reloadData } from '4-features/sync'
 import { convertZmBudgetsToZerro } from '4-features/budget/convertZmBudgetsToZerro'
-import { registerPopover } from '6-shared/historyPopovers'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useAsk, useAsked } from '6-shared/overlays'
+import { Confirm } from '6-shared/ui/Confirm'
 import { useColorScheme } from '6-shared/ui/theme'
 
-const settingsHooks = registerPopover<object, AdaptivePopoverProps>(
-  'settingsMenu',
-  {}
-)
+type SettingsMenuProps = { showLinks?: boolean; anchorEl?: Element | null }
 
-export const useSettingsMenu = () => {
-  const { open } = settingsHooks.useMethods()
-  return useCallback(
-    (e: React.MouseEvent) => {
-      open({}, { anchorEl: e.currentTarget })
-    },
-    [open]
-  )
-}
-
-type SettingsMenuProps = { showLinks?: boolean }
-
+/** The settings menu, asked rather than mounted. Items act on the app
+ * themselves, so it answers nothing. */
 export const SettingsMenu: FC<SettingsMenuProps> = props => {
-  const { showLinks } = props
+  const { showLinks, anchorEl } = props
   const { t } = useTranslation('settings')
-  const { displayProps } = settingsHooks.useProps()
+  const { open, answer } = useAsked<void>()
   return (
-    <AdaptivePopover {...displayProps} aria-label={t('settings')}>
+    <AdaptivePopover
+      open={open}
+      onClose={() => answer()}
+      anchorEl={anchorEl}
+      aria-label={t('settings')}
+    >
       <ActionList aria-label={t('settings')}>
-        <Settings showLinks={showLinks} onClose={displayProps.onClose} />
+        <Settings showLinks={showLinks} onClose={() => answer()} />
       </ActionList>
     </AdaptivePopover>
   )
@@ -136,9 +125,9 @@ type ItemProps = { onClose: () => void }
  */
 function HistoryItem(_props: ItemProps) {
   const { t } = useTranslation('history')
-  const openPanel = useHistoryPanelFromMenu()
+  const openPanel = historyPanelScreen.useOpen()
   return (
-    <ActionListItem onClick={openPanel}>
+    <ActionListItem onClick={() => openPanel(true)}>
       <ListRowIcon>
         <HistoryIcon />
       </ListRowIcon>
@@ -172,16 +161,19 @@ function ExportJsonItem() {
     track('data_export_requested', { format: 'json' })
     dispatch(exportJSON)
   }
-  const confirmExport = useConfirm({
-    title: t('exportPendingTitle'),
-    description: t('exportPendingWarning'),
-    cancelText: t('exportPendingCancel'),
-    okText: t('exportPendingConfirm'),
-    onOk: downloadBackup,
-  })
-  const handleExportJson = () => {
-    if (hasPendingOutbox) confirmExport()
-    else downloadBackup()
+  const ask = useAsk()
+  const handleExportJson = async () => {
+    if (!hasPendingOutbox) return downloadBackup()
+    const confirmed = await ask(
+      <Confirm
+        title={t('exportPendingTitle')}
+        description={t('exportPendingWarning')}
+        cancelText={t('exportPendingCancel')}
+        okText={t('exportPendingConfirm')}
+      />
+    )
+    if (!confirmed) return
+    downloadBackup()
   }
   return (
     <ActionListItem onClick={handleExportJson}>
@@ -234,15 +226,16 @@ function LangItem(_props: ItemProps) {
   )
 }
 
-function NavItems({ onClose }: ItemProps) {
+function NavItems(_props: ItemProps) {
   const { t } = useTranslation('navigation')
   const navigate = useNavigate()
+  // Leaving the page takes the menu with it, so navigating is the whole of
+  // it: closing first would be a Back step racing a push.
   const handleNav =
     (path: string): React.MouseEventHandler<HTMLElement> =>
     e => {
       e.preventDefault()
-      onClose()
-      setTimeout(() => navigate(path), 10)
+      navigate(path)
     }
   return (
     <>
@@ -303,12 +296,18 @@ function ReloadDataItem(_props: ItemProps) {
     track('local_data_reload_requested', {})
     void dispatch(reloadData())
   }, [dispatch])
-  const reload = useConfirm({
-    title: t('reloadData'),
-    description: t('reloadDataDescription'),
-    okText: t('reloadData'),
-    onOk: requestReload,
-  })
+  const ask = useAsk()
+  const reload = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('reloadData')}
+        description={t('reloadDataDescription')}
+        okText={t('reloadData')}
+      />
+    )
+    if (!confirmed) return
+    requestReload()
+  }
   return (
     <ActionListItem onClick={reload}>
       <ListRowIcon>

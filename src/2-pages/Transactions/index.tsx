@@ -1,40 +1,35 @@
-import type { FC, CSSProperties } from 'react'
-import { useState, useCallback } from 'react'
+import type { FC } from 'react'
+import { useCallback, useState } from 'react'
 import { TransactionList } from '3-widgets/transaction/TransactionList'
 import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
-import type { SideDrawerProps } from '6-shared/ui/SideDrawer'
-import { SideDrawer } from '6-shared/ui/SideDrawer'
 import {
   TrEmptyState,
   TransactionPreview,
 } from '3-widgets/transaction/TransactionPreview'
-import { registerPopover } from '6-shared/historyPopovers'
-import type { TTransaction, TTransactionId } from '6-shared/types'
+import { transactionScreen } from '3-widgets/global/TransactionPreviewDrawer'
+import type { TTransactionId } from '6-shared/types'
 import { track } from '6-shared/analytics'
 import { useTranslation } from 'react-i18next'
 
 import { useTransactionsPageView } from './useTransactionsPageView'
 
-const sideWidth = 360
-
 export default function TransactionsView() {
   const { t } = useTranslation('transactions')
   const isMobile = useBreakpointDown('md')
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
-  const { open } = trPreview.useMethods()
   const view = useTransactionsPageView()
-  const openedProps = trPreview.useProps()
-  const opened = openedProps.displayProps.open && openedProps.extraProps.id
+  // The same screen the drawer shows elsewhere. On a phone the drawer draws
+  // it; at desktop width this page lays it out as a column of its own and the
+  // drawer stands aside.
+  const opened = transactionScreen.useValue()
+  const openPreview = transactionScreen.useOpen()
 
   const handleTrOpen = useCallback(
     (id: TTransactionId) => {
       track('transaction_details_viewed', { source: 'transactions_page' })
-      open({
-        id,
-        onSelectSimilar: changed => setCheckedDate(new Date(changed)),
-      })
+      openPreview(id)
     },
-    [open]
+    [openPreview]
   )
 
   return (
@@ -50,16 +45,14 @@ export default function TransactionsView() {
               view={view}
               className="grow"
               onTrOpen={handleTrOpen}
-              opened={opened || undefined}
+              opened={opened}
             />
           </div>
         </div>
 
-        {isMobile ? (
-          <SideContent width={sideWidth} />
-        ) : (
+        {!isMobile && (
           <div className="w-[360px] shrink-0 overflow-auto bg-card">
-            <SideContent width={sideWidth} docked />
+            <DockedPreview onSelectSimilar={setCheckedDate} />
           </div>
         )}
       </div>
@@ -67,54 +60,21 @@ export default function TransactionsView() {
   )
 }
 
-const trPreview = registerPopover<
-  {
-    id?: TTransactionId
-    onSelectSimilar?: (changed: TTransaction['changed']) => void
-  },
-  SideDrawerProps
->('transactionPreview', {})
-
-const SideContent: FC<{ docked?: boolean; width: number }> = ({
-  docked,
-  width,
+/** The desktop column. It is the transaction screen laid out in place rather
+ * than over the page, so Back behaves the same either way. */
+const DockedPreview: FC<{ onSelectSimilar: (date: Date) => void }> = ({
+  onSelectSimilar,
 }) => {
-  const { displayProps, extraProps, open } = trPreview.useProps()
-  const { id, onSelectSimilar } = extraProps
-  const isXS = useBreakpointDown('sm')
-
-  const openAnother = (id: TTransactionId) => {
-    open({ id, onSelectSimilar })
-  }
-
-  const drawerContent = id ? (
-    <TransactionPreview
-      id={extraProps.id || ''}
-      key={extraProps.id}
-      onClose={displayProps.onClose}
-      onOpenOther={openAnother}
-      onSelectSimilar={onSelectSimilar}
-    />
-  ) : (
-    <TrEmptyState />
-  )
-
-  if (docked) {
-    return displayProps.open ? drawerContent : <TrEmptyState />
-  }
-
+  const [id, setId] = transactionScreen.use()
+  const openAnother = transactionScreen.useOpen()
+  if (!id) return <TrEmptyState />
   return (
-    <SideDrawer {...displayProps}>
-      <div
-        className="w-screen sm:w-[var(--transaction-side-width)]"
-        style={
-          {
-            '--transaction-side-width': `${isXS ? '100vw' : `${width}px`}`,
-          } as CSSProperties
-        }
-      >
-        {drawerContent}
-      </div>
-    </SideDrawer>
+    <TransactionPreview
+      id={id}
+      key={id}
+      onClose={() => setId(null)}
+      onOpenOther={openAnother}
+      onSelectSimilar={changed => onSelectSimilar(new Date(changed))}
+    />
   )
 }

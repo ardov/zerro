@@ -1,11 +1,11 @@
 import { IconButton } from '6-shared/ui/Button'
-import type { TTransaction } from '6-shared/types'
+import type { TTransactionId } from '6-shared/types'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SideDrawer } from '6-shared/ui/SideDrawer'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
-import { registerPopover } from '6-shared/historyPopovers'
+import { defineScreen } from '6-shared/overlays'
 import type { core } from 'zerro-core/redux'
 
 import type { TTransactionListProps } from '../transaction/TransactionList'
@@ -14,45 +14,32 @@ import { useTransactionPreview } from './TransactionPreviewDrawer'
 
 export type TransactionDrawerProps = {
   title?: string
-  transactions?: TTransaction[]
+  /** A list someone else has already worked out — the year review's cards.
+   * Ids rather than whole transactions: the value has to survive a reload,
+   * and the invisible half of the address has no length limit to mind. */
+  ids?: TTransactionId[]
   initialQuery?: core.transactions.TTransactionQuery
   initialDate?: TTransactionListProps['initialDate']
 }
 
-const trDrawerHooks = registerPopover(
-  'transaction-list-drawer',
-  {} as TransactionDrawerProps
-)
+/** A screen: a list of transactions, described either by a query or by the
+ * ids it was handed. */
+const transactionListScreen =
+  defineScreen<TransactionDrawerProps>('transactionList')
 
-export const useTransactionDrawer = trDrawerHooks.useMethods
+export const useTransactionDrawer = () => transactionListScreen.useOpen()
 
-export const SmartTransactionListDrawer = () => {
+export const TransactionListDrawer = () => {
   const { t } = useTranslation('common')
-  const drawer = trDrawerHooks.useProps()
-  const trPreview = useTransactionPreview()
-  const { title, transactions, initialQuery, initialDate } = drawer.extraProps
-  const { onClose, open } = drawer.displayProps
-
-  const showTransaction = useCallback(
-    function show(id: string) {
-      trPreview.open({
-        id,
-        onOpenOther: (id: string) => {
-          trPreview.close()
-          show(id)
-        },
-        onSelectSimilar: () => {
-          // TODO: implement
-        },
-      })
-    },
-    [trPreview]
-  )
+  const [value, setValue] = transactionListScreen.use()
+  const showTransaction = useTransactionPreview()
+  const onClose = useCallback(() => setValue(null), [setValue])
+  const { title, ids, initialQuery, initialDate } = value ?? {}
 
   return (
     <SideDrawer
       onClose={onClose}
-      open={open}
+      open={!!value}
       // Full-width on phones, fixed-width from the small breakpoint.
       className="w-screen sm:w-[360px]"
       aria-label={title || t('transactions')}
@@ -71,7 +58,7 @@ export const SmartTransactionListDrawer = () => {
         </div>
 
         <TransactionList
-          transactionIds={transactions?.map(transaction => transaction.id)}
+          transactionIds={ids}
           initialQuery={initialQuery}
           initialDate={initialDate}
           onTrOpen={showTransaction}

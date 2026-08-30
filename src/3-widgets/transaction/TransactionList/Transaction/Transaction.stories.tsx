@@ -11,7 +11,9 @@ const meta = {
   component: Transaction,
   parameters: {
     layout: 'centered',
-    app: { scenario: 'demo', globalWidgets: true, route: '/transactions' },
+    // Not `/transactions`: that page lays the preview screen out as a column
+    // of its own, and this story wants the drawer the rest of the app gets.
+    app: { scenario: 'demo', globalWidgets: true, route: '/budget' },
   },
   args: {
     isChecked: false,
@@ -71,10 +73,7 @@ function PreviewHarness() {
   const preview = useTransactionPreview()
   return (
     <>
-      <button
-        type="button"
-        onClick={() => preview.open({ id: transaction.id })}
-      >
+      <button type="button" onClick={() => preview(transaction.id)}>
         Edit expense
       </button>
       <output data-testid="expense">{transaction.outcome}</output>

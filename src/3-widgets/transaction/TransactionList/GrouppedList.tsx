@@ -7,8 +7,8 @@ import { ListRowSubheader } from '6-shared/ui/ListRow'
 import { formatDate } from '6-shared/helpers/date'
 import type { TDateDraft, TISODate, TTransactionId } from '6-shared/types'
 import { toISODate } from '6-shared/helpers/date'
-import { SmartDialog } from '6-shared/ui/SmartDialog'
-import { registerPopover } from '6-shared/historyPopovers'
+import { AdaptiveDialog } from '6-shared/ui/AdaptiveDialog'
+import { useAsk, useAsked } from '6-shared/overlays'
 import { Calendar } from '6-shared/ui/Calendar'
 import { useTranslation } from 'react-i18next'
 
@@ -60,7 +60,7 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
     onTopDateChange,
   } = props
   const listRef = useRef<ListImperativeAPI>(null)
-  const datePopover = dateDialog.useMethods()
+  const ask = useAsk()
 
   // react-window v2 offsets rows with `transform: translateY(...)`, which
   // breaks `position: sticky` on the in-row headers. So we render the pinned
@@ -101,18 +101,17 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
   )
 
   const onDateClick = useCallback(
-    (date: TISODate) => {
-      datePopover.open({
-        value: date,
-        minDate: groups[groups.length - 1]?.date,
-        maxDate: groups[0]?.date,
-        // Closing is handled inside `DateDialog` via its own (fresh) onClose —
-        // the `close` captured here is stale (the dialog isn't on the history
-        // stack yet at click time), so calling it would be a no-op.
-        onChange: scrollToDate,
-      })
+    async (date: TISODate) => {
+      const picked = await ask<TISODate>(
+        <DateDialog
+          value={date}
+          minDate={groups[groups.length - 1]?.date}
+          maxDate={groups[0]?.date}
+        />
+      )
+      if (picked) scrollToDate(picked)
     },
-    [datePopover, groups, scrollToDate]
+    [ask, groups, scrollToDate]
   )
 
   // Position the list once, after react-window has actually mounted and
@@ -157,7 +156,6 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
 
   return (
     <>
-      <DateDialog />
       <div style={{ position: 'relative', height: '100%' }}>
         <AutoSizer
           renderProp={({ height }) => {
@@ -258,32 +256,28 @@ type TDateDialogProps = {
   value: TISODate
   minDate?: TISODate
   maxDate?: TISODate
-  onChange: (date: TISODate) => void
 }
 
-const dateDialog = registerPopover<TDateDialogProps>('listSateDialog', {
-  value: toISODate(new Date()),
-  onChange: () => {},
-})
-
-const DateDialog = () => {
+/** «Which day?». It answers the date, so the caller scrolls there after the
+ * `await` — no callback rides along, and nothing has to reach a stale close. */
+const DateDialog = ({ value, minDate, maxDate }: TDateDialogProps) => {
   const { t } = useTranslation()
-  const { extraProps, displayProps } = dateDialog.useProps()
-  const { onChange, value, minDate, maxDate } = extraProps
+  const { open, answer } = useAsked<TISODate>()
   return (
-    <SmartDialog elKey={dateDialog.key} aria-label={t('selectDate')}>
+    <AdaptiveDialog
+      open={open}
+      onClose={() => answer()}
+      aria-label={t('selectDate')}
+    >
       <div className="flex justify-center p-2">
         <Calendar
           autoFocus
           value={value}
           minDate={minDate}
           maxDate={maxDate}
-          onChange={date => {
-            displayProps.onClose()
-            onChange(date)
-          }}
+          onChange={date => answer(date)}
         />
       </div>
-    </SmartDialog>
+    </AdaptiveDialog>
   )
 }

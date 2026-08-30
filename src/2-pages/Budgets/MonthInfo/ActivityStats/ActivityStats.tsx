@@ -22,7 +22,7 @@ export function ActivityStats(props: { month: TISOMonth }) {
 
   const showTransactions = useCallback(
     (id: TDataNode['id'], trMode: core.transactions.TrFilterMode) => {
-      transactionDrawer.open({
+      transactionDrawer({
         envelopeConditions: { id, month, mode: trMode, isExact: true },
       })
     },

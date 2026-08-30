@@ -1,53 +1,30 @@
-import React, { useCallback } from 'react'
-import type { MenuProps } from '6-shared/ui/Menu'
 import { Menu, MenuItem } from '6-shared/ui/Menu'
 import { useTranslation } from 'react-i18next'
-import { registerPopover } from '6-shared/historyPopovers'
+import { useAsked } from '6-shared/overlays'
 
-type TableMenuProps = {
+export type TableMenuChoice = 'showAllToggle' | 'reorderModeToggle'
+
+export type TableMenuProps = {
   isAllShown: boolean
   isReordering: boolean
-  onShowAllToggle: () => void
-  onReorderModeToggle: () => void
+  anchorEl?: Element | null
 }
 
-const tableMenu = registerPopover<TableMenuProps, MenuProps>('tableMenu', {
-  isAllShown: false,
-  isReordering: false,
-  onShowAllToggle: () => {},
-  onReorderModeToggle: () => {},
-})
-
-export const useTableMenu = (props: TableMenuProps) => {
-  const { open } = tableMenu.useMethods()
-  return useCallback(
-    (e: React.MouseEvent) => open({ ...props }, { anchorEl: e.currentTarget }),
-    [open, props]
-  )
-}
-
-export function TableMenu() {
+/** «What should the table do?». It returns the choice; the table decides what
+ * it means. */
+export function TableMenu({
+  isAllShown,
+  isReordering,
+  anchorEl,
+}: TableMenuProps) {
   const { t } = useTranslation('envelopeTableMenu')
-  const popover = tableMenu.useProps()
-  const { onShowAllToggle, onReorderModeToggle, isReordering, isAllShown } =
-    popover.extraProps
-
+  const { open, answer } = useAsked<TableMenuChoice>()
   return (
-    <Menu {...popover.displayProps}>
-      <MenuItem
-        onClick={() => {
-          popover.close()
-          onShowAllToggle()
-        }}
-      >
+    <Menu open={open} onClose={() => answer()} anchorEl={anchorEl}>
+      <MenuItem onClick={() => answer('showAllToggle')}>
         {t(isAllShown ? 'showPrtiallyEnvelopes' : 'showAllEnvelopes')}
       </MenuItem>
-      <MenuItem
-        onClick={() => {
-          popover.close()
-          onReorderModeToggle()
-        }}
-      >
+      <MenuItem onClick={() => answer('reorderModeToggle')}>
         {t(isReordering ? 'leaveEditMode' : 'goToEditMode')}
       </MenuItem>
     </Menu>
