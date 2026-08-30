@@ -133,6 +133,34 @@ describe('parseFullBackup', () => {
     expect(parsed.store.transaction.tr).toMatchObject({ id: 'tr', outcome: 10 })
   })
 
+  // Round 9: deleting an account nulls the leg that pointed at it on a debt
+  // operation and soft-deletes the row. A real account can already hold that
+  // shape, so an export of it has to stay importable — otherwise the backup a
+  // person already has quietly stops working.
+  it('reads a soft-deleted transaction whose account leg was nulled', () => {
+    const withNullLeg = (deleted: boolean) =>
+      makeSnapshot({
+        account: { acc: makeAccount({ id: 'acc', title: 'Cash' }) },
+        transaction: {
+          tr: {
+            ...makeTransaction({
+              id: 'tr',
+              incomeAccount: 'debt',
+              outcomeAccount: 'acc',
+              deleted,
+            }),
+            outcomeAccount: null,
+          } as unknown as ReturnType<typeof makeTransaction>,
+        },
+      })
+
+    expect(parseFullBackup(toBackupFile(withNullLeg(true))).ok).toBe(true)
+    expect(parseFullBackup(toBackupFile(withNullLeg(false)))).toEqual({
+      ok: false,
+      reason: 'notABackup',
+    })
+  })
+
   it('rejects a file that is not JSON', () => {
     expect(parseFullBackup('not json at all')).toEqual({
       ok: false,

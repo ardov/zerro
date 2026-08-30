@@ -25,11 +25,16 @@ export type TZmTransaction = {
   qrCode: string | null
   incomeBankID: TBankOperationId | null
   incomeInstrument: TInstrumentId
-  incomeAccount: TAccountId
+  /**
+   * Null only on a soft-deleted row: deleting an account nulls the leg that
+   * pointed at it on a debt operation, instead of purging the row (round 9).
+   */
+  incomeAccount: TAccountId | null
   income: TUnits
   outcomeBankID: TBankOperationId | null
   outcomeInstrument: TInstrumentId
-  outcomeAccount: TAccountId
+  /** Null only on a soft-deleted row — see `incomeAccount`. */
+  outcomeAccount: TAccountId | null
   outcome: TUnits
   tag: TTagId[] | null
   merchant: TMerchantId | null

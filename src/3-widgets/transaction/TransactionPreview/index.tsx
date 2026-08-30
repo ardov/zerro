@@ -75,8 +75,12 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   const tr = useAppSelector(state => core.transactions.selectAll(state)[id])!
   const trType = core.transactions.getType(tr)
   const accounts = core.accounts.usePopulated()
-  const incomeAccount = accounts[tr.incomeAccount]
-  const outcomeAccount = accounts[tr.outcomeAccount]
+  const incomeAccount = tr.incomeAccount
+    ? accounts[tr.incomeAccount]
+    : undefined
+  const outcomeAccount = tr.outcomeAccount
+    ? accounts[tr.outcomeAccount]
+    : undefined
   const instruments = core.instruments.useAll()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle
@@ -189,7 +193,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
       <div className="flex flex-col gap-8 p-6">
         {trType !== 'income' && (
           <AmountInput
-            label={t('otcomeFrom', { account: outcomeAccount.title })}
+            label={t('otcomeFrom', { account: outcomeAccount?.title ?? '—' })}
             currency={outcomeCurrency}
             value={localOutcome}
             onChange={setLocalOutcome}
@@ -200,7 +204,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
         )}
         {trType !== 'outcome' && (
           <AmountInput
-            label={t('incomeTo', { account: incomeAccount.title })}
+            label={t('incomeTo', { account: incomeAccount?.title ?? '—' })}
             currency={incomeCurrency}
             value={localIncome}
             onChange={setLocalIncome}

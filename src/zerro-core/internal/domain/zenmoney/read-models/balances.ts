@@ -85,6 +85,10 @@ export function buildTransactionEffect(
   const outcomeFx = input.instrumentCodeById[transaction.outcomeInstrument]
   const effect: TTransactionEffect = { id, date }
 
+  // A soft-deleted row can carry a leg an account deletion nulled. It moves
+  // nothing, so it contributes neither an account nor a debtor change.
+  if (incomeAccount === null || outcomeAccount === null) return effect
+
   switch (type) {
     case TrType.Income:
       effect.accounts = { [incomeAccount]: { [incomeFx]: income } }

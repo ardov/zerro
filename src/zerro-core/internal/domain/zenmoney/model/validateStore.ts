@@ -149,15 +149,24 @@ export function validateDataStore(
 
     Object.values(store.transaction).forEach((transaction, index) => {
       requireReference(userIds, transaction.user, `transaction[${index}].user`)
+      // Deleting an account nulls the leg that pointed at it on a debt
+      // operation, and soft-deletes the row rather than purging it — observed
+      // in round 9. That row is canonical state the server keeps sending, so
+      // rejecting it here would put a replica into recovery it cannot leave.
+      // Only a soft-deleted row may carry the null: a live transaction with a
+      // dangling leg is still corruption worth failing on.
+      const legsMayBeNull = transaction.deleted === true
       requireReference(
         accountIds,
         transaction.incomeAccount,
-        `transaction[${index}].incomeAccount`
+        `transaction[${index}].incomeAccount`,
+        legsMayBeNull
       )
       requireReference(
         accountIds,
         transaction.outcomeAccount,
-        `transaction[${index}].outcomeAccount`
+        `transaction[${index}].outcomeAccount`,
+        legsMayBeNull
       )
       requireReference(
         instrumentIds,

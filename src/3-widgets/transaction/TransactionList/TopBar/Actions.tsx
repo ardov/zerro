@@ -325,7 +325,7 @@ function getAvailableActions(transactions: TTransaction[]) {
     return instruments.size === 1
   }
   function hasSameInOutAccounts() {
-    const accounts = new Set<string>()
+    const accounts = new Set<string | null>()
     outcomes.forEach(tr => accounts.add(tr.outcomeAccount))
     incomes.forEach(tr => accounts.add(tr.incomeAccount))
     return accounts.size === 1

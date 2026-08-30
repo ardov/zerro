@@ -343,10 +343,12 @@ export async function searchTransactions(
 function moneySide(
   workspace: TWorkspace,
   amount: number,
-  accountId: string,
+  // Null on a soft-deleted row whose leg an account deletion cleared.
+  accountId: string | null,
   instrumentId: number
 ) {
-  const account = workspace.current.account[accountId]
+  const account =
+    accountId === null ? undefined : workspace.current.account[accountId]
   const instrument = workspace.current.instrument[instrumentId]
   return {
     amount,
@@ -363,8 +365,8 @@ export function transactionType(
   transaction: {
     income: number
     outcome: number
-    incomeAccount: string
-    outcomeAccount: string
+    incomeAccount: string | null
+    outcomeAccount: string | null
   },
   debtAccountId: string | undefined
 ) {

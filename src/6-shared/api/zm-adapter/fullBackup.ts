@@ -134,6 +134,30 @@ function hasValidReferences(backup: TFullBackupWire): boolean {
     ids.account.has(row.incomeAccount) &&
     ids.account.has(row.outcomeAccount)
 
+  /**
+   * A transaction's legs, where deleting an account may have left a null.
+   *
+   * The server nulls the leg that pointed at a deleted account on a debt
+   * operation and soft-deletes the row (round 9), so a valid export of a real
+   * account can contain that shape. A null on a live row is still rejected.
+   */
+  const transactionAccountReferences = (row: {
+    incomeInstrument: number
+    outcomeInstrument: number
+    incomeAccount: string | null
+    outcomeAccount: string | null
+    deleted: boolean
+  }) => {
+    const leg = (id: string | null) =>
+      id === null ? row.deleted : ids.account.has(id)
+    return (
+      ids.instrument.has(row.incomeInstrument) &&
+      ids.instrument.has(row.outcomeInstrument) &&
+      leg(row.incomeAccount) &&
+      leg(row.outcomeAccount)
+    )
+  }
+
   return (
     backup.user.filter(row => row.parent === null).length === 1 &&
     backup.user.every(row => row.parent === null || ids.user.has(row.parent)) &&
@@ -175,7 +199,7 @@ function hasValidReferences(backup: TFullBackupWire): boolean {
     owns(backup.transaction) &&
     backup.transaction.every(
       row =>
-        accountReferences(row) &&
+        transactionAccountReferences(row) &&
         tagReferences(row.tag) &&
         merchantReference(row.merchant) &&
         (row.reminderMarker === null ||

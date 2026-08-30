@@ -91,7 +91,9 @@ function compileClause(
         )
     }
     case 'account': {
-      const ids = new Set(clause.ids)
+      // Nullable because a soft-deleted row can carry a leg that an account
+      // deletion nulled. A filter by account simply never matches one.
+      const ids = new Set<string | null>(clause.ids)
       return transaction =>
         !ids.size ||
         ids.has(transaction.incomeAccount) ||

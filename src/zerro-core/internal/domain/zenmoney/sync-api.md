@@ -157,7 +157,9 @@ migration that needs canonical reminders re-read.
   `startDate`, `endDateOffset`, `endDateOffsetInterval`, `capitalization`,
   `percent`, and `payoffStep`.
 - `user` on any entity is immutable (explicit 400). Dictionaries
-  (`instrument`, `company`) are read-only (explicit 400).
+  (`instrument`, `company`) are read-only (explicit 400) and are delivered in
+  full to every account rather than narrowed to what that account uses, so a
+  reference to any of their ids resolves for anybody.
 - `transaction.date` is freely mutable (any distance); moving a transaction
   between accounts recalculates both balances atomically in the response.
 - Tags: no server-side nesting depth limit; a self-referencing `parent` is
@@ -257,8 +259,21 @@ migration that needs canonical reminders re-read.
   already canonicalized to `tag: null` before account deletion: category is
   stripped by transfer materialization, not this cascade.
 
+- That collapse is not universal. Round 9 (2026-08-30) measured the case where
+  the surviving leg is the debt account, which cannot take both sides of a row.
+  The server soft-deletes the operation instead: `deleted` becomes `true`, the
+  leg that pointed at the deleted account becomes **`null`**, and both amounts
+  are kept as they were. No `deletion[]` tombstone is emitted, but the
+  rewritten row arrives in the same response as the account deletion. The debt
+  account's balance loses the operation's contribution. So a dangling — in
+  fact null — account reference is real canonical state, on soft-deleted rows
+  only; `tag` behaviour here is untested, since the fixture carried none.
+
 ## Debt account
 
+- Deleting an ordinary account does not collapse a debt operation onto the
+  debt account; it soft-deletes the row and nulls the freed leg. See the
+  account-deletion cascade above.
 - The debt account is a protected singleton: creating a second one is blocked
   (same 400 for fresh creation and for changing an existing account's type),
   and deleting it is a silent no-op even with zero referencing transactions.

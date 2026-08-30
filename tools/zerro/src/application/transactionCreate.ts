@@ -260,10 +260,12 @@ function presentTransaction(
 function moneySide(
   workspace: TWorkspace,
   amount: number,
-  accountId: string,
+  // Null on a soft-deleted row whose leg an account deletion cleared.
+  accountId: string | null,
   instrumentId: number
 ) {
-  const account = workspace.current.account[accountId]
+  const account =
+    accountId === null ? undefined : workspace.current.account[accountId]
   const instrument = workspace.current.instrument[instrumentId]
   return {
     amount,

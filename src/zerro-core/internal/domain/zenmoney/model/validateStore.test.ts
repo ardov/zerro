@@ -4,6 +4,7 @@ import {
   makeInstrument,
   makeStore,
   makeTag,
+  makeTransaction,
   makeUser,
 } from '../../../../support/testing/zenmoneyTestData'
 import { AccountType } from '../entities/accounts'
@@ -120,6 +121,51 @@ describe('validateDataStore', () => {
     ).toMatchObject({
       ok: false,
       reason: expect.stringContaining('account[1].instrument'),
+    })
+  })
+
+  // Round 9: deleting an ordinary account nulls the leg that pointed at it on
+  // a debt operation and soft-deletes the row instead of purging it. That row
+  // is canonical state the server keeps sending, so rejecting it would put a
+  // replica into a recovery it cannot leave.
+  it('accepts a null account leg only on a soft-deleted transaction', () => {
+    const base = makeStore({
+      serverTimestamp: 100,
+      instrument: { 1: makeInstrument({ id: 1 }) },
+      country: {
+        1: { id: 1, title: 'United States', currency: 1, domain: null },
+      },
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+      account: {
+        cash: makeAccount({ id: 'cash', type: AccountType.Cash }),
+        debt: makeAccount({ id: 'debt', type: AccountType.Debt }),
+      },
+    })
+
+    // Both legs are still typed as required, which is precisely the lie this
+    // shape exposes. The cast keeps that visible here instead of hiding it
+    // behind a widened field that 21 other files would have to reckon with.
+    const nullOutcomeLeg = (patch: Parameters<typeof makeTransaction>[0]) =>
+      ({
+        ...makeTransaction({ incomeAccount: 'debt', ...patch }),
+        outcomeAccount: null,
+      }) as unknown as ReturnType<typeof makeTransaction>
+
+    expect(
+      validateDataStore({
+        ...base,
+        transaction: { tr: nullOutcomeLeg({ id: 'tr', deleted: true }) },
+      })
+    ).toMatchObject({ ok: true })
+
+    expect(
+      validateDataStore({
+        ...base,
+        transaction: { tr: nullOutcomeLeg({ id: 'tr', deleted: false }) },
+      })
+    ).toMatchObject({
+      ok: false,
+      reason: expect.stringContaining('transaction[0].outcomeAccount'),
     })
   })
 })

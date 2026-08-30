@@ -690,6 +690,53 @@ describe('materializeCommand', () => {
     expect(applyPatch(snapshot, patch).account[survivor.id].balance).toBe(11)
   })
 
+  // Round 9: the debt account cannot be the survivor of a collapse, because a
+  // row with debt on both sides is rejected. The server soft-deletes the row
+  // and nulls the leg that pointed at the deleted account, keeping the amounts.
+  it('soft-deletes a debt operation instead of collapsing it onto the debt account', () => {
+    const deleted = makeAccount({ id: 'deleted', balance: -13 })
+    const debt = makeAccount({
+      id: 'debt',
+      type: AccountType.Debt,
+      balance: 315,
+    })
+    const debtOperation = makeTransaction({
+      id: 'debtOperation',
+      incomeAccount: debt.id,
+      outcomeAccount: deleted.id,
+      income: 13,
+      outcome: 13,
+      payee: 'Someone',
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: { [deleted.id]: deleted, [debt.id]: debt },
+      transaction: { [debtOperation.id]: debtOperation },
+    })
+    const command = issuePatch(
+      snapshot,
+      { deletion: [{ id: deleted.id, object: 'account' }] },
+      100
+    )
+
+    const patch = materializeCommand(snapshot, command)
+    expect(patch.deletion).toEqual([
+      { id: deleted.id, object: 'account', stamp: 100, user: 1 },
+    ])
+    expect(patch.transaction).toEqual([
+      {
+        ...debtOperation,
+        deleted: true,
+        outcomeAccount: null,
+        changed: 1001,
+      },
+    ])
+
+    // The soft-deleted row stops counting, so the debt account loses exactly
+    // what the operation contributed.
+    expect(applyPatch(snapshot, patch).account[debt.id].balance).toBe(302)
+  })
+
   it('purges a transaction created in the same command as its deleted account', () => {
     const snapshot = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },

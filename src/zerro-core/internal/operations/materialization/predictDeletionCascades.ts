@@ -39,6 +39,10 @@ export function predictDeletionCascades(
  * it. A transfer that touches one surviving account remains, with that id on
  * both legs and the deleted side zeroed. This is the exact Round 6 shape.
  *
+ * A debt operation is the exception, because the server rejects the debt
+ * account on both sides. Round 9 observed it soft-deleted instead, with the leg
+ * that pointed at the deleted account nulled and both amounts untouched.
+ *
  * An already soft-deleted transaction stays out of the prediction: its server
  * cascade has not been independently observed, and it is already absent from
  * every local read model.
@@ -77,8 +81,12 @@ function predictAccountDeletion(
     ) {
       return
     }
-    const incomeDeleted = deletedAccounts.has(transaction.incomeAccount)
-    const outcomeDeleted = deletedAccounts.has(transaction.outcomeAccount)
+    const { incomeAccount, outcomeAccount } = transaction
+    // Only a soft-deleted row can carry a leg an earlier account deletion
+    // nulled, and those already returned above.
+    if (incomeAccount === null || outcomeAccount === null) return
+    const incomeDeleted = deletedAccounts.has(incomeAccount)
+    const outcomeDeleted = deletedAccounts.has(outcomeAccount)
     if (!incomeDeleted && !outcomeDeleted) return
 
     if (incomeDeleted && outcomeDeleted) {
@@ -90,9 +98,33 @@ function predictAccountDeletion(
       return
     }
 
-    const survivor = incomeDeleted
-      ? transaction.outcomeAccount
-      : transaction.incomeAccount
+    const survivor = incomeDeleted ? outcomeAccount : incomeAccount
+
+    // A debt operation cannot collapse the way an ordinary transfer does: the
+    // server refuses a row with the debt account on both sides. Round 9
+    // observed what it does instead — the row is soft-deleted and the leg that
+    // pointed at the deleted account becomes null, while both amounts are kept
+    // as they were. The row stops counting towards the debt account's balance
+    // because `isDeletedTransaction` excludes it, which is what the observed
+    // balance change confirms.
+    //
+    // `tag` is deliberately left alone: the observed fixture carried none, so
+    // whether the server clears it is unknown, and this file predicts only
+    // effects it has actually seen.
+    if (snapshot.account[survivor]?.type === AccountType.Debt) {
+      primaryTransactions.set(transaction.id, {
+        ...transaction,
+        deleted: true,
+        incomeAccount: incomeDeleted ? null : incomeAccount,
+        outcomeAccount: outcomeDeleted ? null : outcomeAccount,
+        changed: nextChanged(changedAt, transaction.changed),
+        // Both legs are typed as required; a nulled leg on a soft-deleted row
+        // is canonical state the store validator accepts as a special case.
+      } as unknown as TTransaction)
+      predicted = true
+      return
+    }
+
     primaryTransactions.set(transaction.id, {
       ...transaction,
       income: incomeDeleted ? 0 : transaction.income,
@@ -444,9 +476,11 @@ function isDebtTransaction(
   snapshot: TDataStore,
   transaction: TTransaction
 ): boolean {
+  const legType = (id: TAccountId | null) =>
+    id === null ? undefined : snapshot.account[id]?.type
   return (
-    snapshot.account[transaction.incomeAccount]?.type === AccountType.Debt ||
-    snapshot.account[transaction.outcomeAccount]?.type === AccountType.Debt
+    legType(transaction.incomeAccount) === AccountType.Debt ||
+    legType(transaction.outcomeAccount) === AccountType.Debt
   )
 }
 

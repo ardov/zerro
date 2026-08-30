@@ -222,11 +222,15 @@ export const transactionWireSchema = z
     qrCode: nullable(z.string()),
     incomeBankID: nullable(numberId),
     incomeInstrument: numberId,
-    incomeAccount: stringId,
+    // Nullable only because deleting an account nulls the leg that pointed at
+    // it on a soft-deleted debt operation (round 9). The shape rule — a null
+    // leg is legal only on a deleted row — is enforced in `hasValidReferences`,
+    // which can see `deleted` alongside it.
+    incomeAccount: nullable(stringId),
     income: z.number(),
     outcomeBankID: nullable(numberId),
     outcomeInstrument: numberId,
-    outcomeAccount: stringId,
+    outcomeAccount: nullable(stringId),
     outcome: z.number(),
     tag: nullable(stringArray),
     merchant: nullable(stringId),

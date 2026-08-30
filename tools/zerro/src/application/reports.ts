@@ -34,8 +34,8 @@ type TReportTransaction = {
   date: string
   income: number
   outcome: number
-  incomeAccount: string
-  outcomeAccount: string
+  incomeAccount: string | null
+  outcomeAccount: string | null
   incomeInstrument: number
   outcomeInstrument: number
   tag: string[] | null
@@ -266,6 +266,9 @@ function bucketFor(
         routeDirection === 'income'
           ? transaction.incomeAccount
           : transaction.outcomeAccount
+      // Absent on a soft-deleted row whose leg an account deletion cleared,
+      // grouped the same way a missing merchant is.
+      if (!accountId) return { key: 'none', name: 'No account' }
       return {
         key: accountId,
         name: workspace.current.account[accountId]?.title ?? accountId,

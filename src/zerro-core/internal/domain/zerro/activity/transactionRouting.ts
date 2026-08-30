@@ -52,6 +52,11 @@ export function routeTransactionToActivity(
   transaction: TTransaction,
   context: TTransactionActivityRoutingContext
 ): TTransactionActivityRoute | null {
+  // A soft-deleted row can carry a nulled leg. It moves no money, so it
+  // belongs to no month's activity.
+  if (transaction.incomeAccount === null || transaction.outcomeAccount === null)
+    return null
+
   const fromBudget = context.inBudgetAccountIds.has(transaction.outcomeAccount)
   const toBudget = context.inBudgetAccountIds.has(transaction.incomeAccount)
 

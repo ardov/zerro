@@ -91,9 +91,9 @@ const entityRows: readonly TEntityRow[] = [
         transaction =>
           !transaction.deleted &&
           transaction.merchant === merchant.id &&
-          (current.account[transaction.incomeAccount]?.type ===
+          (accountTypeOf(current, transaction.incomeAccount) ===
             AccountType.Debt ||
-            current.account[transaction.outcomeAccount]?.type ===
+            accountTypeOf(current, transaction.outcomeAccount) ===
               AccountType.Debt)
       ),
     generatedId: true,
@@ -425,6 +425,19 @@ function remapEntity(
     }
   })
   return row.remap ? row.remap(remapped, mappings) : remapped
+}
+
+/**
+ * An account leg's type, where the leg may be absent.
+ *
+ * A soft-deleted row can carry a leg that an account deletion nulled, so a
+ * question about "the account on this side" has no answer for it.
+ */
+function accountTypeOf(
+  store: TDataStore,
+  id: string | null
+): AccountType | undefined {
+  return id === null ? undefined : store.account[id]?.type
 }
 
 function mapId(

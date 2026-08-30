@@ -120,6 +120,10 @@ function addContribution(
   sign: 1 | -1
 ): void {
   if (!transaction || isDeletedTransaction(transaction)) return
-  add(transaction.incomeAccount, sign * transaction.income)
-  add(transaction.outcomeAccount, -sign * transaction.outcome)
+  // The guard above already excluded soft-deleted rows, the only ones whose
+  // legs an account deletion can null.
+  if (transaction.incomeAccount !== null)
+    add(transaction.incomeAccount, sign * transaction.income)
+  if (transaction.outcomeAccount !== null)
+    add(transaction.outcomeAccount, -sign * transaction.outcome)
 }

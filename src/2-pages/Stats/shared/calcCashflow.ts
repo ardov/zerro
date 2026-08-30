@@ -63,7 +63,9 @@ export function calcCashflow(
         return
 
       case core.transactions.TrType.Outcome: {
-        const account = accounts[tr.outcomeAccount]
+        const account = tr.outcomeAccount
+          ? accounts[tr.outcomeAccount]
+          : undefined
         if (account?.inBudget) {
           result[group].outcomeInBalance = addFxAmount(
             result[group].outcomeInBalance,

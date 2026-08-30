@@ -39,8 +39,8 @@ function updateBalances(diff: TNormalizedPatch) {
   const totals: Record<TAccountId, number> = {}
   diff.account?.forEach(acc => (totals[acc.id] = acc.balance))
   diff.transaction?.forEach(tr => {
-    if (tr.income) totals[tr.incomeAccount] += tr.income
-    if (tr.outcome) totals[tr.outcomeAccount] -= tr.outcome
+    if (tr.income && tr.incomeAccount) totals[tr.incomeAccount] += tr.income
+    if (tr.outcome && tr.outcomeAccount) totals[tr.outcomeAccount] -= tr.outcome
   })
   diff.account?.forEach(acc => (acc.balance = round(totals[acc.id])))
 }

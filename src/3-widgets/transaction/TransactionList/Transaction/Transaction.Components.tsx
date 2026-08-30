@@ -251,8 +251,12 @@ export const Accounts: FC<InfoProps> = ({
   }
 }
 
-const Account: FC<{ id: string }> = ({ id, ...rest }) => {
-  const account = core.accounts.usePopulated()[id]
+const Account: FC<{ id: string | null }> = ({ id, ...rest }) => {
+  const accounts = core.accounts.usePopulated()
+  // The leg is null when an account deletion nulled it on a soft-deleted row,
+  // and such a row is only on screen because deleted rows are being shown.
+  const account = id === null ? undefined : accounts[id]
+  if (!account) return null
   return <span {...rest}>{account.title}</span>
 }
 
