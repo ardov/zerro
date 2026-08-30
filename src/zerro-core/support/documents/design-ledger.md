@@ -297,6 +297,14 @@ settled rules:
   categories, and merchants will be created anew with new identifiers. The
   restore remains one ordinary undoable command in the outbox; a structurally
   valid foreign backup is never silently imported.
+- Deleted operations are never transferred: a backup's soft-deleted operations
+  are skipped, and soft-deleted operations already in the current account are
+  left alone. This is existing restore behaviour, made explicit rather than an
+  accidental consequence.
+- Account `syncID` values are carried over unchanged. They keep bank-statement
+  matching working when a person moves their own data to another account.
+  Dropping them would silently create duplicates; the foreign-file confirmation
+  already covers the separate case of receiving someone else's backup.
 - Read-only dictionaries — `instrument`, `country`, `company` — are validated
   but never written, and user billing and subscription fields are never
   restored.

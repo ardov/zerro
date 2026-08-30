@@ -159,7 +159,10 @@ migration that needs canonical reminders re-read.
 - `user` on any entity is immutable (explicit 400). Dictionaries
   (`instrument`, `company`) are read-only (explicit 400) and are delivered in
   full to every account rather than narrowed to what that account uses, so a
-  reference to any of their ids resolves for anybody.
+  reference to any of their ids resolves for anybody. The restore compatibility
+  guard still checks that a backup's referenced dictionary ids are present
+  locally, but under this observed behaviour it is a protective guard rather
+  than an expected cross-account failure.
 - `transaction.date` is freely mutable (any distance); moving a transaction
   between accounts recalculates both balances atomically in the response.
 - Tags: no server-side nesting depth limit; a self-referencing `parent` is
