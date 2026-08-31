@@ -225,7 +225,7 @@ const DraggableRevealCell: FC<
       onClick={onClick}
       {...attributes}
       {...listeners}
-      className={`${revealCellClassName} ${drag.disabled ? 'cursor-pointer' : 'cursor-grab'} select-none touch-manipulation active:bg-action-focus`}
+      className={`${revealCellClassName} ${drag.disabled ? 'cursor-pointer' : 'cursor-grab'} select-none touch-manipulation active:bg-focus-surface`}
     >
       <RevealCellContent
         label={item.label}

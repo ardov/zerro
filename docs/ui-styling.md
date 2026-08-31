@@ -46,27 +46,43 @@ The toggle stores only an override. When the selected scheme matches the system
 scheme, the key is removed and the application resumes following the system.
 Storage failures fall back to memory for the current page.
 
-`AppThemeProvider` injects the generated CSS custom properties and provides the
-resolved palette to code that needs concrete colors, such as charts and SVGs.
-Its `defaultMode` prop is reserved for isolated renderers such as Storybook; the
-application leaves it unset so `themeManager` remains the owner of preference.
+`AppThemeProvider` injects both generated CSS token blocks. Its `defaultMode`
+prop is reserved for isolated renderers such as Storybook; the application
+leaves it unset so `themeManager` remains the owner of preference.
 
-## Palette and tokens
+## Color scales and tokens
 
-The theme pipeline has three layers:
+`src/6-shared/ui/theme/colors.ts` is the single authoring surface for theme
+colors. It contains:
 
-1. `src/6-shared/ui/theme/palette.ts` defines the light and dark palettes,
-   elevations, radii and stacking levels.
-2. `src/6-shared/ui/theme/tokens.ts` turns each palette into CSS custom
-   properties and emits the `:root` and `:root.dark` rules.
-3. `src/tailwind.css` maps those properties onto semantic Tailwind colors,
-   radii, typography, shadows, stacking and opacity utilities.
+- continuous `ColorScale` instances for the concrete hue families;
+- semantic scale names such as `primary`, `interactive` and `error`;
+- one table of visual lightness levels for each resolved color scheme;
+- one flat token factory evaluated once for `light` and once for `dark`;
+- serialization of the `:root` and `:root.dark` blocks and the browser
+  `theme-color` value.
+
+A token formula selects a semantic scale and a visual role. For example, the
+same `BORDER` level can be sampled from neutral, primary or error without
+copying numbered shades between separate palettes. Small optical corrections
+remain ordinary arithmetic beside the affected token. The factory may also use
+a literal when the scale abstraction would make a local decision less clear.
+
+Opaque samples use `scale.at(level)`. Transparent light-scheme samples use
+`scale.opaqueAt(level)` and dark-scheme samples use
+`scale.opaqueInvAt(level)`. These use white and black as reference surfaces;
+the Theme Showcase is where scheme-specific corrections are judged.
+
+`src/tailwind.css` maps the generated properties onto semantic Tailwind colors.
+Scheme-independent radii, typography, shadows, stacking levels and utilities
+stay in that stylesheet rather than being emitted twice by the color factory.
 
 Use semantic utilities such as `bg-background`, `text-muted-foreground`,
-`border-input`, `shadow-elevation-8` and `z-modal`. Avoid duplicating token
-values in arbitrary classes. When a state color is composed from a palette
-color and an opacity, compose it once in `tokens.ts` so every consumer receives
-the same plain color value.
+`border-border-strong`, `shadow-elevation-8` and `z-modal`. Charts and SVGs
+read the same generated custom properties directly when a CSS utility cannot
+reach their API. Feature code must not import the scales or semantic levels.
+Avoid duplicating token values in arbitrary classes; add a role to the flat
+factory when multiple consumers need the same decision.
 
 Several `--color-*` aliases are intentionally retained even though current
 source scanning does not find a consumer. They are marked by a comment in
@@ -75,6 +91,10 @@ source scanning does not find a consumer. They are marked by a comment in
 The switch track opacity and disabled-control opacity are numeric tokens rather
 than colors. `opacity-disabled` is therefore a custom utility, while switch
 track opacity is consumed directly by the switch component.
+
+`Foundations/Theme` in Storybook is the visual calibration surface. It shows
+the concrete and semantic scales, the scheme's neutral levels, status roles,
+interaction states, representative controls and chart colors in both themes.
 
 ## Breakpoints
 

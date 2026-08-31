@@ -18,7 +18,7 @@
      the fieldset would pin it back to 1px however this block is written. Any
      property whose precedence is decided here has to leave the class list. */
   .outlined-field__notch {
-    border: 1px solid var(--input);
+    border: 1px solid var(--border-strong);
   }
 
   /* Do not apply hover borders on touch-only devices. */
@@ -45,7 +45,7 @@
   }
 
   [data-disabled] .outlined-field__group .outlined-field__notch {
-    border-color: var(--action-disabled);
+    border-color: var(--disabled-border);
   }
 
   /* The label rests on the control's padding and

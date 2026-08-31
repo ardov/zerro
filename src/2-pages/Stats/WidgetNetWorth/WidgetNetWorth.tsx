@@ -30,11 +30,11 @@ type TDataKey = keyof Omit<Point, 'date'>
  * with the colour scheme through the cascade, without re-rendering. The paired
  * shades are what separates two series that share a meaning. */
 const colors: Record<TDataKey, string> = {
-  lented: 'var(--success-light)',
-  debts: 'var(--error-light)',
-  accountDebts: 'var(--error-dark)',
-  fundsInBudget: 'var(--primary-dark)',
-  fundsSaving: 'var(--primary-light)',
+  lented: 'var(--data-success)',
+  debts: 'var(--data-error)',
+  accountDebts: 'var(--data-error-alt)',
+  fundsInBudget: 'var(--data-primary)',
+  fundsSaving: 'var(--data-primary-alt)',
   total: 'var(--info)',
 }
 

@@ -20,7 +20,7 @@ export function Checkbox({ className, ...props }: CheckboxProps) {
       className={cn(
         'relative box-border inline-flex shrink-0 cursor-pointer items-center justify-center rounded-[50%] border-0 bg-transparent p-[9px] text-muted-foreground outline-0 transition-colors duration-150 ease-in-out',
         'hover:bg-primary-hover data-checked:text-primary',
-        'disabled:pointer-events-none disabled:text-action-disabled',
+        'disabled:pointer-events-none disabled:text-disabled-control-foreground',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
         className
       )}

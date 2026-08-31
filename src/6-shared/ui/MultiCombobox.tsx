@@ -50,7 +50,7 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
                     <Combobox.Chip
                       key={option.value}
                       aria-label={String(option.label)}
-                      className="group flex min-h-6 max-w-full items-center gap-1 rounded-sm bg-secondary px-1.5 type-body-sm text-secondary-foreground focus-within:bg-primary focus-within:text-primary-foreground data-highlighted:bg-primary data-highlighted:text-primary-foreground"
+                      className="group flex min-h-6 max-w-full items-center gap-1 rounded-sm bg-selected px-1.5 type-body-sm text-selected-foreground focus-within:bg-primary focus-within:text-primary-foreground data-highlighted:bg-primary data-highlighted:text-primary-foreground"
                     >
                       <span className="truncate">{option.label}</span>
                       <Combobox.ChipRemove
@@ -72,7 +72,7 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
           </Combobox.Chips>
           <Combobox.Trigger
             aria-label={t('openOptions', { label: props.label })}
-            className="absolute right-1 inline-flex size-8 items-center justify-center rounded-[50%] border-0 bg-transparent p-0 text-action-active hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="absolute right-1 inline-flex size-8 items-center justify-center rounded-[50%] border-0 bg-transparent p-0 text-icon-foreground hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             <ChevronDownIcon />
           </Combobox.Trigger>

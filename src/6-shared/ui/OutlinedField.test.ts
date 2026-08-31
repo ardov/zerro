@@ -156,7 +156,7 @@ describe('outlined field border states', () => {
   // moment a `border-*` class lands back on the notch the states above stop
   // deciding the border.
   it('owns the whole border shorthand rather than sharing it with a utility', () => {
-    expect(css).toContain('border: 1px solid var(--input)')
+    expect(css).toContain('border: 1px solid var(--border-strong)')
 
     const notchClasses = tsx
       .split('outlined-field__notch')[1]

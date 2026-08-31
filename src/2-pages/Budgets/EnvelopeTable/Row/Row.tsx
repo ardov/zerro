@@ -184,7 +184,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
       <SlideReveal enabled={isSmall} items={revealItems}>
         <TableRow
           className={cn(
-            'relative cursor-pointer transition-colors duration-100 hover:bg-accent active:bg-action-focus',
+            'relative cursor-pointer transition-colors duration-100 hover:bg-accent active:bg-focus-surface',
             'hover:[&_.addGoal]:opacity-100 hover:[&_.addGoal]:transition-opacity hover:[&_.addGoal]:duration-300',
             '[&:not(:hover)_.addGoal]:opacity-0',
             isChild ? '[&>*]:py-1' : '[&>*]:py-2'

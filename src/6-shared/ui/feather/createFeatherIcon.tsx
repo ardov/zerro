@@ -12,12 +12,12 @@ const fontSizes = {
 /** Icon colors mapped onto application tokens.
  *
  * `secondary` is the interactive brand color, exposed as
- * `interactive` — `--secondary` is the selected-surface token and would be
+ * `interactive` — `--selected` is a surface token and would be
  * the wrong thing to paint a glyph with. */
 const colors = {
   inherit: 'text-[color:inherit]',
-  action: 'text-action-active',
-  disabled: 'text-action-disabled',
+  action: 'text-icon-foreground',
+  disabled: 'text-disabled-control-foreground',
   primary: 'text-primary',
   secondary: 'text-interactive',
   error: 'text-error',

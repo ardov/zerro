@@ -32,7 +32,7 @@ export default function Auth() {
         'flex min-h-screen flex-col items-center justify-center gap-16 p-6 transition-all duration-300 ease-in-out',
         // A backup can be dropped anywhere on this screen, and the whole of it
         // leans in to say so.
-        isDragging ? 'scale-110 bg-action-focus' : 'scale-100'
+        isDragging ? 'scale-110 bg-focus-surface' : 'scale-100'
       )}
       onDragOver={e => {
         e.stopPropagation()

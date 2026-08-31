@@ -86,29 +86,30 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
+  --color-primary-surface: var(--primary-surface);
   --color-primary-focus: var(--primary-focus);
   --color-primary-selected: var(--primary-selected);
   --color-primary-selected-hover: var(--primary-selected-hover);
-  --color-primary-dark: var(--primary-dark);
-  --color-primary-light: var(--primary-light);
-  --color-success-light: var(--success-light);
-  --color-error-light: var(--error-light);
-  --color-error-dark: var(--error-dark);
+  --color-primary-solid-hover: var(--primary-solid-hover);
+  --color-primary-border: var(--primary-border);
   --color-interactive-hover: var(--interactive-hover);
+  --color-interactive-surface: var(--interactive-surface);
+  --color-interactive-border: var(--interactive-border);
   --color-foreground-hover: var(--foreground-hover);
   --color-error-hover: var(--error-hover);
-  --color-primary-outline: var(--primary-outline);
-  --color-error-outline: var(--error-outline);
+  --color-error-border: var(--error-border);
+  --color-error-surface: var(--error-surface);
   --color-disabled-background: var(--disabled-background);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
+  --color-selected: var(--selected);
+  --color-selected-foreground: var(--selected-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-action-active: var(--action-active);
-  --color-action-disabled: var(--action-disabled);
-  --color-action-focus: var(--action-focus);
+  --color-icon-foreground: var(--icon-foreground);
+  --color-disabled-control-foreground: var(--disabled-control-foreground);
+  --color-disabled-border: var(--disabled-border);
+  --color-focus-surface: var(--focus-surface);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-chip-hover: var(--chip-hover);
@@ -122,25 +123,52 @@
   --color-tooltip: var(--tooltip);
   --color-tooltip-foreground: var(--tooltip-foreground);
   --color-border: var(--border);
-  --color-input: var(--input);
+  --color-border-strong: var(--border-strong);
   --color-ring: var(--ring);
   --color-interactive: var(--interactive);
   --color-interactive-foreground: var(--interactive-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-success-surface: var(--success-surface);
+  --color-success-border: var(--success-border);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-warning-surface: var(--warning-surface);
+  --color-warning-border: var(--warning-border);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-info-surface: var(--info-surface);
+  --color-info-border: var(--info-border);
   --color-error: var(--error);
   --color-error-foreground: var(--error-foreground);
   --color-disabled-foreground: var(--disabled-foreground);
+  --color-data-primary: var(--data-primary);
+  --color-data-primary-alt: var(--data-primary-alt);
+  --color-data-success: var(--data-success);
+  --color-data-error: var(--data-error);
+  --color-data-error-alt: var(--data-error-alt);
 
-  /* Currently unused aliases. They remain declared so their status is visible
-     without making the token surface appear accidentally incomplete. */
-  /* --color-primary-focus, --color-accent-foreground, --color-destructive,
-     --color-destructive-foreground, --color-input,
-     --color-interactive-foreground, --color-success-foreground */
+  /* Aliases no utility currently reaches. They remain declared so their status
+     is visible without making the token surface appear accidentally
+     incomplete, and the list is kept accurate so a genuinely dead token is
+     still distinguishable from one waiting for its first consumer.
+
+     No consumer at all. The status surface and border roles are authored as a
+     complete set — `Foundations/Theme` renders them from the tokens rather
+     than from these utilities, so the showcase does not count as one:
+     --color-primary-surface, --color-primary-focus,
+     --color-interactive-surface, --color-interactive-border,
+     --color-accent-foreground, --color-destructive,
+     --color-destructive-foreground, --color-interactive-foreground,
+     --color-success-foreground, --color-success-surface,
+     --color-success-border, --color-warning-surface, --color-warning-border,
+     --color-info-surface, --color-info-border
+
+     In use, but through the token rather than the utility: a chart hands its
+     colour to an SVG attribute, and the outlined field owns its whole border
+     shorthand, so neither can go through a class:
+     --color-disabled-border, --color-data-primary, --color-data-primary-alt,
+     --color-data-success, --color-data-error, --color-data-error-alt */
 
   --radius-xs: calc(var(--radius) * 0.5);
   --radius-sm: calc(var(--radius) * 0.75);

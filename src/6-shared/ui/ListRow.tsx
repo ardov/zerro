@@ -17,7 +17,7 @@ import { cn } from './shadcn/utils'
  * because a menu keeps its disabled items focusable so they are still
  * announced. Only one of the two variants matches in either container. */
 const rowBase =
-  'relative flex w-full min-w-0 cursor-pointer items-center rounded-lg border-0 bg-transparent px-4 text-left font-sans whitespace-nowrap text-foreground hover:bg-accent focus-visible:bg-action-focus focus-visible:outline-none data-selected:bg-primary-selected data-selected:hover:bg-primary-selected-hover disabled:pointer-events-none disabled:opacity-disabled aria-disabled:pointer-events-none aria-disabled:opacity-disabled'
+  'relative flex w-full min-w-0 cursor-pointer items-center rounded-lg border-0 bg-transparent px-4 text-left font-sans whitespace-nowrap text-foreground hover:bg-accent focus-visible:bg-focus-surface focus-visible:outline-none data-selected:bg-primary-selected data-selected:hover:bg-primary-selected-hover disabled:pointer-events-none disabled:opacity-disabled aria-disabled:pointer-events-none aria-disabled:opacity-disabled'
 
 /** A menu row, tighter than a list row and with a
  * minimum height so a row with no icon still reads as a target. */
@@ -43,7 +43,7 @@ export function ListRowIcon({
   return (
     <span
       className={cn(
-        'inline-flex min-w-9 shrink-0 items-center text-action-active',
+        'inline-flex min-w-9 shrink-0 items-center text-icon-foreground',
         className
       )}
       {...props}

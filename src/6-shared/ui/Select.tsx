@@ -126,7 +126,7 @@ function SelectField<T extends string>({
         >
           <span className="min-w-0 flex-auto truncate">{display}</span>
         </SelectPrimitive.Trigger>
-        <SelectPrimitive.Icon className="pointer-events-none absolute right-[7px] inline-flex text-action-active">
+        <SelectPrimitive.Icon className="pointer-events-none absolute right-[7px] inline-flex text-icon-foreground">
           <ChevronDownIcon />
         </SelectPrimitive.Icon>
       </OutlinedFieldFrame>

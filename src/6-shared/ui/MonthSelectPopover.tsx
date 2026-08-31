@@ -86,7 +86,7 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
             <ButtonBase
               key={month}
               className={cn(
-                'min-w-0 rounded-lg px-4 py-2 text-foreground hover:bg-accent focus-visible:bg-action-focus disabled:opacity-disabled',
+                'min-w-0 rounded-lg px-4 py-2 text-foreground hover:bg-accent focus-visible:bg-focus-surface disabled:opacity-disabled',
                 month === value &&
                   'bg-primary-selected hover:bg-primary-selected-hover',
                 month === curMonth && 'border border-solid border-primary'

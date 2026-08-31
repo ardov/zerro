@@ -152,7 +152,7 @@ export function ImportBackupItem() {
           {pending?.foreign && (
             <div
               role="alert"
-              className="mb-4 rounded-lg border border-error-outline bg-error-light p-3"
+              className="mb-4 rounded-lg border border-error-border bg-error-surface p-3"
             >
               <p className="m-0 type-body-sm">{t('importForeignWarning')}</p>
             </div>

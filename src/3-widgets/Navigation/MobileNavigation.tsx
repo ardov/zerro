@@ -68,7 +68,7 @@ export const MobileNavigation: FC = () => {
 
 const navigationActionClass = (selected: boolean) =>
   [
-    'relative flex min-w-8 flex-1 flex-col items-center justify-center gap-0.5 border-0 bg-transparent px-1 py-1 font-sans text-action-active transition-colors hover:bg-accent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring',
+    'relative flex min-w-8 flex-1 flex-col items-center justify-center gap-0.5 border-0 bg-transparent px-1 py-1 font-sans text-icon-foreground transition-colors hover:bg-accent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring',
     selected && 'text-primary',
   ]
     .filter(Boolean)

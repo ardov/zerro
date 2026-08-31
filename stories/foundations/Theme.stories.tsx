@@ -1,5 +1,8 @@
+import type { CSSProperties, ReactNode } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Logo } from '6-shared/ui/Logo'
+import { useColorScheme } from '6-shared/ui/theme'
+import { getThemeColorShowcase } from '6-shared/ui/theme/colors'
 
 const meta = {
   title: 'Foundations/Theme',
@@ -10,44 +13,225 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-/** Each swatch is a token and the token written to sit on it, which is the
- * pairing the app actually renders — not a contrast recomputed for the
- * catalogue and able to disagree with it. */
-const colors = [
-  ['primary', 'var(--primary)', 'var(--primary-foreground)'],
-  ['secondary', 'var(--interactive)', 'var(--interactive-foreground)'],
-  ['success', 'var(--success)', 'var(--success-foreground)'],
-  ['warning', 'var(--warning)', 'var(--warning-foreground)'],
-  ['error', 'var(--error)', 'var(--error-foreground)'],
-  ['background', 'var(--background)', 'var(--foreground)'],
-] as const
+const statuses = [
+  'primary',
+  'interactive',
+  'success',
+  'warning',
+  'info',
+  'error',
+]
 
-function ThemeCatalog() {
+const token = (name: string) => `var(--${name})`
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <main className="grid gap-6 p-8">
-      <Logo fill="var(--primary)" width={220} />
-      <section>
-        <h1 className="type-display font-sans">Typography</h1>
-        <h2 className="type-title font-sans">
-          Envelope budgeting with clarity
-        </h2>
-        <p className="type-body font-sans text-muted-foreground">
-          Long labels, secondary text and monetary values should remain legible.
-        </p>
-      </section>
-      <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-        {colors.map(([name, background, foreground]) => (
-          <li
-            key={name}
-            className="h-18 w-28 rounded-lg p-2"
-            style={{ backgroundColor: background, color: foreground }}
-          >
-            <span className="type-caption font-sans">{name}</span>
-          </li>
-        ))}
-      </ul>
+    <section className="grid gap-3">
+      <h2 className="m-0 type-title font-sans">{title}</h2>
+      {children}
+    </section>
+  )
+}
+
+function ScaleRows({ rows }: { rows: { name: string; colors: string[] }[] }) {
+  return (
+    <div className="grid gap-2">
+      {rows.map(row => (
+        <div
+          key={row.name}
+          className="grid items-center gap-2 sm:grid-cols-[8rem_1fr]"
+        >
+          <span className="type-caption text-muted-foreground">{row.name}</span>
+          <div className="grid grid-cols-7 overflow-hidden rounded-lg border border-border">
+            {row.colors.map((color, index) => (
+              <div
+                key={`${color}-${index}`}
+                className="h-10"
+                style={{ backgroundColor: color }}
+                title={color}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function RoleCard({ name }: { name: string }) {
+  const foreground = token(`${name}-foreground`)
+  return (
+    <article className="grid gap-2 rounded-lg border border-border bg-card p-3">
+      <div
+        className="rounded-md p-3 type-body-sm"
+        style={{ backgroundColor: token(name), color: foreground }}
+      >
+        {name} solid
+      </div>
+      <div
+        className="rounded-md border p-3 type-body-sm"
+        style={{
+          backgroundColor: token(`${name}-surface`),
+          borderColor: token(`${name}-border`),
+          color: token(name),
+        }}
+      >
+        transparent hover and border
+      </div>
+    </article>
+  )
+}
+
+function ThemeShowcase() {
+  const { mode } = useColorScheme()
+  const showcase = getThemeColorShowcase(mode)
+
+  return (
+    <main className="min-h-screen bg-background p-4 font-sans text-foreground sm:p-8">
+      <div className="mx-auto grid max-w-6xl gap-10">
+        <header className="grid gap-3">
+          <Logo fill="var(--primary)" width={220} />
+          <div>
+            <h1 className="m-0 type-display">Theme Showcase</h1>
+            <p className="m-0 type-body text-muted-foreground">
+              {mode} scheme · long labels, money and controls share one semantic
+              colour pipeline
+            </p>
+          </div>
+        </header>
+
+        <Section title="Concrete color scales">
+          <ScaleRows rows={showcase.concreteScales} />
+        </Section>
+
+        <Section title="Semantic scales">
+          <ScaleRows rows={showcase.semanticScales} />
+        </Section>
+
+        <Section title="Semantic levels on neutral">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+            {showcase.levels.map(({ name, level, color }) => (
+              <div
+                key={name}
+                className="overflow-hidden rounded-lg border border-border bg-card"
+              >
+                <div className="h-12" style={{ backgroundColor: color }} />
+                <div className="p-2 type-caption">
+                  <div>{name}</div>
+                  <div className="text-muted-foreground">
+                    {level.toFixed(3)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Status roles">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {statuses.map(name => (
+              <RoleCard key={name} name={name} />
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Interaction states">
+          <div className="grid gap-3 rounded-lg border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ['hover', '--accent'],
+              ['focus', '--focus-surface'],
+              ['selected', '--selected'],
+              ['disabled', '--disabled-background'],
+            ].map(([label, background]) => (
+              <button
+                key={label}
+                className="min-h-11 rounded-lg border border-border-strong px-4 type-body text-foreground"
+                style={{ backgroundColor: `var(${background})` }}
+                type="button"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Representative UI">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <article className="surface-card grid gap-4 border border-border p-5 shadow-elevation-1">
+              <div>
+                <h3 className="m-0 type-title">August budget</h3>
+                <p className="m-0 type-body-sm text-muted-foreground">
+                  A deliberately long envelope label wraps without losing its
+                  hierarchy or status colour.
+                </p>
+              </div>
+              <div className="grid grid-cols-[1fr_auto] gap-3 border-t border-border pt-3">
+                <span className="type-body">
+                  Rent and shared household costs
+                </span>
+                <strong className="type-body">24 850,00 Kč</strong>
+                <span className="type-body text-muted-foreground">
+                  Available
+                </span>
+                <span className="type-body text-success">3 240,00 Kč</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  className="rounded-lg border-0 bg-primary px-4 py-2 type-body-sm text-primary-foreground"
+                  type="button"
+                >
+                  Save changes
+                </button>
+                <button
+                  className="rounded-lg border border-primary-border bg-transparent px-4 py-2 type-body-sm text-primary"
+                  type="button"
+                >
+                  Cancel
+                </button>
+              </div>
+            </article>
+
+            <article className="surface-card grid gap-4 border border-border p-5 shadow-elevation-1">
+              <div className="rounded-lg border border-error-border bg-error-surface p-3 text-error">
+                <strong className="type-body-sm">Import needs attention</strong>
+                <p className="m-0 type-caption">
+                  One account could not be matched automatically.
+                </p>
+              </div>
+              <div
+                aria-label="Representative chart palette"
+                className="flex h-28 items-end gap-2 border-b border-border"
+              >
+                {[
+                  ['--data-primary', '45%'],
+                  ['--data-primary-alt', '72%'],
+                  ['--data-success', '58%'],
+                  ['--data-error', '82%'],
+                  ['--data-error-alt', '36%'],
+                ].map(([color, height]) => (
+                  <div
+                    key={color}
+                    className="min-w-7 flex-1 rounded-t-sm"
+                    style={
+                      {
+                        backgroundColor: `var(${color})`,
+                        height,
+                      } as CSSProperties
+                    }
+                    title={color}
+                  />
+                ))}
+              </div>
+              <p className="m-0 type-caption text-disabled-foreground">
+                Disabled helper copy and chart axes remain quieter than muted
+                body text.
+              </p>
+            </article>
+          </div>
+        </Section>
+      </div>
     </main>
   )
 }
 
-export const Catalog: Story = { render: () => <ThemeCatalog /> }
+export const Showcase: Story = { render: () => <ThemeShowcase /> }

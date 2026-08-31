@@ -1,8 +1,8 @@
 import { createContext, useContext, useSyncExternalStore } from 'react'
-import type { TColorScheme } from './palette'
+import type { ColorScheme } from './colors'
 
 type ThemeManager = {
-  getTheme: () => TColorScheme
+  getTheme: () => ColorScheme
   toggle: () => void
   subscribe: (listener: () => void) => () => void
 }
@@ -25,13 +25,13 @@ const getThemeManager = () => {
 const subscribe = (listener: () => void) =>
   getThemeManager().subscribe(listener)
 const getSnapshot = () => getThemeManager().getTheme()
-const getServerSnapshot = (): TColorScheme => 'light'
+const getServerSnapshot = (): ColorScheme => 'light'
 const toggleTheme = () => getThemeManager().toggle()
 const ignoreToggle = () => {}
 
 /** A local override for isolated renderers such as Storybook. It never changes
  * the application preference kept by the page-level theme manager. */
-export const ColorSchemeOverrideContext = createContext<TColorScheme | null>(
+export const ColorSchemeOverrideContext = createContext<ColorScheme | null>(
   null
 )
 

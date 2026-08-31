@@ -142,7 +142,7 @@ function NavButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
       {...props}
       color="default"
       className={cn(
-        'aria-disabled:pointer-events-none aria-disabled:text-action-disabled',
+        'aria-disabled:pointer-events-none aria-disabled:text-disabled-control-foreground',
         props.className
       )}
     />
@@ -178,7 +178,7 @@ function CalendarDay({ day, modifiers, className, ...props }: DayButtonProps) {
         modifiers.today && 'border border-solid border-primary',
         modifiers.outside && 'text-muted-foreground',
         modifiers.selected &&
-          'bg-primary text-primary-foreground hover:bg-primary-dark',
+          'bg-primary text-primary-foreground hover:bg-primary-solid-hover',
         modifiers.disabled &&
           'pointer-events-none border-transparent text-disabled-foreground',
         className

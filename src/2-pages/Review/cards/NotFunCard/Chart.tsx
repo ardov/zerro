@@ -10,7 +10,7 @@ type TaxesChartProps = {
 
 export const TaxesChart: FC<TaxesChartProps> = ({ income, outcome }) => {
   const primaryColor = 'var(--primary)'
-  const taxesColor = 'var(--error-light)'
+  const taxesColor = 'var(--data-error)'
 
   const taxes = getTaxes(income, outcome).sort((a, b) => b.value - a.value)
   const totalTaxes = taxes.reduce((sum, t) => round(sum + t.value), 0)

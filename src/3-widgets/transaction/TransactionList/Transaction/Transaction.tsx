@@ -60,9 +60,9 @@ export const Transaction = React.memo(function Transaction(
         // can sit under content the row's own padding does not cover.
         "before:absolute before:inset-0 before:-z-10 before:rounded-lg before:transition-all before:duration-100 before:ease-in-out before:content-['']",
         // Arriving is animated, but reacting to the pointer is not.
-        'hover:before:transition-none active:before:bg-action-focus',
+        'hover:before:transition-none active:before:bg-focus-surface',
         isOpened
-          ? 'before:bg-action-focus'
+          ? 'before:bg-focus-surface'
           : 'before:bg-transparent hover:before:bg-muted',
         deleted && 'line-through decoration-error'
       )}

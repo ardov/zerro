@@ -76,9 +76,9 @@ export function Chip({
         // The radius and root type stay fixed; the label owns the smaller type.
         'rounded-2xl text-[0.8125rem]',
         small ? 'h-6' : 'h-8',
-        // `--secondary` is `action.selected`, which is the chip's own fill.
+        // The selected surface is the chip's own resting fill.
         variant === 'filled'
-          ? 'bg-secondary'
+          ? 'bg-selected'
           : 'border border-solid bg-transparent',
         // `border-none` above is the filled chip's; an outlined one restores
         // the style along with the width.

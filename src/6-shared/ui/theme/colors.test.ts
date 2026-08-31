@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { themeTokensCss } from './tokens'
+import { parseColor } from '6-shared/helpers/color'
+import { getThemeColor, getThemeColorShowcase, themeTokensCss } from './colors'
 
 /** What the theme emits and what Tailwind exposes have to stay in step, and
  * neither half notices on its own when they stop being.
@@ -31,6 +32,18 @@ const blocks = Object.fromEntries(
 )
 const light = blocks[':root']
 const dark = blocks[':root.dark']
+
+const tokenValues = Object.fromEntries(
+  parsed.map(([, selector, body]) => [
+    selector,
+    Object.fromEntries(
+      [...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map(([, name, value]) => [
+        name,
+        value,
+      ])
+    ),
+  ])
+)
 
 /** `var(--x)` and `var(--x, fallback)`, and neither `var(--x-y)`. */
 const references = (css: string) =>
@@ -94,5 +107,68 @@ describe('theme tokens and their Tailwind counterparts', () => {
     expect(dark.filter(token => !light.includes(token))).toEqual([])
     expect(light.filter(token => !dark.includes(token))).toEqual([])
     expect(dark.length).toBeGreaterThan(0)
+  })
+
+  it('emits finite, literal CSS colours', () => {
+    const nonColors = new Set(['--disabled-opacity', '--switch-track-opacity'])
+
+    Object.values(tokenValues).forEach(tokens => {
+      Object.entries(tokens).forEach(([name, value]) => {
+        if (nonColors.has(name)) return
+        expect(value).toMatch(/^(?:#|rgba?\()/)
+        const { l, c, h, alpha } = parseColor(value)
+        expect([l, c, h].every(Number.isFinite)).toBe(true)
+        expect(alpha === undefined || Number.isFinite(alpha)).toBe(true)
+      })
+    })
+  })
+
+  it('reads browser metadata from the generated surface token', () => {
+    expect(getThemeColor('light')).toBe(tokenValues[':root']['--card'])
+    expect(getThemeColor('dark')).toBe(tokenValues[':root.dark']['--card'])
+  })
+})
+
+describe('semantic levels', () => {
+  const levelsFor = (mode: 'light' | 'dark') =>
+    Object.fromEntries(
+      getThemeColorShowcase(mode).levels.map(({ name, level }) => [name, level])
+    )
+
+  it('keeps every base level in the scale domain', () => {
+    for (const mode of ['light', 'dark'] as const) {
+      expect(
+        Object.values(levelsFor(mode)).every(level => level >= 0 && level <= 1)
+      ).toBe(true)
+    }
+  })
+
+  it('keeps the visual roles ordered within each scheme', () => {
+    const light = levelsFor('light')
+    const lightOrder = [
+      light.TEXT,
+      light.TEXT_MUTED,
+      light.TEXT_DISABLED,
+      light.BORDER_STRONG,
+      light.BORDER,
+      light.BACKGROUND,
+      light.SURFACE,
+    ]
+    expect(lightOrder).toEqual([...lightOrder].sort((a, b) => a - b))
+
+    const dark = levelsFor('dark')
+    const darkOrder = [
+      dark.SUBTLE,
+      dark.BACKGROUND,
+      dark.BORDER,
+      dark.SURFACE,
+      dark.BORDER_STRONG,
+      dark.TEXT_DISABLED,
+      dark.TEXT_MUTED,
+      dark.TEXT,
+    ]
+    expect(darkOrder).toEqual([...darkOrder].sort((a, b) => a - b))
+    expect(light.SOLID_HOVER).toBeLessThan(light.SOLID)
+    expect(dark.SOLID_HOVER).toBeLessThan(dark.SOLID)
   })
 })

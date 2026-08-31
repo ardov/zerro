@@ -62,13 +62,13 @@ export const buttonPalettes = {
   },
   contained: {
     primary:
-      'bg-primary text-primary-foreground shadow-elevation-2 hover:bg-primary-dark hover:shadow-elevation-4 focus-visible:shadow-elevation-6 active:shadow-elevation-8 disabled:bg-disabled-background disabled:shadow-none',
+      'bg-primary text-primary-foreground shadow-elevation-2 hover:bg-primary-solid-hover hover:shadow-elevation-4 focus-visible:shadow-elevation-6 active:shadow-elevation-8 disabled:bg-disabled-background disabled:shadow-none',
   },
   outlined: {
     primary:
-      'border-primary-outline text-primary hover:border-primary hover:bg-primary-hover disabled:border-disabled-background',
+      'border-primary-border text-primary hover:border-primary hover:bg-primary-hover disabled:border-disabled-background',
     error:
-      'border-error-outline text-error hover:border-error hover:bg-error-hover disabled:border-disabled-background',
+      'border-error-border text-error hover:border-error hover:bg-error-hover disabled:border-disabled-background',
   },
 }
 
@@ -111,7 +111,7 @@ export function Button({
       className={cn(
         RESET,
         TYPOGRAPHY,
-        'min-w-16 rounded-lg transition-[background-color,box-shadow,border-color,color] duration-250 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:text-action-disabled',
+        'min-w-16 rounded-lg transition-[background-color,box-shadow,border-color,color] duration-250 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:text-disabled-control-foreground',
         borders[variant],
         geometry[variant][size],
         paint,
@@ -147,7 +147,7 @@ const iconGeometry = {
 }
 
 const iconPalettes = {
-  default: 'text-action-active hover:bg-accent',
+  default: 'text-icon-foreground hover:bg-accent',
   inherit: 'text-inherit hover:bg-accent',
   primary: 'text-primary hover:bg-primary-hover',
 }
@@ -185,7 +185,7 @@ export function IconButton({
         RESET,
         // `rounded-[50%]`, not `rounded-full`: 50% turns a non-square
         // icon button into an ellipse where `rounded-full` makes a stadium.
-        'border-0 shrink-0 rounded-[50%] text-center transition-colors duration-150 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:bg-transparent disabled:text-action-disabled',
+        'border-0 shrink-0 rounded-[50%] text-center transition-colors duration-150 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:bg-transparent disabled:text-disabled-control-foreground',
         iconGeometry[size],
         iconPalettes[color],
         edge && edges[edge][size],
