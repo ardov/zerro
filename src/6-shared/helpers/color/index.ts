@@ -34,3 +34,10 @@ export const getMostContrast = (
   const i = contrastRatios.indexOf(maxContrast)
   return colorList[i]
 }
+
+/** The colour module's public surface: a scale, and the conversions dynamic
+ * colour code needs to read and rewrite a value it did not author. Everything
+ * else — channel conversions, gamut checks, the sRGB formatter — stays behind
+ * `ColorScale`, which is the only thing that should be choosing colours. */
+export { ColorScale } from './ColorScale'
+export { clampChroma, formatOklch, oklchToRgb, parseColor } from './oklch'
