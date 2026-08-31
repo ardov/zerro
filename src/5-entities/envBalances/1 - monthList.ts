@@ -9,12 +9,12 @@ import { budgetModel } from '5-entities/budget'
 
 /**
  * Returns the date of first month as ISO.
- * To have correct result we should include all transactions
- * in our calculations. Otherwise calculated balance will be wrong.
+ * Transactions with unreasonable dates are ignored, otherwise a single
+ * transaction dated 1970 adds hundreds of empty months to every calculation.
  */
 const getFirstMonth: TSelector<TISOMonth> = createSelector(
-  [trModel.getTransactionsHistory],
-  transactions => toISOMonth(transactions[0]?.date || Date.now())
+  [trModel.getHistoryStart],
+  historyStart => toISOMonth(historyStart)
 )
 
 /** Returns the last available month to budget. */
