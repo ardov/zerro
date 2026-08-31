@@ -1,15 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap');
 
 /* The document reset. Tailwind Preflight is disabled, so global element
-   defaults belong here.
+   defaults belong here. The baseline is Josh W. Comeau's Custom CSS Reset:
+   https://www.joshwcomeau.com/css/custom-css-reset/
 
-   It belongs in `base` so component rules and utilities win predictably. An
-   unlayered `* { box-sizing: inherit }` wins over a layered field
-   rule no matter how specific its selector is, which collapses every text
-   field by its vertical padding. */
+   It belongs in `base` so component rules and utilities win predictably. */
 @layer base {
   html {
-    box-sizing: border-box;
     font-family: 'IBM Plex Sans', Arial, sans-serif;
     /* Both font-smoothing controls: WebKit thins the type, Gecko turns
        off subpixel rendering, and only together do the two engines agree. */
@@ -30,8 +27,18 @@
   *,
   *::before,
   *::after {
-    box-sizing: inherit;
+    box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  *:not(dialog) {
+    margin: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      interpolate-size: allow-keywords;
+    }
   }
 
   strong,
@@ -40,7 +47,6 @@
   }
 
   body {
-    margin: 0;
     background-color: var(--background);
     color: var(--foreground);
     /* The theme family inherited by application components. */
@@ -48,6 +54,50 @@
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: break-word;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
+  #root,
+  #__next {
+    isolation: isolate;
   }
 
   /* A top-layer element's backdrop is painted against the page rather than

@@ -26,9 +26,11 @@ The cascade order is explicit:
   `src/tailwind.css`.
 
 Tailwind Preflight is disabled. Global element defaults therefore belong in
-`styles.scss`; route and component rules should not recreate document-wide
-resets. Component CSS must be placed in `@layer components` so utilities can
-override it predictably.
+`styles.scss`, which applies [Josh W. Comeau's Custom CSS
+Reset](https://www.joshwcomeau.com/css/custom-css-reset/), plus the
+application's theme and scrollbar defaults. Route and component rules should
+not recreate document-wide resets. Component CSS must be placed in `@layer
+components` so utilities can override it predictably.
 
 ## Theme boot and persistence
 
