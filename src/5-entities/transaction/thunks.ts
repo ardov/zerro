@@ -144,8 +144,9 @@ const modifyTags = (prevTags: string[] | null, newTags?: string[]) => {
   return result
 }
 const modifyComment = (prevComment: string | null, newComment?: string) => {
-  if (!newComment) return prevComment
-  return newComment.replaceAll('$&', prevComment || '')
+  // Only an omitted comment means "keep the old one". An empty string clears it.
+  if (newComment === undefined) return prevComment
+  return newComment.replaceAll('$&', prevComment || '') || null
 }
 
 function split(raw: TTransaction) {
