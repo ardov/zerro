@@ -183,7 +183,7 @@ export function createProjectionGraph(ctx: TCoreContext) {
   )
   const monthList = nodeObj(
     d => ({
-      transactions: transactionsHistory(d),
+      historyStart: historyStart(d),
       budgets: budgets(d),
       currentMonth: currentMonth(),
     }),

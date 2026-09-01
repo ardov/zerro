@@ -20,6 +20,39 @@ describe('createZerroSession', () => {
     expect(session.calendar.getCurrentMonth()).toBe('2026-01')
   })
 
+  it('starts the month list at the first reasonable transaction date', () => {
+    const data = makeEmptyData()
+    data.transaction = {
+      technical: makeTransaction({
+        id: 'technical',
+        date: '1970-01-01',
+        outcome: 1,
+      }),
+      regular: makeTransaction({
+        id: 'regular',
+        date: '2026-01-15',
+        outcome: 1,
+      }),
+      future: makeTransaction({
+        id: 'future',
+        date: '2026-12-01',
+        outcome: 1,
+      }),
+    }
+    const session = createZerroSession(data, {
+      now: () => Date.parse('2026-03-15T12:00:00.000Z'),
+      uuid: () => 'test-id',
+    })
+
+    expect(session.transactions.getHistoryStart()).toBe('2026-01-15')
+    expect(session.months.getList()).toEqual([
+      '2026-01',
+      '2026-02',
+      '2026-03',
+      '2026-04',
+    ])
+  })
+
   it('can build headless envelopes without adapter-provided populated tags', () => {
     const nullTagId = envId.get(EnvType.Tag, null)
     const session = createZerroSession(makeEmptyData(), {

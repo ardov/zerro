@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { makeTransaction } from '../../../../support/testing/zenmoneyTestData'
 import { EnvType, envId } from '../envelope-id'
 import { buildMonthList } from './monthList'
 
 describe('buildMonthList', () => {
-  it('starts at first transaction month and includes one month after current', () => {
+  it('starts at the history start month and includes one month after current', () => {
     expect(
       buildMonthList({
-        transactions: [makeTransaction({ date: '2026-01-15' })],
+        historyStart: '2026-01-15',
         budgets: {},
         currentMonth: '2026-03',
       })
@@ -19,7 +18,7 @@ describe('buildMonthList', () => {
 
     expect(
       buildMonthList({
-        transactions: [makeTransaction({ date: '2026-01-15' })],
+        historyStart: '2026-01-15',
         budgets: {
           '2026-06': {
             [foodId]: 10,
