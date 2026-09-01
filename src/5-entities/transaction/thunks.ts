@@ -138,7 +138,8 @@ const modifyTags = (prevTags: string[] | null, newTags?: string[]) => {
   const addId = (id: string) =>
     result.includes(id) || id === 'null' ? '' : result.push(id)
   newTags?.forEach(id => {
-    if (id === 'mixed' && prevTags) prevTags.forEach(addId)
+    // 'mixed' is a placeholder for the transaction's own tags, never a real id
+    if (id === 'mixed') prevTags?.forEach(addId)
     else addId(id)
   })
   return result
