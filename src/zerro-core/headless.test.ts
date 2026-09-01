@@ -4,7 +4,7 @@ import {
   createEmptyDataStore,
   createZerroSession,
   getSyncCursor,
-} from 'zerro-core/headless'
+} from '@/zerro-core/headless'
 
 describe('zerro-core/headless', () => {
   it('resolves as a runtime source entrypoint without an app adapter', () => {

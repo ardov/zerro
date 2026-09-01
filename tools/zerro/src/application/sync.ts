@@ -1,5 +1,5 @@
-import type { TNormalizedPatch, TZmDiff } from '6-shared/types'
-import { convertDiff } from '6-shared/api/zm-adapter/converters'
+import type { TNormalizedPatch, TZmDiff } from '@/6-shared/types'
+import { convertDiff } from '@/6-shared/api/zm-adapter/converters'
 import {
   beginPush,
   drivePush,
@@ -7,8 +7,8 @@ import {
   replayOutbox,
   type TPushOutcome,
   type TPushSendResult,
-} from 'zerro-core/headless'
-import { measureRequestBytes } from '6-shared/api/zm-adapter'
+} from '@/zerro-core/headless'
+import { measureRequestBytes } from '@/6-shared/api/zm-adapter'
 
 import type { TEndpoint, TToolContext } from './context'
 import { ToolError, success, type TWarning } from './output'

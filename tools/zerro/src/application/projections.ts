@@ -1,4 +1,4 @@
-import { createZerroSession } from 'zerro-core/headless'
+import { createZerroSession } from '@/zerro-core/headless'
 
 import type { TToolContext } from './context'
 import { buildFullRates, convertAmounts, resolveDisplayCurrency } from './fx'

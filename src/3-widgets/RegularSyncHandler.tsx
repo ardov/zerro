@@ -1,12 +1,12 @@
 import type { FC } from 'react'
 import { useCallback, useEffect, useRef } from 'react'
-import { getLoginState } from 'store/token'
-import { refreshData } from '4-features/sync'
-import { getLastSyncTime, getLastChangeTime } from 'store/data'
-import { selectIsSyncPending } from 'store/sync'
-import { loadLocalData } from '4-features/localData'
+import { getLoginState } from '@/store/token'
+import { refreshData } from '@/4-features/sync'
+import { getLastSyncTime, getLastChangeTime } from '@/store/data'
+import { selectIsSyncPending } from '@/store/sync'
+import { loadLocalData } from '@/4-features/localData'
 import useLocalStorageState from 'use-local-storage-state'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { needSync } from './regularSyncPolicy'
 
 /** Local storage hook for regular sync setting */

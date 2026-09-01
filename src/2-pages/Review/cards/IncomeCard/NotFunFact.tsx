@@ -1,14 +1,14 @@
-import { IconButton } from '6-shared/ui/Button'
-import { core } from 'zerro-core/redux'
+import { IconButton } from '@/6-shared/ui/Button'
+import { core } from '@/zerro-core/redux'
 
-import { Link } from '6-shared/ui/Link'
-import { Dialog } from '6-shared/ui/Dialog'
+import { Link } from '@/6-shared/ui/Link'
+import { Dialog } from '@/6-shared/ui/Dialog'
 import Balancer from 'react-wrap-balancer'
-import pluralize from '6-shared/helpers/pluralize'
-import type { TFxAmount } from '6-shared/types'
-import { HelpOutlineIcon } from '6-shared/ui/Icons'
-import { useToggle } from '6-shared/hooks/useToggle'
-import { Amount } from '6-shared/ui/Amount'
+import pluralize from '@/6-shared/helpers/pluralize'
+import type { TFxAmount } from '@/6-shared/types'
+import { HelpOutlineIcon } from '@/6-shared/ui/Icons'
+import { useToggle } from '@/6-shared/hooks/useToggle'
+import { Amount } from '@/6-shared/ui/Amount'
 
 /** Median salary in Russia 2024. Source: https://sberindex.ru/ru/dashboards/median-wages */
 const MEDIAN_WAGE_RUB = 62_632

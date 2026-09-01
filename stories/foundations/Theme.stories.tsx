@@ -1,8 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Logo } from '6-shared/ui/Logo'
-import { useColorScheme } from '6-shared/ui/theme'
-import { getThemeColorShowcase } from '6-shared/ui/theme/colors'
+import { Logo } from '@/6-shared/ui/Logo'
+import { useColorScheme } from '@/6-shared/ui/theme'
+import { getThemeColorShowcase } from '@/6-shared/ui/theme/colors'
 
 const meta = {
   title: 'Foundations/Theme',

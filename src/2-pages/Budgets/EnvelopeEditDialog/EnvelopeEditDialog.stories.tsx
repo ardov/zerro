@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { useAppSelector } from 'store'
-import { core } from 'zerro-core/redux'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 import { MonthProvider } from '../MonthProvider'
 import { EnvelopeEditDialog, useEditDialog } from './EnvelopeEditDialog'
 

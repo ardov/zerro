@@ -4,9 +4,9 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { convertDiff } from '6-shared/api/zm-adapter/converters'
-import { makeDemoDiff, makeDemoStore } from 'zerro-core/demo'
-import { issuePatch } from 'zerro-core/headless'
+import { convertDiff } from '@/6-shared/api/zm-adapter/converters'
+import { makeDemoDiff, makeDemoStore } from '@/zerro-core/demo'
+import { issuePatch } from '@/zerro-core/headless'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { TToolContext } from './context'

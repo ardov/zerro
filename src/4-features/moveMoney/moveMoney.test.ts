@@ -1,18 +1,18 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { RootState } from 'store'
-import { core } from 'zerro-core/redux'
+import type { RootState } from '@/store'
+import { core } from '@/zerro-core/redux'
 
-import { track } from '6-shared/analytics'
+import { track } from '@/6-shared/analytics'
 import { moveMoney } from './moveMoney'
 
-vi.mock('zerro-core/redux', () => ({
+vi.mock('@/zerro-core/redux', () => ({
   core: {
     activity: { selectEnvelopeMetrics: vi.fn() },
     currency: { selectConvertFx: vi.fn() },
     budgets: { set: vi.fn() },
   },
 }))
-vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
+vi.mock('@/6-shared/analytics', () => ({ track: vi.fn() }))
 
 describe('moveMoney', () => {
   it('uses Core metrics and converts the destination budget to its currency', () => {

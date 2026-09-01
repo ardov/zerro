@@ -1,6 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
-import type { TDataStore } from '6-shared/types'
-import { idbBaseName } from '6-shared/config'
+import type { TDataStore } from '@/6-shared/types'
+import { idbBaseName } from '@/6-shared/config'
 import {
   compactJournalEntries,
   createCheckpointEntry,
@@ -12,7 +12,7 @@ import {
   validateDataStore,
   type TCommand,
   type TJournalEntry,
-} from 'zerro-core/replica'
+} from '@/zerro-core/replica'
 
 const DATABASE_VERSION = 2
 const REPLICAS_STORE = 'replicas'

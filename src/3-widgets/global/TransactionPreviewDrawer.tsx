@@ -1,12 +1,12 @@
 import { useCallback, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useAppSelector } from 'store'
-import { core } from 'zerro-core/redux'
-import { SideDrawer } from '6-shared/ui/SideDrawer'
-import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
-import { defineScreen } from '6-shared/overlays'
-import type { TTransactionId } from '6-shared/types'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
+import { SideDrawer } from '@/6-shared/ui/SideDrawer'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
+import { defineScreen } from '@/6-shared/overlays'
+import type { TTransactionId } from '@/6-shared/types'
 import { TransactionPreview } from '../transaction/TransactionPreview'
 
 /** A screen: one transaction, described by its id alone, so Back, Forward and

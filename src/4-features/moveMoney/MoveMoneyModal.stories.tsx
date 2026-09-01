@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { core } from 'zerro-core/redux'
-import { MonthProvider, useMonth } from '2-pages/Budgets/MonthProvider'
-import { useAppSelector } from 'store'
+import { core } from '@/zerro-core/redux'
+import { MonthProvider, useMonth } from '@/2-pages/Budgets/MonthProvider'
+import { useAppSelector } from '@/store'
 import { MoveMoneyModal } from './MoveMoneyModal'
 
 const meta = {

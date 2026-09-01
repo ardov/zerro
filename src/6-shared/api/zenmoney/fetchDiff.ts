@@ -1,4 +1,4 @@
-import type { TToken, TZmDiff, TZmRequest } from '6-shared/types'
+import type { TToken, TZmDiff, TZmRequest } from '@/6-shared/types'
 import type { EndpointPreference } from './endpoints'
 import { endpoints } from './endpoints'
 import { readRetryAfterMs } from './retryAfter'

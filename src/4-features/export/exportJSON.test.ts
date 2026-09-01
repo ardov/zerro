@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { TCommand } from 'zerro-core/replica'
-import { makeTestRootState } from 'store/testing'
+import type { TCommand } from '@/zerro-core/replica'
+import { makeTestRootState } from '@/store/testing'
 import {
   makeAccount,
   makeStore,
-} from 'zerro-core/support/testing/zenmoneyTestData'
+} from '@/zerro-core/support/testing/zenmoneyTestData'
 
 import { getBackupContent } from './exportJSON'
 

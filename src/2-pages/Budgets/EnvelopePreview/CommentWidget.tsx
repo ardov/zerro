@@ -1,12 +1,12 @@
 import type { FC } from 'react'
 import { useState } from 'react'
-import { InputBase } from '6-shared/ui/InputBase'
-import { NotesIcon } from '6-shared/ui/Icons'
-import { useAppDispatch, useAppSelector } from 'store'
+import { InputBase } from '@/6-shared/ui/InputBase'
+import { NotesIcon } from '@/6-shared/ui/Icons'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { cardClass } from './shared'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
+import { useDebouncedCallback } from '@/6-shared/hooks/useDebouncedCallback'
 import { useTranslation } from 'react-i18next'
 
 export const CommentWidget: FC<{ id: core.envelopes.TEnvelopeId }> = ({

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useAsked } from '6-shared/overlays'
+import { useAsked } from '@/6-shared/overlays'
 import { AdaptiveDialog } from './AdaptiveDialog'
 import { Button } from './Button'
 import {

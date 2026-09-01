@@ -8,8 +8,8 @@ import {
   createEmptyDataStore,
   issuePatch,
   type TDataStore,
-} from 'zerro-core/headless'
-import { makeDemoStore } from 'zerro-core/demo'
+} from '@/zerro-core/headless'
+import { makeDemoStore } from '@/zerro-core/demo'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import type { TToolContext } from './context'

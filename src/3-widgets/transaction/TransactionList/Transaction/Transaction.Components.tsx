@@ -1,14 +1,14 @@
-import type { TTransaction } from '6-shared/types'
+import type { TTransaction } from '@/6-shared/types'
 import type { FC, ReactNode } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { cn } from '6-shared/ui/shadcn/utils'
-import { TagIcon } from '6-shared/ui/TagIcon'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { useAppSelector } from 'store'
-import { core } from 'zerro-core/redux'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { TagIcon } from '@/6-shared/ui/TagIcon'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 
-import { SmartAmount } from '3-widgets/Amount'
+import { SmartAmount } from '@/3-widgets/Amount'
 
 type HTMLDivProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,

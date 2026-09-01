@@ -30,4 +30,4 @@ export type TTagMeta = {
 export type TLocalData = Omit<TZmDiff, 'deletion'>
 
 // The normalized store and patch shapes are owned by Zerro Core.
-export type { TDataStore } from 'zerro-core/internal/domain/zenmoney'
+export type { TDataStore } from '@/zerro-core/internal/domain/zenmoney'

@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { continueSyncLater, retryStoppedSync } from '4-features/sync'
-import { Button, IconButton } from '6-shared/ui/Button'
-import { AdaptiveDialog } from '6-shared/ui/AdaptiveDialog'
+import { continueSyncLater, retryStoppedSync } from '@/4-features/sync'
+import { Button, IconButton } from '@/6-shared/ui/Button'
+import { AdaptiveDialog } from '@/6-shared/ui/AdaptiveDialog'
 import {
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-} from '6-shared/ui/Dialog'
-import { CloseIcon } from '6-shared/ui/Icons'
-import { RadialProgress } from '6-shared/ui/RadialProgress'
-import { useAppDispatch, useAppSelector } from 'store'
+} from '@/6-shared/ui/Dialog'
+import { CloseIcon } from '@/6-shared/ui/Icons'
+import { RadialProgress } from '@/6-shared/ui/RadialProgress'
+import { useAppDispatch, useAppSelector } from '@/store'
 import {
   selectSyncDetailsOpen,
   selectSyncProgress,
   syncDetailsClosed,
   type TSyncProgress,
-} from 'store/sync'
+} from '@/store/sync'
 
 export function SyncProgressDialog() {
   const progress = useAppSelector(selectSyncProgress)

@@ -1,5 +1,5 @@
-import type { AppThunk } from 'store'
-import { core } from 'zerro-core/redux'
+import type { AppThunk } from '@/store'
+import { core } from '@/zerro-core/redux'
 
 import { t } from 'i18next'
 

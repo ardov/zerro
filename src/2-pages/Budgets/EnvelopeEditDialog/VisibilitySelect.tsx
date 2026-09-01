@@ -1,7 +1,7 @@
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Select } from '6-shared/ui/Select'
+import { Select } from '@/6-shared/ui/Select'
 
 type VisibilitySelectProps = {
   value: core.envelopes.envelopeVisibility

@@ -1,8 +1,8 @@
 import React from 'react'
-import { captureError } from '6-shared/diagnostics'
-import { tokenStorage } from '6-shared/api/tokenStorage'
+import { captureError } from '@/6-shared/diagnostics'
+import { tokenStorage } from '@/6-shared/api/tokenStorage'
 import { useTranslation } from 'react-i18next'
-import { clearPersistedLocalData } from 'store/data'
+import { clearPersistedLocalData } from '@/store/data'
 
 export default class GlobalErrorBoundary extends React.Component<{
   children: React.ReactNode

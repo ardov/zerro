@@ -1,18 +1,18 @@
-import { ButtonBase } from '6-shared/ui/Button'
+import { ButtonBase } from '@/6-shared/ui/Button'
 import { useCallback } from 'react'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import { Collapse } from '6-shared/ui/Collapse'
+import { Collapse } from '@/6-shared/ui/Collapse'
 import { useTranslation } from 'react-i18next'
-import { useToggle } from '6-shared/hooks/useToggle'
-import type { TISOMonth } from '6-shared/types'
-import type { PercentBarItem } from '6-shared/ui/PercentBar'
-import { PercentBar } from '6-shared/ui/PercentBar'
+import { useToggle } from '@/6-shared/hooks/useToggle'
+import type { TISOMonth } from '@/6-shared/types'
+import type { PercentBarItem } from '@/6-shared/ui/PercentBar'
+import { PercentBar } from '@/6-shared/ui/PercentBar'
 
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@/store'
 
-import { DataLine } from '3-widgets/DataLine'
-import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
+import { DataLine } from '@/3-widgets/DataLine'
+import { useEnvTransactionsDrawer } from '@/3-widgets/global/EnvTransactionsDrawer'
 
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props

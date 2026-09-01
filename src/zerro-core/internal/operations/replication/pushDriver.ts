@@ -165,7 +165,10 @@ export async function drivePush(
       // would resend the same request forever. Only a receipt that fails to
       // match the command it came from can do this, which is a bug rather
       // than a state to retry from.
-      if (accepted.next && remainingItems(accepted.progress) >= remainingItems(prepared.progress)) {
+      if (
+        accepted.next &&
+        remainingItems(accepted.progress) >= remainingItems(prepared.progress)
+      ) {
         return {
           kind: 'abandoned',
           progress: accepted.progress,
@@ -227,7 +230,8 @@ export async function drivePush(
       continue
     }
 
-    const retryable = response.retryable ?? isRetryablePushStatus(response.status)
+    const retryable =
+      response.retryable ?? isRetryablePushStatus(response.status)
     if (retryable && retries < maxAttempts) {
       const delay = response.retryAfterMs ?? firstDelayMs * 2 ** retries
       retries += 1

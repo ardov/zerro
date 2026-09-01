@@ -1,5 +1,5 @@
-import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
-import { cn } from '6-shared/ui/shadcn/utils'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import { Metric, useColumns } from '../models/useMetric'
 

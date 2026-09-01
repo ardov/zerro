@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { appendClientCommand } from 'store/data'
-import type { RootState } from 'store'
+import { appendClientCommand } from '@/store/data'
+import type { RootState } from '@/store'
 import {
   makeAccount,
   makeReminder,
   makeStore,
   makeUser,
 } from '../../support/testing/zenmoneyTestData'
-import { makeTestRootState } from 'store/testing'
+import { makeTestRootState } from '@/store/testing'
 import { remove, set } from './reminders'
 
 const NOW = Date.parse('2026-07-11T12:00:00Z')

@@ -6,9 +6,9 @@ import {
   makeStore,
   makeTransaction,
   makeUser,
-} from 'zerro-core/support/testing/zenmoneyTestData'
-import { acceptPushChunk, beginPush, type TCommand } from 'zerro-core/replica'
-import { AccountType, type TNormalizedPatch } from '6-shared/types'
+} from '@/zerro-core/support/testing/zenmoneyTestData'
+import { acceptPushChunk, beginPush, type TCommand } from '@/zerro-core/replica'
+import { AccountType, type TNormalizedPatch } from '@/6-shared/types'
 import {
   getChangedNum,
   getLastChangeTime,

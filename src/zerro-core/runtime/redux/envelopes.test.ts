@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { i18n } from '6-shared/localization'
+import { i18n } from '@/6-shared/localization'
 import { makeDemoStore } from '../../support/demo'
-import { makeTestRootState } from 'store/testing'
+import { makeTestRootState } from '@/store/testing'
 import { applyPatch } from '../../internal/domain/zenmoney'
 import {
   compilePatchEnvelopeMeta,

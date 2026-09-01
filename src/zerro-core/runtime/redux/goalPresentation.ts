@@ -1,7 +1,7 @@
 import { t } from 'i18next'
-import { parseDate } from '6-shared/helpers/date'
-import { formatMoney, round } from '6-shared/helpers/money'
-import type { TDateDraft, TFxCode } from '6-shared/types'
+import { parseDate } from '@/6-shared/helpers/date'
+import { formatMoney, round } from '@/6-shared/helpers/money'
+import type { TDateDraft, TFxCode } from '@/6-shared/types'
 import { goalType, type TGoal } from '../../internal/domain/zerro'
 
 export function formatGoal(goal: TGoal, currency?: TFxCode): string {

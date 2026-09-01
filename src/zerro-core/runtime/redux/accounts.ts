@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { useAppSelector } from 'store'
-import type { RootState } from 'store'
+import { useAppSelector } from '@/store'
+import type { RootState } from '@/store'
 import { getPopulatedAccounts } from '../../internal/domain/zerro/accounts/read'
 import { fromGraph, graph } from './graph'
 import { ZERRO_DATA_ACCOUNT_NAME } from '../../constants'

@@ -5,15 +5,15 @@ const { syncMock } = vi.hoisted(() => ({
   syncMock: vi.fn(),
 }))
 
-vi.mock('6-shared/api/syncDiff', () => ({ sync: syncMock }))
+vi.mock('@/6-shared/api/syncDiff', () => ({ sync: syncMock }))
 
-vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
+vi.mock('@/6-shared/analytics', () => ({ track: vi.fn() }))
 
 import {
   makeAccount,
   makeUser,
-} from 'zerro-core/support/testing/zenmoneyTestData'
-import { issuePatch } from 'zerro-core/headless'
+} from '@/zerro-core/support/testing/zenmoneyTestData'
+import { issuePatch } from '@/zerro-core/headless'
 import {
   appendClientCommand,
   applyServerPatch,
@@ -21,8 +21,8 @@ import {
   hydrateRecoveryOutbox,
   redoClientCommand,
   undoClientCommand,
-} from 'store/data'
-import { rootReducer } from 'store/rootReducer'
+} from '@/store/data'
+import { rootReducer } from '@/store/rootReducer'
 import { refreshData, reloadData, syncData } from './sync'
 import { continueSyncLater } from './sync'
 

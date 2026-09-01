@@ -1,14 +1,14 @@
 import type { FC, ReactNode } from 'react'
-import { core } from 'zerro-core/redux'
-import { cn } from '6-shared/ui/shadcn/utils'
+import { core } from '@/zerro-core/redux'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 
 import type { ComponentPropsWithoutRef } from 'react'
-import { ListRowSubheader, listItemDenseClass } from '6-shared/ui/ListRow'
-import type { TFxAmount, TFxCode } from '6-shared/types'
-import { Amount } from '6-shared/ui/Amount'
-import { DisplayAmount } from '3-widgets/DisplayAmount'
-import { toISOMonth } from '6-shared/helpers/date'
-import { Tooltip } from '6-shared/ui/Tooltip'
+import { ListRowSubheader, listItemDenseClass } from '@/6-shared/ui/ListRow'
+import type { TFxAmount, TFxCode } from '@/6-shared/types'
+import { Amount } from '@/6-shared/ui/Amount'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
+import { toISOMonth } from '@/6-shared/helpers/date'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
 
 export const Debtor: FC<
   { name: string; currency: TFxCode; balance: number } & Omit<

@@ -95,7 +95,12 @@ describe('push driver', () => {
     expect(context.sleep.mock.calls.flat()).toEqual([1000, 2000, 4000])
     // An unanswered request may already have landed, so a retry has to be the
     // same body rather than a repacked one.
-    expect(requests).toEqual([requests[0], requests[0], requests[0], requests[0]])
+    expect(requests).toEqual([
+      requests[0],
+      requests[0],
+      requests[0],
+      requests[0],
+    ])
     expect(outcome).toMatchObject({ kind: 'stopped', message: 'offline' })
     expect(context.read().outbox).toHaveLength(1)
   })

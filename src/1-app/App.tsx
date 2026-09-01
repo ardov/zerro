@@ -7,37 +7,37 @@ import {
   Routes,
   useLocation,
 } from 'react-router-dom'
-import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
-import { CircularProgress } from '6-shared/ui/CircularProgress'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
+import { CircularProgress } from '@/6-shared/ui/CircularProgress'
 import { useTranslation } from 'react-i18next'
 import {
   initAnalytics,
   setAnalyticsUser,
   trackPageView,
-} from '6-shared/analytics'
-import { OverlayHost } from '6-shared/overlays'
-import { useAppSelector } from 'store'
-import { getLoginState } from 'store/token'
-import { getLastSyncTime } from 'store/data/selectors'
-import { core } from 'zerro-core/redux'
+} from '@/6-shared/analytics'
+import { OverlayHost } from '@/6-shared/overlays'
+import { useAppSelector } from '@/store'
+import { getLoginState } from '@/store/token'
+import { getLastSyncTime } from '@/store/data/selectors'
+import { core } from '@/zerro-core/redux'
 
-import { HistoryShortcuts } from '4-features/historyShortcuts'
-import { RegularSyncHandler } from '3-widgets/RegularSyncHandler'
-import { HistoryTopBar } from '3-widgets/History/HistoryTopBar'
-import Nav from '3-widgets/Navigation'
-import { MobileNavigation } from '3-widgets/Navigation'
-import ErrorBoundary from '3-widgets/ErrorBoundary'
-import Transactions from '2-pages/Transactions'
-import Auth from '2-pages/Auth'
-import Budgets from '2-pages/Budgets'
-import Accounts from '2-pages/Accounts'
+import { HistoryShortcuts } from '@/4-features/historyShortcuts'
+import { RegularSyncHandler } from '@/3-widgets/RegularSyncHandler'
+import { HistoryTopBar } from '@/3-widgets/History/HistoryTopBar'
+import Nav from '@/3-widgets/Navigation'
+import { MobileNavigation } from '@/3-widgets/Navigation'
+import ErrorBoundary from '@/3-widgets/ErrorBoundary'
+import Transactions from '@/2-pages/Transactions'
+import Auth from '@/2-pages/Auth'
+import Budgets from '@/2-pages/Budgets'
+import Accounts from '@/2-pages/Accounts'
 import { GlobalWidgets } from './GlobalWidgets'
 
-const About = lazy(() => import('2-pages/About'))
-const Donation = lazy(() => import('2-pages/Donation'))
-const Token = lazy(() => import('2-pages/Token'))
-const Stats = lazy(() => import('2-pages/Stats'))
-const Review = lazy(() => import('2-pages/Review'))
+const About = lazy(() => import('@/2-pages/About'))
+const Donation = lazy(() => import('@/2-pages/Donation'))
+const Token = lazy(() => import('@/2-pages/Token'))
+const Stats = lazy(() => import('@/2-pages/Stats'))
+const Review = lazy(() => import('@/2-pages/Review'))
 
 export default function App() {
   const isLoggedIn = useAppSelector(getLoginState)

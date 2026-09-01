@@ -1,21 +1,21 @@
-import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
-import { useAppSelector } from 'store'
-import { core } from 'zerro-core/redux'
+import type { TDateDraft, TFxAmount, TISOMonth } from '@/6-shared/types'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { ListRows, listItemDenseClass } from '6-shared/ui/ListRow'
-import { cn } from '6-shared/ui/shadcn/utils'
-import { Total } from '6-shared/ui/Total'
-import { Amount } from '6-shared/ui/Amount'
+import { ListRows, listItemDenseClass } from '@/6-shared/ui/ListRow'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { Total } from '@/6-shared/ui/Total'
+import { Amount } from '@/6-shared/ui/Amount'
 import {
   formatDate,
   parseDate,
   prevMonth,
   toISOMonth,
-} from '6-shared/helpers/date'
+} from '@/6-shared/helpers/date'
 
-import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
-import { OneLiner } from '3-widgets/DataLine'
+import { useEnvTransactionsDrawer } from '@/3-widgets/global/EnvTransactionsDrawer'
+import { OneLiner } from '@/3-widgets/DataLine'
 import { useBudgetPopover } from '../BudgetPopover'
 
 type MonthContext = `${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`

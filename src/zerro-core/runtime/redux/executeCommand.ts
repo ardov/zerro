@@ -1,7 +1,7 @@
 import { v1 as uuidv1 } from 'uuid'
-import type { AppDispatch, AppThunk, RootState } from 'store'
-import { appendClientCommand, getReplicaWriteBlocked } from 'store/data'
-import { selectIsHistoryPointVisible } from 'store/history'
+import type { AppDispatch, AppThunk, RootState } from '@/store'
+import { appendClientCommand, getReplicaWriteBlocked } from '@/store/data'
+import { selectIsHistoryPointVisible } from '@/store/history'
 
 import {
   issuePatch,

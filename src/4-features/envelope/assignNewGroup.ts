@@ -1,7 +1,7 @@
 import { t } from 'i18next'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import type { AppThunk } from 'store/index'
+import type { AppThunk } from '@/store/index'
 
 export function assignNewGroup(id: core.envelopes.TEnvelopeId): AppThunk {
   return (dispatch, getState) => {

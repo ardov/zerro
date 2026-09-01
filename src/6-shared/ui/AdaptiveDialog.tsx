@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Drawer } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
-import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { Dialog } from './Dialog'
 import { useOverlayFocus } from './useOverlayFocus'
 import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'

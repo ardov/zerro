@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Collapse } from '6-shared/ui/Collapse'
+import { Collapse } from '@/6-shared/ui/Collapse'
 import { useDroppable } from '@dnd-kit/core'
 import { DragTypes } from '../DnD'
 import { useTranslation } from 'react-i18next'

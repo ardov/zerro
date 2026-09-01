@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import type { TISOMonth } from '6-shared/types'
+import type { TISOMonth } from '@/6-shared/types'
 import { makeDemoStore } from '../../support/demo'
-import { makeTestRootState } from 'store/testing'
+import { makeTestRootState } from '@/store/testing'
 import { applyPatch, makeTagBudget } from '../../internal/domain/zenmoney'
 import {
   compilePatchUserSettings,

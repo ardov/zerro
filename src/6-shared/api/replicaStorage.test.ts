@@ -1,14 +1,14 @@
 import 'fake-indexeddb/auto'
 import { describe, expect, it } from 'vitest'
 import { openDB } from 'idb'
-import { AccountType } from '6-shared/types'
+import { AccountType } from '@/6-shared/types'
 import {
   makeAccount,
   makeInstrument,
   makeStore,
   makeUser,
-} from 'zerro-core/support/testing/zenmoneyTestData'
-import type { TDataStore } from '6-shared/types'
+} from '@/zerro-core/support/testing/zenmoneyTestData'
+import type { TDataStore } from '@/6-shared/types'
 import { createReplicaStorage, type ReplicaStorage } from './replicaStorage'
 
 describe('ReplicaStorage', () => {

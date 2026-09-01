@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { ById, TAccount, TInstrumentId } from '6-shared/types'
-import { AccountType } from '6-shared/types'
+import type { ById, TAccount, TInstrumentId } from '@/6-shared/types'
+import { AccountType } from '@/6-shared/types'
 import {
   makeAccount,
   makeTransaction,

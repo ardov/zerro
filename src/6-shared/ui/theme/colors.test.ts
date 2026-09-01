@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { parseColor } from '6-shared/helpers/color'
+import { parseColor } from '@/6-shared/helpers/color'
 import { getThemeColor, getThemeColorShowcase, themeTokensCss } from './colors'
 
 /** What the theme emits and what Tailwind exposes have to stay in step, and

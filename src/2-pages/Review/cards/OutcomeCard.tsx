@@ -1,15 +1,15 @@
-import { IconButton } from '6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/Button'
 import { useState } from 'react'
-import { formatDate } from '6-shared/helpers/date'
-import { useAppSelector } from 'store'
-import { core } from 'zerro-core/redux'
+import { formatDate } from '@/6-shared/helpers/date'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 
-import { DisplayAmount } from '3-widgets/DisplayAmount'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 import { useTrToDisplay } from '../shared/useTrToDisplay'
-import { ArrowBackIcon, ArrowForwardIcon } from '6-shared/ui/Icons'
+import { ArrowBackIcon, ArrowForwardIcon } from '@/6-shared/ui/Icons'
 import { useTranslation } from 'react-i18next'
 
 export function OutcomeCard(props: TCardProps) {

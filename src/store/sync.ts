@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
-import type { RootState } from 'store'
-import type { TPushProgressRow } from 'zerro-core/replica'
+import type { RootState } from '@/store'
+import type { TPushProgressRow } from '@/zerro-core/replica'
 
 export type TLastSyncResult = {
   finishedAt: number

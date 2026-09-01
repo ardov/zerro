@@ -7,7 +7,6 @@
     "verbatimModuleSyntax": true,
     "paths": {
       "@/*": ["./src/*"],
-      "*": ["./src/*"],
       "stories/*": ["./stories/*"]
     },
     "target": "esnext",

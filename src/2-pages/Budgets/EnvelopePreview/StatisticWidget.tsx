@@ -1,6 +1,6 @@
-import { cn } from '6-shared/ui/shadcn/utils'
-import type { ButtonBaseProps } from '6-shared/ui/Button'
-import { ButtonBase } from '6-shared/ui/Button'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import type { ButtonBaseProps } from '@/6-shared/ui/Button'
+import { ButtonBase } from '@/6-shared/ui/Button'
 import type { FC } from 'react'
 import type { ComponentPropsWithoutRef } from 'react'
 import { useState } from 'react'
@@ -12,14 +12,14 @@ import {
   ReferenceDot,
 } from 'recharts'
 import { useTranslation } from 'react-i18next'
-import type { TFxCode, TISOMonth } from '6-shared/types'
-import { formatDate, toISOMonth } from '6-shared/helpers/date'
-import { getAverage } from '6-shared/helpers/money/currencyHelpers'
+import type { TFxCode, TISOMonth } from '@/6-shared/types'
+import { formatDate, toISOMonth } from '@/6-shared/helpers/date'
+import { getAverage } from '@/6-shared/helpers/money/currencyHelpers'
 
-import { useAppSelector } from 'store'
-import { core } from 'zerro-core/redux'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 
-import { DataLine } from '3-widgets/DataLine'
+import { DataLine } from '@/3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { trimMonths } from './shared'
 

@@ -1,7 +1,7 @@
 import type { Middleware } from '@reduxjs/toolkit'
-import type { TDataStore } from '6-shared/types'
-import type { TCommand } from 'zerro-core/replica'
-import { replicaStorage } from '6-shared/api/replicaStorage'
+import type { TDataStore } from '@/6-shared/types'
+import type { TCommand } from '@/zerro-core/replica'
+import { replicaStorage } from '@/6-shared/api/replicaStorage'
 import {
   acceptClientPushChunk,
   appendClientCommand,

@@ -1,25 +1,25 @@
-import { getSyncCursor } from 'store/data/selectors'
-import { getToken } from 'store/token'
-import { track } from '6-shared/analytics'
+import { getSyncCursor } from '@/store/data/selectors'
+import { getToken } from '@/store/token'
+import { track } from '@/6-shared/analytics'
 import {
   syncFinished,
   syncStarted,
   syncStatusChanged,
   type TSyncStatus,
-} from 'store/sync'
-import { formatDate } from '6-shared/helpers/date'
-import type { AppThunk, RootState } from 'store'
-import { sync } from '6-shared/api/syncDiff'
+} from '@/store/sync'
+import { formatDate } from '@/6-shared/helpers/date'
+import type { AppThunk, RootState } from '@/store'
+import { sync } from '@/6-shared/api/syncDiff'
 import {
   applyPushChunk,
   applyServerPatch,
   prepareClientSync,
   waitForPersistedReplica,
-} from 'store/data'
-import type { TNormalizedPatch } from '6-shared/types'
-import { measureRequestBytes } from '6-shared/api/zm-adapter'
-import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
-import { refreshSelectedHistoryPoint } from 'store/history'
+} from '@/store/data'
+import type { TNormalizedPatch } from '@/6-shared/types'
+import { measureRequestBytes } from '@/6-shared/api/zm-adapter'
+import { zmPreferenceStorage } from '@/6-shared/api/zmPreferenceStorage'
+import { refreshSelectedHistoryPoint } from '@/store/history'
 import {
   beginPush,
   DEFAULT_PUSH_MAX_BYTES,
@@ -28,7 +28,7 @@ import {
   type TPushEvent,
   type TPushOutcome,
   type TPushProgressRow,
-} from 'zerro-core/replica'
+} from '@/zerro-core/replica'
 
 type TSyncRuntime = {
   now?: () => number

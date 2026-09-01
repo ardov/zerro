@@ -2,7 +2,7 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import ru from './translations/ru.json'
 import { en } from './translations/en'
-import { isProduction } from '6-shared/config'
+import { isProduction } from '@/6-shared/config'
 
 const LOCAL_STORAGE_KEY = 'language'
 export const resources = { ru, en }

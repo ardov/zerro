@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { CheckboxField } from '6-shared/ui/Checkbox'
+import { CheckboxField } from '@/6-shared/ui/Checkbox'
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -12,12 +12,12 @@ import {
   Line,
   ReferenceLine,
 } from 'recharts'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { round } from '6-shared/helpers/money'
-import { formatDate, GroupBy } from '6-shared/helpers/date'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { round } from '@/6-shared/helpers/money'
+import { formatDate, GroupBy } from '@/6-shared/helpers/date'
 
-import { DisplayAmount } from '3-widgets/DisplayAmount'
-import { DataLine } from '3-widgets/DataLine'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
+import { DataLine } from '@/3-widgets/DataLine'
 import { Period, PeriodTitle } from '../shared/period'
 import type { TNetWorthPoint } from './useNetWorth'
 import { useNetWorth } from './useNetWorth'

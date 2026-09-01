@@ -2,7 +2,7 @@ import type { UnknownAction, ThunkAction } from '@reduxjs/toolkit'
 import { configureStore } from '@reduxjs/toolkit'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { tokenStorage } from '6-shared/api/tokenStorage'
+import { tokenStorage } from '@/6-shared/api/tokenStorage'
 
 import { replicaPersistenceMiddleware } from './data/replicaPersistence'
 import { rootReducer } from './rootReducer'

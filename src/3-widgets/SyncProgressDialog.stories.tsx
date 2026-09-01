@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
 import { SyncProgressDialogView } from './SyncProgressDialog'
-import type { TSyncProgress } from 'store/sync'
+import type { TSyncProgress } from '@/store/sync'
 
 const meta = {
   title: 'App/Sync/ProgressDialog',

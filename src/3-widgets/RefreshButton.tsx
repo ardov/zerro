@@ -1,28 +1,28 @@
-import { IconButton } from '6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/Button'
 import type { ComponentProps, FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CircularProgress } from '6-shared/ui/CircularProgress'
-import { RadialProgress } from '6-shared/ui/RadialProgress'
+import { CircularProgress } from '@/6-shared/ui/CircularProgress'
+import { RadialProgress } from '@/6-shared/ui/RadialProgress'
 import {
   SyncIcon,
   SyncDisabledIcon,
   DoneIcon,
   WarningIcon,
-} from '6-shared/ui/Icons'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { cn } from '6-shared/ui/shadcn/utils'
+} from '@/6-shared/ui/Icons'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 
-import { getChangedNum } from 'store/data'
+import { getChangedNum } from '@/store/data'
 import {
   selectIsSyncPending,
   selectLastSyncResult,
   selectSyncProgress,
   syncDetailsOpened,
-} from 'store/sync'
-import { useAppDispatch, useAppSelector } from 'store'
-import { syncData } from '4-features/sync'
-import { useRegularSync } from '3-widgets/RegularSyncHandler'
+} from '@/store/sync'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { syncData } from '@/4-features/sync'
+import { useRegularSync } from '@/3-widgets/RegularSyncHandler'
 
 type ButtonState = 'idle' | 'pending' | 'stopped' | 'success' | 'fail'
 type RefreshButtonProps = {

@@ -1,5 +1,5 @@
-import { i18n } from '6-shared/localization'
-import type { RootState } from 'store'
+import { i18n } from '@/6-shared/localization'
+import type { RootState } from '@/store'
 import { getUserSettings } from '../../internal/domain/zerro'
 import { fromGraph, graph } from './graph'
 import { presentEnvelopes, type TEnvelopeLabels } from './envelopePresentation'

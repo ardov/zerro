@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Provider } from 'react-redux'
 import { describe, expect, it, vi } from 'vitest'
-import dataReducer from 'store/data'
+import dataReducer from '@/store/data'
 
 const { askMock } = vi.hoisted(() => ({
   askMock: vi.fn(async () => undefined),
@@ -14,14 +14,14 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
-vi.mock('6-shared/overlays', () => ({
+vi.mock('@/6-shared/overlays', () => ({
   useAsk: () => askMock,
   useAsked: () => ({ open: false, answer: () => {} }),
 }))
 
-vi.mock('6-shared/ui/Confirm', () => ({ Confirm: () => null }))
+vi.mock('@/6-shared/ui/Confirm', () => ({ Confirm: () => null }))
 
-vi.mock('4-features/sync', () => ({
+vi.mock('@/4-features/sync', () => ({
   reloadData: () => ({ type: 'journal/reload' }),
 }))
 

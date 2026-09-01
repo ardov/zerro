@@ -7,10 +7,10 @@ import {
 } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
 import { enGB as en } from 'date-fns/locale/en-GB'
-import type { TDateDraft } from '6-shared/types'
+import type { TDateDraft } from '@/6-shared/types'
 import { t } from 'i18next'
 import { parseDate } from './utils'
-import { i18n } from '6-shared/localization'
+import { i18n } from '@/6-shared/localization'
 
 /**
  * Formats date.

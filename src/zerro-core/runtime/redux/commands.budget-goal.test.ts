@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { RootState } from 'store'
-import { appendClientCommand } from 'store/data'
+import type { RootState } from '@/store'
+import { appendClientCommand } from '@/store/data'
 import { issuePatch } from '../../internal/operations/materialization'
 import { makeDemoStore } from '../../support/demo'
 import { applyPatch } from '../../internal/domain/zenmoney'
-import { makeTestRootState } from 'store/testing'
+import { makeTestRootState } from '@/store/testing'
 import {
   compilePatchUserSettings,
   compileSetBudget,

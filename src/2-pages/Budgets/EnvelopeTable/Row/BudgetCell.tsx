@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import React from 'react'
-import { cn } from '6-shared/ui/shadcn/utils'
-import { Amount } from '6-shared/ui/Amount'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { Amount } from '@/6-shared/ui/Amount'
 
 import { Btn } from './Btn'
 

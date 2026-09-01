@@ -1,12 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { isZero } from '6-shared/helpers/money'
-import type { ById, ByMonth, TISOMonth } from '6-shared/types'
+import { isZero } from '@/6-shared/helpers/money'
+import type { ById, ByMonth, TISOMonth } from '@/6-shared/types'
 
-import type { TSelector } from 'store'
-import { useAppSelector } from 'store'
-import { core } from 'zerro-core/redux'
+import type { TSelector } from '@/store'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 
-import { deepEqual } from '6-shared/helpers/deepEqual'
+import { deepEqual } from '@/6-shared/helpers/deepEqual'
 
 export type TRenderInfo = {
   id: core.envelopes.TEnvelopeId

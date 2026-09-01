@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
-import type { RootState } from 'store'
-import { appendClientCommand } from 'store/data'
-import { rootReducer } from 'store/rootReducer'
-import { makeTestRootState } from 'store/testing'
+import type { RootState } from '@/store'
+import { appendClientCommand } from '@/store/data'
+import { rootReducer } from '@/store/rootReducer'
+import { makeTestRootState } from '@/store/testing'
 import {
   makeAccount,
   makeStore,

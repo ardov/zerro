@@ -6,10 +6,10 @@ import {
   BarChartIcon,
   SettingsIcon,
   SyncAltIcon,
-} from '6-shared/ui/Icons'
-import { useHomeBar } from '6-shared/hooks/useHomeBar'
-import RefreshButton from '3-widgets/RefreshButton'
-import { useAsk } from '6-shared/overlays'
+} from '@/6-shared/ui/Icons'
+import { useHomeBar } from '@/6-shared/hooks/useHomeBar'
+import RefreshButton from '@/3-widgets/RefreshButton'
+import { useAsk } from '@/6-shared/overlays'
 import { SettingsMenu } from './SettingsMenu'
 
 export const MobileNavigation: FC = () => {

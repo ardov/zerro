@@ -1,4 +1,4 @@
-import type { AppThunk, RootState } from 'store'
+import type { AppThunk, RootState } from '@/store'
 import { v1 as uuidv1 } from 'uuid'
 import {
   compileBulkEditTransactions,

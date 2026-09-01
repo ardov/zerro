@@ -11,20 +11,22 @@ const { storageMock } = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('6-shared/api/replicaStorage', () => ({ replicaStorage: storageMock }))
+vi.mock('@/6-shared/api/replicaStorage', () => ({
+  replicaStorage: storageMock,
+}))
 
 import {
   makeAccount,
   makeInstrument,
   makeStore,
   makeUser,
-} from 'zerro-core/support/testing/zenmoneyTestData'
-import { AccountType } from '6-shared/types'
+} from '@/zerro-core/support/testing/zenmoneyTestData'
+import { AccountType } from '@/6-shared/types'
 import reducer, {
   hydrateRecoveryOutbox,
   rebaseServerInbox,
   receiveServerPatch,
-} from 'store/data/slice'
+} from '@/store/data/slice'
 import { discardCorruptOutbox, loadLocalData } from './localData'
 
 beforeEach(() => vi.clearAllMocks())

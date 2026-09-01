@@ -1,8 +1,8 @@
-import { IconButton } from '6-shared/ui/Button'
-import type { core } from 'zerro-core/redux'
+import { IconButton } from '@/6-shared/ui/Button'
+import type { core } from '@/zerro-core/redux'
 import React from 'react'
-import { Collapse } from '6-shared/ui/Collapse'
-import { ChevronRightIcon } from '6-shared/ui/Icons'
+import { Collapse } from '@/6-shared/ui/Collapse'
+import { ChevronRightIcon } from '@/6-shared/ui/Icons'
 
 type ParentProps = {
   id: core.envelopes.TEnvelopeId

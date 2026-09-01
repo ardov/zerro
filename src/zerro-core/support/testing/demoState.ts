@@ -1,8 +1,8 @@
-import type { RootState } from 'store'
+import type { RootState } from '@/store'
 import { makeDemoStore, type TDemoDataOptions } from '../demo'
 import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
 import type { TCoreContext } from '../../types'
-import { makeTestRootState } from 'store/testing'
+import { makeTestRootState } from '@/store/testing'
 
 export const coreNextDemoOptions = {
   now: '2026-04-15T12:00:00.000Z',

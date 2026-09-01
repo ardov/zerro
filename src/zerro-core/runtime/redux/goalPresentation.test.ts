@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { t } from 'i18next'
-import { formatMoney } from '6-shared/helpers/money'
+import { formatMoney } from '@/6-shared/helpers/money'
 import { goalType } from '../../internal/domain/zerro/goals'
 import { formatGoal } from './goalPresentation'
 

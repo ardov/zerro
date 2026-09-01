@@ -1,15 +1,15 @@
 import type { FC, ReactElement } from 'react'
 import { useCallback } from 'react'
-import { useAppSelector } from 'store'
-import { core } from 'zerro-core/redux'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 
-import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
-import { formatDate } from '6-shared/helpers/date'
-import { nextMonth, prevMonth, toISOMonth } from '6-shared/helpers/date'
+import { formatDate } from '@/6-shared/helpers/date'
+import { nextMonth, prevMonth, toISOMonth } from '@/6-shared/helpers/date'
 
-import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
+import { useEnvTransactionsDrawer } from '@/3-widgets/global/EnvTransactionsDrawer'
 
 import { MonthProvider, useMonth } from './MonthProvider'
 import { EnvelopeTable } from './EnvelopeTable'

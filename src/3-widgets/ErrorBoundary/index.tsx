@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
 import React from 'react'
 import { connect } from 'react-redux'
-import { logOut } from '4-features/authorization'
-import { captureError } from '6-shared/diagnostics'
+import { logOut } from '@/4-features/authorization'
+import { captureError } from '@/6-shared/diagnostics'
 import { ErrorMessage } from './ErrorMessage'
-import type { AppDispatch } from 'store'
+import type { AppDispatch } from '@/store'
 
 interface ErrorBoundaryProps {
   logOut: () => void

@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom'
 import type { FC, ReactNode } from 'react'
 import { useEffect, useState } from 'react'
-import { usePopup } from '6-shared/overlays'
+import { usePopup } from '@/6-shared/overlays'
 import { useCallback } from 'react'
 import type { DragEndEvent } from '@dnd-kit/core'
 import {
@@ -15,11 +15,11 @@ import {
   KeyboardSensor,
 } from '@dnd-kit/core'
 import { useTranslation } from 'react-i18next'
-import { useAppDispatch, useAppSelector } from 'store/index'
-import { core } from 'zerro-core/redux'
+import { useAppDispatch, useAppSelector } from '@/store/index'
+import { core } from '@/zerro-core/redux'
 
-import { MoveMoneyModal } from '4-features/moveMoney'
-import { assignNewGroup } from '4-features/envelope/assignNewGroup'
+import { MoveMoneyModal } from '@/4-features/moveMoney'
+import { assignNewGroup } from '@/4-features/envelope/assignNewGroup'
 import { useMonth } from '../MonthProvider'
 import type { TDragData } from './dragTypes'
 import { DragTypes } from './dragTypes'

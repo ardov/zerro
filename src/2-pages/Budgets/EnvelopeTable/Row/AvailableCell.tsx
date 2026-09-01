@@ -1,13 +1,13 @@
 import type { FC } from 'react'
 import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { cn } from '6-shared/ui/shadcn/utils'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { formatMoney } from '6-shared/helpers/money'
-import { WarningIcon } from '6-shared/ui/Icons'
-import { Amount } from '6-shared/ui/Amount'
-import { DragTypes } from '2-pages/Budgets/DnD'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { formatMoney } from '@/6-shared/helpers/money'
+import { WarningIcon } from '@/6-shared/ui/Icons'
+import { Amount } from '@/6-shared/ui/Amount'
+import { DragTypes } from '@/2-pages/Budgets/DnD'
 
 type AvailableCellProps = {
   id: string

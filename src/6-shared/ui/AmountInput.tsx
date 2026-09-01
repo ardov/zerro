@@ -2,8 +2,8 @@ import type { FC } from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { Button } from './Button'
 import { OutlinedField, type OutlinedFieldProps } from './OutlinedField'
-import { getCurrencySymbol } from '6-shared/helpers/money'
-import type { Modify } from '6-shared/types'
+import { getCurrencySymbol } from '@/6-shared/helpers/money'
+import type { Modify } from '@/6-shared/types'
 
 // `ref` and `type` are owned: the ref drives selectOnFocus and the sign
 // buttons, and `tel` is what raises the numeric keypad on mobile.

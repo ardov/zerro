@@ -1,11 +1,11 @@
-import type { core } from 'zerro-core/redux'
+import type { core } from '@/zerro-core/redux'
 import type { FC } from 'react'
 import type { CSSProperties } from 'react'
 import { memo, useCallback } from 'react'
-import { SideDrawer } from '6-shared/ui/SideDrawer'
+import { SideDrawer } from '@/6-shared/ui/SideDrawer'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
-import { defineScreen } from '6-shared/overlays'
+import { defineScreen } from '@/6-shared/overlays'
 
 type TDrawerId = core.envelopes.TEnvelopeId | 'overview'
 

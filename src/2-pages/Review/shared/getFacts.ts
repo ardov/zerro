@@ -1,12 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import type { TFxAmount, TFxCode, TTagId, TTransaction } from '6-shared/types'
-import { parseDate } from '6-shared/helpers/date'
+import type { TFxAmount, TFxCode, TTagId, TTransaction } from '@/6-shared/types'
+import { parseDate } from '@/6-shared/helpers/date'
 
-import { addFxAmount } from '6-shared/helpers/money'
-import type { TSelector } from 'store/index'
-import { useAppSelector } from 'store/index'
+import { addFxAmount } from '@/6-shared/helpers/money'
+import type { TSelector } from '@/store/index'
+import { useAppSelector } from '@/store/index'
 
 type TInfoNode = {
   income: TFxAmount

@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from 'react'
-import { cn } from '6-shared/ui/shadcn/utils'
-import type { TTransaction } from '6-shared/types'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import type { TTransaction } from '@/6-shared/types'
 
 export type TCardProps = {
   year: string | number

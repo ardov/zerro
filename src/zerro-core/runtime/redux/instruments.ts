@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
-import type { RootState } from 'store'
-import { useAppSelector } from 'store'
+import type { RootState } from '@/store'
+import { useAppSelector } from '@/store'
 import { getInstrumentsByCode } from '../../internal/domain/zenmoney/entities/instruments'
 import { fromGraph, graph } from './graph'
 import { selectData } from './state'

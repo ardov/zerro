@@ -7,7 +7,7 @@ export {
   updateEnvelopeSettings as updateSettings,
 } from './commands'
 import { createSelector } from '@reduxjs/toolkit'
-import type { RootState } from 'store'
+import type { RootState } from '@/store'
 import { fromGraph, graph } from './graph'
 import { getCommandEnvelopeLabels } from './commandRead'
 import { presentEnvelopes } from './envelopePresentation'

@@ -58,7 +58,7 @@ export default tseslint.config(
             {
               name: 'clsx',
               message:
-                "Use `cn` from '6-shared/ui/shadcn/utils' instead of clsx.",
+                "Use `cn` from '@/6-shared/ui/shadcn/utils' instead of clsx.",
             },
           ],
         },

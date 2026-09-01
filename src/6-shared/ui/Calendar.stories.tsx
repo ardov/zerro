@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent, within } from 'storybook/test'
-import type { TISODate } from '6-shared/types'
+import type { TISODate } from '@/6-shared/types'
 import { Calendar } from './Calendar'
 
 /** August 2026 has its 1st on a Saturday and 31 days, so the grid it draws

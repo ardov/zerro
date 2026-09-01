@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type { TZmDiff } from '6-shared/types'
+import type { TZmDiff } from '@/6-shared/types'
 import { fetchDiff } from './fetchDiff'
 
 afterEach(() => {

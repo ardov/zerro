@@ -1,5 +1,5 @@
 import type { FC, ReactElement } from 'react'
-import { Link } from '6-shared/ui/Link'
+import { Link } from '@/6-shared/ui/Link'
 import { useTranslation } from 'react-i18next'
 
 export default function Donation() {

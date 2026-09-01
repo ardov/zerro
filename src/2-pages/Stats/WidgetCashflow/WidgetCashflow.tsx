@@ -1,7 +1,7 @@
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Divider } from '6-shared/ui/Divider'
+import { Divider } from '@/6-shared/ui/Divider'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -11,13 +11,13 @@ import {
   Tooltip as RechartsTooltip,
   CartesianGrid,
 } from 'recharts'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { formatMoney } from '6-shared/helpers/money'
-import { formatDate, parseDate } from '6-shared/helpers/date'
-import type { TISODate } from '6-shared/types'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { formatMoney } from '@/6-shared/helpers/money'
+import { formatDate, parseDate } from '@/6-shared/helpers/date'
+import type { TISODate } from '@/6-shared/types'
 
-import { DisplayAmount } from '3-widgets/DisplayAmount'
-import { DataLine } from '3-widgets/DataLine'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
+import { DataLine } from '@/3-widgets/DataLine'
 import { summarizeCashflow, useCashFlow } from '../shared/cashflow'
 import type { Period } from '../shared/period'
 import { PeriodTitle } from '../shared/period'

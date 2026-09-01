@@ -1,15 +1,15 @@
 import { useTranslation } from 'react-i18next'
-import { useAsk } from '6-shared/overlays'
-import { Confirm } from '6-shared/ui/Confirm'
-import { useSnackbar } from '6-shared/ui/SnackbarProvider'
-import { useAppDispatch, useAppSelector } from 'store'
-import { restoreOutboxPosition } from 'store/data'
+import { useAsk } from '@/6-shared/overlays'
+import { Confirm } from '@/6-shared/ui/Confirm'
+import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { restoreOutboxPosition } from '@/store/data'
 import {
   exitHistoryBrowsing,
   selectHistoryPointData,
   selectSelectedHistoryPoint,
-} from 'store/history'
-import { core } from 'zerro-core/redux'
+} from '@/store/history'
+import { core } from '@/zerro-core/redux'
 
 /**
  * Restoring the selected point, for whichever surface offers it.

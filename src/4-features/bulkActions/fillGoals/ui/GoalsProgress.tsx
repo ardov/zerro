@@ -1,17 +1,17 @@
-import type { ButtonBaseProps } from '6-shared/ui/Button'
-import { ButtonBase } from '6-shared/ui/Button'
+import type { ButtonBaseProps } from '@/6-shared/ui/Button'
+import { ButtonBase } from '@/6-shared/ui/Button'
 import type { FC } from 'react'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import type { TISOMonth } from '6-shared/types'
-import { formatMoney } from '6-shared/helpers/money'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { RadialProgress } from '6-shared/ui/RadialProgress'
-import { useAppDispatch, useAppSelector } from 'store'
+import type { TISOMonth } from '@/6-shared/types'
+import { formatMoney } from '@/6-shared/helpers/money'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { RadialProgress } from '@/6-shared/ui/RadialProgress'
+import { useAppDispatch, useAppSelector } from '@/store'
 
 import { fillGoals } from '../model/fillGoals'
-import { useAsk } from '6-shared/overlays'
-import { Confirm } from '6-shared/ui/Confirm'
+import { useAsk } from '@/6-shared/overlays'
+import { Confirm } from '@/6-shared/ui/Confirm'
 import { useTranslation } from 'react-i18next'
 
 type TGoalsProgressProps = ButtonBaseProps & {

@@ -1,4 +1,4 @@
-import type { RootState } from 'store'
+import type { RootState } from '@/store'
 import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
 import { createProjectionGraph } from '../../internal/projections/graph'
 import { selectData } from './state'

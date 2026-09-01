@@ -1,7 +1,7 @@
-import type { TZmDiff } from '6-shared/types'
+import type { TZmDiff } from '@/6-shared/types'
 
 import type { TEndpoint } from '../application/context'
-import { readRetryAfterMs } from '6-shared/api/zenmoney/retryAfter'
+import { readRetryAfterMs } from '@/6-shared/api/zenmoney/retryAfter'
 import { ToolError } from '../application/output'
 
 const endpointUrls: Record<TEndpoint, string> = {

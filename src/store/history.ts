@@ -3,7 +3,7 @@ import {
   createSlice,
   type PayloadAction,
 } from '@reduxjs/toolkit'
-import type { AppThunk } from 'store'
+import type { AppThunk } from '@/store'
 import type { RootState } from './rootReducer'
 import { appendClientCommand, rebaseServerInbox } from './data/slice'
 import {
@@ -14,9 +14,9 @@ import {
   type TChangeSummary,
   type TCommand,
   type TJournalEntry,
-} from 'zerro-core/replica'
-import type { TDataStore } from '6-shared/types'
-import { replicaStorage } from '6-shared/api/replicaStorage'
+} from '@/zerro-core/replica'
+import type { TDataStore } from '@/6-shared/types'
+import { replicaStorage } from '@/6-shared/api/replicaStorage'
 import { waitForPersistedReplica } from './data/replicaPersistence'
 
 export type THistoryPointRef =

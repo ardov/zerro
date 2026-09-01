@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import { cn } from '6-shared/ui/shadcn/utils'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 
 interface MapProps {
   longitude?: number | null

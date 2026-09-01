@@ -1,14 +1,14 @@
-import { Button, ButtonBase } from '6-shared/ui/Button'
+import { Button, ButtonBase } from '@/6-shared/ui/Button'
 import type { CSSProperties } from 'react'
 import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { cn } from '6-shared/ui/shadcn/utils'
-import { zenmoney } from '6-shared/api/zenmoney'
-import { Logo } from '6-shared/ui/Logo'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { zenmoney } from '@/6-shared/api/zenmoney'
+import { Logo } from '@/6-shared/ui/Logo'
 
-import { useAppDispatch } from 'store'
-import { loadBackup, loadDemoData, logIn } from '4-features/authorization'
+import { useAppDispatch } from '@/store'
+import { loadBackup, loadDemoData, logIn } from '@/4-features/authorization'
 
 import './Auth.css'
 

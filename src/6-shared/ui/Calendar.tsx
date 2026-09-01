@@ -8,8 +8,8 @@ import {
   getDateLocale,
   parseDate,
   toISODate,
-} from '6-shared/helpers/date'
-import type { TDateDraft, TISODate } from '6-shared/types'
+} from '@/6-shared/helpers/date'
+import type { TDateDraft, TISODate } from '@/6-shared/types'
 import { ButtonBase, IconButton } from './Button'
 import { ChevronLeftIcon, ChevronRightIcon } from './Icons'
 import { cn } from './shadcn/utils'

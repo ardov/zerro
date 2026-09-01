@@ -4,7 +4,7 @@ import {
   compileCreateTransaction,
   stageCompiledCommand,
   type TCreateTransactionInput,
-} from 'zerro-core/headless'
+} from '@/zerro-core/headless'
 
 import type { TToolContext } from './context'
 import { ToolError, success } from './output'

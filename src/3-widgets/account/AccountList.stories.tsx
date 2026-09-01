@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import AccountList from './AccountList'
-import { DebtorList } from '3-widgets/DebtorList'
+import { DebtorList } from '@/3-widgets/DebtorList'
 
 const meta = {
   title: 'App/Accounts',

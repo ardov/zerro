@@ -12,64 +12,68 @@ import type {
   TZmReminderMarker,
   TZmTransaction,
   TDataEntityKey,
-} from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
 
 export type {
   TFxCode,
   TInstrument,
   TInstrumentId,
   TZmInstrument,
-} from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
 export type {
   TCompany,
   TCompanyId,
   TZmCompany,
-} from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
 export type {
   TCountry,
   TCountryId,
   TZmCountry,
-} from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
 export type {
   TUser,
   TUserId,
   TZmUser,
-} from 'zerro-core/internal/domain/zenmoney/entities/users'
+} from '@/zerro-core/internal/domain/zenmoney/entities/users'
 export type {
   TMerchant,
   TMerchantId,
   TZmMerchant,
-} from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
 export type {
   TAccount,
   TAccountId,
   TZmAccount,
-} from 'zerro-core/internal/domain/zenmoney'
-export type { TTag, TTagId, TZmTag } from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
+export type {
+  TTag,
+  TTagId,
+  TZmTag,
+} from '@/zerro-core/internal/domain/zenmoney'
 export type {
   TBudget,
   TBudgetId,
   TZmBudget,
-} from 'zerro-core/internal/domain/zenmoney'
-export { globalBudgetTagId } from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
+export { globalBudgetTagId } from '@/zerro-core/internal/domain/zenmoney'
 export type {
   TReminder,
   TReminderId,
   TZmReminder,
-} from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
 export type {
   TReminderMarker,
   TReminderMarkerId,
   TZmReminderMarker,
-} from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
 export type {
   TTransaction,
   TTransactionId,
   TBankOperationId,
   TZmTransaction,
-} from 'zerro-core/internal/domain/zenmoney'
-export type { TOpenEnum } from 'zerro-core/internal/domain/foundation/types'
-export { AccountType } from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
+export type { TOpenEnum } from '@/zerro-core/internal/domain/foundation/types'
+export { AccountType } from '@/zerro-core/internal/domain/zenmoney'
 export {
   accountOffsetIntervals,
   accountPayoffIntervals,
@@ -77,7 +81,7 @@ export {
   balanceCorrectionTypes,
   reminderIntervals,
   reminderMarkerStates,
-} from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
 
 // export type TToken = TAccessToken['access_token']
 
@@ -88,8 +92,8 @@ export {
 export type {
   TZmDeletionObject,
   TDeletionObject,
-} from 'zerro-core/internal/domain/zenmoney'
-import type { TZmDeletionObject } from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
+import type { TZmDeletionObject } from '@/zerro-core/internal/domain/zenmoney'
 
 // ---------------------------------------------------------------------
 // DIFF
@@ -115,7 +119,7 @@ export type TZmDiff = {
 export type {
   TDataEntityKey,
   TNormalizedPatch,
-} from 'zerro-core/internal/domain/zenmoney'
+} from '@/zerro-core/internal/domain/zenmoney'
 
 export type TZmRequest = TZmDiff & {
   currentClientTimestamp: TUnixTime

@@ -1,4 +1,4 @@
-import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import type { FC, ReactNode } from 'react'
 import React, { useContext, useState } from 'react'
 

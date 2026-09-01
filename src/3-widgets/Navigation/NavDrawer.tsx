@@ -2,11 +2,11 @@ import type { FC } from 'react'
 import React from 'react'
 import { useMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import RefreshButton from '3-widgets/RefreshButton'
+import RefreshButton from '@/3-widgets/RefreshButton'
 import { MenuButton } from './MenuButton'
-import { ListRowIcon, ListRowText, listItemClass } from '6-shared/ui/ListRow'
-import { Divider } from '6-shared/ui/Divider'
-import { cn } from '6-shared/ui/shadcn/utils'
+import { ListRowIcon, ListRowText, listItemClass } from '@/6-shared/ui/ListRow'
+import { Divider } from '@/6-shared/ui/Divider'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 import {
   AccountBalanceIcon,
   HelpOutlineIcon,
@@ -14,11 +14,11 @@ import {
   SyncAltIcon,
   WhatshotIcon,
   BarChartIcon,
-} from '6-shared/ui/Icons'
-import { Logo } from '6-shared/ui/Logo'
+} from '@/6-shared/ui/Icons'
+import { Logo } from '@/6-shared/ui/Logo'
 
-import AccountList from '3-widgets/account/AccountList'
-import { DebtorList } from '3-widgets/DebtorList'
+import AccountList from '@/3-widgets/account/AccountList'
+import { DebtorList } from '@/3-widgets/DebtorList'
 import { useTranslation } from 'react-i18next'
 
 /** The docked drawer has two boxes: a root that

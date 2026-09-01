@@ -1,11 +1,11 @@
-import type { TAccountId } from '6-shared/types'
+import type { TAccountId } from '@/6-shared/types'
 import type { FC } from 'react'
-import { Menu, MenuItem } from '6-shared/ui/Menu'
-import { useAppDispatch } from 'store'
-import { useAsked } from '6-shared/overlays'
-import { track } from '6-shared/analytics'
+import { Menu, MenuItem } from '@/6-shared/ui/Menu'
+import { useAppDispatch } from '@/store'
+import { useAsked } from '@/6-shared/overlays'
+import { track } from '@/6-shared/analytics'
 import { useTranslation } from 'react-i18next'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
 export type AccountMenuProps = {
   id: TAccountId

@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { makeCoreNextDemoRootState } from 'zerro-core/support/testing/demoState'
-import { createEmptyDataStore } from 'zerro-core/replica'
-import { rootReducer } from 'store/rootReducer'
+import { makeCoreNextDemoRootState } from '@/zerro-core/support/testing/demoState'
+import { createEmptyDataStore } from '@/zerro-core/replica'
+import { rootReducer } from '@/store/rootReducer'
 
 export type StoryScenario =
   'demo' | 'off-budget-transfers' | 'empty' | 'recovery' | 'persistence-warning'

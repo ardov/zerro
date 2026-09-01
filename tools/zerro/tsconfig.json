@@ -2,8 +2,7 @@
   "extends": "../../tsconfig.node.json",
   "compilerOptions": {
     "paths": {
-      "*": ["../../src/*"],
-      "zerro-core/*": ["../../src/zerro-core/*"]
+      "@/*": ["../../src/*"]
     },
     "tsBuildInfoFile": "../../.cache/tsconfig.tools-zerro.tsbuildinfo"
   },

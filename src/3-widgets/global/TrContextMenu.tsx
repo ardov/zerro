@@ -1,10 +1,10 @@
 import type { FC } from 'react'
-import { Menu, MenuItem } from '6-shared/ui/Menu'
-import type { TTransaction, TTransactionId } from '6-shared/types'
-import { useAppDispatch, useAppSelector } from 'store'
-import { useAsked } from '6-shared/overlays'
-import { track } from '6-shared/analytics'
-import { core } from 'zerro-core/redux'
+import { Menu, MenuItem } from '@/6-shared/ui/Menu'
+import type { TTransaction, TTransactionId } from '@/6-shared/types'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { useAsked } from '@/6-shared/overlays'
+import { track } from '@/6-shared/analytics'
+import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 

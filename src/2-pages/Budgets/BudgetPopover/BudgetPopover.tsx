@@ -1,22 +1,22 @@
-import type { TFxAmount, TISOMonth } from '6-shared/types'
-import { core } from 'zerro-core/redux'
+import type { TFxAmount, TISOMonth } from '@/6-shared/types'
+import { core } from '@/zerro-core/redux'
 
 import type { FC, HTMLAttributes } from 'react'
 import { useState } from 'react'
-import { IconButton } from '6-shared/ui/Button'
-import { ActionList, ActionListItem } from '6-shared/ui/ActionList'
+import { IconButton } from '@/6-shared/ui/Button'
+import { ActionList, ActionListItem } from '@/6-shared/ui/ActionList'
 import { useTranslation } from 'react-i18next'
-import { ArrowForwardIcon } from '6-shared/ui/Icons'
-import { AmountInput } from '6-shared/ui/AmountInput'
-import { formatMoney } from '6-shared/helpers/money'
-import { track } from '6-shared/analytics'
+import { ArrowForwardIcon } from '@/6-shared/ui/Icons'
+import { AmountInput } from '@/6-shared/ui/AmountInput'
+import { formatMoney } from '@/6-shared/helpers/money'
+import { track } from '@/6-shared/analytics'
 import {
   AdaptivePopover,
   type AdaptivePopoverProps,
-} from '6-shared/ui/AdaptivePopover'
+} from '@/6-shared/ui/AdaptivePopover'
 
-import { useAppDispatch, useAppSelector } from 'store'
-import { setTotalBudget } from '4-features/budget/setTotalBudget'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { setTotalBudget } from '@/4-features/budget/setTotalBudget'
 import { useQuickActions } from './useQuickActions'
 
 export type TBudgetPopoverProps = Omit<AdaptivePopoverProps, 'onClose'> & {

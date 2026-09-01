@@ -1,13 +1,13 @@
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { linkClass } from '6-shared/ui/Link'
-import { Collapse } from '6-shared/ui/Collapse'
-import { cn } from '6-shared/ui/shadcn/utils'
+import { linkClass } from '@/6-shared/ui/Link'
+import { Collapse } from '@/6-shared/ui/Collapse'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 import { QRCodeSVG as QRCode } from 'qrcode.react'
-import { formatMoney } from '6-shared/helpers/money'
-import { formatDate } from '6-shared/helpers/date'
-import { parseReceipt } from '6-shared/helpers/receipt'
+import { formatMoney } from '@/6-shared/helpers/money'
+import { formatDate } from '@/6-shared/helpers/date'
+import { parseReceipt } from '@/6-shared/helpers/receipt'
 
 interface ReceiptProps {
   value?: string | null

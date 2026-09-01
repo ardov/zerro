@@ -1,26 +1,26 @@
-import { IconButton } from '6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/Button'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
-import { Chip } from '6-shared/ui/Chip'
+import { Chip } from '@/6-shared/ui/Chip'
 import {
   ListRowSubheader,
   ListRowText,
   ListRows,
   listItemDenseClass,
-} from '6-shared/ui/ListRow'
-import { cn } from '6-shared/ui/shadcn/utils'
-import { formatTimeAgo } from '6-shared/helpers/date'
-import { commandVerbLabelKeys } from '6-shared/localization/commandVerbs'
-import { ChevronDownIcon } from '6-shared/ui/Icons'
-import type { TCommand } from 'zerro-core/replica'
-import { useAppDispatch } from 'store'
+} from '@/6-shared/ui/ListRow'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { formatTimeAgo } from '@/6-shared/helpers/date'
+import { commandVerbLabelKeys } from '@/6-shared/localization/commandVerbs'
+import { ChevronDownIcon } from '@/6-shared/ui/Icons'
+import type { TCommand } from '@/zerro-core/replica'
+import { useAppDispatch } from '@/store'
 import {
   historyRowPoint,
   sameHistoryPoint,
   toggleHistoryRun,
   type THistoryPointRef,
   type THistoryRow,
-} from 'store/history'
+} from '@/store/history'
 import { useChangeSummaryText } from './changeSummaryText'
 
 /** Renders the ordered history list: local changes above, accepted server

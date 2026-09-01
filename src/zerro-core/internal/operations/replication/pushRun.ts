@@ -297,8 +297,7 @@ function bothLegsInsideDeletedAccounts(
   transaction: { incomeAccount: unknown; outcomeAccount: unknown },
   deletedAccountIds: ReadonlySet<string>
 ): boolean {
-  const leg = (id: unknown) =>
-    id !== null && deletedAccountIds.has(String(id))
+  const leg = (id: unknown) => id !== null && deletedAccountIds.has(String(id))
   return leg(transaction.incomeAccount) && leg(transaction.outcomeAccount)
 }
 
@@ -430,10 +429,7 @@ function estimateKind(item: TPushItem): string {
 }
 
 /** Evenly spaced, so one unusual leading row does not set the pace. */
-function sampleOfKind(
-  items: readonly TPushItem[],
-  kind: string
-): TPushItem[] {
+function sampleOfKind(items: readonly TPushItem[], kind: string): TPushItem[] {
   const ofKind = items.filter(item => estimateKind(item) === kind)
   if (ofKind.length <= ESTIMATE_SAMPLE_SIZE) return ofKind
   const stride = ofKind.length / ESTIMATE_SAMPLE_SIZE

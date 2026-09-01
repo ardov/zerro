@@ -1,4 +1,4 @@
-import type { TChangeSummaryKey } from 'zerro-core/replica'
+import type { TChangeSummaryKey } from '@/zerro-core/replica'
 
 /**
  * Display order for a change summary, and the `settings` namespace key that

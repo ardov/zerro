@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import {
   getCanRedoClientCommand,
   getCanUndoClientCommand,
   redoClientCommand,
   undoClientCommand,
-} from 'store/data'
+} from '@/store/data'
 
 type THistoryShortcut = 'undo' | 'redo'
 

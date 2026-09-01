@@ -1,15 +1,15 @@
-import { ButtonBase, IconButton } from '6-shared/ui/Button'
+import { ButtonBase, IconButton } from '@/6-shared/ui/Button'
 import { useState } from 'react'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
-import { entries } from '6-shared/helpers/keys'
-import { DisplayAmount } from '3-widgets/DisplayAmount'
-import { ArrowForwardIcon, ArrowBackIcon } from '6-shared/ui/Icons'
+import { entries } from '@/6-shared/helpers/keys'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
+import { ArrowForwardIcon, ArrowBackIcon } from '@/6-shared/ui/Icons'
 
 export function PayeeByFrequencyCard(props: TCardProps) {
   const { t } = useTranslation('yearReview', { keyPrefix: 'payeeByFrequency' })

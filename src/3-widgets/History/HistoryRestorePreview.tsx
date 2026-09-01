@@ -1,14 +1,17 @@
-import { Button } from '6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/Button'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
-import { useAppSelector } from 'store'
+import {
+  byLabelKey,
+  entityLabelKeys,
+} from '@/6-shared/localization/entityLabels'
+import { useAppSelector } from '@/store'
 import {
   selectHistoryPointData,
   selectSelectedHistoryEntryMissing,
   selectSelectedHistoryPoint,
-} from 'store/history'
-import { core } from 'zerro-core/redux'
+} from '@/store/history'
+import { core } from '@/zerro-core/redux'
 import { useRestoreSelectedPoint } from './useRestoreSelectedPoint'
 
 /**

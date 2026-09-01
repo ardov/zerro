@@ -3,26 +3,26 @@ import type {
   TDateDraft,
   TISODate,
   TTransactionId,
-} from '6-shared/types'
-import { core } from 'zerro-core/redux'
+} from '@/6-shared/types'
+import { core } from '@/zerro-core/redux'
 
 import type { FC } from 'react'
-import { cn } from '6-shared/ui/shadcn/utils'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { track } from '6-shared/analytics'
-import { useDebounce } from '6-shared/hooks/useDebounce'
+import { track } from '@/6-shared/analytics'
+import { useDebounce } from '@/6-shared/hooks/useDebounce'
 
-import { getEventPosition } from '3-widgets/global/shared/helpers'
+import { getEventPosition } from '@/3-widgets/global/shared/helpers'
 
 import { GroupedList } from './GroupedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
-import type { TransactionMenuChoice } from '3-widgets/global/TrContextMenu'
-import { TransactionMenu } from '3-widgets/global/TrContextMenu'
-import { useAsk } from '6-shared/overlays'
-import { useAppDispatch, useAppSelector } from 'store'
+import type { TransactionMenuChoice } from '@/3-widgets/global/TrContextMenu'
+import { TransactionMenu } from '@/3-widgets/global/TrContextMenu'
+import { useAsk } from '@/6-shared/overlays'
+import { useAppDispatch, useAppSelector } from '@/store'
 
 export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void

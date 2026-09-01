@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { RootState } from 'store'
-import { core } from 'zerro-core/redux'
+import type { RootState } from '@/store'
+import { core } from '@/zerro-core/redux'
 
 import { setTotalBudget } from './setTotalBudget'
 
-vi.mock('zerro-core/redux', () => ({
+vi.mock('@/zerro-core/redux', () => ({
   core: {
     activity: { selectEnvelopeMetrics: vi.fn() },
     currency: { selectConvertFx: vi.fn() },

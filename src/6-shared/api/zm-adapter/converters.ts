@@ -27,7 +27,7 @@ import type {
   TDeletionObject,
   TUnixTime,
   TMsTime,
-} from '6-shared/types'
+} from '@/6-shared/types'
 import { toBudgetId } from './toBudgetId'
 
 type TZmAdapter<ZmType, ClientType> = {

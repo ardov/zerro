@@ -1,5 +1,5 @@
 import { parseISO } from 'date-fns'
-import type { TDateDraft, TISODate, TISOMonth } from '6-shared/types'
+import type { TDateDraft, TISODate, TISOMonth } from '@/6-shared/types'
 
 export function parseDate(date: TDateDraft): Date {
   if (typeof date === 'string') return parseISO(date)

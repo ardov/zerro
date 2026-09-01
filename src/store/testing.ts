@@ -1,4 +1,4 @@
-import type { TDataStore } from '6-shared/types'
+import type { TDataStore } from '@/6-shared/types'
 
 import type { RootState } from './rootReducer'
 import { rootReducer } from './rootReducer'

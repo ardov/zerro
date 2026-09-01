@@ -7,11 +7,11 @@ const { clearPersistedLocalDataMock, tokenClearMock } = vi.hoisted(() => ({
   tokenClearMock: vi.fn(),
 }))
 
-vi.mock('store/data', () => ({
+vi.mock('@/store/data', () => ({
   clearPersistedLocalData: clearPersistedLocalDataMock,
 }))
-vi.mock('6-shared/diagnostics', () => ({ captureError: vi.fn() }))
-vi.mock('6-shared/api/tokenStorage', () => ({
+vi.mock('@/6-shared/diagnostics', () => ({ captureError: vi.fn() }))
+vi.mock('@/6-shared/api/tokenStorage', () => ({
   tokenStorage: { clear: tokenClearMock },
 }))
 vi.mock('react-i18next', () => ({

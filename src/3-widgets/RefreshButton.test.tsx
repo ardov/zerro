@@ -3,19 +3,19 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { rootReducer } from 'store/rootReducer'
+import { rootReducer } from '@/store/rootReducer'
 
 const { dispatchMock, state } = vi.hoisted(() => ({
   dispatchMock: vi.fn(),
   state: { current: null as unknown },
 }))
 
-vi.mock('store', () => ({
+vi.mock('@/store', () => ({
   useAppDispatch: () => dispatchMock,
   useAppSelector: (selector: (root: unknown) => unknown) =>
     selector(state.current),
 }))
-vi.mock('3-widgets/RegularSyncHandler', () => ({
+vi.mock('@/3-widgets/RegularSyncHandler', () => ({
   useRegularSync: () => [true],
 }))
 vi.mock('react-i18next', async importOriginal => ({

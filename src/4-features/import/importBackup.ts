@@ -7,10 +7,10 @@
  * the import lands in the outbox, is undoable, and is only sent on a manual
  * sync like any other change.
  */
-import { track } from '6-shared/analytics'
-import type { TDataStore } from '6-shared/types'
-import type { AppThunk } from 'store'
-import { core } from 'zerro-core/redux'
+import { track } from '@/6-shared/analytics'
+import type { TDataStore } from '@/6-shared/types'
+import type { AppThunk } from '@/store'
+import { core } from '@/zerro-core/redux'
 
 export type TImportBackupResult =
   | { ok: true; applied: boolean }

@@ -5,7 +5,7 @@
  * entities remain type-only contracts after conversion.
  */
 import { z } from 'zod'
-import type { TDataEntityKey, TOpenEnum } from '6-shared/types'
+import type { TDataEntityKey, TOpenEnum } from '@/6-shared/types'
 import {
   accountOffsetIntervals,
   accountPayoffIntervals,
@@ -13,7 +13,7 @@ import {
   balanceCorrectionTypes,
   reminderIntervals,
   reminderMarkerStates,
-} from '6-shared/types'
+} from '@/6-shared/types'
 
 const timestamp = z.number().nonnegative()
 const numberId = timestamp.int()

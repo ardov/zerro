@@ -1,22 +1,22 @@
 import { describe, expect, it, vi } from 'vitest'
-import { convertDiff, parseFullBackup } from '6-shared/api/zm-adapter'
+import { convertDiff, parseFullBackup } from '@/6-shared/api/zm-adapter'
 import {
   globalBudgetTagId,
   type TDataStore,
   type TNormalizedPatch,
-} from '6-shared/types'
-import type { AppDispatch, AppThunk, RootState } from 'store'
-import { appendClientCommand } from 'store/data'
-import { makeTestRootState } from 'store/testing'
-import { applyPatch } from 'zerro-core/internal/domain/zenmoney'
-import { materializeCommand } from 'zerro-core/internal/operations/materialization'
-import { AccountType } from 'zerro-core/internal/domain/zenmoney/entities/accounts'
-import { ZERRO_DATA_ACCOUNT_NAME } from 'zerro-core/constants'
-import { getEnvBudgets } from 'zerro-core/internal/domain/zerro/budgets/read'
-import { EnvType, envId } from 'zerro-core/internal/domain/zerro/envelope-id'
-import { getEnvelopeMeta } from 'zerro-core/internal/domain/zerro/envelope-meta'
-import { getRawGoals } from 'zerro-core/internal/domain/zerro/goals/read'
-import { HiddenDataType } from 'zerro-core/internal/domain/zerro/hidden-data'
+} from '@/6-shared/types'
+import type { AppDispatch, AppThunk, RootState } from '@/store'
+import { appendClientCommand } from '@/store/data'
+import { makeTestRootState } from '@/store/testing'
+import { applyPatch } from '@/zerro-core/internal/domain/zenmoney'
+import { materializeCommand } from '@/zerro-core/internal/operations/materialization'
+import { AccountType } from '@/zerro-core/internal/domain/zenmoney/entities/accounts'
+import { ZERRO_DATA_ACCOUNT_NAME } from '@/zerro-core/constants'
+import { getEnvBudgets } from '@/zerro-core/internal/domain/zerro/budgets/read'
+import { EnvType, envId } from '@/zerro-core/internal/domain/zerro/envelope-id'
+import { getEnvelopeMeta } from '@/zerro-core/internal/domain/zerro/envelope-meta'
+import { getRawGoals } from '@/zerro-core/internal/domain/zerro/goals/read'
+import { HiddenDataType } from '@/zerro-core/internal/domain/zerro/hidden-data'
 import {
   makeAccount,
   makeBudget,
@@ -28,7 +28,7 @@ import {
   makeTag,
   makeTransaction,
   makeUser,
-} from 'zerro-core/support/testing/zenmoneyTestData'
+} from '@/zerro-core/support/testing/zenmoneyTestData'
 
 import {
   checkBackupCompatibility,
@@ -40,7 +40,7 @@ const { trackMock, uuidMock } = vi.hoisted(() => ({
   trackMock: vi.fn(),
   uuidMock: vi.fn(() => 'fresh-restore-id'),
 }))
-vi.mock('6-shared/analytics', () => ({ track: trackMock }))
+vi.mock('@/6-shared/analytics', () => ({ track: trackMock }))
 
 const RESTORE_UUID = 'fresh-restore-id'
 vi.mock('uuid', () => ({ v1: uuidMock }))

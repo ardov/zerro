@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { formatMoney } from '6-shared/helpers/money'
-import type { TTagId } from '6-shared/types'
-import { MultiSelect } from '6-shared/ui/Select'
+import { formatMoney } from '@/6-shared/helpers/money'
+import type { TTagId } from '@/6-shared/types'
+import { MultiSelect } from '@/6-shared/ui/Select'
 
 type TagSelectProps = {
   options: { id: TTagId; name: string; amount: number }[]

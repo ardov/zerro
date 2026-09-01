@@ -1,4 +1,4 @@
-import type { TToken } from '6-shared/types'
+import type { TToken } from '@/6-shared/types'
 
 const TOKEN_KEY = 'zm_token'
 

@@ -1,4 +1,4 @@
-import type { TDateDraft } from '6-shared/types'
+import type { TDateDraft } from '@/6-shared/types'
 import { isValidDate, parseDate } from './date'
 
 interface TReceipt {

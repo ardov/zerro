@@ -1,12 +1,12 @@
-import { TransactionListDrawer } from '3-widgets/global/TransactionListDrawer'
-import { TransactionPreviewDrawer } from '3-widgets/global/TransactionPreviewDrawer'
-import { EnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
-import { JournalRecoveryNotice } from '3-widgets/JournalRecoveryNotice'
-import { HistoryPanel } from '3-widgets/History/HistoryPanel'
-import { RestoredOutboxNotice } from '3-widgets/History/RestoredOutboxNotice'
-import { PersistenceWarningNotice } from '3-widgets/PersistenceWarningNotice'
-import { OutboxRecoveryNotice } from '3-widgets/OutboxRecoveryNotice'
-import { SyncProgressDialog } from '3-widgets/SyncProgressDialog'
+import { TransactionListDrawer } from '@/3-widgets/global/TransactionListDrawer'
+import { TransactionPreviewDrawer } from '@/3-widgets/global/TransactionPreviewDrawer'
+import { EnvTransactionsDrawer } from '@/3-widgets/global/EnvTransactionsDrawer'
+import { JournalRecoveryNotice } from '@/3-widgets/JournalRecoveryNotice'
+import { HistoryPanel } from '@/3-widgets/History/HistoryPanel'
+import { RestoredOutboxNotice } from '@/3-widgets/History/RestoredOutboxNotice'
+import { PersistenceWarningNotice } from '@/3-widgets/PersistenceWarningNotice'
+import { OutboxRecoveryNotice } from '@/3-widgets/OutboxRecoveryNotice'
+import { SyncProgressDialog } from '@/3-widgets/SyncProgressDialog'
 
 /** The screens that can be opened from anywhere, and the notices.
  *

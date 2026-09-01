@@ -3,7 +3,7 @@ import { act, renderHook } from '@testing-library/react'
 import type { FC, PropsWithChildren } from 'react'
 import { Provider } from 'react-redux'
 import { describe, expect, it } from 'vitest'
-import view from 'store/view'
+import view from '@/store/view'
 
 import { useTransactionsPageView } from './useTransactionsPageView'
 

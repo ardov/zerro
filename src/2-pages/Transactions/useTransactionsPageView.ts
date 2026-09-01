@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react'
-import type { TISODate } from '6-shared/types'
-import { useAppDispatch, useAppSelector } from 'store'
-import { patchTransactionsPage, selectTransactionsPageView } from 'store/view'
-import type { TTransactionListView } from '3-widgets/transaction/TransactionList'
-import type { core } from 'zerro-core/redux'
+import type { TISODate } from '@/6-shared/types'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { patchTransactionsPage, selectTransactionsPageView } from '@/store/view'
+import type { TTransactionListView } from '@/3-widgets/transaction/TransactionList'
+import type { core } from '@/zerro-core/redux'
 
 export function useTransactionsPageView(): TTransactionListView {
   const dispatch = useAppDispatch()

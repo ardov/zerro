@@ -1,6 +1,6 @@
-import { initSentry } from '6-shared/diagnostics'
-import { store } from 'store'
-import { resetData } from 'store/data'
+import { initSentry } from '@/6-shared/diagnostics'
+import { store } from '@/store'
+import { resetData } from '@/store/data'
 
 import GlobalErrorBoundary from './GlobalErrorBoundary'
 import App from './App'

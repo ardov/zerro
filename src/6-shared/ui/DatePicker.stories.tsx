@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import type { TISODate } from '6-shared/types'
+import type { TISODate } from '@/6-shared/types'
 import { DatePicker } from './DatePicker'
 
 const meta = {

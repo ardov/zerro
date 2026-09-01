@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import { Chip } from '6-shared/ui/Chip'
-import { entries } from '6-shared/helpers/keys'
-import { addFxAmount } from '6-shared/helpers/money'
-import { useAppSelector } from 'store'
+import { Chip } from '@/6-shared/ui/Chip'
+import { entries } from '@/6-shared/helpers/keys'
+import { addFxAmount } from '@/6-shared/helpers/money'
+import { useAppSelector } from '@/store'
 
-import { DisplayAmount } from '3-widgets/DisplayAmount'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 
 import type { TCardProps } from '../../shared/Card'
 import { Card } from '../../shared/Card'

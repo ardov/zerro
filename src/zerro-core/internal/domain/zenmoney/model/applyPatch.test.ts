@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { TNormalizedPatch } from '6-shared/types'
+import type { TNormalizedPatch } from '@/6-shared/types'
 import { makeStore } from '../../../../support/testing/zenmoneyTestData'
 import { applyPatch, applyPatchMutable, replay } from '..'
 

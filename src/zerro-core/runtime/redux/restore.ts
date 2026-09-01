@@ -1,4 +1,4 @@
-import type { RootState } from 'store'
+import type { RootState } from '@/store'
 import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
 import {
   diffStores,

@@ -1,6 +1,6 @@
-import type { TZmDiff } from '6-shared/types'
-import { convertDiff } from '6-shared/api/zm-adapter/converters'
-import { acceptCanonicalPatch, getSyncCursor } from 'zerro-core/headless'
+import type { TZmDiff } from '@/6-shared/types'
+import { convertDiff } from '@/6-shared/api/zm-adapter/converters'
+import { acceptCanonicalPatch, getSyncCursor } from '@/zerro-core/headless'
 
 import type { TToolContext } from './context'
 import { ToolError, success } from './output'

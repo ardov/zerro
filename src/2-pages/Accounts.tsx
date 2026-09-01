@@ -1,5 +1,5 @@
-import AccountList from '3-widgets/account/AccountList'
-import { DebtorList } from '3-widgets/DebtorList'
+import AccountList from '@/3-widgets/account/AccountList'
+import { DebtorList } from '@/3-widgets/DebtorList'
 import { useTranslation } from 'react-i18next'
 
 export default function Accounts() {

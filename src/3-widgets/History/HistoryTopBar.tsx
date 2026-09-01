@@ -1,16 +1,16 @@
-import { Button, IconButton } from '6-shared/ui/Button'
+import { Button, IconButton } from '@/6-shared/ui/Button'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
-import { formatDate } from '6-shared/helpers/date'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
+import { formatDate } from '@/6-shared/helpers/date'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CloseIcon,
   HistoryIcon,
-} from '6-shared/ui/Icons'
-import { isEditingTarget } from '4-features/historyShortcuts'
-import { useAppDispatch, useAppSelector } from 'store'
+} from '@/6-shared/ui/Icons'
+import { isEditingTarget } from '@/4-features/historyShortcuts'
+import { useAppDispatch, useAppSelector } from '@/store'
 import {
   exitHistoryBrowsing,
   returnToCurrent,
@@ -20,7 +20,7 @@ import {
   selectSelectedHistoryEntryMissing,
   selectSelectedHistoryPoint,
   selectSelectedHistoryTime,
-} from 'store/history'
+} from '@/store/history'
 import { historyPanelScreen } from './HistoryPanel'
 import { useRestoreSelectedPoint } from './useRestoreSelectedPoint'
 

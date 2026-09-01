@@ -1,16 +1,16 @@
-import { Button } from '6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/Button'
 import { useCallback } from 'react'
-import { SnackbarNotice } from '6-shared/ui/SnackbarNotice'
+import { SnackbarNotice } from '@/6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
-import { reloadData } from '4-features/sync'
-import { useAsk } from '6-shared/overlays'
-import { Confirm } from '6-shared/ui/Confirm'
-import { useAppDispatch, useAppSelector } from 'store'
+import { reloadData } from '@/4-features/sync'
+import { useAsk } from '@/6-shared/overlays'
+import { Confirm } from '@/6-shared/ui/Confirm'
+import { useAppDispatch, useAppSelector } from '@/store'
 import {
   getJournalRecoveryReason,
   getJournalRecoveryRequired,
   getOutboxRecoveryReason,
-} from 'store/data'
+} from '@/store/data'
 
 /** Persistent recovery prompt for a semantically invalid accepted branch. */
 export const JournalRecoveryNotice = () => {

@@ -1,4 +1,4 @@
-import { Button } from '6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/Button'
 import type { ChangeEvent } from 'react'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -8,22 +8,25 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-} from '6-shared/ui/Dialog'
-import { ActionListItem } from '6-shared/ui/ActionList'
-import { ListRowIcon, ListRowText } from '6-shared/ui/ListRow'
-import { UploadIcon } from '6-shared/ui/Icons'
-import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
-import { useSnackbar } from '6-shared/ui/SnackbarProvider'
-import { track } from '6-shared/analytics'
-import { parseFullBackup } from '6-shared/api/zm-adapter'
-import type { TFullBackupWarning } from '6-shared/api/zm-adapter'
-import type { TDataStore } from '6-shared/types'
-import { useAppDispatch } from 'store'
-import { resetData } from 'store/data'
-import type { core } from 'zerro-core/redux'
-import { clearLocalData } from '4-features/localData'
-import { useAsk, useAsked } from '6-shared/overlays'
-import { Confirm } from '6-shared/ui/Confirm'
+} from '@/6-shared/ui/Dialog'
+import { ActionListItem } from '@/6-shared/ui/ActionList'
+import { ListRowIcon, ListRowText } from '@/6-shared/ui/ListRow'
+import { UploadIcon } from '@/6-shared/ui/Icons'
+import {
+  byLabelKey,
+  entityLabelKeys,
+} from '@/6-shared/localization/entityLabels'
+import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { track } from '@/6-shared/analytics'
+import { parseFullBackup } from '@/6-shared/api/zm-adapter'
+import type { TFullBackupWarning } from '@/6-shared/api/zm-adapter'
+import type { TDataStore } from '@/6-shared/types'
+import { useAppDispatch } from '@/store'
+import { resetData } from '@/store/data'
+import type { core } from '@/zerro-core/redux'
+import { clearLocalData } from '@/4-features/localData'
+import { useAsk, useAsked } from '@/6-shared/overlays'
+import { Confirm } from '@/6-shared/ui/Confirm'
 
 import {
   checkBackupCompatibility,

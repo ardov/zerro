@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { RootState } from 'store'
-import { core } from 'zerro-core/redux'
-import { globalBudgetTagId } from '6-shared/types'
+import type { RootState } from '@/store'
+import { core } from '@/zerro-core/redux'
+import { globalBudgetTagId } from '@/6-shared/types'
 import { convertZmBudgetsToZerro } from './convertZmBudgetsToZerro'
 
-vi.mock('zerro-core/redux', () => ({
+vi.mock('@/zerro-core/redux', () => ({
   core: {
     budgets: {
       selectRaw: vi.fn(),

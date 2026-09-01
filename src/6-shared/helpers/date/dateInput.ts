@@ -1,6 +1,6 @@
 import type { Locale } from 'date-fns'
 import { format } from 'date-fns'
-import type { TDateDraft, TISODate } from '6-shared/types'
+import type { TDateDraft, TISODate } from '@/6-shared/types'
 import { getDateLocale } from './formatDate'
 import { parseDate, toISODate } from './utils'
 

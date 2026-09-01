@@ -16,7 +16,7 @@ import {
   replayOutbox,
   type TCommand,
   type TDataStore,
-} from 'zerro-core/headless'
+} from '@/zerro-core/headless'
 
 import type { TEndpoint, TToolContext } from '../application/context'
 import { buildRatesMeta } from '../application/fx'

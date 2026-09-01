@@ -1,11 +1,11 @@
-import type { core } from 'zerro-core/redux'
+import type { core } from '@/zerro-core/redux'
 import type { FC } from 'react'
 import { useCallback } from 'react'
 
 import { useMonth } from '../MonthProvider'
 import { BudgetPopover } from './BudgetPopover'
-import { useAsk, useAsked } from '6-shared/overlays'
-import type { TISOMonth } from '6-shared/types'
+import { useAsk, useAsked } from '@/6-shared/overlays'
+import type { TISOMonth } from '@/6-shared/types'
 
 /** A popup, not a screen: this is small editing, like a select. Back closes
  * it, and there is nothing to come back to. */

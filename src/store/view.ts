@@ -1,8 +1,8 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
-import type { TISODate } from '6-shared/types'
-import type { core } from 'zerro-core/redux'
-import type { RootState } from 'store'
+import type { TISODate } from '@/6-shared/types'
+import type { core } from '@/zerro-core/redux'
+import type { RootState } from '@/store'
 
 export type TTransactionsPageView = {
   query: core.transactions.TTransactionQuery

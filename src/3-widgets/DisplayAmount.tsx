@@ -1,8 +1,8 @@
-import type { Modify, TFxAmount, TISOMonth } from '6-shared/types'
-import { core } from 'zerro-core/redux'
+import type { Modify, TFxAmount, TISOMonth } from '@/6-shared/types'
+import { core } from '@/zerro-core/redux'
 
-import type { AmountProps } from '6-shared/ui/Amount'
-import { Amount } from '6-shared/ui/Amount'
+import type { AmountProps } from '@/6-shared/ui/Amount'
+import { Amount } from '@/6-shared/ui/Amount'
 
 type TDisplayAmountProps = Modify<
   AmountProps,

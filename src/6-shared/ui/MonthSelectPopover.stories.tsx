@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import MonthSelectPopover from './MonthSelectPopover'
-import { formatDate, toISOMonth } from '6-shared/helpers/date'
-import type { TISOMonth } from '6-shared/types'
+import { formatDate, toISOMonth } from '@/6-shared/helpers/date'
+import type { TISOMonth } from '@/6-shared/types'
 
 const meta = {
   title: 'Library/Input/MonthSelect',

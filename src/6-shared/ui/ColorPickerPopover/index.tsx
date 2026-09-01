@@ -1,13 +1,13 @@
-import { Button } from '6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/Button'
 import type { ChangeEvent, FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Popover } from '6-shared/ui/Popover'
-import { OutlinedField } from '6-shared/ui/OutlinedField'
+import { Popover } from '@/6-shared/ui/Popover'
+import { OutlinedField } from '@/6-shared/ui/OutlinedField'
 import './styles.scss'
 import { zmColors, colors } from './colors'
-import { isHEX } from '6-shared/helpers/color'
-import { useAsked } from '6-shared/overlays'
+import { isHEX } from '@/6-shared/helpers/color'
+import { useAsked } from '@/6-shared/overlays'
 
 export type ColorPickerProps = {
   value?: string | null

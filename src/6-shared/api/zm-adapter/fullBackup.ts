@@ -13,8 +13,8 @@ import {
   createEmptyDataStore,
   eachReferenceIssue,
   validateDataStore,
-} from 'zerro-core/headless'
-import { AccountType, type TDataStore, type TZmDiff } from '6-shared/types'
+} from '@/zerro-core/headless'
+import { AccountType, type TDataStore, type TZmDiff } from '@/6-shared/types'
 
 import { convertDiff } from './converters'
 import {

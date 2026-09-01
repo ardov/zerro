@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import type { TISODate } from '6-shared/types'
-import { GroupBy, makeDateArray, toGroup } from '6-shared/helpers/date'
+import type { TISODate } from '@/6-shared/types'
+import { GroupBy, makeDateArray, toGroup } from '@/6-shared/helpers/date'
 
-import { useAppSelector } from 'store/index'
+import { useAppSelector } from '@/store/index'
 
 import type { Period } from './period'
 import { getStart } from './period'

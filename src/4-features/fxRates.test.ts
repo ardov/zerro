@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { RootState } from 'store'
+import type { RootState } from '@/store'
 
 const { requestRatesMock, editFxRatesMock, selectCurrentMock } = vi.hoisted(
   () => ({
@@ -9,11 +9,11 @@ const { requestRatesMock, editFxRatesMock, selectCurrentMock } = vi.hoisted(
   })
 )
 
-vi.mock('6-shared/api/fxRates', () => ({
+vi.mock('@/6-shared/api/fxRates', () => ({
   firstPossibleDate: '2024-03-10',
   requestRates: requestRatesMock,
 }))
-vi.mock('zerro-core/redux', () => ({
+vi.mock('@/zerro-core/redux', () => ({
   core: {
     fxRates: {
       edit: editFxRatesMock,

@@ -1,11 +1,11 @@
-import type { TTransactionId } from '6-shared/types'
+import type { TTransactionId } from '@/6-shared/types'
 
 import React from 'react'
-import { cn } from '6-shared/ui/shadcn/utils'
-import { useContextMenu } from '6-shared/hooks/useContextMenu'
-import { core } from 'zerro-core/redux'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { useContextMenu } from '@/6-shared/hooks/useContextMenu'
+import { core } from '@/zerro-core/redux'
 
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@/store'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 
 import './Transaction.css'

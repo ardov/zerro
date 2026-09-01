@@ -1,14 +1,14 @@
-import { IconButton } from '6-shared/ui/Button'
-import type { TTransaction } from '6-shared/types'
-import { core } from 'zerro-core/redux'
+import { IconButton } from '@/6-shared/ui/Button'
+import type { TTransaction } from '@/6-shared/types'
+import { core } from '@/zerro-core/redux'
 
 import type { FC, MouseEventHandler } from 'react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Chip } from '6-shared/ui/Chip'
-import { Menu, MenuItem } from '6-shared/ui/Menu'
-import { ListRowIcon, ListRowText } from '6-shared/ui/ListRow'
-import { Divider } from '6-shared/ui/Divider'
+import { Chip } from '@/6-shared/ui/Chip'
+import { Menu, MenuItem } from '@/6-shared/ui/Menu'
+import { ListRowIcon, ListRowText } from '@/6-shared/ui/ListRow'
+import { Divider } from '@/6-shared/ui/Divider'
 import {
   EditIcon,
   LocalOfferOutlinedIcon,
@@ -17,13 +17,13 @@ import {
   VisibilityIcon,
   MergeTypeIcon,
   DeleteIcon,
-} from '6-shared/ui/Icons'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { addFxAmount, createFxAmount } from '6-shared/helpers/money'
-import { track } from '6-shared/analytics'
-import { useAsk, usePopup } from '6-shared/overlays'
-import { Confirm } from '6-shared/ui/Confirm'
-import { useAppDispatch, useAppSelector } from 'store'
+} from '@/6-shared/ui/Icons'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { addFxAmount, createFxAmount } from '@/6-shared/helpers/money'
+import { track } from '@/6-shared/analytics'
+import { useAsk, usePopup } from '@/6-shared/overlays'
+import { Confirm } from '@/6-shared/ui/Confirm'
+import { useAppDispatch, useAppSelector } from '@/store'
 
 import { TagSelect2 } from '../../TagSelect/TagSelect2'
 import { BulkEditModal } from './BulkEditModal'

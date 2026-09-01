@@ -1,4 +1,4 @@
-import type { AppThunk } from 'store'
+import type { AppThunk } from '@/store'
 import {
   clearPersistedLocalData,
   compactPersistedReplica,
@@ -10,12 +10,12 @@ import {
   hydrateReplica,
   persistRecoveryCheckpoint,
   recoveryCheckpointPersisted,
-} from 'store/data'
+} from '@/store/data'
 import {
   replicaStorage,
   type TRecoveryReplica,
-} from '6-shared/api/replicaStorage'
-import { getRootUserId } from 'zerro-core/replica'
+} from '@/6-shared/api/replicaStorage'
+import { getRootUserId } from '@/zerro-core/replica'
 
 export const loadLocalData = (): AppThunk => async dispatch => {
   // Only hydration decides recovery. Retention runs after it and outside this

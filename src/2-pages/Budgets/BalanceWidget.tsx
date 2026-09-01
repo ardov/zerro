@@ -1,13 +1,13 @@
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@/store'
 
 import Balancer from 'react-wrap-balancer'
 import { useTranslation } from 'react-i18next'
-import { keys } from '6-shared/helpers/keys'
-import type { TISOMonth } from '6-shared/types'
-import { Total } from '6-shared/ui/Total'
-import { DataLine } from '3-widgets/DataLine'
+import { keys } from '@/6-shared/helpers/keys'
+import type { TISOMonth } from '@/6-shared/types'
+import { Total } from '@/6-shared/ui/Total'
+import { DataLine } from '@/3-widgets/DataLine'
 
 export function BalanceWidget(props: { month: TISOMonth }) {
   const { t } = useTranslation('budgets')

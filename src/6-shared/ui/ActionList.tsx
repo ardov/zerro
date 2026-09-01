@@ -1,5 +1,5 @@
 import { Toolbar } from '@base-ui/react/toolbar'
-import { useRovingListKeys } from '6-shared/hooks/useRovingListKeys'
+import { useRovingListKeys } from '@/6-shared/hooks/useRovingListKeys'
 import { listRowClass } from './ListRow'
 import { cn } from './shadcn/utils'
 

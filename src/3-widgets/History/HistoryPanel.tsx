@@ -1,10 +1,10 @@
-import { Button, IconButton } from '6-shared/ui/Button'
+import { Button, IconButton } from '@/6-shared/ui/Button'
 import { useEffect } from 'react'
-import { SideDrawer } from '6-shared/ui/SideDrawer'
+import { SideDrawer } from '@/6-shared/ui/SideDrawer'
 import { useTranslation } from 'react-i18next'
-import { CloseIcon, HistoryIcon } from '6-shared/ui/Icons'
-import { defineScreen } from '6-shared/overlays'
-import { useAppDispatch, useAppSelector } from 'store'
+import { CloseIcon, HistoryIcon } from '@/6-shared/ui/Icons'
+import { defineScreen } from '@/6-shared/overlays'
+import { useAppDispatch, useAppSelector } from '@/store'
 import {
   selectHistoryRows,
   loadHistoryPage,
@@ -14,7 +14,7 @@ import {
   selectHighlightedHistoryPoint,
   selectHistoryPoint,
   type THistoryPointRef,
-} from 'store/history'
+} from '@/store/history'
 import { HistoryControls } from './HistoryControls'
 import { HistoryRestorePreview } from './HistoryRestorePreview'
 import { HistoryRowList } from './HistoryRowList'

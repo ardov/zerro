@@ -1,5 +1,5 @@
-import type { AppThunk } from 'store'
-import type { TAcceptedPushChunk } from 'zerro-core/replica'
+import type { AppThunk } from '@/store'
+import type { TAcceptedPushChunk } from '@/zerro-core/replica'
 import {
   acceptClientPushChunk,
   rebaseServerInbox,

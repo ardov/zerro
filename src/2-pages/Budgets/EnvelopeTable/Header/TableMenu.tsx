@@ -1,6 +1,6 @@
-import { Menu, MenuItem } from '6-shared/ui/Menu'
+import { Menu, MenuItem } from '@/6-shared/ui/Menu'
 import { useTranslation } from 'react-i18next'
-import { useAsked } from '6-shared/overlays'
+import { useAsked } from '@/6-shared/overlays'
 
 export type TableMenuChoice = 'showAllToggle' | 'reorderModeToggle'
 

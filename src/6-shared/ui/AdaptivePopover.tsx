@@ -1,6 +1,6 @@
 import { Drawer } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
-import { useBreakpointDown } from '6-shared/hooks/useBreakpointDown'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { Popover, type PopoverProps } from './Popover'
 import { useOverlayFocus } from './useOverlayFocus'
 import { cn } from './shadcn/utils'

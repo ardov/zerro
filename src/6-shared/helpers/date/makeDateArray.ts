@@ -1,4 +1,4 @@
-import type { TDateDraft, TISODate } from '6-shared/types'
+import type { TDateDraft, TISODate } from '@/6-shared/types'
 import { nextDay, nextMonth, nextYear, toISODate } from './utils'
 
 export enum GroupBy {

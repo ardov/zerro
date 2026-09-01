@@ -1,4 +1,4 @@
-import type { TCommandVerb } from 'zerro-core/replica'
+import type { TCommandVerb } from '@/zerro-core/replica'
 
 /**
  * What each command verb is called in the `history` namespace.

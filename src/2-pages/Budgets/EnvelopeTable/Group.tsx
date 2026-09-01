@@ -1,23 +1,27 @@
-import { ButtonBase, IconButton } from '6-shared/ui/Button'
+import { ButtonBase, IconButton } from '@/6-shared/ui/Button'
 import type { FC } from 'react'
 import React, { useRef } from 'react'
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import { deepEqual } from '6-shared/helpers/deepEqual'
-import { AddIcon, ArrowDownwardIcon, ArrowUpwardIcon } from '6-shared/ui/Icons'
-import { useFloatingInput } from '6-shared/ui/FloatingInput'
-import { Tooltip } from '6-shared/ui/Tooltip'
+import { deepEqual } from '@/6-shared/helpers/deepEqual'
+import {
+  AddIcon,
+  ArrowDownwardIcon,
+  ArrowUpwardIcon,
+} from '@/6-shared/ui/Icons'
+import { useFloatingInput } from '@/6-shared/ui/FloatingInput'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
 
-import { useAppDispatch, useAppSelector } from 'store/index'
-import { renameGroup } from '4-features/envelope/renameGroup'
-import { moveGroup } from '4-features/envelope/moveGroup'
-import { createEnvelopeInGroup } from '4-features/envelope/createEnvelope'
+import { useAppDispatch, useAppSelector } from '@/store/index'
+import { renameGroup } from '@/4-features/envelope/renameGroup'
+import { moveGroup } from '@/4-features/envelope/moveGroup'
+import { createEnvelopeInGroup } from '@/4-features/envelope/createEnvelope'
 import { TableRow } from './shared/shared'
-import type { TFxAmount } from '6-shared/types'
+import type { TFxAmount } from '@/6-shared/types'
 
-import { addFxAmount } from '6-shared/helpers/money'
+import { addFxAmount } from '@/6-shared/helpers/money'
 import { useMonth } from '../MonthProvider'
-import { Amount } from '6-shared/ui/Amount'
+import { Amount } from '@/6-shared/ui/Amount'
 import { useTranslation } from 'react-i18next'
 
 type TGroupProps = {

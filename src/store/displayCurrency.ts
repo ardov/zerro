@@ -1,8 +1,8 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
-import type { AppThunk, RootState } from 'store'
-import type { TFxCode } from '6-shared/types'
-import { track } from '6-shared/analytics'
+import type { AppThunk, RootState } from '@/store'
+import type { TFxCode } from '@/6-shared/types'
+import { track } from '@/6-shared/analytics'
 
 const KEY = 'display-currency'
 const savedCurrency = {

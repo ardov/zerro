@@ -1,8 +1,8 @@
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 
-import { DisplayAmount } from '3-widgets/DisplayAmount'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import type { TCardProps } from '../shared/Card'
 import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'

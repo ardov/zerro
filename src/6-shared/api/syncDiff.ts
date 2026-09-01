@@ -1,8 +1,8 @@
-import type { TNormalizedPatch } from '6-shared/types'
-import type { EndpointPreference } from '6-shared/api/zenmoney'
-import { zenmoney } from '6-shared/api/zenmoney'
-import { DiffRequestError } from '6-shared/api/zenmoney/fetchDiff'
-import { convertDiff } from '6-shared/api/zm-adapter'
+import type { TNormalizedPatch } from '@/6-shared/types'
+import type { EndpointPreference } from '@/6-shared/api/zenmoney'
+import { zenmoney } from '@/6-shared/api/zenmoney'
+import { DiffRequestError } from '@/6-shared/api/zenmoney/fetchDiff'
+import { convertDiff } from '@/6-shared/api/zm-adapter'
 
 /** Exchanges a client patch with the Zenmoney server, converting both ways. */
 export async function sync(

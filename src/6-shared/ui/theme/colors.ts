@@ -1,4 +1,4 @@
-import { ColorScale } from '6-shared/helpers/color'
+import { ColorScale } from '@/6-shared/helpers/color'
 
 /** The resolved application colour scheme. The page-level theme manager owns
  * the preference; this module owns every colour the resolved scheme emits. */

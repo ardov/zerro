@@ -9,16 +9,18 @@ const { storageMock } = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('6-shared/api/replicaStorage', () => ({ replicaStorage: storageMock }))
+vi.mock('@/6-shared/api/replicaStorage', () => ({
+  replicaStorage: storageMock,
+}))
 
 import {
   makeAccount,
   makeStore,
-} from 'zerro-core/support/testing/zenmoneyTestData'
+} from '@/zerro-core/support/testing/zenmoneyTestData'
 import {
   createCheckpointEntry,
   createTransitionEntry,
-} from 'zerro-core/replica'
+} from '@/zerro-core/replica'
 import { appendClientCommand, applyServerPatch } from './data'
 import {
   clearPersistedLocalData,

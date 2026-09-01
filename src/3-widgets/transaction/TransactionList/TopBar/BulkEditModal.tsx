@@ -1,6 +1,6 @@
-import { Button } from '6-shared/ui/Button'
-import type { DialogProps } from '6-shared/ui/Dialog'
-import type { Modify, TTransaction } from '6-shared/types'
+import { Button } from '@/6-shared/ui/Button'
+import type { DialogProps } from '@/6-shared/ui/Dialog'
+import type { Modify, TTransaction } from '@/6-shared/types'
 
 import type { FC } from 'react'
 import { useState } from 'react'
@@ -11,11 +11,11 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-} from '6-shared/ui/Dialog'
-import { OutlinedField } from '6-shared/ui/OutlinedField'
-import { useAppDispatch, useAppSelector } from 'store'
-import { track } from '6-shared/analytics'
-import { core } from 'zerro-core/redux'
+} from '@/6-shared/ui/Dialog'
+import { OutlinedField } from '@/6-shared/ui/OutlinedField'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { track } from '@/6-shared/analytics'
+import { core } from '@/zerro-core/redux'
 
 import { TagList } from '../../TagSelect/TagList'
 

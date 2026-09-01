@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { ListRows } from '6-shared/ui/ListRow'
+import { ListRows } from '@/6-shared/ui/ListRow'
 import { Debtor, Subheader } from './components'
-import { addFxAmount, isZero } from '6-shared/helpers/money'
-import { keys } from '6-shared/helpers/keys'
-import type { TFxCode } from '6-shared/types'
-import { core } from 'zerro-core/redux'
+import { addFxAmount, isZero } from '@/6-shared/helpers/money'
+import { keys } from '@/6-shared/helpers/keys'
+import type { TFxCode } from '@/6-shared/types'
+import { core } from '@/zerro-core/redux'
 
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@/store'
 
 type TDebtorInfo = {
   name: string

@@ -1,9 +1,9 @@
-import { toISOMonth } from '6-shared/helpers/date'
-import type { ById, TBudget } from '6-shared/types'
-import { globalBudgetTagId } from '6-shared/types'
-import { core } from 'zerro-core/redux'
+import { toISOMonth } from '@/6-shared/helpers/date'
+import type { ById, TBudget } from '@/6-shared/types'
+import { globalBudgetTagId } from '@/6-shared/types'
+import { core } from '@/zerro-core/redux'
 
-import type { AppThunk } from 'store'
+import type { AppThunk } from '@/store'
 
 export function convertZmBudgetsToZerro(): AppThunk<
   core.budgets.TBudgetUpdate[]

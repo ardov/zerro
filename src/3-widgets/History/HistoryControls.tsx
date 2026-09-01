@@ -1,17 +1,17 @@
-import { Button, IconButton } from '6-shared/ui/Button'
+import { Button, IconButton } from '@/6-shared/ui/Button'
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { RedoIcon, SendIcon, UndoIcon } from '6-shared/ui/Icons'
-import { useAppDispatch, useAppSelector } from 'store'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { RedoIcon, SendIcon, UndoIcon } from '@/6-shared/ui/Icons'
+import { useAppDispatch, useAppSelector } from '@/store'
 import {
   getCanRedoClientCommand,
   getCanUndoClientCommand,
   getChangedNum,
   redoClientCommand,
   undoClientCommand,
-} from 'store/data'
-import { selectIsSyncPending } from 'store/sync'
-import { syncData } from '4-features/sync'
+} from '@/store/data'
+import { selectIsSyncPending } from '@/store/sync'
+import { syncData } from '@/4-features/sync'
 
 /**
  * Undo/redo and the push, above the list they act on.

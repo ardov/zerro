@@ -4,8 +4,8 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { makeDemoStore } from 'zerro-core/demo'
-import { createZerroSession } from 'zerro-core/headless'
+import { makeDemoStore } from '@/zerro-core/demo'
+import { createZerroSession } from '@/zerro-core/headless'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import type { TToolContext } from './context'

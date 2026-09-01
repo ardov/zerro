@@ -1,6 +1,6 @@
-import { Button } from '6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/Button'
 import type { FC } from 'react'
-import { SyncIcon } from '6-shared/ui/Icons'
+import { SyncIcon } from '@/6-shared/ui/Icons'
 import { useTranslation } from 'react-i18next'
 
 interface ErrorMessageProps {

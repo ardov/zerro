@@ -10,10 +10,12 @@ const { storageMock } = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('6-shared/api/replicaStorage', () => ({ replicaStorage: storageMock }))
+vi.mock('@/6-shared/api/replicaStorage', () => ({
+  replicaStorage: storageMock,
+}))
 
-import type { TCommand } from 'zerro-core/replica'
-import { makeStore } from 'zerro-core/support/testing/zenmoneyTestData'
+import type { TCommand } from '@/zerro-core/replica'
+import { makeStore } from '@/zerro-core/support/testing/zenmoneyTestData'
 import { patchTransactionsPage } from '../view'
 import {
   acceptClientPushChunk,

@@ -1,10 +1,10 @@
-import type { AppThunk } from 'store'
-import type { TISOMonth, TFxCode } from '6-shared/types'
+import type { AppThunk } from '@/store'
+import type { TISOMonth, TFxCode } from '@/6-shared/types'
 
-import { round } from '6-shared/helpers/money'
-import { track } from '6-shared/analytics'
+import { round } from '@/6-shared/helpers/money'
+import { track } from '@/6-shared/analytics'
 
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
 export const moveMoney =
   (

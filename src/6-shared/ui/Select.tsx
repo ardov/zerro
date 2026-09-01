@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Select as SelectPrimitive } from '@base-ui/react/select'
-import { usePopup } from '6-shared/overlays'
+import { usePopup } from '@/6-shared/overlays'
 import { CheckIcon, ChevronDownIcon } from './Icons'
 import { listRowClass } from './ListRow'
 import { OutlinedFieldFrame, outlinedControlClass } from './OutlinedField'

@@ -8,9 +8,9 @@ import {
   getDateLocale,
   parseDateInput,
   toISODate,
-} from '6-shared/helpers/date'
-import { usePopup } from '6-shared/overlays'
-import type { TDateDraft, TISODate } from '6-shared/types'
+} from '@/6-shared/helpers/date'
+import { usePopup } from '@/6-shared/overlays'
+import type { TDateDraft, TISODate } from '@/6-shared/types'
 import { AdaptivePopover } from './AdaptivePopover'
 import { IconButton } from './Button'
 import { Calendar } from './Calendar'

@@ -1,19 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { i18n } from '6-shared/localization'
-import type { TDataStore } from '6-shared/types'
-import type { AppDispatch, AppThunk, RootState } from 'store'
-import { appendClientCommand } from 'store/data'
-import { makeDemoStore } from 'zerro-core/demo'
-import { applyPatch } from 'zerro-core/internal/domain/zenmoney'
-import { materializeCommand } from 'zerro-core/internal/operations/materialization'
+import { i18n } from '@/6-shared/localization'
+import type { TDataStore } from '@/6-shared/types'
+import type { AppDispatch, AppThunk, RootState } from '@/store'
+import { appendClientCommand } from '@/store/data'
+import { makeDemoStore } from '@/zerro-core/demo'
+import { applyPatch } from '@/zerro-core/internal/domain/zenmoney'
+import { materializeCommand } from '@/zerro-core/internal/operations/materialization'
 import {
   defaultEnvelopeGroupIds,
   envId,
   EnvType,
   getEnvelopeMeta,
-} from 'zerro-core/internal/domain/zerro'
-import { core } from 'zerro-core/redux'
-import { makeTestRootState } from 'store/testing'
+} from '@/zerro-core/internal/domain/zerro'
+import { core } from '@/zerro-core/redux'
+import { makeTestRootState } from '@/store/testing'
 
 import { createEnvelope } from './createEnvelope'
 

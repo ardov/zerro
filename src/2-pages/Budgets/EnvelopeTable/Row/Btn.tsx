@@ -1,6 +1,6 @@
-import { cn } from '6-shared/ui/shadcn/utils'
-import type { ButtonBaseProps } from '6-shared/ui/Button'
-import { ButtonBase } from '6-shared/ui/Button'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import type { ButtonBaseProps } from '@/6-shared/ui/Button'
+import { ButtonBase } from '@/6-shared/ui/Button'
 import type { FC } from 'react'
 
 // `font-sans` is not decorative: a native button resets the family to the user

@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import { round } from '6-shared/helpers/money'
+import { round } from '@/6-shared/helpers/money'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { getTaxes } from './getTaxesByIncome'
 

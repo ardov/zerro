@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react'
 import { cn } from './shadcn/utils'
-import type { AmountProps } from '6-shared/ui/Amount'
-import { Amount } from '6-shared/ui/Amount'
+import type { AmountProps } from '@/6-shared/ui/Amount'
+import { Amount } from '@/6-shared/ui/Amount'
 
 interface TotalProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
   title: string

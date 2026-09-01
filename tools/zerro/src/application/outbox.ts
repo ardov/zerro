@@ -1,4 +1,4 @@
-import { undoOutbox, type TCommand } from 'zerro-core/headless'
+import { undoOutbox, type TCommand } from '@/zerro-core/headless'
 
 import type { TToolContext } from './context'
 import { ToolError, success } from './output'

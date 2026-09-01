@@ -1,5 +1,5 @@
-import { formatDate } from '6-shared/helpers/date'
-import type { AppThunk, RootState } from 'store'
+import { formatDate } from '@/6-shared/helpers/date'
+import type { AppThunk, RootState } from '@/store'
 import { getDataToSave } from '../shared/getDataToSave'
 
 /** Export always snapshots the last acknowledged server base, never the outbox. */

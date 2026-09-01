@@ -1,10 +1,10 @@
 import { createSelector } from '@reduxjs/toolkit'
 import type { PopulatedTransaction } from './populateTransaction'
 import { populateTransaction } from './populateTransaction'
-import { formatDate } from '6-shared/helpers/date'
-import type { ById } from '6-shared/types'
-import type { AppThunk } from 'store'
-import { core } from 'zerro-core/redux'
+import { formatDate } from '@/6-shared/helpers/date'
+import type { ById } from '@/6-shared/types'
+import type { AppThunk } from '@/store'
+import { core } from '@/zerro-core/redux'
 
 // Only for CSV
 const getPopulatedTransactions = createSelector(

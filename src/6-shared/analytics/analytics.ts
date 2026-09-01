@@ -1,4 +1,4 @@
-import { appVersion, gaid, isProduction } from '6-shared/config'
+import { appVersion, gaid, isProduction } from '@/6-shared/config'
 import type { AnalyticsEventMap, AnalyticsEventName } from './events'
 
 type Gtag = (

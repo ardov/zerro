@@ -3,8 +3,8 @@ import { act, render } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { describe, expect, it, vi } from 'vitest'
 
-import dataReducer, { appendClientCommand } from 'store/data'
-import syncReducer, { syncStarted } from 'store/sync'
+import dataReducer, { appendClientCommand } from '@/store/data'
+import syncReducer, { syncStarted } from '@/store/sync'
 import {
   getHistoryShortcut,
   handleHistoryShortcut,

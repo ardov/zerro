@@ -1,12 +1,12 @@
-import type { ById } from '6-shared/types'
+import type { ById } from '@/6-shared/types'
 
 import { useCallback, useRef, useState } from 'react'
 import type { DragEndEvent, DragMoveEvent } from '@dnd-kit/core'
 import { useDndMonitor } from '@dnd-kit/core'
-import { useAppDispatch, useAppSelector } from 'store/index'
-import { core } from 'zerro-core/redux'
+import { useAppDispatch, useAppSelector } from '@/store/index'
+import { core } from '@/zerro-core/redux'
 
-import { moveEnvelope } from '4-features/envelope/moveEnvelope'
+import { moveEnvelope } from '@/4-features/envelope/moveEnvelope'
 import { DragTypes } from './dragTypes'
 
 const OFFSET = 100

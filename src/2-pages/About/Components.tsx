@@ -1,10 +1,10 @@
-import { ButtonBase } from '6-shared/ui/Button'
+import { ButtonBase } from '@/6-shared/ui/Button'
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import { useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'
-import { cn } from '6-shared/ui/shadcn/utils'
-import { ChevronRightIcon } from '6-shared/ui/Icons'
-import { useToggle } from '6-shared/hooks/useToggle'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { ChevronRightIcon } from '@/6-shared/ui/Icons'
+import { useToggle } from '@/6-shared/hooks/useToggle'
 
 export function ScrollToTop() {
   const { pathname } = useLocation()

@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { describe, expect, it, vi } from 'vitest'
-import token from 'store/token'
-import view, { patchTransactionsPage } from 'store/view'
+import token from '@/store/token'
+import view, { patchTransactionsPage } from '@/store/view'
 
 const { clearLocalDataMock } = vi.hoisted(() => ({
   clearLocalDataMock: vi.fn().mockResolvedValue(undefined),

@@ -1,13 +1,13 @@
-import { track } from '6-shared/analytics'
-import type { TISOMonth } from '6-shared/types'
-import { prevMonth, toISOMonth } from '6-shared/helpers/date'
-import { keys } from '6-shared/helpers/keys'
-import { isZero } from '6-shared/helpers/money'
-import type { AppThunk } from 'store'
+import { track } from '@/6-shared/analytics'
+import type { TISOMonth } from '@/6-shared/types'
+import { prevMonth, toISOMonth } from '@/6-shared/helpers/date'
+import { keys } from '@/6-shared/helpers/keys'
+import { isZero } from '@/6-shared/helpers/money'
+import type { AppThunk } from '@/store'
 
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import { setTotalBudget } from '4-features/budget/setTotalBudget'
+import { setTotalBudget } from '@/4-features/budget/setTotalBudget'
 
 export const startFresh =
   (month: TISOMonth): AppThunk<void> =>

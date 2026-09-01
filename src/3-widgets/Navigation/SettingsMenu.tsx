@@ -18,36 +18,36 @@ import {
   GlobeIcon,
   HistoryIcon,
   TagIcon,
-} from '6-shared/ui/Icons'
-import { Switch } from '6-shared/ui/Switch'
-import { ActionList, ActionListItem } from '6-shared/ui/ActionList'
+} from '@/6-shared/ui/Icons'
+import { Switch } from '@/6-shared/ui/Switch'
+import { ActionList, ActionListItem } from '@/6-shared/ui/ActionList'
 import {
   ListRowAction,
   ListRowIcon,
   ListRowSubheader,
   ListRowText,
-} from '6-shared/ui/ListRow'
-import { Divider } from '6-shared/ui/Divider'
-import { track } from '6-shared/analytics'
-import { useSnackbar } from '6-shared/ui/SnackbarProvider'
-import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
-import { appVersion } from '6-shared/config'
+} from '@/6-shared/ui/ListRow'
+import { Divider } from '@/6-shared/ui/Divider'
+import { track } from '@/6-shared/analytics'
+import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { AdaptivePopover } from '@/6-shared/ui/AdaptivePopover'
+import { appVersion } from '@/6-shared/config'
 
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from '@/store'
 
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
-import { useRegularSync } from '3-widgets/RegularSyncHandler'
-import { historyPanelScreen } from '3-widgets/History/HistoryPanel'
-import { logOut } from '4-features/authorization'
-import { exportCSV } from '4-features/export/exportCSV'
-import { exportJSON } from '4-features/export/exportJSON'
-import { ImportBackupItem } from '4-features/import/ImportBackupItem'
-import { reloadData } from '4-features/sync'
-import { convertZmBudgetsToZerro } from '4-features/budget/convertZmBudgetsToZerro'
-import { useAsk, useAsked } from '6-shared/overlays'
-import { Confirm } from '6-shared/ui/Confirm'
-import { useColorScheme } from '6-shared/ui/theme'
+import { useRegularSync } from '@/3-widgets/RegularSyncHandler'
+import { historyPanelScreen } from '@/3-widgets/History/HistoryPanel'
+import { logOut } from '@/4-features/authorization'
+import { exportCSV } from '@/4-features/export/exportCSV'
+import { exportJSON } from '@/4-features/export/exportJSON'
+import { ImportBackupItem } from '@/4-features/import/ImportBackupItem'
+import { reloadData } from '@/4-features/sync'
+import { convertZmBudgetsToZerro } from '@/4-features/budget/convertZmBudgetsToZerro'
+import { useAsk, useAsked } from '@/6-shared/overlays'
+import { Confirm } from '@/6-shared/ui/Confirm'
+import { useColorScheme } from '@/6-shared/ui/theme'
 
 type SettingsMenuProps = { showLinks?: boolean; anchorEl?: Element | null }
 

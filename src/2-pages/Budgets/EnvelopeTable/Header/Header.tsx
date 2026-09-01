@@ -1,17 +1,17 @@
-import { Button } from '6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/Button'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDownIcon } from '6-shared/ui/Icons'
-import type { TISOMonth } from '6-shared/types'
+import { ChevronDownIcon } from '@/6-shared/ui/Icons'
+import type { TISOMonth } from '@/6-shared/types'
 
-import { GoalsProgress } from '4-features/bulkActions/fillGoals'
+import { GoalsProgress } from '@/4-features/bulkActions/fillGoals'
 import { TableRow, useIsSmall } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
 import { ToBeAssigned } from './ToBeAssigned'
 import { useColumns } from '../models/useMetric'
 import type { TableMenuChoice } from './TableMenu'
 import { TableMenu } from './TableMenu'
-import { useAsk } from '6-shared/overlays'
+import { useAsk } from '@/6-shared/overlays'
 
 type HeaderProps = {
   month: TISOMonth

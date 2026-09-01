@@ -1,11 +1,11 @@
-import type { RootState } from 'store'
-import type { TNormalizedPatch } from '6-shared/types'
+import type { RootState } from '@/store'
+import type { TNormalizedPatch } from '@/6-shared/types'
 import { createSelector } from '@reduxjs/toolkit'
 import {
   getMaterializedOutboxPatches,
   getSyncCursor as getCoreSyncCursor,
-} from 'zerro-core/replica'
-import { selectIsSyncPending } from 'store/sync'
+} from '@/zerro-core/replica'
+import { selectIsSyncPending } from '@/store/sync'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
 
 const getBase = (state: RootState) => state.data.base

@@ -1,4 +1,4 @@
-import type { TNormalizedPatch, TZmDiff, TZmRequest } from '6-shared/types'
+import type { TNormalizedPatch, TZmDiff, TZmRequest } from '@/6-shared/types'
 
 import { convertDiff } from './converters'
 

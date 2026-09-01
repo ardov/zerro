@@ -1,20 +1,20 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { RootState } from 'store'
-import { core } from 'zerro-core/redux'
+import type { RootState } from '@/store'
+import { core } from '@/zerro-core/redux'
 
-import { setTotalBudget } from '4-features/budget/setTotalBudget'
-import { track } from '6-shared/analytics'
+import { setTotalBudget } from '@/4-features/budget/setTotalBudget'
+import { track } from '@/6-shared/analytics'
 import { fixOverspends } from './fixOverspends'
 
-vi.mock('zerro-core/redux', () => ({
+vi.mock('@/zerro-core/redux', () => ({
   core: {
     activity: { selectEnvelopeMetrics: vi.fn() },
   },
 }))
-vi.mock('4-features/budget/setTotalBudget', () => ({
+vi.mock('@/4-features/budget/setTotalBudget', () => ({
   setTotalBudget: vi.fn(),
 }))
-vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
+vi.mock('@/6-shared/analytics', () => ({ track: vi.fn() }))
 
 describe('fixOverspends', () => {
   it('uses Core metrics for child and parent overspends', () => {

@@ -1,12 +1,12 @@
-import { Button } from '6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/Button'
 import { useCallback } from 'react'
-import { SnackbarNotice } from '6-shared/ui/SnackbarNotice'
+import { SnackbarNotice } from '@/6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
-import { discardCorruptOutbox } from '4-features/localData'
-import { useAsk } from '6-shared/overlays'
-import { Confirm } from '6-shared/ui/Confirm'
-import { useAppDispatch, useAppSelector } from 'store'
-import { getOutboxRecoveryReason } from 'store/data'
+import { discardCorruptOutbox } from '@/4-features/localData'
+import { useAsk } from '@/6-shared/overlays'
+import { Confirm } from '@/6-shared/ui/Confirm'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { getOutboxRecoveryReason } from '@/store/data'
 
 /** Keeps a corrupt durable outbox untouched until the user explicitly discards
  * those unsynchronized commands. Canonical recovery waits behind this gate. */

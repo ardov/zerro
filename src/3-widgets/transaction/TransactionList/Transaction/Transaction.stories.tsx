@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { ComponentProps } from 'react'
-import { core } from 'zerro-core/redux'
-import { useAppSelector } from 'store'
+import { core } from '@/zerro-core/redux'
+import { useAppSelector } from '@/store'
 import { Transaction } from './Transaction'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { useTransactionPreview } from '3-widgets/global/TransactionPreviewDrawer'
+import { useTransactionPreview } from '@/3-widgets/global/TransactionPreviewDrawer'
 
 const meta = {
   title: 'App/Transactions/Transaction',

@@ -14,9 +14,9 @@ import {
   undoOutboxTo,
   validateDataStore,
   type TCommand,
-} from 'zerro-core/replica'
-import { withPerf } from '6-shared/helpers/performance'
-import type { TDataStore, TNormalizedPatch } from '6-shared/types'
+} from '@/zerro-core/replica'
+import { withPerf } from '@/6-shared/helpers/performance'
+import type { TDataStore, TNormalizedPatch } from '@/6-shared/types'
 
 interface DataSlice {
   rootUserId: number | null

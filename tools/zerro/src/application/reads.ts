@@ -2,7 +2,7 @@ import {
   createZerroSession,
   TrFilterType,
   type TTransactionFilterClause,
-} from 'zerro-core/headless'
+} from '@/zerro-core/headless'
 
 import type { TToolContext } from './context'
 import {

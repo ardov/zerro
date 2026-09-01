@@ -1,16 +1,16 @@
 import type { FC } from 'react'
 import type { ComponentPropsWithoutRef } from 'react'
 import { useState } from 'react'
-import { cn } from '6-shared/ui/shadcn/utils'
-import { useAppSelector } from 'store'
-import { core } from 'zerro-core/redux'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { useTranslation } from 'react-i18next'
-import type { TFxAmount, TISOMonth } from '6-shared/types'
-import { formatDate } from '6-shared/helpers/date'
+import type { TFxAmount, TISOMonth } from '@/6-shared/types'
+import { formatDate } from '@/6-shared/helpers/date'
 
-import { DataLine } from '3-widgets/DataLine'
+import { DataLine } from '@/3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { getDateRange } from './shared'
 

@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { core } from 'zerro-core/redux'
-import { formatDate, toISOMonth } from '6-shared/helpers/date'
-import { MonthProvider, useMonth } from '2-pages/Budgets/MonthProvider'
-import { SideContent, useSideContent } from '2-pages/Budgets/SideContent'
+import { core } from '@/zerro-core/redux'
+import { formatDate, toISOMonth } from '@/6-shared/helpers/date'
+import { MonthProvider, useMonth } from '@/2-pages/Budgets/MonthProvider'
+import { SideContent, useSideContent } from '@/2-pages/Budgets/SideContent'
 import { useGoalPopover } from './Context'
 import { GoalPopover } from './GoalPopover'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@/store'
 
 const meta = {
   title: 'App/Budgets/GoalPopover',

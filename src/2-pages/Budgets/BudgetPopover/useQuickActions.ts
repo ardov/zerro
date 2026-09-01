@@ -1,12 +1,12 @@
 import type { TFunction } from 'i18next'
-import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
+import type { TDateDraft, TFxAmount, TISOMonth } from '@/6-shared/types'
 import { useTranslation } from 'react-i18next'
-import { round } from '6-shared/helpers/money'
-import { toISOMonth } from '6-shared/helpers/date'
-import { getAverage } from '6-shared/helpers/money/currencyHelpers'
+import { round } from '@/6-shared/helpers/money'
+import { toISOMonth } from '@/6-shared/helpers/date'
+import { getAverage } from '@/6-shared/helpers/money/currencyHelpers'
 
-import { useAppSelector } from 'store'
-import { core } from 'zerro-core/redux'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 
 export const useQuickActions = (
   month: TISOMonth,

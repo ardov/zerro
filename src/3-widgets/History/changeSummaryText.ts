@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { entityLabelKeys } from '6-shared/localization/entityLabels'
-import type { TChangeSummary } from 'zerro-core/replica'
+import { entityLabelKeys } from '@/6-shared/localization/entityLabels'
+import type { TChangeSummary } from '@/zerro-core/replica'
 
 /**
  * Renders a change summary as one line for a list row: "Операции 3 · Счета 1".

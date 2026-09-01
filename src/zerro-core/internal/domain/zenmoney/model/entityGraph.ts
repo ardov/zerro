@@ -317,11 +317,7 @@ function isEmptyReference(
   return reference.nullable === true || reference.nullableWhen?.(row) === true
 }
 
-function hasRow(
-  store: TDataStore,
-  key: TDataEntityKey,
-  id: unknown
-): boolean {
+function hasRow(store: TDataStore, key: TDataEntityKey, id: unknown): boolean {
   if (typeof id !== 'string' && typeof id !== 'number') return false
   return Object.prototype.hasOwnProperty.call(store[key], String(id))
 }

@@ -2,18 +2,18 @@ import '@testing-library/jest-dom'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { TNormalizedPatch } from '6-shared/types'
-import { convertDiff } from '6-shared/api/zm-adapter'
-import { makeTestRootState } from 'store/testing'
+import type { TNormalizedPatch } from '@/6-shared/types'
+import { convertDiff } from '@/6-shared/api/zm-adapter'
+import { makeTestRootState } from '@/store/testing'
 import {
   makeAccount,
   makeInstrument,
   makeMerchant,
   makeStore,
   makeUser,
-} from 'zerro-core/support/testing/zenmoneyTestData'
-import { AccountType } from 'zerro-core/internal/domain/zenmoney'
-import { ActionList } from '6-shared/ui/ActionList'
+} from '@/zerro-core/support/testing/zenmoneyTestData'
+import { AccountType } from '@/zerro-core/internal/domain/zenmoney'
+import { ActionList } from '@/6-shared/ui/ActionList'
 
 import { ImportBackupItem } from './ImportBackupItem'
 
@@ -29,16 +29,16 @@ const { askMock, answerMock, askedOverlay, dispatchMock, snackbarMock } =
     snackbarMock: vi.fn(),
   }))
 
-vi.mock('store', () => ({ useAppDispatch: () => dispatchMock }))
-vi.mock('6-shared/ui/SnackbarProvider', () => ({
+vi.mock('@/store', () => ({ useAppDispatch: () => dispatchMock }))
+vi.mock('@/6-shared/ui/SnackbarProvider', () => ({
   useSnackbar: () => snackbarMock,
 }))
-vi.mock('6-shared/overlays', () => ({
+vi.mock('@/6-shared/overlays', () => ({
   useAsk: () => askMock,
   useAsked: () => ({ open: true, answer: answerMock }),
 }))
-vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
-vi.mock('4-features/localData', () => ({ clearLocalData: vi.fn() }))
+vi.mock('@/6-shared/analytics', () => ({ track: vi.fn() }))
+vi.mock('@/4-features/localData', () => ({ clearLocalData: vi.fn() }))
 vi.mock('react-i18next', async importOriginal => ({
   ...(await importOriginal<typeof import('react-i18next')>()),
   useTranslation: () => ({

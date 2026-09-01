@@ -1,16 +1,16 @@
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
-import { TransactionList } from '3-widgets/transaction/TransactionList'
+import { TransactionList } from '@/3-widgets/transaction/TransactionList'
 import {
   TrEmptyState,
   TransactionPreview,
-} from '3-widgets/transaction/TransactionPreview'
+} from '@/3-widgets/transaction/TransactionPreview'
 import {
   transactionScreen,
   useTransactionScreenDocked,
-} from '3-widgets/global/TransactionPreviewDrawer'
-import type { TTransactionId } from '6-shared/types'
-import { track } from '6-shared/analytics'
+} from '@/3-widgets/global/TransactionPreviewDrawer'
+import type { TTransactionId } from '@/6-shared/types'
+import { track } from '@/6-shared/analytics'
 import { useTranslation } from 'react-i18next'
 
 import { useTransactionsPageView } from './useTransactionsPageView'

@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, FC } from 'react'
 import { cn } from '../shadcn/utils'
-import { Tooltip } from '6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
 import { useTranslation } from 'react-i18next'
 
 export interface PercentBarItem {

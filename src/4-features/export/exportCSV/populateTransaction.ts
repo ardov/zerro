@@ -1,4 +1,4 @@
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 import type {
   ByIdOld,
   Modify,
@@ -7,7 +7,7 @@ import type {
   TTag,
   TTagId,
   TTransaction,
-} from '6-shared/types'
+} from '@/6-shared/types'
 
 interface DataSources {
   instruments: { [id: number]: TInstrument }

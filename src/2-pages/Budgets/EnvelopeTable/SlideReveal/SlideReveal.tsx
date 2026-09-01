@@ -1,10 +1,10 @@
-import { ButtonBase } from '6-shared/ui/Button'
+import { ButtonBase } from '@/6-shared/ui/Button'
 import type { FC, ReactNode } from 'react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { cn } from '6-shared/ui/shadcn/utils'
-import { Amount } from '6-shared/ui/Amount'
-import type { DragTypes } from '2-pages/Budgets/DnD'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { Amount } from '@/6-shared/ui/Amount'
+import type { DragTypes } from '@/2-pages/Budgets/DnD'
 
 const REVEAL_CELL_WIDTH = 88
 const AXIS_DECISION_THRESHOLD = 8

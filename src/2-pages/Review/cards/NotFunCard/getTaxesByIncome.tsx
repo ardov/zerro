@@ -1,5 +1,5 @@
 /** Source https://journal.tinkoff.ru/fns-loves-you/ */
-import { round } from '6-shared/helpers/money'
+import { round } from '@/6-shared/helpers/money'
 
 const ruIncomeTaxes = [
   {

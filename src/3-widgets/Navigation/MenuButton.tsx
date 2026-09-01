@@ -1,11 +1,11 @@
-import type { IconButtonProps } from '6-shared/ui/Button'
-import { IconButton } from '6-shared/ui/Button'
+import type { IconButtonProps } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/Button'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SettingsIcon } from '6-shared/ui/Icons'
-import { Tooltip } from '6-shared/ui/Tooltip'
+import { SettingsIcon } from '@/6-shared/ui/Icons'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
 
-import { useAsk } from '6-shared/overlays'
+import { useAsk } from '@/6-shared/overlays'
 import { SettingsMenu } from './SettingsMenu'
 
 interface MenuButtonProps extends IconButtonProps {

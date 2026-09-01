@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
-import type { RootState } from 'store'
-import type { TToken } from '6-shared/types'
+import type { RootState } from '@/store'
+import type { TToken } from '@/6-shared/types'
 
 const { reducer, actions } = createSlice({
   name: 'token',

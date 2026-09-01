@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { TDataStore } from '6-shared/types'
+import type { TDataStore } from '@/6-shared/types'
 import { EnvType, envId } from '../../internal/domain/zerro/envelope-id'
 import { makeTransaction } from '../../support/testing/zenmoneyTestData'
 import { createZerroSession } from './createZerroSession'

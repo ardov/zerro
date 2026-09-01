@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Popover, type PopoverProps } from './Popover'
 import { ChevronRightIcon, ChevronLeftIcon } from './Icons'
 import { cn } from './shadcn/utils'
-import { formatDate, toISOMonth } from '6-shared/helpers/date'
-import type { Modify, TDateDraft, TISOMonth } from '6-shared/types'
+import { formatDate, toISOMonth } from '@/6-shared/helpers/date'
+import type { Modify, TDateDraft, TISOMonth } from '@/6-shared/types'
 
 type MonthSelectPopoverProps = Modify<
   PopoverProps,

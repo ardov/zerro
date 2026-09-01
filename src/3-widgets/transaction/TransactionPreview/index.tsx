@@ -1,22 +1,26 @@
-import { Button, IconButton } from '6-shared/ui/Button'
-import type { TTransaction, TTransactionId } from '6-shared/types'
+import { Button, IconButton } from '@/6-shared/ui/Button'
+import type { TTransaction, TTransactionId } from '@/6-shared/types'
 
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { cn } from '6-shared/ui/shadcn/utils'
-import { OutlinedField } from '6-shared/ui/OutlinedField'
-import { DatePicker } from '6-shared/ui/DatePicker'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from '6-shared/ui/Icons'
-import { AmountInput } from '6-shared/ui/AmountInput'
-import { rateToWords } from '6-shared/helpers/money'
-import { formatDate, parseDate } from '6-shared/helpers/date'
-import { track } from '6-shared/analytics'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { OutlinedField } from '@/6-shared/ui/OutlinedField'
+import { DatePicker } from '@/6-shared/ui/DatePicker'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
+import {
+  DeleteIcon,
+  CloseIcon,
+  RestoreFromTrashIcon,
+} from '@/6-shared/ui/Icons'
+import { AmountInput } from '@/6-shared/ui/AmountInput'
+import { rateToWords } from '@/6-shared/helpers/money'
+import { formatDate, parseDate } from '@/6-shared/helpers/date'
+import { track } from '@/6-shared/analytics'
 
-import { useAppCommand, useAppSelector } from 'store'
+import { useAppCommand, useAppSelector } from '@/store'
 
-import { core } from 'zerro-core/redux'
+import { core } from '@/zerro-core/redux'
 
 import { TagList } from '../TagSelect/TagList'
 
