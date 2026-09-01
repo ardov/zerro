@@ -97,7 +97,7 @@
     "@storybook/addon-vitest": "10.5.10",
     "@storybook/react-vite": "10.5.10",
     "@tailwindcss/vite": "^4.3.3",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.6",
     "@types/json2mq": "^0.2.2",
