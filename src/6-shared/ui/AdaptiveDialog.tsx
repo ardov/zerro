@@ -13,6 +13,7 @@ export type AdaptiveDialogProps = {
   className?: string
   children?: ReactNode
   'aria-label'?: string
+  'aria-labelledby'?: string
 }
 
 /** A dialog on desktop and a bottom drawer on a phone.

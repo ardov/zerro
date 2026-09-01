@@ -3,6 +3,7 @@ import type { ComponentProps, FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CircularProgress } from '6-shared/ui/CircularProgress'
+import { RadialProgress } from '6-shared/ui/RadialProgress'
 import {
   SyncIcon,
   SyncDisabledIcon,
@@ -13,34 +14,44 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { cn } from '6-shared/ui/shadcn/utils'
 
 import { getChangedNum } from 'store/data'
-import { selectIsSyncPending, selectLastSyncResult } from 'store/sync'
+import {
+  selectIsSyncPending,
+  selectLastSyncResult,
+  selectSyncProgress,
+  syncDetailsOpened,
+} from 'store/sync'
 import { useAppDispatch, useAppSelector } from 'store'
 import { syncData } from '4-features/sync'
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
 
-type ButtonState = 'idle' | 'pending' | 'success' | 'fail'
+type ButtonState = 'idle' | 'pending' | 'stopped' | 'success' | 'fail'
 type RefreshButtonProps = {
   isMobile?: boolean
   className?: string
 }
 
 const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
-  const { t } = useTranslation('common')
+  const { t } = useTranslation(['common', 'syncProgress'])
   const dispatch = useAppDispatch()
   // Sync only. History used to hang off a right-click here, which made the
   // feature undiscoverable and gave one button two unrelated meanings; it is
   // a named item in the settings menu now.
-  const menuProps = {
-    onClick: useCallback(() => dispatch(syncData()), [dispatch]),
-  }
   const changedNum = useAppSelector(getChangedNum)
   const isPending = useAppSelector(selectIsSyncPending)
+  const progress = useAppSelector(selectSyncProgress)
+  const hasDetails = !!progress
+  const handleClick = useCallback(() => {
+    if (hasDetails) dispatch(syncDetailsOpened())
+    else dispatch(syncData())
+  }, [dispatch, hasDetails])
+  const menuProps = { onClick: handleClick }
   const lastResult = useAppSelector(selectLastSyncResult)
   const finishedAt = lastResult?.finishedAt || 0
   const [regular] = useRegularSync()
 
   let buttonState: ButtonState = 'idle'
-  if (isPending) buttonState = 'pending'
+  if (isPending)
+    buttonState = progress?.kind === 'stopped' ? 'stopped' : 'pending'
 
   const [notification, setNotification] = useState<ButtonState | null>(null)
 
@@ -57,27 +68,47 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
     return () => clearTimeout(timer)
   }, [notification])
 
-  const state: ButtonState = notification || buttonState
+  const state: ButtonState = isPending
+    ? buttonState
+    : notification || buttonState
+  const progressValue = progressRatio(progress?.rows ?? [])
 
   const components = {
     idle: regular ? <SyncIcon /> : <SyncDisabledIcon />,
-    pending: <CircularProgress size={24} />,
+    pending: progress ? (
+      <RadialProgress
+        aria-hidden
+        size={24}
+        value={progressValue}
+        active={progress.kind === 'pushing' && progress.phase === 'sending'}
+      />
+    ) : (
+      <CircularProgress size={24} />
+    ),
+    stopped: <WarningIcon color="error" />,
     success: <DoneIcon color="success" />,
     fail: <WarningIcon color="error" />,
   }
+  const actionLabel = hasDetails
+    ? t('syncProgress:detailsTitle')
+    : t('common:refresh')
 
   return isMobile ? (
     <button
       type="button"
-      aria-label={t('refresh')}
+      aria-label={actionLabel}
       className={cn(rest.className, 'type-caption')}
       {...menuProps}
     >
       <SyncBadge count={changedNum}>{components[state]}</SyncBadge>
-      <span>{t('refresh')}</span>
+      <span>{actionLabel}</span>
     </button>
   ) : (
-    <Tooltip title={t('refreshData')}>
+    <Tooltip
+      title={
+        hasDetails ? t('syncProgress:detailsTitle') : t('common:refreshData')
+      }
+    >
       <SyncBadge count={changedNum}>
         <IconButton {...menuProps} className={rest.className}>
           {components[state]}
@@ -85,6 +116,18 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
       </SyncBadge>
     </Tooltip>
   )
+}
+
+function progressRatio(
+  rows: NonNullable<ReturnType<typeof selectSyncProgress>>['rows']
+) {
+  let confirmed = 0
+  let total = 0
+  rows.forEach(row => {
+    confirmed += row.confirmed
+    total += row.total
+  })
+  return total ? confirmed / total : 0
 }
 
 type SyncBadgeProps = ComponentProps<'span'> & { count: number }

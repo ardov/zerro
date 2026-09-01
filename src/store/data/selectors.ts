@@ -2,10 +2,10 @@ import type { RootState } from 'store'
 import type { TNormalizedPatch } from '6-shared/types'
 import { createSelector } from '@reduxjs/toolkit'
 import {
-  buildOutboxTransport,
   getMaterializedOutboxPatches,
   getSyncCursor as getCoreSyncCursor,
 } from 'zerro-core/replica'
+import { selectIsSyncPending } from 'store/sync'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
 
 const getBase = (state: RootState) => state.data.base
@@ -42,20 +42,13 @@ export const getPendingSyncDiff = createSelector(
     mergeMaterializedPatches(getMaterializedOutboxPatches(base, outbox))
 )
 
-export function getPendingSyncTransport(
-  state: RootState,
-  sentAt: number
-): TNormalizedPatch | undefined {
-  return buildOutboxTransport(state.data.base, state.data.outbox, sentAt)
-}
-
 export const getCanUndoClientCommand = (state: RootState) =>
-  state.sync.status !== 'pending' &&
+  !selectIsSyncPending(state) &&
   !getReplicaWriteBlocked(state) &&
   getOutbox(state).length > 0
 
 export const getCanRedoClientCommand = (state: RootState) =>
-  state.sync.status !== 'pending' &&
+  !selectIsSyncPending(state) &&
   !getReplicaWriteBlocked(state) &&
   getRedo(state).length > 0
 

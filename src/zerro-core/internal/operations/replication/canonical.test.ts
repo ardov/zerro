@@ -52,31 +52,6 @@ describe('canonical replica operations', () => {
     expect(accepted.redo).toEqual([undone])
   })
 
-  it('acknowledges exactly the sent prefix and replays later commands', () => {
-    const sent = makeAccountCommand('Sent', 10)
-    const duringRequest = makeAccountCommand('During request', 20)
-    const accepted = acceptCanonicalPatch(
-      {
-        base: makeStore({
-          account: { cash: makeAccount({ id: 'cash', title: 'Before' }) },
-        }),
-        outbox: [sent, duringRequest],
-        redo: [makeAccountCommand('Undone', 30)],
-      },
-      {
-        serverTimestamp: 5000,
-        account: [makeAccount({ id: 'cash', title: 'Canonical sent' })],
-      },
-      1
-    )
-
-    expect(accepted.base.account.cash.title).toBe('Canonical sent')
-    expect(accepted.current.account.cash.title).toBe('During request')
-    expect(accepted.outbox).toEqual([duringRequest])
-    // Acknowledging a prefix commits the applied branch, so the tail goes.
-    expect(accepted.redo).toEqual([])
-  })
-
   it('derives the overlapped incremental cursor without creating a full pull', () => {
     expect(getSyncCursor(0)).toBe(0)
     expect(getSyncCursor(500)).toBe(1000)

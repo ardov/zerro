@@ -1,0 +1,21 @@
+@layer components {
+  /* The dashed orbit says that this determinate step is moving right now.
+     Rotation is constant because it represents ongoing work, not travel. */
+  .radial-progress-activity {
+    transform-box: view-box;
+    transform-origin: center;
+    animation: radial-progress-activity 1.1s linear infinite;
+  }
+
+  @keyframes radial-progress-activity {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .radial-progress-activity {
+      animation: none;
+    }
+  }
+}

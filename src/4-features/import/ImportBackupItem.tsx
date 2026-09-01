@@ -1,6 +1,6 @@
 import { Button } from '6-shared/ui/Button'
 import type { ChangeEvent } from 'react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -16,12 +16,13 @@ import { byLabelKey, entityLabelKeys } from '6-shared/localization/entityLabels'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import { track } from '6-shared/analytics'
 import { parseFullBackup } from '6-shared/api/zm-adapter'
+import type { TFullBackupWarning } from '6-shared/api/zm-adapter'
 import type { TDataStore } from '6-shared/types'
 import { useAppDispatch } from 'store'
 import { resetData } from 'store/data'
 import type { core } from 'zerro-core/redux'
 import { clearLocalData } from '4-features/localData'
-import { useAsk } from '6-shared/overlays'
+import { useAsk, useAsked } from '6-shared/overlays'
 import { Confirm } from '6-shared/ui/Confirm'
 
 import {
@@ -34,19 +35,21 @@ type TPending = {
   store: TDataStore
   summary: core.restore.TStoreDiffSummary
   foreign: boolean
+  warnings: TFullBackupWarning[]
 }
+
+const noop = () => {}
 
 /**
  * Restores the state a backup file describes. The confirmation is not
  * decoration: an import overwrites whatever changed since the backup, so the
  * user sees the size of that before anything is written.
  */
-export function ImportBackupItem() {
+export function ImportBackupItem({ onClose = noop }: { onClose?: () => void }) {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const snackbar = useSnackbar()
   const inputRef = useRef<HTMLInputElement>(null)
-  const [pending, setPending] = useState<TPending | null>(null)
 
   const reloadData = useCallback(async () => {
     track('local_data_reload_requested', {})
@@ -99,35 +102,37 @@ export function ImportBackupItem() {
       }
 
       const summary = dispatch(previewBackup(parsed.store))
-      if (!Object.keys(summary).length) {
+      if (!Object.keys(summary).length && !parsed.warnings.length) {
         snackbar({ message: t('importNoChanges') })
         return
       }
-      setPending({
+      const pending: TPending = {
         store: parsed.store,
         summary,
         foreign: compatibility.foreign,
-      })
-    },
-    [confirmReload, dispatch, snackbar, t]
-  )
-
-  const handleConfirm = useCallback(() => {
-    if (!pending) return
-    const result = dispatch(importBackup(pending.store))
-    setPending(null)
-    if (!result.ok) {
-      if (result.reason === 'invalidCurrentState') {
-        confirmReload()
-        return
+        warnings: parsed.warnings,
       }
-      snackbar({ message: t(`importError_${result.reason}`) })
-    } else {
-      snackbar({
-        message: t(result.applied ? 'importDone' : 'importNoChanges'),
-      })
-    }
-  }, [confirmReload, dispatch, pending, snackbar, t])
+      onClose()
+      const confirmed = await ask<boolean>(
+        <BackupImportDialog pending={pending} />
+      )
+      if (!confirmed) return
+
+      const result = dispatch(importBackup(pending.store))
+      if (!result.ok) {
+        if (result.reason === 'invalidCurrentState') {
+          confirmReload()
+          return
+        }
+        snackbar({ message: t(`importError_${result.reason}`) })
+      } else {
+        snackbar({
+          message: t(result.applied ? 'importDone' : 'importNoChanges'),
+        })
+      }
+    },
+    [ask, confirmReload, dispatch, onClose, snackbar, t]
+  )
 
   return (
     <>
@@ -145,50 +150,73 @@ export function ImportBackupItem() {
         hidden
         onChange={handleFile}
       />
-
-      <Dialog open={!!pending} onClose={() => setPending(null)}>
-        <DialogTitle>{t('importTitle')}</DialogTitle>
-        <DialogContent>
-          {pending?.foreign && (
-            <div
-              role="alert"
-              className="mb-4 rounded-lg border border-error-border bg-error-surface p-3"
-            >
-              <p className="m-0 type-body-sm">{t('importForeignWarning')}</p>
-            </div>
-          )}
-          <DialogContentText>{t('importWarning')}</DialogContentText>
-          <div className="mt-4 flex flex-col gap-1">
-            {entityLabelKeys.map(([key, labelKey]) => {
-              const counts = byLabelKey(pending?.summary)[key]
-              if (!counts) return null
-              return (
-                <div key={key} className="flex justify-between gap-4">
-                  <span className="type-body-sm">{t(labelKey)}</span>
-                  <span className="type-body-sm text-muted-foreground">
-                    {[
-                      counts.created &&
-                        t('importCreated', { n: counts.created }),
-                      counts.updated &&
-                        t('importUpdated', { n: counts.updated }),
-                      counts.removed &&
-                        t('importRemoved', { n: counts.removed }),
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPending(null)}>{t('importCancel')}</Button>
-          <Button onClick={handleConfirm} variant="contained" autoFocus>
-            {t('importConfirm')}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </>
+  )
+}
+
+function BackupImportDialog({ pending }: { pending: TPending }) {
+  const { t } = useTranslation('settings')
+  const { open, answer } = useAsked<boolean>()
+  return (
+    <Dialog open={open} onClose={() => answer()}>
+      <DialogTitle>{t('importTitle')}</DialogTitle>
+      <DialogContent>
+        {pending.foreign && (
+          <div
+            role="alert"
+            className="mb-4 rounded-lg border border-error-border bg-error-surface p-3"
+          >
+            <p className="m-0 type-body-sm">{t('importForeignWarning')}</p>
+          </div>
+        )}
+        {!!pending.warnings.length && (
+          <div
+            role="alert"
+            className="mb-4 rounded-lg border border-warning-border bg-warning-surface p-3"
+          >
+            <p className="m-0 type-body-sm">
+              {t('importCompatibilityWarning')}
+            </p>
+            <ul className="mb-0 mt-2 pl-5 type-body-sm">
+              {pending.warnings.map(warning => (
+                <li key={`${warning.reason}:${warning.path}`}>
+                  {t('importCompatibilityWarningItem', {
+                    path: warning.path,
+                    count: warning.count,
+                  })}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <DialogContentText>{t('importWarning')}</DialogContentText>
+        <div className="mt-4 flex flex-col gap-1">
+          {entityLabelKeys.map(([key, labelKey]) => {
+            const counts = byLabelKey(pending.summary)[key]
+            if (!counts) return null
+            return (
+              <div key={key} className="flex justify-between gap-4">
+                <span className="type-body-sm">{t(labelKey)}</span>
+                <span className="type-body-sm text-muted-foreground">
+                  {[
+                    counts.created && t('importCreated', { n: counts.created }),
+                    counts.updated && t('importUpdated', { n: counts.updated }),
+                    counts.removed && t('importRemoved', { n: counts.removed }),
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => answer()}>{t('importCancel')}</Button>
+        <Button onClick={() => answer(true)} variant="contained" autoFocus>
+          {t(pending.warnings.length ? 'importConfirmAnyway' : 'importConfirm')}
+        </Button>
+      </DialogActions>
+    </Dialog>
   )
 }

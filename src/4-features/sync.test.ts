@@ -9,7 +9,11 @@ vi.mock('6-shared/api/syncDiff', () => ({ sync: syncMock }))
 
 vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
-import { makeAccount } from 'zerro-core/support/testing/zenmoneyTestData'
+import {
+  makeAccount,
+  makeUser,
+} from 'zerro-core/support/testing/zenmoneyTestData'
+import { issuePatch } from 'zerro-core/headless'
 import {
   appendClientCommand,
   applyServerPatch,
@@ -20,6 +24,7 @@ import {
 } from 'store/data'
 import { rootReducer } from 'store/rootReducer'
 import { refreshData, reloadData, syncData } from './sync'
+import { continueSyncLater } from './sync'
 
 function renameCashTo(title: string, issuedAt: number) {
   return {
@@ -59,7 +64,7 @@ describe('syncData', () => {
     await store.dispatch(syncData() as any)
 
     expect(store.getState().sync).toMatchObject({
-      status: 'idle',
+      status: { kind: 'idle' },
       lastResult: { isSuccessful: true, errorMessage: null },
     })
     // A fresh replica still asks for a full sync: the overlap never turns a
@@ -83,7 +88,7 @@ describe('syncData', () => {
     await store.dispatch(syncData() as any)
 
     expect(syncMock).not.toHaveBeenCalled()
-    expect(store.getState().sync.status).toBe('idle')
+    expect(store.getState().sync.status.kind).toBe('idle')
   })
 
   it('allows only a full reload while the canonical journal is recovering', async () => {
@@ -105,7 +110,7 @@ describe('syncData', () => {
   })
 
   it('drops the redo tail before building a failed request payload', async () => {
-    syncMock.mockResolvedValueOnce({ error: 'offline' })
+    syncMock.mockResolvedValueOnce({ error: 'offline', status: 400 })
     const store = configureStore({
       reducer: rootReducer,
     })
@@ -145,7 +150,7 @@ describe('syncData', () => {
     expect(store.getState().data.redo).toEqual([])
     expect(store.getState().data.current.account.cash.title).toBe('Wallet')
     expect(store.getState().sync).toMatchObject({
-      status: 'idle',
+      status: { kind: 'idle' },
       lastResult: { isSuccessful: false, errorMessage: 'offline' },
     })
   })
@@ -160,21 +165,167 @@ describe('syncData', () => {
     expect(store.getState().data.outbox).toEqual([])
   })
 
-  it('settles pending state when the transport throws', async () => {
-    syncMock.mockRejectedValueOnce(new Error('network unavailable'))
-    const store = configureStore({
-      reducer: rootReducer,
-    })
+  it('publishes hidden details while an ordinary one-request push is active', async () => {
+    const store = makeSyncedStore()
+    store.dispatch(appendClientCommand(renameCashTo('Wallet', 10)))
+    let resolveSync: ((value: unknown) => void) | undefined
+    syncMock.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveSync = resolve
+        })
+    )
 
-    await store.dispatch(syncData() as any)
+    const syncing = store.dispatch(syncData() as any)
+    await vi.waitFor(() =>
+      expect(store.getState().sync).toMatchObject({
+        detailsOpen: false,
+        status: {
+          kind: 'pushing',
+          phase: 'sending',
+          rows: [{ key: 'account', confirmed: 0, total: 1 }],
+        },
+      })
+    )
+
+    resolveSync?.({ data: { serverTimestamp: 200_000 } })
+    await syncing
+
+    expect(store.getState().sync.status).toEqual({ kind: 'idle' })
+  })
+
+  /**
+   * A network failure answers without a status rather than throwing, so an
+   * offline push exhausts its retries and still has to come back to rest.
+   * Anything else leaves undo, redo and background pull switched off.
+   */
+  it('returns to rest after an offline one-request push', async () => {
+    syncMock.mockResolvedValue({ error: 'Failed to fetch' })
+    const store = makeSyncedStore()
+    store.dispatch(appendClientCommand(renameCashTo('Wallet', 10)))
+
+    await store.dispatch(syncData({ sleep: async () => undefined }) as any)
+
+    expect(syncMock).toHaveBeenCalledTimes(4)
+    expect(store.getState().sync).toMatchObject({
+      detailsOpen: false,
+      status: { kind: 'idle' },
+      lastResult: { isSuccessful: false, errorMessage: 'Failed to fetch' },
+    })
+    expect(store.getState().data.outbox).toHaveLength(1)
+  })
+
+  it('accepts a frozen multi-chunk batch one durable remainder at a time', async () => {
+    const store = makeTwoAccountStore()
+    store.dispatch(appendClientCommand(renameBothAccounts()))
+    let responseTimestamp = 200_000
+    syncMock.mockImplementation(
+      async (_token: string, _preference: string, request: any) => {
+        if (syncMock.mock.calls.length === 2) {
+          const outbox = store.getState().data.outbox
+          expect(outbox).toHaveLength(1)
+          expect(outbox[0].patch.account).toHaveLength(1)
+        }
+        responseTimestamp += 1000
+        return { data: { ...request, serverTimestamp: responseTimestamp } }
+      }
+    )
+
+    await store.dispatch(syncData({ maxBytes: 1 }) as any)
+
+    expect(syncMock).toHaveBeenCalledTimes(2)
+    expect(store.getState().data.outbox).toEqual([])
+    expect(store.getState().sync.status.kind).toBe('idle')
+  })
+
+  it('remembers the byte limit a 413 established when the run then stops', async () => {
+    const store = makeTwoAccountStore()
+    store.dispatch(appendClientCommand(renameBothAccounts()))
+    syncMock.mockImplementation(
+      async (_token: string, _preference: string, request: any) =>
+        (request.account?.length ?? 0) > 1
+          ? { error: 'too large', status: 413 }
+          : { error: 'invalid row', status: 400 }
+    )
+
+    await store.dispatch(syncData({ maxBytes: 10_000 }) as any)
+
+    const status = store.getState().sync.status
+    expect(status).toMatchObject({
+      kind: 'stopped',
+      errorMessage: 'invalid row',
+    })
+    expect(status.kind === 'stopped' && status.maxBytes).toBeLessThan(10_000)
+  })
+
+  it('stops a failed multi-chunk run with its remainder and can continue later', async () => {
+    const store = makeTwoAccountStore()
+    store.dispatch(appendClientCommand(renameBothAccounts()))
+    syncMock
+      .mockImplementationOnce(
+        async (_token: string, _preference: string, request: any) => ({
+          data: { ...request, serverTimestamp: 200_000 },
+        })
+      )
+      .mockResolvedValueOnce({ error: 'invalid row', status: 400 })
+
+    await store.dispatch(syncData({ maxBytes: 1 }) as any)
 
     expect(store.getState().sync).toMatchObject({
-      status: 'idle',
-      lastResult: {
-        isSuccessful: false,
-        errorMessage: 'network unavailable',
+      status: { kind: 'stopped', errorMessage: 'invalid row' },
+    })
+    expect(store.getState().data.outbox).toHaveLength(1)
+
+    store.dispatch(continueSyncLater() as any)
+    expect(store.getState().sync).toMatchObject({
+      status: { kind: 'idle' },
+      lastResult: { isSuccessful: false, errorMessage: 'invalid row' },
+    })
+    expect(store.getState().data.outbox).toHaveLength(1)
+  })
+
+  it('keeps one timed-out account deletion visible and pending', async () => {
+    const store = makeSyncedStore()
+    store.dispatch(
+      applyServerPatch({
+        serverTimestamp: 101_000,
+        user: [makeUser({ id: 1, parent: null, currency: 1 })],
+      }) as any
+    )
+    store.dispatch(
+      appendClientCommand(
+        issuePatch(
+          store.getState().data.current,
+          { deletion: [{ id: 'cash', object: 'account' }] },
+          10
+        )
+      )
+    )
+    syncMock.mockResolvedValue({
+      error: 'Unparsable diff response (HTTP 504)',
+      status: 504,
+    })
+    await store.dispatch(
+      syncData({
+        sleep: async () => {
+          expect(store.getState().sync.status).toMatchObject({
+            kind: 'pushing',
+            phase: 'waiting',
+            errorStatus: 504,
+          })
+        },
+      }) as any
+    )
+
+    expect(store.getState().sync).toMatchObject({
+      detailsOpen: true,
+      status: {
+        kind: 'stopped',
+        errorStatus: 504,
+        errorMessage: 'Unparsable diff response (HTTP 504)',
       },
     })
+    expect(store.getState().data.outbox).toHaveLength(1)
   })
 })
 
@@ -274,3 +425,27 @@ describe('reloadData', () => {
     expect(state.outbox).toEqual([pending])
   })
 })
+
+function makeTwoAccountStore() {
+  const store = makeSyncedStore()
+  store.dispatch(
+    applyServerPatch({
+      serverTimestamp: 101_000,
+      account: [makeAccount({ id: 'card', title: 'Card' })],
+    }) as any
+  )
+  return store
+}
+
+function renameBothAccounts() {
+  return {
+    type: 'patch' as const,
+    issuedAt: 10,
+    patch: {
+      account: [
+        makeAccount({ id: 'cash', title: 'Wallet' }),
+        makeAccount({ id: 'card', title: 'Credit card' }),
+      ],
+    },
+  }
+}

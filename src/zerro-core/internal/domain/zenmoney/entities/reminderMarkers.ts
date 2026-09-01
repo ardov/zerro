@@ -3,6 +3,7 @@ import type {
   EntityPatch,
   Modify,
   OptionalExceptFor,
+  TOpenEnum,
 } from '../../foundation/types'
 import type { TCoreContext } from '../../../../types'
 import type { TAccountId } from './accounts'
@@ -20,7 +21,11 @@ import type { TTagId } from './tags'
 import type { TUserId } from './users'
 
 export type TReminderMarkerId = string
-export type TReminderMarkerState = 'planned' | 'processed' | 'deleted'
+export const reminderMarkerStates = ['planned', 'processed', 'deleted'] as const
+
+export type TReminderMarkerState = TOpenEnum<
+  (typeof reminderMarkerStates)[number]
+>
 export type TReminderMarker = {
   id: TReminderMarkerId
   changed: TMsTime

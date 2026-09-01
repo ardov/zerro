@@ -185,9 +185,10 @@ needed, build it over these operations rather than beside them.
 
 Issued commands append directly to the outbox. Redux performs authoritative
 `current` rematerialization for append, undo, redo, and base changes. The sync
-adapter derives request transport from the same durable outbox; Redux stores no
-parallel `data.diff` projection. Redux may temporarily stage a response between
-reducer actions, but that is an implementation detail, not a product inbox.
+adapter asks the pure push-run module to derive bounded request transport from
+the same durable outbox; Redux stores no parallel `data.diff` projection. Redux
+may temporarily retain a prepared request for an explicit retry, but that is an
+adapter concern rather than a second replica or product inbox.
 
 ## Read model and memoization
 
@@ -323,32 +324,54 @@ Successful ZenMoney responses are canonical normalized diffs. They contain the
 accepted local changes as well as remote changes and the new server timestamp:
 
 ```txt
-fresh transport from command prefix + cursor -> ZenMoney
-canonical diff                               -> applyPatch(base, diff)
-                                             -> drop sent command count
-                                             -> rematerialize pending commands
+capture outbox prefix -> squash to one run command
+                      -> prepare bounded chunk + cursor -> ZenMoney
+canonical diff        -> applyPatch(base, diff)
+                      -> remove exactly the chunk receipt
+                      -> persist base + remaining command
+                      -> prepare the next chunk
 ```
 
-Manual sync is a commit boundary. It clears `redo`, records the sent outbox
-length, and rematerializes its transport against the current base with
-fresh entity versions. Undo/redo is disabled while the request is active, so
-new commands can only append after that stable prefix. Transport replay starts
-from `base`, applies only primary command patches to a working snapshot, and
-records touched ids and deletions. The final full entities come from that
-primary-only snapshot, never from UI `current` with predicted effects.
+Manual sync captures a stable Outbox prefix and clears `redo`. Transport replay
+starts from `base`, applies only primary command patches to a working snapshot,
+and records touched ids and deletions. The final full entities come from that
+primary-only snapshot, never from UI `current` with predicted effects. Commands
+created after capture remain a suffix for the next Push run.
 
-A successful ZenMoney response updates `base` and acknowledges the whole sent
-prefix. Core removes exactly the captured command count without comparing
-final field values. This matters when several commands changed the same field:
-the last value wins, while every sent command remains part of the accepted
-batch. Commands created while the request was in flight are preserved and
-replayed over the new base. If the request fails, neither base nor the command
-outbox changes.
+Before preparing the request, Core removes canonical historical rows that the
+write API cannot recreate: budgets whose ordinary tag is absent and reminder
+markers whose reminder is absent. Transactions pointing to an omitted marker
+are sent with a null marker reference; the special global-budget tag remains
+valid. Transactions wholly contained in accounts deleted by the same run are
+also omitted because that account purge is verified server behaviour. This
+normalization applies to commands already persisted in the outbox. If it
+removes the entire captured prefix, Core sends a cursor-only request and drops
+that prefix only after the response is accepted.
 
-Periodic sync uses the same primary-only transport path, canonical response,
-and whole-prefix acknowledgement boundary. Whether a dirty session syncs
-automatically remains an adapter policy, not a capability classification
-between persisted command kinds.
+Core uses one request unless its serialized normalized body exceeds 2 MiB or
+Cleanup needs singleton-account or singleton-tag phases. In a multi-Chunk run,
+upserts are ordered by dependency and tag upserts are parent-first. Cleanup
+starts with one account per Chunk. After each accepted account response, Core
+applies the canonical diff and rematerializes the remaining command against the
+new base, so removals already performed by an account cascade disappear without
+encoding an unverified client-side cascade rule. Retained rows remain pending.
+Other surviving deletion kinds follow. Tag deletions run last, one per request,
+in deepest-child-first order calculated from the current canonical tree. HTTP
+413 halves the current byte target and repacks the same unconfirmed work; one
+item that still receives 413 stops the run.
+
+A successful ZenMoney response updates `base` and acknowledges exactly the
+items named by that Chunk's receipt without comparing final field values. The
+first acknowledgement replaces the captured command prefix with one command
+containing the remainder; each later acknowledgement shrinks that command.
+Every accepted Chunk is persisted as its own canonical transition before the
+next request. If a response is not processed, its items remain pending and may
+be sent again. Network, 429, and 5xx retries therefore reuse the exact request;
+a deterministic 400 stops rather than skipping an item.
+
+Periodic pull uses the same canonical response path but acknowledges no local
+command. Whether a dirty session pushes automatically remains an adapter policy,
+not a capability classification between persisted command kinds.
 
 First-stage conflict resolution is field-level last write wins in command
 order. Upsert intentionally recreates a missing entity. Revisit this only with

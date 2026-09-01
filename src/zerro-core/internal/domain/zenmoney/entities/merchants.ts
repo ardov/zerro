@@ -14,6 +14,8 @@ export type TMerchant = {
   changed: TMsTime
   user: TUserId
   title: string
+  /** Observed in complete snapshots; write semantics are not established. */
+  mcc?: number | null
 }
 /** Fields the factory cannot default: creation intent must supply them. */
 export const merchantRequiredFields = [

@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   makeAccount,
+  makeBudget,
   makeInstrument,
+  makeReminderMarker,
   makeStore,
   makeTag,
   makeTransaction,
@@ -122,6 +124,40 @@ describe('validateDataStore', () => {
       ok: false,
       reason: expect.stringContaining('account[1].instrument'),
     })
+  })
+
+  it('accepts server-retained orphans and future semantic values', () => {
+    const store = makeStore({
+      serverTimestamp: 100,
+      instrument: { 1: makeInstrument({ id: 1 }) },
+      country: {
+        1: { id: 1, title: 'United States', currency: 1, domain: null },
+      },
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+      account: {
+        future: makeAccount({ id: 'future', type: 'future-type' }),
+        debt: makeAccount({ id: 'debt', type: AccountType.Debt }),
+      },
+      budget: {
+        '2026-01-01#deleted-tag': makeBudget({
+          id: '2026-01-01#deleted-tag',
+          tag: 'deleted-tag',
+        }),
+      },
+      reminderMarker: {
+        marker: makeReminderMarker({
+          id: 'marker',
+          reminder: 'deleted-reminder',
+          incomeInstrument: 1,
+          incomeAccount: 'future',
+          outcomeInstrument: 1,
+          outcomeAccount: 'future',
+          state: 'future-state',
+        }),
+      },
+    })
+
+    expect(validateDataStore(store)).toEqual({ ok: true })
   })
 
   // Round 9: deleting an ordinary account nulls the leg that pointed at it on

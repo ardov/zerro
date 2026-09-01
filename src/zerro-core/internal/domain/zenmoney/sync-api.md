@@ -356,7 +356,19 @@ be null (`role` and `company` were sent as null). Every 400 was a clean
 `transaction.incomeBankID` and `transaction.outcomeBankID` are opaque IDs for
 bank operations supplied by a synchronization plugin. They are not references
 to `company` entities and may be non-null even when no matching company row is
-present.
+present. Complete account snapshots show that these IDs can be strings as well
+as numbers.
+
+Complete snapshots also establish protocol shapes broader than the create
+matrix above: `balanceCorrectionType` includes `request`, `createCorrection`,
+and `disabled`; reminder `endDate` can be null; merchant `mcc` can be present as
+null. ZenMoney can retain a budget after its tag is gone and a reminder marker
+after its reminder is gone. Zerro preserves those canonical rows when reading a
+snapshot and reports them as loss-awareness warnings, but omits them from
+restore and push writes because the write endpoint refuses to recreate them.
+Transactions pointing to an omitted marker are written with a null marker
+reference. The all-zero global budget tag id is a valid special owner and is
+never treated as a dangling tag.
 
 Reminder `income` and `outcome` were deliberately never omitted: the omission
 could have produced the zero-amount 500 shape. That is a safety blind spot, not

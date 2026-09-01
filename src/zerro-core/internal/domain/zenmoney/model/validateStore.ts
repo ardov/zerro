@@ -1,8 +1,8 @@
 import { AccountType } from '../entities/accounts'
-import { globalBudgetTagId } from '../entities/budgets'
+import { eachReferenceIssue } from './entityGraph'
 import { dataEntityKeys, type TDataStore } from './store'
 
-export const dataStoreValidatorVersion = 1 as const
+export const dataStoreValidatorVersion = 2 as const
 
 export type TDataStoreValidationResult =
   { ok: true } | { ok: false; reason: string }
@@ -14,7 +14,10 @@ export type TDataStoreValidationResult =
  *
  * Empty/partial fixtures are accepted while an account is being bootstrapped.
  * Once both users and accounts exist, the server graph must have one root user,
- * one debt account, valid references, and an acyclic tag-parent relation.
+ * one debt account, the references Zerro must dereference, and an acyclic
+ * tag-parent relation. References come from the entity graph, which also names
+ * the two ZenMoney-retained orphans that are canonical data rather than
+ * corruption.
  */
 export function validateDataStore(
   store: TDataStore
@@ -38,172 +41,22 @@ export function validateDataStore(
       fail(`expected exactly one debt account, found ${debtAccounts.length}`)
     }
 
-    const instrumentIds = store.instrument
-    const countryIds = store.country
-    const userIds = store.user
-    const companyIds = store.company
-    const accountIds = store.account
-    const merchantIds = store.merchant
-    const tagIds = store.tag
-    const reminderIds = store.reminder
-    const markerIds = store.reminderMarker
-
-    users.forEach((user, index) => {
-      requireReference(userIds, user.parent, `user[${index}].parent`, true)
-      requireReference(instrumentIds, user.currency, `user[${index}].currency`)
-      requireReference(countryIds, user.country, `user[${index}].country`)
-    })
-
-    Object.values(store.country).forEach((country, index) => {
-      requireReference(
-        instrumentIds,
-        country.currency,
-        `country[${index}].currency`
-      )
-    })
-
-    Object.values(store.company).forEach((company, index) => {
-      requireReference(
-        countryIds,
-        company.country,
-        `company[${index}].country`,
-        true
-      )
-    })
-
-    accounts.forEach((account, index) => {
-      requireReference(userIds, account.user, `account[${index}].user`)
-      requireReference(
-        instrumentIds,
-        account.instrument,
-        `account[${index}].instrument`
-      )
-      requireReference(
-        companyIds,
-        account.company,
-        `account[${index}].company`,
-        true
-      )
-    })
-
-    Object.values(store.merchant).forEach((merchant, index) => {
-      requireReference(userIds, merchant.user, `merchant[${index}].user`)
-    })
-
-    Object.values(store.tag).forEach((tag, index) => {
-      requireReference(userIds, tag.user, `tag[${index}].user`)
-      requireReference(tagIds, tag.parent, `tag[${index}].parent`, true)
-    })
-    validateTagCycles(store.tag)
-
-    Object.values(store.budget).forEach((budget, index) => {
-      requireReference(userIds, budget.user, `budget[${index}].user`)
-      if (budget.tag !== null && budget.tag !== globalBudgetTagId) {
-        requireReference(tagIds, budget.tag, `budget[${index}].tag`)
-      }
+    eachReferenceIssue(store, issue => {
+      if (issue.reference.read === 'tolerate') return
+      fail(issue.message)
     })
 
     Object.values(store.reminder).forEach((reminder, index) => {
-      validateTransferReferences(
-        reminder,
-        {
-          userIds,
-          instrumentIds,
-          accountIds,
-          merchantIds,
-          tagIds,
-        },
-        `reminder[${index}]`
-      )
-      if (reminder.points !== null) {
-        if (
-          !Array.isArray(reminder.points) ||
-          reminder.points.some(point => !Number.isFinite(point))
-        ) {
-          fail(`reminder[${index}].points is invalid`)
-        }
+      if (reminder.points === null) return
+      if (
+        !Array.isArray(reminder.points) ||
+        reminder.points.some(point => !Number.isFinite(point))
+      ) {
+        fail(`reminder[${index}].points is invalid`)
       }
     })
 
-    Object.values(store.reminderMarker).forEach((marker, index) => {
-      validateTransferReferences(
-        marker,
-        {
-          userIds,
-          instrumentIds,
-          accountIds,
-          merchantIds,
-          tagIds,
-        },
-        `reminderMarker[${index}]`
-      )
-      requireReference(
-        reminderIds,
-        marker.reminder,
-        `reminderMarker[${index}].reminder`
-      )
-      if (!['planned', 'processed', 'deleted'].includes(marker.state)) {
-        fail(`reminderMarker[${index}].state is invalid`)
-      }
-    })
-
-    Object.values(store.transaction).forEach((transaction, index) => {
-      requireReference(userIds, transaction.user, `transaction[${index}].user`)
-      // Deleting an account nulls the leg that pointed at it on a debt
-      // operation, and soft-deletes the row rather than purging it — observed
-      // in round 9. That row is canonical state the server keeps sending, so
-      // rejecting it here would put a replica into recovery it cannot leave.
-      // Only a soft-deleted row may carry the null: a live transaction with a
-      // dangling leg is still corruption worth failing on.
-      const legsMayBeNull = transaction.deleted === true
-      requireReference(
-        accountIds,
-        transaction.incomeAccount,
-        `transaction[${index}].incomeAccount`,
-        legsMayBeNull
-      )
-      requireReference(
-        accountIds,
-        transaction.outcomeAccount,
-        `transaction[${index}].outcomeAccount`,
-        legsMayBeNull
-      )
-      requireReference(
-        instrumentIds,
-        transaction.incomeInstrument,
-        `transaction[${index}].incomeInstrument`
-      )
-      requireReference(
-        instrumentIds,
-        transaction.outcomeInstrument,
-        `transaction[${index}].outcomeInstrument`
-      )
-      requireTagReferences(transaction.tag, tagIds, `transaction[${index}].tag`)
-      requireReference(
-        merchantIds,
-        transaction.merchant,
-        `transaction[${index}].merchant`,
-        true
-      )
-      requireReference(
-        markerIds,
-        transaction.reminderMarker,
-        `transaction[${index}].reminderMarker`,
-        true
-      )
-      requireReference(
-        instrumentIds,
-        transaction.opIncomeInstrument,
-        `transaction[${index}].opIncomeInstrument`,
-        true
-      )
-      requireReference(
-        instrumentIds,
-        transaction.opOutcomeInstrument,
-        `transaction[${index}].opOutcomeInstrument`,
-        true
-      )
-    })
+    validateTagCycles(store.tag)
 
     return { ok: true }
   } catch (error) {
@@ -235,82 +88,6 @@ function validateShape(store: TDataStore): void {
 }
 
 type TIdMap = Record<string, unknown>
-
-function requireReference(
-  map: TIdMap,
-  id: unknown,
-  path: string,
-  nullable = false
-): void {
-  if (id === null && nullable) return
-  if (
-    (typeof id !== 'string' && typeof id !== 'number') ||
-    !Object.prototype.hasOwnProperty.call(map, String(id))
-  ) {
-    fail(`${path} references a missing entity`)
-  }
-}
-
-function requireTagReferences(
-  tags: string[] | null,
-  tagIds: TIdMap,
-  path: string
-): void {
-  if (tags === null) return
-  if (!Array.isArray(tags)) fail(`${path} is invalid`)
-  tags.forEach((tag, index) =>
-    requireReference(tagIds, tag, `${path}[${index}]`)
-  )
-}
-
-function validateTransferReferences(
-  transfer: {
-    user: number
-    incomeInstrument: number
-    incomeAccount: string
-    outcomeInstrument: number
-    outcomeAccount: string
-    tag: string[] | null
-    merchant: string | null
-  },
-  maps: {
-    userIds: TIdMap
-    instrumentIds: TIdMap
-    accountIds: TIdMap
-    merchantIds: TIdMap
-    tagIds: TIdMap
-  },
-  path: string
-): void {
-  requireReference(maps.userIds, transfer.user, `${path}.user`)
-  requireReference(
-    maps.instrumentIds,
-    transfer.incomeInstrument,
-    `${path}.incomeInstrument`
-  )
-  requireReference(
-    maps.instrumentIds,
-    transfer.outcomeInstrument,
-    `${path}.outcomeInstrument`
-  )
-  requireReference(
-    maps.accountIds,
-    transfer.incomeAccount,
-    `${path}.incomeAccount`
-  )
-  requireReference(
-    maps.accountIds,
-    transfer.outcomeAccount,
-    `${path}.outcomeAccount`
-  )
-  requireTagReferences(transfer.tag, maps.tagIds, `${path}.tag`)
-  requireReference(
-    maps.merchantIds,
-    transfer.merchant,
-    `${path}.merchant`,
-    true
-  )
-}
 
 function validateTagCycles(tags: TIdMap): void {
   const visiting = new Set<string>()

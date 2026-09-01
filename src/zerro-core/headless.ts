@@ -19,6 +19,23 @@ export {
 export { applyPatch } from './internal/domain/zenmoney/model/applyPatch'
 
 export {
+  eachReferenceIssue,
+  entityCleanupOrder,
+  entityProgressOrder,
+  entityUpsertOrder,
+  isAbsentRow,
+  isRowWritable,
+  clearAbsentReferences,
+  type TReferenceIssue,
+  type TRowPresence,
+} from './internal/domain/zenmoney/model/entityGraph'
+
+export {
+  validateDataStore,
+  type TDataStoreValidationResult,
+} from './internal/domain/zenmoney/model/validateStore'
+
+export {
   compileCreateTransaction,
   type TCreateTransactionData,
   type TCreateTransactionInput,
@@ -70,5 +87,29 @@ export {
 } from './internal/operations/replication/canonical'
 
 export { getSyncCursor } from './internal/operations/replication/cursor'
+
+export {
+  DEFAULT_PUSH_RETRY_POLICY,
+  drivePush,
+  isRetryablePushStatus,
+  type TPushCommitResult,
+  type TPushDriverPorts,
+  type TPushEvent,
+  type TPushOutcome,
+  type TPushRetryPolicy,
+  type TPushSendResult,
+} from './internal/operations/replication/pushDriver'
+
+export {
+  DEFAULT_PUSH_MAX_BYTES,
+  acceptPushChunk,
+  beginPush,
+  shrinkPushChunk,
+  type TAcceptedPushChunk,
+  type TPreparedPush,
+  type TPushMeasure,
+  type TPushProgressRow,
+  type TPushRun,
+} from './internal/operations/replication/pushRun'
 
 export type { TCompiled, TCoreContext } from './types'

@@ -3,6 +3,7 @@ import type { TDataStore } from '6-shared/types'
 import type { TCommand } from 'zerro-core/replica'
 import { replicaStorage } from '6-shared/api/replicaStorage'
 import {
+  acceptClientPushChunk,
   appendClientCommand,
   persistenceFailed,
   rebaseServerInbox,
@@ -71,11 +72,29 @@ export const replicaPersistenceMiddleware: Middleware =
           before: beforeBase,
           after: after.data.base,
           outbox: after.data.outbox,
-          pushed: Boolean(inbox.push),
+          pushed: false,
           checkpointReason,
         })
         // Retention is secondary: a failed pass only postpones it and must
         // never mark the primary write as failed.
+        await replicaStorage
+          .compactOneBatch()
+          .catch(error =>
+            console.warn('Failed to compact replica history', error)
+          )
+      })
+      return result
+    }
+
+    if (acceptClientPushChunk.match(action)) {
+      if (after.data.rootUserId === null) return result
+      enqueuePrimary(api.dispatch, async () => {
+        await replicaStorage.commitCanonical({
+          before: beforeBase,
+          after: after.data.base,
+          outbox: after.data.outbox,
+          pushed: true,
+        })
         await replicaStorage
           .compactOneBatch()
           .catch(error =>

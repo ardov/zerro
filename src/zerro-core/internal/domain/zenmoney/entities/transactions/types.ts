@@ -10,7 +10,7 @@ import type { TUserId } from '../users'
 export type TTransactionId = string
 
 /** Opaque plugin-owned bank-operation ID; it is not a company reference. */
-export type TBankOperationId = number
+export type TBankOperationId = string | number
 
 export type TZmTransaction = {
   id: TTransactionId

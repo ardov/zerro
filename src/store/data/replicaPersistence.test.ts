@@ -12,9 +12,11 @@ const { storageMock } = vi.hoisted(() => ({
 
 vi.mock('6-shared/api/replicaStorage', () => ({ replicaStorage: storageMock }))
 
+import type { TCommand } from 'zerro-core/replica'
 import { makeStore } from 'zerro-core/support/testing/zenmoneyTestData'
 import { patchTransactionsPage } from '../view'
 import {
+  acceptClientPushChunk,
   appendClientCommand,
   rebaseServerInbox,
   receiveServerPatch,
@@ -48,7 +50,7 @@ describe('replica persistence queue', () => {
   it('commits canonical base and outbox together, then attempts compaction', async () => {
     const state = replicaState()
     const invoke = middleware(state)
-    invoke(receiveServerPatch({ serverTimestamp: 200, push: true }))
+    invoke(receiveServerPatch({ serverTimestamp: 200 }))
 
     invoke(rebaseServerInbox())
 
@@ -57,7 +59,7 @@ describe('replica persistence queue', () => {
         before: expect.objectContaining({ serverTimestamp: 100 }),
         after: expect.objectContaining({ serverTimestamp: 200 }),
         outbox: [],
-        pushed: true,
+        pushed: false,
         checkpointReason: undefined,
       })
     )
@@ -66,17 +68,37 @@ describe('replica persistence queue', () => {
     )
   })
 
+  it('commits every accepted push chunk with its remaining outbox', async () => {
+    const state = replicaState()
+    state.data.outbox = [entry]
+    const invoke = middleware(state)
+    const after = makeStore({ serverTimestamp: 150 })
+    const remainder = { ...entry, issuedAt: 20 }
+
+    invoke(
+      acceptClientPushChunk({
+        base: after,
+        current: after,
+        outbox: [remainder],
+        redo: [],
+      })
+    )
+
+    await vi.waitFor(() =>
+      expect(storageMock.commitCanonical).toHaveBeenCalledWith({
+        before: expect.objectContaining({ serverTimestamp: 100 }),
+        after,
+        outbox: [remainder],
+        pushed: true,
+      })
+    )
+  })
+
   it('records recovery as the checkpoint reason even for a full reload', async () => {
     const state = replicaState()
     state.data.journalRecoveryRequired = true
     const invoke = middleware(state)
-    invoke(
-      receiveServerPatch({
-        serverTimestamp: 200,
-        fullReload: true,
-        push: false,
-      })
-    )
+    invoke(receiveServerPatch({ serverTimestamp: 200, fullReload: true }))
 
     invoke(rebaseServerInbox())
 
@@ -171,8 +193,8 @@ function replicaState() {
       rootUserId: 7 as number | null,
       base: makeStore({ serverTimestamp: 100 }),
       current: makeStore({ serverTimestamp: 100 }),
-      outbox: [] as (typeof entry)[],
-      redo: [],
+      outbox: [] as TCommand[],
+      redo: [] as TCommand[],
       inbox: null as any,
       journalRecoveryRequired: false,
       outboxRecoveryReason: null as string | null,
@@ -197,6 +219,12 @@ function middleware(state: ReturnType<typeof replicaState>) {
     }
     if (appendClientCommand.match(action))
       state.data.outbox.push(action.payload)
+    if (acceptClientPushChunk.match(action)) {
+      state.data.base = action.payload.base
+      state.data.current = action.payload.current
+      state.data.outbox = action.payload.outbox
+      state.data.redo = action.payload.redo
+    }
     return action
   })
   return invoke

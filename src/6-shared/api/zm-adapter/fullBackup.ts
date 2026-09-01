@@ -3,47 +3,56 @@
  *
  * This is a protocol adapter: it validates untrusted wire JSON, converts it
  * through the shared ZenMoney codec, then returns a normalized Core snapshot.
+ * Structural rules that are about the data rather than the file — references,
+ * tag cycles, cardinalities — belong to the store validator, which every
+ * other source of a snapshot passes through as well.
  */
 import { z } from 'zod'
-import { applyPatch, createEmptyDataStore } from 'zerro-core/headless'
-import type { TDataStore, TZmDiff } from '6-shared/types'
+import {
+  applyPatch,
+  createEmptyDataStore,
+  eachReferenceIssue,
+  validateDataStore,
+} from 'zerro-core/headless'
+import { AccountType, type TDataStore, type TZmDiff } from '6-shared/types'
 
 import { convertDiff } from './converters'
 import {
-  accountWireSchema,
-  budgetWireSchema,
-  companyWireSchema,
-  countryWireSchema,
-  instrumentWireSchema,
-  merchantWireSchema,
-  reminderMarkerWireSchema,
-  reminderWireSchema,
-  tagWireSchema,
-  transactionWireSchema,
-  userWireSchema,
+  fullBackupCollectionsShape,
+  knownWireValues,
+  wireSchemas,
 } from './schemas'
 
 const fullBackupWireSchema = z
   .object({
     serverTimestamp: z.number().nonnegative(),
-    instrument: z.array(instrumentWireSchema),
-    country: z.array(countryWireSchema),
-    company: z.array(companyWireSchema),
-    user: z.array(userWireSchema),
-    merchant: z.array(merchantWireSchema),
-    account: z.array(accountWireSchema),
-    tag: z.array(tagWireSchema),
-    budget: z.array(budgetWireSchema),
-    reminder: z.array(reminderWireSchema),
-    reminderMarker: z.array(reminderMarkerWireSchema),
-    transaction: z.array(transactionWireSchema),
+    // Unknown keys pass so a newer export stays importable; this is the one
+    // that must not, because it is what tells an incremental diff from a
+    // complete backup.
+    deletion: z.never().optional(),
+    ...fullBackupCollectionsShape,
   })
-  .strict()
+  .passthrough()
 
 type TFullBackupWire = z.output<typeof fullBackupWireSchema>
+type TWireRow = Record<string, unknown>
+
+/** Fields a snapshot may carry that Zerro can read but cannot write back. */
+const unwritableWireFields = ['merchant.mcc'] as const
+
+export type TFullBackupWarning = {
+  reason:
+    | 'unknownField'
+    | 'unknownValue'
+    /** A field Zerro reads and understands but has no way to write back. */
+    | 'unwritableField'
+    | 'danglingReference'
+  path: string
+  count: number
+}
 
 export type TFullBackupParseResult =
-  | { ok: true; store: TDataStore }
+  | { ok: true; store: TDataStore; warnings: TFullBackupWarning[] }
   | { ok: false; reason: 'unreadable' | 'notABackup' }
 
 /** Parses a structurally valid backup without considering the current account. */
@@ -56,168 +65,151 @@ export function parseFullBackup(text: string): TFullBackupParseResult {
   }
 
   const parsed = fullBackupWireSchema.safeParse(value)
-  if (
-    !parsed.success ||
-    !hasUniqueRows(parsed.data) ||
-    !hasValidReferences(parsed.data)
-  ) {
+  if (!parsed.success || !hasUniqueRows(parsed.data)) {
     return { ok: false, reason: 'notABackup' }
   }
 
-  return {
-    ok: true,
-    store: applyPatch(
-      createEmptyDataStore(),
-      convertDiff.toClient(parsed.data as TZmDiff)
-    ),
+  const store = applyPatch(
+    createEmptyDataStore(),
+    convertDiff.toClient(parsed.data as TZmDiff)
+  )
+  if (!describesAnAccount(store) || !validateDataStore(store).ok) {
+    return { ok: false, reason: 'notABackup' }
   }
+
+  return { ok: true, store, warnings: collectWarnings(parsed.data, store) }
 }
 
-function hasUniqueRows(backup: TFullBackupWire): boolean {
+/**
+ * A complete export always describes a live account. The store validator
+ * deliberately accepts the half-empty shape of a replica that is still
+ * bootstrapping, which a backup file never is.
+ */
+function describesAnAccount(store: TDataStore): boolean {
+  const debtAccounts = Object.values(store.account).filter(
+    account => account.type === AccountType.Debt
+  )
   return (
-    hasUniqueIds(backup.instrument) &&
-    hasUniqueIds(backup.country) &&
-    hasUniqueIds(backup.company) &&
-    hasUniqueIds(backup.user) &&
-    hasUniqueIds(backup.merchant) &&
-    hasUniqueIds(backup.account) &&
-    hasExactlyOneDebtAccount(backup.account) &&
-    hasUniqueIds(backup.tag) &&
-    hasUniqueBudgetIdentities(backup) &&
-    hasUniqueIds(backup.reminder) &&
-    hasUniqueIds(backup.reminderMarker) &&
-    hasUniqueIds(backup.transaction)
+    debtAccounts.length === 1 &&
+    Object.values(store.user).some(user => user.parent === null)
   )
 }
 
-function hasExactlyOneDebtAccount(rows: TFullBackupWire['account']): boolean {
-  return rows.filter(row => row.type === 'debt').length === 1
+function collectWarnings(
+  backup: TFullBackupWire,
+  store: TDataStore
+): TFullBackupWarning[] {
+  return [
+    ...unknownFieldWarnings(backup),
+    ...unwritableFieldWarnings(backup),
+    ...unknownValueWarnings(backup),
+    ...danglingReferenceWarnings(store),
+  ]
 }
 
-function hasUniqueIds<TRow extends { id: string | number }>(
-  rows: TRow[]
-): boolean {
+/** Data a newer exporter wrote and this version has no meaning for. */
+function unknownFieldWarnings(backup: TFullBackupWire): TFullBackupWarning[] {
+  const warnings: TFullBackupWarning[] = []
+  const knownTopLevelFields = new Set([
+    'serverTimestamp',
+    ...Object.keys(wireSchemas),
+  ])
+  Object.entries(backup).forEach(([field, value]) => {
+    if (knownTopLevelFields.has(field)) return
+    warnings.push({
+      reason: 'unknownField',
+      path: field,
+      count: Array.isArray(value) ? Math.max(value.length, 1) : 1,
+    })
+  })
+
+  Object.entries(wireSchemas).forEach(([collection, schema]) => {
+    const knownFields = new Set(Object.keys(schema.shape))
+    const counts = new Map<string, number>()
+    rowsOf(backup, collection).forEach(row => {
+      Object.keys(row).forEach(field => {
+        if (knownFields.has(field)) return
+        counts.set(field, (counts.get(field) ?? 0) + 1)
+      })
+    })
+    counts.forEach((count, field) =>
+      warnings.push({
+        reason: 'unknownField',
+        path: `${collection}.${field}`,
+        count,
+      })
+    )
+  })
+
+  return warnings
+}
+
+/** Known fields a restore reads but the write API gives it no way to send. */
+function unwritableFieldWarnings(
+  backup: TFullBackupWire
+): TFullBackupWarning[] {
+  return unwritableWireFields.flatMap(path => {
+    const [collection, field] = path.split('.')
+    const count = rowsOf(backup, collection).filter(
+      row => row[field] !== undefined && row[field] !== null
+    ).length
+    return count ? [{ reason: 'unwritableField' as const, path, count }] : []
+  })
+}
+
+/** Values the protocol allows but this version has no behavior for. */
+function unknownValueWarnings(backup: TFullBackupWire): TFullBackupWarning[] {
+  const warnings: TFullBackupWarning[] = []
+
+  Object.entries(knownWireValues).forEach(([path, known]) => {
+    const [collection, field] = path.split('.')
+    const knownValues = new Set<string>(known)
+    const count = rowsOf(backup, collection).filter(row => {
+      const value = row[field]
+      return typeof value === 'string' && !knownValues.has(value)
+    }).length
+    if (count) warnings.push({ reason: 'unknownValue', path, count })
+  })
+
+  return warnings
+}
+
+/** Rows ZenMoney kept after their owner was deleted — see the entity graph. */
+function danglingReferenceWarnings(store: TDataStore): TFullBackupWarning[] {
+  const counts = new Map<string, number>()
+  eachReferenceIssue(store, issue => {
+    if (issue.reference.read !== 'tolerate') return
+    const path = `${issue.reference.from}.${issue.reference.field}`
+    counts.set(path, (counts.get(path) ?? 0) + 1)
+  })
+  return [...counts].map(([path, count]) => ({
+    reason: 'danglingReference',
+    path,
+    count,
+  }))
+}
+
+function rowsOf(backup: TFullBackupWire, collection: string): TWireRow[] {
+  return (backup as Record<string, unknown>)[collection] as TWireRow[]
+}
+
+/**
+ * Duplicates have to be caught on the wire: a normalized store is keyed by id,
+ * so building it silently keeps the last row of a repeated identity.
+ */
+function hasUniqueRows(backup: TFullBackupWire): boolean {
+  return Object.keys(wireSchemas).every(collection =>
+    collection === 'budget'
+      ? hasUniqueBudgetIdentities(backup)
+      : hasUniqueIds(rowsOf(backup, collection))
+  )
+}
+
+function hasUniqueIds(rows: TWireRow[]): boolean {
   return new Set(rows.map(row => row.id)).size === rows.length
 }
 
 function hasUniqueBudgetIdentities(backup: TFullBackupWire): boolean {
   const identities = backup.budget.map(row => `${row.date}#${row.tag}`)
   return new Set(identities).size === identities.length
-}
-
-function hasValidReferences(backup: TFullBackupWire): boolean {
-  const ids = {
-    instrument: new Set(backup.instrument.map(row => row.id)),
-    country: new Set(backup.country.map(row => row.id)),
-    company: new Set(backup.company.map(row => row.id)),
-    user: new Set(backup.user.map(row => row.id)),
-    merchant: new Set(backup.merchant.map(row => row.id)),
-    account: new Set(backup.account.map(row => row.id)),
-    tag: new Set(backup.tag.map(row => row.id)),
-    reminder: new Set(backup.reminder.map(row => row.id)),
-    reminderMarker: new Set(backup.reminderMarker.map(row => row.id)),
-  }
-  const owns = <TRow extends { user: number }>(rows: TRow[]) =>
-    rows.every(row => ids.user.has(row.user))
-  const tagReferences = (tags: string[] | null) =>
-    tags === null || tags.every(tag => ids.tag.has(tag))
-  const merchantReference = (merchant: string | null) =>
-    merchant === null || ids.merchant.has(merchant)
-  const accountReferences = (row: {
-    incomeInstrument: number
-    outcomeInstrument: number
-    incomeAccount: string
-    outcomeAccount: string
-  }) =>
-    ids.instrument.has(row.incomeInstrument) &&
-    ids.instrument.has(row.outcomeInstrument) &&
-    ids.account.has(row.incomeAccount) &&
-    ids.account.has(row.outcomeAccount)
-
-  /**
-   * A transaction's legs, where deleting an account may have left a null.
-   *
-   * The server nulls the leg that pointed at a deleted account on a debt
-   * operation and soft-deletes the row (round 9), so a valid export of a real
-   * account can contain that shape. A null on a live row is still rejected.
-   */
-  const transactionAccountReferences = (row: {
-    incomeInstrument: number
-    outcomeInstrument: number
-    incomeAccount: string | null
-    outcomeAccount: string | null
-    deleted: boolean
-  }) => {
-    const leg = (id: string | null) =>
-      id === null ? row.deleted : ids.account.has(id)
-    return (
-      ids.instrument.has(row.incomeInstrument) &&
-      ids.instrument.has(row.outcomeInstrument) &&
-      leg(row.incomeAccount) &&
-      leg(row.outcomeAccount)
-    )
-  }
-
-  return (
-    backup.user.filter(row => row.parent === null).length === 1 &&
-    backup.user.every(row => row.parent === null || ids.user.has(row.parent)) &&
-    backup.user.every(
-      row => ids.instrument.has(row.currency) && ids.country.has(row.country)
-    ) &&
-    backup.country.every(row => ids.instrument.has(row.currency)) &&
-    backup.company.every(
-      row => row.country === null || ids.country.has(row.country)
-    ) &&
-    owns(backup.merchant) &&
-    backup.account.every(
-      row =>
-        ids.user.has(row.user) &&
-        ids.instrument.has(row.instrument) &&
-        (row.company === null || ids.company.has(row.company))
-    ) &&
-    owns(backup.tag) &&
-    hasAcyclicTagGraph(backup.tag) &&
-    backup.budget.every(
-      row =>
-        ids.user.has(row.user) && (row.tag === null || ids.tag.has(row.tag))
-    ) &&
-    owns(backup.reminder) &&
-    backup.reminder.every(
-      row =>
-        accountReferences(row) &&
-        tagReferences(row.tag) &&
-        merchantReference(row.merchant)
-    ) &&
-    owns(backup.reminderMarker) &&
-    backup.reminderMarker.every(
-      row =>
-        accountReferences(row) &&
-        tagReferences(row.tag) &&
-        merchantReference(row.merchant) &&
-        ids.reminder.has(row.reminder)
-    ) &&
-    owns(backup.transaction) &&
-    backup.transaction.every(
-      row =>
-        transactionAccountReferences(row) &&
-        tagReferences(row.tag) &&
-        merchantReference(row.merchant) &&
-        (row.reminderMarker === null ||
-          ids.reminderMarker.has(row.reminderMarker))
-    )
-  )
-}
-
-function hasAcyclicTagGraph(rows: TFullBackupWire['tag']): boolean {
-  const parentById = new Map(rows.map(row => [row.id, row.parent]))
-  return rows.every(row => {
-    const visited = new Set<string>()
-    let id: string | null | undefined = row.id
-    while (id !== null) {
-      if (id === undefined || visited.has(id)) return false
-      visited.add(id)
-      id = parentById.get(id)
-    }
-    return true
-  })
 }

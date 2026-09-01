@@ -8,12 +8,10 @@ import type {
   ByDate,
   TISODate,
   TFxAmount,
-  AccountType,
 } from '6-shared/types'
 
 type Account = {
   inBudget?: boolean
-  type?: AccountType
   [key: string]: any
 }
 

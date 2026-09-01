@@ -167,11 +167,13 @@ describe('diffStores', () => {
 
   it('creates and updates reminder markers', () => {
     const current = makeSnapshot({
+      reminder: { reminder: makeReminder({ id: 'reminder' }) },
       reminderMarker: {
         existing: makeReminderMarker({ id: 'existing', comment: 'Before' }),
       },
     })
     const desired = makeSnapshot({
+      reminder: { reminder: makeReminder({ id: 'reminder' }) },
       reminderMarker: {
         existing: makeReminderMarker({ id: 'existing', comment: 'After' }),
         created: makeReminderMarker({ id: 'created', notify: true }),
@@ -200,6 +202,38 @@ describe('diffStores', () => {
         { id: 'existing', comment: 'After' },
       ],
     })
+  })
+
+  it('does not recreate canonical rows whose required owner is absent', () => {
+    const current = makeSnapshot()
+    const desired = makeSnapshot({
+      budget: {
+        '2026-01-01#missing-tag': makeBudget({
+          id: '2026-01-01#missing-tag',
+          tag: 'missing-tag',
+        }),
+      },
+      reminderMarker: {
+        orphan: makeReminderMarker({
+          id: 'orphan',
+          reminder: 'missing-reminder',
+        }),
+      },
+      transaction: {
+        linked: makeTransaction({
+          id: 'linked',
+          reminderMarker: 'orphan',
+        }),
+      },
+    })
+
+    const patch = diffStores(current, desired)
+
+    expect(patch.budget).toBeUndefined()
+    expect(patch.reminderMarker).toBeUndefined()
+    expect(patch.transaction).toEqual([
+      expect.objectContaining({ reminderMarker: null }),
+    ])
   })
 
   it('normalizes a deleted reminder marker as absence', () => {
@@ -335,9 +369,11 @@ describe('diffStores removals', () => {
     const desired = makeSnapshot()
 
     expect(diffStores(current, desired)).toEqual({
+      // Planning order follows the entity graph; the push run re-sorts
+      // deletions into cleanup order before anything is transmitted.
       deletion: [
-        { id: 'acc', object: 'account' },
         { id: 'shop', object: 'merchant' },
+        { id: 'acc', object: 'account' },
         { id: 'food', object: 'tag' },
       ],
     })

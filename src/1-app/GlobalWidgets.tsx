@@ -6,6 +6,7 @@ import { HistoryPanel } from '3-widgets/History/HistoryPanel'
 import { RestoredOutboxNotice } from '3-widgets/History/RestoredOutboxNotice'
 import { PersistenceWarningNotice } from '3-widgets/PersistenceWarningNotice'
 import { OutboxRecoveryNotice } from '3-widgets/OutboxRecoveryNotice'
+import { SyncProgressDialog } from '3-widgets/SyncProgressDialog'
 
 /** The screens that can be opened from anywhere, and the notices.
  *
@@ -19,6 +20,7 @@ export const GlobalWidgets = () => {
       <OutboxRecoveryNotice />
       <PersistenceWarningNotice />
       <RestoredOutboxNotice />
+      <SyncProgressDialog />
 
       <HistoryPanel />
       <TransactionListDrawer />

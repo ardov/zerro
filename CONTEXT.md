@@ -48,6 +48,22 @@ The ordered, durable commands applied locally but not yet accepted by ZenMoney.
 It is also the durable undo stack.
 _Avoid_: Local journal, pending patch
 
+**Push run**:
+A fixed prefix of the Outbox captured when a deliberate synchronization starts.
+It may be delivered through several requests while later commands wait for the
+next run.
+_Avoid_: Upload session, background sync
+
+**Chunk**:
+One size-bounded request inside a Push run. Its successful response is applied
+and persisted before the next Chunk starts.
+_Avoid_: Page, batch command
+
+**Cleanup phase**:
+The deletion-only tail of a multi-Chunk Push run, after all upserts have been
+accepted. Deletions run in reverse dependency order.
+_Avoid_: Garbage collection, rollback
+
 **Redo stack**:
 Commands undone in the current browser session and available to reapply. It is
 never durable.

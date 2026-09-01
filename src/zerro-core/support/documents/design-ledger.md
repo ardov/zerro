@@ -1,6 +1,6 @@
 # Zerro Core design ledger
 
-- Updated: 2026-08-22
+- Updated: 2026-08-31
 - Purpose: settled decisions, accepted risks, active bridges, and open questions
   — each stated once, with only the reasoning that keeps it from being
   re-litigated. Implementation history stays in Git. Questions that need the
@@ -109,6 +109,24 @@ restated there:
   still clears it up front through `prepareClientSync`, keeping the commit
   boundary where it was recorded. Otherwise pull-only sync would fix undo while
   still discarding redo every few idle minutes.
+- A Push run captures and squashes the current Outbox prefix. A body at or below
+  2 MiB remains one request unless Cleanup needs singleton-account or
+  singleton-tag phases. Multi-Chunk runs send dependency-ordered upserts, then
+  one account per Cleanup Chunk, then surviving removals with child-first
+  singleton tags last. Later commands are not added to the active run.
+- Each successful Chunk is a durable acknowledgement boundary. The first turns
+  the captured prefix into one remaining command, later acknowledgements remove
+  exact item receipts, and a request without a processed response stays pending
+  for at-least-once delivery. Web Redux and the CLI are adapters over the same
+  pure Core run module and the same delivery loop: they supply transport,
+  persistence and presentation, while what counts as retryable, how long to
+  wait and how to repack after a 413 belong to Core.
+- Which entity references exist, which of them a dangling pointer invalidates,
+  and which ZenMoney legitimately leaves orphaned are declared once as a
+  reference graph. Validation, backup warnings, restore planning and push
+  sanitation all read it, and the dependency write order is derived from it.
+  Deletion order is not: it encodes observed server cascade behaviour — an
+  account first, a tag last — and is declared with that reason attached.
 - Unsynchronized intent is never silent: a leave confirmation before unload, and
   a notice after load when the restored outbox is not empty. Nothing else
   distinguishes "saved locally" from "saved in ZenMoney".
@@ -129,8 +147,8 @@ point. What is still open is listed in
 - A transition is a compact normalized delta — changed fields, deletions, new
   cursor — not a raw ZenMoney response and not a restore intent, and it must
   satisfy `applyPatch(before, transition) === after`. An empty pull creates no
-  point; one successful push creates exactly one, covering the accepted local
-  and remote changes together.
+  point; each accepted Push Chunk creates exactly one, covering the accepted
+  local and remote changes together.
 - Compaction folds only the oldest prefix into a `retention` checkpoint and
   never renumbers, so every retained point stays forward-replayable. Retention
   is the stricter of 90 days of server time and 100 MiB of logical entry bytes,
@@ -139,7 +157,9 @@ point. What is still open is listed in
 - There are no branches: a full reload appends another checkpoint to the same
   line, so older history stays reachable through ordinary retention.
 - Validation runs on the reconstructed `base` at load, not on every response:
-  root and debt cardinalities, references, tag-parent cycles. A failure keeps a
+  root and debt cardinalities, references Zerro must dereference, and tag-parent
+  cycles. ZenMoney-retained budgets whose tag is gone and markers whose
+  reminder is gone are canonical rows, not corruption. A failure keeps a
   structurally valid outbox, raises the session-only `journalRecoveryRequired`
   flag, and is resolved by a full reload that writes a `recovery` checkpoint. A
   historical point is validated when opened and is simply unavailable if that
@@ -196,13 +216,13 @@ point. What is still open is listed in
   has no diff, being a state rather than a change.
 - Labels are captured at issue time as an inert optional
   `label?: { verb, args }` on `Command` and are never stored in the journal: a
-  push squashes however many commands it acknowledges into one transition, and
-  the command is the only carrier that survives issue, undo/redo, and push. So
-  history older than the last push has no label, and every row must survive a
-  missing one. `args` carries the referenced id and a name snapshot, so a later
-  rename still resolves through the id while a deletion renders under the name
-  it had. Verbs are a closed union in Core, making a missing translation a
-  compile-time gap rather than a blank label. A label stays inert:
+  Push run squashes its captured commands into one unlabeled remaining command,
+  while accepted Chunks become journal transitions. So history older than the
+  last push has no label, and every row must survive a missing one. `args`
+  carries the referenced id and a name snapshot, so a later rename still
+  resolves through the id while a deletion renders under the name it had.
+  Verbs are a closed union in Core, making a missing translation a compile-time
+  gap rather than a blank label. A label stays inert:
   materialization and transport never read it, and a corrupt one is dropped
   without failing its command — a bad label must never be why a durable outbox
   fails to load.
@@ -284,10 +304,18 @@ point. What is still open is listed in
 Backup import is the file-shaped form of the same operation, and carries its own
 settled rules:
 
-- Only a complete backup produced by Zerro is importable; an incremental or
-  partial ZenMoney diff is not a backup. There is no format envelope and no
-  version field — the exported shape is the contract, and an incompatible change
-  to it requires an explicit validator update.
+- Only a complete snapshot is importable; an incremental or partial ZenMoney
+  diff is not a backup. There is no format envelope and no version field, so
+  protocol additions are classified separately from corruption. Unknown row
+  fields, top-level data, and future semantic values produce aggregated
+  warnings and an explicit “Restore anyway” confirmation. Missing required
+  collections, invalid primitive shapes, duplicate identities, broken required
+  references, cycles, and root/debt cardinality failures remain non-overridable.
+- The wire adapter is deliberately open to protocol values Zerro does not yet
+  understand. Known domain behavior tests exact known strings; future values
+  are carried through restore as opaque strings. Unknown fields that the
+  allow-list-driven command materializer cannot express are named by the
+  warning rather than silently presented as fully supported.
 - Export reads `state.data.base`, so pending local commands are never part of a
   backup. When the outbox is not empty, export says so and lets the user cancel
   or download anyway; it never triggers a sync to make the file complete.
@@ -309,8 +337,8 @@ settled rules:
   but never written, and user billing and subscription fields are never
   restored.
 - Out of scope by decision rather than omission: partial or merge import,
-  exporting `current`, restoring an outbox from a backup, automatic sync after a
-  restore, and splitting one restore across several network requests.
+  exporting `current`, restoring an outbox from a backup, and automatic sync
+  after a restore.
 
 Restore is not undo, and three consequences must be visible in the UI rather
 than only recorded here. The backup-import confirmation states all three and
@@ -389,24 +417,23 @@ shows the per-entity counts the restore would write:
   errors, without rebuilding factory defaults or predicting balances. Envelope
   creation, rename, settings, and structure mutation, and transaction update and
   delete, stay out of scope.
-- Sync is explicit and reuses the Core primary-only transport and canonical
-  prefix acknowledgement, accepting the same whole-prefix and silent-drop risk
-  as the app; satisfaction checks, quarantine, and retry are deferred. An empty
-  outbox never needs a token or the network path, an explicit 4xx refusal is a
-  definitive local no-op, and any uncertainty after the request may have reached
-  ZenMoney preserves the outbox and reports an unknown, non-retryable outcome
-  rather than inviting a blind retry.
+- Sync is explicit and reuses Core's bounded Push run. An empty outbox never
+  needs a token or the network path; each accepted Chunk is saved before the
+  next; HTTP 413 repacks; and network, 429, and 5xx failures retry the exact
+  request up to three times. An explicit deterministic 4xx stops without
+  changing the unconfirmed remainder. The CLI exposes no progress UI but owns
+  the same delivery and persistence boundaries as the app.
 
 ## Accepted product risks
 
 - Upsert may recreate an entity that disappeared remotely while a local patch
   remained pending.
-- A successful response is trusted as whole-batch acknowledgement, so a server
+- A successful response is trusted as whole-Chunk acknowledgement, so a server
   that silently rejects part of a request can cause local intent to be dropped.
   Probing confirmed the mechanism exists — an older or equal `changed` is
   ignored under HTTP 200, and some invalid field values are dropped while the
-  write applies — and the product accepts the risk to keep one stable
-  whole-prefix acknowledgement rule.
+  write applies — and the product accepts the risk to keep one stable Chunk
+  acknowledgement rule.
 - Persisted replica V2 has a one-way compatibility reader that preserves its
   applied prefix and discards its redo tail: a bounded migration, not a general
   migration framework.

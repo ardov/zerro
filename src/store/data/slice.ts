@@ -2,6 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 import {
   acceptCanonicalPatch,
+  type TAcceptedPushChunk,
   appendOutbox,
   applyPatch,
   applyOutboxCommand,
@@ -42,11 +43,11 @@ interface DataSlice {
   inbox?: TServerInbox | null
 }
 
+export type TAcceptedPushReplica = Omit<TAcceptedPushChunk, 'next' | 'progress'>
+
+/** A canonical pull response waiting to be rebased over the outbox. */
 export interface TServerInbox extends TNormalizedPatch {
-  sentOutboxCount?: number
   fullReload?: boolean
-  /** Whether this response came from a deliberate push rather than a pull. */
-  push?: boolean
 }
 
 // INITIAL STATE
@@ -147,9 +148,7 @@ const { reducer, actions } = createSlice({
     ),
     rebaseServerInbox: withPerf('rebaseServerInbox', state => {
       if (!state.inbox) return
-      // `push` is read by the persistence middleware, not here.
-      const { sentOutboxCount, fullReload, push, ...canonicalPatch } =
-        state.inbox
+      const { fullReload, ...canonicalPatch } = state.inbox
       if (fullReload) {
         const recoveringJournal = state.journalRecoveryRequired
         const checkpoint = applyPatch(createEmptyDataStore(), canonicalPatch)
@@ -189,8 +188,7 @@ const { reducer, actions } = createSlice({
       }
       const accepted = acceptCanonicalPatch(
         { base: state.base, outbox: state.outbox, redo: state.redo },
-        canonicalPatch,
-        sentOutboxCount
+        canonicalPatch
       )
 
       state.base = accepted.base
@@ -204,6 +202,17 @@ const { reducer, actions } = createSlice({
       }
       state.inbox = null
     }),
+    acceptClientPushChunk: withPerf(
+      'acceptClientPushChunk',
+      (state, { payload }: PayloadAction<TAcceptedPushReplica>) => {
+        state.base = payload.base
+        state.current = payload.current
+        state.outbox = payload.outbox
+        state.redo = payload.redo
+        state.rootUserId = getRootUserId(payload.base.user) ?? state.rootUserId
+        state.restoredOutboxCount = 0
+      }
+    ),
     appendClientCommand: withPerf(
       'appendClientCommand',
       (state, { payload }: PayloadAction<TCommand>) => {
@@ -305,6 +314,7 @@ export const {
   rebaseServerInbox,
   appendClientCommand,
   prepareClientSync,
+  acceptClientPushChunk,
   undoClientCommand,
   redoClientCommand,
   restoreOutboxPosition,

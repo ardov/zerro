@@ -4,6 +4,7 @@ export * from './model/replay'
 export * from './primitives'
 export * from './model/color'
 export * from './model/store'
+export * from './model/entityGraph'
 export * from './model/validateStore'
 
 export * from './entities/instruments'

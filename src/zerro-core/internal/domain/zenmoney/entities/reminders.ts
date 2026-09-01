@@ -4,6 +4,7 @@ import type {
   ById,
   Modify,
   OptionalExceptFor,
+  TOpenEnum,
 } from '../../foundation/types'
 import type { TCoreContext } from '../../../../types'
 import type { TAccountId } from './accounts'
@@ -22,7 +23,9 @@ import type { TUser, TUserId } from './users'
 
 export type TReminderId = string
 
-export type TReminderInterval = 'day' | 'week' | 'month' | 'year'
+export const reminderIntervals = ['day', 'week', 'month', 'year'] as const
+
+export type TReminderInterval = TOpenEnum<(typeof reminderIntervals)[number]>
 
 export type TReminder = {
   id: TReminderId
@@ -45,7 +48,7 @@ export type TReminder = {
   step: number | null
   points: number[] | null
   startDate: TISODate
-  endDate: TISODate
+  endDate: TISODate | null
   notify: boolean
 }
 
@@ -92,7 +95,7 @@ export type TReminderFactoryDraft = Modify<
   OptionalExceptFor<TReminder, 'user' | 'incomeAccount' | 'outcomeAccount'>,
   {
     startDate?: TDateDraft
-    endDate?: TDateDraft
+    endDate?: TDateDraft | null
   }
 >
 
@@ -122,14 +125,15 @@ export function makeReminder(
     step: draft.step === undefined ? 0 : draft.step,
     points: draft.points === undefined ? [0] : draft.points,
     startDate: toISODate(draft.startDate ?? ctx.now()),
-    endDate: toISODate(draft.endDate ?? ctx.now()),
+    endDate:
+      draft.endDate === null ? null : toISODate(draft.endDate ?? ctx.now()),
     notify: draft.notify ?? false,
   }
 }
 
 export type TReminderDraft = Modify<
   Omit<TReminderFactoryDraft, 'user'>,
-  { startDate?: TDateDraft; endDate?: TDateDraft }
+  { startDate?: TDateDraft; endDate?: TDateDraft | null }
 >
 
 export function compileSetReminder(
@@ -152,7 +156,9 @@ export function compileSetReminder(
         } = item as TReminderDraft
         const patch: TReminderPatch = { ...fields, id: item.id }
         if (startDate !== undefined) patch.startDate = toISODate(startDate)
-        if (endDate !== undefined) patch.endDate = toISODate(endDate)
+        if (endDate !== undefined) {
+          patch.endDate = endDate === null ? null : toISODate(endDate)
+        }
         return patch
       }
 

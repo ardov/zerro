@@ -16,7 +16,7 @@ export {
   restoreOutboxPosition,
   resetData,
 } from './slice'
-export { applyServerPatch } from './applyServerPatch'
+export { applyPushChunk, applyServerPatch } from './applyServerPatch'
 export {
   clearPersistedLocalData,
   compactPersistedReplica,
@@ -28,7 +28,6 @@ export {
 // SELECTORS
 export {
   getPendingSyncDiff,
-  getPendingSyncTransport,
   getCanUndoClientCommand,
   getCanRedoClientCommand,
   getJournalRecoveryReason,

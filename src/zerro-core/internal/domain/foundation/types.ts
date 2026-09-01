@@ -10,6 +10,12 @@ export type ByDate<T> = Record<TISODate, T>
 /** Override properties of T with properties of R */
 export type Modify<T, R> = Omit<T, keyof R> & R
 
+/**
+ * A discriminator the server owns: one of the values this version knows, or
+ * any other string it may introduce. Autocomplete keeps the known values.
+ */
+export type TOpenEnum<TKnown extends string> = TKnown | (string & {})
+
 /** Sparse writable intent for an entity identified by id. */
 export type EntityPatch<
   TEntity extends { id: string | number },

@@ -13,6 +13,9 @@ import { sync } from './sync'
 import { stageCreateTransaction } from './transactionCreate'
 import { loadWorkspace, saveWorkspace } from '../adapters/stateFile'
 
+/** Backoff is real now, so tests hand the driver a wait that returns at once. */
+const noSleep = async () => {}
+
 const directories: string[] = []
 let context: TToolContext
 let accountId: string
@@ -53,7 +56,11 @@ afterEach(async () => {
 describe('explicit sync', () => {
   it('returns a no-network success when the outbox is empty', async () => {
     const fetchMock = vi.fn()
-    const result = await sync(context, { fetch: fetchMock, now: context.now })
+    const result = await sync(context, {
+      fetch: fetchMock,
+      now: context.now,
+      sleep: noSleep,
+    })
 
     expect(result).toMatchObject({
       effect: 'remote',
@@ -94,6 +101,7 @@ describe('explicit sync', () => {
     const result = await sync(context, {
       fetch: fetchMock as typeof fetch,
       now: context.now,
+      sleep: noSleep,
     })
 
     expect(result).toMatchObject({
@@ -109,6 +117,48 @@ describe('explicit sync', () => {
     })
   })
 
+  it('repackages 413 and persists each accepted chunk before continuing', async () => {
+    await stageExpense()
+    await stageCreateTransaction(context, 'sync-expense-2', {
+      kind: 'expense',
+      accountId,
+      amount: 7.5,
+      date: '2026-07-06',
+    })
+    let rejected = 0
+    let accepted = 0
+    const fetchMock = vi.fn(
+      async (_url: string | URL | Request, init?: RequestInit) => {
+        const { currentClientTimestamp: _clientTimestamp, ...body } =
+          JSON.parse(String(init?.body))
+        if ((body.transaction?.length ?? 0) > 1) {
+          rejected += 1
+          return new Response('too large', { status: 413 })
+        }
+        accepted += 1
+        return new Response(
+          JSON.stringify({
+            ...body,
+            serverTimestamp: 2_000_000_000 + accepted,
+          }),
+          { status: 200 }
+        )
+      }
+    )
+
+    const result = await sync(context, {
+      fetch: fetchMock as typeof fetch,
+      now: context.now,
+      sleep: noSleep,
+      pushMaxBytes: 10_000,
+    })
+
+    expect(rejected).toBeGreaterThan(0)
+    expect(accepted).toBe(2)
+    expect(result.data.pendingCommandCount).toBe(0)
+    expect((await loadWorkspace(context, 'fixture')).state.outbox).toEqual([])
+  })
+
   it('preserves staged intent on uncertain transport/server failures', async () => {
     await stageExpense()
     const before = await readFile(context.statePath, 'utf8')
@@ -119,6 +169,7 @@ describe('explicit sync', () => {
           throw new Error('offline')
         }) as typeof fetch,
         now: context.now,
+        sleep: noSleep,
       })
     ).rejects.toMatchObject({
       code: 'NETWORK_FAILURE',
@@ -133,6 +184,7 @@ describe('explicit sync', () => {
           async () => new Response('server error', { status: 500 })
         ) as typeof fetch,
         now: context.now,
+        sleep: noSleep,
       })
     ).rejects.toMatchObject({
       code: 'ZENMONEY_REJECTED',
@@ -147,6 +199,7 @@ describe('explicit sync', () => {
           async () => new Response('not JSON', { status: 200 })
         ) as typeof fetch,
         now: context.now,
+        sleep: noSleep,
       })
     ).rejects.toMatchObject({
       code: 'INVALID_ZENMONEY_RESPONSE',
@@ -165,6 +218,7 @@ describe('explicit sync', () => {
           async () => new Response('invalid request', { status: 400 })
         ) as typeof fetch,
         now: context.now,
+        sleep: noSleep,
       })
     ).rejects.toMatchObject({
       code: 'ZENMONEY_REJECTED',
@@ -181,6 +235,7 @@ describe('explicit sync', () => {
           })
       ) as typeof fetch,
       now: context.now,
+      sleep: noSleep,
     })
     expect(result.warnings).toEqual([
       expect.objectContaining({ code: 'CANONICAL_TRANSACTION_MISSING' }),

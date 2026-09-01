@@ -68,7 +68,16 @@ export type {
   TBankOperationId,
   TZmTransaction,
 } from 'zerro-core/internal/domain/zenmoney'
+export type { TOpenEnum } from 'zerro-core/internal/domain/foundation/types'
 export { AccountType } from 'zerro-core/internal/domain/zenmoney'
+export {
+  accountOffsetIntervals,
+  accountPayoffIntervals,
+  accountTypes,
+  balanceCorrectionTypes,
+  reminderIntervals,
+  reminderMarkerStates,
+} from 'zerro-core/internal/domain/zenmoney'
 
 // export type TToken = TAccessToken['access_token']
 

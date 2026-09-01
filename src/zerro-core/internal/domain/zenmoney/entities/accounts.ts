@@ -4,6 +4,7 @@ import type {
   EntityPatch,
   Modify,
   OptionalExceptFor,
+  TOpenEnum,
 } from '../../foundation/types'
 import type { TCoreContext } from '../../../../types'
 import type { TCompanyId } from './companies'
@@ -31,6 +32,38 @@ export enum AccountType {
   Debt = 'debt',
 }
 
+/**
+ * ZenMoney owns these discriminators and may add values before Zerro knows
+ * their behavior. The known values are listed once here: the domain type, the
+ * wire schema and the backup warning all read the same list, and an unknown
+ * string stays representable so a complete backup can still be restored.
+ */
+export const accountTypes = Object.values(AccountType)
+
+export const balanceCorrectionTypes = [
+  'request',
+  'createCorrection',
+  'disabled',
+] as const
+
+export const accountOffsetIntervals = ['day', 'week', 'month', 'year'] as const
+
+export const accountPayoffIntervals = ['month', 'year'] as const
+
+export type TAccountType = TOpenEnum<AccountType>
+
+export type TBalanceCorrectionType = TOpenEnum<
+  (typeof balanceCorrectionTypes)[number]
+>
+
+export type TAccountOffsetInterval = TOpenEnum<
+  (typeof accountOffsetIntervals)[number]
+>
+
+export type TAccountPayoffInterval = TOpenEnum<
+  (typeof accountPayoffIntervals)[number]
+>
+
 export type TAccount = {
   id: TAccountId
 
@@ -42,7 +75,7 @@ export type TAccount = {
   title: string
   role: number | null
   company: TCompanyId | null
-  type: AccountType
+  type: TAccountType
   syncID: string[] | null
   balance: TUnits
 
@@ -53,7 +86,7 @@ export type TAccount = {
   inBalance: boolean
   savings: boolean | null
   enableCorrection: boolean
-  balanceCorrectionType: 'request' | null
+  balanceCorrectionType: TBalanceCorrectionType | null
   enableSMS: boolean
   archive: boolean
   private: boolean
@@ -71,13 +104,13 @@ export type TAccount = {
   endDateOffset: number | null
 
   /** Meaningful only for loan and deposit accounts; otherwise usually null. */
-  endDateOffsetInterval: 'day' | 'week' | 'month' | 'year' | null
+  endDateOffsetInterval: TAccountOffsetInterval | null
 
   /** Meaningful only for loan and deposit accounts; otherwise usually null. */
   payoffStep: number | null
 
   /** Meaningful only for loan and deposit accounts; otherwise usually null. */
-  payoffInterval: 'month' | 'year' | null
+  payoffInterval: TAccountPayoffInterval | null
 }
 
 /** Fields the factory cannot default: creation intent must supply them. */

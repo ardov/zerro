@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { convertDiff, parseFullBackup } from '6-shared/api/zm-adapter'
-import type { TDataStore, TNormalizedPatch } from '6-shared/types'
+import {
+  globalBudgetTagId,
+  type TDataStore,
+  type TNormalizedPatch,
+} from '6-shared/types'
 import type { AppDispatch, AppThunk, RootState } from 'store'
 import { appendClientCommand } from 'store/data'
 import { makeTestRootState } from 'store/testing'
@@ -15,9 +19,11 @@ import { getRawGoals } from 'zerro-core/internal/domain/zerro/goals/read'
 import { HiddenDataType } from 'zerro-core/internal/domain/zerro/hidden-data'
 import {
   makeAccount,
+  makeBudget,
   makeInstrument,
   makeMerchant,
   makeReminder,
+  makeReminderMarker,
   makeStore,
   makeTag,
   makeTransaction,
@@ -124,6 +130,161 @@ function makeThunkRunner(initial: RootState) {
 }
 
 describe('parseFullBackup', () => {
+  it('accepts the wire variants observed in a complete ZenMoney backup', () => {
+    const file = JSON.parse(
+      toBackupFile(
+        makeSnapshot({
+          merchant: {
+            shop: makeMerchant({ id: 'shop', title: 'Shop' }),
+          },
+          account: {
+            acc: makeAccount({ id: 'acc', title: 'Cash' }),
+          },
+          reminder: {
+            reminder: makeReminder({
+              id: 'reminder',
+              incomeAccount: 'acc',
+              outcomeAccount: 'acc',
+            }),
+          },
+          transaction: {
+            transaction: makeTransaction({
+              id: 'transaction',
+              incomeAccount: 'acc',
+              outcomeAccount: 'acc',
+            }),
+          },
+        })
+      )
+    ) as {
+      merchant: Array<Record<string, unknown>>
+      account: Array<Record<string, unknown>>
+      reminder: Array<Record<string, unknown>>
+      transaction: Array<Record<string, unknown>>
+    }
+    file.merchant[0].mcc = null
+    file.account.find(account => account.id === 'acc')!.balanceCorrectionType =
+      'createCorrection'
+    file.reminder[0].endDate = null
+    file.transaction[0].incomeBankID = 'income-operation'
+    file.transaction[0].outcomeBankID = 'outcome-operation'
+
+    const parsed = parseFullBackup(JSON.stringify(file))
+
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    expect(parsed.store.account.acc.balanceCorrectionType).toBe(
+      'createCorrection'
+    )
+    expect(parsed.store.reminder.reminder.endDate).toBeNull()
+    expect(parsed.store.transaction.transaction).toMatchObject({
+      incomeBankID: 'income-operation',
+      outcomeBankID: 'outcome-operation',
+    })
+  })
+
+  /**
+   * Every warning the file itself can produce, in one backup: a collection and
+   * a row field this version has no meaning for, a known field the write API
+   * gives it no way to send back, and a discriminator value it does not know.
+   * None of them may reject the backup.
+   */
+  it('reports everything it does not fully understand and still accepts', () => {
+    const file = JSON.parse(
+      toBackupFile(
+        makeSnapshot({
+          merchant: {
+            first: makeMerchant({ id: 'first', title: 'First' }),
+            second: makeMerchant({ id: 'second', title: 'Second' }),
+          },
+          account: {
+            future: makeAccount({ id: 'future', title: 'Future' }),
+          },
+        })
+      )
+    ) as Record<string, Array<Record<string, unknown>>> & {
+      futureCollection?: unknown
+    }
+    file.futureCollection = [{ id: 'one' }, { id: 'two' }]
+    file.merchant.forEach(merchant => {
+      merchant.futureField = true
+    })
+    file.merchant[0].mcc = 5411
+    file.account.find(account => account.id === 'future')!.type = 'future-type'
+
+    const parsed = parseFullBackup(JSON.stringify(file))
+
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    expect(parsed.warnings).toEqual([
+      { reason: 'unknownField', path: 'futureCollection', count: 2 },
+      { reason: 'unknownField', path: 'merchant.futureField', count: 2 },
+      { reason: 'unwritableField', path: 'merchant.mcc', count: 1 },
+      { reason: 'unknownValue', path: 'account.type', count: 1 },
+    ])
+    expect(parsed.store.account.future.type).toBe('future-type')
+  })
+
+  it('warns about orphaned budgets and markers retained by ZenMoney', () => {
+    const parsed = parseFullBackup(
+      toBackupFile(
+        makeSnapshot({
+          account: {
+            acc: makeAccount({ id: 'acc', title: 'Cash' }),
+          },
+          budget: {
+            '2026-01-01#deleted-tag': makeBudget({
+              id: '2026-01-01#deleted-tag',
+              tag: 'deleted-tag',
+            }),
+          },
+          reminderMarker: {
+            marker: makeReminderMarker({
+              id: 'marker',
+              reminder: 'deleted-reminder',
+              incomeAccount: 'acc',
+              outcomeAccount: 'acc',
+            }),
+          },
+        })
+      )
+    )
+
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    expect(parsed.warnings).toEqual([
+      {
+        reason: 'danglingReference',
+        path: 'budget.tag',
+        count: 1,
+      },
+      {
+        reason: 'danglingReference',
+        path: 'reminderMarker.reminder',
+        count: 1,
+      },
+    ])
+  })
+
+  it('treats the global budget tag as a valid server relation', () => {
+    const parsed = parseFullBackup(
+      toBackupFile(
+        makeSnapshot({
+          budget: {
+            [`2026-01-01#${globalBudgetTagId}`]: makeBudget({
+              id: `2026-01-01#${globalBudgetTagId}`,
+              tag: globalBudgetTagId,
+            }),
+          },
+        })
+      )
+    )
+
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    expect(parsed.warnings).toEqual([])
+  })
+
   it('reads an exported backup back into the store it described', () => {
     const store = makeSnapshot({
       account: {
@@ -227,7 +388,6 @@ describe('parseFullBackup', () => {
     const instruments = complete.instrument as unknown[]
     const invalidFiles = [
       { ...complete, deletion: [] },
-      { ...complete, unsupportedCollection: [] },
       { ...complete, serverTimestamp: -1 },
       { ...complete, account: [{ id: 'only-an-id' }] },
       {
@@ -328,6 +488,79 @@ describe('importBackup', () => {
     expect(restored.account.acc.title).toBe('Cash')
     expect(restored.transaction.tr.outcome).toBe(100)
     expect(restored.transaction.later.deleted).toBe(true)
+  })
+
+  it('restores and re-exports the observed ZenMoney wire variants', () => {
+    const current = makeSnapshot({
+      account: { acc: makeAccount({ id: 'acc', title: 'Cash' }) },
+      reminder: {
+        reminder: makeReminder({
+          id: 'reminder',
+          incomeAccount: 'acc',
+          outcomeAccount: 'acc',
+        }),
+      },
+      transaction: {
+        transaction: makeTransaction({
+          id: 'transaction',
+          incomeAccount: 'acc',
+          outcomeAccount: 'acc',
+        }),
+      },
+    })
+    const backup = makeSnapshot({
+      account: {
+        acc: makeAccount({
+          id: 'acc',
+          title: 'Cash',
+          balanceCorrectionType: 'createCorrection',
+        }),
+      },
+      reminder: {
+        reminder: makeReminder({
+          id: 'reminder',
+          incomeAccount: 'acc',
+          outcomeAccount: 'acc',
+          endDate: null,
+        }),
+      },
+      transaction: {
+        transaction: makeTransaction({
+          id: 'transaction',
+          incomeAccount: 'acc',
+          outcomeAccount: 'acc',
+          incomeBankID: 'income-operation',
+          outcomeBankID: 'outcome-operation',
+        }),
+      },
+    })
+    const runner = makeThunkRunner(makeTestRootState(current))
+
+    expect(runner.dispatch(importBackup(backup))).toEqual({
+      ok: true,
+      applied: true,
+    })
+
+    const restored = runner.state().data.current
+    expect(restored.account.acc.balanceCorrectionType).toBe('createCorrection')
+    expect(restored.reminder.reminder.endDate).toBeNull()
+    expect(restored.transaction.transaction).toMatchObject({
+      incomeBankID: 'income-operation',
+      outcomeBankID: 'outcome-operation',
+    })
+    const exported = JSON.parse(toBackupFile(restored)) as {
+      account: Array<Record<string, unknown>>
+      reminder: Array<Record<string, unknown>>
+      transaction: Array<Record<string, unknown>>
+    }
+    expect(
+      exported.account.find(account => account.id === 'acc')
+    ).toMatchObject({ balanceCorrectionType: 'createCorrection' })
+    expect(exported.reminder[0]).toMatchObject({ endDate: null })
+    expect(exported.transaction[0]).toMatchObject({
+      incomeBankID: 'income-operation',
+      outcomeBankID: 'outcome-operation',
+    })
   })
 
   it('writes nothing when the backup matches the current data', () => {

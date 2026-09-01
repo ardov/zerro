@@ -8,12 +8,17 @@
  */
 import {
   AccountType,
+  type TAccountType,
   accountWritableFields,
   budgetWritableFields,
+  entityUpsertOrder,
   getRootUser,
   intentEntityKeys,
+  isAbsentRow,
   isSameEntityFieldValue,
   merchantWritableFields,
+  pruneUnwritableRows,
+  referencesFrom,
   reminderMarkerWritableFields,
   reminderWritableFields,
   tagWritableFields,
@@ -55,8 +60,7 @@ type TRemovalContext = {
   deletedAccountIds: Set<string>
 }
 
-type TEntityRow = {
-  key: TIntentEntityKey
+type TEntityDefinition = {
   writableFields: readonly string[]
   creationFields?: readonly string[]
   semanticFields?: readonly string[]
@@ -71,7 +75,6 @@ type TEntityRow = {
     current: TDataStore,
     context: TRemovalContext
   ) => boolean
-  references?: readonly TReference[]
   generatedId?: boolean
   remap?: (row: TRow, mappings: TRestoreIdMappings) => TRow
   /**
@@ -83,17 +86,20 @@ type TEntityRow = {
   matchByIdOnly?: boolean
 }
 
-/** Dependency order: every rewritten reference is mapped before it is used. */
-const entityRows: readonly TEntityRow[] = [
-  {
-    key: 'user',
+/** A definition bound to its key and to the references it has to rewrite. */
+type TEntityRow = TEntityDefinition & {
+  key: TIntentEntityKey
+  references: readonly TReference[]
+}
+
+const entityDefinitions: Record<TIntentEntityKey, TEntityDefinition> = {
+  user: {
     writableFields: userWritableFields,
     removal: null,
     existingOnly: true,
     skip: row => row.parent !== null,
   },
-  {
-    key: 'account',
+  account: {
     writableFields: accountWritableFields,
     removal: 'deletion',
     skip: row => row.type === AccountType.Debt,
@@ -103,8 +109,7 @@ const entityRows: readonly TEntityRow[] = [
     generatedId: true,
     matchByIdOnly: true,
   },
-  {
-    key: 'merchant',
+  merchant: {
     writableFields: merchantWritableFields,
     removal: 'deletion',
     // The server silently refuses merchant deletion while an active debt
@@ -122,45 +127,27 @@ const entityRows: readonly TEntityRow[] = [
       ),
     generatedId: true,
   },
-  {
-    key: 'tag',
+  tag: {
     writableFields: tagWritableFields,
     removal: 'deletion',
     generatedId: true,
-    references: [{ field: 'parent', key: 'tag' }],
   },
-  {
-    key: 'reminder',
+  reminder: {
     writableFields: reminderWritableFields,
     removal: 'deletion',
     generatedId: true,
-    references: [
-      { field: 'incomeAccount', key: 'account' },
-      { field: 'outcomeAccount', key: 'account' },
-      { field: 'tag', key: 'tag', many: true },
-      { field: 'merchant', key: 'merchant' },
-    ],
     remap: (row, mappings) => ({
       ...row,
       comment: remapHiddenDataComment(row.comment, mappings),
     }),
   },
-  {
-    key: 'reminderMarker',
+  reminderMarker: {
     writableFields: reminderMarkerWritableFields,
     removal: 'deletion',
     generatedId: true,
-    isAbsent: row => row.state === 'deleted',
-    references: [
-      { field: 'incomeAccount', key: 'account' },
-      { field: 'outcomeAccount', key: 'account' },
-      { field: 'tag', key: 'tag', many: true },
-      { field: 'merchant', key: 'merchant' },
-      { field: 'reminder', key: 'reminder' },
-    ],
+    isAbsent: row => isAbsentRow('reminderMarker', row),
   },
-  {
-    key: 'transaction',
+  transaction: {
     writableFields: transactionWritableFields,
     creationFields: transactionIntentFields,
     semanticFields: transactionIntentFields,
@@ -171,33 +158,41 @@ const entityRows: readonly TEntityRow[] = [
     // See `bothLegsInsideDeletedAccounts` for why this is skipped.
     skipRemoval: (row, _current, context) =>
       bothLegsInsideDeletedAccounts(row, context),
-    references: [
-      { field: 'incomeAccount', key: 'account' },
-      { field: 'outcomeAccount', key: 'account' },
-      { field: 'tag', key: 'tag', many: true },
-      { field: 'merchant', key: 'merchant' },
-      { field: 'reminderMarker', key: 'reminderMarker' },
-    ],
   },
-  {
-    key: 'budget',
+  budget: {
     writableFields: budgetWritableFields,
     removal: 'zero',
     zeroFields: ['income', 'outcome'],
-    references: [{ field: 'tag', key: 'tag' }],
-    remap: (row, mappings) => {
-      const tag = mapId(mappings, 'tag', row.tag as TId | null)
-      return {
-        ...row,
-        tag,
-        id: toBudgetId(
-          row.date as Parameters<typeof toBudgetId>[0],
-          tag as Parameters<typeof toBudgetId>[1]
-        ),
-      }
-    },
+    // `tag` arrives already remapped: the identity is derived from it, never
+    // mapped a second time.
+    remap: row => ({
+      ...row,
+      id: toBudgetId(
+        row.date as Parameters<typeof toBudgetId>[0],
+        row.tag as Parameters<typeof toBudgetId>[1]
+      ),
+    }),
   },
-]
+}
+
+/**
+ * Definitions in dependency order, each carrying the references it has to
+ * rewrite. Both come from the entity graph: a reference to an entity whose ids
+ * a restore can reallocate is a reference this planner must remap.
+ */
+const entityRows: readonly TEntityRow[] = entityUpsertOrder.map(key => ({
+  ...entityDefinitions[key],
+  key,
+  references: referencesFrom(key).flatMap(reference =>
+    isRemappableKey(reference.to)
+      ? [{ field: reference.field, key: reference.to, many: reference.many }]
+      : []
+  ),
+}))
+
+function isRemappableKey(key: string): key is TIntentEntityKey {
+  return (intentEntityKeys as readonly string[]).includes(key)
+}
 
 export type TStoreDiffScope = {
   entities?: readonly TIntentEntityKey[]
@@ -227,6 +222,7 @@ export function buildRestorePlan(
   desired: TDataStore,
   options: TRestorePlannerOptions = {}
 ): TRestorePlan {
+  const target = normalizeRestoreTarget(desired)
   const scope = options.scope ?? {}
   const selectedKeys = new Set<string>(scope.entities ?? intentEntityKeys)
   const patch: TIntentPatch = {}
@@ -235,14 +231,14 @@ export function buildRestorePlan(
   const mappings: TRestoreIdMappings = {}
   const removalContext: TRemovalContext = { deletedAccountIds: new Set() }
 
-  seedRootUserMapping(current, desired, mappings)
-  seedDebtAccountMapping(current, desired, mappings)
+  seedRootUserMapping(current, target, mappings)
+  seedDebtAccountMapping(current, target, mappings)
 
   entityRows.forEach(row => {
     if (!selectedKeys.has(row.key)) return
 
     const currentById = (current[row.key] ?? {}) as TById
-    const desiredById = (desired[row.key] ?? {}) as TById
+    const desiredById = (target[row.key] ?? {}) as TById
     const activeCurrent = sortedRows(currentById).filter(
       entity =>
         !isSkipped(row, entity) &&
@@ -374,6 +370,17 @@ export function buildRestorePlan(
 
   if (deletion.length) patch.deletion = deletion
   return { patch, mappings }
+}
+
+/**
+ * Canonical ZenMoney snapshots may retain historical dependants after their
+ * owner disappeared. They are valid to read but cannot be recreated through
+ * the write API, so the entity graph's write rules decide what a restore
+ * target may contain: required-owner orphans are dropped, and references that
+ * would point at a dropped or never-recreated row are cleared.
+ */
+function normalizeRestoreTarget(desired: TDataStore): TDataStore {
+  return pruneUnwritableRows(desired)
 }
 
 function seedRootUserMapping(
@@ -597,7 +604,7 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
 function accountTypeOf(
   store: TDataStore,
   id: string | null
-): AccountType | undefined {
+): TAccountType | undefined {
   return id === null ? undefined : store.account[id]?.type
 }
 

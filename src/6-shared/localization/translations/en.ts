@@ -72,6 +72,23 @@ export const en: typeof ru = {
     total: 'Total',
   },
 
+  syncProgress: {
+    sendingTitle: 'Syncing changes',
+    waitingTitle: 'Retrying sync',
+    stoppedTitle: 'Sync stopped',
+    sendingDescription:
+      'Sending changes to Zenmoney. Accepted parts are saved after every request.',
+    waitingDescription: '{{error}}. Retrying in {{count}} s.',
+    stoppedDescription:
+      'Could not send {{entity}}: {{error}}. Accepted changes remain synchronized.',
+    gatewayTimeoutError:
+      'Zenmoney did not respond before the server timeout. The unconfirmed change remains pending',
+    count: '{{confirmed}} / {{total}}',
+    detailsTitle: 'Sync details',
+    retryNow: 'Retry now',
+    continueLater: 'Continue later',
+  },
+
   errorGlobal: {
     message: "Everything's broken 💩",
     btnFix: 'Fix It 🛠',
@@ -470,6 +487,9 @@ export const en: typeof ru = {
     importTitle: 'Restore from backup',
     importForeignWarning:
       'This file is from another account. Accounts, categories and merchants will be created anew with new identifiers.',
+    importCompatibilityWarning:
+      'This backup is valid, but it contains data this version of Zerro does not fully understand. Known data will be restored; the items below may be ignored or behave differently.',
+    importCompatibilityWarningItem: '{{path}} — affected records: {{count}}',
     importWarning:
       'Your data will be set to what the file describes. Anything changed since the backup is overwritten. The change goes to the queue, so you can undo it before syncing.',
     importCreated: 'create {{n}}',
@@ -477,6 +497,7 @@ export const en: typeof ru = {
     importRemoved: 'remove {{n}}',
     importCancel: 'Cancel',
     importConfirm: 'Restore',
+    importConfirmAnyway: 'Restore anyway',
     importDone: 'Done. Sync to send the changes',
     importNoChanges: 'The file matches your current data',
     importError_unreadable: 'Could not read the file',

@@ -1,6 +1,7 @@
 import type { TZmDiff } from '6-shared/types'
 
 import type { TEndpoint } from '../application/context'
+import { readRetryAfterMs } from '6-shared/api/zenmoney/retryAfter'
 import { ToolError } from '../application/output'
 
 const endpointUrls: Record<TEndpoint, string> = {
@@ -11,6 +12,7 @@ const endpointUrls: Record<TEndpoint, string> = {
 export type TZenMoneyDependencies = {
   fetch: typeof fetch
   now: () => number
+  sleep?: (milliseconds: number) => Promise<void>
 }
 
 export type TExchangeMode = 'refresh' | 'sync'
@@ -45,15 +47,20 @@ export async function exchangeDiff(
   }
 
   const body = await response.text()
-  if (!response.ok)
+  if (!response.ok) {
+    const retryAfterMs = readRetryAfterMs(response)
     throw exchangeFailure(
       mode,
       'ZENMONEY_REJECTED',
       'ZenMoney rejected the request',
       6,
-      { httpStatus: response.status },
+      {
+        httpStatus: response.status,
+        ...(retryAfterMs === undefined ? {} : { retryAfterMs }),
+      },
       response.status >= 500
     )
+  }
 
   let value: unknown
   try {

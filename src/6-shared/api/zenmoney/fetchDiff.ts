@@ -1,8 +1,19 @@
 import type { TToken, TZmDiff, TZmRequest } from '6-shared/types'
 import type { EndpointPreference } from './endpoints'
 import { endpoints } from './endpoints'
+import { readRetryAfterMs } from './retryAfter'
 
 export const fakeToken = 'fake_token'
+
+export class DiffRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status?: number,
+    readonly retryAfterMs?: number
+  ) {
+    super(message)
+  }
+}
 
 export async function fetchDiff(
   token: TToken,
@@ -38,14 +49,27 @@ export async function fetchDiff(
   try {
     json = JSON.parse(text)
   } catch {
-    throw new Error(`Unparsable diff response (HTTP ${response.status})`)
+    throw new DiffRequestError(
+      `Unparsable diff response (HTTP ${response.status})`,
+      response.status,
+      readRetryAfterMs(response)
+    )
   }
 
   const apiError = readApiError(json)
-  if (apiError) throw new Error(JSON.stringify(apiError))
+  if (apiError)
+    throw new DiffRequestError(
+      JSON.stringify(apiError),
+      response.status,
+      readRetryAfterMs(response)
+    )
 
   if (response.status < 200 || response.status >= 300) {
-    throw new Error(`Diff request failed (HTTP ${response.status})`)
+    throw new DiffRequestError(
+      `Diff request failed (HTTP ${response.status})`,
+      response.status,
+      readRetryAfterMs(response)
+    )
   }
 
   return json as TZmDiff

@@ -7,15 +7,15 @@ import {
   makeTransaction,
   makeUser,
 } from 'zerro-core/support/testing/zenmoneyTestData'
-import { type TCommand } from 'zerro-core/replica'
-import { AccountType } from '6-shared/types'
+import { acceptPushChunk, beginPush, type TCommand } from 'zerro-core/replica'
+import { AccountType, type TNormalizedPatch } from '6-shared/types'
 import {
   getChangedNum,
   getLastChangeTime,
   getPendingSyncDiff,
-  getPendingSyncTransport,
 } from './selectors'
 import reducer, {
+  acceptClientPushChunk,
   appendClientCommand,
   hydrateReplica,
   hydrateRecoveryOutbox,
@@ -40,6 +40,23 @@ function getRootState(state: ReturnType<typeof reducer>) {
 
 function getPendingDiff(state: ReturnType<typeof reducer>) {
   return getPendingSyncDiff(getRootState(state))
+}
+
+/**
+ * Runs the real push acknowledgement: capture the outbox, accept one Chunk.
+ * `atAccept` is the replica as it stands when the response lands, which is how
+ * a command appended while the request was in flight is modelled.
+ */
+function acknowledgePush(
+  captured: ReturnType<typeof reducer>,
+  canonicalPatch: TNormalizedPatch,
+  atAccept: ReturnType<typeof reducer> = captured
+) {
+  const prepared = beginPush(captured, 100)
+  if (!prepared) throw new Error('Expected a prepared push')
+  const accepted = acceptPushChunk(atAccept, prepared, canonicalPatch)
+  const { next: _next, progress: _progress, ...replica } = accepted
+  return { state: reducer(atAccept, acceptClientPushChunk(replica)), prepared }
 }
 
 function makeAccountEntry(title: string, issuedAt: number): TCommand {
@@ -249,9 +266,8 @@ describe('command outbox boundaries', () => {
     }
     const pending = reducer(base, appendClientCommand(entry))
 
-    const accepted = applyServerPatch(pending, {
+    const { state: accepted } = acknowledgePush(pending, {
       transaction: [makeTransaction({ id: 'tr-1', viewed: false })],
-      sentOutboxCount: 1,
     })
     expect(accepted.outbox).toEqual([])
     expect(accepted.current.transaction['tr-1'].viewed).toBe(false)
@@ -268,9 +284,8 @@ describe('command outbox boundaries', () => {
     }
     const pending = reducer(base, appendClientCommand(entry))
 
-    const accepted = applyServerPatch(pending, {
+    const { state: accepted } = acknowledgePush(pending, {
       transaction: [makeTransaction({ id: 'tr-1', comment: null })],
-      sentOutboxCount: 1,
     })
 
     expect(accepted.outbox).toEqual([])
@@ -296,9 +311,8 @@ describe('command outbox boundaries', () => {
       appendClientCommand(second)
     )
 
-    const accepted = applyServerPatch(pending, {
+    const { state: accepted } = acknowledgePush(pending, {
       transaction: [makeTransaction({ id: 'tr-1', comment: 'Second' })],
-      sentOutboxCount: 2,
     })
 
     expect(accepted.outbox).toEqual([])
@@ -318,9 +332,11 @@ describe('command outbox boundaries', () => {
     }
     const pending = reducer(base, appendClientCommand(entry))
 
-    expect(
-      getPendingSyncTransport(getRootState(pending), 100)?.transaction?.[0]
-    ).toMatchObject({ changed: 6000, viewed: true })
+    const prepared = beginPush(pending, 100)
+    expect(prepared?.request.transaction?.[0]).toMatchObject({
+      changed: 6000,
+      viewed: true,
+    })
   })
 
   it('keeps commands created during sync and drops the committed redo tail', () => {
@@ -329,14 +345,12 @@ describe('command outbox boundaries', () => {
     })
     const sent = makeAccountEntry('Wallet', 10)
     const during = makeAccountEntry('Vault', 20)
-    const pending = reducer(
-      reducer(base, appendClientCommand(sent)),
-      appendClientCommand(during)
+    const sentOnly = reducer(base, appendClientCommand(sent))
+    const { state: rebased } = acknowledgePush(
+      sentOnly,
+      { account: [makeAccount({ id: 'cash', title: 'Server Wallet' })] },
+      reducer(sentOnly, appendClientCommand(during))
     )
-    const rebased = applyServerPatch(pending, {
-      account: [makeAccount({ id: 'cash', title: 'Server Wallet' })],
-      sentOutboxCount: 1,
-    })
 
     expect(rebased.outbox).toEqual([during])
     expect(rebased.current.account.cash.title).toBe('Vault')

@@ -99,7 +99,7 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       <HistoryItem onClose={props.onClose} />
       <ExportCsvItem />
       <ExportJsonItem />
-      <ImportBackupItem />
+      <ImportBackupItem onClose={props.onClose} />
       <Divider className="opacity-60" />
       <LangItem onClose={props.onClose} />
       <LogOutItem onClose={props.onClose} />

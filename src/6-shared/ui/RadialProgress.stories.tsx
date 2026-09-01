@@ -14,12 +14,17 @@ type Story = StoryObj<typeof meta>
 /** One component instance, entirely controlled by the Args panel. */
 export const Bench: Story = {}
 
+export const Active: Story = {
+  args: { active: true },
+}
+
 export const Showcase: Story = {
   tags: ['!test'],
   render: () => (
     <div className="flex gap-4">
       <RadialProgress value={0} size={64} />
       <RadialProgress value={0.55} size={64} />
+      <RadialProgress value={0.55} size={64} active />
       <RadialProgress value={1} size={64} />
     </div>
   ),

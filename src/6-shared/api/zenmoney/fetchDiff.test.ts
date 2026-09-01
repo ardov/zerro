@@ -77,6 +77,22 @@ describe('fetchDiff', () => {
     ).rejects.toThrow('Unparsable diff response (HTTP 502)')
   })
 
+  it('exposes status and Retry-After for transport policy', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ error: { message: 'slow down' } }), {
+          status: 429,
+          headers: { 'Retry-After': '3' },
+        })
+      )
+    )
+
+    await expect(
+      fetchDiff('token', 'ru', { serverTimestamp: 1 })
+    ).rejects.toMatchObject({ status: 429, retryAfterMs: 3000 })
+  })
+
   it('rejects a successful response that is not parsable JSON', async () => {
     vi.stubGlobal('fetch', respondWith(200, 'not json'))
 
