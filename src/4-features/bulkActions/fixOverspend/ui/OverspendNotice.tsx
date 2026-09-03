@@ -33,7 +33,7 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
 
   return (
     <div className="flex flex-row rounded-lg bg-background p-4">
-      <div className="pt-[2px] text-warning">
+      <div className="shrink-0 pt-[2px] text-warning">
         <WarningIcon />
       </div>
       <div className="ml-3">

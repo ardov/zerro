@@ -13,6 +13,7 @@ export const RadialProgress: FC<RadialProgressProps> = ({
   size = 16,
   value,
   active = false,
+  style,
   ...rest
 }) => {
   // A caller dividing by a total it did not check hands over NaN, which would
@@ -25,7 +26,16 @@ export const RadialProgress: FC<RadialProgressProps> = ({
   const r = 12
   const length = 2 * Math.PI * r
   return (
-    <svg height={size} width={size} viewBox="0 0 64 64" {...rest}>
+    <svg
+      height={size}
+      width={size}
+      viewBox="0 0 64 64"
+      {...rest}
+      /* The global `svg { max-width: 100% }` reset shrinks this icon's width
+         alone when its button is narrower than `size`, distorting the circle.
+         A fixed-size UI icon isn't responsive content, so it opts out. */
+      style={{ maxWidth: 'none', flexShrink: 0, ...style }}
+    >
       {active && (
         <g className="radial-progress-activity">
           <circle
