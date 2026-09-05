@@ -49,8 +49,6 @@ Area-specific policies can require more evidence, never less:
 
 - `src/zerro-core/support/documents/testing.md` — Core contracts and broad-test
   triggers;
-- `src/zerro-core/support/documents/local-tooling.md` — local finance-tool
-  contracts;
 - `docs/ui-styling.md` — UI and Storybook behavior.
 
 ## CI

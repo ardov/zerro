@@ -4,12 +4,11 @@ A deliberate Push run captures the current Outbox prefix and sends it either as
 one request or as a sequence of requests whose serialized normalized bodies are
 bounded to 2 MiB. Multi-Chunk runs send dependency-ordered upserts first, then
 singleton-account Cleanup Chunks, then surviving removals with child-first
-singleton tags last. Dependency order and Cleanup order both come from one
-declared entity reference graph rather than from per-caller lists. Core owns
-planning, exact item receipts and the delivery loop — retry classification,
-backoff and repacking; the browser and CLI own HTTP, persistence and
-presentation, and each supplies the byte measurement for the representation it
-actually transmits. Account or tag phases force a run into multi-Chunk mode
+singleton tags last. Upsert order is derived from the shared
+entity reference graph; Cleanup order is declared alongside it from observed
+server cascade behavior. Core owns planning, exact item receipts and the
+delivery loop — retry classification, backoff and repacking. The host owns HTTP,
+persistence and presentation, and measures the representation it transmits. Account or tag phases force a run into multi-Chunk mode
 even below 2 MiB, including a single slow deletion, so progress and recovery
 remain explicit.
 

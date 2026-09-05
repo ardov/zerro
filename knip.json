@@ -4,7 +4,6 @@
     "src/**/*.{ts,tsx}",
     "stories/**/*.{ts,tsx}",
     ".storybook/**/*.{ts,tsx}",
-    "tools/**/*.ts",
     "vitest*.config.ts"
   ],
   "ignoreDependencies": ["tailwindcss"]
