@@ -20,8 +20,7 @@ import reducer, {
   hydrateReplica,
   hydrateRecoveryOutbox,
   prepareClientSync,
-  rebaseServerInbox,
-  receiveServerPatch,
+  applyServerPatch as serverPatchApplied,
   redoClientCommand,
   resetData,
   undoClientCommand,
@@ -29,9 +28,9 @@ import reducer, {
 
 function applyServerPatch(
   state: ReturnType<typeof reducer> | undefined,
-  patch: Parameters<typeof receiveServerPatch>[0]
+  patch: Parameters<typeof serverPatchApplied>[0]
 ) {
-  return reducer(reducer(state, receiveServerPatch(patch)), rebaseServerInbox())
+  return reducer(state, serverPatchApplied(patch))
 }
 
 function getRootState(state: ReturnType<typeof reducer>) {
@@ -150,13 +149,7 @@ describe('command outbox boundaries', () => {
 
   it('applies canonical server patches with no pending commands', () => {
     const initial = reducer(undefined, { type: 'test/init' })
-    const received = reducer(
-      initial,
-      receiveServerPatch({ serverTimestamp: 300 })
-    )
-    expect(received.current.serverTimestamp).toBe(0)
-
-    const next = reducer(received, rebaseServerInbox())
+    const next = reducer(initial, serverPatchApplied({ serverTimestamp: 300 }))
     expect(next.current.serverTimestamp).toBe(300)
     expect(next.outbox).toEqual([])
   })

@@ -5,7 +5,7 @@ import {
 } from '@reduxjs/toolkit'
 import type { AppThunk } from '@/store'
 import type { RootState } from './rootReducer'
-import { appendClientCommand, rebaseServerInbox } from './data/slice'
+import { appendClientCommand, applyServerPatch } from './data/slice'
 import {
   getMaterializedOutboxPatches,
   replayOutbox,
@@ -137,7 +137,7 @@ const { reducer, actions } = createSlice({
     builder.addCase(appendClientCommand, state => {
       state.selection = { status: 'idle', point: null }
     })
-    builder.addCase(rebaseServerInbox, state => {
+    builder.addCase(applyServerPatch, state => {
       state.entries = []
       state.nextBeforeSequence = undefined
       state.pageStatus = 'idle'

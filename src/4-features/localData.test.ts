@@ -24,8 +24,7 @@ import {
 import { AccountType } from '@/6-shared/types'
 import reducer, {
   hydrateRecoveryOutbox,
-  rebaseServerInbox,
-  receiveServerPatch,
+  applyServerPatch,
 } from '@/store/data/slice'
 import { discardCorruptOutbox, loadLocalData } from './localData'
 
@@ -205,7 +204,7 @@ describe('loadLocalData', () => {
     )
     dataState = reducer(
       dataState,
-      receiveServerPatch({
+      applyServerPatch({
         fullReload: true,
         serverTimestamp: 100,
         instrument: [makeInstrument({ id: 1 })],
@@ -222,7 +221,6 @@ describe('loadLocalData', () => {
         ],
       })
     )
-    dataState = reducer(dataState, rebaseServerInbox())
     const getState = () => ({ data: dataState })
     const dispatch: any = (action: any) => {
       if (typeof action === 'function') {

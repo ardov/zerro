@@ -6,12 +6,11 @@ import {
   acceptClientPushChunk,
   appendClientCommand,
   persistenceFailed,
-  rebaseServerInbox,
+  applyServerPatch,
   redoClientCommand,
   resetData,
   restoreOutboxPosition,
   undoClientCommand,
-  type TServerInbox,
 } from './slice'
 
 type TReplicaStateSource = {
@@ -22,7 +21,6 @@ type TReplicaStateSource = {
     outbox: TCommand[]
     journalRecoveryRequired: boolean
     outboxRecoveryReason: string | null
-    inbox?: TServerInbox | null
   }
 }
 
@@ -34,7 +32,6 @@ export const replicaPersistenceMiddleware: Middleware =
   api => next => action => {
     const before = api.getState() as TReplicaStateSource
     const beforeBase = before.data.base
-    const beforeInbox = before.data.inbox
     const beforeRootUserId = before.data.rootUserId
     const recoveryRequired = before.data.journalRecoveryRequired
     const result = next(action)
@@ -53,16 +50,15 @@ export const replicaPersistenceMiddleware: Middleware =
       primaryWritesDisabled ||
       resetData.match(action) ||
       outboxQuarantined ||
-      (recovering && !rebaseServerInbox.match(action))
+      (recovering && !applyServerPatch.match(action))
     )
       return result
 
-    if (rebaseServerInbox.match(action)) {
-      const inbox = beforeInbox
-      if (!inbox || after.data.rootUserId === null) return result
+    if (applyServerPatch.match(action)) {
+      if (after.data.rootUserId === null) return result
       const checkpointReason = recoveryRequired
         ? 'recovery'
-        : inbox.fullReload
+        : action.payload.fullReload
           ? 'full-sync'
           : beforeRootUserId === null
             ? 'full-sync'

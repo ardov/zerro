@@ -24,7 +24,7 @@ interface DataSlice {
   base: TDataStore
   /** Applied local commands. This is the durable undo stack and sync outbox. */
   outbox: TCommand[]
-  /** Undone commands available only until reload, logout, or sync. */
+  /** Undone commands; pulls preserve them, a new command or push clears them. */
   redo: TCommand[]
   /** The replayed canonical journal failed domain validation and needs a full
    * reload. */
@@ -40,13 +40,12 @@ interface DataSlice {
    * pushed since. Session-only: it exists so the app can say the outbox
    * survived a reload, which pull-only sync made possible. */
   restoredOutboxCount: number
-  inbox?: TServerInbox | null
 }
 
 export type TAcceptedPushReplica = Omit<TAcceptedPushChunk, 'next' | 'progress'>
 
-/** A canonical pull response waiting to be rebased over the outbox. */
-export interface TServerInbox extends TNormalizedPatch {
+/** A canonical pull response, optionally replacing the complete base. */
+export interface TServerPatch extends TNormalizedPatch {
   fullReload?: boolean
 }
 
@@ -140,68 +139,61 @@ const { reducer, actions } = createSlice({
         state.outboxRecoveryReason = payload.outboxReason
       }
     ),
-    receiveServerPatch: withPerf(
-      'receiveServerPatch',
-      (state, { payload }: PayloadAction<TServerInbox>) => {
-        state.inbox = payload
-      }
-    ),
-    rebaseServerInbox: withPerf('rebaseServerInbox', state => {
-      if (!state.inbox) return
-      const { fullReload, ...canonicalPatch } = state.inbox
-      if (fullReload) {
-        const recoveringJournal = state.journalRecoveryRequired
-        const checkpoint = applyPatch(createEmptyDataStore(), canonicalPatch)
-        const checkpointRootUserId = getRootUserId(checkpoint.user)
-        const rootUserChanged =
-          state.rootUserId !== null &&
-          checkpointRootUserId !== null &&
-          state.rootUserId !== checkpointRootUserId
-        state.rootUserId = checkpointRootUserId ?? state.rootUserId
-        if (rootUserChanged) {
-          state.outbox = []
-          state.redo = []
-          state.restoredOutboxCount = 0
-        }
-        if (recoveringJournal) {
-          const replayed = replayAndValidateOutbox(checkpoint, state.outbox)
-          if (!replayed.ok) {
-            state.base = checkpoint
-            state.current = checkpoint
+    applyServerPatch: withPerf(
+      'applyServerPatch',
+      (state, { payload }: PayloadAction<TServerPatch>) => {
+        const { fullReload, ...canonicalPatch } = payload
+        if (fullReload) {
+          const recoveringJournal = state.journalRecoveryRequired
+          const checkpoint = applyPatch(createEmptyDataStore(), canonicalPatch)
+          const checkpointRootUserId = getRootUserId(checkpoint.user)
+          const rootUserChanged =
+            state.rootUserId !== null &&
+            checkpointRootUserId !== null &&
+            state.rootUserId !== checkpointRootUserId
+          state.rootUserId = checkpointRootUserId ?? state.rootUserId
+          if (rootUserChanged) {
             state.outbox = []
             state.redo = []
             state.restoredOutboxCount = 0
-            state.outboxRecoveryReason = replayed.reason
-            state.inbox = null
-            return
           }
-          state.current = replayed.current
-        } else {
-          state.current = replayOutbox(checkpoint, state.outbox)
+          if (recoveringJournal) {
+            const replayed = replayAndValidateOutbox(checkpoint, state.outbox)
+            if (!replayed.ok) {
+              state.base = checkpoint
+              state.current = checkpoint
+              state.outbox = []
+              state.redo = []
+              state.restoredOutboxCount = 0
+              state.outboxRecoveryReason = replayed.reason
+              return
+            }
+            state.current = replayed.current
+          } else {
+            state.current = replayOutbox(checkpoint, state.outbox)
+          }
+          state.journalRecoveryRequired = false
+          state.journalRecoveryReason = null
+          state.outboxRecoveryReason = null
+          state.base = checkpoint
+          return
         }
-        state.journalRecoveryRequired = false
-        state.journalRecoveryReason = null
-        state.outboxRecoveryReason = null
-        state.base = checkpoint
-        state.inbox = null
-        return
-      }
-      const accepted = acceptCanonicalPatch(
-        { base: state.base, outbox: state.outbox, redo: state.redo },
-        canonicalPatch
-      )
+        const accepted = acceptCanonicalPatch(
+          { base: state.base, outbox: state.outbox, redo: state.redo },
+          canonicalPatch
+        )
 
-      state.base = accepted.base
-      state.current = accepted.current
-      state.outbox = accepted.outbox
-      state.redo = accepted.redo
-      state.rootUserId = getRootUserId(accepted.base.user) ?? state.rootUserId
-      if (state.journalRecoveryRequired) {
-        state.journalRecoveryRequired = false
-        state.journalRecoveryReason = null
+        state.base = accepted.base
+        state.current = accepted.current
+        state.outbox = accepted.outbox
+        state.redo = accepted.redo
+        state.rootUserId = getRootUserId(accepted.base.user) ?? state.rootUserId
+        if (state.journalRecoveryRequired) {
+          state.journalRecoveryRequired = false
+          state.journalRecoveryReason = null
+        }
       }
-      state.inbox = null
-    }),
+    ),
     acceptClientPushChunk: withPerf(
       'acceptClientPushChunk',
       (state, { payload }: PayloadAction<TAcceptedPushReplica>) => {
@@ -310,8 +302,7 @@ export const {
   hydrateReplica,
   hydrateCorruptOutbox,
   hydrateCorruptReplica,
-  receiveServerPatch,
-  rebaseServerInbox,
+  applyServerPatch,
   appendClientCommand,
   prepareClientSync,
   acceptClientPushChunk,

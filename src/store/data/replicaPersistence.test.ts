@@ -20,8 +20,7 @@ import { patchTransactionsPage } from '../view'
 import {
   acceptClientPushChunk,
   appendClientCommand,
-  rebaseServerInbox,
-  receiveServerPatch,
+  applyServerPatch,
 } from './slice'
 import {
   clearPersistedLocalData,
@@ -52,9 +51,7 @@ describe('replica persistence queue', () => {
   it('commits canonical base and outbox together, then attempts compaction', async () => {
     const state = replicaState()
     const invoke = middleware(state)
-    invoke(receiveServerPatch({ serverTimestamp: 200 }))
-
-    invoke(rebaseServerInbox())
+    invoke(applyServerPatch({ serverTimestamp: 200 }))
 
     await vi.waitFor(() =>
       expect(storageMock.commitCanonical).toHaveBeenCalledWith({
@@ -100,9 +97,7 @@ describe('replica persistence queue', () => {
     const state = replicaState()
     state.data.journalRecoveryRequired = true
     const invoke = middleware(state)
-    invoke(receiveServerPatch({ serverTimestamp: 200, fullReload: true }))
-
-    invoke(rebaseServerInbox())
+    invoke(applyServerPatch({ serverTimestamp: 200, fullReload: true }))
 
     await vi.waitFor(() =>
       expect(storageMock.commitCanonical).toHaveBeenCalledWith(
@@ -126,9 +121,8 @@ describe('replica persistence queue', () => {
     const state = replicaState()
     state.data.rootUserId = null
     const invoke = middleware(state)
-    invoke(receiveServerPatch({ serverTimestamp: 200 }))
+    invoke(applyServerPatch({ serverTimestamp: 200 }))
 
-    invoke(rebaseServerInbox())
     await Promise.resolve()
 
     expect(storageMock.commitCanonical).not.toHaveBeenCalled()
@@ -166,8 +160,7 @@ describe('replica persistence queue', () => {
     const invoke = middleware(state)
 
     invoke(appendClientCommand(entry))
-    invoke(receiveServerPatch({ serverTimestamp: 200 }))
-    invoke(rebaseServerInbox())
+    invoke(applyServerPatch({ serverTimestamp: 200 }))
     await Promise.resolve()
     await Promise.resolve()
     await Promise.resolve()
@@ -197,7 +190,6 @@ function replicaState() {
       current: makeStore({ serverTimestamp: 100 }),
       outbox: [] as TCommand[],
       redo: [] as TCommand[],
-      inbox: null as any,
       journalRecoveryRequired: false,
       outboxRecoveryReason: null as string | null,
     },
@@ -210,14 +202,12 @@ function middleware(state: ReturnType<typeof replicaState>) {
     getState: () => state,
     dispatch,
   })((action: any) => {
-    if (receiveServerPatch.match(action)) state.data.inbox = action.payload
-    if (rebaseServerInbox.match(action) && state.data.inbox) {
+    if (applyServerPatch.match(action)) {
       state.data.base = {
         ...state.data.base,
-        serverTimestamp: state.data.inbox.serverTimestamp ?? 100,
+        serverTimestamp: action.payload.serverTimestamp ?? 100,
       }
       state.data.current = state.data.base
-      state.data.inbox = null
     }
     if (appendClientCommand.match(action))
       state.data.outbox.push(action.payload)

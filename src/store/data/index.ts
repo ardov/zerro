@@ -4,6 +4,7 @@ export default reducer
 // ACTIONS
 export {
   appendClientCommand,
+  applyServerPatch,
   hydrateReplica,
   hydrateCorruptOutbox,
   hydrateCorruptReplica,
@@ -16,7 +17,7 @@ export {
   restoreOutboxPosition,
   resetData,
 } from './slice'
-export { applyPushChunk, applyServerPatch } from './applyServerPatch'
+export { applyPushChunk } from './applyServerPatch'
 export {
   clearPersistedLocalData,
   compactPersistedReplica,
