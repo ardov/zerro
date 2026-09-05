@@ -36,27 +36,16 @@ export const RadialProgress: FC<RadialProgressProps> = ({
          A fixed-size UI icon isn't responsive content, so it opts out. */
       style={{ maxWidth: 'none', flexShrink: 0, ...style }}
     >
-      {active && (
-        <g className="radial-progress-activity">
-          <circle
-            r="28"
-            cx="32"
-            cy="32"
-            fill="none"
-            stroke="var(--primary)"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeDasharray="5 7"
-          />
-        </g>
-      )}
       <circle
+        className={'radial-progress-activity'}
         r="30"
         cx="32"
         cy="32"
-        stroke={completed ? colorSuccess : colorMain}
-        strokeWidth={2}
-        opacity={completed ? 0.15 : 1}
+        stroke={active ? colorMain : completed ? colorSuccess : colorMain}
+        strokeWidth={active ? 3 : 2}
+        strokeDasharray={active ? '8 16' : '24 0'}
+        strokeLinecap="round"
+        opacity={active ? 1 : completed ? 0.15 : 1}
         fill={completed ? colorSuccess : 'transparent'}
         style={{ transition: '0.5s ease-out 0.1s' }}
       />

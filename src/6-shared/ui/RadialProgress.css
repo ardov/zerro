@@ -4,7 +4,7 @@
   .radial-progress-activity {
     transform-box: view-box;
     transform-origin: center;
-    animation: radial-progress-activity 1.1s linear infinite;
+    animation: radial-progress-activity 3s linear infinite;
   }
 
   @keyframes radial-progress-activity {
