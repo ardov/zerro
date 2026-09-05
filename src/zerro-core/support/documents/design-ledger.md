@@ -1,478 +1,156 @@
-# Zerro Core design ledger
+# Zerro Core design decisions
 
-- Updated: 2026-08-31
-- Purpose: settled decisions, accepted risks, active bridges, and open questions
-  — each stated once, with only the reasoning that keeps it from being
-  re-litigated. Implementation history stays in Git. Questions that need the
-  maintainer rather than an implementer live in the private `open-decisions.md`,
-  outside this repository; an answer becomes a settled decision here.
+[Architecture](./architecture.md) explains the flow. This document records the
+reasons and domain rules that are easy to lose during a refactor. Plans belong
+in the private tracker; implementation history belongs in Git.
 
-## Settled decisions
+## One replica owner
 
-### Module and package boundary
+Redux owns the browser replica. Core supplies pure Outbox operations rather
+than another mutable engine object. This keeps append, undo, redo, replay, and
+acknowledgement in one implementation without adding a second reactive store.
 
-- Zerro Core is an internal source module. The repository-local CLI
-  ([local-tooling.md](./local-tooling.md)) shipped as a real headless consumer
-  without publishing or moving Core — the evidence that the source boundary
-  holds.
-- The entrypoints, and nothing else: root `zerro-core` (constants, shared root
-  types, snapshot session), `zerro-core/redux` (the app's namespace-first
-  adapter), `zerro-core/replica` (store and worker seam — internal, not a
-  semantic API), `zerro-core/headless` (non-Redux; only the reads, semantic
-  commands, and replica capabilities the CLI needs). `domain`, `application`,
-  `infrastructure`, and `presentation` are internal paths. No entrypoint exports
-  an internal barrel.
-- Redux is the only reactive replica owner. The CLI owns one non-reactive
-  `base + outbox` document and reuses the same pure outbox operations. Canonical
-  patch acceptance, empty-replica creation, and cursor overlap are pure Core
-  operations; no headless consumer reimplements them.
-- One semantic engine: `zerro-core/headless` and `core.transactions.create` both
-  delegate to the same compiler and command/outbox path.
-- npm publication, an `exports` policy, and a physical package move stay
-  deferred until a second real consumer needs them.
+Core remains an internal source module with explicit entrypoints. A physical
+package split would add release and compatibility work without changing the
+current dependency boundary. `6-shared/types` remains a compatibility facade
+for normalized types; consumers can move gradually.
 
-### Reads and Redux adapter
+The journal is linear because startup, history selection, and retention can
+then share one replay model. A full reload appends a checkpoint rather than
+starting a branch. The storage format and tradeoffs are in
+[ADR 0001](../../../../docs/adr/0001-linear-indexeddb-replica.md).
 
-- Session reads are grouped by domain and use `get*` names.
-- The projection dependency graph is declared once in
-  `internal/projections/graph.ts` and instantiated by both runtimes, so they
-  cannot drift: a session binds each node to one frozen snapshot, the Redux
-  adapter keeps one instance and memoizes across snapshots. The wiring is the
-  reference; there is no hand-kept diagram.
-- Memoization is a per-node decision, not a default: expensive nodes for cost
-  (`buildRawActivity` ~18 ms, `buildBalances` ~10 ms on a 16866-transaction
-  store), cheap-but-allocating nodes only so dependents keep their reference,
-  and nodes returning a primitive or a pass-through store map not at all.
-  `inBudgetAccountIds` also uses result equality, so an unrelated account edit
-  does not invalidate the activity chain.
-- The graph reads `now()` per call, so the long-lived Redux instance follows the
-  clock while a session freezes `now` at construction.
-  `projectionStability.test.ts` guards the whole-store-dependency and
-  result-equality contracts.
-- Selectors, hooks, commands, and app-facing types live in their domain modules.
-  `runtime/redux/state.ts` owns only the complete-snapshot path, entity modules
-  own narrowing selectors, `commandRead.ts` owns command-time reads.
-- Domain functions take the entity map directly, or a small inline object of
-  named maps when they need several. One-field `*Source` aliases and identity
-  getters are intentionally absent.
-- Domain namespaces are the desired adapter shape: add and retain members only
-  for real consumers.
-- Activity and budget projections retain aggregate amounts and counts, never
-  transaction arrays; lists filter the canonical history on demand.
-- Transaction filters are typed query clauses. Intrinsic clauses compile from
-  fields; activity and envelope clauses use the same pure routing projector as
-  activity calculation, with context prepared at the adapter boundary. Clauses
-  compose with AND, values inside one clause with OR, and sets and envelope
-  scope compile once outside the transaction loop.
-- Display names, duplicate-name labels, tag child lists, colors, icons,
-  localization, and asset URLs stay outside domain Core.
+## Reads and Redux adapter
 
-### Commands and materialization
+The session and Redux adapter instantiate the same projection graph. Defining
+the wiring once prevents two consumers from calculating different financial
+results. Memoization follows the lifetime of the consumer, not a separate
+reactive Core store.
 
-Command shape, upsert semantics, the materialization pipeline, and the ownership
-split live in [architecture.md](./architecture.md#change-pipeline). Not restated
-there:
+Cheap allocating nodes may need caching to keep their dependents stable.
+`inBudgetAccountIds` additionally compares the resulting IDs, so an account
+rename does not invalidate transaction activity. Primitive and pass-through
+reads do not earn a cache merely by being graph nodes.
 
-- Writable field lists document the domain capability, not current callers:
-  every non-managed changeable field is accepted, persisted, and materialized
-  before a UI exposes it.
-- `materializeCommand` may diverge from `materializePrimaryCommand` — the first
-  predicts server effects for local `current`, the second is the transport
-  source. Purging a transaction whose stored amounts are both zero is the first
-  such case and must stay one: sending the predicted `deletion` would make
-  ZenMoney soft-delete instead of purge.
-- Predicted balances never convert currency, and no future rule may make them.
-  Each side of a transaction is already in its own account's currency, so a
-  cross-currency transfer expresses its rate as the pair of stored numbers, and
-  a foreign original amount lives in `opIncome`/`opOutcome`, which the rule
-  excludes.
+Activity projections retain amounts and counts, not transaction arrays. Lists
+query transaction history on demand. Query clauses combine with AND, values
+within a clause with OR; activity filters share the activity routing projector.
 
-### Replica and sync
+Display labels and domain identities are separate. Localized group names are
+mapped back to stable IDs before command compilation. The adapter's
+`commandRead.ts` reads the shared graph without importing namespace modules
+that re-export commands and would create cycles.
 
-The replica model, undo/redo rules, commit boundary, primary-only transport, and
-conflict policy live in [architecture.md](./architecture.md#replica-model). Not
-restated there:
+## Commands and synchronization
 
-- Applied unsynchronized commands are the durable outbox and the undo stack.
-  Redo is session-only and resets on reload, sync, canonical rebase, and logout.
-- Platform history shortcuts map to undo/redo only outside text-editing controls
-  and only when that direction is available.
-- Logout resets replica state immediately and awaits an ordered storage clear;
-  queued saves from the previous login are invalidated.
-- Background sync does not classify commands as rebase-safe versus blocking:
-  every admitted command follows the same sparse replay contract.
-- Pushing is always a deliberate user action, so automatic sync is pull-only: a
-  push clears the acknowledged prefix and with it the undo history the user
-  still expects. `syncData` pushes and only the refresh control calls it;
-  `refreshData` pulls and is what background sync and post-login use.
-- `redo` survives a pull and is cleared only by an acknowledgement. Manual sync
-  still clears it up front through `prepareClientSync`, keeping the commit
-  boundary where it was recorded. Otherwise pull-only sync would fix undo while
-  still discarding redo every few idle minutes.
-- A Push run captures and squashes the current Outbox prefix. A body at or below
-  2 MiB remains one request unless Cleanup needs singleton-account or
-  singleton-tag phases. Multi-Chunk runs send dependency-ordered upserts, then
-  one account per Cleanup Chunk, then surviving removals with child-first
-  singleton tags last. Later commands are not added to the active run.
-- Each successful Chunk is a durable acknowledgement boundary. The first turns
-  the captured prefix into one remaining command, later acknowledgements remove
-  exact item receipts, and a request without a processed response stays pending
-  for at-least-once delivery. Web Redux and the CLI are adapters over the same
-  pure Core run module and the same delivery loop: they supply transport,
-  persistence and presentation, while what counts as retryable, how long to
-  wait and how to repack after a 413 belong to Core.
-- Which entity references exist, which of them a dangling pointer invalidates,
-  and which ZenMoney legitimately leaves orphaned are declared once as a
-  reference graph. Validation, backup warnings, restore planning and push
-  sanitation all read it, and the dependency write order is derived from it.
-  Deletion order is not: it encodes observed server cascade behaviour — an
-  account first, a tag last — and is declared with that reason attached.
-- Unsynchronized intent is never silent: a leave confirmation before unload, and
-  a notice after load when the restored outbox is not empty. Nothing else
-  distinguishes "saved locally" from "saved in ZenMoney".
+Sparse absolute intent is small enough to persist and can replay against a
+new base. Separate durable create/update command variants are unnecessary:
+missing IDs create, present IDs update. Writable field lists describe domain
+capabilities, not just fields currently exposed by the UI.
 
-### Change history and restore
+Primary transport and local effects use separate replay paths. For example,
+zeroed transaction amounts may predict a local purge, but sending a deletion
+instead of those amounts would ask ZenMoney for a different operation.
+[Materialization](./materialization.md) owns the exact rules.
 
-The app keeps a user-visible change history and can restore any retained valid
-point. What is still open is listed in
-[notes.md](./notes.md#remaining-work).
+Background sync is pull-only because acknowledging commands also removes their
+undo history. Pull preserves redo. A new command, deliberate push, push
+acknowledgement, reload, or logout clears it; switching root user also clears
+both stacks.
 
-#### The journal
+Large pushes are bounded and durably acknowledged Chunk by Chunk. Planning and
+delivery live in Core; adapters supply HTTP, persistence, byte measurement, and
+reporting. This keeps protocol rules out of UI orchestration.
+[ADR 0002](../../../../docs/adr/0002-bounded-push-runs.md) owns that decision.
 
-- The journal is not the outbox. The outbox is what must still be sent and is
-  truncated on acknowledgement — the temporary undo/redo tail after the last
-  server point. The journal is the durable record of accepted server state: one
-  linear sequence of checkpoints and compact canonical transitions. Replaying
-  from the latest checkpoint yields `base`; `base + outbox` yields `current`.
-- A transition is a compact normalized delta — changed fields, deletions, new
-  cursor — not a raw ZenMoney response and not a restore intent, and it must
-  satisfy `applyPatch(before, transition) === after`. An empty pull creates no
-  point; each accepted Push Chunk creates exactly one, covering the accepted
-  local and remote changes together.
-- Compaction folds only the oldest prefix into a `retention` checkpoint and
-  never renumbers, so every retained point stays forward-replayable. Retention
-  is the stricter of 90 days of server time and 100 MiB of logical entry bytes,
-  both tunable. One checkpoint plus the outbox is the minimum durable replica
-  and may exceed the budget.
-- There are no branches: a full reload appends another checkpoint to the same
-  line, so older history stays reachable through ordinary retention.
-- Validation runs on the reconstructed `base` at load, not on every response:
-  root and debt cardinalities, references Zerro must dereference, and tag-parent
-  cycles. ZenMoney-retained budgets whose tag is gone and markers whose
-  reminder is gone are canonical rows, not corruption. A failure keeps a
-  structurally valid outbox, raises the session-only `journalRecoveryRequired`
-  flag, and is resolved by a full reload that writes a `recovery` checkpoint. A
-  historical point is validated when opened and is simply unavailable if that
-  fails; there is no cached per-point status.
-- A point stores one boolean, `pushed` — the only record of cause the journal
-  keeps. It exists so the list can collapse consecutive pull points into one row
-  while every deliberate push stays visible on its own, and it is not a step
-  toward a per-point audit trail.
+The entity reference graph is shared by validation, backup compatibility,
+restore, and push sanitation. Read tolerance is separate from write validity:
+ZenMoney may retain orphaned budgets and reminder markers that cannot be
+recreated. Cleanup order records server behavior rather than assuming every
+cascade is the reverse of an ordinary reference.
 
-#### The history surface
+## Restore
 
-- The list is one read-only ordered projection over journal replay: redo tail,
-  applied local commands, journal points. There is no `/history` route — the
-  sync button is the sole entry point, where a click pushes and a right-click or
-  long-press previews the list's live end, and an action there expands into a
-  non-modal panel: a right drawer on desktop, a full-screen sheet on mobile,
-  which gives back the width it takes rather than covering the app it sits
-  beside.
-- Order is not time. `current = base + outbox`, so a background pull inserts a
-  journal point _under_ unsent local commands although it arrived later. A
-  divider marks the boundary; it is not read as a timestamp.
-- Selecting a row below the redo tail changes Core read selectors but never the
-  live `base + outbox`; commands and patches are blocked and restore is the only
-  write. A collapsed run of pull points is a position as well as a row — it
-  stands in for its newest point, which makes it one step rather than none —
-  until it is expanded, when it becomes the header its own points hang under and
-  stops being a position. Checkpoints open and restore like any other point;
-  nothing in the projection may special-case one into being unopenable.
-- The surface never claims to be live when it is not, or past when it is not.
-  The newest row is the live replica under another name, so selecting it
-  normalizes to no selection at all — as a read selector rather than a
-  dispatch-site guard, because an undo can shorten the outbox until the selected
-  position _is_ the head and the app has to become editable again without
-  waiting for the user to notice. Issuing a command likewise clears the
-  selection, since an append proves the stored position stale. And if a
-  background pull compacts the open point away, the panel and status bar say so
-  instead of quietly falling back to live data.
-- The status bar is a browsing mode, not a rendering of the selection: it opens
-  on selection and closes only on its own exit control or Escape, so stepping
-  forward onto the head — which is no selection — leaves it in place. Every
-  control stays mounted and toggles `disabled` instead of appearing and
-  disappearing, and none changes meaning between states: go-to-current jumps and
-  never exits, exit never jumps, and restore is the only action that ends the
-  session, because it writes. The bar sits at the top of the content column,
-  clear of both the mobile bottom navigation and the fixed navigation drawer.
+[`buildRestorePlan`](../../internal/operations/restore/diffStores.ts) reconciles
+`current` with a desired snapshot and returns an intent patch plus summary.
+Preview uses temporary deterministic IDs. Apply recomputes against the live
+snapshot with real IDs, since a pull may have arrived in between. Preview
+counts are therefore not a guarantee of the eventual patch.
 
-#### What a row shows
+A canonical history restore and a backup restore use the ordinary command
+path. They remain undoable before push and never truncate the canonical
+journal. Restoring an unsent local position instead undoes to that Outbox
+position. The current history and backup flows restore complete snapshots.
 
-- A point shows its own diff — `compactCanonicalTransition` against the previous
-  point — which is already what `transition` stores, so it needs no replay and
-  never changes once written. The diff against live state, which is what a
-  restore would overwrite, is computed on demand in the panel. An applied local
-  command shows its label, falling back to its materialized diff; a checkpoint
-  has no diff, being a state rather than a change.
-- Labels are captured at issue time as an inert optional
-  `label?: { verb, args }` on `Command` and are never stored in the journal: a
-  Push run squashes its captured commands into one unlabeled remaining command,
-  while accepted Chunks become journal transitions. So history older than the
-  last push has no label, and every row must survive a missing one. `args`
-  carries the referenced id and a name snapshot, so a later rename still
-  resolves through the id while a deletion renders under the name it had.
-  Verbs are a closed union in Core, making a missing translation a compile-time
-  gap rather than a blank label. A label stays inert:
-  materialization and transport never read it, and a corrupt one is dropped
-  without failing its command — a bad label must never be why a durable outbox
-  fails to load.
-- Zerro's own state — goals, envelope budgets and metadata, FX rates, the other
-  `HiddenDataType` payloads — lives as JSON in one `reminder` `comment` per
-  month, so a changed goal would otherwise read as "1 reminder changed".
-  Decomposition splits by cost. The **type** is readable from the changed
-  comment alone, so a row reports the `HiddenDataType` (`goal`,
-  `envelope-budget`, `fx-rates`, and the rest) in place of `reminder`, counting
-  monthly records. The **key** needs the payload as it was before, hence a
-  replay, so it belongs to the panel's restore preview where the point is
-  replayed anyway; there `summarizeStoreDiff` compares both comments and counts
-  payload entries, including those a deleted hidden-data reminder takes with it.
-  Splitting the two keeps the row's "no replay" rule intact. This is a
-  presentation pass over the ZenMoney-entity diff, never a second diff over
-  derived Zerro state — balances and activity would make every transaction look
-  like it changed a dozen envelopes — so `tag`, `account`, and `merchant` keep
-  their own entity type and only join an envelope's group. An unparseable
-  payload falls back to the raw entity row. The diff view is read-only.
+Identity rules:
 
-#### Restore
+- A live same-ID entity is updated in place. An absent backup ID is never
+  reused: ZenMoney tombstones are permanent.
+- Other eligible entities may reuse one exact semantic match; otherwise they
+  get fresh IDs, with dependent references remapped.
+- Accounts match only by ID. Reusing a resembling account would leave its old
+  transactions as permanent soft-deleted rows; deleting it allows the server
+  to purge contained operations. Consequently, repeated restore of a backup
+  with absent account IDs rebuilds accounts rather than converging.
+- The root user maps to the signed-in root, and the debt account remains the
+  protected singleton. Hidden Zerro payloads are remapped with their entities.
+- Desired soft-deleted transactions are skipped. Existing deleted transactions
+  are not resurrected under their old IDs.
 
-- Restoring a journal point and importing a backup are one operation:
-  `buildRestorePlan(current, desired, { scope, allocateId }) -> TRestorePlan`
-  produces an ordinary command's intent patch, so restore inherits
-  materialization, transport, and undo-before-push, and its accepted canonical
-  response becomes a journal point. There is no second write path into the
-  store. Preview gets deterministic temporary IDs; apply gets real UUIDs at
-  dispatch, recomputing the diff rather than issuing the preview's patch — a
-  pull can land between the two, and a restore is defined against the store it
-  is applied to. The preview is a count, not a promise.
-- Restoring a local (unsent) point is a plain undo to that position, not a
-  diff-and-append: diffing would ask `buildRestorePlan` to emit a `deletion` for
-  an entity the server has never seen, which the transport must never send.
-- Restore never reuses an absent backup ID. A live same-ID entity is updated in
-  place; otherwise an exact semantic match is reused once, and an unmatched
-  creatable entity gets a fresh ID with every dependent reference remapped.
-  Desired deleted transactions stay absent, current deleted transactions never
-  return under their old ID, and a desired live transaction with no semantic
-  replacement gets a fresh ID — so repeating a restore converges instead of
-  producing a second command.
-- Accounts are exempt from the semantic match above: a backup account is
-  reconciled to a live account only when their IDs are equal, never by
-  resemblance. Reusing a resembling account forces every operation inside it
-  to be removed one at a time as a soft delete, and a soft delete is a
-  permanent server-side ratchet, so the account would survive forever carrying
-  struck-through rows; deleting it instead hard-purges the operations wholly
-  contained in it, which is observed server behaviour. This is a global rule,
-  not a foreign-import special case, and it knowingly weakens the convergence
-  promise above: a restore converges only where identifiers match, which is
-  every ordinary same-account restore. It does not converge for an account
-  whose ID is absent, so repeating a restore that creates accounts rebuilds
-  rather than converges.
-- An operation whose both legs sit on accounts a restore is deleting carries no
-  soft delete of its own — the account deletion already purges it, and a
-  redundant soft delete would both bloat the push and leave the local replica
-  holding a tombstone the server does not have. An operation with a surviving
-  leg is still removed explicitly, which includes every debt operation, since
-  the debt account singleton above is never removed.
-- A restore removes a row the way that entity type is removed at all: soft
-  delete for transactions, zeroing for budgets, a real `deletion` for accounts,
-  merchants, tags, reminders, and reminder markers, and nothing for the user
-  row. The cascades those deletions set off are predicted locally —
-  [materialization.md](./materialization.md) rules 4-7 — so a removed account,
-  tag, or merchant does not leave transactions pointing at a missing row. Two
-  removals are deliberately skipped because the server refuses them and
-  predicting one would make `current` lie until the next sync: the debt account
-  singleton, and a merchant still referenced by an active debt transaction.
-- Restore never truncates the timeline — its response appends a later point.
-  Dropping later points would destroy both the record of what was overwritten
-  and the ability to restore back.
-- Scoped restore (one account, envelope, or month) is the intended primary
-  form, with global restore as an escape hatch behind its own confirmation,
-  because a rewind is only safe where the user knows what it overwrites. Only
-  the global form is built: a history point restores whole, and a backup import
-  is always a complete snapshot. Scope is tracked as remaining work in
-  [notes.md](./notes.md#2-scoped-restore).
+Removal follows each entity's protocol: soft deletion for transactions, zeroing
+for budgets, real deletion for accounts, merchants, tags, reminders, and
+markers; no user removal. The debt account and merchants referenced by active
+debt transactions are protected. A transaction wholly inside accounts being
+deleted needs no separate soft delete. The materializer predicts the supported
+cascades locally; transport sends primary intent.
 
-Backup import is the file-shaped form of the same operation, and carries its own
-settled rules:
+## Backup compatibility
 
-- Only a complete snapshot is importable; an incremental or partial ZenMoney
-  diff is not a backup. There is no format envelope and no version field, so
-  protocol additions are classified separately from corruption. Unknown row
-  fields, top-level data, and future semantic values produce aggregated
-  warnings and an explicit “Restore anyway” confirmation. Missing required
-  collections, invalid primitive shapes, duplicate identities, broken required
-  references, cycles, and root/debt cardinality failures remain non-overridable.
-- The wire adapter is deliberately open to protocol values Zerro does not yet
-  understand. Known domain behavior tests exact known strings; future values
-  are carried through restore as opaque strings. Unknown fields that the
-  allow-list-driven command materializer cannot express are named by the
-  warning rather than silently presented as fully supported.
-- Export reads `state.data.base`, so pending local commands are never part of a
-  backup. When the outbox is not empty, export says so and lets the user cancel
-  or download anyway; it never triggers a sync to make the file complete.
-- A complete backup whose root user differs from the signed-in root user is a
-  foreign backup, not an incompatibility. Compatibility reports it as
-  `{ ok: true, foreign: true }`, and the confirmation warns that accounts,
-  categories, and merchants will be created anew with new identifiers. The
-  restore remains one ordinary undoable command in the outbox; a structurally
-  valid foreign backup is never silently imported.
-- Deleted operations are never transferred: a backup's soft-deleted operations
-  are skipped, and soft-deleted operations already in the current account are
-  left alone. This is existing restore behaviour, made explicit rather than an
-  accidental consequence.
-- Account `syncID` values are carried over unchanged. They keep bank-statement
-  matching working when a person moves their own data to another account.
-  Dropping them would silently create duplicates; the foreign-file confirmation
-  already covers the separate case of receiving someone else's backup.
-- Read-only dictionaries — `instrument`, `country`, `company` — are validated
-  but never written, and user billing and subscription fields are never
-  restored.
-- Out of scope by decision rather than omission: partial or merge import,
-  exporting `current`, restoring an outbox from a backup, and automatic sync
-  after a restore.
+A backup is a complete canonical snapshot. Export reads `base`, excludes local
+Outbox commands, and never triggers sync. Restore also never pushes by itself.
 
-Restore is not undo, and three consequences must be visible in the UI rather
-than only recorded here. The backup-import confirmation states all three and
-shows the per-entity counts the restore would write:
+Structural failures block restore: missing collections, malformed primitives,
+duplicate identities, broken required references, cycles, and invalid root or
+debt cardinality. Unknown fields and business values instead produce aggregated
+warnings and an explicit “Restore anyway” choice. Acceptance of a file does
+not imply that every unknown field is writable.
 
-- it overwrites concurrent changes from other devices inside its scope — the
-  motivating "my phone changed something" case is exactly when other real edits
-  also exist, which is why scope is the primary control;
-- it is lossy for deletions: `deleted: true` is a server-side ratchet and a
-  purged id is a permanent tombstone, so a removed transaction can only come
-  back under a new id, losing its identity and references;
-- a large restore is one big push against the accepted whole-prefix
-  acknowledgement risk, so a partial silent rejection can land a state that is
-  neither the chosen point nor the current one. The point immediately before a
-  restore is therefore exempt from pruning, so a restore is always reversible by
-  another restore.
+A different root user makes a backup foreign, not invalid. It requires explicit
+confirmation and remaps owned entities into the signed-in root. Account
+`syncID` values are retained for bank-statement matching. Reference dictionaries
+are validated but never written; billing and subscription fields are excluded.
 
-### Product rules
+## History presentation
 
-- Renaming a payee envelope promotes it to a merchant: a matching merchant is
-  renamed and every transaction that carried only the raw payee string is
-  attached to it, otherwise the merchant is created first. The several raw
-  spellings behind one visible payee therefore collapse under one merchant
-  instead of being rewritten one by one.
-- The promotion is one command, so undo reverses the rename, the creation, and
-  every attachment together. It also changes the envelope id from `payee#…` to
-  `merchant#…`, so it must carry the envelope's metadata — budget, goal, parent,
-  group, visibility — to the new id rather than orphaning it.
+History order follows the replica: redo, local commands, canonical points.
+A later pull sits beneath unsent commands even when its timestamp is newer.
+The selected historical snapshot never replaces the live replica. Selecting
+the live head normalizes to no selection, and an unavailable retained point is
+reported instead of silently displaying live data.
 
-### Testing
+Canonical rows summarize stored transitions without replay. Checkpoints have
+no per-point diff. Local rows use optional command labels, falling back to the
+materialized change. Labels do not survive as journal metadata after push.
 
-- Focused domain and contract tests protect behavior, Redux invalidation tests
-  protect memoization edges, and deterministic demo data protects representative
-  public graph behavior.
-- Legacy parity tests are temporary bridges and leave with their implementation.
-- Trivial map access and self-consistency tests are not valuable by default.
-- The default parallel suite must pass; serial-only green is diagnostic, not a
-  completion result.
+A hidden-data reminder is summarized by its payload type. Counting entries
+inside that payload requires both versions and belongs to the detailed diff,
+where replay already occurs. Unparseable hidden data falls back to the raw
+entity. Derived balances and activity are not a second source of history diffs.
 
-### Local tooling
+## Accepted risks
 
-- One CLI with bounded JSON output. Shell access plus machine-readable help and
-  explicit side-effect metadata proved sufficient for a maintainer in a
-  repository checkout, so no MCP adapter ships. An adapter stays open only as
-  part of a different product question — a desktop host that embeds Zerro and
-  owns the ZenMoney token, so nobody pastes one into a terminal
-  (`private/open-decisions.md` § 1) — and would be justified by distribution,
-  not agent ergonomics. If it ships it delegates to the same application
-  functions, maps one-to-one onto CLI commands, and holds no logic of its own.
-- Preview, local stage/undo, and remote sync are separate commands. Reads and
-  previews never mutate implicitly, nothing combines stage with sync, and
-  preview is not persisted — stage recompiles semantic input against the latest
-  local `current`.
-- Outbox mutations require caller-provided request ids; one bounded cache of
-  recent receipts makes retries idempotent without becoming a proposal store,
-  history, or audit database. Refresh is naturally repeatable and skips it.
-- One profile, one endpoint (`ZERRO_ENDPOINT`, default `ru`), one JSON state
-  document, one environment-provided token. No OAuth, keychain, multi-profile
-  database, capability system, daemon, or network listener.
-- The document persists replica truth only as `base + outbox` — `current` is
-  derived, redo is session-only — plus the bounded request cache and nothing
-  else. The tool owns its parser: Core exposes durable command-array validation,
-  but the browser's persisted-replica migration parser does not belong in the
-  headless boundary. Concurrent writers are out of scope, but atomic file
-  replacement is still required against truncated local state, and the document
-  uses private directory and file permissions.
-- Stable ids come from bounded reads. Automatic title matching is deferred
-  rather than choosing an ambiguous entity: entity options resolve a stable id
-  or an exact case-insensitive title, never a substring match. Shared read
-  options keep one name and meaning across every read that offers them.
-- Writes stay semantic and narrow. They reuse Core's compilers and materializers
-  — a budget update is one bounded batch of explicit `set` and `clear`
-  operations delegated to the existing `compileSetBudget` routing — and never
-  expose a raw patch, hidden reminder payload, or durable redo tail. The CLI
-  validates only its external JSON contract and resolves references for bounded
-  errors, without rebuilding factory defaults or predicting balances. Envelope
-  creation, rename, settings, and structure mutation, and transaction update and
-  delete, stay out of scope.
-- Sync is explicit and reuses Core's bounded Push run. An empty outbox never
-  needs a token or the network path; each accepted Chunk is saved before the
-  next; HTTP 413 repacks; and network, 429, and 5xx failures retry the exact
-  request up to three times. An explicit deterministic 4xx stops without
-  changing the unconfirmed remainder. The CLI exposes no progress UI but owns
-  the same delivery and persistence boundaries as the app.
+- Upsert can recreate an entity deleted remotely while local intent is pending.
+- HTTP success acknowledges the whole Chunk, including fields the server may
+  silently reject. Returned field values are not used as per-item receipts.
+- A multi-Chunk push is not atomic. Earlier Chunks remain accepted if a later
+  one stops, and the first acknowledgement replaces original command history
+  with the remaining intent.
+- Restoring a deleted entity may require a new identity. A restore overwrites
+  changes within its scope; it is not a way to recover server-side identity.
+- Retention may remove old points, including the point preceding a restore.
+  There is no special pin for that point.
+- Browser persistence is best-effort after its first primary write failure.
+  Multiple active tabs are not coordinated.
 
-## Accepted product risks
-
-- Upsert may recreate an entity that disappeared remotely while a local patch
-  remained pending.
-- A successful response is trusted as whole-Chunk acknowledgement, so a server
-  that silently rejects part of a request can cause local intent to be dropped.
-  Probing confirmed the mechanism exists — an older or equal `changed` is
-  ignored under HTTP 200, and some invalid field values are dropped while the
-  write applies — and the product accepts the risk to keep one stable Chunk
-  acknowledgement rule.
-- Persisted replica V2 has a one-way compatibility reader that preserves its
-  applied prefix and discards its redo tail: a bounded migration, not a general
-  migration framework.
-
-## Active compatibility bridges
-
-- `6-shared/types` is the intentional compatibility facade for Core-owned
-  normalized types. Move consumers gradually; do not perform a big-bang type
-  migration or widen the Core root to expose implementation barrels.
-- App tag SVG and assets remain outside domain Core, while package-safe emoji
-  metadata lives in `presentation/tag-icons`.
-
-Keep both until a real consumer or a package decision makes their exit useful.
-
-## Open questions
-
-The ones that need the maintainer's answer before any implementation are
-restated with their options and consequences in the private `open-decisions.md`.
-
-- Which real ZenMoney responses become fixtures for the account-deletion and
-  transfer-survivor cascades, when those rules become reachable? The balance
-  rule needed none: probing had established the formula, and the rule performs
-  no currency conversion, so no unverified assumption was left.
-- Future command-shape changes need an explicit compatibility decision; do not
-  add a general migration framework without evidence.
-- How do real-account transition sizes compare with the initial retention
-  defaults? A follow-up measurement, not an implementation gate
-  (`private/open-decisions.md` § 5, retention budget for the change log).
-- Not scheduled: does a second external consumer justify publishing or
-  physically moving the Core package? Which presentation assets need a supported
-  package boundary? Which package subpaths should exist if Core becomes
-  publishable?
-
-## Update rules
-
-- Move an answer into settled decisions only when it is implemented or
-  explicitly accepted.
-- Remove a bridge with its last consumer.
-- Remove an item from the private `open-decisions.md` in the same commit that
-  records its answer here.
-- Put concrete local smells in [notes.md](./notes.md).
-- Put implementation history in Git, not this ledger.
+These are limits of the current model, not additional behaviors for callers to
+implement. A change to them needs an explicit contract and regression coverage.

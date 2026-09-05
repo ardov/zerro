@@ -1,8 +1,5 @@
 # Zerro Core testing policy
 
-- Status: active policy; the migration completion gate is satisfied
-- Updated: 2026-08-22
-
 Tests protect domain rules, dependency boundaries, replay, and consumer-visible
 behavior. They should not make thin helpers or obsolete compatibility layers
 expensive to change.
@@ -20,7 +17,7 @@ Use for:
 - hidden-data parsing and writes;
 - envelope, budget, FX, activity, month-total, goal, and transaction edge cases;
 - outbox append, undo/redo, reload redo reset, logout clearing, rebase, and
-  session redo behavior;
+  redo preservation across pulls;
 - dependency and package boundaries.
 
 For command changes, compare state after applying the patch. Patch shape alone
@@ -67,11 +64,13 @@ only named Core behavior as direct expectations, invariants, or safe summaries.
 
 ## Builders
 
-- `testing/zenmoneyTestData.ts` — normalized stores and entities;
-- `testing/zerroTestData.ts` — Zerro projection shapes;
-- `testing/demoState.ts` — pinned public demo snapshot;
-- `testing/rootState.ts` — minimal Redux test state;
-- `testing/stableJson.ts` — deterministic safe comparison.
+Paths are relative to `src/zerro-core/` unless they start with `src/`.
+
+- `support/testing/zenmoneyTestData.ts` — normalized stores and entities;
+- `support/testing/zerroTestData.ts` — Zerro projection shapes;
+- `support/testing/demoState.ts` — pinned public demo snapshot;
+- `src/store/testing.ts` — minimal Redux test state;
+- `support/testing/stableJson.ts` — deterministic safe comparison.
 
 Keep important scenario fields visible. Production factories must not become
 permissive test builders.
@@ -107,8 +106,9 @@ compact agent output: `--reporter=agent --silent=passed-only`.
 
 Automated checks do not cover the load-to-sync path, so one manual smoke does:
 initial load, budget/goal edit, transaction edit, reload with pending state,
-explicit sync with a pending outbox, undo/redo, and logout history reset. It
-last passed on 2026-07-30 and satisfied the migration completion gate.
+explicit sync with a pending outbox, undo/redo, and logout history reset. Record
+what was exercised and whether the server was real or simulated; a previous
+smoke is not evidence for a new change.
 
 Re-run it when replica persistence, the command shape, or the sync transport
 changes. Routine domain work does not need it.

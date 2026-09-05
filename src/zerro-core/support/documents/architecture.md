@@ -1,411 +1,229 @@
 # Zerro Core architecture
 
-- Status: accepted architecture; the migration it guided is closed
-- Updated: 2026-08-22
+Core is a set of domain functions over normalized ZenMoney data. Redux owns the
+live state. HTTP, IndexedDB, React, localization, and assets stay in adapters.
+The [glossary](../../../../CONTEXT.md) defines the domain terms.
 
-## Purpose
+## Replica model
 
-Zerro Core extracts Zerro and normalized ZenMoney behavior into a module that
-can run in the current React/Redux app, a worker, a local server, tests, or a
-future local-only runtime. The module is not a storage layer and does not own
-UI reactivity. It provides pure domain operations plus facades that runtimes
-can adapt.
+There are two snapshots and two command stacks:
 
-Near-term non-goals: solving memory pressure for the largest accounts; rich
-field-level remote conflict previews; replacing Redux with a second reactive
-Core store; publishing a standalone package before its API stabilizes.
-
-## Boundaries
-
-Dependency direction is one-way, and Core must not import back from adapters
-or app layers:
-
-```txt
-shared primitives
-  -> normalized ZenMoney entities and operations
-  -> Zerro hidden data and domain behavior
-  -> projections and materializer
-  -> facade (snapshot session, command compilers)
-  -> runtime adapters (Redux, persistence, sync, UI)
+```ts
+type ReplicaState = {
+  base: TDataStore // latest canonical state accepted from ZenMoney
+  current: TDataStore // replayOutbox(base, outbox)
+  outbox: TCommand[] // applied commands not yet acknowledged
+  redo: TCommand[] // undone commands, kept only in this session
+}
 ```
+
+`current` is derived, never a second source of truth. The Outbox is both pending
+intent and the durable undo stack. The canonical journal separately retains
+accepted server states; it reconstructs `base` at startup.
+
+| Operation             | Effect                                                          |
+| --------------------- | --------------------------------------------------------------- |
+| Append                | Add one command, advance `current`, clear redo                  |
+| Undo / redo           | Move commands between stacks and replay over `base`             |
+| Pull                  | Update `base`, replay the Outbox, preserve redo                 |
+| Begin deliberate push | Capture the Outbox prefix, clear redo                           |
+| Accept Push Chunk     | Update `base`, retire its receipt, replay the remainder         |
+| Reload                | Reconstruct `base` and Outbox from IndexedDB; redo starts empty |
+| Logout                | Reset the live replica and clear persisted data in queue order  |
+
+The pure operations are in
+[`outbox.ts`](../../internal/operations/replication/outbox.ts). The Redux owner
+is [`store/data/slice.ts`](../../../store/data/slice.ts). Appending applies only
+the new command to `current`, preserving unrelated entity-map references;
+undo, redo, and rebase replay the remaining Outbox.
 
 ## Change pipeline
 
-Core persists requested changes and derives their complete local effects:
-
 ```txt
-base + durable outbox -> materialized patches -> current
-base + durable outbox -> fresh transport patch
-current               -> derived views
+semantic input -> compiler -> intent patch -> issued command -> Outbox
+base + Outbox -> materialization with predicted effects -> current
+base + captured Outbox -> primary-only replay -> transport
 ```
 
 ### Commands
 
-This section is the single canonical specification of the persisted command
-shape; other documents reference it and must not restate it.
-
-Durable commands describe sparse user intent and remain serializable. The
-outbox stores one command shape directly:
+A durable command records sparse, absolute intent:
 
 ```ts
 type Command = {
   type: 'patch'
   issuedAt: TMsTime
-  patch: IntentPatch
-}
-
-type IntentPatch = {
-  user?: UserPatch[]
-  account?: AccountPatch[]
-  merchant?: MerchantPatch[]
-  tag?: TagPatch[]
-  budget?: BudgetPatch[]
-  reminder?: ReminderPatch[]
-  reminderMarker?: ReminderMarkerPatch[]
-  transaction?: TransactionPatch[]
-  deletion?: DeleteIntent[]
+  patch: TIntentPatch
+  label?: TCommandLabel
 }
 ```
 
-This list is closed. Reference and server-owned families such as instruments,
-countries, and companies are not command intent. Users and reminder markers are
-command intent only through their explicitly writable fields; user intent is an
-update to the signed-in root user, and billing and subscription fields remain
-excluded. The issue and persistence boundaries reject other `TNormalizedPatch`
-members instead of implicitly inheriting them. There is no outbox-entry wrapper,
-entry id, durable command union, or persisted materialized patch.
+`TIntentPatch` admits only `user`, `account`, `merchant`, `tag`, `budget`,
+`reminder`, `reminderMarker`, `transaction`, and `deletion`. Reference
+collections (`instrument`, `country`, `company`) cannot be command intent.
+Entity modules declare writable and required fields beside their factories;
+user intent is limited to writable fields on the root user.
 
-Entity patch types live beside their entity types and document locally writable
-fields through `EntityPatch<TEntity, TWritableFields>`. The helper makes `id`
-required and only the explicitly listed writable fields optional. A present id
-is patched and a missing id is created. This upsert rule deliberately favors one
-simple command shape over separate create/update operations.
+A present ID is updated; an absent ID is created. Only fields present in the
+intent overwrite the latest entity. Creation must supply the required fields.
+This means rebase can recreate an entity removed remotely.
 
-Command issue captures generated ids, `issuedAt`, and every other
-nondeterministic input. Replay must not call ambient time or generate a new id.
-Deletion intent stores entity identity; materialization adds protocol metadata.
+Compilers resolve relative requests such as toggle into absolute values and
+capture generated IDs through an explicit context. Issue captures the time.
+Replay never generates IDs or reads ambient time. A compiler may return
+`{ patch, receipt }`; the receipt is for its caller and is not replay state.
+Labels record a verb, optional arguments, and Origin for review. They do not
+affect replay, permission, or transport; an invalid stored label is discarded
+without rejecting the command.
 
-Commands set absolute values and must be idempotent under rebase. Semantic Redux
-verbs may use different compilers, but they all issue this persisted patch
-shape. Relative requests such as toggle or increment are resolved to absolute
-values before issue.
-
-If compilation generates caller-only metadata, it returns
-`{ patch: TIntentPatch, receipt: TReceipt }`. The receipt is not replay state.
-
-Internal compilers keep the `compile*` prefix; runtime namespaces expose short
-domain verbs such as `envelopes.rename(id, name)`.
+The browser enters through
+[`executeReduxCommand`](../../runtime/redux/executeCommand.ts), which checks
+write restrictions, compiles and issues intent, and omits empty changes before
+dispatching `appendClientCommand`. Domain compilers do not read Redux.
 
 ### Materialization
 
-Local writes pass through one deterministic pipeline:
+[`materializeCommand.ts`](../../internal/operations/materialization/materializeCommand.ts)
+expands intent against the latest snapshot, predicts local server effects, and
+returns an applied patch. Replaying repeats this for each command in order.
+Local replay uses `issuedAt`; transport replay uses the request's `sentAt`.
 
-```txt
-base
-  -> expand sparse primary intent
-  -> derive predicted server effects
-  -> applyPatch(primary + effects)
-  -> repeat for the next command
-  -> current
-```
+Transport uses `materializePrimaryCommand`, which expands only primary intent.
+Predicted cascades and balances must never become outgoing client intent.
+[Materialization rules](./materialization.md) specify the exact effects and
+why some server behavior is deliberately not predicted.
 
-Sparse patches read the latest entity and overlay only present fields. A missing
-id invokes the entity factory and creates a complete entity; an incomplete
-creation intent fails before it can be persisted. Patching an entity that
-disappeared remotely therefore recreates it after rebase. Command order resolves
-delete-then-patch and repeated field writes.
+[`applyPatch`](../../internal/domain/zenmoney/model/applyPatch.ts) only applies
+explicit changes. It discovers no cascades and interprets no commands.
+Canonical responses bypass materialization because the server has already
+computed their effects.
 
-Predicted server rules belong here rather than in command compilers. Their
-content — which effects Core predicts, which the server owns, and where the two
-deliberately differ — is specified in [materialization.md](./materialization.md).
+## Accepting a server response
 
-Each entity module owns its writable, required, and creation field contracts
-next to its factory; the application materializer holds the command loop and
-one registry row per entity. Materialization is pure and receives the current normalized snapshot, command,
-and explicit version time. Local replay uses `issuedAt`; request transport uses
-a fresh `sentAt`. Local `current` contains primary changes plus predicted
-effects. Transport is built from a separate primary-only replay so predicted
-server effects are never sent as client intent.
+A pull dispatches one `applyServerPatch({ ...patch, fullReload? })` action.
+The reducer updates `base` and rebases pending commands in the same transition,
+so subscribers see the complete replica. There is no staged response in state.
 
-### Dumb patch application
+A full reload builds a replacement base from an empty store. A changed root
+user drops the previous user's command stacks. During journal recovery, the
+replayed Outbox must also pass resulting-state validation before it is used.
 
-`applyPatch` performs only the changes explicitly present in an applied patch.
-It must not discover cascades, call external services, or interpret commands.
-Canonical server diffs bypass local materialization because ZenMoney may have
-already expanded the same effects.
+[`replicaPersistence.ts`](../../../store/data/replicaPersistence.ts) observes
+the action and the states before and after it. The payload supplies
+`fullReload`; the previous recovery state determines whether to record a
+recovery checkpoint. History listens to the same action to invalidate cached
+historical data. The action does not wait for IndexedDB.
 
-## Public facade
-
-The root entrypoint (`import { createZerroSession } from 'zerro-core'`) is the
-package-facing semantic surface. It must not re-export Redux adapters or whole
-implementation trees. The outbox engine operations are internal and are not
-root exports; the current Redux store and worker reach them through the explicit
-`zerro-core/replica` integration entrypoint. Implementation paths behind that
-entrypoint are not stable APIs.
-
-The React app uses one explicit Redux adapter entrypoint grouped by domain
-(`import { core } from 'zerro-core/redux'`).
-The namespaces contain granular selectors, hooks, semantic command creators,
-and their domain types. They do not own state or read the Redux store
-imperatively. Flat adapter exports are intentionally unsupported. Each Redux
-domain module owns its selector implementations and hook wrappers; there is no
-shared selector or hook barrel. `runtime/redux/state.ts` owns only `selectData`,
-the path from `RootState` to the complete Core snapshot. Each domain namespace
-owns its `selectAll`/`selectRaw` narrowing selector, and downstream selectors
-depend on that stable entity-map reference. Command-time derived reads use
-`commandRead.ts`; it exposes the same
-projection-graph nodes under command-local names because `commands.ts` cannot
-import the domain namespace modules (they re-export command creators, which
-would cycle). It reads the committed snapshot, so it shares the graph memo
-rather than recomputing.
-
-### Snapshot session
-
-`createZerroSession` represents one immutable snapshot. Its internal reads are
-lazy and each node is evaluated at most once for the session lifetime. No
-cross-snapshot invalidation is needed. The session exposes only namespaced
-reads grouped by domain with `get*` names (`session.envelopes.getAll()`,
-`session.months.getTotals()`); new reads belong on the matching domain
-namespace. Session context contains only nondeterministic dependencies such as
-`now()` and `uuid()`. Root user and currency are derived from normalized data.
-
-### Runtime engine
-
-`internal/operations/replication/outbox.ts` is the engine: pure operations
-defining append, undo/redo stack transitions, command rematerialization, and
-primary-only transport. The only runtime-specific part is who owns the state —
-in the React app that is Redux (`store/data/slice.ts`), and a future standalone
-package wraps the same functions.
-
-There is deliberately no second engine object. An in-memory `createZerroEngine`
-reference implementation existed and was deleted: it had no production
-consumer and was a standing invitation to grow a second implementation of
-append, undo, redo, and replay rules. If a semantic engine facade is ever
-needed, build it over these operations rather than beside them.
-
-Issued commands append directly to the outbox. Redux performs authoritative
-`current` rematerialization for append, undo, redo, and base changes. The sync
-adapter asks the pure push-run module to derive bounded request transport from
-the same durable outbox; Redux stores no parallel `data.diff` projection. Redux
-may temporarily retain a prepared request for an explicit retry, but that is an
-adapter concern rather than a second replica or product inbox.
-
-## Read model and memoization
-
-Pure projectors own calculations and declare which inputs are required. The
-projection graph is defined once in `internal/projections/graph.ts`; both runtimes
-instantiate it and own memoization at their own scope — a session binds the
-graph to one frozen snapshot, the Redux adapter keeps one instance across
-snapshots. Do not depend a node on the entire `current` store — it would
-invalidate transaction-heavy calculations after unrelated writes; the graph
-depends on individual entity maps and `projectionStability.test.ts` guards it.
-
-Read `internal/projections/graph.ts` for the living dependency wiring rather than a
-maintained diagram. Whether a node is memoized is a deliberate per-node call,
-recorded in [design-ledger.md](./design-ledger.md#reads-and-redux-adapter).
-
-Carry-forward projections such as `envMetrics` may need the full month range
-up to the requested month; the optimization target is stable upstream caching,
-not independent calculation of every month.
-
-## Domain and presentation
-
-Domain envelopes contain semantic state only: identity, normalized and source
-titles, hierarchy, stable group id, configured tag color, visibility, currency,
-and budgeting behavior. Presentation envelopes may add localized labels and
-group names, emoji/SVG resolution, generated and display colors, and future
-bank logos. Reusable appearance policy belongs in an optional presentation
-package or subpath; domain Core must not import bundler-specific SVG URLs,
-i18n, React, or Redux.
-
-Write commands must resolve against domain envelopes, never localized or
-presentation-decorated views. This boundary is implemented: the session builds
-tag envelopes from Core tag structure, while the Redux adapter applies
-`TPresentedEnvelope` fields and localized groups afterward. Before compiling an
-app draft, the adapter maps known localized default-group labels back to stable
-domain group ids.
-
-## Internal responsibilities
-
-- **ZenMoney Core** works only with normalized data and owns: normalized
-  entities, ids, dates, and timestamps; root user and entity facts; patch
-  application and replay; entity commands and factories; ZenMoney-derived
-  debtors and balance history; materialized server-like rules when implemented.
-  Raw HTTP/wire conversion belongs to a sync adapter.
-- **Zerro Core** depends on ZenMoney Core and owns: hidden-data formats and
-  future migrations; the `🤖 [Zerro Data]` service-account convention; user
-  settings, envelope metadata, envelope ids, budgets, goals, and FX data;
-  high-level Zerro command compilation.
-- **Runtime adapters** own: Redux subscriptions and selector memoization;
-  IndexedDB or other persistence; ZenMoney HTTP synchronization; React hooks
-  and event tracking; localization and concrete assets.
-
-## Replica model
-
-The browser replica is one linear canonical journal plus a command outbox. In
-memory Redux owns the reconstructed live state and session-only redo stack:
-
-```ts
-type ReplicaState = {
-  base: TDataStore
-  current: TDataStore // replayOutbox(base, outbox)
-  outbox: Command[]
-  redo: Command[] // session only
-}
-```
-
-IndexedDB has one database version and two stores. A schema upgrade from the
-legacy per-domain cache is destructive; there is no record-level compatibility
-format:
-
-```ts
-type PersistedReplica = {
-  rootUserId: number
-  serverTimestamp: number
-  headSequence: number
-  latestCheckpointSequence: number
-  oldestSequence: number
-  oldestServerTimestamp: number
-  retainedBytes: number
-  outbox: Command[]
-}
-
-type JournalEntry =
-  | { rootUserId; sequence; kind: 'checkpoint'; snapshot; reason; byteSize }
-  | { rootUserId; sequence; kind: 'transition'; transition; pushed; byteSize }
-```
-
-`sequence` is monotonically increasing per root user and is the IndexedDB key
-with `rootUserId`. Server timestamps remain metadata and the synchronization
-cursor. A full sync appends another checkpoint to the same line; it does not
-create a branch. Empty pulls update only `PersistedReplica.serverTimestamp`.
-
-Only a full sync, recovery, and retention write checkpoints — there is no
-periodic one, so the replayed suffix grows with ordinary syncing until the user
-asks for a full reload. That is the deliberate manual lever, not an oversight;
-see `private/open-decisions.md` § 7, what writes a checkpoint during ordinary
-use.
-
-Startup gets the latest checkpoint directly, scans only its suffix through
-`headSequence`, validates the reconstructed base, and then replays the parsed
-outbox. History pages contain metadata only in Redux. Opening a historical
-sequence scans backward to its nearest checkpoint and keeps only that selected
-snapshot in memory. Historical viewing remains read-only; restore emits an
-ordinary live command.
-
-Canonical entry, manifest, cursor, and outbox updates share one IndexedDB
-transaction. Redux is updated first. Browser persistence uses one Promise queue
-per tab; after its first primary write failure it is disabled until reload and
-the UI warns without blocking continued work. Compaction failures only log and
-are retried at the next canonical commit or startup. Multiple active tabs are
-intentionally not coordinated.
-
-Retention uses the stricter of a 90-day server-time window and 100 MiB of
-logical UTF-8 JSON entry bytes. One bounded pass folds only the oldest prefix
-into a `retention` checkpoint at the last consumed sequence; sequences are
-never renumbered. A pass runs after a canonical commit and once after startup.
-The minimal current checkpoint and outbox may exceed the budget.
-
-If canonical replay is corrupt, a structurally valid outbox is preserved, a
-full sync writes a `recovery` checkpoint, and the outbox is replayed over it.
-Ordinary commands and non-recovery sync stay blocked until that checkpoint is
-accepted.
-A corrupt outbox is not guessed or partially repaired: its raw value stays in
-IndexedDB, commands and sync are blocked, and the user must explicitly discard
-it before recovery can continue. A different root user clears both stores
-before starting sequence 1, so accounts never share a journal or outbox.
-
-Any future replica implementation must reuse the pure outbox operations. Two
-implementations of append, undo, redo, or replay rules are not acceptable.
+Push acknowledgement is separate: Core computes an accepted Chunk, and Redux
+receives it through `acceptClientPushChunk`. Persistence records its canonical
+state and remaining Outbox before delivery proceeds to the next Chunk.
 
 ## Sync and conflicts
 
-Successful ZenMoney responses are canonical normalized diffs. They contain the
-accepted local changes as well as remote changes and the new server timestamp:
+A deliberate push captures a fixed Outbox prefix. Later commands remain a
+suffix for the next run. Background refresh pulls only, because a push also
+consumes the user's undo history.
 
-```txt
-capture outbox prefix -> squash to one run command
-                      -> prepare bounded chunk + cursor -> ZenMoney
-canonical diff        -> applyPatch(base, diff)
-                      -> remove exactly the chunk receipt
-                      -> persist base + remaining command
-                      -> prepare the next chunk
-```
+[`pushRun.ts`](../../internal/operations/replication/pushRun.ts) plans requests
+and accepts receipts. [`pushDriver.ts`](../../internal/operations/replication/pushDriver.ts)
+owns delivery order, retry classification, backoff, and repacking. The browser
+supplies HTTP, byte measurement, persistence, and progress reporting.
 
-Manual sync captures a stable Outbox prefix and clears `redo`. Transport replay
-starts from `base`, applies only primary command patches to a working snapshot,
-and records touched ids and deletions. The final full entities come from that
-primary-only snapshot, never from UI `current` with predicted effects. Commands
-created after capture remain a suffix for the next Push run.
+Requests are bounded to 2 MiB of the transmitted representation. Multi-Chunk
+runs send dependency-ordered upserts, then Cleanup: singleton accounts first,
+other removals next, singleton child-first tags last. Account or tag deletion
+forces Chunk mode even below the byte limit. The reference graph drives upsert
+ordering and sanitation; Cleanup order records observed server cascades.
 
-Before preparing the request, Core removes canonical historical rows that the
-write API cannot recreate: budgets whose ordinary tag is absent and reminder
-markers whose reminder is absent. Transactions pointing to an omitted marker
-are sent with a null marker reference; the special global-budget tag remains
-valid. Transactions wholly contained in accounts deleted by the same run are
-also omitted because that account purge is verified server behaviour. This
-normalization applies to commands already persisted in the outbox. If it
-removes the entire captured prefix, Core sends a cursor-only request and drops
-that prefix only after the response is accepted.
+Each successful response updates the canonical base and retires the exact
+items in its receipt. The first acknowledgement replaces the captured prefix
+with one remaining command; later acknowledgements shrink it. Applying each
+response also lets the next request omit work already done by server cascades.
+Every accepted Chunk is persisted before another is sent.
 
-Core uses one request unless its serialized normalized body exceeds 2 MiB or
-Cleanup needs singleton-account or singleton-tag phases. In a multi-Chunk run,
-upserts are ordered by dependency and tag upserts are parent-first. Cleanup
-starts with one account per Chunk. After each accepted account response, Core
-applies the canonical diff and rematerializes the remaining command against the
-new base, so removals already performed by an account cascade disappear without
-encoding an unverified client-side cascade rule. Retained rows remain pending.
-Other surviving deletion kinds follow. Tag deletions run last, one per request,
-in deepest-child-first order calculated from the current canonical tree. HTTP
-413 halves the current byte target and repacks the same unconfirmed work; one
-item that still receives 413 stops the run.
+HTTP 413 shrinks and repacks unconfirmed work. Transient failures retry the same
+request; deterministic errors stop without skipping items. A response that was
+not processed leaves its work pending, so delivery is at least once. A stopped
+run starts again from the remaining Outbox; no durable run object is required.
+See [ADR 0002](../../../../docs/adr/0002-bounded-push-runs.md).
 
-A successful ZenMoney response updates `base` and acknowledges exactly the
-items named by that Chunk's receipt without comparing final field values. The
-first acknowledgement replaces the captured command prefix with one command
-containing the remainder; each later acknowledgement shrinks that command.
-Every accepted Chunk is persisted as its own canonical transition before the
-next request. If a response is not processed, its items remain pending and may
-be sent again. Network, 429, and 5xx retries therefore reuse the exact request;
-a deterministic 400 stops rather than skipping an item.
+Conflicts use sparse field overwrite in command order. A successful response
+acknowledges its whole Chunk without comparing returned field values. The
+consequences are recorded in [Design decisions](./design-ledger.md#accepted-risks).
 
-Periodic pull uses the same canonical response path but acknowledges no local
-command. Whether a dirty session pushes automatically remains an adapter policy,
-not a capability classification between persisted command kinds.
+## Read model and memoization
 
-First-stage conflict resolution is field-level last write wins in command
-order. Upsert intentionally recreates a missing entity. Revisit this only with
-evidence that remote deletion or silent partial rejection needs a different
-product policy or multi-device editing justifies a richer conflict model.
+Pure projectors calculate views from explicit inputs. Their dependencies are
+wired once in [`graph.ts`](../../internal/projections/graph.ts):
 
-## Migrations and compatibility
+- `createZerroSession` binds a graph to one immutable snapshot and freezes time
+  at construction; reads are lazy and grouped as `session.envelopes.getAll()`;
+- the Redux adapter keeps a graph across snapshots, compares input references,
+  and reads the clock on each call.
 
-Hidden-data migrations belong to Zerro Core because the hidden format is a
-domain contract. Core should read old formats and compile a write-back patch
-when an upgrade is needed.
+Expensive calculations and allocating inputs to other nodes are memoized.
+Primitive reads and existing map references generally are not. Depend on
+specific entity maps rather than all of `current`, so unrelated edits leave
+expensive results intact. Carry-forward budget calculations still need the
+preceding month range.
 
-Temporary app bridges and exit criteria are tracked in
-[design-ledger.md](./design-ledger.md). Do not preserve a bridge merely because
-it appears in legacy code; preserve it until its listed replacement is ready.
+Presentation decorates domain values afterward: localized names, group labels,
+icons, colors, and asset URLs never enter domain calculations. Command-time
+reads use the same graph; commands resolve domain identities before compilation.
 
-## Architectural invariants
+## Persistence and history
 
-1. Production Core imports no Redux, React, storage, i18n, ZenMoney HTTP, or
-   runtime values from `6-shared`.
-2. Root `zerro-core` stays facade-only; adapter subpaths are explicit.
-3. Root user and user currency are derived from data.
-4. Nondeterminism enters through explicit context.
-5. Projectors expose explicit dependencies; expensive nodes do not depend on
-   the whole store.
-6. Session memoization is snapshot-local; Redux owns cross-snapshot
-   memoization.
-7. Commands use narrow semantic inputs and do not import Redux selectors.
-8. Local intent passes through the materializer; canonical server diffs do not.
-9. `applyPatch` remains dumb and deterministic.
-10. Replay rematerializes issued patch commands in prefix order.
-11. Redux remains the sole replica owner in the React app.
-12. Presentation decoration is not domain state.
-13. Real-account fixtures require a concrete regression case and must never
-    print or commit private contents.
-14. Every migration slice is small, independently testable, and documented
-    when it changes a boundary or next step.
+[`replicaStorage.ts`](../../../6-shared/api/replicaStorage.ts) owns IndexedDB:
+`replicas` holds the cursor, journal metadata, and Outbox; `journalEntries`
+holds checkpoints and compact transitions keyed by root user and sequence.
+Their canonical updates share one database transaction.
+
+Startup loads the latest checkpoint and replays its suffix to reconstruct
+`base`, then parses and replays the Outbox. A historical point is loaded lazily
+from its nearest checkpoint and validated when opened. Redux keeps history
+metadata and only the selected historical snapshot.
+
+Full sync, recovery, and retention write checkpoints. Ordinary pulls append
+transitions only when canonical data changes; empty pulls update the cursor.
+Sequences are never renumbered. Retention folds bounded oldest prefixes under
+90 days of server time and 100 MiB of logical JSON bytes. The minimal current
+checkpoint and Outbox may exceed the budget. There is no periodic checkpoint
+or special retention exemption for restore. See
+[ADR 0001](../../../../docs/adr/0001-linear-indexeddb-replica.md).
+
+Browser writes use one Promise queue per tab. A primary persistence failure
+disables further primary writes until reload and shows a warning; Redux remains
+usable. Compaction failures are secondary and retried later. Logout invalidates
+queued saves and awaits the ordered clear. Active tabs are not coordinated.
+
+A corrupt canonical journal preserves a structurally valid Outbox for recovery
+through a full reload. If replay over the recovered base is invalid, the Outbox
+is quarantined. A corrupt persisted Outbox stays untouched on disk; commands
+and sync remain blocked until explicit discard. Recovery never guesses which
+unsent commands can be lost.
+
+Viewing history changes the displayed snapshot, not the live replica. Normal
+writes are blocked there. Restoring a canonical point or backup compiles an
+ordinary live command; restoring a local Outbox point undoes to that position.
+The planner and identity rules are described under
+[Restore](./design-ledger.md#restore).
+
+## Module boundaries
+
+| Location / entrypoint      | Responsibility                                                |
+| -------------------------- | ------------------------------------------------------------- |
+| `internal/domain/zenmoney` | Normalized entities, factories, entity facts, reference rules |
+| `internal/domain/zerro`    | Hidden data, envelopes, budgets, goals, FX, activity          |
+| `internal/operations`      | Materialization, replication, restore                         |
+| `internal/projections`     | Shared dependency wiring and memoization                      |
+| `zerro-core`               | Snapshot session, constants, shared root types                |
+| `zerro-core/redux`         | App-facing `core` domain namespaces: reads, hooks, commands   |
+| `zerro-core/replica`       | Explicit integration functions for store and persistence      |
+| `zerro-core/headless`      | Non-Redux reads, compilers, and replica operations            |
+| `runtime/presentation`     | Presentation helpers and package-safe icon metadata           |
+| `support`                  | Test builders, demo fixtures, these documents                 |
+
+Core internals import no React, Redux, HTTP, storage, localization, or app runtime
+values. Runtime adapters may depend on the app. Entry files export explicit
+capabilities rather than internal barrels; implementation paths are not stable
+interfaces. `api-boundary.test.ts` enforces this direction.
