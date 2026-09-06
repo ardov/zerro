@@ -163,7 +163,7 @@ function SelectField<T extends string>({
                   )}
                 </SelectPrimitive.ItemText>
                 <SelectPrimitive.ItemIndicator className="ml-4 inline-flex shrink-0 items-center text-primary">
-                  <CheckIcon fontSize="small" />
+                  <CheckIcon size={20} />
                 </SelectPrimitive.ItemIndicator>
               </SelectPrimitive.Item>
             ))}

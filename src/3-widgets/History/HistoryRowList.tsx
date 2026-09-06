@@ -120,7 +120,7 @@ function HistoryRowItem({
           onClick={toggle}
         >
           <ChevronDownIcon
-            fontSize="small"
+            size={20}
             className={row.expanded ? 'rotate-180' : undefined}
           />
         </IconButton>

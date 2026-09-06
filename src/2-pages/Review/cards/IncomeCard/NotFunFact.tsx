@@ -40,7 +40,7 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
           <br />
           Если сложить их зарплаты — получится ваша.{' '}
           <IconButton size="small" onClick={toggleInfo}>
-            <HelpOutlineIcon fontSize="small" />
+            <HelpOutlineIcon size={20} />
           </IconButton>
         </p>
       </div>

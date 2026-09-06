@@ -17,7 +17,7 @@ import {
   AccountBalanceWalletIcon,
   GlobeIcon,
   HistoryIcon,
-  TagIcon,
+  CategoryIcon,
 } from '@/6-shared/ui/Icons'
 import { Switch } from '@/6-shared/ui/Switch'
 import { ActionList, ActionListItem } from '@/6-shared/ui/ActionList'
@@ -348,7 +348,7 @@ function IconModeItem() {
   return (
     <ActionListItem onClick={handleClick}>
       <ListRowIcon>
-        <TagIcon />
+        <CategoryIcon />
       </ListRowIcon>
       <ListRowText>{t(emojiIcons ? 'useIcons' : 'useEmojis')}</ListRowText>
     </ActionListItem>

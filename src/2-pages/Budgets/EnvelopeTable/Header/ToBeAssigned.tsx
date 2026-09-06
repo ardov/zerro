@@ -59,7 +59,7 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
             '👌'
           )}
         </p>
-        <ArrowForwardIcon fontSize="small" />
+        <ArrowForwardIcon size={20} />
       </ButtonBase>
     </Tooltip>
   )

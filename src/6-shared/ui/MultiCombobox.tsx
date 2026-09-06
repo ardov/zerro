@@ -57,7 +57,7 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
                         aria-label={t('removeValue', { label: option.label })}
                         className="inline-flex size-4 shrink-0 items-center justify-center rounded-sm border-0 bg-transparent p-0 text-inherit hover:bg-foreground-hover focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
                       >
-                        <CloseIcon fontSize="small" />
+                        <CloseIcon size={20} />
                       </Combobox.ChipRemove>
                     </Combobox.Chip>
                   ))}
@@ -108,7 +108,7 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
                   )}
                 >
                   <Combobox.ItemIndicator className="mr-2 inline-flex size-4 shrink-0 items-center justify-center text-primary">
-                    <CheckIcon fontSize="small" />
+                    <CheckIcon size={20} />
                   </Combobox.ItemIndicator>
                   <span className="min-w-0 flex-auto truncate">
                     {option.label}

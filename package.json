@@ -70,6 +70,7 @@
     "i18next": "^26.4.0",
     "idb": "^8.0.3",
     "json2mq": "^0.2.0",
+    "lucide-react": "^1.39.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
     "react-day-picker": "^10.0.1",

@@ -95,7 +95,7 @@ export function HistoryTopBar() {
               }
               aria-label={t('stepBack')}
             >
-              <ChevronLeftIcon fontSize="small" />
+              <ChevronLeftIcon size={20} />
             </IconButton>
             <IconButton
               size="small"
@@ -105,7 +105,7 @@ export function HistoryTopBar() {
               }
               aria-label={t('stepForward')}
             >
-              <ChevronRightIcon fontSize="small" />
+              <ChevronRightIcon size={20} />
             </IconButton>
           </>
         )}
@@ -124,7 +124,7 @@ export function HistoryTopBar() {
               onClick={() => setPanelOpen(true)}
               aria-label={t('openPanel')}
             >
-              <HistoryIcon fontSize="small" />
+              <HistoryIcon size={20} />
             </IconButton>
             {/* The date is the only thing allowed to shrink: a label that wraps
                 would make the bar two rows tall mid-step and shift the page. */}
@@ -151,7 +151,7 @@ export function HistoryTopBar() {
           onClick={() => dispatch(exitHistoryBrowsing())}
           aria-label={t('exitHistory')}
         >
-          <CloseIcon fontSize="small" />
+          <CloseIcon size={20} />
         </IconButton>
       </div>
     </div>

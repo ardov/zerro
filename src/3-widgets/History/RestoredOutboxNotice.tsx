@@ -52,7 +52,7 @@ export const RestoredOutboxNotice = () => {
             aria-label={t('dismissNotice')}
             onClick={() => setDismissed(true)}
           >
-            <CloseIcon fontSize="small" />
+            <CloseIcon size={20} />
           </IconButton>
         </>
       }

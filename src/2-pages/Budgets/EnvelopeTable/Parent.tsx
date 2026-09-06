@@ -48,7 +48,7 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
             className={`absolute -left-[6px] top-[10px] z-[1] transition-transform duration-300 ${isExpanded ? 'rotate-90' : 'rotate-0'}`}
             onClick={handleExpand}
           >
-            <ChevronRightIcon fontSize="inherit" />
+            <ChevronRightIcon size={20} />
           </IconButton>
         )}
         {parent}

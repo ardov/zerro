@@ -72,7 +72,7 @@ export function HistoryPanel() {
           onClick={() => setOpened(null)}
           aria-label={t('closePanel')}
         >
-          <CloseIcon fontSize="small" />
+          <CloseIcon size={20} />
         </IconButton>
       </div>
       <hr className="m-0 border-0 border-t border-border" />
@@ -113,7 +113,7 @@ function EmptyHistory({ loading }: { loading: boolean }) {
   const { t } = useTranslation('history')
   return (
     <div className="flex grow flex-col items-center justify-center gap-2 px-8 text-center text-muted-foreground">
-      <HistoryIcon className="text-[40px] opacity-40" />
+      <HistoryIcon className="size-10 opacity-40" />
       <p className="m-0 type-body-sm">
         {loading ? t('historyLoading') : t('noHistory')}
       </p>

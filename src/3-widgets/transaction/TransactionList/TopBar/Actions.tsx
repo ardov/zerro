@@ -11,7 +11,7 @@ import { ListRowIcon, ListRowText } from '@/6-shared/ui/ListRow'
 import { Divider } from '@/6-shared/ui/Divider'
 import {
   EditIcon,
-  LocalOfferOutlinedIcon,
+  CategoryIcon,
   DoneAllIcon,
   MoreVertIcon,
   VisibilityIcon,
@@ -158,7 +158,7 @@ const Actions: FC<ActionsProps> = ({
               onChange={handleSetTag}
               trigger={
                 <Tooltip title={t('setCategory')}>
-                  <IconButton children={<LocalOfferOutlinedIcon />} />
+                  <IconButton children={<CategoryIcon />} />
                 </Tooltip>
               }
             />

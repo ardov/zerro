@@ -123,7 +123,7 @@ export function DatePicker({
             aria-label={t('selectDate')}
             onClick={() => setOpen(true)}
           >
-            <CalendarIcon fontSize="small" />
+            <CalendarIcon size={20} />
           </IconButton>
         }
       />

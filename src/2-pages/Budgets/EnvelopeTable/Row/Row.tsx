@@ -270,7 +270,7 @@ const GoalButton: FC<GoalButtonProps> = props => {
       <span className={'addGoal'}>
         <Tooltip title={t('addGoal')}>
           <IconButton size="small" onClick={onClick}>
-            <EmojiFlagsIcon fontSize="inherit" />
+            <EmojiFlagsIcon size={20} />
           </IconButton>
         </Tooltip>
       </span>

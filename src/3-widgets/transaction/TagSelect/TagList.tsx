@@ -47,7 +47,7 @@ export const TagList: FC<TagListProps> = props => {
               <IconButton
                 edge="end"
                 size="small"
-                children={<AddIcon fontSize="inherit" />}
+                children={<AddIcon size={20} />}
               />
             </Tooltip>
           </span>

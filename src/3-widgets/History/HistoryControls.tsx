@@ -37,7 +37,7 @@ export function HistoryControls() {
             disabled={!canUndo}
             onClick={() => dispatch(undoClientCommand())}
           >
-            <UndoIcon fontSize="small" />
+            <UndoIcon size={20} />
           </IconButton>
         </span>
       </Tooltip>
@@ -48,7 +48,7 @@ export function HistoryControls() {
             disabled={!canRedo}
             onClick={() => dispatch(redoClientCommand())}
           >
-            <RedoIcon fontSize="small" />
+            <RedoIcon size={20} />
           </IconButton>
         </span>
       </Tooltip>
@@ -56,7 +56,7 @@ export function HistoryControls() {
       <Button
         size="small"
         variant="text"
-        startIcon={<SendIcon fontSize="small" />}
+        startIcon={<SendIcon size={20} />}
         disabled={!pending || isSyncing}
         onClick={() => dispatch(syncData())}
         className="shrink-0 whitespace-nowrap"

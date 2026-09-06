@@ -85,9 +85,9 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
     ) : (
       <CircularProgress size={24} />
     ),
-    stopped: <WarningIcon color="error" />,
-    success: <DoneIcon color="success" />,
-    fail: <WarningIcon color="error" />,
+    stopped: <WarningIcon className="text-error" />,
+    success: <DoneIcon className="text-success" />,
+    fail: <WarningIcon className="text-error" />,
   }
   const actionLabel = hasDetails
     ? t('syncProgress:detailsTitle')
