@@ -93,7 +93,10 @@ export const DeleteIcon = createIcon(Trash2, 'DeleteIcon')
 /** Puts back what was deleted. The name is the one the application already
  * used; the drawing is no longer a bin, because the counter-clockwise arrow
  * reads as "undo this" beside a `DeleteIcon` that is one. */
-export const RestoreFromTrashIcon = createIcon(RotateCcw, 'RestoreFromTrashIcon')
+export const RestoreFromTrashIcon = createIcon(
+  RotateCcw,
+  'RestoreFromTrashIcon'
+)
 export const MergeTypeIcon = createIcon(Merge, 'MergeTypeIcon')
 export const FilterListIcon = createIcon(Funnel, 'FilterListIcon')
 export const DragIndicatorIcon = createIcon(GripVertical, 'DragIndicatorIcon')
@@ -138,10 +141,7 @@ export const WhatshotIcon = createIcon(Rewind, 'WhatshotIcon')
 
 // Application chrome
 export const SettingsIcon = createIcon(Settings, 'SettingsIcon')
-export const HelpOutlineIcon = createIcon(
-  CircleQuestionMark,
-  'HelpOutlineIcon'
-)
+export const HelpOutlineIcon = createIcon(CircleQuestionMark, 'HelpOutlineIcon')
 export const ExitToAppIcon = createIcon(LogOut, 'ExitToAppIcon')
 export const FavoriteBorderIcon = createIcon(Heart, 'FavoriteBorderIcon')
 export const GlobeIcon = createIcon(Globe, 'GlobeIcon')
