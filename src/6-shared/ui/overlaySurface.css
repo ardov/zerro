@@ -90,4 +90,61 @@
       transition: none;
     }
   }
+
+  /* A surface whose list runs past its edge.
+
+     The scrollbar is hidden and a fade stands in for it, on whichever edge
+     has something behind it — `useScrollFade` writes that answer onto the
+     element.
+
+     Two sticky strips painted in the surface's own colour, not a mask. A
+     mask on this element would take the surface with it: the background and
+     the shadow are drawn by the same box, so the paper itself would fade out
+     and the page would show through the top of the menu. A strip fades the
+     rows into the paper instead, and leaves the paper alone.
+
+     Sticky rather than absolute because this element is the scroller: the
+     strips have to stay at the edges of the scrollport while the rows move
+     under them. The negative margin is the strip giving its own height back,
+     so neither of them takes a row's worth of room. */
+  .scroll-fade::before,
+  .scroll-fade::after {
+    content: '';
+    position: sticky;
+    z-index: 1;
+    display: block;
+    height: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease;
+  }
+
+  .scroll-fade::before {
+    top: 0;
+    margin-bottom: -24px;
+    background: linear-gradient(to bottom, var(--popover), transparent);
+  }
+
+  .scroll-fade::after {
+    bottom: 0;
+    margin-top: -24px;
+    background: linear-gradient(to top, var(--popover), transparent);
+  }
+
+  .scroll-fade[data-fade='top']::before,
+  .scroll-fade[data-fade='both']::before {
+    opacity: 1;
+  }
+
+  .scroll-fade[data-fade='bottom']::after,
+  .scroll-fade[data-fade='both']::after {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-fade::before,
+    .scroll-fade::after {
+      transition: none;
+    }
+  }
 }

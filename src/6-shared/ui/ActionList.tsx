@@ -1,6 +1,6 @@
 import { Toolbar } from '@base-ui/react/toolbar'
 import { useRovingListKeys } from '@/6-shared/hooks/useRovingListKeys'
-import { listRowClass } from './ListRow'
+import { ListRowBacking, listRowClass } from './ListRow'
 import { cn } from './shadcn/utils'
 
 const ITEM_SELECTOR = '[data-slot="action-list-item"]'
@@ -36,6 +36,7 @@ export function ActionList({
 export function ActionListItem({
   className,
   selected,
+  children,
   ...props
 }: Omit<Toolbar.Button.Props, 'className'> & {
   className?: string
@@ -47,6 +48,9 @@ export function ActionListItem({
       data-selected={selected || undefined}
       className={cn(listRowClass, className)}
       {...props}
-    />
+    >
+      <ListRowBacking selected={selected} />
+      {children}
+    </Toolbar.Button>
   )
 }

@@ -1,0 +1,91 @@
+@layer components {
+  /* The state colours live here rather than in Tailwind variants because
+     their precedence has to be exact, and Tailwind decides utility order for
+     us. Source order here is ours, and it reproduces the contract: rest,
+     hover, focus, invalid, then disabled last so it wins over all of them.
+
+     Every rule weighs (0,2,0) — one class and one state — except the invalid
+     one, which is noted where it sits.
+
+     Anything decided in this block has to stay out of the class list: a
+     `components` rule cannot outrank a utility, so one `bg-muted` on the
+     frame would pin the background through every state below. That is why
+     the background and the border are here and only the geometry is a
+     utility. */
+  .filled-field {
+    --field-hatch: rgb(255 255 255 / 0.5);
+
+    background-color: var(--muted);
+    /* Always present, transparent at rest. A border that appeared on hover
+       would move the content 1.5px and the row would twitch under the
+       pointer. 1.5px because that is the weight the icons are drawn with. */
+    border: 1.5px solid transparent;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease;
+  }
+
+  :root.dark .filled-field {
+    --field-hatch: rgb(255 255 255 / 0.04);
+  }
+
+  /* Not on touch: there is no pointer to rest on a field, and the border
+     would arrive with the tap that is already opening the keyboard. */
+  @media (hover: hover) {
+    .filled-field:hover {
+      border-color: var(--border);
+    }
+  }
+
+  .filled-field:focus-within {
+    background-color: var(--card);
+    border-color: var(--foreground);
+  }
+
+  /* Only under the caret. At rest a wrong field is an ordinary field with a
+     zigzag beside it: a form that has just refused to save would otherwise
+     be a row of red boxes, and the mark alone already says which ones. The
+     red arrives when the person goes to fix one.
+
+     The one rule here at (0,3,0) rather than (0,2,0): it names a state on
+     top of the focus it replaces, and it is the only one at that weight. */
+  .filled-field[data-invalid]:focus-within {
+    border-color: var(--error);
+  }
+
+  /* Nothing can be done to a disabled field, so nothing marks it. */
+  .filled-field[data-disabled] {
+    border-color: transparent;
+  }
+
+  /* Readonly and disabled share a backing: the same fill under a diagonal
+     hatch. The hatch is drawn over the whole field and then masked down to
+     the top and bottom edges, fading out over a fixed 24px, so a tall field
+     and a short one are marked the same way instead of one being striped
+     from end to end. */
+  .filled-field[data-hatched]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--field-hatch) 0 3px,
+      transparent 3px 9px
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 0,
+      transparent 16px,
+      transparent calc(100% - 16px),
+      #000 100%
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .filled-field {
+      transition: none;
+    }
+  }
+}

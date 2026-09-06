@@ -2,10 +2,11 @@ import { Combobox } from '@base-ui/react/combobox'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, ChevronDownIcon, CloseIcon } from './Icons'
-import { listRowClass } from './ListRow'
+import { ListRowBacking, listRowClass } from './ListRow'
 import { OutlinedFieldFrame } from './OutlinedField'
 import { popupPositioning, overlaySurfaceClass } from './overlaySurface'
 import { cn } from './shadcn/utils'
+import { useScrollFade } from './useScrollFade'
 
 export type MultiComboboxOption<T extends string> = {
   value: T
@@ -27,6 +28,7 @@ type MultiComboboxProps<T extends string> = {
  * narrows a fixed set of values: committing text never creates a filter value. */
 export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
   const { t } = useTranslation()
+  const fadeRef = useScrollFade<HTMLDivElement>()
   const selected = props.options.filter(option =>
     props.value.includes(option.value)
   )
@@ -88,7 +90,11 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
           style={{ minWidth: 'var(--anchor-width)' }}
         >
           <Combobox.Popup
-            className={cn(overlaySurfaceClass, '[--grow-from:0.95]')}
+            ref={fadeRef}
+            className={cn(
+              overlaySurfaceClass,
+              '[--grow-from:0.95] max-h-[min(22.5rem,var(--available-height))]'
+            )}
           >
             {props.emptyText && (
               <Combobox.Empty>
@@ -97,16 +103,16 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
                 </div>
               </Combobox.Empty>
             )}
-            <Combobox.List className="max-h-[min(22.5rem,var(--available-height))] overflow-y-auto overscroll-contain outline-none">
+            <Combobox.List className="outline-none">
               {option => (
                 <Combobox.Item
                   key={option.value}
                   value={option}
-                  className={cn(
-                    listRowClass,
-                    'data-highlighted:bg-primary-selected data-selected:bg-primary-selected'
-                  )}
+                  className={listRowClass}
                 >
+                  <ListRowBacking
+                    selected={props.value.includes(option.value)}
+                  />
                   <Combobox.ItemIndicator className="mr-2 inline-flex size-4 shrink-0 items-center justify-center text-primary">
                     <CheckIcon size={20} />
                   </Combobox.ItemIndicator>

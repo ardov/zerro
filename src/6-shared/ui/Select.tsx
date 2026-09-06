@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Select as SelectPrimitive } from '@base-ui/react/select'
 import { usePopup } from '@/6-shared/overlays'
 import { CheckIcon, ChevronDownIcon } from './Icons'
-import { listRowClass } from './ListRow'
+import { ListRowBacking, listRowClass } from './ListRow'
 import { OutlinedFieldFrame, outlinedControlClass } from './OutlinedField'
 import type { OutlinedFieldFrameProps, TFieldSize } from './OutlinedField'
 import {
@@ -11,6 +11,7 @@ import {
   overlaySurfaceClass,
 } from './overlaySurface'
 import { cn } from './shadcn/utils'
+import { useScrollFade } from './useScrollFade'
 
 /** One row of the list.
  *
@@ -112,6 +113,7 @@ function SelectField<T extends string>({
   'aria-label': ariaLabel,
   ...frame
 }: TFieldProps & { options: TSelectOption<T>[]; display: ReactNode }) {
+  const fadeRef = useScrollFade<HTMLDivElement>()
   return (
     <>
       {/* The trigger is not a `Field.Control`, so nothing tells the frame the
@@ -143,6 +145,7 @@ function SelectField<T extends string>({
           {/* A list grows less than a menu: it opens over the field, so a
               deeper scale reads as the field jumping. */}
           <SelectPrimitive.Popup
+            ref={fadeRef}
             className={cn(overlaySurfaceClass, '[--grow-from:0.95]')}
           >
             {options.map(option => (
@@ -152,6 +155,7 @@ function SelectField<T extends string>({
                 data-slot="select-item"
                 className={listRowClass}
               >
+                <ListRowBacking />
                 {/* Base UI aligns the chosen row's text with the trigger's,
                     and takes that measurement from `ItemText`. */}
                 <SelectPrimitive.ItemText className="min-w-0 flex-auto">

@@ -1,0 +1,28 @@
+@layer components {
+  /* The press lives on the backing, not on the row.
+     Shrinking a whole button drags its label and icon along with it, which at
+     this size reads as the text wobbling rather than the control giving way.
+     The backing is the only thing that moves, so the content stays where the
+     finger left it. */
+  .press-backing {
+    transition:
+      transform 150ms ease,
+      background-color 150ms ease;
+  }
+
+  /* Any host that can be pressed: the rule asks the parent rather than the
+     backing, so a row does not need a state class to answer for it. */
+  :active > .press-backing {
+    transform: scale(0.98);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .press-backing {
+      transition: none;
+    }
+
+    :active > .press-backing {
+      transform: none;
+    }
+  }
+}

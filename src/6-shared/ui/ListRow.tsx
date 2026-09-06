@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
+import { PressBacking } from './PressBacking'
 import { cn } from './shadcn/utils'
 
 /** Shared row vocabulary for menus, action lists and navigation.
@@ -17,24 +18,54 @@ import { cn } from './shadcn/utils'
  * because a menu keeps its disabled items focusable so they are still
  * announced. Only one of the two variants matches in either container. */
 const rowBase =
-  'relative flex w-full min-w-0 cursor-pointer items-center rounded-lg border-0 bg-transparent px-4 text-left font-sans whitespace-nowrap text-foreground hover:bg-accent focus-visible:bg-focus-surface focus-visible:outline-none data-selected:bg-primary-selected data-selected:hover:bg-primary-selected-hover disabled:pointer-events-none disabled:opacity-disabled aria-disabled:pointer-events-none aria-disabled:opacity-disabled'
+  'relative flex w-full min-w-0 cursor-pointer items-center border-0 bg-transparent text-left font-sans whitespace-nowrap text-foreground focus-visible:outline-none disabled:pointer-events-none disabled:opacity-disabled aria-disabled:pointer-events-none aria-disabled:opacity-disabled'
 
-/** A menu row, tighter than a list row and with a
- * minimum height so a row with no icon still reads as a target. */
-export const listRowClass = `${rowBase} min-h-12 py-1.5 type-body sm:min-h-9`
+/** The rows the application's own lists are built from, which paint their own
+ * background. */
+const paintedRow = `${rowBase} rounded-lg px-4 hover:bg-accent focus-visible:bg-focus-surface data-selected:bg-primary-selected data-selected:hover:bg-primary-selected-hover`
 
-/** A list row. Taller than a menu row — 8px around a
- * label that keeps its own 4px, where `MenuItem` takes 6px and zeroes the
- * label's — and no minimum, because a list row is sized by what is in it.
+/** A row in a menu, a select list or an action bar.
  *
- * The two are separate classes rather than one with an override, because
- * every call site that reached for the menu row and then added `py-2` was
- * rederiving this one. */
-export const listItemClass = `${rowBase} py-2 type-body`
+ * As tall as a field and inset by the same 12px, so a list opened over a
+ * field lands with its text exactly where the field's was. The 12px radius is
+ * concentric inside the surface's 16px once the surface's own 4px is taken
+ * off.
+ *
+ * It paints nothing itself: the fill, the highlight and the press all belong
+ * to the `PressBacking` layers the row renders, which is what keeps the press
+ * on the background instead of dragging the label into it. `isolate` is what
+ * lets those layers sit behind the content. */
+export const listRowClass = `${rowBase} group isolate min-h-12 rounded-xl px-3 py-1.5 type-body`
+
+/** Everything a `listRowClass` row is painted with. Rendered as the row's
+ * first child.
+ *
+ * Two layers rather than three colours: the chosen row keeps its fill and the
+ * highlight goes over it, so a selected row under the pointer is one
+ * translucent layer over another and nobody has to mix the result by hand.
+ * A row that is merely resting has no fill at all. */
+export function ListRowBacking({ selected }: { selected?: boolean }) {
+  return (
+    <>
+      {/* The resting fill. `selected` is for a row that tracks its own choice;
+          a list whose primitive already marks the chosen row — Base UI writes
+          `data-selected` on it — needs to pass nothing. */}
+      <PressBacking
+        className={cn(
+          'group-data-selected:bg-selected',
+          selected && 'bg-selected'
+        )}
+      />
+      <PressBacking className="group-hover:bg-foreground-hover group-focus-visible:bg-foreground-hover group-data-highlighted:bg-foreground-hover" />
+    </>
+  )
+}
+
+export const listItemClass = `${paintedRow} py-2 type-body`
 
 /** A dense list row, which halves the padding and drops the label to
  * `body2`. The account, debtor and history lists are all dense. */
-export const listItemDenseClass = `${rowBase} py-1 type-body-sm`
+export const listItemDenseClass = `${paintedRow} py-1 type-body-sm`
 
 export function ListRowIcon({
   className,

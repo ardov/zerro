@@ -9,6 +9,7 @@ import {
   popupPositioning,
 } from './overlaySurface'
 import { cn } from './shadcn/utils'
+import { useScrollFade } from './useScrollFade'
 
 /** A surface grows out of the corner selected by its alignment. */
 const growOrigins = {
@@ -38,6 +39,11 @@ export type PopoverProps = Pick<
   placement?: 'over' | 'below'
   /** Horizontal alignment against the anchor. */
   align?: keyof typeof growOrigins
+  /** Nudge along that alignment, and away from the anchor. A list laid over
+   * its trigger takes the surface's own padding off both, so the first row's
+   * text lands where the trigger's was rather than 4px in from it. */
+  alignOffset?: number
+  sideOffset?: number
   children?: ReactNode
 }
 
@@ -52,6 +58,8 @@ export function Popover({
   anchorEl,
   placement = 'over',
   align = 'start',
+  alignOffset,
+  sideOffset = 0,
   className,
   children,
   ...props
@@ -66,6 +74,7 @@ export function Popover({
       ? lastAnchor
       : null
   const { finalFocus } = useOverlayFocus(open)
+  const fadeRef = useScrollFade<HTMLDivElement>()
   return (
     <PopoverPrimitive.Root
       open={open}
@@ -88,12 +97,19 @@ export function Popover({
           anchor={anchor}
           side="bottom"
           align={align}
-          sideOffset={placement === 'below' ? 0 : overAnchor}
+          alignOffset={alignOffset}
+          sideOffset={
+            placement === 'below'
+              ? sideOffset
+              : (data: { anchor: { height: number } }) =>
+                  overAnchor(data) + sideOffset
+          }
           collisionAvoidance={{ side: 'shift', align: 'shift' }}
           className={cn(popupPositioning.className, 'max-w-[calc(100vw-32px)]')}
         >
           <PopoverPrimitive.Popup
             {...props}
+            ref={fadeRef}
             data-slot="popover"
             finalFocus={finalFocus}
             className={cn(anchoredSurfaceClass, growOrigins[align], className)}

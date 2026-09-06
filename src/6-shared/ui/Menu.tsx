@@ -1,12 +1,13 @@
 import type { HTMLAttributes, ReactNode } from 'react'
 import { Menu as MenuPrimitive } from '@base-ui/react/menu'
-import { listRowClass } from './ListRow'
+import { ListRowBacking, listRowClass } from './ListRow'
 import {
   overAnchor,
   popupPositioning,
   overlaySurfaceClass,
 } from './overlaySurface'
 import { cn } from './shadcn/utils'
+import { useScrollFade } from './useScrollFade'
 
 export type MenuProps = Pick<
   HTMLAttributes<HTMLDivElement>,
@@ -58,6 +59,7 @@ export function Menu({
       }
     : anchorEl
   const openUp = placement === 'top-end'
+  const fadeRef = useScrollFade<HTMLDivElement>()
 
   return (
     <MenuPrimitive.Root
@@ -80,6 +82,7 @@ export function Menu({
         >
           <MenuPrimitive.Popup
             {...props}
+            ref={fadeRef}
             data-slot="menu"
             className={cn(overlaySurfaceClass, 'min-w-[112px]', className)}
           >
@@ -99,6 +102,7 @@ export function Menu({
 export function MenuItem({
   className,
   selected,
+  children,
   ...props
 }: Omit<MenuPrimitive.Item.Props, 'className'> & {
   className?: string
@@ -111,6 +115,9 @@ export function MenuItem({
       closeOnClick={false}
       className={cn(listRowClass, className)}
       {...props}
-    />
+    >
+      <ListRowBacking selected={selected} />
+      {children}
+    </MenuPrimitive.Item>
   )
 }
