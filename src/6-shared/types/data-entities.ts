@@ -69,6 +69,7 @@ export type {
 export type {
   TTransaction,
   TTransactionId,
+  TTransactionEditablePatch,
   TBankOperationId,
   TZmTransaction,
 } from '@/zerro-core/internal/domain/zenmoney'
