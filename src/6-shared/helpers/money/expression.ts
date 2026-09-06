@@ -1,3 +1,5 @@
+import { round } from './currencyHelpers'
+
 /** The arithmetic an amount field accepts.
  *
  * Amount fields let a sum be worked out in place — `1200/3`, `450+80` — so
@@ -18,7 +20,15 @@ export function cleanAmountInput(text: string): string {
  * Half-typed input is ordinary here — every keystroke is evaluated, and
  * `12+` is a state on the way to `12+5`. Leading zeroes and a trailing or
  * leading operator are trimmed rather than refused, so the amount follows
- * along instead of falling back to the last whole one. */
+ * along instead of falling back to the last whole one.
+ *
+ * The result is rounded to two decimals. A division is the obvious reason —
+ * splitting 1200 three ways is a number, splitting it seven ways is not a
+ * sum of money — but so is addition: `0.1 + 0.2` is not 0.3 in binary
+ * floating point, and without this an amount nobody could type would be the
+ * one that ends up in the transaction. Only the answer is rounded; the
+ * evaluation stays exact, so the rounding happens once rather than at every
+ * operator. */
 export function amountFromExpression(text: string, fallback: number): number {
   try {
     const computed = evalExpression(
@@ -27,7 +37,7 @@ export function amountFromExpression(text: string, fallback: number): number {
         .replace(/[-+*/]*$/g, '')
         .replace(/^[+*/]*/g, '')
     )
-    return computed || 0
+    return round(computed) || 0
   } catch {
     return fallback
   }

@@ -54,4 +54,19 @@ describe('amountFromExpression', () => {
   it('keeps the last whole amount when the numbers do not parse', () => {
     expect(amountFromExpression('1..2', 7)).toBe(7)
   })
+
+  it('is worth a sum of money rather than a number', () => {
+    // A division that does not come out evenly.
+    expect(amountFromExpression('1200/7', 0)).toBe(171.43)
+    // And the one every binary float does: 0.1 + 0.2 is not 0.3.
+    expect(amountFromExpression('0.1+0.2', 0)).toBe(0.3)
+    // Typing past the second decimal rounds; the field still shows the text.
+    expect(amountFromExpression('12.345', 0)).toBe(12.35)
+    expect(amountFromExpression('99.999', 0)).toBe(100)
+  })
+
+  it('rounds the answer once, not every operator', () => {
+    // Rounded at every operator this would be 0.33; the whole sum is 0.335.
+    expect(amountFromExpression('0.111+0.112+0.112', 0)).toBe(0.34)
+  })
 })
