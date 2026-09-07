@@ -345,15 +345,17 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
           onTimeChange={time => edit({ time })}
         />
 
-        <MerchantField
-          invalid={!!marks.payee}
-          error={marks.payee && t(`issue_${marks.payee}`)}
-          payee={draft.payee}
-          merchant={draft.merchant}
-          debt={isDebt(draft.type)}
-          placeholder={isDebt(draft.type) ? t('debtor') : t('payee')}
-          onChange={named => setDraft(setDraftMerchant(draft, named))}
-        />
+        {!transfer && (
+          <MerchantField
+            invalid={!!marks.payee}
+            error={marks.payee && t(`issue_${marks.payee}`)}
+            payee={draft.payee}
+            merchant={draft.merchant}
+            debt={isDebt(draft.type)}
+            placeholder={isDebt(draft.type) ? t('debtor') : t('payee')}
+            onChange={named => setDraft(setDraftMerchant(draft, named))}
+          />
+        )}
 
         <FilledInput
           icon={<NotesIcon size={20} />}

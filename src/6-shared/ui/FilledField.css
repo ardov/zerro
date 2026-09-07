@@ -14,15 +14,16 @@
      utility. */
   .filled-field {
     --field-hatch: rgb(255 255 255 / 0.5);
+    --field-border: transparent;
 
     background-color: var(--muted);
-    /* Always present, transparent at rest. A border that appeared on hover
-       would move the content 1.5px and the row would twitch under the
-       pointer. 1.5px because that is the weight the icons are drawn with. */
-    border: 1.5px solid transparent;
+    /* An inset shadow is a border that takes no layout space. That keeps the
+       16px and 48px content coordinates exact in every visual state. */
+    border: 0;
+    box-shadow: inset 0 0 0 1.5px var(--field-border);
     transition:
       background-color 150ms ease,
-      border-color 150ms ease;
+      box-shadow 150ms ease;
   }
 
   :root.dark .filled-field {
@@ -33,13 +34,13 @@
      would arrive with the tap that is already opening the keyboard. */
   @media (hover: hover) {
     .filled-field:hover {
-      border-color: var(--border);
+      --field-border: var(--border);
     }
   }
 
   .filled-field:focus-within {
     background-color: var(--card);
-    border-color: var(--foreground);
+    --field-border: var(--foreground);
   }
 
   /* Only under the caret. At rest a wrong field is an ordinary field with a
@@ -50,12 +51,12 @@
      The one rule here at (0,3,0) rather than (0,2,0): it names a state on
      top of the focus it replaces, and it is the only one at that weight. */
   .filled-field[data-invalid]:focus-within {
-    border-color: var(--error);
+    --field-border: var(--error);
   }
 
   /* Nothing can be done to a disabled field, so nothing marks it. */
   .filled-field[data-disabled] {
-    border-color: transparent;
+    --field-border: transparent;
   }
 
   /* Readonly and disabled share a backing: the same fill under a diagonal

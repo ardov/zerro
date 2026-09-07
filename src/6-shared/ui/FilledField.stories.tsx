@@ -8,7 +8,12 @@ import {
   CalendarIcon,
   PlaceIcon,
 } from './Icons'
-import { FilledButton, FilledField, FilledInput } from './FilledField'
+import {
+  FilledButton,
+  FilledField,
+  FilledInput,
+  filledFieldActionClass,
+} from './FilledField'
 
 const meta = {
   title: 'Library/Inputs/FilledField',
@@ -167,5 +172,60 @@ export const FocusCheck: Story = {
       keys: '[MouseLeft]',
     })
     await expect(input).toHaveFocus()
+  },
+}
+
+/** Leading content occupies one 48px square. Without it, text keeps 16px. */
+export const AlignmentCheck: Story = {
+  tags: ['!autodocs'],
+  args: {},
+  render: () => (
+    <div className="flex w-[320px] flex-col gap-3">
+      <FilledInput
+        icon={<PlaceIcon size={20} />}
+        aria-label="With icon"
+        value="With icon"
+        readOnly
+      />
+      <FilledInput aria-label="Without icon" value="Without icon" readOnly />
+      <FilledField>
+        <button
+          type="button"
+          aria-label="Calendar"
+          className={filledFieldActionClass}
+        >
+          <CalendarIcon size={20} />
+        </button>
+        <span>After action</span>
+      </FilledField>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const withIcon = canvas.getByRole('textbox', { name: 'With icon' })
+    const withoutIcon = canvas.getByRole('textbox', { name: 'Without icon' })
+    const action = canvas.getByRole('button', { name: 'Calendar' })
+    const afterAction = canvas.getByText('After action')
+    const icon = withIcon
+      .closest('[data-slot="filled-field"]')!
+      .querySelector('[data-slot="filled-field-icon"]')!
+
+    const offset = (element: Element, frame: Element) =>
+      element.getBoundingClientRect().left - frame.getBoundingClientRect().left
+    const centre = (element: Element, frame: Element) => {
+      const box = element.getBoundingClientRect()
+      return box.left + box.width / 2 - frame.getBoundingClientRect().left
+    }
+
+    const iconFrame = withIcon.closest('[data-slot="filled-field"]')!
+    expect(offset(withIcon, iconFrame)).toBeCloseTo(48, 1)
+    expect(centre(icon, iconFrame)).toBeCloseTo(24, 1)
+
+    const plainFrame = withoutIcon.closest('[data-slot="filled-field"]')!
+    expect(offset(withoutIcon, plainFrame)).toBeCloseTo(16, 1)
+
+    const actionFrame = action.closest('[data-slot="filled-field"]')!
+    expect(offset(afterAction, actionFrame)).toBeCloseTo(48, 1)
+    expect(centre(action, actionFrame)).toBeCloseTo(24, 1)
   },
 }

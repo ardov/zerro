@@ -8,6 +8,7 @@ import type { FilledFieldState } from '@/6-shared/ui/FilledField'
 import { FilledButton, FilledInput } from '@/6-shared/ui/FilledField'
 import {
   ListRowBacking,
+  ListRowIcon,
   listRowClass,
   ListRowText,
 } from '@/6-shared/ui/ListRow'
@@ -17,6 +18,7 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useScrollFade } from '@/6-shared/ui/useScrollFade'
 import { core } from '@/zerro-core/redux'
 import type { TDraftMerchant, TNamedMerchant } from './draft'
+import { initialMerchantSearch, merchantMatchPriority } from './merchantSearch'
 
 type TMerchantOption = { id: TMerchantId; title: string }
 
@@ -79,12 +81,28 @@ export const MerchantField: FC<MerchantFieldProps> = ({
   const chosen = merchant && 'id' in merchant ? merchant.id : undefined
   const pending = merchant && 'title' in merchant ? merchant.title : undefined
   const shown = pending ?? (chosen && merchants[chosen]?.title) ?? payee ?? ''
+  const unlinkedPayee = !merchant && !!payee
 
   // Searching looks through every merchant: the operation's kind decides what
   // the list opens on, not what it can reach.
   const query = normalizePayee(search)
   const found = query
-    ? all.filter(option => normalizePayee(option.title).includes(query))
+    ? all
+        .map(option => ({
+          option,
+          priority: merchantMatchPriority(
+            normalizePayee(option.title),
+            usage[option.id],
+            query
+          ),
+        }))
+        .filter(match => Number.isFinite(match.priority))
+        .sort(
+          (a, b) =>
+            a.priority - b.priority ||
+            a.option.title.localeCompare(b.option.title)
+        )
+        .map(match => match.option)
     : null
   const fits = all.filter(option =>
     debt ? usage[option.id]?.debt : usage[option.id]?.regular
@@ -113,7 +131,7 @@ export const MerchantField: FC<MerchantFieldProps> = ({
   if (wasOpen !== open) {
     setWasOpen(open)
     if (open) {
-      setSearch('')
+      setSearch(initialMerchantSearch(Boolean(merchant), payee))
       setShowAll(false)
       setHighlighted(null)
     }
@@ -187,7 +205,11 @@ export const MerchantField: FC<MerchantFieldProps> = ({
           setOpen(true)
         }}
       >
-        {shown || <span className="text-muted-foreground">{placeholder}</span>}
+        {shown ? (
+          <span className={cn(unlinkedPayee && 'italic')}>{shown}</span>
+        ) : (
+          <span className="text-muted-foreground">{placeholder}</span>
+        )}
       </FilledButton>
 
       <Popover
@@ -241,6 +263,7 @@ export const MerchantField: FC<MerchantFieldProps> = ({
               {rows.map((row, index) => {
                 const selected =
                   row.kind === 'merchant' && row.merchant.id === chosen
+                const icon = rowIcon(row)
                 return (
                   <li key={rowKey(row)} role="presentation">
                     <button
@@ -251,13 +274,11 @@ export const MerchantField: FC<MerchantFieldProps> = ({
                       tabIndex={-1}
                       aria-selected={selected}
                       data-highlighted={index === focused || undefined}
-                      className={cn(listRowClass, 'gap-2')}
+                      className={listRowClass}
                       onClick={() => choose(row)}
                     >
                       <ListRowBacking selected={selected} />
-                      <span className="inline-flex shrink-0 text-icon-foreground">
-                        {rowIcon(row)}
-                      </span>
+                      {icon && <ListRowIcon>{icon}</ListRowIcon>}
                       <ListRowText className="truncate">
                         {rowLabel(row)}
                       </ListRowText>

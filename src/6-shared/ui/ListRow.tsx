@@ -26,16 +26,16 @@ const paintedRow = `${rowBase} rounded-lg px-4 hover:bg-accent focus-visible:bg-
 
 /** A row in a menu, a select list or an action bar.
  *
- * As tall as a field and inset by the same 12px, so a list opened over a
- * field lands with its text exactly where the field's was. The 12px radius is
- * concentric inside the surface's 16px once the surface's own 4px is taken
- * off.
+ * As tall as a field and following the same horizontal rhythm: 16px for a
+ * plain label, or one 48px leading slot whose glyph is centred at 24px. The
+ * 12px radius is concentric inside the surface's 16px once the surface's own
+ * 4px is taken off.
  *
  * It paints nothing itself: the fill, the highlight and the press all belong
  * to the `PressBacking` layers the row renders, which is what keeps the press
  * on the background instead of dragging the label into it. `isolate` is what
  * lets those layers sit behind the content. */
-export const listRowClass = `${rowBase} group isolate min-h-12 rounded-xl px-3 py-1.5 text-body`
+export const listRowClass = `${rowBase} group isolate min-h-12 rounded-xl px-4 py-1.5 text-body [&>[data-slot=list-row-icon]]:-my-1.5 [&>[data-slot=list-row-icon]]:h-12 [&>[data-slot=list-row-icon]]:self-start`
 
 /** Everything a `listRowClass` row is painted with. Rendered as the row's
  * first child.
@@ -73,8 +73,9 @@ export function ListRowIcon({
 }: ComponentPropsWithoutRef<'span'>) {
   return (
     <span
+      data-slot="list-row-icon"
       className={cn(
-        'inline-flex min-w-9 shrink-0 items-center text-icon-foreground',
+        'inline-flex w-12 shrink-0 -ml-4 items-center justify-center text-icon-foreground',
         className
       )}
       {...props}

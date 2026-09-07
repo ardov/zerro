@@ -82,6 +82,27 @@ export const Showcase: Story = {
   },
 }
 
+/** Transfers have no counterparty place: their two accounts describe both sides. */
+export const Transfer: Story = {
+  args: { id: '', onClose: () => {}, onOpenOther: () => {} },
+  render: args => {
+    const transfer = useByType().transfer
+    return (
+      <Frame>
+        {transfer ? (
+          <TransactionPreview {...args} id={transfer.id} />
+        ) : (
+          <TrEmptyState />
+        )}
+      </Frame>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.queryByRole('button', { name: 'Place' })).toBeNull()
+  },
+}
+
 /** Nothing selected. */
 export const Empty: Story = {
   args: { id: 'missing', onClose: () => {}, onOpenOther: () => {} },

@@ -20,13 +20,11 @@ import './FilledField.css'
  * so that is what is shared. Its states live in `FilledField.css`.
  */
 
-/** The frame: a 48px row with the icon gap already in it.
- *
- * The horizontal padding is 1.5px short of 12px because the border makes up
- * the difference — content sits 12px from the outer edge in every state, and
- * the 12px radius is what the rest of the geometry is concentric with. */
+/** The frame: a 48px row whose unlabelled content starts 16px from its edge.
+ * A leading glyph supplies its own full-height slot and gives that space back
+ * to the frame with a negative margin. */
 export const filledFieldClass =
-  'filled-field relative flex min-h-12 w-full items-center gap-2 rounded-xl px-[10.5px] text-base text-foreground'
+  'filled-field relative flex min-h-12 w-full items-center rounded-xl px-4 text-base text-foreground'
 
 /** A frame that is itself the control. Preflight is off, so the native button
  * decoration is spelled away here. */
@@ -40,12 +38,10 @@ export const filledControlClass = cn(
   inputPlaceholderClass
 )
 
-/** An icon that does something, at the end of a field. 32px square, and a 4px
- * radius: it sits 8px inside a 12px corner, and 12 − 8 is what keeps the two
- * curves concentric. The negative margin is that 8px — the frame's own
- * padding is 12. */
+/** A leading icon that does something. It occupies the same 48px square as a
+ * passive glyph, so the value after either kind starts on the same line. */
 export const filledFieldActionClass =
-  'inline-flex size-8 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-sm border-0 bg-transparent p-0 text-icon-foreground outline-none transition-colors duration-150 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:text-disabled-control-foreground -mx-1'
+  'inline-flex size-12 shrink-0 -ml-4 cursor-pointer appearance-none items-center justify-center rounded-xl border-0 bg-transparent p-0 text-icon-foreground outline-none transition-colors duration-150 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-[-8px] focus-visible:outline-ring disabled:text-disabled-control-foreground'
 
 /** State the frame reads, whatever is inside it. */
 export type FilledFieldState = {
@@ -211,16 +207,16 @@ export function FilledInput({
         onMouseDown={disabled ? undefined : focusFieldControl}
         {...stateProps(state)}
       >
-        {icon && <FilledFieldIcon top={multiline}>{icon}</FilledFieldIcon>}
+        {icon && <FilledFieldIcon>{icon}</FilledFieldIcon>}
         {multiline ? (
           <GrowingTextarea
             {...props}
             readOnly={readOnly}
             disabled={disabled}
             maxRows={maxRows}
-            // 12px less the border, so a field that can grow still starts at
-            // the 48px every other row is.
-            className={cn(filledControlClass, 'py-[10.5px]')}
+            // One 24px line plus 12px on either side starts at the same 48px
+            // height as every other row.
+            className={cn(filledControlClass, 'py-3')}
           />
         ) : (
           <InputPrimitive
@@ -278,29 +274,14 @@ export function FilledButton({
   )
 }
 
-/** The icon slot. Muted, and not a tab stop. Exported for a row whose control
- * is a third-party primitive and so cannot go through `FilledInput`.
- *
- * `top` is the multiline row: the frame stops centring once the text can be
- * several lines, and the icon lines up with the first of them instead. */
-export function FilledFieldIcon({
-  top,
-  children,
-}: {
-  top?: boolean
-  children: ReactNode
-}) {
+/** The leading 48px square. The glyph is centred in its first row even when a
+ * multiline field grows taller. Muted, and not a tab stop. */
+export function FilledFieldIcon({ children }: { children: ReactNode }) {
   return (
     <span
       data-slot="filled-field-icon"
       aria-hidden
-      className={cn(
-        'inline-flex shrink-0 items-center text-muted-foreground',
-        // A multiline row is aligned to the top, so the icon takes exactly one
-        // line and centres itself in it: its middle then lands on the middle
-        // of the first line rather than 2px above it.
-        top && 'mt-[10.5px] h-6'
-      )}
+      className="inline-flex size-12 shrink-0 -ml-4 items-center justify-center self-start text-muted-foreground"
     >
       {children}
     </span>

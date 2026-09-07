@@ -1,7 +1,7 @@
 import { parseDate, toISODate } from '../../foundation/date'
 import type { TISODate } from '../primitives'
 import type { TAccountId } from '../entities/accounts'
-import type { TMerchantId } from '../entities/merchants'
+import { normalizePayee, type TMerchantId } from '../entities/merchants'
 import { getTransactionType, TrType } from '../entities/transactions'
 import type { TTransaction } from '../entities/transactions/types'
 
@@ -12,6 +12,10 @@ export type TMerchantUsage = {
   debt: boolean
   /** Uses within the last 30 days. */
   recentUses: number
+  searchTerms?: {
+    payee: string[]
+    originalPayee: string[]
+  }
 }
 
 export type TMerchantUsageById = Record<TMerchantId, TMerchantUsage>
@@ -48,9 +52,26 @@ export function buildMerchantUsage({
     }
 
     if (transaction.date >= since) entry.recentUses++
+    addSearchTerm(entry, 'payee', transaction.payee)
+    addSearchTerm(entry, 'originalPayee', transaction.originalPayee)
   })
 
   return usage
+}
+
+function addSearchTerm(
+  usage: TMerchantUsage,
+  field: keyof NonNullable<TMerchantUsage['searchTerms']>,
+  value: string | null
+) {
+  const term = normalizePayee(value)
+  if (!term) return
+
+  const terms = (usage.searchTerms ??= {
+    payee: [],
+    originalPayee: [],
+  })[field]
+  if (!terms.includes(term)) terms.push(term)
 }
 
 function daysBefore(date: TISODate, days: number): TISODate {

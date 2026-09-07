@@ -67,4 +67,26 @@ describe('buildMerchantUsage', () => {
 
     expect(usage.shop.recentUses).toBe(1)
   })
+
+  it('collects normalized payee search terms from linked transactions', () => {
+    const usage = build([
+      makeTransaction({
+        id: 'one',
+        merchant: 'shop',
+        payee: 'Amazon',
+        originalPayee: 'Amazon.de*zl74v08e4',
+      }),
+      makeTransaction({
+        id: 'two',
+        merchant: 'shop',
+        payee: 'Amazon',
+        originalPayee: 'Amzn Mktp De Amazon.de',
+      }),
+    ])
+
+    expect(usage.shop.searchTerms).toEqual({
+      payee: ['amazon'],
+      originalPayee: ['amazon de zl74v08e4', 'amzn mktp de amazon de'],
+    })
+  })
 })

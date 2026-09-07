@@ -9,6 +9,7 @@ import type { FilledFieldState } from '@/6-shared/ui/FilledField'
 import { FilledButton } from '@/6-shared/ui/FilledField'
 import {
   ListRowBacking,
+  ListRowIcon,
   listRowClass,
   ListRowText,
 } from '@/6-shared/ui/ListRow'
@@ -91,14 +92,16 @@ export const AccountField: FC<AccountFieldProps> = ({
                 role="option"
                 aria-selected={option.id === value}
                 data-selected={option.id === value || undefined}
-                className={cn(listRowClass, 'gap-2')}
+                className={listRowClass}
                 onClick={() => {
                   setOpen(false)
                   onChange(option.id)
                 }}
               >
                 <ListRowBacking selected={option.id === value} />
-                <AccountIcon size={20} className="text-icon-foreground" />
+                <ListRowIcon>
+                  <AccountIcon size={20} />
+                </ListRowIcon>
                 <ListRowText
                   className={cn(
                     'truncate',

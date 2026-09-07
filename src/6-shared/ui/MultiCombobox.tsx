@@ -2,7 +2,7 @@ import { Combobox } from '@base-ui/react/combobox'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, ChevronDownIcon, CloseIcon } from './Icons'
-import { ListRowBacking, listRowClass } from './ListRow'
+import { ListRowBacking, ListRowIcon, listRowClass } from './ListRow'
 import { OutlinedFieldFrame } from './OutlinedField'
 import { popupPositioning, overlaySurfaceClass } from './overlaySurface'
 import { cn } from './shadcn/utils'
@@ -113,9 +113,11 @@ export function MultiCombobox<T extends string>(props: MultiComboboxProps<T>) {
                   <ListRowBacking
                     selected={props.value.includes(option.value)}
                   />
-                  <Combobox.ItemIndicator className="mr-2 inline-flex size-4 shrink-0 items-center justify-center text-primary">
-                    <CheckIcon size={20} />
-                  </Combobox.ItemIndicator>
+                  <ListRowIcon>
+                    <Combobox.ItemIndicator className="inline-flex items-center justify-center text-primary">
+                      <CheckIcon size={20} />
+                    </Combobox.ItemIndicator>
+                  </ListRowIcon>
                   <span className="min-w-0 flex-auto truncate">
                     {option.label}
                   </span>
