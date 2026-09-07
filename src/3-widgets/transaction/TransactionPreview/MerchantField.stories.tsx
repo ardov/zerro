@@ -19,6 +19,7 @@ export const BarePayee: Story = {
   args: {
     merchant: null,
     payee: 'Temporary place',
+    originalPayee: null,
     debt: false,
     placeholder: 'Place',
     onChange: () => {},

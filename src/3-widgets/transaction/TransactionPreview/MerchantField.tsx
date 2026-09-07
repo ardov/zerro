@@ -18,6 +18,7 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useScrollFade } from '@/6-shared/ui/useScrollFade'
 import { core } from '@/zerro-core/redux'
 import type { TDraftMerchant, TNamedMerchant } from './draft'
+import { MerchantFavicon } from './MerchantFavicon'
 import { initialMerchantSearch, merchantMatchPriority } from './merchantSearch'
 
 type TMerchantOption = { id: TMerchantId; title: string }
@@ -33,6 +34,7 @@ export type MerchantFieldProps = FilledFieldState & {
   merchant: TDraftMerchant
   /** The free text an old transaction may carry instead of a merchant. */
   payee: string | null
+  originalPayee: string | null
   /** Debts and everything else are with different people. */
   debt: boolean
   onChange: (named: TNamedMerchant | null) => void
@@ -52,6 +54,7 @@ const { normalizePayee } = core.merchants
 export const MerchantField: FC<MerchantFieldProps> = ({
   merchant,
   payee,
+  originalPayee,
   debt,
   onChange,
   placeholder,
@@ -82,6 +85,10 @@ export const MerchantField: FC<MerchantFieldProps> = ({
   const pending = merchant && 'title' in merchant ? merchant.title : undefined
   const shown = pending ?? (chosen && merchants[chosen]?.title) ?? payee ?? ''
   const unlinkedPayee = !merchant && !!payee
+  const unlinkedDomain = useMemo(() => {
+    if (merchant) return undefined
+    return core.merchants.findWebsiteDomain(payee, originalPayee)
+  }, [merchant, originalPayee, payee])
 
   // Searching looks through every merchant: the operation's kind decides what
   // the list opens on, not what it can reach.
@@ -180,7 +187,14 @@ export const MerchantField: FC<MerchantFieldProps> = ({
 
   const rowIcon = (row: TRow) => {
     if (row.kind === 'create') return <AddIcon size={20} />
-    if (row.kind === 'merchant') return glyph(row.merchant.id)
+    if (row.kind === 'merchant') {
+      return (
+        <MerchantFavicon
+          domain={usage[row.merchant.id]?.website?.domain}
+          fallback={glyph(row.merchant.id)}
+        />
+      )
+    }
     return null
   }
 
@@ -198,7 +212,12 @@ export const MerchantField: FC<MerchantFieldProps> = ({
         aria-label={placeholder}
         aria-haspopup="listbox"
         aria-expanded={open}
-        icon={glyph(chosen)}
+        icon={
+          <MerchantFavicon
+            domain={chosen ? usage[chosen]?.website?.domain : unlinkedDomain}
+            fallback={glyph(chosen)}
+          />
+        }
         className={className}
         onClick={event => {
           setAnchor(event.currentTarget)

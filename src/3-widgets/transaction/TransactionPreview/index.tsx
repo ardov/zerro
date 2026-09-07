@@ -350,6 +350,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
             invalid={!!marks.payee}
             error={marks.payee && t(`issue_${marks.payee}`)}
             payee={draft.payee}
+            originalPayee={tr.originalPayee}
             merchant={draft.merchant}
             debt={isDebt(draft.type)}
             placeholder={isDebt(draft.type) ? t('debtor') : t('payee')}
