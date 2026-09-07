@@ -22,3 +22,4 @@ export * from './entities/transactions'
 
 export * from './read-models/debtors'
 export * from './read-models/balances'
+export * from './read-models/merchantUsage'

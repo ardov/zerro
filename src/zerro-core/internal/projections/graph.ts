@@ -5,6 +5,7 @@ import {
   buildBalances,
   buildBalancesByDate,
   buildDebtors,
+  buildMerchantUsage,
   getDebtAccountId,
   getHistoryStart,
   getInstCodeMap,
@@ -150,6 +151,16 @@ export function createProjectionGraph(ctx: TCoreContext) {
       debtAccountId: debtAccountId(d),
     }),
     buildDebtors
+  )
+
+  // --- merchants -----------------------------------------------------------
+  const merchantUsage = nodeObj(
+    d => ({
+      transactions: transactionsHistory(d),
+      currentDate: currentDate(),
+      debtAccountId: debtAccountId(d),
+    }),
+    buildMerchantUsage
   )
 
   // --- envelopes (domain only; presentation stays in the adapter) ----------
@@ -309,6 +320,7 @@ export function createProjectionGraph(ctx: TCoreContext) {
     fxRatesGetter,
     convertFx,
     debtors,
+    merchantUsage,
     envelopes,
     envelopeStructure,
     keepingEnvelopeIds,

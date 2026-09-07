@@ -4,7 +4,7 @@ import {
   makeTransaction,
   usdInstruments,
 } from '../../../../support/testing/zenmoneyTestData'
-import { buildDebtors, normalizePayee } from './debtors'
+import { buildDebtors } from './debtors'
 
 describe('buildDebtors', () => {
   it('collects payee debt transactions and balances', () => {
@@ -66,7 +66,7 @@ describe('buildDebtors', () => {
     })
   })
 
-  it('ignores non-debt transactions and preserves payee word boundaries', () => {
+  it('ignores non-debt transactions', () => {
     const result = buildDebtors({
       transactions: [
         makeTransaction({
@@ -83,8 +83,5 @@ describe('buildDebtors', () => {
     })
 
     expect(result).toEqual({})
-    expect(normalizePayee(' Вася + Alex! ')).toBe('вася + alex')
-    expect(normalizePayee('A B')).not.toBe(normalizePayee('AB'))
-    expect(normalizePayee('张三')).toBe('张三')
   })
 })

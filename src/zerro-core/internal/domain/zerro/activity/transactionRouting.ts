@@ -1,7 +1,7 @@
 import { toISOMonth } from '../../foundation/date'
 import type { ById } from '../../foundation/types'
 import type { TAccountId } from '../../zenmoney/entities/accounts'
-import { normalizePayee } from '../../zenmoney/read-models/debtors'
+import { normalizePayee } from '../../zenmoney/entities/merchants'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import {
   getTransactionType,

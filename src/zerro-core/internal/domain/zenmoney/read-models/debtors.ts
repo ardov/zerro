@@ -3,7 +3,11 @@ import type { ById } from '../../foundation/types'
 import type { TAccountId } from '../entities/accounts'
 import type { TFxAmount } from '../model/money'
 import type { TInstrument } from '../entities/instruments'
-import type { TMerchant, TMerchantId } from '../entities/merchants'
+import {
+  normalizePayee,
+  type TMerchant,
+  type TMerchantId,
+} from '../entities/merchants'
 import type { TTransaction } from '../entities/transactions/types'
 import { getTransactionType, TrType } from '../entities/transactions'
 
@@ -54,14 +58,6 @@ export function buildDebtors(input: TBuildDebtorsInput): ById<TDebtor> {
   })
 
   return debtors
-}
-
-/** Canonical payee key used by ZenMoney. */
-export function normalizePayee(name: string | null | undefined) {
-  return (name || '')
-    .replace(/[\s.,;!?():\-"'&«»„”`*]+/g, ' ')
-    .trim()
-    .toLowerCase()
 }
 
 function getTransactionDebtor(

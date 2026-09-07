@@ -6,13 +6,12 @@ import type { TAccount, TAccountId } from '../entities/accounts'
 import type { TISODate, TDateDraft } from '../primitives'
 import type { TFxAmount } from '../model/money'
 import type { TFxCode, TInstrumentId } from '../entities/instruments'
-import type { TMerchant } from '../entities/merchants'
+import { normalizePayee, type TMerchant } from '../entities/merchants'
 import type {
   TTransaction,
   TTransactionId,
 } from '../entities/transactions/types'
 import type { TDebtor } from './debtors'
-import { normalizePayee } from './debtors'
 import { getTransactionType, TrType } from '../entities/transactions'
 
 export type TBalanceState<Value = TFxAmount> = {
