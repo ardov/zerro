@@ -52,7 +52,7 @@
     "@mui/x-date-pickers": "^8.28.4",
     "@reduxjs/toolkit": "^2.11.2",
     "@sentry/browser": "^10.50.0",
-    "browserslist": "^4.28.2",
+    "browserslist": "^4.28.7",
     "comlink": "^4.4.2",
     "convert-layout": "^0.11.1",
     "date-fns": "^4.1.0",
