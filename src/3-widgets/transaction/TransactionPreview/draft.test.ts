@@ -7,6 +7,8 @@ import {
   draftCreated,
   draftIssues,
   emptyDraft,
+  newMerchantTitle,
+  setDraftMerchant,
   setDraftType,
   setTransferAccount,
   setTransferAmount,
@@ -277,6 +279,40 @@ describe('toPatch', () => {
     const draft = { ...toDraft(expense, ctx), payee: '   ' }
     expect(toPatch(draft, ctx)?.payee).toBeNull()
   })
+
+  it('claims the merchant it names, and nobody when it names none', () => {
+    const draft = toDraft(expense, ctx)
+    expect(
+      toPatch(setDraftMerchant(draft, { id: 'm1', title: 'Shop' }), ctx)
+    ).toMatchObject({ merchant: 'm1', payee: 'Shop' })
+    expect(toPatch(setDraftMerchant(draft, null), ctx)).toMatchObject({
+      merchant: null,
+      payee: null,
+    })
+  })
+
+  it('leaves the merchant out while it is still only a title', () => {
+    const draft = setDraftMerchant(toDraft(expense, ctx), { title: 'Kiosk' })
+    const patch = toPatch(draft, ctx)!
+
+    expect('merchant' in patch).toBe(false)
+    expect(patch.payee).toBe('Kiosk')
+    expect(newMerchantTitle(draft)).toBe('Kiosk')
+  })
+
+  it('names nobody when the name is blank', () => {
+    const draft = setDraftMerchant(toDraft(expense, ctx), { title: '  ' })
+    expect(toPatch(draft, ctx)).toMatchObject({ merchant: null, payee: null })
+    expect(newMerchantTitle(draft)).toBeNull()
+  })
+
+  it('has no new merchant to create when it names an existing one', () => {
+    const draft = toDraft(expense, ctx)
+    expect(newMerchantTitle(draft)).toBeNull()
+    expect(
+      newMerchantTitle(setDraftMerchant(draft, { id: 'm1', title: 'Shop' }))
+    ).toBeNull()
+  })
 })
 
 describe('staleRates', () => {
@@ -346,7 +382,9 @@ describe('draftIssues', () => {
     expect(draftIssues(lent)).toEqual({ payee: 'debtor' })
     expect(draftIssues({ ...lent, payee: 'Alex' })).toEqual({})
     // A picked merchant is a debtor too, even with no text beside it.
-    expect(draftIssues({ ...lent, merchant: 'm1' })).toEqual({})
+    expect(draftIssues({ ...lent, merchant: { id: 'm1' } })).toEqual({})
+    // So is one that only has a name yet: the save creates it.
+    expect(draftIssues({ ...lent, merchant: { title: 'Alex' } })).toEqual({})
   })
 
   it('asks no debtor of anything that is not a debt', () => {

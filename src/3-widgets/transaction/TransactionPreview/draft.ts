@@ -23,6 +23,10 @@ import { core } from '@/zerro-core/redux'
  * "Against a source" compare it with the transaction it came from. */
 export type TDraftType = `${core.transactions.TrType}`
 
+/** A merchant that exists is `{ id }`; one the save still has to create is
+ * `{ title }`. */
+export type TDraftMerchant = { id: TMerchantId } | { title: string } | null
+
 export type TTransactionDraft = {
   type: TDraftType
   /** The account a one-sided operation touches: an expense's, an income's, or
@@ -38,7 +42,10 @@ export type TTransactionDraft = {
   /** Categories. Only an income or an expense sends them; the others keep
    * them so that coming back restores them. */
   tag: TTagId[] | null
-  merchant: TMerchantId | null
+  /** Who the operation is with. */
+  merchant: TDraftMerchant
+  /** The free text beside the merchant. An old transaction can carry one with
+   * no merchant at all, and leaving both alone is what keeps it that way. */
   payee: string | null
   comment: string | null
   date: TISODate
@@ -125,7 +132,7 @@ export function toDraft(
     ...single,
     ...transfer,
     tag: tr.tag,
-    merchant: tr.merchant,
+    merchant: tr.merchant ? { id: tr.merchant } : null,
     payee: tr.payee,
     comment: tr.comment,
     date: tr.date,
@@ -184,6 +191,21 @@ export function setDraftType(
   }
 
   return { ...draft, type }
+}
+
+/** Names who the operation is with. The merchant is the link and `payee` the
+ * text every other client reads, so naming one names both. */
+export function setDraftMerchant(
+  draft: TTransactionDraft,
+  named: { id?: TMerchantId; title: string } | null
+): TTransactionDraft {
+  const title = named?.title.trim()
+  if (!named || !title) return { ...draft, merchant: null, payee: null }
+  return {
+    ...draft,
+    merchant: named.id ? { id: named.id } : { title },
+    payee: named.title,
+  }
 }
 
 /** Turns a transfer around: accounts and amounts change places together, so
@@ -328,14 +350,34 @@ export function toPatch(
 ): (TTransactionEditablePatch & TDraftLegs) | null {
   const legs = toLegs(draft, ctx)
   if (!legs) return null
+  const merchant = claimedMerchant(draft)
   return {
     ...legs,
     tag: isCategorized(draft.type) ? nonEmpty(draft.tag) : null,
-    merchant: draft.merchant,
+    // A merchant that does not exist yet has no id to claim. Leaving the key
+    // out says nothing about it; `newMerchantTitle` is what the save acts on.
+    ...(merchant !== undefined && { merchant }),
     payee: emptyToNull(draft.payee),
     comment: emptyToNull(draft.comment),
     date: draft.date,
   }
+}
+
+/** The merchant a save has to create before the transaction can point at it.
+ * A draft that names no new one answers `null`. */
+export function newMerchantTitle(draft: TTransactionDraft): string | null {
+  const { merchant } = draft
+  return merchant && 'title' in merchant ? merchant.title : null
+}
+
+/** The merchant the patch may claim: an id, `null` for nobody, and
+ * `undefined` while it is still only a title. */
+function claimedMerchant(
+  draft: TTransactionDraft
+): TMerchantId | null | undefined {
+  const { merchant } = draft
+  if (!merchant) return null
+  return 'id' in merchant ? merchant.id : undefined
 }
 
 /** The moment a transaction claims it was created at, from the draft's date

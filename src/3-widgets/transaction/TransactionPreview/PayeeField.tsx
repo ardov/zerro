@@ -17,14 +17,14 @@ import {
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useScrollFade } from '@/6-shared/ui/useScrollFade'
 import { core } from '@/zerro-core/redux'
+import type { TDraftMerchant } from './draft'
 
 type TMerchantOption = { value: TMerchantId; label: string }
 
 export type PayeeFieldProps = FilledFieldState & {
   payee: string | null
-  /** The normalised merchant, when the transaction carries one. */
-  merchant: TMerchantId | null
-  onChange: (payee: string, merchant: TMerchantId | null) => void
+  merchant: TDraftMerchant
+  onChange: (named: { id?: TMerchantId; title: string } | null) => void
   icon: ReactNode
   placeholder: string
   className?: string
@@ -55,7 +55,8 @@ export const PayeeField: FC<PayeeFieldProps> = ({
   // not the one place where a merchant-only transaction looks blank. The raw
   // payee is what ZenMoney's plugin read off the statement; the merchant is
   // what it was recognised as, and that is the name a person put there.
-  const shown = (merchant ? merchants[merchant]?.title : payee) ?? ''
+  const shown =
+    (merchant && 'id' in merchant ? merchants[merchant.id]?.title : payee) ?? ''
 
   const options = useMemo(
     () =>
@@ -67,11 +68,18 @@ export const PayeeField: FC<PayeeFieldProps> = ({
   const byTitle = useMemo(() => {
     const map = new Map<string, TMerchantId>()
     options.forEach(option => {
-      const key = option.label.trim().toLowerCase()
+      const key = core.merchants.normalizePayee(option.label)
       if (!map.has(key)) map.set(key, option.value)
     })
     return map
   }, [options])
+
+  /** Typed text names the merchant that spells it. Text that spells none
+   * names a merchant the save will create. */
+  const pick = (title: string) => ({
+    id: byTitle.get(core.merchants.normalizePayee(title)),
+    title,
+  })
 
   // Nothing to complete: the autocomplete's popup would only ever say so.
   if (!options.length) {
@@ -83,7 +91,7 @@ export const PayeeField: FC<PayeeFieldProps> = ({
         aria-label={placeholder}
         autoComplete="off"
         value={shown}
-        onChange={event => onChange(event.target.value, null)}
+        onChange={event => onChange(pick(event.target.value))}
         className={className}
       />
     )
@@ -93,9 +101,7 @@ export const PayeeField: FC<PayeeFieldProps> = ({
     <Autocomplete.Root
       items={options}
       value={shown}
-      onValueChange={next =>
-        onChange(next, byTitle.get(next.trim().toLowerCase()) ?? null)
-      }
+      onValueChange={next => onChange(pick(next))}
     >
       <FilledField {...state} icon={icon} className={className}>
         <Autocomplete.Input

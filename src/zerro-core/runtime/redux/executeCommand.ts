@@ -27,7 +27,10 @@ export type TCommandExecution<TReceipt> = {
 }
 
 // Late-bound lookups so Date.now/uuid mocks installed after module load work.
-const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
+export const coreContext: TCoreContext = {
+  now: () => Date.now(),
+  uuid: () => uuidv1(),
+}
 
 /**
  * Cycle-safe Redux execution primitive. It intentionally imports no selectors
@@ -66,7 +69,7 @@ export function executeReduxCommandWithStatus<TReceipt = unknown>(
     ) {
       return { applied: false, receipt: undefined }
     }
-    const result = compile(state, defaultCtx)
+    const result = compile(state, coreContext)
     const patch = isCompiled(result) ? result.patch : result
     const applied =
       !isEmptyPatch(patch) && appendIntentPatch(dispatch, state, patch, options)
@@ -96,7 +99,7 @@ function appendIntentPatch(
   { allowHistory = false, label }: TExecuteOptions = {}
 ): boolean {
   const data = selectData(state, allowHistory ? 'live' : 'displayed')
-  const command = issuePatch(data, patch, defaultCtx.now(), label)
+  const command = issuePatch(data, patch, coreContext.now(), label)
   const materialized = materializeCommand(data, command)
   if (isEmptyPatch(materialized)) return false
 

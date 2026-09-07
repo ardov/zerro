@@ -43,6 +43,8 @@ import {
   hasIssues,
   isDebt,
   isIncoming,
+  newMerchantTitle,
+  setDraftMerchant,
   setDraftType,
   setTransferAccount,
   setTransferAmount,
@@ -150,7 +152,10 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   const changes = claimed ? changedFields(tr, claimed) : {}
   const recreated = timeChanged(draft, tr)
   const issues = draftIssues(draft)
-  const dirty = recreated || Object.keys(changes).length > 0
+  // A merchant that has yet to be created is a change all by itself: the
+  // patch cannot name it, so nothing in `changes` would show it.
+  const newMerchant = newMerchantTitle(draft)
+  const dirty = recreated || !!newMerchant || Object.keys(changes).length > 0
   const stillWrong = marked.filter(field => issues[field])
   if (stillWrong.length !== marked.length) setMarked(stillWrong)
   const marks: TDraftIssues = Object.fromEntries(
@@ -179,16 +184,15 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
       return
     }
     if (recreated) {
-      const newId = recreate({
-        id,
-        ...claimed,
-        created: draftCreated(draft, tr.created),
-      })
+      const newId = recreate(
+        { id, ...claimed, created: draftCreated(draft, tr.created) },
+        newMerchant ?? undefined
+      )
       track('transaction_recreated', { source: 'preview' })
       onOpenOther(newId)
       return
     }
-    update({ id, ...changes })
+    update({ id, ...changes }, newMerchant ?? undefined)
     track('transaction_edited', { source: 'preview' })
   }
 
@@ -349,7 +353,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
           merchant={draft.merchant}
           icon={<PlaceIcon size={20} />}
           placeholder={isDebt(draft.type) ? t('debtor') : t('payee')}
-          onChange={(payee, merchant) => edit({ payee, merchant })}
+          onChange={named => setDraft(setDraftMerchant(draft, named))}
         />
 
         <FilledInput

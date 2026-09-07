@@ -6,6 +6,7 @@ import { rootReducer } from '@/store/rootReducer'
 import { makeTestRootState } from '@/store/testing'
 import {
   makeAccount,
+  makeMerchant,
   makeStore,
   makeTransaction,
   makeUser,
@@ -156,12 +157,7 @@ describe('Redux semantic commands', () => {
       })
     )
 
-    const patches = dispatch.mock.calls
-      .map(([action]: [any]) => action)
-      .filter((action: any) => action?.type === appendClientCommand.type)
-      .map((action: any) => action.payload.patch)
-
-    expect(patches).toEqual([
+    expect(appendedPatches(dispatch)).toEqual([
       {
         transaction: [
           { id: 'first', viewed: true },
@@ -177,4 +173,38 @@ describe('Redux semantic commands', () => {
       },
     ])
   })
+
+  it('creates a named merchant in the same command as the edit it belongs to', () => {
+    const dispatch = makeDispatch(
+      makeTestRootState(
+        makeStore({
+          user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+          transaction: { first: makeTransaction({ id: 'first' }) },
+          merchant: { shop: makeMerchant({ id: 'shop', title: 'Shop' }) },
+        })
+      )
+    )
+
+    dispatch(
+      applyChangesToTransaction({ id: 'first', payee: 'Kiosk' }, 'Kiosk')
+    )
+    dispatch(applyChangesToTransaction({ id: 'first', payee: 'Shop' }, 'Shop'))
+
+    expect(appendedPatches(dispatch)).toEqual([
+      {
+        merchant: [{ id: UUID, title: 'Kiosk' }],
+        transaction: [{ id: 'first', payee: 'Kiosk', merchant: UUID }],
+      },
+      // The title is taken, so nothing is created and the edit points at the
+      // merchant that already carries it.
+      { transaction: [{ id: 'first', payee: 'Shop', merchant: 'shop' }] },
+    ])
+  })
 })
+
+function appendedPatches(dispatch: any) {
+  return dispatch.mock.calls
+    .map(([action]: [any]) => action)
+    .filter((action: any) => action?.type === appendClientCommand.type)
+    .map((action: any) => action.payload.patch)
+}

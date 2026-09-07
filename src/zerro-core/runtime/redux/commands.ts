@@ -19,6 +19,7 @@ import {
   compilePatchAccount,
   type TAccountId,
 } from '../../internal/domain/zenmoney/entities/accounts'
+import { compileCreateMerchant } from '../../internal/domain/zenmoney/entities/merchants'
 import {
   compileDeleteReminder,
   compileSetReminder,
@@ -61,6 +62,7 @@ import {
   getCommandPresentedEnvelopes,
 } from './commandRead'
 import {
+  coreContext,
   executeReduxCommand,
   executeReduxPatch,
   executeReduxCommandWithStatus,
@@ -284,35 +286,64 @@ function patchTransactions(
   )
 }
 
+/** `newMerchantTitle` names a merchant the editor offered to create. It is
+ * compiled into the same command as the edit, so undo takes both back. */
 export function applyChangesToTransaction(
-  patch: TTransactionEditablePatch & { id: TTransactionId }
+  patch: TTransactionEditablePatch & { id: TTransactionId },
+  newMerchantTitle?: string
 ): AppThunk {
   const { id, ...set } = patch
-  return patchTransactions([id], set, {
-    verb: 'transaction-edited',
-    args: { id },
-  })
+  return executeCommand(
+    (state, ctx) => {
+      const merchant = newMerchantTitle
+        ? compileCreateMerchant(
+            selectData(state).merchant,
+            newMerchantTitle,
+            ctx
+          )
+        : null
+      return {
+        ...merchant?.patch,
+        transaction: [
+          {
+            id,
+            ...set,
+            ...(merchant && { merchant: merchant.receipt.merchantId }),
+          },
+        ],
+      }
+    },
+    { verb: 'transaction-edited', args: { id } }
+  )
 }
 
 export function recreateTransaction(
-  patch: TTransactionRecreatePatch & { id: TTransactionId }
+  patch: TTransactionRecreatePatch & { id: TTransactionId },
+  newMerchantTitle?: string
 ): AppThunk<TTransactionId> {
   return (dispatch, getState, extra) => {
-    const source = getState().data.current.transaction[patch.id]
+    const data = selectData(getState(), 'live')
+    const source = data.transaction[patch.id]
     if (!source) {
       throw new Error(`Transaction ${patch.id} does not exist`)
     }
+
+    const merchant = newMerchantTitle
+      ? compileCreateMerchant(data.merchant, newMerchantTitle, coreContext)
+      : null
 
     const { id: sourceId, ...set } = patch
     const replacementId = uuidv1()
     const replacement = {
       ...source,
       ...set,
+      ...(merchant && { merchant: merchant.receipt.merchantId }),
       id: replacementId,
       deleted: false,
     }
     const execute = executeReduxPatch(
       {
+        ...merchant?.patch,
         transaction: [
           { id: sourceId, income: 0.00001, outcome: 0.00001 },
           replacement,

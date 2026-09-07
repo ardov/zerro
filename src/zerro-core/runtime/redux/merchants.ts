@@ -8,3 +8,5 @@ export const useAll = () => useAppSelector(selectAll)
 
 export const selectUsage = fromGraph(graph.merchantUsage)
 export const useUsage = () => useAppSelector(selectUsage)
+
+export { normalizePayee } from '../../internal/domain/zenmoney/entities/merchants'
