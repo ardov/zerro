@@ -1,35 +1,53 @@
-import { Button, IconButton } from '@/6-shared/ui/Button'
-import type { TTransaction, TTransactionId } from '@/6-shared/types'
-
-import type { FC } from 'react'
-import { useState } from 'react'
+import type { FC, ReactNode } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { cn } from '@/6-shared/ui/shadcn/utils'
-import { OutlinedField } from '@/6-shared/ui/OutlinedField'
-import { DatePicker } from '@/6-shared/ui/DatePicker'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import type { TAccountId, TTransaction, TTransactionId } from '@/6-shared/types'
+import { Button, IconButton } from '@/6-shared/ui/Button'
+import { BigAmountInput } from '@/6-shared/ui/BigAmountInput'
+import { FilledInput } from '@/6-shared/ui/FilledField'
 import {
-  DeleteIcon,
   CloseIcon,
-  RestoreFromTrashIcon,
+  NotesIcon,
+  MoneyInIcon,
+  MoneyOutIcon,
+  PlaceIcon,
+  ArrowDownwardIcon,
 } from '@/6-shared/ui/Icons'
-import { AmountInput } from '@/6-shared/ui/AmountInput'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { formatDate, formatTimeAgo } from '@/6-shared/helpers/date'
 import { rateToWords } from '@/6-shared/helpers/money'
-import { formatDate, parseDate } from '@/6-shared/helpers/date'
 import { track } from '@/6-shared/analytics'
-
 import { useAppCommand, useAppSelector } from '@/store'
-
 import { core } from '@/zerro-core/redux'
 
-import { TagList } from '../TagSelect/TagList'
-
+import { AccountField } from './AccountField'
+import { ActionsMenu } from './ActionsMenu'
+import { AmountField } from './AmountField'
+import { CategoryRow } from './CategoryRow'
+import { DateTimeField } from './DateTimeField'
+import { PayeeField } from './PayeeField'
+import { TypeSelect, draftTypes } from './TypeSelect'
 import { Receipt } from './Receipt'
 import { Map } from './Map'
+import type { TDraftContext, TTransactionDraft } from './draft'
+import {
+  changedFields,
+  draftCreated,
+  draftIssues,
+  hasIssues,
+  isDebt,
+  isIncoming,
+  setDraftType,
+  setTransferAccount,
+  setTransferAmount,
+  swapTransferSides,
+  staleRates,
+  timeChanged,
+  toDraft,
+  toPatch,
+} from './draft'
 
-/**
- * Empty state for transaction preview
- */
+/** Empty state for transaction preview */
 export const TrEmptyState = () => {
   const { t } = useTranslation('transaction')
   return (
@@ -52,302 +70,330 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const transaction = useAppSelector(
     state => core.transactions.selectAll(state)[props.id]
   )
-  return transaction ? <TransactionContent {...props} /> : <TrEmptyState />
+  return transaction ? <TransactionEditor {...props} /> : <TrEmptyState />
 }
 
-const TransactionContent: FC<TransactionPreviewProps> = props => {
+const TransactionEditor: FC<TransactionPreviewProps> = props => {
   const { id, onClose, onOpenOther, onSelectSimilar } = props
   const { t } = useTranslation('transaction')
+  const tr = useAppSelector(state => core.transactions.selectAll(state)[id])!
+
   const remove = useAppCommand(core.transactions.remove)
-  const removePermanently = useAppCommand(core.transactions.removePermanently)
   const restore = useAppCommand(core.transactions.restore)
   const recreate = useAppCommand(core.transactions.recreate)
   const update = useAppCommand(core.transactions.update)
-  const onDelete = () => {
-    remove([id])
-    track('transaction_deleted', { mode: 'single', source: 'preview' })
-  }
-  const onDeletePermanently = () => {
-    removePermanently([id])
-    track('transaction_deleted_permanently', { source: 'preview' })
-  }
-  const onRestore = () => {
-    restore(id)
-    track('transaction_restored', { source: 'preview' })
-  }
 
-  const tr = useAppSelector(state => core.transactions.selectAll(state)[id])!
-  const trType = core.transactions.getType(tr)
   const accounts = core.accounts.usePopulated()
-  const incomeAccount = tr.incomeAccount
-    ? accounts[tr.incomeAccount]
-    : undefined
-  const outcomeAccount = tr.outcomeAccount
-    ? accounts[tr.outcomeAccount]
-    : undefined
   const instruments = core.instruments.useAll()
-  const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
-  const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle
+  const debtAccountId = useAppSelector(core.accounts.selectDebtAccountId)
 
-  const {
-    date,
-    changed,
-    created,
-    deleted,
-    qrCode,
-    income,
-    outcome,
-    tag,
-    comment,
-    payee,
-    latitude,
-    longitude,
-  } = tr
+  /** Every account a leg may be moved to. The debt account is not one of
+   * them: it is reached by choosing a debt type, not by naming it. An
+   * archived account is offered only while it is the one already in use, so
+   * an old transaction stays editable without the list growing back. */
+  const options = useMemo(() => {
+    const list = Object.values(accounts)
+      .filter(account => account.id !== debtAccountId)
+      .filter(
+        account =>
+          !account.archive ||
+          account.id === tr.incomeAccount ||
+          account.id === tr.outcomeAccount
+      )
+      .map(account => ({
+        id: account.id,
+        title: account.title,
+        fxCode: account.fxCode,
+        archive: account.archive,
+      }))
+    list.sort((a, b) => Number(a.archive) - Number(b.archive))
+    return list
+  }, [accounts, debtAccountId, tr.incomeAccount, tr.outcomeAccount])
 
-  const [localComment, setLocalComment] = useState(tr.comment)
-  const [localOutcome, setLocalOutcome] = useState(tr.outcome)
-  const [localIncome, setLocalIncome] = useState(tr.income)
-  const [localPayee, setLocalPayee] = useState(tr.payee)
-  const [localDate, setLocalDate] = useState(tr.date)
-  const [localTime, setLocalTime] = useState(formatDate(tr.created, 'HH:mm'))
-  const [localTag, setLocalTag] = useState(tr.tag)
+  const ctx: TDraftContext = useMemo(
+    () => ({
+      accountIds: options.map(option => option.id),
+      instrumentOf: (accountId: TAccountId) => accounts[accountId]?.instrument,
+      debtAccountId,
+    }),
+    [options, accounts, debtAccountId]
+  )
 
-  const [prevTr, setPrevTr] = useState(tr)
-  if (prevTr !== tr) {
-    setPrevTr(tr)
-    setLocalComment(tr.comment)
-    setLocalOutcome(tr.outcome)
-    setLocalIncome(tr.income)
-    setLocalPayee(tr.payee)
-    setLocalDate(tr.date)
-    setLocalTime(formatDate(tr.created, 'HH:mm'))
-    setLocalTag(tr.tag)
+  const [draft, setDraft] = useState(() => toDraft(tr, ctx))
+  // Nothing is wrong until saving has been asked for and refused. After that
+  // a mark stays on a field for exactly as long as the field is still wrong,
+  // so fixing one clears its own mark and leaves the others alone.
+  const [refused, setRefused] = useState(false)
+  // A transaction arriving from a sync, or the replacement a save just made,
+  // replaces what is being edited. Comparing the entity rather than its id:
+  // the id is the same one after a field of it changed elsewhere.
+  const [source, setSource] = useState(tr)
+  if (source !== tr) {
+    setSource(tr)
+    setDraft(toDraft(tr, ctx))
+    setRefused(false)
   }
 
-  const timeChanged = formatDate(tr.created, 'HH:mm') !== localTime
+  const transfer = draft.type === 'transfer'
+  const categorized = draft.type === 'income' || draft.type === 'outcome'
+  const patch = toPatch(draft, ctx)
+  // The rates a moved leg invalidates are part of the same save.
+  const claimed = patch ? { ...patch, ...staleRates(patch, tr) } : null
+  const changes = claimed ? changedFields(tr, claimed) : {}
+  const recreated = timeChanged(draft, tr)
+  const issues = draftIssues(draft)
+  const dirty = recreated || Object.keys(changes).length > 0
+  const marks = refused ? issues : {}
 
-  const hasChanges =
-    comment !== localComment ||
-    outcome !== localOutcome ||
-    income !== localIncome ||
-    payee !== localPayee ||
-    date !== localDate ||
-    localTag !== tag ||
-    timeChanged
+  /** Types this transaction has nowhere to go: a transfer needs a second
+   * account, and a debt needs the account ZenMoney keeps them on. */
+  const unavailable = useMemo(
+    () =>
+      draftTypes.filter(type => {
+        if (type === 'transfer') return options.length < 2
+        return isDebt(type) && !debtAccountId
+      }),
+    [options.length, debtAccountId]
+  )
+
+  const edit = (next: Partial<TTransactionDraft>) =>
+    setDraft(current => ({ ...current, ...next }))
 
   const onSave = () => {
-    if (timeChanged) {
-      const hh = +localTime.split(':')[0]
-      const mm = +localTime.split(':')[1]
-      const createdDate = parseDate(tr.date)
-      createdDate.setHours(hh)
-      createdDate.setMinutes(mm)
+    if (!claimed || !dirty) return
+    if (hasIssues(issues)) {
+      setRefused(true)
+      return
+    }
+    if (recreated) {
       const newId = recreate({
         id,
-        created: +createdDate,
-        comment: localComment,
-        outcome: localOutcome,
-        income: localIncome,
-        payee: localPayee,
-        date: localDate,
-        tag: localTag,
+        ...claimed,
+        created: draftCreated(draft, tr.created),
       })
       track('transaction_recreated', { source: 'preview' })
       onOpenOther(newId)
-    } else if (hasChanges) {
-      update({
-        id,
-        ...(comment !== localComment && { comment: localComment }),
-        ...(outcome !== localOutcome && { outcome: localOutcome }),
-        ...(income !== localIncome && { income: localIncome }),
-        ...(payee !== localPayee && { payee: localPayee }),
-        ...(date !== localDate && { date: localDate }),
-        ...(tag !== localTag && { tag: localTag }),
-      })
-      track('transaction_edited', { source: 'preview' })
+      return
     }
+    update({ id, ...changes })
+    track('transaction_edited', { source: 'preview' })
   }
 
-  const titles = {
-    income: t('type_income'),
-    outcome: t('type_outcome'),
-    transfer: t('type_transfer'),
-    incomeDebt: t('type_debt'),
-    outcomeDebt: t('type_debt'),
+  /** What an account counts in, spelled the short way an amount is labelled
+   * with — `CZK` rather than the instrument it comes from. */
+  const currencyOf = (accountId: TAccountId) => {
+    const instrument = ctx.instrumentOf(accountId)
+    return instrument === undefined
+      ? undefined
+      : instruments[instrument]?.shortTitle
   }
 
   return (
-    <div className="relative min-w-80">
-      <Head
-        title={titles[trType]}
-        onClose={onClose}
-        onDelete={onDelete}
-        onDeletePermanently={onDeletePermanently}
-        onRestore={onRestore}
-        deleted={deleted}
-      />
-      {(trType === 'income' || trType === 'outcome') && (
-        <TagList
-          tags={localTag}
-          onChange={setLocalTag}
-          tagType={trType}
-          className="bg-background px-6 py-4"
-        />
-      )}
-      <div className="flex flex-col gap-8 p-6">
-        {trType !== 'income' && (
-          <AmountInput
-            label={t('otcomeFrom', { account: outcomeAccount?.title ?? '—' })}
-            currency={outcomeCurrency}
-            value={localOutcome}
-            onChange={setLocalOutcome}
-            selectOnFocus
-            fullWidth
-            size="small"
-          />
-        )}
-        {trType !== 'outcome' && (
-          <AmountInput
-            label={t('incomeTo', { account: incomeAccount?.title ?? '—' })}
-            currency={incomeCurrency}
-            value={localIncome}
-            onChange={setLocalIncome}
-            selectOnFocus
-            fullWidth
-            size="small"
-          />
-        )}
-        <div className="flex flex-row gap-4">
-          <DatePicker
-            label={t('date')}
-            value={localDate}
-            onChange={setLocalDate}
-            fullWidth
-            size="small"
-          />
-          {/* Hide the native time-picker button. The field class lands on the
-              frame, so the input is reached through it. */}
-          <OutlinedField
-            label={t('time')}
-            value={localTime}
-            onChange={e => setLocalTime(e.target.value)}
-            type="time"
-            size="small"
-            className="min-w-[104px] [&_input]:appearance-none [&_input::-webkit-calendar-picker-indicator]:hidden"
+    <div className="flex min-h-full min-w-80 flex-col bg-card">
+      <header className="flex items-center gap-1 px-6 py-3">
+        <div className="min-w-0 grow">
+          {tr.deleted && (
+            <span className="block truncate type-caption text-error">
+              {t('transactionDeleted')}
+            </span>
+          )}
+          <TypeSelect
+            value={draft.type}
+            unavailable={unavailable}
+            onChange={type => setDraft(setDraftType(draft, type, ctx))}
           />
         </div>
-        <OutlinedField
-          label={t('payee')}
-          value={localPayee || ''}
-          onChange={e => setLocalPayee(e.target.value)}
-          multiline
-          maxRows={4}
-          fullWidth
-          size="small"
+        <ActionsMenu
+          deleted={tr.deleted}
+          onDelete={() => {
+            remove([id])
+            track('transaction_deleted', { mode: 'single', source: 'preview' })
+          }}
+          onRestore={() => {
+            // Restoring makes a copy under a new id — the server's deletion
+            // cannot be taken back — so this screen is left naming a
+            // tombstone. It closes rather than going on offering a Restore
+            // that would make a second copy.
+            restore(id)
+            track('transaction_restored', { source: 'preview' })
+            onClose()
+          }}
+          onSelectSimilar={
+            onSelectSimilar ? () => onSelectSimilar(tr.changed) : undefined
+          }
         />
-        <OutlinedField
-          label={t('comment')}
-          value={localComment || ''}
-          onChange={e => setLocalComment(e.target.value)}
-          multiline
-          maxRows={4}
-          fullWidth
-          size="small"
-        />
-        <Receipt value={qrCode} />
-        <Map longitude={longitude} latitude={latitude} />
+        <IconButton size="small" aria-label={t('btnClose')} onClick={onClose}>
+          <CloseIcon size={20} />
+        </IconButton>
+      </header>
 
-        <div className="flex flex-col gap-2 type-caption text-muted-foreground">
+      <div className="flex flex-col gap-3 px-6">
+        {transfer ? (
+          <div className="relative flex flex-col gap-3">
+            <FieldGroup>
+              <AccountField
+                className="rounded-b-md"
+                invalid={!!marks.fromAccount}
+                label={t('accountFrom')}
+                value={draft.fromAccount}
+                options={options}
+                onChange={account =>
+                  setDraft(setTransferAccount(draft, 'from', account, ctx))
+                }
+              />
+              <AmountField
+                className="rounded-t-md"
+                invalid={!!marks.fromAmount}
+                error={marks.fromAmount && t(`issue_${marks.fromAmount}`)}
+                label={t('amountFrom')}
+                icon={<MoneyOutIcon size={20} />}
+                value={draft.fromAmount}
+                currency={currencyOf(draft.fromAccount)}
+                onChange={amount =>
+                  setDraft(setTransferAmount(draft, 'from', amount, ctx))
+                }
+              />
+            </FieldGroup>
+            <FieldGroup>
+              <AccountField
+                className="rounded-b-md"
+                invalid={!!marks.toAccount}
+                error={marks.toAccount && t(`issue_${marks.toAccount}`)}
+                label={t('accountTo')}
+                value={draft.toAccount}
+                options={options}
+                onChange={account =>
+                  setDraft(setTransferAccount(draft, 'to', account, ctx))
+                }
+              />
+              <AmountField
+                className="rounded-t-md"
+                invalid={!!marks.toAmount}
+                error={marks.toAmount && t(`issue_${marks.toAmount}`)}
+                label={t('amountTo')}
+                icon={<MoneyInIcon size={20} />}
+                value={draft.toAmount}
+                currency={currencyOf(draft.toAccount)}
+                onChange={amount =>
+                  setDraft(setTransferAmount(draft, 'to', amount, ctx))
+                }
+              />
+            </FieldGroup>
+            {/* Centred on the seam between the two halves, and it turns the
+                transfer around rather than turning the arrow around: the
+                arrow states which way money moves, and that never changes. */}
+            <button
+              type="button"
+              aria-label={t('btnSwap')}
+              onClick={() => setDraft(swapTransferSides(draft))}
+              className="absolute top-1/2 left-1/2 inline-flex size-8 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-2 border-solid border-card bg-muted p-0 text-foreground hover:bg-selected focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <ArrowDownwardIcon size={20} />
+            </button>
+          </div>
+        ) : (
+          <>
+            <BigAmountInput
+              value={draft.amount}
+              onChange={amount => edit({ amount })}
+              // Enter on the headline is the shortest way through the form:
+              // change the amount, press it, done. The amount is already in
+              // the draft by then — every keystroke reported it.
+              onEnter={onSave}
+              currency={currencyOf(draft.account)}
+              sign={isIncoming(draft.type) ? '+' : '−'}
+              aria-label={t('amount')}
+              className="pt-4"
+            />
+            {/* The headline has no frame for a zigzag to hang off, so it says
+                what is wrong in words under itself. */}
+            {marks.amount && (
+              <p className="m-0 -mt-2 text-center type-body-sm text-error">
+                {t(`issue_${marks.amount}`)}
+              </p>
+            )}
+            {categorized && (
+              <CategoryRow
+                tags={draft.tag}
+                tagType={draft.type === 'income' ? 'income' : 'outcome'}
+                onChange={tag => edit({ tag })}
+                className="pb-2"
+              />
+            )}
+            <AccountField
+              label={t('account')}
+              value={draft.account}
+              options={options}
+              onChange={account => edit({ account })}
+            />
+          </>
+        )}
+
+        <DateTimeField
+          date={draft.date}
+          onDateChange={date => edit({ date })}
+          time={draft.time}
+          onTimeChange={time => edit({ time })}
+        />
+
+        <PayeeField
+          invalid={!!marks.payee}
+          error={marks.payee && t(`issue_${marks.payee}`)}
+          payee={draft.payee}
+          merchant={draft.merchant}
+          icon={<PlaceIcon size={20} />}
+          placeholder={isDebt(draft.type) ? t('debtor') : t('payee')}
+          onChange={(payee, merchant) => edit({ payee, merchant })}
+        />
+
+        <FilledInput
+          icon={<NotesIcon size={20} />}
+          placeholder={t('comment')}
+          aria-label={t('comment')}
+          multiline
+          maxRows={6}
+          value={draft.comment ?? ''}
+          onChange={event => edit({ comment: event.target.value })}
+        />
+
+        <Receipt value={tr.qrCode} />
+        <Map longitude={tr.longitude} latitude={tr.latitude} />
+
+        <div className="flex flex-col items-center gap-1 py-4 type-body-sm text-muted-foreground">
           <span>
-            {t('created', {
-              date: formatDate(created, 'dd MMM yyyy, HH:mm'),
-            })}
+            {t('created', { date: formatDate(tr.created, 'dd.MM.yyyy HH:mm') })}
           </span>
-          <span>
-            {t('changed', {
-              date: formatDate(changed, 'dd MMM yyyy, HH:mm'),
-            })}
-          </span>
+          <span>{t('changedAgo', { ago: formatTimeAgo(tr.changed) })}</span>
           <RateToWords tr={tr} />
         </div>
+      </div>
 
-        {!!onSelectSimilar && (
-          <Button onClick={() => onSelectSimilar(changed)}>
-            {t('btnOtherFromSync')}
+      {/* No button at all until there is something to save: a permanently
+          disabled control is a question a person keeps re-reading. */}
+      {dirty && (
+        <div className="sticky bottom-0 mt-auto bg-card px-6 pt-2 pb-6">
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={onSave}
+            className="h-12 rounded-xl"
+          >
+            {t('btnSave')}
           </Button>
-        )}
-      </div>
-      <SaveButton visible={hasChanges} onSave={onSave} />
-    </div>
-  )
-}
-
-const Head: FC<{
-  title: string
-  deleted: boolean
-  onClose: () => void
-  onDelete: () => void
-  onDeletePermanently: () => void
-  onRestore: () => void
-}> = props => {
-  const { title, deleted, onClose, onDelete, onDeletePermanently, onRestore } =
-    props
-  const { t } = useTranslation('transaction')
-  return (
-    <div className="flex items-center px-6 py-2">
-      <div className="grow">
-        {deleted && (
-          <span className="truncate type-caption text-error">
-            {t('transactionDeleted')}
-          </span>
-        )}
-        <h2 className="m-0 truncate type-title">{title}</h2>
-      </div>
-      {deleted ? (
-        <Tooltip title={t('btnRestore')}>
-          <IconButton onClick={onRestore} children={<RestoreFromTrashIcon />} />
-        </Tooltip>
-      ) : (
-        <Tooltip title={t('btnDelete')}>
-          <IconButton
-            onClick={e => (e.shiftKey ? onDeletePermanently() : onDelete())}
-            children={<DeleteIcon />}
-          />
-        </Tooltip>
+        </div>
       )}
-      <Tooltip title={t('btnClose')}>
-        <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
-      </Tooltip>
     </div>
   )
 }
 
-const SaveButton: FC<{ visible: boolean; onSave: () => void }> = props => {
-  const { visible, onSave } = props
-  const { t } = useTranslation('transaction')
-  return (
-    <div
-      style={{ transform: 'translateX(-50%)' }}
-      className="sticky bottom-4 left-1/2 z-[200] mt-8 inline-block"
-    >
-      {/* Keep the pill mounted while scaling it out. A hidden pill is removed
-          from keyboard navigation. */}
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={onSave}
-        className={cn(
-          'h-12 rounded-full px-4 transition-transform duration-225 ease-in-out',
-          visible ? 'scale-100' : 'scale-0'
-        )}
-        tabIndex={visible ? undefined : -1}
-        aria-hidden={!visible}
-      >
-        {t('btnSave')}
-      </Button>
-    </div>
-  )
-}
+/** Rows that belong to one thing: an account and what it moves. They close up
+ * into a block, so the pair reads as one field with two lines rather than two
+ * unrelated ones. */
+const FieldGroup: FC<{ children: ReactNode; className?: string }> = ({
+  children,
+  className,
+}) => <div className={cn('flex flex-col gap-0.5', className)}>{children}</div>
 
 const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
   const { t } = useTranslation('transaction')

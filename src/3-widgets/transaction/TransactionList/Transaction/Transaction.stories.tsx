@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { ComponentProps } from 'react'
+import { useState } from 'react'
 import { core } from '@/zerro-core/redux'
 import { useAppSelector } from '@/store'
 import { Transaction } from './Transaction'
@@ -66,18 +67,28 @@ export const SelectionMode: Story = {
   },
 }
 
+/** One expense, and everything about it the checks below assert on. The id is
+ * captured once: an edit can stop it being an expense, and the harness has to
+ * keep watching the same transaction when it does. */
 function PreviewHarness() {
   const transactions = useAppSelector(core.transactions.selectAll)
-  const transaction = Object.values(transactions).find(
-    tr => core.transactions.getType(tr) === 'outcome'
-  )!
+  const getType = core.transactions.useType()
+  const [id] = useState(
+    () =>
+      Object.values(transactions).find(
+        tr => getType(tr) === 'outcome' && !!tr.tag?.length
+      )!.id
+  )
+  const transaction = transactions[id]
   const preview = useTransactionPreview()
   return (
     <>
-      <button type="button" onClick={() => preview(transaction.id)}>
+      <button type="button" onClick={() => preview(id)}>
         Edit expense
       </button>
       <output data-testid="expense">{transaction.outcome}</output>
+      <output data-testid="type">{getType(transaction)}</output>
+      <output data-testid="tags">{transaction.tag?.join(',') ?? ''}</output>
     </>
   )
 }
@@ -88,8 +99,7 @@ export const AmountEditorRegression: Story = {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
     await userEvent.click(canvas.getByRole('button', { name: 'Edit expense' }))
-    const input = await body.findByRole('textbox', { name: /Expense from / })
-    await expect(input.getBoundingClientRect().height).toBe(40)
+    const input = await body.findByRole('textbox', { name: 'Amount' })
     await userEvent.click(input)
     await userEvent.clear(input)
     await userEvent.type(input, '25,5+4.5')
@@ -97,5 +107,26 @@ export const AmountEditorRegression: Story = {
     await waitFor(() =>
       expect(canvas.getByTestId('expense')).toHaveTextContent(/^30$/)
     )
+  },
+}
+
+/** Changing the type rewrites both legs. A transfer carries no categories, so
+ * saving one drops them — the draft keeps them, the transaction cannot. */
+export const TypeSwitchRegression: Story = {
+  render: () => <PreviewHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await expect(canvas.getByTestId('type')).toHaveTextContent(/^outcome$/)
+    await userEvent.click(canvas.getByRole('button', { name: 'Edit expense' }))
+    await userEvent.click(await body.findByRole('button', { name: /Expense/ }))
+    await userEvent.click(
+      await body.findByRole('menuitem', { name: 'Transfer' })
+    )
+    await userEvent.click(await body.findByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(canvas.getByTestId('type')).toHaveTextContent(/^transfer$/)
+    )
+    await expect(canvas.getByTestId('tags')).toHaveTextContent('')
   },
 }
