@@ -57,6 +57,7 @@ import {
   SquareCheck,
   Pencil,
   Store,
+  User,
   Sun,
   Tag,
   Trash2,
@@ -131,8 +132,10 @@ export const MoneyInIcon = createIcon(LogIn, 'MoneyInIcon')
 /** A category. Not to be confused with `ui/TagIcon`, which draws the icon
  * ZenMoney stores on the category itself. */
 export const CategoryIcon = createIcon(Tag, 'CategoryIcon')
-/** Where the money was spent. */
+/** Where the money was spent, and who it was spent with: a shop keeps the
+ * shop glyph, a person a person's. */
 export const PlaceIcon = createIcon(Store, 'PlaceIcon')
+export const PersonIcon = createIcon(User, 'PersonIcon')
 export const NotesIcon = createIcon(MessageSquare, 'NotesIcon')
 export const CalendarIcon = createIcon(Calendar, 'CalendarIcon')
 export const EmojiFlagsIcon = createIcon(Flag, 'EmojiFlagsIcon')

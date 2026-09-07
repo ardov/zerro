@@ -11,7 +11,6 @@ import {
   NotesIcon,
   MoneyInIcon,
   MoneyOutIcon,
-  PlaceIcon,
   ArrowDownwardIcon,
 } from '@/6-shared/ui/Icons'
 import { cn } from '@/6-shared/ui/shadcn/utils'
@@ -26,7 +25,7 @@ import { ActionsMenu } from './ActionsMenu'
 import { AmountField } from './AmountField'
 import { CategoryRow } from './CategoryRow'
 import { DateTimeField } from './DateTimeField'
-import { PayeeField } from './PayeeField'
+import { MerchantField } from './MerchantField'
 import { TypeSelect, draftTypes } from './TypeSelect'
 import { Receipt } from './Receipt'
 import { Map } from './Map'
@@ -346,12 +345,12 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
           onTimeChange={time => edit({ time })}
         />
 
-        <PayeeField
+        <MerchantField
           invalid={!!marks.payee}
           error={marks.payee && t(`issue_${marks.payee}`)}
           payee={draft.payee}
           merchant={draft.merchant}
-          icon={<PlaceIcon size={20} />}
+          debt={isDebt(draft.type)}
           placeholder={isDebt(draft.type) ? t('debtor') : t('payee')}
           onChange={named => setDraft(setDraftMerchant(draft, named))}
         />

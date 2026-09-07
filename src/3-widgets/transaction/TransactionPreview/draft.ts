@@ -27,6 +27,10 @@ export type TDraftType = `${core.transactions.TrType}`
  * `{ title }`. */
 export type TDraftMerchant = { id: TMerchantId } | { title: string } | null
 
+/** A merchant by name: with an id when one already carries it, without when
+ * saving is what will create it. */
+export type TNamedMerchant = { id?: TMerchantId; title: string }
+
 export type TTransactionDraft = {
   type: TDraftType
   /** The account a one-sided operation touches: an expense's, an income's, or
@@ -197,7 +201,7 @@ export function setDraftType(
  * text every other client reads, so naming one names both. */
 export function setDraftMerchant(
   draft: TTransactionDraft,
-  named: { id?: TMerchantId; title: string } | null
+  named: TNamedMerchant | null
 ): TTransactionDraft {
   const title = named?.title.trim()
   if (!named || !title) return { ...draft, merchant: null, payee: null }
