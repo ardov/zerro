@@ -1,7 +1,7 @@
 import { Button } from '@/6-shared/ui/Button'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import './index.scss'
+import './index.css'
 import type { TTransaction } from '@/6-shared/types'
 
 import { useTransactionDrawer } from '@/3-widgets/global/TransactionListDrawer'

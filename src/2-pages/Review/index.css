@@ -81,15 +81,15 @@
     -webkit-text-fill-color: transparent;
     -moz-text-fill-color: transparent;
     animation: gradient-animation 10s infinite alternate ease-in-out;
+  }
 
-    &.year-shadow {
-      user-select: none;
-      position: absolute;
-      top: 8px;
-      z-index: 1;
-      opacity: 0.4;
-      filter: blur(12px);
-    }
+  .year.year-shadow {
+    user-select: none;
+    position: absolute;
+    top: 8px;
+    z-index: 1;
+    opacity: 0.4;
+    filter: blur(12px);
   }
 
   @keyframes gradient-animation {

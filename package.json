@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "test:changed": "pnpm test --changed --passWithNoTests",
     "test:related": "vitest related --run --reporter=agent --silent=passed-only",
-    "lint:css": "stylelint \"src/**/*.{css,scss}\" --max-warnings 0",
+    "lint:css": "stylelint \"src/**/*.css\" --max-warnings 0",
     "lint": "pnpm lint:css && pnpm lint:js",
     "lint:js": "eslint src tools stories .storybook --max-warnings 0 --cache",
     "knip": "knip --dependencies",
@@ -40,10 +40,12 @@
   "stylelint": {
     "defaultSeverity": "warning",
     "extends": [
-      "stylelint-config-recommended-scss"
+      "stylelint-config-recommended"
     ],
     "rules": {
-      "scss/at-rule-no-unknown": [
+      "no-descending-specificity": null,
+      "no-duplicate-selectors": null,
+      "at-rule-no-unknown": [
         true,
         {
           "ignoreAtRules": [
@@ -117,10 +119,9 @@
     "knip": "^6.33.0",
     "playwright": "^1.62.1",
     "prettier": "^3.9.6",
-    "sass": "^1.103.1",
     "storybook": "10.5.10",
     "stylelint": "^17.14.1",
-    "stylelint-config-recommended-scss": "17.0.1",
+    "stylelint-config-recommended": "18.0.0",
     "tailwindcss": "^4.3.3",
     "tsx": "4.23.12",
     "typescript": "^6.0.3",

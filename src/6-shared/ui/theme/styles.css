@@ -132,7 +132,6 @@
   @media (max-width: 880px) {
     * {
       scrollbar-width: none;
-      overflow: -moz-scrollbars-none;
     }
 
     ::-webkit-scrollbar {
@@ -144,10 +143,9 @@
 @layer components {
   .hidden-scroll {
     scrollbar-width: none;
-    overflow: -moz-scrollbars-none;
+  }
 
-    &::-webkit-scrollbar {
-      display: none;
-    }
+  .hidden-scroll::-webkit-scrollbar {
+    display: none;
   }
 }

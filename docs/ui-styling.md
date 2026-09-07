@@ -20,12 +20,12 @@ The cascade order is explicit:
 
 - `theme` contains Tailwind's theme variables.
 - `base` contains the document reset and scrollbar defaults from
-  `src/6-shared/ui/theme/styles.scss`.
+  `src/6-shared/ui/theme/styles.css`.
 - `components` contains co-located component and route styles.
 - `utilities` contains Tailwind utilities.
 
 Tailwind Preflight is disabled. Global element defaults therefore belong in
-`styles.scss`, which applies [Josh W. Comeau's Custom CSS
+`styles.css`, which applies [Josh W. Comeau's Custom CSS
 Reset](https://www.joshwcomeau.com/css/custom-css-reset/), plus the
 application's theme and scrollbar defaults. Route and component rules should
 not recreate document-wide resets. Component CSS must be placed in `@layer

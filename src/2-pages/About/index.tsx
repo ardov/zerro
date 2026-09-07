@@ -11,7 +11,7 @@ import AboutRu from './pages/AboutRu.mdx'
 import AboutEn from './pages/AboutEn.mdx'
 import QuickStartEn from './pages/QuickStartEn.mdx'
 import QuickStartRu from './pages/QuickStartRu.mdx'
-import './index.scss'
+import './index.css'
 
 const components = { a: TextLink } as MDXComponents
 

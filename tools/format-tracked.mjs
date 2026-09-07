@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 
 const mode = process.argv[2]
 
@@ -15,7 +16,7 @@ if (tracked.status !== 0) {
   process.exit(tracked.status ?? 1)
 }
 
-const files = tracked.stdout.split('\0').filter(Boolean)
+const files = tracked.stdout.split('\0').filter(existsSync)
 if (files.length === 0) process.exit(0)
 
 const prettier = spawnSync(

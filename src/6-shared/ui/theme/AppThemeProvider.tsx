@@ -4,7 +4,7 @@ import type { ColorScheme } from './colors'
 import { getThemeColor, themeTokensCss } from './colors'
 import { ColorSchemeOverrideContext, useColorScheme } from './hooks'
 
-import './styles.scss'
+import './styles.css'
 
 export type AppThemeProviderProps = {
   /** Pins an isolated renderer to one scheme without changing the application
