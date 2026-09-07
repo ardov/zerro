@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { TAccountId, TTransaction, TTransactionId } from '@/6-shared/types'
 import { Button, IconButton } from '@/6-shared/ui/Button'
 import { BigAmountInput } from '@/6-shared/ui/BigAmountInput'
+import { useShake } from '@/6-shared/ui/useShake'
 import { FilledInput } from '@/6-shared/ui/FilledField'
 import {
   CloseIcon,
@@ -29,7 +30,12 @@ import { PayeeField } from './PayeeField'
 import { TypeSelect, draftTypes } from './TypeSelect'
 import { Receipt } from './Receipt'
 import { Map } from './Map'
-import type { TDraftContext, TTransactionDraft } from './draft'
+import type {
+  TDraftContext,
+  TDraftField,
+  TDraftIssues,
+  TTransactionDraft,
+} from './draft'
 import {
   changedFields,
   draftCreated,
@@ -52,7 +58,7 @@ export const TrEmptyState = () => {
   const { t } = useTranslation('transaction')
   return (
     <div className="flex min-h-screen items-center justify-center p-6 text-disabled-foreground">
-      <p className="m-0 text-center type-body-sm text-inherit">
+      <p className="m-0 text-center text-body-sm text-inherit">
         {t('fullEmptyState')}
       </p>
     </div>
@@ -120,10 +126,12 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   )
 
   const [draft, setDraft] = useState(() => toDraft(tr, ctx))
-  // Nothing is wrong until saving has been asked for and refused. After that
-  // a mark stays on a field for exactly as long as the field is still wrong,
-  // so fixing one clears its own mark and leaves the others alone.
-  const [refused, setRefused] = useState(false)
+  // Nothing is wrong until saving has been asked for and refused, and what it
+  // refused over is remembered by field. A mark leaves for good the moment
+  // its field is right — breaking the same field again says nothing until
+  // saving is refused a second time.
+  const [marked, setMarked] = useState<readonly TDraftField[]>([])
+  const [headline, shakeHeadline] = useShake<HTMLDivElement>()
   // A transaction arriving from a sync, or the replacement a save just made,
   // replaces what is being edited. Comparing the entity rather than its id:
   // the id is the same one after a field of it changed elsewhere.
@@ -131,7 +139,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   if (source !== tr) {
     setSource(tr)
     setDraft(toDraft(tr, ctx))
-    setRefused(false)
+    setMarked([])
   }
 
   const transfer = draft.type === 'transfer'
@@ -143,7 +151,11 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   const recreated = timeChanged(draft, tr)
   const issues = draftIssues(draft)
   const dirty = recreated || Object.keys(changes).length > 0
-  const marks = refused ? issues : {}
+  const stillWrong = marked.filter(field => issues[field])
+  if (stillWrong.length !== marked.length) setMarked(stillWrong)
+  const marks: TDraftIssues = Object.fromEntries(
+    stillWrong.map(field => [field, issues[field]])
+  )
 
   /** Types this transaction has nowhere to go: a transfer needs a second
    * account, and a debt needs the account ZenMoney keeps them on. */
@@ -162,7 +174,8 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   const onSave = () => {
     if (!claimed || !dirty) return
     if (hasIssues(issues)) {
-      setRefused(true)
+      setMarked(Object.keys(issues) as TDraftField[])
+      if (issues.amount) shakeHeadline()
       return
     }
     if (recreated) {
@@ -193,7 +206,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
       <header className="flex items-center gap-1 px-6 py-3">
         <div className="min-w-0 grow">
           {tr.deleted && (
-            <span className="block truncate type-caption text-error">
+            <span className="block truncate text-caption text-error">
               {t('transactionDeleted')}
             </span>
           )}
@@ -244,7 +257,6 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
               <AmountField
                 className="rounded-t-md"
                 invalid={!!marks.fromAmount}
-                error={marks.fromAmount && t(`issue_${marks.fromAmount}`)}
                 label={t('amountFrom')}
                 icon={<MoneyOutIcon size={20} />}
                 value={draft.fromAmount}
@@ -269,7 +281,6 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
               <AmountField
                 className="rounded-t-md"
                 invalid={!!marks.toAmount}
-                error={marks.toAmount && t(`issue_${marks.toAmount}`)}
                 label={t('amountTo')}
                 icon={<MoneyInIcon size={20} />}
                 value={draft.toAmount}
@@ -294,6 +305,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
         ) : (
           <>
             <BigAmountInput
+              ref={headline}
               value={draft.amount}
               onChange={amount => edit({ amount })}
               // Enter on the headline is the shortest way through the form:
@@ -303,15 +315,9 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
               currency={currencyOf(draft.account)}
               sign={isIncoming(draft.type) ? '+' : '−'}
               aria-label={t('amount')}
+              invalid={!!marks.amount}
               className="pt-4"
             />
-            {/* The headline has no frame for a zigzag to hang off, so it says
-                what is wrong in words under itself. */}
-            {marks.amount && (
-              <p className="m-0 -mt-2 text-center type-body-sm text-error">
-                {t(`issue_${marks.amount}`)}
-              </p>
-            )}
             {categorized && (
               <CategoryRow
                 tags={draft.tag}
@@ -359,7 +365,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
         <Receipt value={tr.qrCode} />
         <Map longitude={tr.longitude} latitude={tr.latitude} />
 
-        <div className="flex flex-col items-center gap-1 py-4 type-body-sm text-muted-foreground">
+        <div className="flex flex-col items-center gap-1 py-4 text-body-sm text-muted-foreground">
           <span>
             {t('created', { date: formatDate(tr.created, 'dd.MM.yyyy HH:mm') })}
           </span>

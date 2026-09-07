@@ -165,7 +165,7 @@ const Color: FC<ColorProps> = ({ value, onChange }) => {
     <ButtonBase
       onClick={pick}
       style={{ backgroundColor: value ?? undefined }}
-      className="size-6 rounded-[50%] [box-shadow:inset_0_0_0_1px_rgba(0,0,0,.1)]"
+      className="size-6 rounded-full [box-shadow:inset_0_0_0_1px_rgba(0,0,0,.1)]"
     />
   )
 }

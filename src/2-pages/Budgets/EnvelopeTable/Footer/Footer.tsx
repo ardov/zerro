@@ -15,7 +15,7 @@ type FooterProps = {
 }
 
 const Sum: FC<{ value: TFxAmount; month: TISOMonth }> = ({ value, month }) => (
-  <span className="truncate text-right type-overline text-muted-foreground">
+  <span className="truncate text-right text-overline uppercase text-muted-foreground">
     <DisplayAmount value={value} decimals="ifOnly" month={month} noCurrency />
   </span>
 )
@@ -29,7 +29,7 @@ export const Footer: FC<FooterProps> = props => {
     <TableRow
       name={
         <div>
-          <span className="truncate type-overline text-muted-foreground">
+          <span className="truncate text-overline uppercase text-muted-foreground">
             {t('total')}
           </span>
         </div>

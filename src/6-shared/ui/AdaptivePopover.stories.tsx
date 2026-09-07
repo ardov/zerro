@@ -38,8 +38,8 @@ function PopoverHarness(props: {
         onClose={() => setAnchorEl(null)}
       >
         <div className="min-w-[280px] p-6">
-          <h2 className="type-title">Responsive popover</h2>
-          <p className="type-body text-muted-foreground">
+          <h2 className="text-title">Responsive popover</h2>
+          <p className="text-body text-muted-foreground">
             Popover on desktop, swipeable drawer on mobile.
           </p>
           <input aria-label="Overlay input" autoFocus />
@@ -87,7 +87,7 @@ const checkDismissal: Story['play'] = async ({ canvasElement }) => {
   // names the token and not a number that can drift from it.
   await expect(backdropStyle.zIndex).toBe(
     getComputedStyle(document.documentElement)
-      .getPropertyValue('--z-modal')
+      .getPropertyValue('--z-index-modal')
       .trim()
   )
   await expect(

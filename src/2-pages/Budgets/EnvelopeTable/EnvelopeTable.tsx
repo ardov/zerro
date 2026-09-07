@@ -148,7 +148,10 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
 
   return (
     <div
-      className={cn('surface-card shadow-elevation-1 relative pb-2', className)}
+      className={cn(
+        'rounded-lg bg-card text-card-foreground shadow-elevation-1 relative pb-2',
+        className
+      )}
     >
       <Header
         month={month}

@@ -183,9 +183,7 @@ export function IconButton({
       data-slot="icon-button"
       className={cn(
         RESET,
-        // `rounded-[50%]`, not `rounded-full`: 50% turns a non-square
-        // icon button into an ellipse where `rounded-full` makes a stadium.
-        'border-0 shrink-0 rounded-[50%] text-center transition-colors duration-150 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:bg-transparent disabled:text-disabled-control-foreground',
+        'border-0 shrink-0 rounded-full text-center transition-colors duration-150 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:bg-transparent disabled:text-disabled-control-foreground',
         iconGeometry[size],
         iconPalettes[color],
         edge && edges[edge][size],

@@ -34,7 +34,7 @@ export const Showcase: Story = {
             <Icon size={20} />
             <Icon size={24} />
           </div>
-          <span className="type-caption text-muted-foreground">
+          <span className="text-caption text-muted-foreground">
             {name.replace(/Icon$/, '')}
           </span>
         </div>
@@ -51,7 +51,7 @@ export const StrokeWeights: Story = {
     <div className="flex flex-col gap-4">
       {[1, 1.5, 2, 2.5].map(strokeWidth => (
         <div key={strokeWidth} className="flex items-center gap-4">
-          <span className="w-10 type-caption text-muted-foreground">
+          <span className="w-10 text-caption text-muted-foreground">
             {strokeWidth}
           </span>
           {(

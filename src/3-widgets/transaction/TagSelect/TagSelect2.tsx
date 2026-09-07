@@ -173,7 +173,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
       aria-label={t('selectCategory')}
       {...popoverProps}
     >
-      <div className="surface-card sticky top-0 z-10 rounded-none shadow-none px-2 pt-2">
+      <div className="bg-card text-card-foreground sticky top-0 z-10 rounded-none shadow-none px-2 pt-2">
         <OutlinedField
           value={search}
           onChange={e => setSearch(e.target.value)}

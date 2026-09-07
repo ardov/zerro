@@ -29,7 +29,7 @@ export function Switch({ checked, edge, className }: SwitchProps) {
       <span
         data-slot="switch-track"
         className={cn(
-          'h-full w-full rounded-[7px]',
+          'h-full w-full rounded-full',
           checked
             ? 'bg-primary opacity-50'
             : 'bg-switch-track opacity-[var(--switch-track-opacity)]'
@@ -38,7 +38,7 @@ export function Switch({ checked, edge, className }: SwitchProps) {
       <span
         data-slot="switch-thumb"
         className={cn(
-          'absolute top-[9px] left-[9px] size-5 rounded-[50%] bg-current shadow-elevation-1 transition-transform duration-150 ease-in-out',
+          'absolute top-[9px] left-[9px] size-5 rounded-full bg-current shadow-elevation-1 transition-transform duration-150 ease-in-out',
           checked ? 'translate-x-5 text-primary' : 'text-switch-thumb'
         )}
       />

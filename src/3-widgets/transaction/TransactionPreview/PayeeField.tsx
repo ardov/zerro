@@ -118,7 +118,7 @@ export const PayeeField: FC<PayeeFieldProps> = ({
             ref={fadeRef}
             className={cn(overlaySurfaceClass, 'max-h-64')}
           >
-            <Autocomplete.Empty className="px-4 py-2 type-body-sm text-muted-foreground">
+            <Autocomplete.Empty className="px-4 py-2 text-body-sm text-muted-foreground">
               {t('noMerchants')}
             </Autocomplete.Empty>
             <Autocomplete.List>

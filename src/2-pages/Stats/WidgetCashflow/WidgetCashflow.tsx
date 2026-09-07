@@ -54,9 +54,9 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
   const colorAxisText = 'var(--disabled-foreground)'
 
   return (
-    <div className="surface-card shadow-elevation-1">
+    <div className="rounded-lg bg-card text-card-foreground shadow-elevation-1">
       <div className="min-w-full p-4">
-        <h2 className="m-0 type-title-lg">
+        <h2 className="m-0 text-title-lg">
           {t('incomesAndOutcomes')}{' '}
           <span
             style={{
@@ -70,7 +70,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
           </span>{' '}
           <Summary income={income} outcome={outcome} />
         </h2>
-        <p className="mt-2 mb-0 type-body text-muted-foreground">
+        <p className="mt-2 mb-0 text-body text-muted-foreground">
           {t(savingsRate >= 0 ? 'savingsRatePositive' : 'savingsRateNegative', {
             percent: formatSavingsRate(savingsRate),
           })}
@@ -153,8 +153,8 @@ const CustomTooltip = (props: any) => {
   const savingsRate = income > 0 ? (diff / income) * 100 : 0
 
   return (
-    <div className="surface-card shadow-elevation-10 p-4">
-      <p className="m-0 type-title">
+    <div className="rounded-lg bg-card text-card-foreground shadow-elevation-10 p-4">
+      <p className="m-0 text-title">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
       </p>
       {payload.map(v => (
@@ -202,10 +202,10 @@ function Summary(props: { income: number; outcome: number }) {
 
   const tooltip = (
     <div className="p-2">
-      <p className="mt-0 mb-[0.35em] type-body-sm">
+      <p className="mt-0 mb-[0.35em] text-body-sm">
         {t('income')}: <DisplayAmount value={income} />
       </p>
-      <p className="m-0 type-body-sm">
+      <p className="m-0 text-body-sm">
         {t('outcome')}: <DisplayAmount value={outcome} />
       </p>
     </div>

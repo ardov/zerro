@@ -19,7 +19,7 @@ export const ActivityCell: FC<ActivityCellProps> = props => {
       )}
     >
       <Btn onClick={onClick}>
-        <p className="m-0 text-right type-body">
+        <p className="m-0 text-right text-body">
           <Amount value={displayActivity} decimals="ifOnly" />
         </p>
       </Btn>

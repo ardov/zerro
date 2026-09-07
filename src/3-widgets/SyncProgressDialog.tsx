@@ -121,7 +121,7 @@ export function SyncProgressDialogView({
                 value={row.confirmed / row.total}
                 active={phase === 'sending' && current?.key === row.key}
               />
-              <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 type-body">
+              <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 text-body">
                 <span>{entityLabel(t, row.key)}</span>
                 <span className="shrink-0 tabular-nums text-muted-foreground">
                   {t('syncProgress:count', {

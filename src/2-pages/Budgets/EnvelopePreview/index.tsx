@@ -57,7 +57,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
           <EmojiFlagsIcon />
           <span
             className={cn(
-              'type-body font-sans text-left',
+              'text-body font-sans text-left',
               goalInfo ? 'text-foreground' : 'text-disabled-foreground'
             )}
           >
@@ -110,7 +110,7 @@ const Header: FC<{
           onClick={openColorPicker}
           button
         />
-        <h2 className="m-0 truncate type-title">{name}</h2>
+        <h2 className="m-0 truncate text-title">{name}</h2>
       </div>
       <Tooltip title={t('edit')}>
         <IconButton

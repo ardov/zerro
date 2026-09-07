@@ -48,7 +48,7 @@ export function InputBase({
     </>
   )
   const rootClassName = cn(
-    // `type-body` would be 16px on a 24px line; this field is 16px on
+    // `text-body` would be 16px on a 24px line; this field is 16px on
     // 1.4375em, which is the 23px every height under it is measured from.
     'relative inline-flex cursor-text items-center font-sans text-base leading-[1.4375] font-normal text-foreground',
     className

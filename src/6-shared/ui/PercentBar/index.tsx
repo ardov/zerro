@@ -42,7 +42,7 @@ export const PercentBar: FC<PercentBarProps> = ({
   return (
     <div
       {...rest}
-      className={cn('flex w-full overflow-hidden rounded-[6px]', className)}
+      className={cn('flex w-full overflow-hidden rounded-full', className)}
       style={{ height, ...style }}
     >
       {displayData.map((bar, i) => (

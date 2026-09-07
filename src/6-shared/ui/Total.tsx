@@ -33,7 +33,7 @@ export function Total({
         ? 'text-left'
         : 'text-center'
   const amountClassName = cn(
-    'm-0 type-title-lg',
+    'm-0 text-title-lg',
     alignmentClassName,
     amountColor === 'error'
       ? 'text-error'
@@ -48,7 +48,7 @@ export function Total({
     <div {...rest}>
       <p
         className={cn(
-          'm-0 type-body-sm text-muted-foreground',
+          'm-0 text-body-sm text-muted-foreground',
           alignmentClassName
         )}
       >

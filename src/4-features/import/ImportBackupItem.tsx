@@ -169,7 +169,7 @@ function BackupImportDialog({ pending }: { pending: TPending }) {
             role="alert"
             className="mb-4 rounded-lg border border-error-border bg-error-surface p-3"
           >
-            <p className="m-0 type-body-sm">{t('importForeignWarning')}</p>
+            <p className="m-0 text-body-sm">{t('importForeignWarning')}</p>
           </div>
         )}
         {!!pending.warnings.length && (
@@ -177,10 +177,10 @@ function BackupImportDialog({ pending }: { pending: TPending }) {
             role="alert"
             className="mb-4 rounded-lg border border-warning-border bg-warning-surface p-3"
           >
-            <p className="m-0 type-body-sm">
+            <p className="m-0 text-body-sm">
               {t('importCompatibilityWarning')}
             </p>
-            <ul className="mb-0 mt-2 pl-5 type-body-sm">
+            <ul className="mb-0 mt-2 pl-5 text-body-sm">
               {pending.warnings.map(warning => (
                 <li key={`${warning.reason}:${warning.path}`}>
                   {t('importCompatibilityWarningItem', {
@@ -199,8 +199,8 @@ function BackupImportDialog({ pending }: { pending: TPending }) {
             if (!counts) return null
             return (
               <div key={key} className="flex justify-between gap-4">
-                <span className="type-body-sm">{t(labelKey)}</span>
-                <span className="type-body-sm text-muted-foreground">
+                <span className="text-body-sm">{t(labelKey)}</span>
+                <span className="text-body-sm text-muted-foreground">
                   {[
                     counts.created && t('importCreated', { n: counts.created }),
                     counts.updated && t('importUpdated', { n: counts.updated }),

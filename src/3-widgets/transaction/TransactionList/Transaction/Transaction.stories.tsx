@@ -33,7 +33,7 @@ export const Showcase: Story = {
     const ids = Object.keys(transactions).slice(0, 8)
     return (
       <div className="flex w-[560px] max-w-full flex-col gap-1">
-        <p className="m-0 type-caption text-muted-foreground">
+        <p className="m-0 text-caption text-muted-foreground">
           Generated demo operations
         </p>
         {ids.map((id, index) => (

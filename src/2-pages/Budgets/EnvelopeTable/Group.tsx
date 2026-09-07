@@ -33,7 +33,7 @@ type TGroupProps = {
   children?: React.ReactNode[]
 }
 const Sum: FC<{ value: number }> = ({ value }) => (
-  <p className="m-0 self-baseline truncate text-right type-body text-disabled-foreground">
+  <p className="m-0 self-baseline truncate text-right text-body text-disabled-foreground">
     <Amount value={value} decimals="ifOnly" />
   </p>
 )
@@ -87,7 +87,7 @@ export const Group: FC<TGroupProps> = ({
         className="-ml-2 min-w-0 shrink p-2"
         onClick={() => floating.open(name)}
       >
-        <h6 className="m-0 truncate type-title font-sans font-black">{name}</h6>
+        <h6 className="m-0 truncate text-title font-sans font-black">{name}</h6>
       </ButtonBase>
 
       {isReordering && Actions}

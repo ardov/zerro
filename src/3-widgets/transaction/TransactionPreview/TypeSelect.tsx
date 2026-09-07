@@ -48,7 +48,7 @@ export const TypeSelect: FC<{
       >
         {/* A span rather than a heading: this is the label of the button
             that changes the type, and a heading is not phrasing content. */}
-        <span className="truncate type-title">{t(`type_${value}`)}</span>
+        <span className="truncate text-title">{t(`type_${value}`)}</span>
         <ChevronDownIcon size={16} className="text-icon-foreground" />
       </ButtonBase>
 

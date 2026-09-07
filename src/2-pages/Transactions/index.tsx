@@ -41,7 +41,7 @@ export default function TransactionsView() {
       <link rel="canonical" href="https://zerro.app/transactions" />
       <div className="flex h-screen">
         <div className="flex min-w-0 grow justify-center p-0 md:p-4">
-          <div className="surface-card shadow-elevation-1 flex max-w-[560px] flex-1 overflow-hidden pb-14 md:pb-0">
+          <div className="rounded-lg bg-card text-card-foreground shadow-elevation-1 flex max-w-[560px] flex-1 overflow-hidden pb-14 md:pb-0">
             <TransactionList
               checkedDate={checkedDate}
               view={view}

@@ -95,7 +95,7 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
               aria-pressed={month === value}
               onClick={() => onChange(month)}
             >
-              <span className="my-1 min-w-0 flex-auto text-center font-sans type-body">
+              <span className="my-1 min-w-0 flex-auto text-center font-sans text-body">
                 {formatDate(month, 'LLL').toUpperCase()}
               </span>
             </ButtonBase>

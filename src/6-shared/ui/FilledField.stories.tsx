@@ -105,7 +105,7 @@ function StateShowcase() {
     <div className="flex flex-col gap-6">
       {rows.map(row => (
         <div key={row.name} className="flex flex-col gap-2">
-          <span className="type-caption text-muted-foreground">{row.name}</span>
+          <span className="text-caption text-muted-foreground">{row.name}</span>
           <div className="flex w-[720px] gap-4">
             <FilledInput
               icon={<NotesIcon size={20} />}

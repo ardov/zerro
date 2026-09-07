@@ -165,7 +165,6 @@ function createColorTokens(mode: ColorScheme) {
       SOLID_HOVER + (isLight ? -0.233 : 0)
     ),
     '--primary-border': transparentAt(semanticScales.primary, BORDER),
-    '--disabled-opacity': '0.38',
 
     '--interactive': semanticScales.interactive.at(interactiveSolidLevel),
     '--interactive-foreground': onSolid(),

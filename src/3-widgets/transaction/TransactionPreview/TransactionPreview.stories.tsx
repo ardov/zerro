@@ -36,7 +36,7 @@ function useByType() {
 }
 
 const Frame = ({ children }: { children: React.ReactNode }) => (
-  <div className="surface-card shadow-elevation-1 w-[360px] overflow-y-auto">
+  <div className="rounded-lg bg-card text-card-foreground shadow-elevation-1 w-[360px] overflow-y-auto">
     {children}
   </div>
 )

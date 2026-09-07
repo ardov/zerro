@@ -46,7 +46,7 @@ export const CategoryRow: FC<CategoryRowProps> = ({
           trigger={
             <button
               type="button"
-              className="inline-flex h-8 cursor-pointer items-center gap-1 rounded-full border border-dashed border-border-strong bg-transparent px-3 type-body-sm text-muted-foreground hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              className="inline-flex h-8 cursor-pointer items-center gap-1 rounded-full border border-dashed border-border-strong bg-transparent px-3 text-body-sm text-muted-foreground hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               <AddIcon size={16} />
               {t('addCategory')}
@@ -115,7 +115,7 @@ const CategoryChip: FC<{
   return (
     <span
       className={cn(
-        'inline-flex h-8 max-w-full items-center gap-1.5 rounded-full pr-2 pl-3 type-body-sm',
+        'inline-flex h-8 max-w-full items-center gap-1.5 rounded-full pr-2 pl-3 text-body-sm',
         !color && 'bg-selected text-foreground'
       )}
       style={

@@ -22,8 +22,7 @@ The cascade order is explicit:
 - `base` contains the document reset and scrollbar defaults from
   `src/6-shared/ui/theme/styles.scss`.
 - `components` contains co-located component and route styles.
-- `utilities` contains Tailwind utilities and the custom utilities declared in
-  `src/tailwind.css`.
+- `utilities` contains Tailwind utilities.
 
 Tailwind Preflight is disabled. Global element defaults therefore belong in
 `styles.scss`, which applies [Josh W. Comeau's Custom CSS
@@ -73,24 +72,34 @@ Opaque samples use `scale.at(level)`. Transparent light-scheme samples use
 `scale.opaqueInvAt(level)`. These use white and black as reference surfaces;
 the Theme Showcase is where scheme-specific corrections are judged.
 
-`src/tailwind.css` maps the generated properties onto semantic Tailwind colors.
-Scheme-independent radii, typography, shadows, stacking levels and utilities
-stay in that stylesheet rather than being emitted twice by the color factory.
+`src/tailwind.css` maps the generated properties onto semantic Tailwind colors
+via `@theme inline { --color-*: var(--*) }`. Typography recipes, elevation
+shadows, stacking levels and corner radii use native Tailwind theme namespaces
+(`--text-*`, `--shadow-*`, `--z-index-*` and `--radius-*`), so no custom
+`@utility` blocks are needed. The radius scale is declared in pixels and
+descends from an 8px `rounded-lg`; the namespace is cleared first, so the
+registered steps are exactly the ones the stylesheet lists.
 
 Use semantic utilities such as `bg-background`, `text-muted-foreground`,
-`border-border-strong`, `shadow-elevation-8` and `z-modal`. Charts and SVGs
-read the same generated custom properties directly when a CSS utility cannot
-reach their API. Feature code must not import the scales or semantic levels.
-Avoid duplicating token values in arbitrary classes; add a role to the flat
-factory when multiple consumers need the same decision.
+`border-border-strong`, `shadow-elevation-8` and `z-modal`. Typography
+recipes are `text-body`, `text-body-sm`, `text-caption`, `text-overline`,
+`text-title`, `text-title-lg` and `text-display`; `text-overline` sets size,
+line height and weight but not `text-transform`, so pair it with `uppercase`
+at the call site. Charts and SVGs read the same generated custom properties
+directly when a CSS utility cannot reach their API. Feature code must not
+import the scales or semantic levels. Avoid duplicating token values in
+arbitrary classes; add a role to the flat factory when multiple consumers need
+the same decision.
 
 Several `--color-*` aliases are intentionally retained even though current
 source scanning does not find a consumer. They are marked by a comment in
 `src/tailwind.css`; do not silently remove or expand that set.
 
-The switch track opacity and disabled-control opacity are numeric tokens rather
-than colors. `opacity-disabled` is therefore a custom utility, while switch
-track opacity is consumed directly by the switch component.
+Two numeric tokens are not colors. The disabled-control opacity is declared in
+the `--opacity-*` namespace, so it reads as `opacity-disabled` and composes
+with variants such as `disabled:` and `aria-disabled:`. The switch track
+opacity differs between schemes, so the switch component consumes it directly
+as an arbitrary value.
 
 `Foundations/Theme` in Storybook is the visual calibration surface. It shows
 the concrete and semantic scales, the scheme's neutral levels, status roles,
@@ -119,21 +128,22 @@ such as color-scheme or input-capability queries.
 
 ## Typography and spacing
 
-The application font is IBM Plex Sans. The reusable typography recipes are
-top-level Tailwind `@utility` declarations:
+The application font is IBM Plex Sans. Typography recipes are defined as
+compound `--text-*` theme variables in `src/tailwind.css`. Each variable sets
+size, line height and weight together, generating native Tailwind utilities:
 
-- `type-body`
-- `type-body-sm`
-- `type-caption`
-- `type-overline`
-- `type-title`
-- `type-title-lg`
-- `type-display`
+- `text-body`
+- `text-body-sm`
+- `text-caption`
+- `text-overline` (pair with `uppercase` — the theme variable does not set
+  `text-transform`)
+- `text-title`
+- `text-title-lg`
+- `text-display`
 
-These recipes set size, line height and weight together. Apply margins and text
-color separately at the call site. Because custom `type-*` recipes are not
-understood as a conflict group by `tailwind-merge`, do not pass competing type
-recipes through `cn()` and expect the latter one to win.
+Apply margins and text color separately at the call site. Because compound
+`text-*` recipes share the font-size namespace in `tailwind-merge`, competing
+recipes passed through `cn()` resolve in favor of the last one.
 
 Tailwind spacing units are 4px. Prefer named utilities and explicit `gap` on
 layout containers. Use arbitrary values only when the component contract calls
@@ -177,8 +187,8 @@ or anchors; decorative controls must not become accidental tab stops.
 ## Overlay behavior
 
 Overlay components portal to the document body and share the stacking tokens
-`z-drawer`, `z-modal`, and `z-tooltip`. The fallback values in the utilities
-keep isolated stories correctly layered even before theme tokens are mounted.
+`z-drawer`, `z-modal`, and `z-tooltip`. They come from `--z-index-*` in
+`src/tailwind.css`, so they do not depend on a mounted provider.
 
 `Popover` and `Menu` position against an element or virtual anchor and use the
 shared surface geometry in `overlaySurface`. `SideDrawer` is a modal sheet.

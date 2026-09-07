@@ -107,7 +107,7 @@ export const AccountField: FC<AccountFieldProps> = ({
                 >
                   {option.title}
                 </ListRowText>
-                <span className="ml-2 shrink-0 type-body-sm text-muted-foreground">
+                <span className="ml-2 shrink-0 text-body-sm text-muted-foreground">
                   {option.fxCode}
                 </span>
               </button>

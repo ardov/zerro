@@ -437,7 +437,7 @@ function VersionItem({ onClose }: ItemProps) {
     >
       <ListRowIcon />
       <ListRowText>
-        <span className="type-overline text-muted-foreground">
+        <span className="text-overline uppercase text-muted-foreground">
           {t('version', { version: appVersion })}
         </span>
       </ListRowText>

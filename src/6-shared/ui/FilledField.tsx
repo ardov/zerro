@@ -45,7 +45,7 @@ export const filledControlClass = cn(
  * curves concentric. The negative margin is that 8px — the frame's own
  * padding is 12. */
 export const filledFieldActionClass =
-  'inline-flex size-8 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-[4px] border-0 bg-transparent p-0 text-icon-foreground outline-none transition-colors duration-150 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:text-disabled-control-foreground -mx-1'
+  'inline-flex size-8 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-sm border-0 bg-transparent p-0 text-icon-foreground outline-none transition-colors duration-150 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:text-disabled-control-foreground -mx-1'
 
 /** State the frame reads, whatever is inside it. */
 export type FilledFieldState = {
@@ -132,7 +132,7 @@ function InvalidMark() {
 /** The message under a field, and the room it takes. */
 function FieldError({ children }: { children: ReactNode }) {
   if (!children) return null
-  return <p className="m-0 px-3 pt-1 type-caption text-error">{children}</p>
+  return <p className="m-0 px-3 pt-1 text-caption text-error">{children}</p>
 }
 
 export type FilledFieldProps = ComponentPropsWithRef<'div'> &
@@ -218,7 +218,9 @@ export function FilledInput({
             readOnly={readOnly}
             disabled={disabled}
             maxRows={maxRows}
-            className={cn(filledControlClass, 'py-3')}
+            // 12px less the border, so a field that can grow still starts at
+            // the 48px every other row is.
+            className={cn(filledControlClass, 'py-[10.5px]')}
           />
         ) : (
           <InputPrimitive
@@ -294,7 +296,10 @@ export function FilledFieldIcon({
       aria-hidden
       className={cn(
         'inline-flex shrink-0 items-center text-muted-foreground',
-        top && 'py-3'
+        // A multiline row is aligned to the top, so the icon takes exactly one
+        // line and centres itself in it: its middle then lands on the middle
+        // of the first line rather than 2px above it.
+        top && 'mt-[10.5px] h-6'
       )}
     >
       {children}

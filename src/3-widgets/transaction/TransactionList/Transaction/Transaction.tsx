@@ -70,11 +70,11 @@ export const Transaction = React.memo(function Transaction(
     >
       <Symbol {...{ tr, trType, isChecked, isInSelectionMode, onToggle }} />
       <div className="ml-4 min-w-0 grow">
-        <div className="transaction-line flex type-body">
+        <div className="transaction-line flex text-body">
           <Tags {...{ tr, trType }} />
           <Amounts {...{ tr, trType }} />
         </div>
-        <div className="transaction-line mt-1 flex type-body-sm text-muted-foreground">
+        <div className="transaction-line mt-1 flex text-body-sm text-muted-foreground">
           <Info {...{ tr, trType, onFilterByPayee }} />
           <Accounts {...{ tr, trType, onFilterByPayee }} />
         </div>

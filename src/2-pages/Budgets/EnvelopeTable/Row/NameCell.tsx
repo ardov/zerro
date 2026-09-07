@@ -62,7 +62,7 @@ export const NameCell: FC<{
           className="mr-3"
         />
         <span
-          className="truncate type-body"
+          className="truncate text-body"
           title={name}
           ref={ref}
           onClick={e => {
@@ -80,7 +80,7 @@ export const NameCell: FC<{
       {!!comment && (
         <span
           title={comment}
-          className="shrink truncate type-body italic text-disabled-foreground"
+          className="shrink truncate text-body italic text-disabled-foreground"
         >
           {comment}
         </span>

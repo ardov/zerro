@@ -53,7 +53,7 @@ export function NotFunCard(props: TCardProps) {
   const emptyCardContent = (
     <div className="flex w-full flex-col items-center gap-4">
       <Balancer>
-        <p className="m-0 text-center type-body">
+        <p className="m-0 text-center text-body">
           Нет доходов — нет налогов 😅
         </p>
       </Balancer>
@@ -64,12 +64,12 @@ export function NotFunCard(props: TCardProps) {
     <div className="flex w-full flex-col items-center gap-4">
       <TaxesChart income={totalIncome} outcome={totalOutcome} />
       <Balancer>
-        <p className="m-0 text-center type-body">
+        <p className="m-0 text-center text-body">
           ≈{Math.round(taxesRatio * 100)}% от вашего дохода получила Россия.
         </p>
       </Balancer>
       <Balancer>
-        <p className="m-0 text-center type-body">
+        <p className="m-0 text-center text-body">
           <b>
             {taxMonths} {pluralize(taxMonths, ['месяц', 'месяца', 'месяцев'])}
           </b>{' '}
@@ -82,7 +82,7 @@ export function NotFunCard(props: TCardProps) {
         </p>
       </Balancer>
       <Balancer>
-        <p className="m-0 text-center type-body">
+        <p className="m-0 text-center text-body">
           Если вы тратите столько времени на государство, значит абсолютно
           нормально и правильно требовать от него выполнения обязательств.
         </p>
@@ -91,8 +91,8 @@ export function NotFunCard(props: TCardProps) {
       <hr className="m-0 w-full border-0 border-t border-border" />
 
       <div>
-        <p className="m-0 text-center type-body">Россия получила от вас</p>
-        <h2 className="red-gradient m-0 text-center type-display">
+        <p className="m-0 text-center text-body">Россия получила от вас</p>
+        <h2 className="red-gradient m-0 text-center text-display">
           ≈<DisplayAmount value={totalTaxes} noShade decimals="ifOnly" />
         </h2>
       </div>
@@ -120,7 +120,7 @@ export function NotFunCard(props: TCardProps) {
         ))}
       </div>
       <hr className="m-0 w-full border-0 border-t border-border" />
-      <p className="m-0 text-center type-body">
+      <p className="m-0 text-center text-body">
         <Balancer>
           Это приблизительные цифры, подробнее можно посчитать в{' '}
           <Link

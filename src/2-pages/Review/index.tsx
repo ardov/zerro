@@ -64,7 +64,7 @@ function CardTitle({ year }: { year: number }) {
   const { t } = useTranslation('yearReview')
   return (
     <Card>
-      <p className="results m-0 text-center type-body text-muted-foreground">
+      <p className="results m-0 text-center text-body text-muted-foreground">
         {t('yearReview')}
       </p>
       <div className="relative">

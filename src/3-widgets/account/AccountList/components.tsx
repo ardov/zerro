@@ -96,7 +96,7 @@ export const Subheader: FC<
   return (
     <ListRowSubheader sticky className={cn('rounded-lg', className)} {...rest}>
       <span className="flex w-full">
-        <span className="grow truncate type-body leading-[inherit]">
+        <span className="grow truncate text-body leading-[inherit]">
           <b>{name}</b>
         </span>
 

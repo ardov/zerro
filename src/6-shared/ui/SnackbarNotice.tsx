@@ -59,9 +59,9 @@ function SnackbarNoticeContents(props: SnackbarNoticeProps) {
             )}
           >
             <Toast.Content className="flex items-start gap-3">
-              <div className="min-w-0 flex-1 type-body-sm">
+              <div className="min-w-0 flex-1 text-body-sm">
                 {props.title && (
-                  <Toast.Title className="m-0 mb-1 type-body font-medium" />
+                  <Toast.Title className="m-0 mb-1 text-body font-medium" />
                 )}
                 {props.children}
               </div>

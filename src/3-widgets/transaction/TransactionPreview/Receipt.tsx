@@ -34,7 +34,7 @@ export const Receipt: FC<ReceiptProps> = ({ value, className }) => {
           <button
             type="button"
             // Reset the native button so the control reads visually as text.
-            className={`${linkClass} m-0 border-0 bg-transparent p-0 align-middle font-sans type-caption select-none`}
+            className={`${linkClass} m-0 border-0 bg-transparent p-0 align-middle font-sans text-caption select-none`}
             onClick={() => setShowMore(true)}
           >
             {t('showMore', { ns: 'common' })}
@@ -51,11 +51,16 @@ export const Receipt: FC<ReceiptProps> = ({ value, className }) => {
       </Collapse>
     </>
   ) : (
-    <p className="m-0 type-body">{t('unknown')}</p>
+    <p className="m-0 text-body">{t('unknown')}</p>
   )
 
   return (
-    <div className={cn('surface-card shadow-elevation-1 flex p-4', className)}>
+    <div
+      className={cn(
+        'rounded-lg bg-card text-card-foreground shadow-elevation-1 flex p-4',
+        className
+      )}
+    >
       <div className="flex flex-col">{parsedContent}</div>
       <div className="ml-auto">
         <QRCode
@@ -76,7 +81,7 @@ interface LineProps {
 
 const Line: FC<LineProps> = ({ name, value }) => (
   <div className="mb-2">
-    <span className="block type-caption text-muted-foreground">{name}</span>
-    <p className="m-0 type-body">{value}</p>
+    <span className="block text-caption text-muted-foreground">{name}</span>
+    <p className="m-0 text-body">{value}</p>
   </div>
 )

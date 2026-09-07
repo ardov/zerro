@@ -129,7 +129,7 @@ const DragObj = () => {
       <Monies />
     ) : activeType === DragTypes.envelope ? (
       <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-background px-4 py-1">
-        <p className="m-0 truncate type-body">
+        <p className="m-0 truncate text-body">
           {activeId ? envelopes[activeId].name : t('category')}
         </p>
       </div>

@@ -125,9 +125,9 @@ const classNames = {
   // `inline-block` so the first letter is addressable: `date-fns` writes
   // Russian month names in lower case, and a caption is not a sentence.
   caption_label:
-    'inline-block truncate type-body font-medium first-letter:uppercase',
+    'inline-block truncate text-body font-medium first-letter:uppercase',
   month_grid: 'col-span-3 border-collapse',
-  weekday: 'w-10 pb-1 type-caption text-muted-foreground',
+  weekday: 'w-10 pb-1 text-caption text-muted-foreground',
   day: 'p-0.5 text-center',
 }
 
@@ -174,7 +174,7 @@ function CalendarDay({ day, modifiers, className, ...props }: DayButtonProps) {
       ref={ref}
       {...props}
       className={cn(
-        'size-9 rounded-[50%] font-sans type-body text-foreground transition-colors duration-150 ease-in-out hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+        'size-9 rounded-full font-sans text-body text-foreground transition-colors duration-150 ease-in-out hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
         modifiers.today && 'border border-solid border-primary',
         modifiers.outside && 'text-muted-foreground',
         modifiers.selected &&

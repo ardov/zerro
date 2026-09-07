@@ -66,7 +66,7 @@ export function HistoryPanel() {
       aria-label={t('panelTitle')}
     >
       <div className="flex items-center justify-between px-4 py-2">
-        <h2 className="m-0 type-title">{t('panelTitle')}</h2>
+        <h2 className="m-0 text-title">{t('panelTitle')}</h2>
         <IconButton
           size="small"
           onClick={() => setOpened(null)}
@@ -114,11 +114,11 @@ function EmptyHistory({ loading }: { loading: boolean }) {
   return (
     <div className="flex grow flex-col items-center justify-center gap-2 px-8 text-center text-muted-foreground">
       <HistoryIcon className="size-10 opacity-40" />
-      <p className="m-0 type-body-sm">
+      <p className="m-0 text-body-sm">
         {loading ? t('historyLoading') : t('noHistory')}
       </p>
       {!loading && (
-        <p className="m-0 type-caption opacity-80">{t('noHistoryHint')}</p>
+        <p className="m-0 text-caption opacity-80">{t('noHistoryHint')}</p>
       )}
     </div>
   )

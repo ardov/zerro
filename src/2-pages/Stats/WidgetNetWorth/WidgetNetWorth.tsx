@@ -107,10 +107,10 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
   )
 
   return (
-    <div className="surface-card shadow-elevation-1">
+    <div className="rounded-lg bg-card text-card-foreground shadow-elevation-1">
       <div className="min-w-full p-4">
         {/* Header */}
-        <h2 className="m-0 type-title-lg">
+        <h2 className="m-0 text-title-lg">
           {t('netWorth.title')}{' '}
           <span
             style={{ color: 'var(--interactive)', cursor: 'pointer' }}
@@ -120,7 +120,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           </span>
         </h2>
 
-        <p className="mt-2 mb-0 type-body text-muted-foreground">
+        <p className="mt-2 mb-0 text-body text-muted-foreground">
           <SurviveFact />
         </p>
       </div>
@@ -192,8 +192,8 @@ const CustomTooltip = (props: any) => {
   const date = payload[0]?.payload?.date
   const values = payload.filter(v => v.value)
   return (
-    <div className="surface-card shadow-elevation-10 p-4">
-      <p className="m-0 type-title">
+    <div className="rounded-lg bg-card text-card-foreground shadow-elevation-10 p-4">
+      <p className="m-0 text-title">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
       </p>
       {values.map(v => (
@@ -226,11 +226,11 @@ function SurviveFact() {
 
   const tooltipContent = (
     <div className="p-2">
-      <p className="mt-0 mb-[0.35em] type-body-sm">
+      <p className="mt-0 mb-[0.35em] text-body-sm">
         {t('netWorth.tooltipCurrentBalance')}:{' '}
         <DisplayAmount value={currentBalance} />
       </p>
-      <p className="m-0 type-body-sm">
+      <p className="m-0 text-body-sm">
         {t('netWorth.tooltipAvgExpenses')}:{' '}
         <DisplayAmount value={averageExpenses} />
       </p>

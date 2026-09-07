@@ -86,7 +86,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({
       {isMobile && (
         <div className="flex items-center px-6 py-2">
           <div className="grow">
-            <h2 className="m-0 truncate type-title">{getMonthName(month)}</h2>
+            <h2 className="m-0 truncate text-title">{getMonthName(month)}</h2>
           </div>
 
           <Tooltip title={t('close')}>
@@ -103,7 +103,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({
 
         <div className="rounded-lg bg-background p-4">
           <div className="mb-2">
-            <p className="m-0 text-center type-body">{t('actions')}</p>
+            <p className="m-0 text-center text-body">{t('actions')}</p>
           </div>
 
           <Button fullWidth color="secondary" onClick={copyAllBudgets}>

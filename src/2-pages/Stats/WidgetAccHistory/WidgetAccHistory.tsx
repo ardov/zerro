@@ -135,7 +135,7 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
       onClick={onClick}
     >
       <span className="flex w-full">
-        <span className="grow truncate type-body leading-[inherit]">
+        <span className="grow truncate text-body leading-[inherit]">
           <b>{name}</b>
         </span>
 
@@ -192,9 +192,9 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
     const colorId = 'gradient' + acc.id.replace(/[^a-zA-Z0-9]/g, '')
 
     return (
-      <div className="surface-card shadow-elevation-1 relative mb-2 overflow-hidden">
+      <div className="rounded-lg bg-card text-card-foreground shadow-elevation-1 relative mb-2 overflow-hidden">
         <div className="relative z-[1] min-w-40 pointer-events-none p-4">
-          <p className="m-0 type-body-sm">
+          <p className="m-0 text-body-sm">
             <span
               style={{ textDecoration: acc.archive ? 'line-through' : 'none' }}
             >
@@ -202,7 +202,7 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
             </span>{' '}
             {isHovering && hoverDate && formatDate(hoverDate)}
           </p>
-          <p className="m-0 type-title">
+          <p className="m-0 text-title">
             <Amount value={balance} currency={acc.fxCode} decimals="ifAny" />
           </p>
         </div>

@@ -47,7 +47,7 @@ export const TransactionListDrawer = () => {
       <div className="flex h-screen min-w-80 flex-col">
         <div className="flex items-center px-6 py-2">
           <div className="grow">
-            <h2 className="m-0 truncate type-title">
+            <h2 className="m-0 truncate text-title">
               {title || t('transactions')}
             </h2>
           </div>

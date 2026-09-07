@@ -130,7 +130,7 @@ export function OutlinedFieldFrame({
       {helperText && (
         <Field.Description
           className={cn(
-            'mx-3.5 mt-[3px] mb-0 type-caption text-muted-foreground',
+            'mx-3.5 mt-[3px] mb-0 text-caption text-muted-foreground',
             error && 'text-error'
           )}
         >

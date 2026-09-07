@@ -139,7 +139,7 @@ const Actions: FC<ActionsProps> = ({
           data-visible={visible ? '' : undefined}
           aria-hidden={!visible}
           inert={!visible}
-          className="actions-transition flex items-center rounded-[60px] bg-info pl-2 shadow-elevation-4"
+          className="actions-transition flex items-center rounded-full bg-info pl-2 shadow-elevation-4"
         >
           <Chip
             label={t('selected', { count: ids.length })}

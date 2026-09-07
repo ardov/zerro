@@ -256,7 +256,7 @@ const EmptyState = () => {
   const { t } = useTranslation('transactions')
   return (
     <div className="p-10">
-      <p className="mt-0 mb-4 text-center type-body">{t('emptyState')}</p>
+      <p className="mt-0 mb-4 text-center text-body">{t('emptyState')}</p>
     </div>
   )
 }

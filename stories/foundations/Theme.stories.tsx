@@ -27,7 +27,7 @@ const token = (name: string) => `var(--${name})`
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="grid gap-3">
-      <h2 className="m-0 type-title font-sans">{title}</h2>
+      <h2 className="m-0 text-title font-sans">{title}</h2>
       {children}
     </section>
   )
@@ -41,7 +41,7 @@ function ScaleRows({ rows }: { rows: { name: string; colors: string[] }[] }) {
           key={row.name}
           className="grid items-center gap-2 sm:grid-cols-[8rem_1fr]"
         >
-          <span className="type-caption text-muted-foreground">{row.name}</span>
+          <span className="text-caption text-muted-foreground">{row.name}</span>
           <div className="grid grid-cols-7 overflow-hidden rounded-lg border border-border">
             {row.colors.map((color, index) => (
               <div
@@ -63,13 +63,13 @@ function RoleCard({ name }: { name: string }) {
   return (
     <article className="grid gap-2 rounded-lg border border-border bg-card p-3">
       <div
-        className="rounded-md p-3 type-body-sm"
+        className="rounded-md p-3 text-body-sm"
         style={{ backgroundColor: token(name), color: foreground }}
       >
         {name} solid
       </div>
       <div
-        className="rounded-md border p-3 type-body-sm"
+        className="rounded-md border p-3 text-body-sm"
         style={{
           backgroundColor: token(`${name}-surface`),
           borderColor: token(`${name}-border`),
@@ -92,8 +92,8 @@ function ThemeShowcase() {
         <header className="grid gap-3">
           <Logo fill="var(--primary)" width={220} />
           <div>
-            <h1 className="m-0 type-display">Theme Showcase</h1>
-            <p className="m-0 type-body text-muted-foreground">
+            <h1 className="m-0 text-display">Theme Showcase</h1>
+            <p className="m-0 text-body text-muted-foreground">
               {mode} scheme · long labels, money and controls share one semantic
               colour pipeline
             </p>
@@ -116,7 +116,7 @@ function ThemeShowcase() {
                 className="overflow-hidden rounded-lg border border-border bg-card"
               >
                 <div className="h-12" style={{ backgroundColor: color }} />
-                <div className="p-2 type-caption">
+                <div className="p-2 text-caption">
                   <div>{name}</div>
                   <div className="text-muted-foreground">
                     {level.toFixed(3)}
@@ -145,7 +145,7 @@ function ThemeShowcase() {
             ].map(([label, background]) => (
               <button
                 key={label}
-                className="min-h-11 rounded-lg border border-border-strong px-4 type-body text-foreground"
+                className="min-h-11 rounded-lg border border-border-strong px-4 text-body text-foreground"
                 style={{ backgroundColor: `var(${background})` }}
                 type="button"
               >
@@ -157,33 +157,33 @@ function ThemeShowcase() {
 
         <Section title="Representative UI">
           <div className="grid gap-4 lg:grid-cols-2">
-            <article className="surface-card grid gap-4 border border-border p-5 shadow-elevation-1">
+            <article className="rounded-lg bg-card text-card-foreground grid gap-4 border border-border p-5 shadow-elevation-1">
               <div>
-                <h3 className="m-0 type-title">August budget</h3>
-                <p className="m-0 type-body-sm text-muted-foreground">
+                <h3 className="m-0 text-title">August budget</h3>
+                <p className="m-0 text-body-sm text-muted-foreground">
                   A deliberately long envelope label wraps without losing its
                   hierarchy or status colour.
                 </p>
               </div>
               <div className="grid grid-cols-[1fr_auto] gap-3 border-t border-border pt-3">
-                <span className="type-body">
+                <span className="text-body">
                   Rent and shared household costs
                 </span>
-                <strong className="type-body">24 850,00 Kč</strong>
-                <span className="type-body text-muted-foreground">
+                <strong className="text-body">24 850,00 Kč</strong>
+                <span className="text-body text-muted-foreground">
                   Available
                 </span>
-                <span className="type-body text-success">3 240,00 Kč</span>
+                <span className="text-body text-success">3 240,00 Kč</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
-                  className="rounded-lg border-0 bg-primary px-4 py-2 type-body-sm text-primary-foreground"
+                  className="rounded-lg border-0 bg-primary px-4 py-2 text-body-sm text-primary-foreground"
                   type="button"
                 >
                   Save changes
                 </button>
                 <button
-                  className="rounded-lg border border-primary-border bg-transparent px-4 py-2 type-body-sm text-primary"
+                  className="rounded-lg border border-primary-border bg-transparent px-4 py-2 text-body-sm text-primary"
                   type="button"
                 >
                   Cancel
@@ -191,10 +191,10 @@ function ThemeShowcase() {
               </div>
             </article>
 
-            <article className="surface-card grid gap-4 border border-border p-5 shadow-elevation-1">
+            <article className="rounded-lg bg-card text-card-foreground grid gap-4 border border-border p-5 shadow-elevation-1">
               <div className="rounded-lg border border-error-border bg-error-surface p-3 text-error">
-                <strong className="type-body-sm">Import needs attention</strong>
-                <p className="m-0 type-caption">
+                <strong className="text-body-sm">Import needs attention</strong>
+                <p className="m-0 text-caption">
                   One account could not be matched automatically.
                 </p>
               </div>
@@ -222,7 +222,7 @@ function ThemeShowcase() {
                   />
                 ))}
               </div>
-              <p className="m-0 type-caption text-disabled-foreground">
+              <p className="m-0 text-caption text-disabled-foreground">
                 Disabled helper copy and chart axes remain quieter than muted
                 body text.
               </p>

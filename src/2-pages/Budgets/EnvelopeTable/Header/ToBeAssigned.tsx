@@ -43,7 +43,7 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
         style={{ background: bg, color }}
         {...props}
       >
-        <p className="m-0 truncate text-center type-body font-sans">
+        <p className="m-0 truncate text-center text-body font-sans">
           {!isSmall &&
             (toBeAssigned ? t('notAllocated') : t('allAllocated')) + ' '}
           {toBeAssigned ? (
@@ -107,7 +107,7 @@ function useTotalsModel() {
   function TooltipContent() {
     return (
       <div className="flex flex-col gap-2">
-        <p className="m-0 text-center type-body-sm">{messages[msgType]}</p>
+        <p className="m-0 text-center text-body-sm">{messages[msgType]}</p>
         <Divider />
 
         <DataLine name={t('inBalance')} amount={fundsEnd} currency={currency} />

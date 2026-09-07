@@ -35,7 +35,7 @@ const paintedRow = `${rowBase} rounded-lg px-4 hover:bg-accent focus-visible:bg-
  * to the `PressBacking` layers the row renders, which is what keeps the press
  * on the background instead of dragging the label into it. `isolate` is what
  * lets those layers sit behind the content. */
-export const listRowClass = `${rowBase} group isolate min-h-12 rounded-xl px-3 py-1.5 type-body`
+export const listRowClass = `${rowBase} group isolate min-h-12 rounded-xl px-3 py-1.5 text-body`
 
 /** Everything a `listRowClass` row is painted with. Rendered as the row's
  * first child.
@@ -61,11 +61,11 @@ export function ListRowBacking({ selected }: { selected?: boolean }) {
   )
 }
 
-export const listItemClass = `${paintedRow} py-2 type-body`
+export const listItemClass = `${paintedRow} py-2 text-body`
 
 /** A dense list row, which halves the padding and drops the label to
  * `body2`. The account, debtor and history lists are all dense. */
-export const listItemDenseClass = `${paintedRow} py-1 type-body-sm`
+export const listItemDenseClass = `${paintedRow} py-1 text-body-sm`
 
 export function ListRowIcon({
   className,
@@ -104,7 +104,7 @@ export function ListRowText({
         // row truncates it too. It clips with an ellipsis under `whitespace-nowrap`
         // and wraps freely under a `whitespace-normal` row, where
         // nothing overflows for the ellipsis to land on.
-        <span className="block min-w-0 overflow-hidden text-ellipsis type-body-sm text-muted-foreground">
+        <span className="block min-w-0 overflow-hidden text-ellipsis text-body-sm text-muted-foreground">
           {secondary}
         </span>
       )}

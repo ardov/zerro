@@ -84,9 +84,9 @@ describe('theme tokens and their Tailwind counterparts', () => {
 
   it('exposes no token the theme has stopped emitting', () => {
     // The reverse direction, and the one a palette change actually breaks:
-    // drop `--elevation-24` from the theme and `shadow-elevation-24` stays a
-    // utility that resolves to nothing, on every element that still asks for
-    // it. Tailwind's own variables are the ones `tailwind.css` declares itself.
+    // drop `--card` from the theme and `bg-card` stays a utility that resolves
+    // to nothing, on every element that still asks for it. Tailwind's own
+    // variables are the ones `tailwind.css` declares itself.
     const declared = new Set(
       [...tailwind.matchAll(/^\s*(--[\w-]+):/gm)].map(([, name]) => name)
     )
@@ -110,7 +110,7 @@ describe('theme tokens and their Tailwind counterparts', () => {
   })
 
   it('emits finite, literal CSS colours', () => {
-    const nonColors = new Set(['--disabled-opacity', '--switch-track-opacity'])
+    const nonColors = new Set(['--switch-track-opacity'])
 
     Object.values(tokenValues).forEach(tokens => {
       Object.entries(tokens).forEach(([name, value]) => {

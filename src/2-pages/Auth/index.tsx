@@ -67,7 +67,7 @@ export default function Auth() {
         />
 
         <p
-          className="auth-reveal m-0 type-body text-muted-foreground"
+          className="auth-reveal m-0 text-body text-muted-foreground"
           style={reveal(2000)}
         >
           {t('haveTrouble')}{' '}

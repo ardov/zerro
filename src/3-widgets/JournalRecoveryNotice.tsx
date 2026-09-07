@@ -49,7 +49,7 @@ export const JournalRecoveryNotice = () => {
     >
       {t('journalRecoveryDescription')}
       {recoveryReason && (
-        <div className="mt-2 break-words font-mono type-caption">
+        <div className="mt-2 break-words font-mono text-caption">
           {t('journalRecoveryDiagnostic')}: {recoveryReason}
         </div>
       )}

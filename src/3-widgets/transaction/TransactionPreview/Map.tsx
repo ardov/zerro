@@ -13,7 +13,7 @@ export const Map: FC<MapProps> = ({ longitude, latitude, className }) => {
   return (
     <div
       className={cn(
-        'surface-card shadow-elevation-1 overflow-hidden',
+        'rounded-lg bg-card text-card-foreground shadow-elevation-1 overflow-hidden',
         className
       )}
     >

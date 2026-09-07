@@ -76,7 +76,7 @@ function HistoryRowItem({
     // background pull lands under unsent commands that were made before it.
     return (
       // Not sticky, and re-typed to `overline` at a tighter leading. The
-      // type is spelled in utilities rather than `type-overline` so that
+      // type is spelled in utilities rather than `text-overline` so that
       // tailwind-merge can see it beat the subheader's own `text-sm/[48px]`.
       <ListRowSubheader className="bg-transparent pt-1 text-xs/[2] font-normal uppercase">
         {t(row.id === 'local' ? 'sectionLocal' : 'sectionSynced')}
@@ -86,7 +86,7 @@ function HistoryRowItem({
 
   if (row.type === 'redo') {
     return (
-      <div className="px-4 py-1 opacity-50 type-body-sm">
+      <div className="px-4 py-1 opacity-50 text-body-sm">
         <ListRowText className="my-1 truncate" secondary={t('undoneHint')}>
           {commandTitle(row.command, t)}
         </ListRowText>

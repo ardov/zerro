@@ -7,6 +7,30 @@
 
 @theme {
   --spacing: 0.25rem;
+
+  /* Opacity */
+  --opacity-disabled: 0.38;
+
+  /* Stacking levels. A tooltip sits above every overlay, including the modal
+     ones it can be opened from inside; the docked navigation panel is fixed
+     and so has to sit above the page it reserves room in, but under every
+     overlay. */
+  --z-index-drawer: 1200;
+  --z-index-modal: 1300;
+  --z-index-tooltip: 1500;
+
+  /* Corner radii, in pixels: the scale descends from `shape.borderRadius`,
+     which is 8px, and a corner has no reason to follow the root font size.
+     Cleared first so the registered steps are exactly the ones below. */
+  --radius-*: initial;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+
   /* Mirrors `breakpoints` in src/6-shared/ui/theme/breakpoints.ts, which is
      the single source these values are derived from. Keep them in step.
      Pixels, not rem: `useBreakpointDown` queries pixels, and a rem
@@ -21,61 +45,64 @@
   --breakpoint-2xl: initial;
 }
 
-/* What does not change with the colour scheme, and so has no reason to be
-   generated: a scheme-independent constant is the same in both blocks the
-   theme emits, and emitting it from TypeScript only made it arrive when
-   `AppThemeProvider` mounted. Declared here it is simply always on the page,
-   which is why none of the utilities below carry a fallback.
-
-   `:root` rather than `@theme`, because a `@theme` variable nothing resolves
-   through a Tailwind utility name is pruned from the output. */
-@layer base {
-  :root {
-    /* `shape.borderRadius`, in pixels. */
-    --radius: 8px;
-
-    /* Elevation shadows for raised surfaces. */
-    --elevation-1:
-      0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
-      0px 1px 3px 0px rgba(0, 0, 0, 0.12);
-    --elevation-2:
-      0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
-      0px 1px 5px 0px rgba(0, 0, 0, 0.12);
-    --elevation-4:
-      0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14),
-      0px 1px 10px 0px rgba(0, 0, 0, 0.12);
-    --elevation-6:
-      0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14),
-      0px 1px 18px 0px rgba(0, 0, 0, 0.12);
-    --elevation-8:
-      0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14),
-      0px 3px 14px 2px rgba(0, 0, 0, 0.12);
-    --elevation-10:
-      0px 6px 6px -3px rgba(0, 0, 0, 0.2),
-      0px 10px 14px 1px rgba(0, 0, 0, 0.14),
-      0px 4px 18px 3px rgba(0, 0, 0, 0.12);
-    --elevation-16:
-      0px 8px 10px -5px rgba(0, 0, 0, 0.2),
-      0px 16px 24px 2px rgba(0, 0, 0, 0.14),
-      0px 6px 30px 5px rgba(0, 0, 0, 0.12);
-    --elevation-24:
-      0px 11px 15px -7px rgba(0, 0, 0, 0.2),
-      0px 24px 38px 3px rgba(0, 0, 0, 0.14),
-      0px 9px 46px 8px rgba(0, 0, 0, 0.12);
-
-    /* Stacking levels. A tooltip sits above every overlay, including the modal
-       ones it can be opened from inside; the docked navigation panel is fixed
-       and so has to sit above the page it reserves room in, but under every
-       overlay. */
-    --z-drawer: 1200;
-    --z-modal: 1300;
-    --z-tooltip: 1500;
-  }
-}
-
 @theme inline {
   /* The application font family. */
   --font-sans: 'IBM Plex Sans', sans-serif;
+
+  /* Typography */
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-body--font-weight: 400;
+
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.43;
+  --text-body-sm--font-weight: 400;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.66;
+  --text-caption--font-weight: 400;
+
+  --text-overline: 0.75rem;
+  --text-overline--line-height: 2.66;
+  --text-overline--font-weight: 400;
+
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.6;
+  --text-title--font-weight: 500;
+
+  --text-display: 2.125rem;
+  --text-display--line-height: 1.235;
+  --text-display--font-weight: 500;
+
+  --text-title-lg: 1.5rem;
+  --text-title-lg--line-height: 1.334;
+  --text-title-lg--font-weight: 400;
+
+  /* Elevation shadows */
+  --shadow-elevation-1:
+    0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-2:
+    0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-4:
+    0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-6:
+    0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 18px 0px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-8:
+    0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-10:
+    0px 6px 6px -3px rgba(0, 0, 0, 0.2), 0px 10px 14px 1px rgba(0, 0, 0, 0.14),
+    0px 4px 18px 3px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-16:
+    0px 8px 10px -5px rgba(0, 0, 0, 0.2), 0px 16px 24px 2px rgba(0, 0, 0, 0.14),
+    0px 6px 30px 5px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-24:
+    0px 11px 15px -7px rgba(0, 0, 0, 0.2),
+    0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -169,98 +196,4 @@
      shorthand, so neither can go through a class:
      --color-disabled-border, --color-data-primary, --color-data-primary-alt,
      --color-data-success, --color-data-error, --color-data-error-alt */
-
-  --radius-xs: calc(var(--radius) * 0.5);
-  --radius-sm: calc(var(--radius) * 0.75);
-  --radius-md: calc(var(--radius) * 0.875);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.5);
-  --radius-2xl: calc(var(--radius) * 2);
-}
-
-@utility type-body {
-  @apply text-base leading-6 font-normal;
-}
-
-@utility type-body-sm {
-  @apply text-sm leading-[1.43] font-normal;
-}
-
-@utility type-caption {
-  @apply text-xs leading-[1.66] font-normal;
-}
-
-@utility type-overline {
-  @apply text-xs leading-[2.66] font-normal uppercase;
-}
-
-@utility type-title {
-  @apply text-xl leading-[1.6] font-medium;
-}
-
-@utility type-display {
-  @apply text-[2.125rem] leading-[1.235] font-medium;
-}
-
-@utility type-title-lg {
-  @apply text-2xl leading-[1.334] font-normal;
-}
-
-@utility surface-card {
-  @apply rounded-lg bg-card text-card-foreground;
-}
-
-@utility shadow-elevation-1 {
-  box-shadow: var(--elevation-1);
-}
-
-@utility shadow-elevation-2 {
-  box-shadow: var(--elevation-2);
-}
-
-@utility shadow-elevation-4 {
-  box-shadow: var(--elevation-4);
-}
-
-@utility shadow-elevation-6 {
-  box-shadow: var(--elevation-6);
-}
-
-@utility shadow-elevation-8 {
-  box-shadow: var(--elevation-8);
-}
-
-@utility shadow-elevation-10 {
-  box-shadow: var(--elevation-10);
-}
-
-@utility shadow-elevation-16 {
-  box-shadow: var(--elevation-16);
-}
-
-@utility shadow-elevation-24 {
-  box-shadow: var(--elevation-24);
-}
-
-@utility z-modal {
-  z-index: var(--z-modal);
-}
-
-@utility z-drawer {
-  z-index: var(--z-drawer);
-}
-
-@utility z-tooltip {
-  z-index: var(--z-tooltip);
-}
-
-/* An `@utility` rather than a `--color-*` alias because it is an opacity and
-   not a colour. It keeps its fallback: unlike the stacking levels above it is
-   a palette value, so it still arrives with `AppThemeProvider`. */
-@utility opacity-disabled {
-  opacity: var(--disabled-opacity, 0.38);
-}
-
-@utility shadow-none {
-  box-shadow: none;
 }

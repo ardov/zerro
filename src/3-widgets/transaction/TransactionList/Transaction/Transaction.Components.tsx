@@ -119,7 +119,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
               }
               placement="top"
             >
-              <span className="type-body-sm text-muted-foreground">
+              <span className="text-body-sm text-muted-foreground">
                 <SmartAmount
                   value={tr.opOutcome}
                   instrument={tr.opOutcomeInstrument}
@@ -147,7 +147,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
               }
               placement="top"
             >
-              <span className="type-body-sm text-muted-foreground">
+              <span className="text-body-sm text-muted-foreground">
                 <SmartAmount
                   value={tr.opIncome}
                   instrument={tr.opIncomeInstrument}

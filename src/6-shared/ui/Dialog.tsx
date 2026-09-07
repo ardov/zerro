@@ -65,7 +65,7 @@ export function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn('m-0 flex-none px-6 py-4 type-title', className)}
+      className={cn('m-0 flex-none px-6 py-4 text-title', className)}
       {...props}
     />
   )
@@ -99,7 +99,7 @@ export function DialogContentText({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-content-text"
-      className={cn('m-0 type-body text-muted-foreground', className)}
+      className={cn('m-0 text-body text-muted-foreground', className)}
       {...props}
     />
   )

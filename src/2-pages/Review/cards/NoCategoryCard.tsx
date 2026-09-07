@@ -21,18 +21,18 @@ export function NoCategoryCard(props: TCardProps) {
               className="rounded-lg px-2"
               onClick={() => props.onShowTransactions(noTag)}
             >
-              <h2 className="m-0 text-center type-display font-sans">
+              <h2 className="m-0 text-center text-display font-sans">
                 {t('title', { count })}
               </h2>
             </ButtonBase>
-            <p className="m-0 text-center type-body">
+            <p className="m-0 text-center text-body">
               {t('withoutCategory', { count })}
             </p>
           </>
         ) : (
           <>
-            <p className="m-0 text-center type-display">👍</p>
-            <p className="m-0 text-center type-body">
+            <p className="m-0 text-center text-display">👍</p>
+            <p className="m-0 text-center text-body">
               {t('allTransactionsHaveCategories')}
             </p>
           </>

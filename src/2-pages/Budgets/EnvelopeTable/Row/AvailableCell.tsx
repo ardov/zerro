@@ -30,7 +30,7 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
 
   return (
     <div>
-      <p className="m-0 text-right type-body">
+      <p className="m-0 text-right text-body">
         {!!hiddenOverspend && (
           <Tooltip
             title={

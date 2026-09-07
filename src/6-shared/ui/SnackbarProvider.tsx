@@ -46,7 +46,7 @@ function SnackbarContents({ children }: { children: React.ReactNode }) {
               className="relative flex w-full items-center gap-2 rounded-lg bg-tooltip px-4 py-1.5 font-sans text-tooltip-foreground shadow-elevation-6 transition-[opacity,transform] duration-250 ease-in-out data-ending-style:-translate-y-2 data-ending-style:opacity-0 data-starting-style:-translate-y-2 data-starting-style:opacity-0"
             >
               <Toast.Content className="min-w-0 flex-1 py-1">
-                <Toast.Description className="m-0 type-body-sm" />
+                <Toast.Description className="m-0 text-body-sm" />
               </Toast.Content>
               <IconButton
                 size="small"

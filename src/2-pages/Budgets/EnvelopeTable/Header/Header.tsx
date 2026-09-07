@@ -25,7 +25,7 @@ type HeaderProps = {
 const ColumnTitle: FC<{ name: string; onClick?: () => void }> = props => (
   <span
     onClick={props.onClick}
-    className="truncate text-right type-overline text-muted-foreground"
+    className="truncate text-right text-overline uppercase text-muted-foreground"
   >
     {props.name}
   </span>
@@ -77,7 +77,7 @@ export const Header: FC<HeaderProps> = props => {
                 onClick={openOnClick}
                 className="-ml-2 px-2 py-0"
               >
-                <span className="truncate type-overline text-muted-foreground">
+                <span className="truncate text-overline uppercase text-muted-foreground">
                   {t('categories', {
                     ns: 'budgets',
                     context: isAllShown ? 'all' : '',

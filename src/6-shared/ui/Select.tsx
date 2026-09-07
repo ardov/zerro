@@ -161,7 +161,7 @@ function SelectField<T extends string>({
                 <SelectPrimitive.ItemText className="min-w-0 flex-auto">
                   <span className="block truncate">{option.label}</span>
                   {option.description && (
-                    <span className="block type-body-sm text-muted-foreground">
+                    <span className="block text-body-sm text-muted-foreground">
                       {option.description}
                     </span>
                   )}

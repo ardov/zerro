@@ -242,10 +242,10 @@ const RevealCellContent: FC<{
   color: string
 }> = ({ label, value, color }) => (
   <>
-    <span className="truncate type-caption font-sans leading-[1.2] text-muted-foreground">
+    <span className="truncate text-caption font-sans leading-[1.2] text-muted-foreground">
       {label}
     </span>
-    <p className={cn('m-0 truncate type-body-sm font-sans', color)}>
+    <p className={cn('m-0 truncate text-body-sm font-sans', color)}>
       <Amount value={value} decimals="ifOnly" />
     </p>
   </>

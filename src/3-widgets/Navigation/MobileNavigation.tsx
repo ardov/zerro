@@ -46,7 +46,7 @@ export const MobileNavigation: FC = () => {
             className={navigationActionClass(currentRoute?.path === route.path)}
           >
             {route.icon}
-            <span className="type-caption">{route.label}</span>
+            <span className="text-caption">{route.label}</span>
           </button>
         ))}
         <button
@@ -58,7 +58,7 @@ export const MobileNavigation: FC = () => {
           className={navigationActionClass(false)}
         >
           <SettingsIcon />
-          <span className="type-caption">{t('settings')}</span>
+          <span className="text-caption">{t('settings')}</span>
         </button>
         <RefreshButton isMobile className={navigationActionClass(false)} />
       </div>

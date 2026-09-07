@@ -97,7 +97,7 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
     <button
       type="button"
       aria-label={actionLabel}
-      className={cn(rest.className, 'type-caption')}
+      className={cn(rest.className, 'text-caption')}
       {...menuProps}
     >
       <SyncBadge count={changedNum}>{components[state]}</SyncBadge>

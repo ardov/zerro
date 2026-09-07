@@ -35,12 +35,12 @@ export const DataLine: FC<DataLineProps> = ({
 }) => {
   const typographyClassName =
     variant === 'body2'
-      ? 'type-body-sm'
+      ? 'text-body-sm'
       : variant === 'caption'
-        ? 'type-caption'
+        ? 'text-caption'
         : variant === 'h6'
-          ? 'type-title'
-          : 'type-body'
+          ? 'text-title'
+          : 'text-body'
 
   return (
     <div className={cn('flex flex-row', className)} {...rest}>

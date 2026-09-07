@@ -45,7 +45,7 @@ export function OutboxRecoveryNotice() {
       }
     >
       {t('outboxRecoveryDescription')}
-      <div className="mt-2 break-words font-mono type-caption">
+      <div className="mt-2 break-words font-mono text-caption">
         {t('journalRecoveryDiagnostic')}: {reason}
       </div>
     </SnackbarNotice>

@@ -136,7 +136,7 @@ const Filter: FC<FilterProps> = ({
   )
 
   return (
-    <div className="surface-card shadow-elevation-10 flex flex-col p-[6px]">
+    <div className="rounded-lg bg-card text-card-foreground shadow-elevation-10 flex flex-col p-[6px]">
       <div className="flex min-h-9 items-center px-2">
         <InputBase
           value={search}
