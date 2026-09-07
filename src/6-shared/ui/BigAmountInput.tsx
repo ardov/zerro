@@ -1,6 +1,6 @@
 import type { TFxCode } from '@/6-shared/types'
 import { formatMoney } from '@/6-shared/helpers/money'
-import type { MouseEvent } from 'react'
+import type { MouseEvent, Ref } from 'react'
 import { AutoWidthInput } from './AutoWidthInput'
 import { cn } from './shadcn/utils'
 import { useAmountExpression } from './useAmountExpression'
@@ -15,6 +15,12 @@ export type BigAmountInputProps = {
   sign?: '+' | '−' | null
   autoFocus?: boolean
   disabled?: boolean
+  /** Marked wrong. The headline has no frame to hang a mark off, so the
+   * amount itself turns red. */
+  invalid?: boolean
+  /** The line itself, for a caller that has to move it — a refused save
+   * shakes the headline. */
+  ref?: Ref<HTMLDivElement>
   className?: string
   'aria-label'?: string
 }
@@ -39,6 +45,8 @@ export function BigAmountInput({
   sign,
   autoFocus,
   disabled,
+  invalid,
+  ref,
   className,
   'aria-label': ariaLabel,
 }: BigAmountInputProps) {
@@ -48,8 +56,11 @@ export function BigAmountInput({
     onEnter,
     // No trailing zeroes on a whole amount: the headline is read far more
     // often than it is edited, and `3 240` reads faster than `3 240,00`.
-    format: amount => formatMoney(amount, null, 'ifAny'),
+    // Nothing at all is shown as a placeholder zero rather than a real one,
+    // so an amount waiting to be typed does not read as an amount of zero.
+    format: amount => (amount === 0 ? '' : formatMoney(amount, null, 'ifAny')),
   })
+  const empty = inputProps.value === ''
 
   const focusAmount = (event: MouseEvent<HTMLDivElement>) => {
     if (disabled) return
@@ -64,28 +75,39 @@ export function BigAmountInput({
 
   return (
     <div
+      ref={ref}
       onMouseDown={focusAmount}
       className={cn(
         'flex cursor-text flex-wrap items-baseline justify-center text-[2.125rem] leading-[1.235] font-bold',
         disabled && 'text-disabled-foreground',
+        invalid && 'text-error',
         className
       )}
     >
       {sign && (
-        <span aria-hidden className="shrink-0">
+        <span
+          aria-hidden
+          className={cn('shrink-0', empty && 'text-disabled-foreground')}
+        >
           {sign}
         </span>
       )}
       <AutoWidthInput
         {...inputProps}
+        placeholder="0"
         autoFocus={autoFocus}
         disabled={disabled}
         aria-label={ariaLabel}
-        className="max-w-full justify-items-center"
-        inputClassName="text-center"
+        className="max-w-full"
+        inputClassName={cn(
+          'text-center',
+          // The placeholder is dimmed the way every other one in the app is
+          // rather than recoloured, so it reads the same in both schemes.
+          'placeholder:text-current placeholder:opacity-[0.42] dark:placeholder:opacity-50'
+        )}
       />
       {currency && (
-        <span className="ml-2 shrink-0 type-body text-muted-foreground">
+        <span className="ml-2 shrink-0 text-body text-muted-foreground">
           {currency}
         </span>
       )}

@@ -113,21 +113,24 @@
     position: sticky;
     z-index: 1;
     display: block;
-    height: 24px;
+    height: 28px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 150ms ease;
   }
 
+  /* Pulled out over the surface's own 4px so the fade reaches the edge. A
+     strip that started at the padding would leave a hard line of untouched
+     row above it, which is the thing the fade exists to prevent. */
   .scroll-fade::before {
-    top: 0;
-    margin-bottom: -24px;
+    top: -4px;
+    margin: -4px -4px -24px;
     background: linear-gradient(to bottom, var(--popover), transparent);
   }
 
   .scroll-fade::after {
-    bottom: 0;
-    margin-top: -24px;
+    bottom: -4px;
+    margin: -24px -4px -4px;
     background: linear-gradient(to top, var(--popover), transparent);
   }
 

@@ -16,13 +16,18 @@ export type AutoWidthInputProps = Omit<
 
 /** An input exactly as wide as its text.
  *
- * A mirror of the text shares one grid cell with the input, so the cell is
- * the text's width and the input stretches to it. No measurement, no effect,
- * no layout pass out of step with the keystroke that caused it.
+ * A mirror of the text sits in the flow and the input lies over it, so the
+ * box is the text's width and nothing else. No measurement, no effect, no
+ * layout pass out of step with the keystroke that caused it.
+ *
+ * The input is taken out of the flow on purpose. An input carries an
+ * intrinsic width of its own — a `size` in characters, which at display sizes
+ * is wider than a short amount — and in the flow that width, not the text,
+ * would decide the box. A single `0` would then sit in a box half as wide
+ * again as itself, pushed away from the sign beside it.
  *
  * This is what lets an amount stay optically centred, or sit right against
- * the currency code beside it — a full-width input would put the text in the
- * middle of a box that is not the text. */
+ * the currency code beside it. */
 export function AutoWidthInput({
   measure,
   className,
@@ -31,25 +36,20 @@ export function AutoWidthInput({
 }: AutoWidthInputProps) {
   const text = measure ?? String(props.value ?? '')
   return (
-    <span className={cn('grid min-w-0 justify-items-start', className)}>
+    <span className={cn('relative inline-block min-w-0', className)}>
+      {/* One trailing sliver, so a caret at the end of the text is not
+          clipped. The mirror is what the box is measured from, so it falls
+          back to the placeholder when there is nothing typed. */}
+      <span aria-hidden className="invisible block pr-0.5 whitespace-pre">
+        {text || props.placeholder || '0'}
+      </span>
       <input
-        // An input's intrinsic width comes from `size`, and the default 20
-        // characters would set the grid track rather than the text does.
-        size={1}
         {...props}
         className={cn(
-          'col-start-1 row-start-1 m-0 w-full min-w-4 border-0 bg-transparent p-0 font-[family-name:inherit] text-[length:inherit] leading-[inherit] font-[inherit] text-current outline-none disabled:text-disabled-foreground',
+          'absolute inset-0 m-0 w-full border-0 bg-transparent p-0 font-[family-name:inherit] text-[length:inherit] leading-[inherit] font-[inherit] text-current outline-none disabled:text-disabled-foreground',
           inputClassName
         )}
       />
-      {/* A sliver wider than the text, so a caret at its end is not clipped.
-          A whole trailing space would be a visible gap at display sizes. */}
-      <span
-        aria-hidden
-        className="col-start-1 row-start-1 invisible pr-0.5 whitespace-pre"
-      >
-        {text || props.placeholder || '0'}
-      </span>
     </span>
   )
 }
