@@ -199,70 +199,79 @@ export const MerchantField: FC<MerchantFieldProps> = ({
         alignOffset={-surfacePadding}
         sideOffset={-surfacePadding}
         aria-label={placeholder}
-        // The search keeps its place and the rows scroll under it, so the
-        // list is the scroller rather than the surface.
-        className="flex max-h-[60vh] min-w-[calc(var(--anchor-width)+8px)] flex-col overflow-hidden p-1"
+        className="min-w-[calc(var(--anchor-width)+8px)] p-1"
       >
-        <FilledInput
-          autoFocus
-          role="combobox"
-          aria-expanded
-          aria-controls={listId}
-          aria-activedescendant={
-            rows[focused] ? `${listId}-${focused}` : undefined
-          }
-          value={search}
-          onChange={event => {
-            setSearch(event.target.value)
-            setHighlighted(null)
-          }}
-          onKeyDown={onKeyDown}
-          placeholder={t('findMerchant')}
-          aria-label={t('findMerchant')}
-          autoComplete="off"
-          className="mb-1"
-        />
+        {/* The search keeps its place and the rows scroll under it, so the
+            list is the scroller and this box is what bounds it. The surface
+            itself must stay a plain block: its scroll fade is drawn by
+            pseudo-elements, and a flex surface would lay those out as items
+            and push the content past both its edges. */}
+        <div className="flex max-h-[60vh] flex-col">
+          <FilledInput
+            autoFocus
+            role="combobox"
+            aria-expanded
+            aria-controls={listId}
+            aria-activedescendant={
+              rows[focused] ? `${listId}-${focused}` : undefined
+            }
+            value={search}
+            onChange={event => {
+              setSearch(event.target.value)
+              setHighlighted(null)
+            }}
+            onKeyDown={onKeyDown}
+            placeholder={t('findMerchant')}
+            aria-label={t('findMerchant')}
+            autoComplete="off"
+            className="mb-1"
+          />
 
-        {rows.length ? (
-          <ul
-            ref={fadeRef}
-            id={listId}
-            role="listbox"
-            className="scroll-fade hidden-scroll -mx-1 my-0 flex min-h-0 list-none flex-col overflow-x-hidden overflow-y-auto px-1 py-0"
-          >
-            {rows.map((row, index) => {
-              const selected =
-                row.kind === 'merchant' && row.merchant.id === chosen
-              return (
-                <li key={rowKey(row)} role="presentation">
-                  <button
-                    type="button"
-                    role="option"
-                    id={`${listId}-${index}`}
-                    ref={index === focused ? keepInView : undefined}
-                    tabIndex={-1}
-                    aria-selected={selected}
-                    data-highlighted={index === focused || undefined}
-                    className={cn(listRowClass, 'gap-2')}
-                    onClick={() => choose(row)}
-                  >
-                    <ListRowBacking selected={selected} />
-                    <span className="inline-flex shrink-0 text-icon-foreground">
-                      {rowIcon(row)}
-                    </span>
-                    <ListRowText className="truncate">
-                      {rowLabel(row)}
-                    </ListRowText>
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        ) : (
-          <p className="m-0 px-3 py-2 text-body-sm text-muted-foreground">
-            {t('noMerchants')}
-          </p>
-        )}
+          {rows.length ? (
+            <ul
+              ref={fadeRef}
+              id={listId}
+              role="listbox"
+              // A plain block, not a flex column: the fade is drawn by
+              // pseudo-elements, and flex would lay them out as items that
+              // collapse and drag the rows up by their negative margin. The
+              // side padding is given back so the fade reaches both edges.
+              className="scroll-fade hidden-scroll -mx-1 my-0 block min-h-0 list-none overflow-x-hidden overflow-y-auto px-1 py-0"
+            >
+              {rows.map((row, index) => {
+                const selected =
+                  row.kind === 'merchant' && row.merchant.id === chosen
+                return (
+                  <li key={rowKey(row)} role="presentation">
+                    <button
+                      type="button"
+                      role="option"
+                      id={`${listId}-${index}`}
+                      ref={index === focused ? keepInView : undefined}
+                      tabIndex={-1}
+                      aria-selected={selected}
+                      data-highlighted={index === focused || undefined}
+                      className={cn(listRowClass, 'gap-2')}
+                      onClick={() => choose(row)}
+                    >
+                      <ListRowBacking selected={selected} />
+                      <span className="inline-flex shrink-0 text-icon-foreground">
+                        {rowIcon(row)}
+                      </span>
+                      <ListRowText className="truncate">
+                        {rowLabel(row)}
+                      </ListRowText>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p className="m-0 px-3 py-2 text-body-sm text-muted-foreground">
+              {t('noMerchants')}
+            </p>
+          )}
+        </div>
       </Popover>
     </>
   )

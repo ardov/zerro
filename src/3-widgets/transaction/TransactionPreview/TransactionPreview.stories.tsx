@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
@@ -89,4 +90,62 @@ export const Empty: Story = {
       <TransactionPreview {...args} />
     </Frame>
   ),
+}
+
+/** The merchant picker with more rows than it can show: the search keeps its
+ * place at the top and the list is the only thing that scrolls. */
+export const MerchantPicker: Story = {
+  tags: ['!dev', '!autodocs'],
+  args: { id: '', onClose: () => {}, onOpenOther: () => {} },
+  render: args => {
+    const outcome = useByType().outcome
+    return (
+      <Frame>
+        {outcome && <TransactionPreview {...args} id={outcome.id} />}
+      </Frame>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+    await userEvent.click(await canvas.findByRole('button', { name: 'Place' }))
+
+    const list = await body.findByRole('listbox')
+    const search = await body.findByRole('combobox', { name: 'Find or create' })
+    const field = search.closest('[data-slot="filled-field"]')!
+    // The surface arrives scaled, so nothing is measured until it has settled:
+    // a rect read mid-entrance is not the layout.
+    const surface = field.closest('.scroll-fade')!
+    await waitFor(() =>
+      expect(getComputedStyle(surface).transform).toBe('none')
+    )
+    await waitFor(() =>
+      expect(list.scrollHeight).toBeGreaterThan(list.clientHeight)
+    )
+
+    const rowTop = () =>
+      within(list).getAllByRole('option')[0].getBoundingClientRect().top
+    const fieldBox = () => field.getBoundingClientRect()
+
+    // Everything stays inside the paper, and the search sits above the rows
+    // rather than over them.
+    const paper = surface.getBoundingClientRect()
+    expect(fieldBox().top).toBeGreaterThanOrEqual(paper.top)
+    expect(list.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      paper.bottom + 1
+    )
+    expect(fieldBox().bottom).toBeLessThanOrEqual(rowTop() + 1)
+
+    // Scrolling the rows leaves the search where it was, and the top of the
+    // list comes back.
+    const before = fieldBox().top
+    list.scrollTop = list.scrollHeight
+    await waitFor(() => expect(fieldBox().top).toBeCloseTo(before, 0))
+    // Rows running off the top are faded there, not cut.
+    await waitFor(() => expect(list.dataset.fade).toBe('top'))
+    list.scrollTop = 0
+    await waitFor(() =>
+      expect(fieldBox().bottom).toBeLessThanOrEqual(rowTop() + 1)
+    )
+  },
 }
