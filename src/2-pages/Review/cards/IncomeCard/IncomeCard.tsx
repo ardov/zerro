@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Typography, Chip, Stack } from '@mui/material'
 import { entries } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
@@ -34,6 +34,13 @@ export function IncomeCard(props: TCardProps) {
     .sort((a, b) => b.income - a.income)
 
   const [checked, setChecked] = useState(incomeTags.map(t => t.id))
+
+  const incomeIdsKey = incomeTags.map(t => t.id).join(',')
+
+  useEffect(() => {
+    setChecked(incomeTags.map(t => t.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomeIdsKey])
 
   const totalIncomeFx = incomeTags
     .filter(t => checked.includes(t.id))
