@@ -100,6 +100,20 @@ export const Transfer: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     expect(canvas.queryByRole('button', { name: 'Place' })).toBeNull()
+
+    const amount = canvas.getByRole<HTMLInputElement>('textbox', {
+      name: 'Amount taken',
+    })
+    await userEvent.click(amount)
+    await userEvent.clear(amount)
+    await userEvent.type(amount, '12345')
+    expect(amount.value).toBe('12\u00a0345')
+
+    amount.setSelectionRange(4, 4)
+    await userEvent.type(amount, '0', { skipClick: true })
+    expect(amount.value).toBe('123\u00a0045')
+    expect(amount.selectionStart).toBe(5)
+    expect(amount.selectionEnd).toBe(5)
   },
 }
 

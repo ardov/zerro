@@ -93,10 +93,10 @@ export const ExpressionCheck: Story = {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('textbox', { name: 'Amount' })
     await userEvent.click(input)
-    await userEvent.type(input, '25,5+4.5')
-    await expect(input).toHaveValue('25.5+4.5')
-    await expect(canvas.getByTestId('value')).toHaveTextContent(/^30$/)
+    await userEvent.type(input, '2500,5+4000.5')
+    await expect(input).toHaveValue('2\u00a0500,5+4\u00a0000,5')
+    await expect(canvas.getByTestId('value')).toHaveTextContent(/^6501$/)
     await userEvent.tab()
-    await expect(input).toHaveValue('30')
+    await expect(input).toHaveValue('6\u00a0501')
   },
 }

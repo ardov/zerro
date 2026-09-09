@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { amountFromExpression, cleanAmountInput } from './expression'
+import {
+  amountFromExpression,
+  cleanAmountInput,
+  formatAmountExpression,
+} from './expression'
 
 /** What the amount fields were doing before this moved out of one of them.
  * Every case here is reachable by typing into a field, which is why
@@ -17,6 +21,27 @@ describe('cleanAmountInput', () => {
   it('drops everything the grammar has no room for', () => {
     expect(cleanAmountInput('1 000 ₽')).toBe('1000')
     expect(cleanAmountInput('(2+3)')).toBe('2+3')
+  })
+})
+
+describe('formatAmountExpression', () => {
+  it('groups every number without evaluating the expression', () => {
+    expect(formatAmountExpression('12000/3+2500.50')).toBe(
+      '12\u00a0000/3+2\u00a0500,50'
+    )
+  })
+
+  it('preserves unfinished decimals and leading zeroes', () => {
+    expect(formatAmountExpression('12.')).toBe('12,')
+    expect(formatAmountExpression('.5')).toBe(',5')
+    expect(formatAmountExpression('00123')).toBe('00\u00a0123')
+  })
+
+  it('round trips through the input cleaner', () => {
+    const expression = '12000/3+2500.50'
+    expect(cleanAmountInput(formatAmountExpression(expression))).toBe(
+      expression
+    )
   })
 })
 

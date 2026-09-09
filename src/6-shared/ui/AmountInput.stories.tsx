@@ -54,20 +54,43 @@ export const ExpressionInput: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('textbox', { name: 'Amount' })
+    await expect(input).toHaveValue('1\u00a0250,00')
     await userEvent.click(input)
+    await expect(input).toHaveValue('1\u00a0250,00')
     await userEvent.clear(input)
-    await userEvent.type(input, '1,5+2*3')
-    await expect(canvas.getByTestId('value')).toHaveTextContent('7.5')
+    await userEvent.type(input, '1500,5+2000*3')
+    await expect(input).toHaveValue('1\u00a0500,5+2\u00a0000*3')
+    await expect(canvas.getByTestId('value')).toHaveTextContent('7500.5')
     await userEvent.keyboard('{Enter}')
-    await expect(canvas.getByTestId('committed')).toHaveTextContent('7.5')
+    await expect(canvas.getByTestId('committed')).toHaveTextContent('7500.5')
     await userEvent.click(canvas.getByRole('button', { name: 'Outside field' }))
-    await expect(input).toHaveValue('7,50')
+    await expect(input).toHaveValue('7\u00a0500,50')
     await userEvent.click(input)
     await userEvent.clear(input)
     await userEvent.type(input, '-12.5')
     await expect(canvas.getByTestId('value')).toHaveTextContent('-12.5')
     await userEvent.clear(input)
     await expect(canvas.getByTestId('value')).toHaveTextContent('0')
+  },
+}
+
+export const SeparatorDeletion: Story = {
+  tags: ['!dev', '!autodocs'],
+  render: () => <ControlledInput />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole<HTMLInputElement>('textbox', {
+      name: 'Amount',
+    })
+    await userEvent.click(input)
+    input.setSelectionRange(2, 2)
+    await userEvent.keyboard('{Backspace}')
+    await expect(input).toHaveValue('250,00')
+    await expect(input.selectionStart).toBe(0)
+    input.setSelectionRange(2, 2)
+    await userEvent.type(input, 'x', { skipClick: true })
+    await expect(input).toHaveValue('250,00')
+    await expect(input.selectionStart).toBe(2)
   },
 }
 

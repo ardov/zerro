@@ -6,8 +6,12 @@ const currencyInfo = currencySymbols as Record<
   { name: string; symbol?: string }
 >
 
-const thousandSeparator = ' '
-const decimalSeparator = ','
+const moneySeparator = '\u00a0'
+export const moneyDecimalSeparator = ','
+
+export function groupMoneyInteger(integer: string): string {
+  return integer.replace(/\B(?=(\d{3})+(?!\d))/g, moneySeparator)
+}
 
 export function getCurrencySymbol(code: TFxCode): string {
   return currencyInfo[code]?.symbol || code
@@ -15,8 +19,8 @@ export function getCurrencySymbol(code: TFxCode): string {
 
 function formatNumber(number: number, decimals: number): string {
   const parts = number.toFixed(decimals).split('.')
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator)
-  return parts.join(decimalSeparator)
+  parts[0] = groupMoneyInteger(parts[0])
+  return parts.join(moneyDecimalSeparator)
 }
 
 /**
@@ -38,7 +42,7 @@ export function formatMoney(
   }
   const value = formatNumber(number, decimals)
   if (currency) {
-    return value + ' ' + getCurrencySymbol(currency)
+    return value + moneySeparator + getCurrencySymbol(currency)
   }
   return value
 }

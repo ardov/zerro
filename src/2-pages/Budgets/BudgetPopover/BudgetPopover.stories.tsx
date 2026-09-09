@@ -110,7 +110,7 @@ const checkAssignment: Story['play'] = async ({ canvasElement }) => {
   await userEvent.click(trigger)
   input = await body.findByPlaceholderText('0')
   await userEvent.click(input)
-  await expect(input).toHaveValue('7.5')
+  await expect(input).toHaveValue('7,50')
   await userEvent.keyboard('{Escape}')
   await waitFor(() => expect(input).not.toBeVisible())
   await expect(commandCount()).toBe(initialCommands + 1)

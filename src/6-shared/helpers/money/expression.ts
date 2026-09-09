@@ -1,4 +1,5 @@
 import { round } from './currencyHelpers'
+import { groupMoneyInteger, moneyDecimalSeparator } from './format'
 
 /** The arithmetic an amount field accepts.
  *
@@ -13,6 +14,24 @@ import { round } from './currencyHelpers'
  * points, so a decimal typed either way is the same number. */
 export function cleanAmountInput(text: string): string {
   return text.replace(/[^0-9,.+\-/*]/g, '').replace(/,/g, '.')
+}
+
+/** Formats every number in an expression without evaluating it.
+ *
+ * The expression remains the editable source of truth. Group separators are
+ * only a projection of its integer runs, and a decimal point is shown as the
+ * locale comma. That preserves half-typed values such as `12.` and arithmetic
+ * such as `12000/3`, neither of which can make a round trip through `number`. */
+export function formatAmountExpression(text: string): string {
+  return text.replace(/\d+(?:\.\d*)?|\.\d+/g, token => {
+    const decimal = token.indexOf('.')
+    const integer = decimal === -1 ? token : token.slice(0, decimal)
+    const fraction = decimal === -1 ? null : token.slice(decimal + 1)
+    const grouped = groupMoneyInteger(integer)
+    return fraction === null
+      ? grouped
+      : `${grouped}${moneyDecimalSeparator}${fraction}`
+  })
 }
 
 /** What the expression is worth, or `fallback` when it is not one.
