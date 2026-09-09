@@ -5,6 +5,7 @@ import { Popover, type PopoverProps } from './Popover'
 import { useOverlayFocus } from './useOverlayFocus'
 import { cn } from './shadcn/utils'
 import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'
+import { MobileDrawerViewport } from './MobileDrawerViewport'
 
 /** Base UI names the vertical swipe directions `up`/`down`, so the edge a
  * drawer sits on does not spell its own swipe direction. */
@@ -75,9 +76,9 @@ function PopoverDrawer({
             'fixed inset-0 z-modal bg-black/50'
           )}
         />
-        <Drawer.Viewport
+        <MobileDrawerViewport
           className={cn(
-            'pointer-events-none fixed inset-0 z-modal flex',
+            'flex',
             drawerSide === 'top' && 'items-start',
             drawerSide === 'bottom' && 'items-end',
             drawerSide === 'left' && 'justify-start',
@@ -91,7 +92,7 @@ function PopoverDrawer({
             finalFocus={finalFocus}
             className={cn(
               drawerSurfaceClass,
-              'pointer-events-auto relative max-h-[calc(100dvh-48px)] overflow-y-auto bg-popover text-popover-foreground shadow-elevation-16 outline-none',
+              'pointer-events-auto relative max-h-[calc(100%-48px)] overflow-y-auto bg-popover text-popover-foreground shadow-elevation-16 outline-none',
               drawerSide === 'top' || drawerSide === 'bottom'
                 ? 'w-full'
                 : 'h-full',
@@ -104,7 +105,7 @@ function PopoverDrawer({
                 responsive variants carry one. */}
             <Drawer.Close className="sr-only">{t('close')}</Drawer.Close>
           </Drawer.Popup>
-        </Drawer.Viewport>
+        </MobileDrawerViewport>
       </Drawer.Portal>
     </Drawer.Root>
   )

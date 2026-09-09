@@ -89,7 +89,7 @@ export const TransactionPreviewDrawer = () => {
       className="w-screen sm:w-[360px]"
       aria-label={t('transaction')}
     >
-      <div className="flex min-h-screen min-w-80 flex-col">
+      <div className="flex min-h-full min-w-80 flex-col">
         {id && (
           <TransactionPreview
             id={id}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { TAccountId, TTransaction, TTransactionId } from '@/6-shared/types'
 import { Button, IconButton } from '@/6-shared/ui/Button'
 import { BigAmountInput } from '@/6-shared/ui/BigAmountInput'
+import { Tooltip } from '@/6-shared/ui/Tooltip'
 import { useShake } from '@/6-shared/ui/useShake'
 import { FilledInput } from '@/6-shared/ui/FilledField'
 import {
@@ -19,6 +20,7 @@ import { rateToWords } from '@/6-shared/helpers/money'
 import { track } from '@/6-shared/analytics'
 import { useAppCommand, useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
+import { SmartAmount } from '@/3-widgets/Amount'
 
 import { AccountField } from './AccountField'
 import { ActionsMenu } from './ActionsMenu'
@@ -132,7 +134,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   // its field is right — breaking the same field again says nothing until
   // saving is refused a second time.
   const [marked, setMarked] = useState<readonly TDraftField[]>([])
-  const [headline, shakeHeadline] = useShake<HTMLDivElement>()
+  const [headline, shakeHeadline] = useShake<HTMLLabelElement>()
   // A transaction arriving from a sync, or the replacement a save just made,
   // replaces what is being edited. Comparing the entity rather than its id:
   // the id is the same one after a field of it changed elsewhere.
@@ -307,28 +309,28 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
           </div>
         ) : (
           <>
-            <BigAmountInput
-              ref={headline}
-              value={draft.amount}
-              onChange={amount => edit({ amount })}
-              // Enter on the headline is the shortest way through the form:
-              // change the amount, press it, done. The amount is already in
-              // the draft by then — every keystroke reported it.
-              onEnter={onSave}
-              currency={currencyOf(draft.account)}
-              sign={isIncoming(draft.type) ? '+' : '−'}
-              aria-label={t('amount')}
-              invalid={!!marks.amount}
-              className="pt-4"
-            />
-            {categorized && (
-              <CategoryRow
-                tags={draft.tag}
-                tagType={draft.type === 'income' ? 'income' : 'outcome'}
-                onChange={tag => edit({ tag })}
-                className="pb-2"
-              />
-            )}
+            <div className="flex min-h-50 flex-col justify-center gap-4 py-8">
+              <div className="flex flex-col items-center gap-1">
+                <OriginalAmount tr={tr} />
+                <BigAmountInput
+                  ref={headline}
+                  value={draft.amount}
+                  onChange={amount => edit({ amount })}
+                  onEnter={onSave}
+                  currency={currencyOf(draft.account)}
+                  sign={isIncoming(draft.type) ? '+' : '−'}
+                  aria-label={t('amount')}
+                  invalid={!!marks.amount}
+                />
+              </div>
+              {categorized && (
+                <CategoryRow
+                  tags={draft.tag}
+                  tagType={draft.type === 'income' ? 'income' : 'outcome'}
+                  onChange={tag => edit({ tag })}
+                />
+              )}
+            </div>
             <AccountField
               label={t('account')}
               value={draft.account}
@@ -407,8 +409,31 @@ const FieldGroup: FC<{ children: ReactNode; className?: string }> = ({
   className,
 }) => <div className={cn('flex flex-col gap-0.5', className)}>{children}</div>
 
+const OriginalAmount: FC<{ tr: TTransaction }> = ({ tr }) => {
+  const type = core.transactions.getType(tr)
+  const original = type === 'income' ? tr.opIncome : tr.opOutcome
+  const instrument =
+    type === 'income' ? tr.opIncomeInstrument : tr.opOutcomeInstrument
+
+  if (!original || !instrument || (type !== 'income' && type !== 'outcome')) {
+    return null
+  }
+
+  return (
+    <Tooltip title={<RateToWords tr={tr} />} placement="top">
+      <SmartAmount
+        value={original}
+        instrument={instrument}
+        decimals="ifAny"
+        noShade
+        tabIndex={0}
+        className="rounded-sm text-body-sm text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      />
+    </Tooltip>
+  )
+}
+
 const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
-  const { t } = useTranslation('transaction')
   const trType = core.transactions.getType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
   const instruments = core.instruments.useAll()
@@ -431,8 +456,5 @@ const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
     rate = rateToWords(outcome, outcomeCurrency, income, incomeCurrency)
   }
 
-  if (rate) {
-    return <span>{t('rate', { rate })}</span>
-  }
-  return null
+  return rate || null
 }

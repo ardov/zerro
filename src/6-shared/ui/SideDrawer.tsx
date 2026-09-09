@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useOverlayFocus } from './useOverlayFocus'
 import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'
 import { cn } from './shadcn/utils'
+import { MobileDrawerViewport } from './MobileDrawerViewport'
 
 export type SideDrawerProps = {
   open: boolean
@@ -55,9 +56,9 @@ export function SideDrawer({
             'fixed inset-0 z-modal bg-black/50'
           )}
         />
-        <Drawer.Viewport
+        <MobileDrawerViewport
           className={cn(
-            'pointer-events-none fixed inset-0 z-modal flex',
+            'flex',
             side === 'left' ? 'justify-start' : 'justify-end'
           )}
         >
@@ -78,7 +79,7 @@ export function SideDrawer({
                 hatch assistive technology gets. */}
             <Drawer.Close className="sr-only">{t('close')}</Drawer.Close>
           </Drawer.Popup>
-        </Drawer.Viewport>
+        </MobileDrawerViewport>
       </Drawer.Portal>
     </Drawer.Root>
   )

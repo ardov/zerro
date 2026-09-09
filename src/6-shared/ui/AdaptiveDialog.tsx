@@ -6,6 +6,7 @@ import { Dialog } from './Dialog'
 import { useOverlayFocus } from './useOverlayFocus'
 import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'
 import { cn } from './shadcn/utils'
+import { MobileDrawerViewport } from './MobileDrawerViewport'
 
 export type AdaptiveDialogProps = {
   open: boolean
@@ -54,7 +55,7 @@ export function AdaptiveDialog({
             'fixed inset-0 z-modal bg-black/50'
           )}
         />
-        <Drawer.Viewport className="pointer-events-none fixed inset-0 z-modal flex items-end">
+        <MobileDrawerViewport className="flex items-end">
           <Drawer.Popup
             {...props}
             finalFocus={finalFocus}
@@ -63,7 +64,7 @@ export function AdaptiveDialog({
             className={cn(
               drawerSurfaceClass,
               // This bottom sheet is less rounded than the popover drawer.
-              'pointer-events-auto relative flex max-h-[calc(100dvh-48px)] w-full flex-col overflow-y-auto bg-card text-card-foreground shadow-elevation-16 outline-none [--drawer-radius:8px]',
+              'pointer-events-auto relative flex max-h-[calc(100%-48px)] w-full flex-col overflow-y-auto bg-card text-card-foreground shadow-elevation-16 outline-none [--drawer-radius:8px]',
               className
             )}
           >
@@ -72,7 +73,7 @@ export function AdaptiveDialog({
                 the escape hatch assistive technology gets. */}
             <Drawer.Close className="sr-only">{t('close')}</Drawer.Close>
           </Drawer.Popup>
-        </Drawer.Viewport>
+        </MobileDrawerViewport>
       </Drawer.Portal>
     </Drawer.Root>
   )
