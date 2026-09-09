@@ -72,6 +72,12 @@
     font: inherit;
   }
 
+  /* Navigation and card links inherit their surrounding surface by default.
+     The shared `Link` component and article styles opt into their own colour. */
+  a {
+    color: inherit;
+  }
+
   p,
   h1,
   h2,
