@@ -36,7 +36,7 @@
       var(--drawer-swipe-movement-x, 0),
       var(--drawer-swipe-movement-y, 0)
     );
-    transition: transform 225ms cubic-bezier(0, 0, 0.2, 1);
+    transition: transform 250ms ease;
 
     &[data-placement='top'] {
       border-radius: 0 0 var(--drawer-radius, 16px) var(--drawer-radius, 16px);
