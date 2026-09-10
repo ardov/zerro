@@ -76,6 +76,14 @@ export const Anchored: Story = {
   play: async ({ canvasElement }) => {
     const { canvas, body, trigger } = await open(canvasElement)
     const menu = await body.findByRole('menu', { name: 'Demo menu' })
+    const doc = canvasElement.ownerDocument
+    await waitFor(() =>
+      expect(
+        [doc.body, doc.documentElement].some(
+          element => getComputedStyle(element).overflow === 'hidden'
+        )
+      ).toBe(true)
+    )
 
     // Menu semantics, unlike ActionList: this popup was opened by something
     // and can be dismissed.
@@ -98,6 +106,11 @@ export const Anchored: Story = {
       expect(canvas.getByTestId('closed')).toHaveTextContent('1')
     )
     await waitFor(() => expect(trigger).toHaveFocus())
+    await expect(
+      [doc.body, doc.documentElement].every(
+        element => getComputedStyle(element).overflow !== 'hidden'
+      )
+    ).toBe(true)
   },
 }
 
