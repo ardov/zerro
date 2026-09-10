@@ -84,10 +84,30 @@
     }
   }
 
+  /* No travel: the sheet fades in place instead of arriving from an edge. A
+     swipe is the exception — the drawer has to stay under the finger, or the
+     gesture has nothing to show for itself. */
   @media (prefers-reduced-motion: reduce) {
-    .drawer-slide,
+    .drawer-slide {
+      transform: none;
+      transition: opacity 150ms ease;
+
+      &[data-starting-style],
+      &[data-ending-style] {
+        opacity: 0;
+        transform: none;
+      }
+
+      &[data-swiping] {
+        transform: translate(
+          var(--drawer-swipe-movement-x, 0),
+          var(--drawer-swipe-movement-y, 0)
+        );
+      }
+    }
+
     .drawer-slide-backdrop {
-      transition: none;
+      transition-duration: 150ms;
     }
   }
 
