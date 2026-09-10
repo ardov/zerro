@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { TAccountId, TTransaction, TTransactionId } from '@/6-shared/types'
 import { Button, IconButton } from '@/6-shared/ui/Button'
 import { BigAmountInput } from '@/6-shared/ui/BigAmountInput'
+import { SideDrawer } from '@/6-shared/ui/SideDrawer'
 import { Tooltip } from '@/6-shared/ui/Tooltip'
 import { useShake } from '@/6-shared/ui/useShake'
 import { FilledInput } from '@/6-shared/ui/FilledField'
@@ -39,7 +40,10 @@ import type {
 } from './draft'
 import {
   changedFields,
+  fixDraft,
   draftCreated,
+  emptyDraft,
+  toCreateInput,
   draftIssues,
   hasIssues,
   isDebt,
@@ -55,6 +59,11 @@ import {
   toDraft,
   toPatch,
 } from './draft'
+import { createDefaultsFromQuery } from './createDefaults'
+import {
+  loadLastTransactionAccount,
+  saveLastTransactionAccount,
+} from './createStorage'
 
 /** Empty state for transaction preview */
 export const TrEmptyState = () => {
@@ -79,14 +88,55 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const transaction = useAppSelector(
     state => core.transactions.selectAll(state)[props.id]
   )
-  return transaction ? <TransactionEditor {...props} /> : <TrEmptyState />
+  return transaction ? (
+    <TransactionEditor {...props} tr={transaction} />
+  ) : (
+    <TrEmptyState />
+  )
 }
 
-const TransactionEditor: FC<TransactionPreviewProps> = props => {
-  const { id, onClose, onOpenOther, onSelectSimilar } = props
-  const { t } = useTranslation('transaction')
-  const tr = useAppSelector(state => core.transactions.selectAll(state)[id])!
+export const TransactionCreate = ({
+  onClose,
+  query,
+  open,
+  onCreated,
+}: {
+  onClose: () => void
+  query: core.transactions.TTransactionQuery
+  open: boolean
+  onCreated: () => void
+}) => (
+  <TransactionEditor
+    onClose={onClose}
+    onOpenOther={() => {}}
+    createQuery={query}
+    createOpen={open}
+    onCreated={onCreated}
+  />
+)
 
+const TransactionEditor = ({
+  tr,
+  onClose,
+  onOpenOther,
+  onSelectSimilar,
+  createQuery,
+  createOpen,
+  onCreated,
+}: {
+  tr?: TTransaction
+  onClose: () => void
+  onOpenOther: (id: TTransactionId) => void
+  onSelectSimilar?: (date: number) => void
+  createQuery?: core.transactions.TTransactionQuery
+  createOpen?: boolean
+  onCreated?: () => void
+}) => {
+  const id = tr?.id ?? ''
+  const { t } = useTranslation('transaction')
+  const createPosting = useAppCommand(core.transactions.createPosting)
+  const createTransfer = useAppCommand(core.transactions.createTransfer)
+  const [startedAt] = useState(Date.now)
   const remove = useAppCommand(core.transactions.remove)
   const restore = useAppCommand(core.transactions.restore)
   const recreate = useAppCommand(core.transactions.recreate)
@@ -94,21 +144,25 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   const setViewed = useAppCommand(core.transactions.setViewed)
 
   const accounts = core.accounts.usePopulated()
+  const allAccounts = core.accounts.useAll()
+  const tags = useAppSelector(core.tags.selectAll)
+  const merchants = core.merchants.useAll()
   const instruments = core.instruments.useAll()
   const debtAccountId = useAppSelector(core.accounts.selectDebtAccountId)
 
   /** Every account a leg may be moved to. The debt account is not one of
-   * them: it is reached by choosing a debt type, not by naming it. An
-   * archived account is offered only while it is the one already in use, so
-   * an old transaction stays editable without the list growing back. */
+   * them: it is reached by choosing a debt type, not by naming it. Creation
+   * may target archived accounts; editing offers one only while it is already
+   * used, so an old transaction stays editable without growing the list. */
   const options = useMemo(() => {
     const list = Object.values(accounts)
       .filter(account => account.id !== debtAccountId)
       .filter(
         account =>
           !account.archive ||
-          account.id === tr.incomeAccount ||
-          account.id === tr.outcomeAccount
+          !tr ||
+          account.id === tr?.incomeAccount ||
+          account.id === tr?.outcomeAccount
       )
       .map(account => ({
         id: account.id,
@@ -118,7 +172,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
       }))
     list.sort((a, b) => Number(a.archive) - Number(b.archive))
     return list
-  }, [accounts, debtAccountId, tr.incomeAccount, tr.outcomeAccount])
+  }, [accounts, debtAccountId, tr])
 
   const ctx: TDraftContext = useMemo(
     () => ({
@@ -129,23 +183,44 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
     [options, accounts, debtAccountId]
   )
 
-  const [draft, setDraft] = useState(() => toDraft(tr, ctx))
+  const [storedDraft, setDraft] = useState(() => {
+    if (tr) return toDraft(tr, ctx)
+
+    const defaults = createQuery ? createDefaultsFromQuery(createQuery) : {}
+    const lastAccount = loadLastTransactionAccount()
+    const preferredAccount =
+      defaults.account ??
+      (lastAccount && ctx.accountIds.includes(lastAccount)
+        ? lastAccount
+        : undefined)
+    return emptyDraft(ctx, startedAt, {
+      ...defaults,
+      account: preferredAccount,
+    })
+  })
+  const draft = fixDraft(storedDraft, {
+    accounts: allAccounts,
+    tags,
+    merchants,
+  })
+  if (draft !== storedDraft) setDraft(draft)
   // Nothing is wrong until saving has been asked for and refused, and what it
   // refused over is remembered by field. A mark leaves for good the moment
   // its field is right — breaking the same field again says nothing until
   // saving is refused a second time.
   const [marked, setMarked] = useState<readonly TDraftField[]>([])
+  if (createOpen === false && marked.length) setMarked([])
   const [headline, shakeHeadline] = useShake<HTMLLabelElement>()
   // A transaction arriving from a sync, or the replacement a save just made,
   // replaces what is being edited. Comparing the entity rather than its id:
   // the id is the same one after a field of it changed elsewhere.
   const [source, setSource] = useState(tr)
-  if (source !== tr) {
+  if (tr && source !== tr) {
     setSource(tr)
     // Only what the form is editing replaces what is in it. Marking the
     // operation viewed from its Actions menu applies at once and leaves
     // unsaved fields alone; a content change from a sync still refreshes.
-    if (!sameDraftSource(source, tr)) {
+    if (!source || !sameDraftSource(source, tr)) {
       setDraft(toDraft(tr, ctx))
       setMarked([])
     }
@@ -155,14 +230,15 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   const categorized = draft.type === 'income' || draft.type === 'outcome'
   const patch = toPatch(draft, ctx)
   // The rates a moved leg invalidates are part of the same save.
-  const claimed = patch ? { ...patch, ...staleRates(patch, tr) } : null
-  const changes = claimed ? changedFields(tr, claimed) : {}
-  const recreated = timeChanged(draft, tr)
+  const claimed = patch ? { ...patch, ...(tr && staleRates(patch, tr)) } : null
+  const changes = claimed && tr ? changedFields(tr, claimed) : {}
+  const recreated = !!tr && timeChanged(draft, tr)
   const issues = draftIssues(draft)
   // A merchant that has yet to be created is a change all by itself: the
   // patch cannot name it, so nothing in `changes` would show it.
   const newMerchant = newMerchantTitle(draft)
-  const dirty = recreated || !!newMerchant || Object.keys(changes).length > 0
+  const dirty =
+    !tr || recreated || !!newMerchant || Object.keys(changes).length > 0
   const stillWrong = marked.filter(field => issues[field])
   if (stillWrong.length !== marked.length) setMarked(stillWrong)
   const marks: TDraftIssues = Object.fromEntries(
@@ -181,13 +257,27 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   )
 
   const edit = (next: Partial<TTransactionDraft>) =>
-    setDraft(current => ({ ...current, ...next }))
+    setDraft({ ...draft, ...next })
 
   const onSave = () => {
-    if (!claimed || !dirty) return
+    if (!dirty) return
     if (hasIssues(issues)) {
       setMarked(Object.keys(issues) as TDraftField[])
       if (issues.amount) shakeHeadline()
+      return
+    }
+    if (!claimed) return
+    if (!tr) {
+      const command = toCreateInput(draft, ctx, startedAt)
+      if (!command) return
+      if (command.type === 'transfer') createTransfer(command.input)
+      else createPosting(command.input)
+      saveLastTransactionAccount(
+        command.type === 'transfer'
+          ? command.input.fromAccountId
+          : command.input.accountId
+      )
+      onCreated?.()
       return
     }
     if (recreated) {
@@ -212,11 +302,11 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
       : instruments[instrument]?.shortTitle
   }
 
-  return (
+  const content = (
     <div className="flex min-h-full min-w-80 flex-col bg-card">
       <header className="flex items-center gap-1 px-6 py-3">
         <div className="min-w-0 grow">
-          {tr.deleted && (
+          {tr?.deleted && (
             <span className="block truncate text-caption text-error">
               {t('transactionDeleted')}
             </span>
@@ -227,34 +317,39 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
             onChange={type => setDraft(setDraftType(draft, type, ctx))}
           />
         </div>
-        <ActionsMenu
-          deleted={tr.deleted}
-          viewed={core.transactions.isViewed(tr)}
-          onDelete={() => {
-            remove([id])
-            track('transaction_deleted', { mode: 'single', source: 'preview' })
-          }}
-          onRestore={() => {
-            // Restoring makes a copy under a new id — the server's deletion
-            // cannot be taken back — so this screen is left naming a
-            // tombstone. It closes rather than going on offering a Restore
-            // that would make a second copy.
-            restore(id)
-            track('transaction_restored', { source: 'preview' })
-            onClose()
-          }}
-          onSetViewed={viewed => {
-            setViewed([id], viewed)
-            track('transaction_viewed_changed', {
-              viewed,
-              mode: 'single',
-              source: 'preview',
-            })
-          }}
-          onSelectSimilar={
-            onSelectSimilar ? () => onSelectSimilar(tr.changed) : undefined
-          }
-        />
+        {tr && (
+          <ActionsMenu
+            deleted={tr.deleted}
+            viewed={core.transactions.isViewed(tr)}
+            onDelete={() => {
+              remove([id])
+              track('transaction_deleted', {
+                mode: 'single',
+                source: 'preview',
+              })
+            }}
+            onRestore={() => {
+              // Restoring makes a copy under a new id — the server's deletion
+              // cannot be taken back — so this screen is left naming a
+              // tombstone. It closes rather than going on offering a Restore
+              // that would make a second copy.
+              restore(id)
+              track('transaction_restored', { source: 'preview' })
+              onClose()
+            }}
+            onSetViewed={viewed => {
+              setViewed([id], viewed)
+              track('transaction_viewed_changed', {
+                viewed,
+                mode: 'single',
+                source: 'preview',
+              })
+            }}
+            onSelectSimilar={
+              onSelectSimilar ? () => onSelectSimilar(tr.changed) : undefined
+            }
+          />
+        )}
         <IconButton size="small" aria-label={t('btnClose')} onClick={onClose}>
           <CloseIcon size={20} />
         </IconButton>
@@ -290,7 +385,9 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
               <AccountField
                 className="rounded-b-md"
                 invalid={!!marks.toAccount}
-                error={marks.toAccount && t(`issue_${marks.toAccount}`)}
+                error={
+                  marks.toAccount === 'sameAccount' && t('issue_sameAccount')
+                }
                 label={t('accountTo')}
                 value={draft.toAccount}
                 options={options}
@@ -326,9 +423,10 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
           <>
             <div className="flex min-h-50 flex-col justify-center gap-4 py-8">
               <div className="flex flex-col items-center gap-1">
-                <OriginalAmount tr={tr} />
+                {tr && <OriginalAmount tr={tr} />}
                 <BigAmountInput
                   ref={headline}
+                  autoFocus={!tr}
                   value={draft.amount}
                   onChange={amount => edit({ amount })}
                   onEnter={onSave}
@@ -336,6 +434,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
                   sign={isIncoming(draft.type) ? '+' : '−'}
                   aria-label={t('amount')}
                   invalid={!!marks.amount}
+                  error={marks.amount && t(`issue_${marks.amount}`)}
                 />
               </div>
               {categorized && (
@@ -350,6 +449,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
               label={t('account')}
               value={draft.account}
               options={options}
+              invalid={!!marks.account}
               onChange={account => edit({ account })}
             />
           </>
@@ -367,7 +467,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
             invalid={!!marks.payee}
             error={marks.payee && t(`issue_${marks.payee}`)}
             payee={draft.payee}
-            originalPayee={tr.originalPayee}
+            originalPayee={tr?.originalPayee ?? null}
             merchant={draft.merchant}
             debt={isDebt(draft.type)}
             placeholder={isDebt(draft.type) ? t('debtor') : t('payee')}
@@ -385,16 +485,22 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
           onChange={event => edit({ comment: event.target.value })}
         />
 
-        <Receipt value={tr.qrCode} />
-        <Map longitude={tr.longitude} latitude={tr.latitude} />
+        {tr && (
+          <>
+            <Receipt value={tr.qrCode} />
+            <Map longitude={tr.longitude} latitude={tr.latitude} />
 
-        <div className="flex flex-col items-center gap-1 py-4 text-body-sm text-muted-foreground">
-          <span>
-            {t('created', { date: formatDate(tr.created, 'dd.MM.yyyy HH:mm') })}
-          </span>
-          <span>{t('changedAgo', { ago: formatTimeAgo(tr.changed) })}</span>
-          <RateToWords tr={tr} />
-        </div>
+            <div className="flex flex-col items-center gap-1 py-4 text-body-sm text-muted-foreground">
+              <span>
+                {t('created', {
+                  date: formatDate(tr.created, 'dd.MM.yyyy HH:mm'),
+                })}
+              </span>
+              <span>{t('changedAgo', { ago: formatTimeAgo(tr.changed) })}</span>
+              <RateToWords tr={tr} />
+            </div>
+          </>
+        )}
       </div>
 
       {/* No button at all until there is something to save: a permanently
@@ -408,11 +514,23 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
             onClick={onSave}
             className="h-12 rounded-xl"
           >
-            {t('btnSave')}
+            {t(tr ? 'btnSave' : 'btnCreate')}
           </Button>
         </div>
       )}
     </div>
+  )
+  return createQuery ? (
+    <SideDrawer
+      open={!!createOpen}
+      onClose={onClose}
+      className="w-screen sm:w-[360px]"
+      aria-label={t('newTransaction')}
+    >
+      {content}
+    </SideDrawer>
+  ) : (
+    content
   )
 }
 

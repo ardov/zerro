@@ -613,6 +613,8 @@
   },
 
   "transaction": {
+    "newTransaction": "Новая операция",
+    "btnCreate": "Создать операцию",
     "typeLabel": "Тип операции",
     "type_outcome": "Расход",
     "type_income": "Доход",

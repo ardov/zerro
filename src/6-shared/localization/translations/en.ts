@@ -653,6 +653,8 @@ export const en: typeof ru = {
   },
 
   transaction: {
+    newTransaction: 'New transaction',
+    btnCreate: 'Create transaction',
     typeLabel: 'Transaction type',
     type_outcome: 'Expense',
     type_income: 'Income',

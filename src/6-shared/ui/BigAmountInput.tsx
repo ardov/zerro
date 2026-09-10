@@ -15,9 +15,11 @@ export type BigAmountInputProps = {
   sign?: '+' | '−' | null
   autoFocus?: boolean
   disabled?: boolean
-  /** Marked wrong. The headline has no frame to hang a mark off, so the
-   * amount itself turns red. */
+  /** Marked wrong for assistive technology. The caller owns any visual
+   * feedback. */
   invalid?: boolean
+  /** What is wrong, announced by assistive technology. */
+  error?: string
   /** The line itself, for a caller that has to move it — a refused save
    * shakes the headline. */
   ref?: Ref<HTMLLabelElement>
@@ -34,6 +36,7 @@ export function BigAmountInput({
   autoFocus,
   disabled,
   invalid,
+  error,
   ref,
   className,
   'aria-label': ariaLabel,
@@ -49,19 +52,15 @@ export function BigAmountInput({
   return (
     <label
       ref={ref}
-      // onMouseDown={focusAmount}
       className={cn(
         'flex cursor-text flex-wrap items-baseline justify-center text-4xl font-bold',
         disabled && 'text-disabled-foreground',
-        invalid && 'text-error',
+        empty && 'text-disabled-foreground',
         className
       )}
     >
       {sign && (
-        <span
-          aria-hidden
-          className={cn('shrink-0', empty && 'text-disabled-foreground')}
-        >
+        <span aria-hidden className="shrink-0">
           {sign}
         </span>
       )}
@@ -70,13 +69,10 @@ export function BigAmountInput({
         placeholder="0"
         autoFocus={autoFocus}
         disabled={disabled}
-        aria-label={ariaLabel}
+        aria-label={error ? `${ariaLabel}: ${error}` : ariaLabel}
+        aria-invalid={invalid || undefined}
         className="max-w-full"
-        inputClassName={cn(
-          'text-center',
-          // TODO: add opacities to the system
-          'placeholder:text-current placeholder:opacity-42 dark:placeholder:opacity-50'
-        )}
+        inputClassName="text-center"
       />
       {currency && (
         <span className="ml-1 shrink-0 text-body font-bold">{currency}</span>

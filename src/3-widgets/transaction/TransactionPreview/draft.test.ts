@@ -4,6 +4,7 @@ import type { TAccountId } from '@/6-shared/types'
 import type { TDraftContext } from './draft'
 import {
   changedFields,
+  fixDraft,
   draftCreated,
   draftIssues,
   emptyDraft,
@@ -13,6 +14,7 @@ import {
   setTransferAccount,
   setTransferAmount,
   swapTransferSides,
+  toCreateInput,
   toDraft,
   toLegs,
   staleRates,
@@ -67,6 +69,25 @@ describe('emptyDraft', () => {
       outcomeAccount: 'card',
       outcome: 250,
       income: 0,
+    })
+  })
+
+  it('carries an exact default amount into both transfer fields', () => {
+    expect(emptyDraft(ctx, 0, { type: 'transfer', amount: 125 })).toMatchObject(
+      {
+        type: 'transfer',
+        fromAccount: 'card',
+        toAccount: 'cash',
+        fromAmount: 125,
+        toAmount: 125,
+      }
+    )
+  })
+
+  it('keeps an invalid explicit default empty instead of silently changing accounts', () => {
+    expect(emptyDraft(ctx, Date.now(), { account: 'deleted' })).toMatchObject({
+      account: '',
+      fromAccount: '',
     })
   })
 })
@@ -363,6 +384,22 @@ describe('draftIssues', () => {
     expect(draftIssues({ ...draft, amount: 0 })).toEqual({ amount: 'amount' })
   })
 
+  it('marks a missing account on a one-account operation', () => {
+    expect(draftIssues({ ...draft, account: '' })).toEqual({
+      account: 'account',
+    })
+  })
+
+  it('marks missing transfer accounts instead of calling them equal', () => {
+    const transfer = setDraftType(draft, 'transfer', ctx)
+    expect(
+      draftIssues({ ...transfer, fromAccount: '', toAccount: '' })
+    ).toMatchObject({
+      fromAccount: 'account',
+      toAccount: 'account',
+    })
+  })
+
   it('marks both ends of a transfer to the account it came from', () => {
     const transfer = setDraftType(draft, 'transfer', ctx)
     expect(
@@ -381,14 +418,61 @@ describe('draftIssues', () => {
     const lent = setDraftType(draft, 'outcomeDebt', ctx)
     expect(draftIssues(lent)).toEqual({ payee: 'debtor' })
     expect(draftIssues({ ...lent, payee: 'Alex' })).toEqual({})
-    // A picked merchant is a debtor too, even with no text beside it.
-    expect(draftIssues({ ...lent, merchant: { id: 'm1' } })).toEqual({})
-    // So is one that only has a name yet: the save creates it.
-    expect(draftIssues({ ...lent, merchant: { title: 'Alex' } })).toEqual({})
+    // The provider requires a payee even when a merchant is linked.
+    expect(draftIssues({ ...lent, merchant: { id: 'm1' } })).toEqual({
+      payee: 'debtor',
+    })
   })
 
   it('asks no debtor of anything that is not a debt', () => {
     expect(draftIssues({ ...draft, payee: null })).toEqual({})
+  })
+})
+
+describe('toCreateInput', () => {
+  it('builds a posting with its one-account metadata', () => {
+    const now = +new Date(2026, 4, 17, 14, 30)
+    const draft = setDraftMerchant(
+      { ...emptyDraft(ctx, now), amount: 25 },
+      { title: 'Kiosk' }
+    )
+
+    expect(toCreateInput(draft, ctx, now)).toEqual({
+      type: 'posting',
+      input: {
+        kind: 'expense',
+        accountId: 'card',
+        amount: 25,
+        tagIds: undefined,
+        merchant: { title: 'Kiosk' },
+        payee: 'Kiosk',
+        comment: null,
+        date: '2026-05-17',
+        createdAt: now,
+      },
+    })
+  })
+
+  it('preserves the selected time when building a transfer', () => {
+    const now = +new Date(2026, 4, 17, 14, 30)
+    const draft = {
+      ...setDraftType(emptyDraft(ctx, now), 'transfer', ctx),
+      fromAmount: 25,
+      toAmount: 25,
+    }
+
+    expect(toCreateInput(draft, ctx, now)).toEqual({
+      type: 'transfer',
+      input: {
+        fromAccountId: 'card',
+        toAccountId: 'cash',
+        sent: 25,
+        received: 25,
+        createdAt: now,
+        comment: null,
+        date: '2026-05-17',
+      },
+    })
   })
 })
 
@@ -407,5 +491,56 @@ describe('draftCreated', () => {
   it('keeps the original moment when the time is not one', () => {
     const draft = { ...toDraft(expense, ctx), time: '' }
     expect(draftCreated(draft, expense.created)).toBe(expense.created)
+  })
+})
+
+describe('fixDraft', () => {
+  const entities = {
+    accounts: { card: {}, cash: { archive: true } },
+    tags: { food: {} },
+    merchants: { shop: {} },
+  }
+
+  it('removes deleted references while preserving entered values and surviving tags', () => {
+    const draft = {
+      ...emptyDraft(ctx, 0),
+      account: 'missing',
+      fromAccount: 'card',
+      toAccount: 'missing',
+      tag: ['deleted', 'food'],
+      merchant: { id: 'deleted' },
+      amount: 123,
+      comment: 'Keep me',
+      payee: 'Shop',
+    }
+    const fixed = fixDraft(draft, entities)
+    expect(fixed).toEqual({
+      ...draft,
+      account: '',
+      fromAccount: 'card',
+      toAccount: '',
+      tag: ['food'],
+      merchant: null,
+    })
+    expect(draft.tag).toEqual(['deleted', 'food'])
+    expect(fixDraft(fixed, entities)).toBe(fixed)
+  })
+
+  it('keeps existing references including archived accounts and a new merchant title', () => {
+    const draft = {
+      ...emptyDraft(ctx, 0),
+      account: 'cash',
+      tag: ['food'],
+      merchant: { title: 'New shop' },
+    }
+    expect(fixDraft(draft, entities)).toBe(draft)
+    const linked = { ...draft, merchant: { id: 'shop' } }
+    expect(fixDraft(linked, entities)).toBe(linked)
+  })
+
+  it('clears the last deleted category', () => {
+    expect(
+      fixDraft({ ...emptyDraft(ctx, 0), tag: ['deleted'] }, entities).tag
+    ).toBeNull()
   })
 })

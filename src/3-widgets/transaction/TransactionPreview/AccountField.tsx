@@ -58,6 +58,7 @@ export const AccountField: FC<AccountFieldProps> = ({
       <FilledButton
         {...state}
         aria-label={label}
+        aria-invalid={state.invalid || undefined}
         aria-haspopup="listbox"
         aria-expanded={open}
         icon={<AccountIcon size={20} />}

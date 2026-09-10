@@ -69,6 +69,10 @@ export type TDraftContext = {
   debtAccountId?: TAccountId
 }
 
+export type TCreateDraftDefaults = Partial<
+  Pick<TTransactionDraft, 'type' | 'account' | 'amount' | 'tag' | 'date'>
+>
+
 const { TrType } = core.transactions
 
 // ---------------------------------------------------------------------------
@@ -77,23 +81,77 @@ const { TrType } = core.transactions
 
 /** A draft with nothing in it yet, for composing a transaction rather than
  * editing one. */
-export function emptyDraft(ctx: TDraftContext, now: number): TTransactionDraft {
-  const account = ctx.accountIds[0] ?? ''
-  return {
+export function emptyDraft(
+  ctx: TDraftContext,
+  now: number,
+  defaults: TCreateDraftDefaults = {}
+): TTransactionDraft {
+  const account =
+    defaults.account === undefined
+      ? (ctx.accountIds[0] ?? '')
+      : ctx.accountIds.includes(defaults.account)
+        ? defaults.account
+        : ''
+  const draft: TTransactionDraft = {
     type: TrType.Outcome,
     account,
-    amount: 0,
+    amount: defaults.amount ?? 0,
     fromAccount: account,
     toAccount: otherAccount(account, ctx),
     fromAmount: 0,
     toAmount: 0,
-    tag: null,
+    tag: defaults.tag ?? null,
     merchant: null,
     payee: null,
     comment: null,
-    date: toISODate(now),
+    date: defaults.date ?? toISODate(now),
     time: formatDate(now, 'HH:mm'),
   }
+  return setDraftType(draft, defaults.type ?? TrType.Outcome, ctx)
+}
+
+/** Removes references absent from the loaded replica, keeping all entered
+ * values and archived entities. Picker visibility is not existence. */
+export function fixDraft(
+  draft: TTransactionDraft,
+  entities: {
+    accounts: Readonly<Record<TAccountId, unknown>>
+    tags: Readonly<Record<TTagId, unknown>>
+    merchants: Readonly<Record<TMerchantId, unknown>>
+  }
+): TTransactionDraft {
+  const account = (id: TAccountId) =>
+    Object.hasOwn(entities.accounts, id) ? id : ''
+  const remainingTags = draft.tag?.filter(id =>
+    Object.hasOwn(entities.tags, id)
+  )
+  const tag =
+    remainingTags?.length === draft.tag?.length
+      ? draft.tag
+      : remainingTags?.length
+        ? remainingTags
+        : null
+  const merchant =
+    draft.merchant &&
+    'id' in draft.merchant &&
+    !Object.hasOwn(entities.merchants, draft.merchant.id)
+      ? null
+      : draft.merchant
+  const next = {
+    ...draft,
+    account: account(draft.account),
+    fromAccount: account(draft.fromAccount),
+    toAccount: account(draft.toAccount),
+    tag,
+    merchant,
+  }
+  return next.account === draft.account &&
+    next.fromAccount === draft.fromAccount &&
+    next.toAccount === draft.toAccount &&
+    next.tag === draft.tag &&
+    next.merchant === draft.merchant
+    ? draft
+    : next
 }
 
 /** Reads a transaction as a draft. Both sides are filled in whatever the type
@@ -450,10 +508,16 @@ export function timeChanged(
 
 /** A field a mark can be put on. */
 export type TDraftField =
-  'amount' | 'fromAmount' | 'toAmount' | 'fromAccount' | 'toAccount' | 'payee'
+  | 'account'
+  | 'amount'
+  | 'fromAmount'
+  | 'toAmount'
+  | 'fromAccount'
+  | 'toAccount'
+  | 'payee'
 
 /** Why that field is wrong. */
-export type TDraftIssue = 'amount' | 'sameAccount' | 'debtor'
+export type TDraftIssue = 'account' | 'amount' | 'sameAccount' | 'debtor'
 
 export type TDraftIssues = Partial<Record<TDraftField, TDraftIssue>>
 
@@ -468,8 +532,13 @@ export type TDraftIssues = Partial<Record<TDraftField, TDraftIssue>>
  * as a debt with nowhere to record it. */
 export function draftIssues(draft: TTransactionDraft): TDraftIssues {
   if (draft.type === TrType.Transfer) {
-    const sameAccount = draft.fromAccount === draft.toAccount
+    const fromMissing = !draft.fromAccount
+    const toMissing = !draft.toAccount
+    const sameAccount =
+      !fromMissing && !toMissing && draft.fromAccount === draft.toAccount
     return {
+      ...(fromMissing && { fromAccount: 'account' as const }),
+      ...(toMissing && { toAccount: 'account' as const }),
       ...(sameAccount && {
         fromAccount: 'sameAccount' as const,
         toAccount: 'sameAccount' as const,
@@ -479,11 +548,11 @@ export function draftIssues(draft: TTransactionDraft): TDraftIssues {
     }
   }
   return {
+    ...(!draft.account && { account: 'account' as const }),
     ...(draft.amount <= 0 && { amount: 'amount' as const }),
     // A debt is owed by somebody. Nothing else here needs a name.
     ...(isDebt(draft.type) &&
-      !emptyToNull(draft.payee) &&
-      !draft.merchant && { payee: 'debtor' as const }),
+      !emptyToNull(draft.payee) && { payee: 'debtor' as const }),
   }
 }
 
@@ -537,4 +606,62 @@ function sameValue(a: unknown, b: unknown): boolean {
     return a.length === b.length && a.every((item, i) => item === b[i])
   }
   return a === b
+}
+
+export type TCreateDraftCommand =
+  | {
+      type: 'posting'
+      input: core.transactions.TCreatePostingInput
+    }
+  | {
+      type: 'transfer'
+      input: core.transactions.TCreateTransferInput
+    }
+
+/** The semantic creation command, sharing the editor's normalization. */
+export function toCreateInput(
+  draft: TTransactionDraft,
+  ctx: TDraftContext,
+  now: number
+): TCreateDraftCommand | null {
+  const patch = toPatch(draft, ctx)
+  if (!patch || hasIssues(draftIssues(draft))) return null
+  const details = {
+    date: draft.date,
+    createdAt: draftCreated(draft, now),
+    comment: patch.comment,
+  }
+  if (draft.type === 'transfer') {
+    return {
+      type: 'transfer',
+      input: {
+        ...details,
+        fromAccountId: draft.fromAccount,
+        toAccountId: draft.toAccount,
+        sent: draft.fromAmount,
+        received: draft.toAmount,
+      },
+    }
+  }
+  return {
+    type: 'posting',
+    input: {
+      ...details,
+      kind:
+        draft.type === 'outcome'
+          ? 'expense'
+          : draft.type === 'incomeDebt'
+            ? 'borrowed'
+            : draft.type === 'outcomeDebt'
+              ? 'lent'
+              : draft.type,
+      accountId: draft.account,
+      amount: draft.amount,
+      ...(isCategorized(draft.type) && {
+        tagIds: patch.tag ?? undefined,
+      }),
+      merchant: draft.merchant,
+      payee: patch.payee,
+    },
+  }
 }

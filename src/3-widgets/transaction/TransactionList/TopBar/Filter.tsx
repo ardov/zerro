@@ -13,6 +13,7 @@ import { core } from '@/zerro-core/redux'
 import { useAppSelector } from '@/store'
 import { AddIcon, CloseIcon, FilterListIcon } from '@/6-shared/ui/Icons'
 import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { TransactionCreateButton } from '../../TransactionCreateButton'
 
 type Clause = core.transactions.TTransactionFilterClause
 type AddableFilterKind = Exclude<Clause['kind'], 'search' | 'date' | 'activity'>
@@ -153,14 +154,10 @@ const Filter: FC<FilterProps> = ({
             />
           </Tooltip>
         )}
+        <TransactionCreateButton query={query} />
         {!appliedClauses.length && (
           <Tooltip title={t('addFilter')}>
-            <IconButton
-              size="small"
-              color="primary"
-              onClick={openAddMenu}
-              children={<FilterListIcon />}
-            />
+            <IconButton onClick={openAddMenu} children={<FilterListIcon />} />
           </Tooltip>
         )}
       </div>
