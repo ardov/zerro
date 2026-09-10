@@ -91,6 +91,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   const restore = useAppCommand(core.transactions.restore)
   const recreate = useAppCommand(core.transactions.recreate)
   const update = useAppCommand(core.transactions.update)
+  const setViewed = useAppCommand(core.transactions.setViewed)
 
   const accounts = core.accounts.usePopulated()
   const instruments = core.instruments.useAll()
@@ -141,8 +142,13 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
   const [source, setSource] = useState(tr)
   if (source !== tr) {
     setSource(tr)
-    setDraft(toDraft(tr, ctx))
-    setMarked([])
+    // Only what the form is editing replaces what is in it. Marking the
+    // operation viewed from its Actions menu applies at once and leaves
+    // unsaved fields alone; a content change from a sync still refreshes.
+    if (!sameDraftSource(source, tr)) {
+      setDraft(toDraft(tr, ctx))
+      setMarked([])
+    }
   }
 
   const transfer = draft.type === 'transfer'
@@ -223,6 +229,7 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
         </div>
         <ActionsMenu
           deleted={tr.deleted}
+          viewed={core.transactions.isViewed(tr)}
           onDelete={() => {
             remove([id])
             track('transaction_deleted', { mode: 'single', source: 'preview' })
@@ -235,6 +242,14 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
             restore(id)
             track('transaction_restored', { source: 'preview' })
             onClose()
+          }}
+          onSetViewed={viewed => {
+            setViewed([id], viewed)
+            track('transaction_viewed_changed', {
+              viewed,
+              mode: 'single',
+              source: 'preview',
+            })
           }}
           onSelectSimilar={
             onSelectSimilar ? () => onSelectSimilar(tr.changed) : undefined
@@ -398,6 +413,45 @@ const TransactionEditor: FC<TransactionPreviewProps> = props => {
         </div>
       )}
     </div>
+  )
+}
+
+/** The fields `toDraft` reads, named rather than derived by excluding the two
+ * that are known not to matter: an allowlist says what the form is editing,
+ * and a field ZenMoney adds later cannot quietly join it. */
+const draftSourceFields = [
+  'date',
+  'created',
+  'income',
+  'outcome',
+  'incomeAccount',
+  'outcomeAccount',
+  'incomeInstrument',
+  'outcomeInstrument',
+  'tag',
+  'merchant',
+  'payee',
+  'comment',
+] as const satisfies readonly (keyof TTransaction)[]
+
+/** Whether the arriving transaction still describes the same thing the form
+ * is editing. `changed` moves with every command and `viewed` is list
+ * metadata, so neither is here; `tag` is compared by content, because a store
+ * that rebuilt the array would otherwise read as an edit. */
+function sameDraftSource(before: TTransaction, after: TTransaction) {
+  return draftSourceFields.every(key =>
+    key === 'tag'
+      ? sameTags(before.tag, after.tag)
+      : Object.is(before[key], after[key])
+  )
+}
+
+function sameTags(before: TTransaction['tag'], after: TTransaction['tag']) {
+  if (before === after) return true
+  if (!before || !after) return false
+  return (
+    before.length === after.length &&
+    before.every((id, index) => id === after[index])
   )
 }
 

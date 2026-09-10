@@ -50,7 +50,7 @@ export type AnalyticsEventMap = {
   }
   transaction_viewed_changed: {
     mode: 'bulk' | 'single'
-    source: 'bulk_toolbar' | 'context_menu' | 'transaction_list'
+    source: 'bulk_toolbar' | 'context_menu' | 'preview' | 'transaction_list'
     viewed: boolean
   }
   transactions_combined: {

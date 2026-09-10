@@ -184,3 +184,35 @@ export const MerchantPicker: Story = {
     )
   },
 }
+
+/** Viewed state applies immediately, but it is metadata beside the editable
+ * draft and must not replace unsaved field work. */
+export const MarkNewPreservesDraft: Story = {
+  tags: ['!dev', '!autodocs'],
+  args: { id: '', onClose: () => {}, onOpenOther: () => {} },
+  render: args => {
+    const outcome = useByType().outcome
+    return (
+      <Frame>
+        {outcome && <TransactionPreview {...args} id={outcome.id} />}
+      </Frame>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const comment = await canvas.findByRole<HTMLInputElement>('textbox', {
+      name: 'Comment',
+    })
+    await userEvent.type(comment, ' unsaved draft')
+    const draft = comment.value
+
+    await userEvent.click(canvas.getByRole('button', { name: 'More' }))
+    const action = await body.findByRole('menuitem', {
+      name: /Mark as (new|viewed)/,
+    })
+    await userEvent.click(action)
+
+    await waitFor(() => expect(comment).toHaveValue(draft))
+  },
+}

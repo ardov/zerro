@@ -7,6 +7,7 @@ import {
   MoreVertIcon,
   RestoreFromTrashIcon,
   SyncIcon,
+  VisibilityIcon,
 } from '@/6-shared/ui/Icons'
 import { Menu, MenuItem } from '@/6-shared/ui/Menu'
 import { ListRowIcon, ListRowText } from '@/6-shared/ui/ListRow'
@@ -15,22 +16,26 @@ import { usePopup } from '@/6-shared/overlays'
 export type TransactionActions = {
   onDelete: () => void
   onRestore: () => void
+  onSetViewed: (viewed: boolean) => void
   /** Only offered where the surface has somewhere to show the result. */
   onSelectSimilar?: () => void
 }
 
 /** Everything that can be done to a transaction other than edit it.
  *
- * One item today, because deleting is the only one that has moved here; the
- * menu exists so the next one does not have to become another button in a
- * header that has no room for it. */
-export const ActionsMenu: FC<TransactionActions & { deleted: boolean }> = ({
+ * Kept in a menu so metadata and lifecycle actions do not become a row of
+ * competing buttons in a header that has no room for them. */
+export const ActionsMenu: FC<
+  TransactionActions & { deleted: boolean; viewed: boolean }
+> = ({
   deleted,
+  viewed,
   onDelete,
   onRestore,
+  onSetViewed,
   onSelectSimilar,
 }) => {
-  const { t } = useTranslation('transaction')
+  const { t } = useTranslation(['transaction', 'transactionContextMenu'])
   // On the overlay stack, so Back closes the menu rather than the editor
   // underneath it.
   const [open, setOpen] = usePopup()
@@ -79,6 +84,17 @@ export const ActionsMenu: FC<TransactionActions & { deleted: boolean }> = ({
             <SyncIcon size={20} />,
             t('btnOtherFromSync'),
             onSelectSimilar
+          )}
+        {!deleted &&
+          item(
+            'viewed',
+            <VisibilityIcon size={20} />,
+            t(
+              viewed
+                ? 'transactionContextMenu:markUnviewed'
+                : 'transactionContextMenu:markViewed'
+            ),
+            () => onSetViewed(!viewed)
           )}
         {deleted
           ? item(
