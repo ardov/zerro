@@ -4,12 +4,14 @@ import {
   compileBulkEditTransactions,
   compileCombineToIncome,
   compileCombineToOutcome,
-  compileCreateTransaction,
+  compileCreatePosting,
+  compileCreateTransfer,
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
   compileMergeTransactionsAsTransfer,
   compileRestoreTransaction,
-  type TCreateTransactionInput,
+  type TCreatePostingInput,
+  type TCreateTransferInput,
   type TCreateTransactionReceipt,
   type TTransactionId,
   type TTransactionEditablePatch,
@@ -237,14 +239,31 @@ export function deleteTransactions(ids: TTransactionId[]): AppThunk {
   )
 }
 
-export function createTransaction(
-  input: TCreateTransactionInput
+export function createPosting(
+  input: TCreatePostingInput
 ): AppThunk<TTransactionId> {
   const execute = executeCommand<TCreateTransactionReceipt>(
-    (state, ctx) => compileCreateTransaction(selectData(state), input, ctx),
+    (state, ctx) => compileCreatePosting(selectData(state), input, ctx),
     { verb: 'transaction-created' }
   )
 
+  return executeCreatedTransaction(execute)
+}
+
+export function createTransfer(
+  input: TCreateTransferInput
+): AppThunk<TTransactionId> {
+  const execute = executeCommand<TCreateTransactionReceipt>(
+    (state, ctx) => compileCreateTransfer(selectData(state), input, ctx),
+    { verb: 'transaction-created' }
+  )
+
+  return executeCreatedTransaction(execute)
+}
+
+function executeCreatedTransaction(
+  execute: AppThunk<TCreateTransactionReceipt | undefined>
+): AppThunk<TTransactionId> {
   return (dispatch, getState, extra) => {
     const receipt = execute(dispatch, getState, extra)
     if (!receipt) throw new Error('Transaction was not created')

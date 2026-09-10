@@ -108,7 +108,8 @@ describe('zerro-core API boundary', () => {
 
     expect(headlessIndex).not.toMatch(/export \*/)
     expect(headlessIndex).toContain('createZerroSession')
-    expect(headlessIndex).toContain('compileCreateTransaction')
+    expect(headlessIndex).toContain('compileCreatePosting')
+    expect(headlessIndex).toContain('compileCreateTransfer')
     expect(headlessIndex).toContain('acceptCanonicalPatch')
     expect(headlessIndex).toContain('parseCommandOutbox')
     expect(headlessIndex).not.toContain('parsePersistedReplica')

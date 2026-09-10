@@ -6,6 +6,7 @@ import {
 } from '../../../../operations/materialization'
 import {
   makeAccount,
+  makeInstrument,
   makeMerchant,
   makeStore,
   makeTag,
@@ -14,8 +15,10 @@ import {
 import { applyPatch } from '../../model/applyPatch'
 import type { TDataStore } from '../../model/store'
 import {
-  compileCreateTransaction,
-  type TCreateTransactionInput,
+  compileCreatePosting,
+  compileCreateTransfer,
+  type TCreatePostingInput,
+  type TCreateTransferInput,
 } from './commands'
 
 const NOW = Date.parse('2026-07-29T10:00:00.000Z')
@@ -25,9 +28,14 @@ function makeData(): TDataStore {
   return makeStore({
     user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
     account: {
+      debt: makeAccount({ id: 'debt', type: 'debt', instrument: 1 }),
       cash: makeAccount({ id: 'cash', instrument: 1 }),
       card: makeAccount({ id: 'card', instrument: 1 }),
       euro: makeAccount({ id: 'euro', instrument: 2 }),
+    },
+    instrument: {
+      1: makeInstrument({ id: 1, shortTitle: 'RUB' }),
+      2: makeInstrument({ id: 2, shortTitle: 'EUR' }),
     },
     tag: { food: makeTag({ id: 'food', title: 'Food' }) },
     merchant: {
@@ -36,9 +44,15 @@ function makeData(): TDataStore {
   })
 }
 
-function materialize(input: TCreateTransactionInput) {
+function materialize(
+  input: TCreatePostingInput | TCreateTransferInput,
+  type: 'posting' | 'transfer' = 'posting'
+) {
   const data = makeData()
-  const compiled = compileCreateTransaction(data, input, ctx)
+  const compiled =
+    type === 'posting'
+      ? compileCreatePosting(data, input as TCreatePostingInput, ctx)
+      : compileCreateTransfer(data, input as TCreateTransferInput, ctx)
   const command = issuePatch(data, compiled.patch, NOW)
   const current = applyPatch(data, materializeCommand(data, command))
   return {
@@ -48,7 +62,47 @@ function materialize(input: TCreateTransactionInput) {
   }
 }
 
-describe('compileCreateTransaction', () => {
+describe('transaction creation compilers', () => {
+  it.each(['borrowed', 'lent'] as const)(
+    'creates %s in the real account currency with the selected time',
+    kind => {
+      const created = Date.parse('2026-07-28T09:15:00Z')
+      const { transaction } = materialize({
+        kind,
+        accountId: 'euro',
+        amount: 50,
+        date: '2026-07-28',
+        createdAt: created,
+        payee: 'Alex',
+        merchant: { id: 'shop' },
+      })
+      expect(transaction).toMatchObject({
+        created,
+        changed: NOW,
+        income: 50,
+        outcome: 50,
+        incomeInstrument: 2,
+        outcomeInstrument: 2,
+        incomeAccount: kind === 'borrowed' ? 'euro' : 'debt',
+        outcomeAccount: kind === 'borrowed' ? 'debt' : 'euro',
+        payee: 'Alex',
+        merchant: 'shop',
+        tag: null,
+      })
+    }
+  )
+
+  it('refuses an unnamed debt', () => {
+    expect(() =>
+      materialize({
+        kind: 'borrowed',
+        accountId: 'cash',
+        amount: 5,
+        date: '2026-07-28',
+      })
+    ).toThrow('counterparty')
+  })
+
   it('creates a categorized expense as a normalized same-account operation', () => {
     const { compiled, transaction } = materialize({
       kind: 'expense',
@@ -56,8 +110,11 @@ describe('compileCreateTransaction', () => {
       amount: 12.5,
       date: '2026-07-28',
       tagIds: ['food'],
-      merchantId: 'shop',
+      merchant: { id: 'shop' },
       payee: 'Market',
+      originalPayee: 'MARKET TERMINAL 17',
+      originalAmount: { amount: 14, instrumentId: 2 },
+      qrCode: 'QR:receipt',
       comment: 'Lunch',
     })
 
@@ -76,6 +133,12 @@ describe('compileCreateTransaction', () => {
       tag: ['food'],
       merchant: 'shop',
       payee: 'Market',
+      originalPayee: 'MARKET TERMINAL 17',
+      opOutcome: 14,
+      opOutcomeInstrument: 2,
+      opIncome: 0,
+      opIncomeInstrument: null,
+      qrCode: 'QR:receipt',
       comment: 'Lunch',
       viewed: true,
     })
@@ -97,18 +160,53 @@ describe('compileCreateTransaction', () => {
       tag: null,
       merchant: null,
       payee: null,
+      originalPayee: null,
       comment: null,
     })
   })
 
-  it('defaults a same-instrument transfer income to its outcome', () => {
+  it('puts original currency on the real income leg and derives original payee', () => {
     const { transaction } = materialize({
-      kind: 'transfer',
-      outcomeAccountId: 'cash',
-      incomeAccountId: 'card',
-      outcome: 50,
+      kind: 'income',
+      accountId: 'card',
+      amount: 100,
       date: '2026-07-28',
+      payee: 'Employer',
+      originalAmount: { amount: 4, instrumentId: 2 },
     })
+
+    expect(transaction).toMatchObject({
+      originalPayee: 'Employer',
+      opIncome: 4,
+      opIncomeInstrument: 2,
+      opOutcome: 0,
+      opOutcomeInstrument: null,
+    })
+  })
+
+  it('fills an explicitly null original payee from payee', () => {
+    const { transaction } = materialize({
+      kind: 'expense',
+      accountId: 'cash',
+      amount: 5,
+      date: '2026-07-28',
+      payee: 'Visible name',
+      originalPayee: null,
+    })
+
+    expect(transaction.originalPayee).toBe('Visible name')
+  })
+
+  it('defaults a same-instrument transfer income to its outcome', () => {
+    const { transaction } = materialize(
+      {
+        fromAccountId: 'cash',
+        toAccountId: 'card',
+        sent: 50,
+        date: '2026-07-28',
+      },
+      'transfer'
+    )
 
     expect(transaction).toMatchObject({
       outcome: 50,
@@ -121,18 +219,22 @@ describe('compileCreateTransaction', () => {
   })
 
   it('requires and preserves both sides of a cross-instrument transfer', () => {
-    const { transaction } = materialize({
-      kind: 'transfer',
-      outcomeAccountId: 'cash',
-      incomeAccountId: 'euro',
-      outcome: 120,
-      income: 3,
-      date: '2026-07-28',
-    })
+    const { transaction } = materialize(
+      {
+        fromAccountId: 'cash',
+        toAccountId: 'euro',
+        sent: 120,
+        received: 3,
+        createdAt: NOW - 3600000,
+        date: '2026-07-28',
+      },
+      'transfer'
+    )
 
     expect(transaction).toMatchObject({
       outcome: 120,
       income: 3,
+      created: NOW - 3600000,
       outcomeInstrument: 1,
       incomeInstrument: 2,
     })
@@ -140,7 +242,7 @@ describe('compileCreateTransaction', () => {
 
   it('rejects invalid references and amounts', () => {
     expect(() =>
-      compileCreateTransaction(
+      compileCreatePosting(
         makeData(),
         {
           kind: 'expense',
@@ -173,22 +275,36 @@ describe('compileCreateTransaction', () => {
 
     expect(() =>
       materialize({
-        kind: 'transfer',
-        outcomeAccountId: 'cash',
-        incomeAccountId: 'cash',
-        outcome: 1,
+        kind: 'expense',
+        accountId: 'cash',
+        amount: 1,
         date: '2026-07-28',
+        originalAmount: { amount: 2, instrumentId: 999 },
       })
+    ).toThrow('Transaction instrument not found: 999')
+
+    expect(() =>
+      materialize(
+        {
+          fromAccountId: 'cash',
+          toAccountId: 'cash',
+          sent: 1,
+          date: '2026-07-28',
+        },
+        'transfer'
+      )
     ).toThrow('Transfer accounts must be different')
 
     expect(() =>
-      materialize({
-        kind: 'transfer',
-        outcomeAccountId: 'cash',
-        incomeAccountId: 'euro',
-        outcome: 1,
-        date: '2026-07-28',
-      })
+      materialize(
+        {
+          fromAccountId: 'cash',
+          toAccountId: 'euro',
+          sent: 1,
+          date: '2026-07-28',
+        },
+        'transfer'
+      )
     ).toThrow('Cross-instrument transfer requires income amount')
   })
 
@@ -197,7 +313,7 @@ describe('compileCreateTransaction', () => {
     data.user = {}
 
     expect(() =>
-      compileCreateTransaction(
+      compileCreatePosting(
         data,
         {
           kind: 'income',

@@ -3,7 +3,8 @@ export {
   bulkEditTransactions as bulkEdit,
   combineTransactionsToIncome as combineToIncome,
   combineTransactionsToOutcome as combineToOutcome,
-  createTransaction as create,
+  createPosting,
+  createTransfer,
   deleteTransactions as remove,
   deleteTransactionsPermanently as removePermanently,
   mergeTransactionsAsTransfer as mergeAsTransfer,
@@ -11,7 +12,12 @@ export {
   restoreTransaction as restore,
   setTransactionsViewed as setViewed,
 } from './commands'
-export type { TCreateTransactionInput } from '../../internal/domain/zenmoney/entities/transactions'
+export type {
+  TCreateMerchantReference,
+  TCreatePostingInput,
+  TCreateTransferInput,
+  TOriginalAmount,
+} from '../../internal/domain/zenmoney/entities/transactions'
 import { useCallback } from 'react'
 import { useAppSelector } from '@/store'
 import type { RootState } from '@/store'

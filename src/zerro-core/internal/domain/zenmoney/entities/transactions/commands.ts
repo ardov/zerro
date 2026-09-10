@@ -1,8 +1,13 @@
 import type { ById } from '../../../foundation/types'
 import type { TCompiled, TCoreContext } from '../../../../../types'
-import type { TDateDraft } from '../../primitives'
-import type { TAccount, TAccountId } from '../accounts'
-import type { TMerchant, TMerchantId } from '../merchants'
+import type { TDateDraft, TMsTime } from '../../primitives'
+import { getDebtAccountId, type TAccount, type TAccountId } from '../accounts'
+import type { TInstrument, TInstrumentId } from '../instruments'
+import {
+  compileCreateMerchant,
+  type TMerchant,
+  type TMerchantId,
+} from '../merchants'
 import type { TTag, TTagId } from '../tags'
 import { getRootUser, type TUser } from '../users'
 import { round } from '../../../foundation/numbers'
@@ -21,35 +26,55 @@ export type TTransactionIntent = {
   account?: never
 }
 
-type TCreateTransactionDetails = {
+type TCreateDetails = {
+  createdAt?: TMsTime
   date: TDateDraft
   comment?: string | null
 }
 
-type TCreateCategorizedTransactionDetails = TCreateTransactionDetails & {
-  tagIds?: TTagId[]
-  merchantId?: TMerchantId | null
-  payee?: string | null
+export type TCreateMerchantReference = { id: TMerchantId } | { title: string }
+
+export type TOriginalAmount = {
+  amount: number
+  instrumentId: TInstrumentId
 }
 
-export type TCreateTransactionInput =
-  | (TCreateCategorizedTransactionDetails & {
+type TCreatePostingDetails = TCreateDetails & {
+  merchant?: TCreateMerchantReference | null
+  payee?: string | null
+  originalPayee?: string | null
+  /** What the bank charged before converting into the account currency. */
+  originalAmount?: TOriginalAmount | null
+  qrCode?: string | null
+}
+
+type TCreateCategorizedPostingDetails = TCreatePostingDetails & {
+  tagIds?: TTagId[]
+}
+
+export type TCreatePostingInput =
+  | (TCreateCategorizedPostingDetails & {
       kind: 'expense'
       accountId: TAccountId
       amount: number
     })
-  | (TCreateCategorizedTransactionDetails & {
+  | (TCreateCategorizedPostingDetails & {
       kind: 'income'
       accountId: TAccountId
       amount: number
     })
-  | (TCreateTransactionDetails & {
-      kind: 'transfer'
-      outcomeAccountId: TAccountId
-      incomeAccountId: TAccountId
-      outcome: number
-      income?: number
+  | (TCreatePostingDetails & {
+      kind: 'lent' | 'borrowed'
+      accountId: TAccountId
+      amount: number
     })
+
+export type TCreateTransferInput = TCreateDetails & {
+  fromAccountId: TAccountId
+  toAccountId: TAccountId
+  sent: number
+  received?: number
+}
 
 export type TCreateTransactionReceipt = {
   transactionId: TTransactionId
@@ -58,39 +83,78 @@ export type TCreateTransactionReceipt = {
 export type TCreateTransactionData = {
   user: ById<TUser>
   account: ById<TAccount>
+  instrument: ById<TInstrument>
   tag: ById<TTag>
   merchant: ById<TMerchant>
 }
 
-export function compileCreateTransaction(
+export function compileCreatePosting(
   data: TCreateTransactionData,
-  input: TCreateTransactionInput,
+  input: TCreatePostingInput,
+  ctx: TCoreContext
+): TCompiled<TCreateTransactionReceipt> {
+  const merchant = resolveMerchant(data, input.merchant, ctx)
+  const compiled = compileCreateTransaction(
+    data,
+    {
+      mode: 'posting',
+      input,
+      merchantId: merchant?.receipt.merchantId ?? null,
+    },
+    ctx
+  )
+  return {
+    ...compiled,
+    patch: { ...compiled.patch, ...merchant?.patch },
+  }
+}
+
+export function compileCreateTransfer(
+  data: TCreateTransactionData,
+  input: TCreateTransferInput,
+  ctx: TCoreContext
+): TCompiled<TCreateTransactionReceipt> {
+  return compileCreateTransaction(data, { mode: 'transfer', input }, ctx)
+}
+
+type TResolvedCreateInput =
+  | {
+      mode: 'posting'
+      input: TCreatePostingInput
+      merchantId: TMerchantId | null
+    }
+  | { mode: 'transfer'; input: TCreateTransferInput }
+
+function compileCreateTransaction(
+  data: TCreateTransactionData,
+  resolved: TResolvedCreateInput,
   ctx: TCoreContext
 ): TCompiled<TCreateTransactionReceipt> {
   const user = getRootUser(data.user)
   if (!user) throw new Error('Cannot create transaction without root user')
 
   let transaction: TTransaction
-  if (input.kind === 'transfer') {
+  if (resolved.mode === 'transfer') {
+    const { input } = resolved
     const outcomeAccount = requireEntity(
       data.account,
-      input.outcomeAccountId,
+      input.fromAccountId,
       'outcome account'
     )
     const incomeAccount = requireEntity(
       data.account,
-      input.incomeAccountId,
+      input.toAccountId,
       'income account'
     )
     if (outcomeAccount.id === incomeAccount.id) {
       throw new Error('Transfer accounts must be different')
     }
 
-    requirePositiveAmount(input.outcome, 'outcome')
+    requirePositiveAmount(input.sent, 'sent')
     const income =
-      input.income ??
+      input.received ??
       (outcomeAccount.instrument === incomeAccount.instrument
-        ? input.outcome
+        ? input.sent
         : undefined)
     if (income === undefined) {
       throw new Error('Cross-instrument transfer requires income amount')
@@ -104,9 +168,9 @@ export function compileCreateTransaction(
         user: user.id,
         date: input.date,
         comment: input.comment,
-        created: issuedAt,
+        created: input.createdAt ?? issuedAt,
         changed: issuedAt,
-        outcome: input.outcome,
+        outcome: input.sent,
         outcomeAccount: outcomeAccount.id,
         outcomeInstrument: outcomeAccount.instrument,
         income,
@@ -116,13 +180,30 @@ export function compileCreateTransaction(
       ctx
     )
   } else {
+    const { input, merchantId } = resolved
     const account = requireEntity(data.account, input.accountId, 'account')
     requirePositiveAmount(input.amount, 'amount')
-    input.tagIds?.forEach(id => requireEntity(data.tag, id, 'tag'))
-    if (input.merchantId != null) {
-      requireEntity(data.merchant, input.merchantId, 'merchant')
-    }
+    const tagIds =
+      input.kind === 'expense' || input.kind === 'income'
+        ? input.tagIds
+        : undefined
+    tagIds?.forEach(id => requireEntity(data.tag, id, 'tag'))
 
+    const debt = input.kind === 'lent' || input.kind === 'borrowed'
+    const debtId = debt ? getDebtAccountId(data.account) : undefined
+    if (debt && !debtId) throw new Error('Debt account is missing')
+    if (debt && !input.payee?.trim()) {
+      throw new Error('Debt requires a counterparty')
+    }
+    if (input.originalAmount) {
+      requirePositiveAmount(input.originalAmount.amount, 'original amount')
+      requireEntity(
+        data.instrument,
+        input.originalAmount.instrumentId,
+        'instrument'
+      )
+    }
+    const incoming = input.kind === 'income' || input.kind === 'borrowed'
     const issuedAt = ctx.now()
     transaction = makeTransaction(
       {
@@ -130,17 +211,27 @@ export function compileCreateTransaction(
         user: user.id,
         date: input.date,
         comment: input.comment,
-        created: issuedAt,
+        created: input.createdAt ?? issuedAt,
         changed: issuedAt,
-        income: input.kind === 'income' ? input.amount : 0,
-        outcome: input.kind === 'expense' ? input.amount : 0,
-        incomeAccount: account.id,
-        outcomeAccount: account.id,
+        income: debt || incoming ? input.amount : 0,
+        outcome: debt || !incoming ? input.amount : 0,
+        incomeAccount: input.kind === 'lent' ? debtId! : account.id,
+        outcomeAccount: input.kind === 'borrowed' ? debtId! : account.id,
         incomeInstrument: account.instrument,
         outcomeInstrument: account.instrument,
-        tag: input.tagIds?.length ? [...input.tagIds] : null,
-        merchant: input.merchantId ?? null,
+        opIncome: incoming ? input.originalAmount?.amount : undefined,
+        opIncomeInstrument: incoming
+          ? input.originalAmount?.instrumentId
+          : undefined,
+        opOutcome: !incoming ? input.originalAmount?.amount : undefined,
+        opOutcomeInstrument: !incoming
+          ? input.originalAmount?.instrumentId
+          : undefined,
+        tag: tagIds?.length ? [...tagIds] : null,
+        merchant: merchantId,
         payee: input.payee,
+        originalPayee: input.originalPayee ?? input.payee,
+        qrCode: input.qrCode,
       },
       ctx
     )
@@ -150,6 +241,19 @@ export function compileCreateTransaction(
     patch: { transaction: [toCreationPatch(transaction)] },
     receipt: { transactionId: transaction.id },
   }
+}
+
+function resolveMerchant(
+  data: TCreateTransactionData,
+  merchant: TCreateMerchantReference | null | undefined,
+  ctx: TCoreContext
+) {
+  if (!merchant) return null
+  if ('title' in merchant) {
+    return compileCreateMerchant(data.merchant, merchant.title, ctx)
+  }
+  requireEntity(data.merchant, merchant.id, 'merchant')
+  return { patch: {}, receipt: { merchantId: merchant.id } }
 }
 
 export function compileDeleteTransactions(

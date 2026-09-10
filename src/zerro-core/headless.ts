@@ -36,10 +36,14 @@ export {
 } from './internal/domain/zenmoney/model/validateStore'
 
 export {
-  compileCreateTransaction,
+  compileCreatePosting,
+  compileCreateTransfer,
   type TCreateTransactionData,
-  type TCreateTransactionInput,
+  type TCreateMerchantReference,
+  type TCreatePostingInput,
+  type TCreateTransferInput,
   type TCreateTransactionReceipt,
+  type TOriginalAmount,
 } from './internal/domain/zenmoney/entities/transactions/commands'
 
 export {

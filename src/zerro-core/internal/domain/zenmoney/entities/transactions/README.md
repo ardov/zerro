@@ -21,9 +21,16 @@ income, outcome, transfer, and the two debt directions.
 
 ## Writes
 
-Commands record intent only. `compileCreateTransaction` uses the store's root
-user and the production factory. Restore uses a new id because server deletion
-is irreversible; changing immutable `created` also recreates the transaction.
+Commands record intent only. `compileCreatePosting` accepts one-account income,
+expense, and debt operations; `compileCreateTransfer` accepts only the two
+accounts and amounts that a transfer needs. Both use the store's root user and
+the production factory. Restore uses a new id because server deletion is
+irreversible; changing immutable `created` also recreates the transaction.
+
+A posting may additionally carry a merchant reference (`{ id }` or `{ title }`),
+payee and original payee, QR code, and an atomic original-currency
+amount (`{ amount, instrumentId }`). Transfers deliberately expose none of that
+posting-only metadata. Both commands accept an optional creation time. A new merchant and its posting compile into one command.
 
 The materializer predicts balance changes and deletion effects for immediate
 local reads. Transport omits those predictions and sends full entities expanded

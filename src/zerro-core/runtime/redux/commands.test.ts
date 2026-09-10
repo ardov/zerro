@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 import type { RootState } from '@/store'
-import { appendClientCommand } from '@/store/data'
+import { appendClientCommand, undoClientCommand } from '@/store/data'
 import { rootReducer } from '@/store/rootReducer'
 import { makeTestRootState } from '@/store/testing'
 import {
@@ -14,7 +14,7 @@ import {
 import {
   applyChangesToTransaction,
   bulkEditTransactions,
-  createTransaction,
+  createPosting,
   setAccountInBalance,
   setTransactionsViewed,
 } from './commands'
@@ -55,7 +55,7 @@ describe('Redux semantic commands', () => {
     })
 
     const transactionId = store.dispatch(
-      createTransaction({
+      createPosting({
         kind: 'expense',
         accountId: 'cash',
         amount: 12.5,
@@ -90,6 +90,39 @@ describe('Redux semantic commands', () => {
       comment: 'Lunch',
       viewed: true,
     })
+  })
+
+  it('creates a merchant and transaction together and undoes both', () => {
+    const current = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+      account: { cash: makeAccount({ id: 'cash', instrument: 1 }) },
+    })
+    const store = configureStore({
+      reducer: rootReducer,
+      preloadedState: makeTestRootState(current),
+      middleware: getDefaultMiddleware =>
+        getDefaultMiddleware({
+          immutableCheck: false,
+          serializableCheck: false,
+        }),
+    })
+    const id = store.dispatch(
+      createPosting({
+        kind: 'expense',
+        accountId: 'cash',
+        amount: 25,
+        date: '2026-07-29',
+        payee: 'New shop',
+        merchant: { title: 'New shop' },
+      })
+    )
+    const state = store.getState().data
+    expect(state.outbox).toHaveLength(1)
+    const merchantId = state.current.transaction[id].merchant!
+    expect(state.current.merchant[merchantId].title).toBe('New shop')
+    store.dispatch(undoClientCommand())
+    expect(store.getState().data.current.transaction[id]).toBeUndefined()
+    expect(store.getState().data.current.merchant[merchantId]).toBeUndefined()
   })
 
   it('writes sparse account intent through the public wrapper', () => {
