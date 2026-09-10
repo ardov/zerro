@@ -37,6 +37,7 @@ type DragState = {
   axis: 'h' | 'v' | null
   lastX: number
   lastTime: number
+  velocityX: number
 }
 
 function useSlideRevealGesture(revealWidth: number) {
@@ -47,6 +48,11 @@ function useSlideRevealGesture(revealWidth: number) {
   useEffect(() => {
     offsetXRef.current = offsetX
   }, [offsetX])
+
+  const updateOffset = useCallback((next: number) => {
+    offsetXRef.current = next
+    setOffsetX(next)
+  }, [])
 
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef<DragState | null>(null)
@@ -60,7 +66,7 @@ function useSlideRevealGesture(revealWidth: number) {
     )
   }
 
-  const closeReveal = useCallback(() => setOffsetX(0), [])
+  const closeReveal = useCallback(() => updateOffset(0), [updateOffset])
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -73,6 +79,7 @@ function useSlideRevealGesture(revealWidth: number) {
         axis: null,
         lastX: e.clientX,
         lastTime: Date.now(),
+        velocityX: 0,
       }
       setIsDragging(true)
     },
@@ -94,12 +101,15 @@ function useSlideRevealGesture(revealWidth: number) {
         t.axis = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v'
       }
       if (t.axis !== 'h') return
+      const now = Date.now()
+      const elapsed = now - t.lastTime
+      if (elapsed > 0) t.velocityX = (e.clientX - t.lastX) / elapsed
       t.lastX = e.clientX
-      t.lastTime = Date.now()
+      t.lastTime = now
       const next = Math.min(0, Math.max(-revealWidth, t.startOffset + dx))
-      setOffsetX(next)
+      updateOffset(next)
     },
-    [revealWidth]
+    [revealWidth, updateOffset]
   )
 
   const handlePointerUp = useCallback(
@@ -112,12 +122,18 @@ function useSlideRevealGesture(revealWidth: number) {
       }
       if (!t || t.axis !== 'h') return
       const elapsed = Date.now() - t.lastTime
-      const velocity = elapsed > 0 ? (e.clientX - t.lastX) / elapsed : 0
+      const releaseVelocity =
+        elapsed > 0 && e.clientX !== t.lastX
+          ? (e.clientX - t.lastX) / elapsed
+          : t.velocityX
+      const velocity = elapsed <= 100 ? releaseVelocity : 0
       const shouldOpen =
-        velocity < -VELOCITY_THRESHOLD || offsetXRef.current < -revealWidth / 2
-      setOffsetX(shouldOpen ? -revealWidth : 0)
+        Math.abs(velocity) > VELOCITY_THRESHOLD
+          ? velocity < 0
+          : offsetXRef.current < -revealWidth / 2
+      updateOffset(shouldOpen ? -revealWidth : 0)
     },
-    [revealWidth]
+    [revealWidth, updateOffset]
   )
 
   return {
@@ -159,7 +175,7 @@ export const SlideReveal: FC<SlideRevealProps> = ({
         }}
       >
         <div
-          className="relative touch-auto"
+          className="relative touch-pan-y"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
