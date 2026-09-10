@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
-import { useOverlayFocus } from './useOverlayFocus'
+import { useOverlayFinalFocus } from './useOverlayFinalFocus'
 import { cn } from './shadcn/utils'
 import './Dialog.css'
 
@@ -27,7 +27,7 @@ export function Dialog({
   children,
   ...props
 }: DialogProps) {
-  const { finalFocus } = useOverlayFocus(open)
+  const finalFocus = useOverlayFinalFocus(open)
   return (
     <DialogPrimitive.Root
       open={open}

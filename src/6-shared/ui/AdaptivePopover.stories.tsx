@@ -105,11 +105,13 @@ const checkDismissal: Story['play'] = async ({ canvasElement }) => {
     await body.findByRole('button', { name: 'Close surface' })
   )
   await waitFor(() => expect(trigger).toHaveFocus())
+  await expect(trigger.matches(':focus-visible')).toBe(false)
   await userEvent.click(trigger)
   await body.findByRole('textbox', { name: 'Overlay input' })
   const backdrop = document.querySelector<HTMLElement>(ADAPTIVE_BACKDROP)!
   await userEvent.click(backdrop)
   await waitFor(() => expect(trigger).toHaveFocus())
+  await expect(trigger.matches(':focus-visible')).toBe(false)
   await expect(
     [document.body, document.documentElement].every(
       element => getComputedStyle(element).overflow !== 'hidden'
@@ -183,5 +185,6 @@ export const MobileSwipe: Story = {
     fireEvent.touchEnd(popup, { touches: [], changedTouches: [touch(0)] })
     await waitFor(() => expect(popup).not.toBeVisible())
     await waitFor(() => expect(trigger).toHaveFocus())
+    await expect(trigger.matches(':focus-visible')).toBe(false)
   },
 }

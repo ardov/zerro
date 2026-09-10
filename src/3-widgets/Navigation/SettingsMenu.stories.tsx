@@ -36,8 +36,10 @@ const checkNestedConfirm: Story['play'] = async ({ canvasElement }) => {
   await userEvent.click(cancel)
   await waitFor(() => expect(cancel).not.toBeVisible())
   await waitFor(() => expect(reload).toHaveFocus())
+  await expect(reload.matches(':focus-visible')).toBe(false)
   await userEvent.keyboard('{Escape}')
   await waitFor(() => expect(trigger).toHaveFocus())
+  await expect(trigger.matches(':focus-visible')).toBe(true)
 }
 
 export const Desktop: Story = {

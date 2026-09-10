@@ -2,7 +2,7 @@ import type { HTMLAttributes, ReactNode } from 'react'
 import { useState } from 'react'
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import { useTranslation } from 'react-i18next'
-import { useOverlayFocus } from './useOverlayFocus'
+import { useOverlayFinalFocus } from './useOverlayFinalFocus'
 import {
   anchoredSurfaceClass,
   overAnchor,
@@ -73,7 +73,7 @@ export function Popover({
     : lastAnchor?.isConnected
       ? lastAnchor
       : null
-  const { finalFocus } = useOverlayFocus(open)
+  const finalFocus = useOverlayFinalFocus(open)
   const fadeRef = useScrollFade<HTMLDivElement>()
   return (
     <PopoverPrimitive.Root

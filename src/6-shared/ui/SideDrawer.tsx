@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Drawer } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
-import { useOverlayFocus } from './useOverlayFocus'
+import { useOverlayFinalFocus } from './useOverlayFinalFocus'
 import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'
 import { cn } from './shadcn/utils'
 import { MobileDrawerViewport } from './MobileDrawerViewport'
@@ -39,7 +39,7 @@ export function SideDrawer({
   ...props
 }: SideDrawerProps) {
   const { t } = useTranslation()
-  const { finalFocus } = useOverlayFocus(open)
+  const finalFocus = useOverlayFinalFocus(open)
   return (
     <Drawer.Root
       open={open}

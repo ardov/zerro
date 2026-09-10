@@ -2,7 +2,7 @@ import { Drawer } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
 import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { Popover, type PopoverProps } from './Popover'
-import { useOverlayFocus } from './useOverlayFocus'
+import { useOverlayFinalFocus } from './useOverlayFinalFocus'
 import { cn } from './shadcn/utils'
 import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'
 import { MobileDrawerViewport } from './MobileDrawerViewport'
@@ -56,7 +56,7 @@ function PopoverDrawer({
   ...props
 }: PopoverProps & { drawerSide: keyof typeof swipeDirections }) {
   const { t } = useTranslation()
-  const { finalFocus } = useOverlayFocus(open)
+  const finalFocus = useOverlayFinalFocus(open)
   return (
     <Drawer.Root
       open={open}

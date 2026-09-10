@@ -73,6 +73,29 @@ export const Mobile: Story = {
   globals: { viewport: { value: 'iphone13' } },
 }
 
+/** Pointer dismissal restores focus without manufacturing a keyboard ring. */
+export const MobilePointerDismissal: Story = {
+  tags: ['!dev', '!autodocs'],
+  globals: { viewport: { value: 'iphone13' } },
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('button', { name: 'Open' })
+    await userEvent.click(trigger)
+    await userEvent.click(await body.findByRole('button', { name: 'Done' }))
+    await waitFor(() => expect(trigger).toHaveFocus())
+    await expect(trigger.matches(':focus-visible')).toBe(false)
+
+    await userEvent.click(trigger)
+    const done = await body.findByRole('button', { name: 'Done' })
+    done.focus()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(trigger).toHaveFocus())
+    await expect(trigger.matches(':focus-visible')).toBe(true)
+  },
+}
+
 /** Modal behaviour: a focus trap, a scroll lock, and backdrop dismissal. */
 export const Dismissal: Story = {
   tags: ['!dev', '!autodocs'],
@@ -102,6 +125,7 @@ export const Dismissal: Story = {
     )
     await waitFor(() => expect(sheet).not.toBeVisible())
     await waitFor(() => expect(trigger).toHaveFocus())
+    await expect(trigger.matches(':focus-visible')).toBe(false)
     await expect(
       [doc.body, doc.documentElement].every(
         el => getComputedStyle(el).overflow !== 'hidden'

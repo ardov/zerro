@@ -88,6 +88,7 @@ export const ConfirmFromDrawer: Story = {
     await waitFor(() => expect(reopened).not.toBeVisible())
     await expect(parent).toBeVisible()
     await waitFor(() => expect(trigger).toHaveFocus())
+    await expect(trigger.matches(':focus-visible')).toBe(false)
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(parent).not.toBeVisible())
     await waitFor(() => expect(opener).toHaveFocus())

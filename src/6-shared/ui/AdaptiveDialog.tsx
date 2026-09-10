@@ -3,7 +3,7 @@ import { Drawer } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
 import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { Dialog } from './Dialog'
-import { useOverlayFocus } from './useOverlayFocus'
+import { useOverlayFinalFocus } from './useOverlayFinalFocus'
 import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'
 import { cn } from './shadcn/utils'
 import { MobileDrawerViewport } from './MobileDrawerViewport'
@@ -28,9 +28,7 @@ export function AdaptiveDialog({
   children,
   ...props
 }: AdaptiveDialogProps) {
-  const { t } = useTranslation()
   const isMobile = useBreakpointDown('sm')
-  const { finalFocus } = useOverlayFocus(open)
 
   if (!isMobile) {
     return (
@@ -40,6 +38,29 @@ export function AdaptiveDialog({
     )
   }
 
+  return (
+    <DialogDrawer
+      {...props}
+      open={open}
+      onClose={onClose}
+      className={className}
+    >
+      {children}
+    </DialogDrawer>
+  )
+}
+
+/** A component boundary keeps the responsive branches' hooks independent
+ * without changing hook order across breakpoints. */
+function DialogDrawer({
+  open,
+  onClose,
+  className,
+  children,
+  ...props
+}: AdaptiveDialogProps) {
+  const { t } = useTranslation()
+  const finalFocus = useOverlayFinalFocus(open)
   return (
     <Drawer.Root
       open={open}
