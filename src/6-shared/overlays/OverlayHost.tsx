@@ -300,16 +300,40 @@ function AskedLayerView({
   layer: AskLayer
   onAnswer: (id: string, value: unknown) => void
 }) {
+  const open = useEntranceOpen(layer.open)
   const value = useMemo(
     () => ({
-      open: layer.open,
+      open,
       answer: (answered?: unknown) => onAnswer(layer.id, answered),
     }),
-    [layer.open, layer.id, onAnswer]
+    [open, layer.id, onAnswer]
   )
   return (
     <AskedContext.Provider value={value}>{layer.element}</AskedContext.Provider>
   )
+}
+
+/** An asked surface is mounted only once it is already open, so Base UI has
+ * nothing closed to transition from: its transition status starts at whatever
+ * the first committed frame said, and a popup that was open on that frame gets
+ * no starting style. Withhold the open by one frame to give it that frame.
+ *
+ * Closing is not delayed — an answer has to start its exit on the press.
+ *
+ * Here rather than in each surface: every asked overlay mounts this way, so a
+ * fix at the call site is one every next surface has to remember, and it would
+ * have to know which breakpoint it is animating for. */
+function useEntranceOpen(open: boolean) {
+  const [entered, setEntered] = useState(false)
+  // Reset while rendering the closed layer, so the next opening of a layer
+  // that is kept mounted through its exit gets its closed frame too.
+  if (!open && entered) setEntered(false)
+  useEffect(() => {
+    if (!open) return undefined
+    const frame = requestAnimationFrame(() => setEntered(true))
+    return () => cancelAnimationFrame(frame)
+  }, [open])
+  return open && entered
 }
 
 /** The overlay entry rides under its own key, so anything else a route puts in

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { MenuButton } from './MenuButton'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 
 const meta = {
   title: 'App/Navigation/SettingsMenu',
@@ -57,4 +57,26 @@ export const Mobile: Story = {
   args: { showLinks: true },
   render: args => <MenuButton {...args} />,
   play: checkNestedConfirm,
+}
+
+/** Asked content mounts already open; the mobile sheet must nevertheless get
+ * a closed starting frame and travel up from the bottom. */
+export const MobileEntrance: Story = {
+  tags: ['!dev', '!autodocs'],
+  globals: { viewport: { value: 'iphone13' } },
+  args: { showLinks: true },
+  render: args => <MenuButton {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const doc = canvasElement.ownerDocument
+    fireEvent.click(canvas.getByRole('button', { name: 'Settings' }))
+    const popup = await within(doc.body).findByRole('dialog', {
+      name: 'Settings',
+    })
+    expect(popup).toHaveAttribute('data-starting-style')
+    expect(getComputedStyle(popup).transform).not.toBe('none')
+    await waitFor(() =>
+      expect(popup).not.toHaveAttribute('data-starting-style')
+    )
+  },
 }
