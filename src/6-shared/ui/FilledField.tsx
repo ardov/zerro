@@ -1,5 +1,6 @@
 import type { ComponentPropsWithRef, MouseEvent, ReactNode } from 'react'
 import { useId } from 'react'
+import { Field } from '@base-ui/react/field'
 import { Input as InputPrimitive } from '@base-ui/react/input'
 import { GrowingTextarea, inputPlaceholderClass } from './GrowingTextarea'
 import { PressBacking } from './PressBacking'
@@ -128,7 +129,11 @@ function InvalidMark() {
 /** The message under a field, and the room it takes. */
 function FieldError({ children }: { children: ReactNode }) {
   if (!children) return null
-  return <p className="m-0 px-3 pt-1 text-caption text-error">{children}</p>
+  return (
+    <Field.Error match className="m-0 px-3 pt-1 text-caption text-error">
+      {children}
+    </Field.Error>
+  )
 }
 
 export type FilledFieldProps = ComponentPropsWithRef<'div'> &
@@ -153,7 +158,7 @@ export function FilledField({
 }: FilledFieldProps) {
   const state = { invalid, readOnly, disabled, error }
   return (
-    <div>
+    <Field.Root invalid={invalid} disabled={disabled}>
       <div
         data-slot="filled-field"
         className={cn(filledFieldClass, className)}
@@ -167,7 +172,7 @@ export function FilledField({
         {invalid && <InvalidMark />}
       </div>
       <FieldError>{error}</FieldError>
-    </div>
+    </Field.Root>
   )
 }
 
@@ -200,7 +205,7 @@ export function FilledInput({
 }: FilledInputProps) {
   const state = { invalid, readOnly, disabled, error }
   return (
-    <div>
+    <Field.Root invalid={invalid} disabled={disabled}>
       <div
         data-slot="filled-field"
         className={cn(filledFieldClass, multiline && 'items-start', className)}
@@ -230,7 +235,7 @@ export function FilledInput({
         {invalid && <InvalidMark />}
       </div>
       <FieldError>{error}</FieldError>
-    </div>
+    </Field.Root>
   )
 }
 
@@ -250,8 +255,10 @@ export function FilledButton({
   error,
   className,
   children,
+  'aria-describedby': describedBy,
   ...props
 }: FilledButtonProps) {
+  const errorId = useId()
   const state = { invalid, readOnly, disabled, error }
   return (
     <div>
@@ -259,6 +266,12 @@ export function FilledButton({
         type="button"
         data-slot="filled-field"
         disabled={disabled}
+        aria-invalid={invalid || undefined}
+        aria-describedby={
+          [describedBy, error ? errorId : undefined]
+            .filter(Boolean)
+            .join(' ') || undefined
+        }
         className={cn(filledFieldClass, filledFieldButtonClass, className)}
         {...stateProps(state)}
         {...props}
@@ -269,7 +282,11 @@ export function FilledButton({
         {trailing}
         {invalid && <InvalidMark />}
       </button>
-      <FieldError>{error}</FieldError>
+      {error && (
+        <p id={errorId} className="m-0 px-3 pt-1 text-caption text-error">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

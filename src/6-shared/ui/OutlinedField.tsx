@@ -19,9 +19,8 @@ export type OutlinedFieldFrameProps = {
   /** Which field height to use. The frame needs it because a label
    * that is not floated rests on the control's padding. */
   size?: TFieldSize
-  /** Keeps the label floated whatever the control is doing. Base UI reports a
-   * field filled from its `Field.Control`, and a select's trigger is not one,
-   * so the select says so itself. */
+  /** Keeps the label floated when the display has content even without a
+   * selected value, such as a multiple select's empty summary. */
   shrink?: boolean
   error?: boolean
   disabled?: boolean
@@ -61,12 +60,8 @@ export function outlinedControlClass(opts: {
 /** The notched border, the floating label and the helper text, with no opinion
  * about what sits inside. `OutlinedField` puts an input there and `Select` puts
  * a trigger, so the notch geometry is written once. */
-export function OutlinedFieldFrame({
+export function OutlinedFieldRoot({
   className,
-  label,
-  helperText,
-  startAdornment,
-  endAdornment,
   fullWidth,
   size = 'medium',
   shrink,
@@ -89,6 +84,24 @@ export function OutlinedFieldFrame({
         className
       )}
     >
+      {children}
+    </Field.Root>
+  )
+}
+
+/** The decoration inside an existing field context. Select/Combobox roots
+ * belong between OutlinedFieldRoot and this content so their validation and
+ * value state reach the same field as the label and description. */
+export function OutlinedFieldContent({
+  label,
+  helperText,
+  startAdornment,
+  endAdornment,
+  error,
+  children,
+}: OutlinedFieldFrameProps & { children: ReactNode }) {
+  return (
+    <>
       <div
         data-slot="input-group"
         className={cn(
@@ -137,10 +150,20 @@ export function OutlinedFieldFrame({
           {helperText}
         </Field.Description>
       )}
-    </Field.Root>
+    </>
   )
 }
 
+/** A complete frame for a control that does not need its own root. */
+export function OutlinedFieldFrame(
+  props: OutlinedFieldFrameProps & { children: ReactNode }
+) {
+  return (
+    <OutlinedFieldRoot {...props}>
+      <OutlinedFieldContent {...props} />
+    </OutlinedFieldRoot>
+  )
+}
 /** An outlined text field with its label cut into a notched border.
  *
  * The label rests inside the field and floats up into the notch once the field

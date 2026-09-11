@@ -1,4 +1,5 @@
 import type { ComponentPropsWithRef } from 'react'
+import { Input as InputPrimitive } from '@base-ui/react/input'
 import { cn } from './shadcn/utils'
 
 export type AutoWidthInputProps = Omit<
@@ -30,7 +31,7 @@ export function AutoWidthInput({
       <span aria-hidden className="invisible block pr-0.5 whitespace-pre">
         {text || props.placeholder || '0'}
       </span>
-      <input
+      <InputPrimitive
         {...props}
         className={cn(
           'absolute inset-0 m-0 w-full border-0 bg-transparent p-0 text-[length:inherit] leading-[inherit] font-[inherit] text-current outline-none disabled:text-disabled-foreground',

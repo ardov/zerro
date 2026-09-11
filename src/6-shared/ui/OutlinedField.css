@@ -50,8 +50,8 @@
 
   /* The label rests on the control's padding and
      floats it into the notch once the field is focused or filled — Base UI
-     puts both of those on the field root, along with the `data-shrink` a
-     select sets for itself, so all three are read the same way.
+     puts both of those on the field root. An explicit `data-shrink` keeps a
+     display-only summary floated even without a value.
 
      The transform has to leave the class list: which of the two positions
      applies is decided here, and a `translate-*` utility would outrank both

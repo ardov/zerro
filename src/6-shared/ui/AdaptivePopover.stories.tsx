@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { usePopup } from '@/6-shared/overlays'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { AdaptivePopover } from './AdaptivePopover'
 import { Button } from './Button'
@@ -187,4 +189,77 @@ export const MobileSwipe: Story = {
     await waitFor(() => expect(trigger).toHaveFocus())
     await expect(trigger.matches(':focus-visible')).toBe(false)
   },
+}
+
+function CompletionHarness() {
+  const [open, setOpen] = usePopup()
+  const navigate = useNavigate()
+  const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null)
+  const [opened, setOpened] = useState(0)
+  const [closed, setClosed] = useState(0)
+  return (
+    <>
+      <Button ref={setAnchor} onClick={() => setOpen(true)}>
+        Open counted surface
+      </Button>
+      <output data-testid="completions">
+        {opened}/{closed}
+      </output>
+      <AdaptivePopover
+        open={open}
+        anchorEl={anchor}
+        onClose={() => setOpen(false)}
+        onOpenComplete={() => setOpened(count => count + 1)}
+        onCloseComplete={() => setClosed(count => count + 1)}
+        alignOffset={2}
+        sideOffset={3}
+        aria-label="Counted surface"
+      >
+        <div className="p-6">
+          <button onClick={() => setOpen(false)}>Close counted surface</button>
+          <button onClick={() => navigate(-1)}>History Back</button>
+        </div>
+      </AdaptivePopover>
+    </>
+  )
+}
+
+const checkCompletions: Story['play'] = async ({ canvasElement }) => {
+  const canvas = within(canvasElement)
+  const body = within(canvasElement.ownerDocument.body)
+  const trigger = canvas.getByRole('button', { name: 'Open counted surface' })
+  const counts = canvas.getByTestId('completions')
+  for (const [index, close] of [
+    'Escape',
+    'Close counted surface',
+    'History Back',
+  ].entries()) {
+    await userEvent.click(trigger)
+    const popup = await body.findByRole('dialog', { name: 'Counted surface' })
+    await waitFor(() =>
+      expect(counts).toHaveTextContent(`${index + 1}/${index}`)
+    )
+    await expect(popup).not.toHaveAttribute('alignOffset')
+    await expect(popup).not.toHaveAttribute('sideOffset')
+    if (close === 'Escape') await userEvent.keyboard('{Escape}')
+    else
+      await userEvent.click(within(popup).getByRole('button', { name: close }))
+    await waitFor(() =>
+      expect(counts).toHaveTextContent(`${index + 1}/${index + 1}`)
+    )
+    await waitFor(() => expect(popup).not.toBeInTheDocument())
+    await expect(trigger).toHaveFocus()
+  }
+}
+
+export const DesktopCompletion: Story = {
+  tags: ['!dev', '!autodocs'],
+  globals: { viewport: { value: 'zerro900' } },
+  render: () => <CompletionHarness />,
+  play: checkCompletions,
+}
+
+export const MobileCompletion: Story = {
+  ...DesktopCompletion,
+  globals: { viewport: { value: 'zerro899' } },
 }

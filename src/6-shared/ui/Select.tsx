@@ -3,7 +3,11 @@ import { Select as SelectPrimitive } from '@base-ui/react/select'
 import { usePopup } from '@/6-shared/overlays'
 import { CheckIcon, ChevronDownIcon } from './Icons'
 import { ListRowBacking, listRowClass } from './ListRow'
-import { OutlinedFieldFrame, outlinedControlClass } from './OutlinedField'
+import {
+  OutlinedFieldRoot,
+  OutlinedFieldContent,
+  outlinedControlClass,
+} from './OutlinedField'
 import type { OutlinedFieldFrameProps, TFieldSize } from './OutlinedField'
 import {
   overAnchor,
@@ -67,22 +71,24 @@ export function Select<T extends string>(props: SelectProps<T>) {
   const { value, onChange, options, ...field } = props
   const [open, onOpenChange] = usePopup()
   return (
-    <SelectPrimitive.Root
-      items={options}
-      value={value}
-      // Base UI lets a select be cleared; no row here carries a null value.
-      onValueChange={next => {
-        if (next !== null) onChange(next)
-      }}
-      open={open}
-      onOpenChange={onOpenChange}
-    >
-      <SelectField
-        {...field}
-        options={options}
-        display={<SelectPrimitive.Value />}
-      />
-    </SelectPrimitive.Root>
+    <OutlinedFieldRoot {...field}>
+      <SelectPrimitive.Root
+        items={options}
+        value={value}
+        // Base UI lets a select be cleared; no row here carries a null value.
+        onValueChange={next => {
+          if (next !== null) onChange(next)
+        }}
+        open={open}
+        onOpenChange={onOpenChange}
+      >
+        <SelectField
+          {...field}
+          options={options}
+          display={<SelectPrimitive.Value />}
+        />
+      </SelectPrimitive.Root>
+    </OutlinedFieldRoot>
   )
 }
 
@@ -93,16 +99,22 @@ export function MultiSelect<T extends string>(props: MultiSelectProps<T>) {
   const { value, onChange, options, renderValue, ...field } = props
   const [open, onOpenChange] = usePopup()
   return (
-    <SelectPrimitive.Root
-      multiple
-      items={options}
-      value={value}
-      onValueChange={onChange}
-      open={open}
-      onOpenChange={onOpenChange}
-    >
-      <SelectField {...field} options={options} display={renderValue(value)} />
-    </SelectPrimitive.Root>
+    <OutlinedFieldRoot {...field} shrink>
+      <SelectPrimitive.Root
+        multiple
+        items={options}
+        value={value}
+        onValueChange={onChange}
+        open={open}
+        onOpenChange={onOpenChange}
+      >
+        <SelectField
+          {...field}
+          options={options}
+          display={renderValue(value)}
+        />
+      </SelectPrimitive.Root>
+    </OutlinedFieldRoot>
   )
 }
 
@@ -116,9 +128,7 @@ function SelectField<T extends string>({
   const fadeRef = useScrollFade<HTMLDivElement>()
   return (
     <>
-      {/* The trigger is not a `Field.Control`, so nothing tells the frame the
-          field is filled — but a select always shows a value. */}
-      <OutlinedFieldFrame {...frame} size={size} shrink>
+      <OutlinedFieldContent {...frame}>
         <SelectPrimitive.Trigger
           aria-label={ariaLabel}
           className={cn(
@@ -131,7 +141,7 @@ function SelectField<T extends string>({
         <SelectPrimitive.Icon className="pointer-events-none absolute right-[7px] inline-flex text-icon-foreground">
           <ChevronDownIcon />
         </SelectPrimitive.Icon>
-      </OutlinedFieldFrame>
+      </OutlinedFieldContent>
 
       <SelectPrimitive.Portal>
         <SelectPrimitive.Positioner

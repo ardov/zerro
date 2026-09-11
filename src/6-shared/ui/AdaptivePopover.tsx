@@ -44,12 +44,15 @@ function PopoverDrawer({
   open,
   onClose,
   onOpenComplete,
+  onCloseComplete,
   // Geometry against an anchor, which a drawer off an edge has none of. Named
   // here so they cannot reach the popup: everything left in `props` is an
   // attribute a `div` understands.
   anchorEl,
   placement,
   align,
+  alignOffset,
+  sideOffset,
   drawerSide,
   className,
   children,
@@ -65,6 +68,7 @@ function PopoverDrawer({
       }}
       onOpenChangeComplete={next => {
         if (next) onOpenComplete?.()
+        else onCloseComplete?.()
       }}
       swipeDirection={swipeDirections[drawerSide]}
     >
