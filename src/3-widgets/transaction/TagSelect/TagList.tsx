@@ -1,5 +1,6 @@
 import { IconButton } from '@/6-shared/ui/Button'
 import type { FC } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import type { HTMLAttributes } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { Tooltip } from '@/6-shared/ui/Tooltip'
@@ -16,14 +17,32 @@ type TagListProps = Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> & {
 export const TagList: FC<TagListProps> = props => {
   const { t } = useTranslation()
   const { tags = null, onChange, tagType, className, ...rest } = props
-  const removeTag = (removeId: string) =>
-    tags && onChange(tags.filter(id => id !== removeId))
+  const listRef = useRef<HTMLDivElement>(null)
+  const focusAfterRemoval = useRef<HTMLElement | null>(null)
+  useLayoutEffect(() => {
+    if (!focusAfterRemoval.current) return
+    focusAfterRemoval.current.focus()
+    focusAfterRemoval.current = null
+  }, [tags])
+  const removeTag = (removeId: string) => {
+    const chip =
+      listRef.current?.querySelectorAll<HTMLElement>('[data-slot="chip"]')[
+        tags?.indexOf(removeId) ?? -1
+      ]
+    if (chip?.contains(document.activeElement)) {
+      const next = chip.nextElementSibling ?? chip.previousElementSibling
+      focusAfterRemoval.current = next?.matches('button')
+        ? (next as HTMLElement)
+        : (next?.querySelector<HTMLElement>('button') ?? null)
+    }
+    if (tags) onChange(tags.filter(id => id !== removeId))
+  }
   const replaceTag = (oldId: string, newId: string) =>
     tags && onChange(tags.map(id => (id === oldId ? newId : id)))
   const addTag = (id: string) => onChange(tags ? [...tags, id] : [id])
 
   return (
-    <div className={cn(className)} {...rest}>
+    <div ref={listRef} className={cn(className)} {...rest}>
       {tags?.map(id => (
         <TagSelect2
           key={id}
@@ -31,9 +50,11 @@ export const TagList: FC<TagListProps> = props => {
           exclude={tags}
           tagType={tagType}
           trigger={
-            <span className="my-1 mr-2 inline-block">
-              <TagChip id={id} onDelete={() => removeTag(id)} />
-            </span>
+            <TagChip
+              id={id}
+              className="my-1 mr-2"
+              onDelete={() => removeTag(id)}
+            />
           }
         />
       ))}

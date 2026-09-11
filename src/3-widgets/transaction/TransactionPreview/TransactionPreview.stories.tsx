@@ -99,7 +99,7 @@ export const Transfer: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    expect(canvas.queryByRole('button', { name: 'Place' })).toBeNull()
+    expect(canvas.queryByRole('combobox', { name: 'Place' })).toBeNull()
 
     const amount = canvas.getByRole<HTMLInputElement>('textbox', {
       name: 'Amount taken',
@@ -143,7 +143,9 @@ export const MerchantPicker: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(document.body)
-    await userEvent.click(await canvas.findByRole('button', { name: 'Place' }))
+    await userEvent.click(
+      await canvas.findByRole('combobox', { name: 'Place' })
+    )
 
     const list = await body.findByRole('listbox')
     const search = await body.findByRole('combobox', { name: 'Find or create' })

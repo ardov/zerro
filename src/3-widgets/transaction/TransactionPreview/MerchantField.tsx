@@ -1,19 +1,29 @@
-import type { FC, KeyboardEventHandler } from 'react'
-import { useCallback, useId, useMemo, useState } from 'react'
+import type { FC } from 'react'
+import { Field } from '@base-ui/react/field'
+import { Combobox } from '@base-ui/react/combobox'
+import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TMerchantId } from '@/6-shared/types'
 import { usePopup } from '@/6-shared/overlays'
 import { AddIcon, PersonIcon, PlaceIcon } from '@/6-shared/ui/Icons'
 import type { FilledFieldState } from '@/6-shared/ui/FilledField'
-import { FilledButton, FilledInput } from '@/6-shared/ui/FilledField'
+import {
+  FilledButton,
+  filledFieldClass,
+  filledControlClass,
+} from '@/6-shared/ui/FilledField'
 import {
   ListRowBacking,
   ListRowIcon,
   listRowClass,
   ListRowText,
 } from '@/6-shared/ui/ListRow'
-import { Popover } from '@/6-shared/ui/Popover'
-import { surfacePadding } from '@/6-shared/ui/overlaySurface'
+import {
+  surfacePadding,
+  popupPositioning,
+  anchoredSurfaceClass,
+  overAnchor,
+} from '@/6-shared/ui/overlaySurface'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useScrollFade } from '@/6-shared/ui/useScrollFade'
 import { core } from '@/zerro-core/redux'
@@ -28,7 +38,6 @@ type TRow =
   | { kind: 'merchant'; merchant: TMerchantOption }
   | { kind: 'create'; title: string }
   | { kind: 'clear' }
-  | { kind: 'showAll' }
 
 export type MerchantFieldProps = FilledFieldState & {
   merchant: TDraftMerchant
@@ -65,13 +74,10 @@ export const MerchantField: FC<MerchantFieldProps> = ({
   const merchants = core.merchants.useAll()
   const usage = core.merchants.useUsage()
   const [open, setOpen] = usePopup()
-  const [anchor, setAnchor] = useState<Element | null>(null)
   const [search, setSearch] = useState('')
   const [showAll, setShowAll] = useState(false)
-  // `null` leaves the highlight on whichever row is the sensible default.
-  const [highlighted, setHighlighted] = useState<number | null>(null)
-  const fadeRef = useScrollFade<HTMLUListElement>()
-  const listId = useId()
+  const searchRef = useRef<HTMLInputElement>(null)
+  const fadeRef = useScrollFade<HTMLDivElement>()
 
   const all = useMemo(
     () =>
@@ -124,56 +130,27 @@ export const MerchantField: FC<MerchantFieldProps> = ({
       : null
 
   const rows: TRow[] = [
-    ...(creating ? [{ kind: 'create' as const, title: creating }] : []),
     ...(!query && shown ? [{ kind: 'clear' as const }] : []),
     ...listed.map(option => ({ kind: 'merchant' as const, merchant: option })),
-    ...(!found && narrowed ? [{ kind: 'showAll' as const }] : []),
+    ...(creating ? [{ kind: 'create' as const, title: creating }] : []),
   ]
 
-  // Enter takes the match rather than the offer to create: a typed prefix is
-  // far more often the start of a name that exists than a new one.
-  const focused = highlighted ?? (creating && listed.length ? 1 : 0)
-
+  // Matching merchants precede the create action so Base UI's automatic
+  // highlight commits an existing match on Enter.
   const [wasOpen, setWasOpen] = useState(open)
   if (wasOpen !== open) {
     setWasOpen(open)
     if (open) {
       setSearch(initialMerchantSearch(Boolean(merchant), payee))
       setShowAll(false)
-      setHighlighted(null)
     }
   }
 
   const choose = (row: TRow) => {
-    if (row.kind === 'showAll') return setShowAll(true)
-    setOpen(false)
     if (row.kind === 'clear') return onChange(null)
     if (row.kind === 'create') return onChange({ title: row.title })
     onChange({ id: row.merchant.id, title: row.merchant.title })
   }
-
-  const onKeyDown: KeyboardEventHandler = event => {
-    if (event.key === 'ArrowDown') {
-      event.preventDefault()
-      setHighlighted(Math.min(focused + 1, rows.length - 1))
-    }
-    if (event.key === 'ArrowUp') {
-      event.preventDefault()
-      setHighlighted(Math.max(focused - 1, 0))
-    }
-    if (event.key === 'Enter' && rows[focused]) {
-      event.preventDefault()
-      choose(rows[focused])
-    }
-  }
-
-  // The ref is stable, so it runs when the highlighted row changes and not on
-  // every render.
-  const keepInView = useCallback(
-    (node: HTMLButtonElement | null) =>
-      node?.scrollIntoView({ block: 'nearest' }),
-    []
-  )
 
   /** A merchant money has been spent with is a place; one only ever met over
    * a debt is a person. One that does not exist yet takes the glyph of the
@@ -201,119 +178,137 @@ export const MerchantField: FC<MerchantFieldProps> = ({
   const rowLabel = (row: TRow) => {
     if (row.kind === 'merchant') return row.merchant.title
     if (row.kind === 'create') return t('createMerchant', { title: row.title })
-    if (row.kind === 'clear') return t('clearMerchant')
-    return t('showAllMerchants')
+    return t('clearMerchant')
   }
 
   return (
-    <>
-      <FilledButton
-        {...state}
-        aria-label={placeholder}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        icon={
-          <MerchantFavicon
-            domain={chosen ? usage[chosen]?.website?.domain : unlinkedDomain}
-            fallback={glyph(chosen)}
-          />
+    <Field.Root
+      invalid={state.invalid}
+      disabled={state.disabled}
+      className="contents"
+    >
+      <Combobox.Root<TRow>
+        readOnly={state.readOnly}
+        items={rows}
+        filter={null}
+        autoHighlight
+        value={
+          chosen
+            ? { kind: 'merchant', merchant: { id: chosen, title: shown } }
+            : null
         }
-        className={className}
-        onClick={event => {
-          setAnchor(event.currentTarget)
-          setOpen(true)
+        isItemEqualToValue={(a, b) => rowKey(a) === rowKey(b)}
+        itemToStringLabel={rowLabel}
+        inputValue={search}
+        onInputValueChange={(value, details) => {
+          if (
+            details.reason === 'input-change' ||
+            details.reason === 'input-clear'
+          )
+            setSearch(value)
         }}
-      >
-        {shown ? (
-          <span className={cn(unlinkedPayee && 'italic')}>{shown}</span>
-        ) : (
-          <span className="text-muted-foreground">{placeholder}</span>
-        )}
-      </FilledButton>
-
-      <Popover
         open={open}
-        onClose={() => setOpen(false)}
-        anchorEl={anchor}
-        placement="over"
-        align="start"
-        alignOffset={-surfacePadding}
-        sideOffset={-surfacePadding}
-        aria-label={placeholder}
-        className="min-w-[calc(var(--anchor-width)+8px)] p-1"
+        onOpenChange={setOpen}
+        onValueChange={row => {
+          if (row) choose(row)
+        }}
+        modal
       >
-        {/* The search keeps its place and the rows scroll under it, so the
-            list is the scroller and this box is what bounds it. The surface
-            itself must stay a plain block: its scroll fade is drawn by
-            pseudo-elements, and a flex surface would lay those out as items
-            and push the content past both its edges. */}
-        <div className="flex max-h-[60vh] flex-col">
-          <FilledInput
-            autoFocus
-            role="combobox"
-            aria-expanded
-            aria-controls={listId}
-            aria-activedescendant={
-              rows[focused] ? `${listId}-${focused}` : undefined
-            }
-            value={search}
-            onChange={event => {
-              setSearch(event.target.value)
-              setHighlighted(null)
-            }}
-            onKeyDown={onKeyDown}
-            placeholder={t('findMerchant')}
-            aria-label={t('findMerchant')}
-            autoComplete="off"
-            className="mb-1"
-          />
-
-          {rows.length ? (
-            <ul
-              ref={fadeRef}
-              id={listId}
-              role="listbox"
-              // A plain block, not a flex column: the fade is drawn by
-              // pseudo-elements, and flex would lay them out as items that
-              // collapse and drag the rows up by their negative margin. The
-              // side padding is given back so the fade reaches both edges.
-              className="scroll-fade hidden-scroll -mx-1 my-0 block min-h-0 list-none overflow-x-hidden overflow-y-auto px-1 py-0"
+        <Combobox.Trigger
+          render={
+            <FilledButton
+              {...state}
+              aria-label={placeholder}
+              icon={
+                <MerchantFavicon
+                  domain={
+                    chosen ? usage[chosen]?.website?.domain : unlinkedDomain
+                  }
+                  fallback={glyph(chosen)}
+                />
+              }
+              className={className}
             >
-              {rows.map((row, index) => {
-                const selected =
-                  row.kind === 'merchant' && row.merchant.id === chosen
-                const icon = rowIcon(row)
-                return (
-                  <li key={rowKey(row)} role="presentation">
-                    <button
-                      type="button"
-                      role="option"
-                      id={`${listId}-${index}`}
-                      ref={index === focused ? keepInView : undefined}
-                      tabIndex={-1}
-                      aria-selected={selected}
-                      data-highlighted={index === focused || undefined}
-                      className={listRowClass}
-                      onClick={() => choose(row)}
-                    >
-                      <ListRowBacking selected={selected} />
-                      {icon && <ListRowIcon>{icon}</ListRowIcon>}
-                      <ListRowText className="truncate">
-                        {rowLabel(row)}
-                      </ListRowText>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          ) : (
-            <p className="m-0 px-3 py-2 text-body-sm text-muted-foreground">
-              {t('noMerchants')}
-            </p>
-          )}
-        </div>
-      </Popover>
-    </>
+              {shown ? (
+                <span className={cn(unlinkedPayee && 'italic')}>{shown}</span>
+              ) : (
+                <span className="text-muted-foreground">{placeholder}</span>
+              )}
+            </FilledButton>
+          }
+        />
+        <Combobox.Portal>
+          <Combobox.Positioner
+            {...popupPositioning}
+            side="bottom"
+            align="start"
+            alignOffset={-surfacePadding}
+            sideOffset={data => overAnchor(data) - surfacePadding}
+            collisionAvoidance={{ side: 'shift', align: 'shift' }}
+          >
+            <Combobox.Popup
+              aria-label={placeholder}
+              className={cn(
+                anchoredSurfaceClass,
+                'min-w-[calc(var(--anchor-width)+8px)] p-1'
+              )}
+            >
+              <div className="flex max-h-[60vh] flex-col">
+                <div
+                  data-slot="filled-field"
+                  className={cn(filledFieldClass, 'mb-1 shrink-0')}
+                >
+                  <Combobox.Input
+                    ref={searchRef}
+                    placeholder={t('findMerchant')}
+                    aria-label={t('findMerchant')}
+                    className={filledControlClass}
+                  />
+                </div>
+                <Combobox.List
+                  ref={fadeRef}
+                  className="scroll-fade hidden-scroll -mx-1 my-0 block min-h-0 list-none overflow-x-hidden overflow-y-auto px-1 py-0 outline-none"
+                >
+                  {(row: TRow) => {
+                    const selected =
+                      row.kind === 'merchant' && row.merchant.id === chosen
+                    const icon = rowIcon(row)
+                    return (
+                      <Combobox.Item
+                        key={rowKey(row)}
+                        value={row}
+                        className={listRowClass}
+                      >
+                        <ListRowBacking selected={selected} />
+                        {icon && <ListRowIcon>{icon}</ListRowIcon>}
+                        <ListRowText className="truncate">
+                          {rowLabel(row)}
+                        </ListRowText>
+                      </Combobox.Item>
+                    )
+                  }}
+                </Combobox.List>
+                <Combobox.Empty className="m-0 px-3 py-2 text-body-sm text-muted-foreground">
+                  {t('noMerchants')}
+                </Combobox.Empty>
+                {!found && narrowed && (
+                  <button
+                    type="button"
+                    className={listRowClass}
+                    onClick={() => {
+                      setShowAll(true)
+                      searchRef.current?.focus()
+                    }}
+                  >
+                    {t('showAllMerchants')}
+                  </button>
+                )}
+              </div>
+            </Combobox.Popup>
+          </Combobox.Positioner>
+        </Combobox.Portal>
+      </Combobox.Root>
+    </Field.Root>
   )
 }
 

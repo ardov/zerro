@@ -1,4 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from 'react'
+import { useId } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CloseIcon } from './Icons'
 import { cn } from './shadcn/utils'
 
@@ -35,28 +37,37 @@ export function Chip({
   className,
   ...props
 }: ChipProps) {
+  const { t } = useTranslation()
+  const labelId = useId()
+  const removeId = useId()
   const small = size === 'small'
-  // A deletable chip is focusable so Backspace and Delete can reach it, but
-  // only a chip that does something when it is activated is a button: Enter
-  // and Space on a delete-only chip do nothing, and announcing it as a button
-  // promises an action it does not have.
   const interactive = Boolean(onClick || onDelete)
+  const deleteClass = cn(
+    'inline-flex shrink-0 cursor-pointer items-center text-chip-delete hover:text-chip-delete-hover group-has-[:focus-visible]:text-inherit',
+    small
+      ? '-ml-1 mr-1 [&>svg]:size-4'
+      : '-ml-1.5 mr-[5px] [&>svg]:size-[22px]',
+    variant === 'outlined' && small && 'mr-[3px]'
+  )
+  const Label = interactive ? 'button' : 'span'
   return (
     <div
       data-slot="chip"
-      role={onClick ? 'button' : undefined}
-      tabIndex={tabIndex ?? (interactive ? 0 : undefined)}
-      onClick={onClick}
+      onClick={
+        onClick ??
+        (onDelete
+          ? event => {
+              event.stopPropagation()
+              onDelete()
+            }
+          : undefined)
+      }
       onKeyDown={event => {
         onKeyDown?.(event)
         if (event.defaultPrevented) return
         if (onDelete && (event.key === 'Backspace' || event.key === 'Delete')) {
           event.preventDefault()
           return
-        }
-        if (onClick && (event.key === 'Enter' || event.key === ' ')) {
-          event.preventDefault()
-          if (event.key === 'Enter') event.currentTarget.click()
         }
       }}
       onKeyUp={event => {
@@ -66,13 +77,12 @@ export function Chip({
           onDelete()
           return
         }
-        if (onClick && event.key === ' ') event.currentTarget.click()
       }}
       className={cn(
         // Half the height — a pill, but a
         // measurable one rather than the 9999px that `rounded-full` computes
         // to.
-        'box-border inline-flex max-w-full cursor-[unset] items-center justify-center border-none p-0 align-middle font-sans whitespace-nowrap text-foreground outline-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+        'group box-border inline-flex max-w-full cursor-[unset] items-center justify-center border-none p-0 align-middle font-sans whitespace-nowrap text-foreground outline-0 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring has-[:focus-visible]:bg-primary has-[:focus-visible]:text-primary-foreground',
         // The radius and root type stay fixed; the label owns the smaller type.
         'rounded-2xl text-[0.8125rem]',
         small ? 'h-6' : 'h-8',
@@ -99,41 +109,57 @@ export function Chip({
       )}
       {...props}
     >
-      <span
+      {onDelete && (
+        <span id={removeId} className="sr-only">
+          {t('removeValue', { label: '' })}
+        </span>
+      )}
+      <Label
+        type={interactive ? 'button' : undefined}
+        tabIndex={interactive ? (tabIndex ?? 0) : undefined}
+        aria-labelledby={
+          !onClick && onDelete ? `${removeId} ${labelId}` : undefined
+        }
         data-slot="chip-label"
         className={cn(
-          'overflow-hidden text-ellipsis whitespace-nowrap',
-          small ? 'px-2' : 'px-3',
-          // An outlined chip is a pixel narrower on each side, so its label
-          // gives that pixel back and the pill keeps the same width.
-          variant === 'outlined' && (small ? 'px-[7px]' : 'px-[11px]')
+          'inline-flex min-w-0 items-center',
+          interactive &&
+            'h-full cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-inherit outline-none'
         )}
       >
-        {label}
-      </span>
-      {onDelete && (
         <span
+          id={labelId}
+          className={cn(
+            'overflow-hidden text-ellipsis whitespace-nowrap',
+            small ? 'px-2' : 'px-3',
+            variant === 'outlined' && (small ? 'px-[7px]' : 'px-[11px]')
+          )}
+        >
+          {label}
+        </span>
+        {onDelete && !onClick && (
+          <span aria-hidden className={deleteClass}>
+            {deleteIcon ?? <CloseIcon />}
+          </span>
+        )}
+      </Label>
+      {onDelete && onClick && (
+        <button
+          type="button"
+          tabIndex={-1}
           data-slot="chip-delete"
-          aria-hidden
+          aria-labelledby={`${removeId} ${labelId}`}
           onClick={event => {
             event.stopPropagation()
             onDelete()
           }}
           className={cn(
-            'inline-flex shrink-0 cursor-pointer items-center text-chip-delete hover:text-chip-delete-hover',
-            // The cross hangs into the label's own padding, which is why the
-            // left margin is negative; the right one is the gap it keeps from
-            // the pill's edge.
-            small
-              ? '-ml-1 mr-1 [&>svg]:size-4'
-              : '-ml-1.5 mr-[5px] [&>svg]:size-[22px]',
-            // An outlined chip carries a border on that edge, so the cross
-            // gives a pixel back — the same pixel the label gives back above.
-            variant === 'outlined' && small && 'mr-[3px]'
+            deleteClass,
+            'border-0 bg-transparent p-0 outline-none'
           )}
         >
           {deleteIcon ?? <CloseIcon />}
-        </span>
+        </button>
       )}
     </div>
   )

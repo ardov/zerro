@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { core } from '@/zerro-core/redux'
 import Filter from './Filter'
 
@@ -63,4 +64,35 @@ export const Flags: Story = {
       }}
     />
   ),
+}
+
+export const KeyboardRemoval: Story = {
+  render: () => (
+    <FilterHarness
+      initialQuery={{
+        clauses: [
+          { kind: 'account', ids: ['Cash USD'] },
+          { kind: 'tag', ids: ['Food'] },
+        ],
+      }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const chipButtons = () =>
+      Array.from(
+        canvasElement.querySelectorAll<HTMLButtonElement>(
+          '[data-slot="chip-label"]'
+        )
+      )
+    const [first, second] = chipButtons()
+    first.focus()
+    await userEvent.keyboard('{Delete}')
+    await waitFor(() => expect(first).not.toBeInTheDocument())
+    await expect(second).toHaveFocus()
+    await userEvent.keyboard('{Delete}')
+    await waitFor(() => expect(second).not.toBeInTheDocument())
+    await expect(
+      within(canvasElement).getByRole('button', { name: 'Add filter' })
+    ).toHaveFocus()
+  },
 }

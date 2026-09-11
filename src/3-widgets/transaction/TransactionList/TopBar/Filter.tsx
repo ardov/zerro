@@ -1,6 +1,6 @@
 import { IconButton } from '@/6-shared/ui/Button'
 import type { FC, MouseEvent } from 'react'
-import { useMemo, useRef, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { usePopup } from '@/6-shared/overlays'
 import { useTranslation } from 'react-i18next'
 import { Chip } from '@/6-shared/ui/Chip'
@@ -48,6 +48,8 @@ const Filter: FC<FilterProps> = ({
   const chipRefs = useRef<Partial<Record<Clause['kind'], HTMLElement | null>>>(
     {}
   )
+  const addButtonRef = useRef<HTMLButtonElement | null>(null)
+  const focusAfterRemoval = useRef<{ target: HTMLElement | null } | null>(null)
   const pendingEditingKind = useRef<EditableFilterKind | null>(null)
   // Both surfaces sit on the overlay stack, so Back closes the one on top
   // rather than leaving the page. The anchors stay plain state beside them.
@@ -67,6 +69,15 @@ const Filter: FC<FilterProps> = ({
   const availableKinds = filterKinds.filter(
     kind => !appliedClauses.some(clause => clause.kind === kind)
   )
+
+  useLayoutEffect(() => {
+    // A closing editor restores focus only after its exit callback clears
+    // editingKind. The chip it opened from may already have been removed.
+    if (editingKind || !focusAfterRemoval.current) return
+    const target = focusAfterRemoval.current.target
+    focusAfterRemoval.current = null
+    ;(target?.isConnected ? target : addButtonRef.current)?.focus()
+  }, [query.clauses, editingKind])
 
   const upsertClause = (clause: Clause) => {
     onQueryChange({
@@ -125,6 +136,18 @@ const Filter: FC<FilterProps> = ({
   }
 
   const removeClause = (clause: Clause) => {
+    const chip = chipRefs.current[clause.kind]
+    if (chip?.contains(document.activeElement) || editingKind === clause.kind) {
+      const index = query.clauses.indexOf(clause)
+      const neighbour = query.clauses[index + 1] ?? query.clauses[index - 1]
+      focusAfterRemoval.current = {
+        target: neighbour
+          ? (chipRefs.current[neighbour.kind]?.querySelector<HTMLElement>(
+              'button'
+            ) ?? null)
+          : null,
+      }
+    }
     if (editingKind === clause.kind) setEditorOpen(false)
     onQueryChange({
       clauses: query.clauses.filter(item => item !== clause),
@@ -157,7 +180,11 @@ const Filter: FC<FilterProps> = ({
         <TransactionCreateButton query={query} />
         {!appliedClauses.length && (
           <Tooltip title={t('addFilter')}>
-            <IconButton onClick={openAddMenu} children={<FilterListIcon />} />
+            <IconButton
+              ref={addButtonRef}
+              onClick={openAddMenu}
+              children={<FilterListIcon />}
+            />
           </Tooltip>
         )}
       </div>
@@ -183,6 +210,7 @@ const Filter: FC<FilterProps> = ({
           {!!availableKinds.length && (
             <Tooltip title={t('addFilter')}>
               <IconButton
+                ref={addButtonRef}
                 size="small"
                 color="primary"
                 onClick={openAddMenu}

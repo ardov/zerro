@@ -58,7 +58,7 @@ export const Showcase: Story = {
   render: () => <VariantShowcase />,
 }
 
-/** A deletable chip is focusable without pretending that it is a button. */
+/** A delete-only chip exposes a named button with keyboard deletion. */
 export const KeyboardDelete: Story = {
   tags: ['!dev', '!autodocs'],
   render: function Render() {
@@ -75,9 +75,50 @@ export const KeyboardDelete: Story = {
       .getByText('Category')
       .closest<HTMLElement>('[data-slot="chip"]')!
     await expect(chip).not.toHaveAttribute('role')
-    chip.focus()
-    await expect(chip).toHaveFocus()
+    const action = within(chip).getByRole('button')
+    action.focus()
+    await expect(action).toHaveFocus()
     await userEvent.keyboard('{Delete}')
     await expect(canvas.getByText('Removed')).toBeInTheDocument()
+  },
+}
+
+export const SingleTabStop: Story = {
+  render: function Render() {
+    const [edited, setEdited] = useState(0)
+    const [deleted, setDeleted] = useState(0)
+    return (
+      <>
+        <button>Before</button>
+        <Chip
+          label="Editable"
+          onClick={() => setEdited(n => n + 1)}
+          onDelete={() => setDeleted(n => n + 1)}
+        />
+        <button>After</button>
+        <output>
+          {edited}/{deleted}
+        </output>
+      </>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    canvas.getByRole('button', { name: 'Before' }).focus()
+    await userEvent.tab()
+    const edit = canvas.getByRole('button', { name: 'Editable' })
+    await expect(edit).toHaveFocus()
+    const chip = edit.closest<HTMLElement>('[data-slot="chip"]')!
+    await expect(getComputedStyle(chip).outlineStyle).toBe('solid')
+    await userEvent.keyboard('{Enter}')
+    await expect(canvas.getByText('1/0')).toBeInTheDocument()
+    await userEvent.keyboard('{Delete}')
+    await expect(canvas.getByText('1/1')).toBeInTheDocument()
+    await userEvent.tab()
+    await expect(canvas.getByRole('button', { name: 'After' })).toHaveFocus()
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Remove Editable' })
+    )
+    await expect(canvas.getByText('1/2')).toBeInTheDocument()
   },
 }
