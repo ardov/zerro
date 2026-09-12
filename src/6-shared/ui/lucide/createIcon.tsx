@@ -38,7 +38,7 @@ export type TIconProps = Omit<
 
 export function createIcon(Source: LucideIcon, displayName: string) {
   function Icon({
-    size = 24,
+    size = 20,
     strokeWidth = 1.5,
     className,
     titleAccess,

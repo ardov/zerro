@@ -1,5 +1,7 @@
 @layer theme, base, components, utilities;
 
+@import './6-shared/ui/kit/theme.css';
+
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
 
@@ -22,7 +24,7 @@
   /* Corner radii, in pixels: the scale descends from `shape.borderRadius`,
      which is 8px, and a corner has no reason to follow the root font size.
      Cleared first so the registered steps are exactly the ones below. */
-  --radius-*: initial;
+  /* --radius-*: initial; */
   --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 6px;

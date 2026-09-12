@@ -1,0 +1,75 @@
+/* prettier-ignore */
+
+@theme {
+  /* 🪟 Opacity */
+  --opacity-ui-border:   0.1;
+  --opacity-ui-disabled: 0.32;
+
+  /* Main colors */
+  /* 🎨 Surfaces */
+  --color-ui-base:      oklch(0.97 0.002 214);
+  --color-ui-card:      oklch(1 0 0);
+  --color-ui-popover:   oklch(1 0 0);
+  --color-ui-backdrop:  oklch(0 0 0 / 0.5);
+  /* 🎨 State colors */
+  --color-ui-focus:     oklch(0 0 0);
+  --color-ui-highlight: oklch(0 0 0 / 0.04);
+  --color-ui-pressed:   oklch(0 0 0 / 0.06);
+  --color-ui-selected:  oklch(0.95 0.002 214);
+  /* 🎨 Text */
+  --color-ui-primary:    oklch(0 0 0 / 0.95);
+  --color-ui-secondary:  oklch(0 0 0 / 0.60);
+  --color-ui-placeholder: oklch(0 0 0 / 0.35);
+  --color-ui-link:       oklch(0.52 0.2 240);
+  --color-ui-success:    oklch(0.6 0.2 150);
+  --color-ui-error:      oklch(0.6 0.2 50);
+  /* 🎨 Border */
+  --color-ui-border:      oklch(0 0 0 / var(--opacity-ui-border));
+
+  /* 🎨 Buttons */
+  --color-ui-button-primary: oklch(0 0 0);
+  --color-ui-button-primary-hover: oklch(0 0 0);
+  --color-ui-on-button-primary: oklch(1 0 0);
+
+  /* ⭕ Radius */
+  --radius-ui-card: 16px;
+  --radius-ui-control: 12px;
+  --radius-ui-control-inner: 8px;
+  --radius-ui-popover: 16px;
+
+  /* 🌚 Shadows */
+  --shadow-ui-card: 0 2px 4px oklch(0 0 0 / 0.04);
+
+  /* 💫 Easing */
+   --ease-overshoot: linear(0, 1.07 9.8%, 1.36 15.4%, 1.5 21.8%, 1.51 26.4%, 1.48 31.6%, 1.17 53.8%, 1.06 66.2%, 1.01 79.2%, 1);
+
+  /* 🅰️ Typography */
+  --text-ui-14: 14px;
+  --text-ui-14--line-height: 20px;
+  --text-ui-14--letter-spacing: 0.02em;
+  --text-ui-16: 16px;
+  --text-ui-16--line-height: 24px;
+  --text-ui-16--letter-spacing: 0.01em;
+  --text-ui-20: 20px;
+  --text-ui-20--line-height: 32px;
+  --text-ui-20--letter-spacing: 0;
+}
+
+@layer theme {
+  :root.dark {
+    /* TODO */
+  }
+}
+
+@utility focusable {
+  outline: 1.5px solid transparent;
+  outline-offset: -2px;
+  &:focus-visible {
+    outline-color: var(--color-ui-focus);
+    outline-offset: 1px;
+  }
+}
+
+@utility rounded-smooth {
+  corner-shape: superellipse(1.2);
+}
