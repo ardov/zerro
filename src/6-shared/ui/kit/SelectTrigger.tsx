@@ -192,18 +192,22 @@ export function SelectTrigger(props: SelectTriggerProps) {
   )
 }
 
-/** Whether an element already says what it is: content, or a name of its own. */
-export function isNamedSelectTrigger(element: ReactElement) {
+/** Combobox naming is explicit, even when its trigger is a text button. */
+export function getSelectTriggerLabel(element: ReactElement, fallback: string) {
   const props = element.props as {
     children?: ReactNode
     'aria-label'?: string
     'aria-labelledby'?: string
     label?: ReactNode
   }
-  return (
-    props.children != null ||
+  if (
     props['aria-label'] != null ||
     props['aria-labelledby'] != null ||
     props.label != null
   )
+    return undefined
+  return typeof props.children === 'string' ||
+    typeof props.children === 'number'
+    ? String(props.children)
+    : fallback
 }

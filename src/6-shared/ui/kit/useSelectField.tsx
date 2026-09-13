@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { SelectItem, SelectProps } from './Select'
-import { SelectTrigger, isNamedSelectTrigger } from './SelectTrigger'
+import type { SelectItem, SelectControlProps } from './Select'
+import { SelectTrigger, getSelectTriggerLabel } from './SelectTrigger'
 
 // Compensate for the panel padding so option and field text line up.
 export const selectPanelOutset = 4
@@ -14,12 +14,21 @@ export function flattenSelectItems<T extends string>(
 }
 
 /** Shared field rules; each primitive owns its popup and keyboard behavior. */
-export function useSelectField<T extends string>(props: SelectProps<T>) {
+export function useSelectField<T extends string>(props: SelectControlProps<T>) {
   const [internalOpen, setInternalOpen] = useState(false)
   // Alignment needs geometry during the render that opens the panel.
   const [surface, setSurface] = useState<HTMLDivElement | null>(null)
   const options = flattenSelectItems(props.items)
-  const selected = options.find(item => item.value === props.value)
+  const values = props.multiple
+    ? props.value
+    : props.value === null
+      ? []
+      : [props.value]
+  const selectedItems = values.flatMap(value => {
+    const option = options.find(item => item.value === value)
+    return option ? [option] : []
+  })
+  const selected = values.length === 1 ? selectedItems[0] : undefined
   const reserveStart = options.some(item => item.start != null)
   const unavailable = props.disabled || props.readOnly
   const open = !unavailable && (props.open ?? internalOpen)
@@ -28,16 +37,20 @@ export function useSelectField<T extends string>(props: SelectProps<T>) {
     setInternalOpen(next)
     props.onOpenChange?.(next)
   }
-  const changeValue = (next: T | null) => {
-    if (!unavailable && !(props.required && next === null)) props.onChange(next)
+  const changeValue = (next: T | T[] | null) => {
+    if (unavailable) return
+    if (props.multiple) {
+      if (Array.isArray(next) && !(props.required && next.length === 0))
+        props.onChange(next)
+    } else if (!Array.isArray(next) && !(props.required && next === null)) {
+      props.onChange(next)
+    }
   }
   const triggerProps = {
     ref: props.ref,
-    // Preserve a custom trigger's visible name, supplying a fallback only.
-    'aria-label':
-      props.trigger && !isNamedSelectTrigger(props.trigger)
-        ? props.label
-        : undefined,
+    'aria-label': props.trigger
+      ? getSelectTriggerLabel(props.trigger, props.label)
+      : undefined,
     render: props.trigger ?? (
       <SelectTrigger
         label={props.label}
@@ -48,7 +61,7 @@ export function useSelectField<T extends string>(props: SelectProps<T>) {
         clearLabel={props.clearLabel}
         className={props.className}
         style={props.style}
-        filled={props.value !== null}
+        filled={values.length > 0}
         surfaceRef={setSurface}
         disabled={props.disabled}
         readOnly={props.readOnly}
@@ -56,15 +69,22 @@ export function useSelectField<T extends string>(props: SelectProps<T>) {
         invalid={props.invalid}
         error={props.error}
         start={props.showValueIcon !== false ? selected?.start : undefined}
-        onClear={() => changeValue(null)}
+        onClear={() => changeValue(props.multiple ? [] : null)}
       />
     ),
   }
   const displayValue = props.trigger
     ? undefined
-    : props.renderValue
-      ? props.renderValue(selected)
-      : (selected?.label ?? props.value)
+    : props.multiple
+      ? props.renderValue
+        ? props.renderValue(selectedItems)
+        : values.length > 1
+          ? (props.selectionLabel?.(values.length) ??
+            `Selected: ${values.length}`)
+          : (selected?.label ?? values[0])
+      : props.renderValue
+        ? props.renderValue(selected)
+        : (selected?.label ?? props.value)
 
   return {
     options,

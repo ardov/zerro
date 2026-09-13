@@ -1,4 +1,5 @@
 import { useState, type ReactElement, type ReactNode } from 'react'
+import type { MultiSelectProps } from './MultiSelect'
 import { SelectSearch, type SelectSearchOptions } from './SelectSearch'
 import { Field } from '@base-ui/react/field'
 import { Select as Primitive } from '@base-ui/react/select'
@@ -65,7 +66,7 @@ export type SelectProps<T extends string = string> = Pick<
   /** Align an existing selection; empty values, touch and tight spaces fall back. */
   alignSelected?: boolean
   showValueIcon?: boolean
-  /** A button with its own layout; the select supplies popup semantics and events. */
+  /** Custom button. For rich content, supply its accessible name explicitly. */
   trigger?: ReactElement
   renderValue?: (item: SelectOption<T> | undefined) => ReactNode
   emptyText?: string
@@ -73,8 +74,18 @@ export type SelectProps<T extends string = string> = Pick<
   search?: boolean | SelectSearchOptions<T>
 }
 
+/** Internal modes share rendering while preserving the public value contracts. */
+export type SelectControlProps<T extends string> =
+  | (SelectProps<T> & { multiple?: false })
+  | (MultiSelectProps<T> & { multiple: true; alignSelected?: never })
+
 /** Controlled single selection. null represents an empty field. */
 export function Select<T extends string>(props: SelectProps<T>) {
+  return <SelectControl {...props} />
+}
+
+/** Internal dispatcher used by the single and multiple public controls. */
+export function SelectControl<T extends string>(props: SelectControlProps<T>) {
   const { search, ...restProps } = props
   return search ? (
     <SelectSearch {...restProps} search={search === true ? {} : search} />
@@ -83,7 +94,7 @@ export function Select<T extends string>(props: SelectProps<T>) {
   )
 }
 
-function PlainSelect<T extends string>(props: SelectProps<T>) {
+function PlainSelect<T extends string>(props: SelectControlProps<T>) {
   const {
     value,
     items,
@@ -167,7 +178,8 @@ function PlainSelect<T extends string>(props: SelectProps<T>) {
       invalid={invalid ?? (error ? true : undefined)}
       disabled={disabled}
     >
-      <Primitive.Root<T>
+      <Primitive.Root<T, boolean>
+        multiple={props.multiple}
         value={value}
         onValueChange={changeValue}
         name={name}

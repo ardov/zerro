@@ -2,7 +2,7 @@ import { useRef, useState, type ReactNode } from 'react'
 import { Combobox } from '@base-ui/react/combobox'
 import { Field } from '@base-ui/react/field'
 import { Search } from 'lucide-react'
-import type { SelectItem, SelectOption, SelectProps } from './Select'
+import type { SelectItem, SelectOption, SelectControlProps } from './Select'
 import {
   useSelectField,
   flattenSelectItems as flatten,
@@ -61,7 +61,7 @@ function visibleItems<T extends string>(
 
 /** Internal searchable branch of Select; Base UI owns navigation and selection. */
 export function SelectSearch<T extends string>(
-  props: Omit<SelectProps<T>, 'search'> & { search: SelectSearchOptions<T> }
+  props: SelectControlProps<T> & { search: SelectSearchOptions<T> }
 ) {
   const {
     search,
@@ -134,7 +134,8 @@ export function SelectSearch<T extends string>(
       invalid={invalid ?? (error ? true : undefined)}
       disabled={disabled}
     >
-      <Combobox.Root<T>
+      <Combobox.Root<T, boolean>
+        multiple={props.multiple}
         items={shownOptions.map(item => item.value)}
         filter={null}
         value={value}
