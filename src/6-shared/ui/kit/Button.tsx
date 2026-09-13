@@ -29,7 +29,6 @@ const buttonVariants = cva(
           'border-ui-border text-ui-secondary',
           'hover:bg-ui-highlight hover:text-ui-primary',
           'aria-expanded:bg-ui-highlight aria-expanded:text-ui-primary',
-          'active:bg-ui-pressed active:text-ui-primary',
         ],
         ghost: [
           'hover:bg-ui-highlight hover:text-ui-primary',

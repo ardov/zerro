@@ -5,3 +5,20 @@ Light and dark palettes OKLCH, text 16 and 14 px. Tailwind utilities with `ui-` 
 
 Plan: `private/work/ui-kit/spec.md`, section «Plan».
 File is in the main checkout and not in the public repository.
+
+## Guidelines
+
+- Write documentation and stories in English.
+- Don't preserve backward compatibility with previous versions of the kit.
+- Use shadcn/ui and Base UI as references, not blueprints. Keep our own theme
+  and geometry; simplify APIs for actual Zerro use cases and avoid unnecessary complexity.
+- Prefer modern CSS over JavaScript where practical. Target the latest two
+  stable versions of major browsers.
+- Highlight decisions and trade-offs that introduce additional complexity over Base UI or other frameworks.
+- Split long Tailwind class lists across lines and group related utilities by
+  purpose when it improves readability.
+- Use semantic Tailwind tokens from `theme.css` for shared styling. Add
+  `rounded-smooth` alongside radius utilities on rounded surfaces; the shared
+  utility defines the corner shape, while the radius controls its size.
+- Preserve keyboard access, visible focus, accessible names, and reduced-motion
+  behavior.

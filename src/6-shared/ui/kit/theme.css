@@ -23,13 +23,20 @@
   --color-ui-link:       oklch(0.52 0.2 240);
   --color-ui-success:    oklch(0.6 0.2 150);
   --color-ui-error:      oklch(0.6 0.2 50);
+
   /* 🎨 Border */
   --color-ui-border:      oklch(0 0 0 / var(--opacity-ui-border));
 
-  /* 🎨 Buttons */
+  /* 🎨 Semantic component tokens */
   --color-ui-button-primary: oklch(0 0 0);
   --color-ui-button-primary-hover: oklch(0 0 0);
   --color-ui-on-button-primary: oklch(1 0 0);
+  --color-ui-tooltip:   oklch(0.22 0 0);
+  --color-ui-on-tooltip: oklch(1.000 0.000 0);
+
+  /* 📏 Stroke thickness */
+  --stroke-ui-control: 1.5px;
+
 
   /* ⭕ Radius */
   --radius-ui-card: 16px;
@@ -41,7 +48,7 @@
   --shadow-ui-card: 0 2px 4px oklch(0 0 0 / 0.04);
 
   /* 💫 Easing */
-   --ease-overshoot: linear(0, 1.07 9.8%, 1.36 15.4%, 1.5 21.8%, 1.51 26.4%, 1.48 31.6%, 1.17 53.8%, 1.06 66.2%, 1.01 79.2%, 1);
+  --ease-overshoot: linear(0, 1.07 9.8%, 1.36 15.4%, 1.5 21.8%, 1.51 26.4%, 1.48 31.6%, 1.17 53.8%, 1.06 66.2%, 1.01 79.2%, 1);
 
   /* 🅰️ Typography */
   --text-ui-14: 14px;
@@ -56,14 +63,20 @@
 }
 
 @layer theme {
+  :root {
+    --color-ui-field-hatch: oklch(0 0 0 / 0.03);
+  }
   :root.dark {
-    /* TODO */
+    --color-ui-field-hatch: oklch(1 0 0 / 0.04);
+    /* TODO: remaining dark palette */
   }
 }
 
 @utility focusable {
-  outline: 1.5px solid transparent;
+  outline: var(--stroke-ui-control) solid transparent;
   outline-offset: -2px;
+  /* Tailwind @utility supplies the selector when compiling this nesting. */
+  /* stylelint-disable-next-line nesting-selector-no-missing-scoping-root */
   &:focus-visible {
     outline-color: var(--color-ui-focus);
     outline-offset: 1px;
@@ -72,4 +85,19 @@
 
 @utility rounded-smooth {
   corner-shape: superellipse(1.2);
+}
+
+@utility field-hatched {
+  background-image: repeating-linear-gradient(
+    -30deg,
+    var(--color-ui-field-hatch) 0 3px,
+    transparent 3px 9px
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    black 0,
+    transparent 16px,
+    transparent calc(100% - 16px),
+    black 100%
+  );
 }
