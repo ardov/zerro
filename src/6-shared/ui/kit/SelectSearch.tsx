@@ -11,7 +11,6 @@ import {
 import { FieldAddon, FieldSurface, fieldControlClass } from './Field'
 import { ListPanel } from './ListPanel'
 import { ListRow, ListRowHeader, ListRowSeparator } from './ListRow'
-import { Button } from './Button'
 import { useListPanelPositioning } from './useListPanelPositioning'
 
 export type SelectSearchOptions<T extends string> = {
@@ -226,10 +225,11 @@ export function SelectSearch<T extends string>(
                   actions={
                     <>
                       {hasMore && (
-                        <Button
-                          variant="ghost"
+                        <ListRow
+                          render={<button type="button" />}
                           size={size}
-                          className="w-full justify-start"
+                          reserveStart={reserveStart}
+                          className="hover:after:opacity-100 focus-visible:after:opacity-100"
                           onClick={() => {
                             setSession(current => ({
                               ...current,
@@ -239,7 +239,7 @@ export function SelectSearch<T extends string>(
                           }}
                         >
                           {search.showMoreLabel ?? 'Show more'}
-                        </Button>
+                        </ListRow>
                       )}
                       {search.actions}
                     </>
