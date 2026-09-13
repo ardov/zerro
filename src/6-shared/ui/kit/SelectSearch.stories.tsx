@@ -1,3 +1,4 @@
+import { usePopup } from '@/6-shared/overlays'
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within, waitFor } from 'storybook/test'
@@ -44,7 +45,7 @@ const meta = {
 - **search.filter(items, query)** returns the final filtered/ranked items, without a second filter. Keep the full source in **items** so the closed value and icon remain available.
 - **search.autoFocus=false** focuses the popup without opening a software keyboard; Tab reaches search.
 - Localize **search.label**, **search.placeholder**, **search.showMoreLabel**, **emptyText**, and **clearLabel**.
-- **search.actions** holds consumer-owned buttons after the list. Control **open/onOpenChange** to close after an action.
+- **search.actions** holds consumer-owned buttons after the list. Pass **popup={usePopup()}** to close after an action.
 - Search uses ordinary positioning; **alignSelected** applies only without search. Mobile keyboard behavior needs testing on a real device.
 `,
       },
@@ -334,7 +335,8 @@ export const Showcase: Story = {
 }
 
 function ActionDemo() {
-  const [open, setOpen] = useState(false)
+  const popup = usePopup()
+  const [, setOpen] = popup
   const [created, setCreated] = useState(false)
   return (
     <div className="grid max-w-sm gap-4">
@@ -343,8 +345,7 @@ function ActionDemo() {
         items={items}
         value="daily"
         onChange={() => {}}
-        open={open}
-        onOpenChange={setOpen}
+        popup={popup}
         search={{
           actions: (
             <Button

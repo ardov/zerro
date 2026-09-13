@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePopup } from '@/6-shared/overlays'
 import type { SelectItem, SelectControlProps } from './Select'
 import { SelectTrigger, getSelectTriggerLabel } from './SelectTrigger'
 
@@ -15,7 +16,8 @@ export function flattenSelectItems<T extends string>(
 
 /** Shared field rules; each primitive owns its popup and keyboard behavior. */
 export function useSelectField<T extends string>(props: SelectControlProps<T>) {
-  const [internalOpen, setInternalOpen] = useState(false)
+  const internalPopup = usePopup()
+  const [popupOpen, changeOpen] = props.popup ?? internalPopup
   // Alignment needs geometry during the render that opens the panel.
   const [surface, setSurface] = useState<HTMLDivElement | null>(null)
   const options = flattenSelectItems(props.items)
@@ -31,11 +33,15 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
   const selected = values.length === 1 ? selectedItems[0] : undefined
   const reserveStart = options.some(item => item.start != null)
   const unavailable = props.disabled || props.readOnly
-  const open = !unavailable && (props.open ?? internalOpen)
+  const open = !unavailable && popupOpen
+  // An unavailable or unmounted field must not leave a phantom history layer.
+  useEffect(() => {
+    if (unavailable && popupOpen) changeOpen(false)
+  }, [unavailable, popupOpen, changeOpen])
+  useEffect(() => () => changeOpen(false), [changeOpen])
   const setOpen = (next: boolean) => {
     if (next && unavailable) return
-    setInternalOpen(next)
-    props.onOpenChange?.(next)
+    changeOpen(next)
   }
   const changeValue = (next: T | T[] | null) => {
     if (unavailable) return

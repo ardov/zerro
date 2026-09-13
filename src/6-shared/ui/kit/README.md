@@ -32,3 +32,12 @@ Keep brief component documentation in its `.stories.tsx`: purpose, a minimal
 example, and important usage rules or limitations. Use prop comments for
 non-obvious options and implementation comments for technical decisions.
 This README holds shared guidelines; plans and open questions stay private.
+
+## Select popup history
+
+`Select` and `MultiSelect` require `OverlayHost` inside a Router. The host owns
+opening and closing; Back dismisses the top popup before its parent overlay.
+For programmatic control, pass `popup={popup}` where `popup = usePopup()`.
+Do not substitute a `useState` pair: the popup must participate in host history.
+Without this prop the select creates its own popup control. Arbitrary
+`open` / `onOpenChange` props are not part of the select API.

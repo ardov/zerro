@@ -1,3 +1,4 @@
+import { usePopup } from '@/6-shared/overlays'
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within, waitFor } from 'storybook/test'
@@ -317,7 +318,8 @@ export const EmptyAlignment: Story = {
 
 function ControlledAlignmentDemo() {
   const [value, setValue] = useState<string | null>('two')
-  const [open, setOpen] = useState(false)
+  const popup = usePopup()
+  const [, setOpen] = popup
   return (
     <div className="mx-auto mt-40 grid w-80 gap-4">
       <Button variant="secondary" onClick={() => setOpen(true)}>
@@ -326,8 +328,7 @@ function ControlledAlignmentDemo() {
       <Select
         label="Visibility"
         alignSelected
-        open={open}
-        onOpenChange={setOpen}
+        popup={popup}
         value={value}
         onChange={setValue}
         items={[
@@ -340,7 +341,7 @@ function ControlledAlignmentDemo() {
 }
 
 /** Alignment is decided as the panel opens, so it also works when the consumer
- * owns `open` and Base UI's change handler never runs. */
+ * opens through `usePopup` and Base UI's change handler never runs. */
 export const ControlledAlignment: Story = {
   render: () => <ControlledAlignmentDemo />,
   play: async ({ canvasElement }) => {

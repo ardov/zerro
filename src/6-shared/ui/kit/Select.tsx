@@ -1,4 +1,5 @@
 import { useState, type ReactElement, type ReactNode } from 'react'
+import type { usePopup } from '@/6-shared/overlays'
 import type { MultiSelectProps } from './MultiSelect'
 import { SelectSearch, type SelectSearchOptions } from './SelectSearch'
 import { Field } from '@base-ui/react/field'
@@ -61,8 +62,8 @@ export type SelectProps<T extends string = string> = Pick<
   name?: string
   id?: string
   form?: string
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
+  /** Optional external control from usePopup(); OverlayHost owns visibility. */
+  popup?: ReturnType<typeof usePopup>
   /** Align an existing selection; empty values, touch and tight spaces fall back. */
   alignSelected?: boolean
   showValueIcon?: boolean
