@@ -3,7 +3,7 @@ import { expect, userEvent, waitFor } from 'storybook/test'
 import { SearchIcon } from 'lucide-react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { CalendarIcon, CloseIcon } from '@/6-shared/ui/Icons'
-import { Button } from './Button'
+import { Button, IconButton } from './Button'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { FieldSurface, FieldAddon, fieldControlClass } from './Field'
 import { Input } from './Input'
@@ -44,14 +44,14 @@ function SearchExample() {
       }
       end={
         <FieldAddon kind="action">
-          <Button
+          <IconButton
             variant="ghost"
-            size="icon-sm"
-            aria-label="Очистить поиск"
+            size="sm"
+            label="Очистить поиск"
             onClick={() => setValue('')}
           >
             <CloseIcon />
-          </Button>
+          </IconButton>
         </FieldAddon>
       }
     />
@@ -64,17 +64,17 @@ function DateTimeExample() {
     <FieldSurface
       start={
         <FieldAddon kind="action">
-          <Button
+          <IconButton
             variant="ghost"
-            size="icon-sm"
-            aria-label="Открыть календарь"
+            size="sm"
+            label="Открыть календарь"
             onClick={() => {
               dateRef.current?.focus()
               dateRef.current?.showPicker?.()
             }}
           >
             <CalendarIcon />
-          </Button>
+          </IconButton>
         </FieldAddon>
       }
     >
@@ -121,9 +121,9 @@ export const Showcase: Story = {
           placeholder="Комментарий"
           start={
             <FieldAddon kind="action">
-              <Button variant="ghost" size="icon-sm" aria-label="Поиск">
+              <IconButton variant="ghost" size="sm" label="Поиск">
                 <SearchIcon />
-              </Button>
+              </IconButton>
             </FieldAddon>
           }
         />

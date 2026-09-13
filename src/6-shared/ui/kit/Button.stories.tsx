@@ -1,10 +1,10 @@
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { AddIcon, ArrowForwardIcon } from '@/6-shared/ui/Icons'
-import { Button, buttonOptions } from './Button'
+import { Button, IconButton, buttonOptions } from './Button'
 
 const variants = buttonOptions.variant
-const sizes = buttonOptions.size.filter(size => !size.startsWith('icon'))
-const iconSizes = buttonOptions.size.filter(size => size.startsWith('icon'))
+const sizes = buttonOptions.size
 
 const meta = {
   title: 'UI Kit/Button',
@@ -54,7 +54,7 @@ export const Showcase: Story = {
         ))}
       </section>
       <section className="grid gap-4">
-        <h2 className="m-0 text-ui-16 font-medium">Sizes</h2>
+        <h2 className="text-ui-16 font-medium">Sizes</h2>
         <div className="flex flex-wrap items-end gap-6">
           {sizes.map(size => (
             <div key={size} className="grid justify-items-start gap-2">
@@ -68,18 +68,76 @@ export const Showcase: Story = {
         </div>
       </section>
       <section className="grid gap-4">
-        <h2 className="m-0 text-ui-16 font-medium">Only icon</h2>
+        <h2 className="text-ui-16 font-medium">Only icon</h2>
         <div className="flex flex-wrap items-end gap-6">
-          {iconSizes.map(size => (
+          {sizes.map(size => (
             <div key={size} className="grid justify-items-start gap-2">
               <span className="text-ui-secondary">{size}</span>
-              <Button size={size} aria-label="Add item">
+              <IconButton size={size} label="Add item">
                 <AddIcon />
-              </Button>
+              </IconButton>
             </div>
           ))}
         </div>
       </section>
     </div>
   ),
+}
+
+export const IconButtons: Story = {
+  render: args => (
+    <div className="flex flex-wrap gap-4">
+      <IconButton {...args} label="Add item">
+        <AddIcon />
+      </IconButton>
+      <IconButton {...args} label="Continue">
+        <ArrowForwardIcon />
+      </IconButton>
+      <IconButton {...args} label="Without tooltip" tooltip={false}>
+        <AddIcon />
+      </IconButton>
+    </div>
+  ),
+  play: async ({ canvasElement, args, step }) => {
+    if (args.disabled) return
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const button = canvas.getByRole('button', { name: 'Add item' })
+
+    await step('Hover reveals the button label', async () => {
+      await userEvent.hover(button)
+      await waitFor(() => expect(body.getByText('Add item')).toBeVisible())
+      await userEvent.unhover(button)
+      await waitFor(() =>
+        expect(body.queryByText('Add item')).not.toBeInTheDocument()
+      )
+    })
+
+    await step(
+      'Keyboard focus reveals the label; Escape preserves focus',
+      async () => {
+        button.focus()
+        await waitFor(() => expect(body.getByText('Add item')).toBeVisible())
+        await userEvent.keyboard('{Escape}')
+        await waitFor(() =>
+          expect(body.queryByText('Add item')).not.toBeInTheDocument()
+        )
+        await expect(button).toHaveFocus()
+      }
+    )
+
+    await step(
+      'Without a tooltip, the button still has an accessible name',
+      async () => {
+        const withoutTooltip = canvas.getByRole('button', {
+          name: 'Without tooltip',
+        })
+        withoutTooltip.focus()
+        await expect(withoutTooltip).toHaveFocus()
+        await expect(
+          body.queryByText('Without tooltip')
+        ).not.toBeInTheDocument()
+      }
+    )
+  },
 }

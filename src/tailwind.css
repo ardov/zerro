@@ -3,6 +3,7 @@
 @import './6-shared/ui/kit/theme.css';
 
 @import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
 
 @custom-variant dark (&:where(.dark, .dark *));

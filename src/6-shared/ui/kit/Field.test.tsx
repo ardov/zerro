@@ -4,7 +4,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { createRef } from 'react'
 import { Input } from './Input'
 import { Textarea } from './Textarea'
-import { Button } from './Button'
+import { IconButton } from './Button'
 import { FieldAddon } from './Field'
 
 afterEach(cleanup)
@@ -31,14 +31,9 @@ it('preserves button interaction and native readonly/disabled behavior', () => {
       <Input
         label="Search"
         end={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Clear"
-            onClick={action}
-          >
+          <IconButton variant="ghost" size="sm" label="Clear" onClick={action}>
             ×
-          </Button>
+          </IconButton>
         }
       />
       <Input label="Readonly" readOnly defaultValue="Copy me" />

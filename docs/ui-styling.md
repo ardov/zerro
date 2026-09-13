@@ -12,24 +12,24 @@ application source, and excludes stories and tests from the production utility
 set. Storybook loads `.storybook/tailwind.css`, which scans both application
 source and stories while excluding tests.
 
-The cascade order is explicit:
+The cascade order is declared in the app and Storybook HTML heads before
+component CSS loads:
 
 ```css
 @layer theme, base, components, utilities;
 ```
 
 - `theme` contains Tailwind's theme variables.
-- `base` contains the document reset and scrollbar defaults from
+- `base` contains Tailwind Preflight and application defaults from
   `src/6-shared/ui/theme/styles.css`.
 - `components` contains co-located component and route styles.
 - `utilities` contains Tailwind utilities.
 
-Tailwind Preflight is disabled. Global element defaults therefore belong in
-`styles.css`, which applies [Josh W. Comeau's Custom CSS
-Reset](https://www.joshwcomeau.com/css/custom-css-reset/), plus the
-application's theme and scrollbar defaults. Route and component rules should
-not recreate document-wide resets. Component CSS must be placed in `@layer
-components` so utilities can override it predictably.
+Tailwind Preflight provides the document reset. Global application defaults
+belong in `styles.css`.
+Route and component rules should not recreate document-wide resets. Component
+CSS must be placed in `@layer components` so utilities can override it
+predictably.
 
 ## Theme boot and persistence
 

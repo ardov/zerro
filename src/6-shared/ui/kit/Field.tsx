@@ -16,7 +16,6 @@ const surfaceVariants = cva(
     // Surface and interaction
     'border-0 bg-ui-highlight inset-ring-(length:--stroke-ui-control) inset-ring-transparent',
     'hover:not-focus-within:inset-ring-ui-border focus-within:inset-ring-ui-focus focus-within:bg-ui-card',
-    'transition-colors duration-150 motion-reduce:transition-none',
     // Validation and availability
     'data-invalid:focus-within:inset-ring-ui-error',
     'data-disabled:pointer-events-none data-disabled:opacity-ui-disabled data-disabled:inset-ring-transparent',
