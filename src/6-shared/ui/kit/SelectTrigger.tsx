@@ -1,4 +1,11 @@
-import { useId, useRef, type MouseEvent, type Ref, type ReactNode } from 'react'
+import {
+  type ReactElement,
+  useId,
+  useRef,
+  type MouseEvent,
+  type Ref,
+  type ReactNode,
+} from 'react'
 import { useRender } from '@base-ui/react/use-render'
 import { ChevronDown, X } from 'lucide-react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
@@ -182,5 +189,21 @@ export function SelectTrigger(props: SelectTriggerProps) {
         </FieldMessage>
       )}
     </div>
+  )
+}
+
+/** Whether an element already says what it is: content, or a name of its own. */
+export function isNamedSelectTrigger(element: ReactElement) {
+  const props = element.props as {
+    children?: ReactNode
+    'aria-label'?: string
+    'aria-labelledby'?: string
+    label?: ReactNode
+  }
+  return (
+    props.children != null ||
+    props['aria-label'] != null ||
+    props['aria-labelledby'] != null ||
+    props.label != null
   )
 }

@@ -1,32 +1,19 @@
 import { useState, type ReactElement, type ReactNode } from 'react'
+import { SelectSearch, type SelectSearchOptions } from './SelectSearch'
 import { Field } from '@base-ui/react/field'
 import { Select as Primitive } from '@base-ui/react/select'
 import { ListPanel } from './ListPanel'
 import { ListRow, ListRowHeader, ListRowSeparator } from './ListRow'
-import { SelectTrigger, type SelectTriggerProps } from './SelectTrigger'
+import type { SelectTriggerProps } from './SelectTrigger'
 import {
   listPanelMargin,
   useListPanelPositioning,
 } from './useListPanelPositioning'
 
-// Compensate for the panel's inner padding to align option and field text.
-const panelOutset = 4
-
-/** Whether an element already says what it is: content, or a name of its own. */
-function isNamed(element: ReactElement) {
-  const props = element.props as {
-    children?: ReactNode
-    'aria-label'?: string
-    'aria-labelledby'?: string
-    label?: ReactNode
-  }
-  return (
-    props.children != null ||
-    props['aria-label'] != null ||
-    props['aria-labelledby'] != null ||
-    props.label != null
-  )
-}
+import {
+  useSelectField,
+  selectPanelOutset as panelOutset,
+} from './useSelectField'
 
 export type SelectOption<T extends string = string> = {
   value: T
@@ -35,6 +22,8 @@ export type SelectOption<T extends string = string> = {
   start?: ReactNode
   end?: ReactNode
   disabled?: boolean
+  /** Additional terms used by searchable selects. */
+  keywords?: readonly string[]
 }
 export type SelectItem<T extends string = string> =
   | SelectOption<T>
@@ -80,51 +69,50 @@ export type SelectProps<T extends string = string> = Pick<
   trigger?: ReactElement
   renderValue?: (item: SelectOption<T> | undefined) => ReactNode
   emptyText?: string
+  /** Search inside the popup; selected-row alignment applies only without search. */
+  search?: boolean | SelectSearchOptions<T>
 }
 
 /** Controlled single selection. null represents an empty field. */
 export function Select<T extends string>(props: SelectProps<T>) {
+  const { search, ...restProps } = props
+  return search ? (
+    <SelectSearch {...restProps} search={search === true ? {} : search} />
+  ) : (
+    <PlainSelect {...restProps} />
+  )
+}
+
+function PlainSelect<T extends string>(props: SelectProps<T>) {
   const {
     value,
-    onChange,
     items,
     label,
     size = 'lg',
     name,
     id,
     form,
-    open: controlledOpen,
-    onOpenChange,
     alignSelected = false,
-    showValueIcon = true,
     trigger,
-    renderValue,
     emptyText = 'No options',
     disabled,
     readOnly,
     required,
     invalid,
     error,
-    ref,
-    ...restProps
   } = props
-  const [internalOpen, setInternalOpen] = useState(false)
-  // The surface is state, not a ref: the alignment decision below is taken
-  // while rendering the opening panel, and needs its geometry right then.
-  const [surface, setSurface] = useState<HTMLDivElement | null>(null)
+  const {
+    options,
+    selected,
+    reserveStart,
+    open,
+    setOpen,
+    changeValue,
+    surface,
+    triggerProps,
+    displayValue,
+  } = useSelectField(props)
   const positioning = useListPanelPositioning()
-  const options = items.flatMap(item =>
-    'type' in item ? (item.type === 'group' ? item.items : []) : [item]
-  )
-  const selected = options.find(item => item.value === value)
-  const reserveStart = options.some(item => item.start != null)
-  const unavailable = disabled || readOnly
-  const open = !unavailable && (controlledOpen ?? internalOpen)
-  const setOpen = (next: boolean) => {
-    if (next && unavailable) return
-    setInternalOpen(next)
-    onOpenChange?.(next)
-  }
   const canAlign = () => {
     // Native overlap positioning uses its own edge tolerances. Near viewport
     // edges (or a reduced visual viewport), use the boundary-aware positioner.
@@ -181,9 +169,7 @@ export function Select<T extends string>(props: SelectProps<T>) {
     >
       <Primitive.Root<T>
         value={value}
-        onValueChange={next => {
-          if (!unavailable && !(required && next === null)) onChange(next)
-        }}
+        onValueChange={changeValue}
         name={name}
         id={id}
         form={form}
@@ -194,39 +180,10 @@ export function Select<T extends string>(props: SelectProps<T>) {
         onOpenChange={setOpen}
       >
         {trigger ? (
-          <Primitive.Trigger
-            ref={ref}
-            render={trigger}
-            // A custom trigger renders its own content, and naming it from the
-            // field label would drop that visible text out of the accessible
-            // name (WCAG 2.5.3). Name it only when it has nothing to go on.
-            aria-label={isNamed(trigger) ? undefined : label}
-          />
+          <Primitive.Trigger {...triggerProps} />
         ) : (
-          <Primitive.Trigger
-            ref={ref}
-            render={
-              <SelectTrigger
-                {...restProps}
-                label={label}
-                size={size}
-                filled={value !== null}
-                surfaceRef={setSurface}
-                disabled={disabled}
-                readOnly={readOnly}
-                required={required}
-                invalid={invalid}
-                error={error}
-                start={showValueIcon ? selected?.start : undefined}
-                onClear={() => {
-                  if (!unavailable && !required) onChange(null)
-                }}
-              />
-            }
-          >
-            <Primitive.Value>
-              {renderValue ? renderValue(selected) : (selected?.label ?? value)}
-            </Primitive.Value>
+          <Primitive.Trigger {...triggerProps}>
+            <Primitive.Value>{displayValue}</Primitive.Value>
           </Primitive.Trigger>
         )}
         <Primitive.Portal>

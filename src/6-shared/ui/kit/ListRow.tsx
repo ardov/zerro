@@ -1,5 +1,6 @@
 import type { ComponentPropsWithRef, ReactNode } from 'react'
 import { useRender } from '@base-ui/react/use-render'
+import { FieldAddon } from './Field'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 
 export type ListRowSize = 'lg' | 'sm'
@@ -45,11 +46,12 @@ export function ListRow(props: ListRowProps) {
       }),
       className: cn(
         // Layout and shared typography
-        'relative isolate flex w-full min-w-0 cursor-default items-center gap-3 border-0 bg-transparent text-left font-[family-name:inherit] text-ui-16 text-ui-primary whitespace-normal select-none',
+        'relative isolate flex w-full min-w-0 cursor-default items-center border-0 bg-transparent text-left font-[family-name:inherit] text-ui-16 text-ui-primary whitespace-normal select-none',
         'rounded-smooth before:rounded-smooth after:rounded-smooth outline-none',
         size === 'lg'
           ? 'min-h-12 rounded-ui-control px-4 py-3'
           : 'min-h-10 rounded-ui-control-inner px-3 py-2',
+        (reserveStart || start != null) && 'pl-0',
         // Selection is the base; highlight is a separate translucent layer.
         'before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-[inherit] before:bg-ui-selected before:opacity-0',
         'data-selected:before:opacity-100 aria-selected:before:opacity-100',
@@ -68,12 +70,18 @@ export function ListRow(props: ListRowProps) {
       children: (
         <>
           {(reserveStart || start != null) && (
-            <span
+            <FieldAddon
+              kind="icon"
               aria-hidden
-              className="flex size-6 shrink-0 items-center justify-center self-start [&>svg]:size-5 [&>img]:max-h-full [&>img]:max-w-full [&>img]:object-contain"
+              className={cn(
+                'self-start text-ui-primary',
+                size === 'lg' ? '-my-3 h-12' : '-my-2 h-10'
+              )}
             >
-              {start}
-            </span>
+              <span className="flex size-5 items-center justify-center [&>svg]:size-5 [&>img]:size-full [&>img]:object-contain">
+                {start}
+              </span>
+            </FieldAddon>
           )}
           <span className="min-w-0 flex-1 wrap-anywhere text-pretty">
             <span className="block">{children}</span>
@@ -84,7 +92,7 @@ export function ListRow(props: ListRowProps) {
             )}
           </span>
           {end != null && (
-            <span className="shrink-0 self-start text-ui-14 leading-6 text-ui-secondary">
+            <span className="ml-3 shrink-0 self-start text-ui-14 leading-6 text-ui-secondary">
               {end}
             </span>
           )}
