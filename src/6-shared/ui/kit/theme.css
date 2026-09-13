@@ -84,7 +84,7 @@
   outline-offset: -2px;
   /* Tailwind @utility supplies the selector when compiling this nesting. */
   /* stylelint-disable-next-line nesting-selector-no-missing-scoping-root */
-  &:focus-visible {
+  &:is(:focus-visible, :has(:focus-visible)) {
     outline-color: var(--color-ui-focus);
     outline-offset: 1px;
   }
