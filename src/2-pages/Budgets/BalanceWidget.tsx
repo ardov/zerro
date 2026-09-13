@@ -2,7 +2,6 @@ import { core } from '@/zerro-core/redux'
 
 import { useAppSelector } from '@/store'
 
-import Balancer from 'react-wrap-balancer'
 import { useTranslation } from 'react-i18next'
 import { keys } from '@/6-shared/helpers/keys'
 import type { TISOMonth } from '@/6-shared/types'
@@ -60,8 +59,8 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         currency={currency}
       />
       <hr className="m-0 w-full border-0 border-t border-border" />
-      <p className="m-0 text-center text-body-sm text-muted-foreground">
-        <Balancer>{getExplaining(fundsEnd, toBeAssigned, overspend)}</Balancer>
+      <p className="m-0 text-center text-body-sm text-muted-foreground text-balance">
+        {getExplaining(fundsEnd, toBeAssigned, overspend)}
       </p>
     </div>
   )

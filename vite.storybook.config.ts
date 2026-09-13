@@ -20,7 +20,6 @@ export default defineConfig({
       'tailwind-merge',
       '@dnd-kit/core',
       'formik',
-      'react-wrap-balancer',
       'recharts',
       '@base-ui/react/button',
       '@base-ui/react/field',

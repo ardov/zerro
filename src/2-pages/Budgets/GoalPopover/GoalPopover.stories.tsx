@@ -45,53 +45,69 @@ export const ConfirmFromDrawer: Story = {
     </MonthProvider>
   ),
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const body = within(canvasElement.ownerDocument.body)
-    const opener = canvas.getByRole('button', { name: 'Open month overview' })
-    await userEvent.click(opener)
-    const parent = await body.findByRole('dialog')
-    const trigger = within(parent).getByRole('button', {
-      name: 'Copy from last month',
-    })
-    await userEvent.click(trigger)
-    const child = await body.findByRole('dialog', { name: 'Copy all budgets?' })
-    const expectChildFocus = () =>
-      expect(child).toContainElement(
-        canvasElement.ownerDocument.activeElement as HTMLElement
-      )
-    await waitFor(expectChildFocus)
-    await waitFor(() =>
-      expect(within(child).getByRole('button', { name: 'Copy' })).toHaveFocus()
-    )
-    await userEvent.tab({ shift: true })
-    await waitFor(() =>
-      expect(
-        within(child).getByRole('button', { name: 'Cancel' })
-      ).toHaveFocus()
-    )
-    for (let i = 0; i < 3; i++) {
-      await userEvent.tab()
-      await waitFor(expectChildFocus)
+    const resizeErrors: string[] = []
+    const recordResizeError = (event: ErrorEvent) => {
+      if (event.message.includes('ResizeObserver loop'))
+        resizeErrors.push(event.message)
     }
-    await userEvent.keyboard('{Escape}')
-    await waitFor(() => expect(child).not.toBeVisible())
-    await expect(parent).toBeVisible()
-    await waitFor(() => expect(trigger).toHaveFocus())
+    const win = canvasElement.ownerDocument.defaultView!
+    win.addEventListener('error', recordResizeError)
+    try {
+      const canvas = within(canvasElement)
+      const body = within(canvasElement.ownerDocument.body)
+      const opener = canvas.getByRole('button', { name: 'Open month overview' })
+      await userEvent.click(opener)
+      const parent = await body.findByRole('dialog')
+      const trigger = within(parent).getByRole('button', {
+        name: 'Copy from last month',
+      })
+      await userEvent.click(trigger)
+      const child = await body.findByRole('dialog', {
+        name: 'Copy all budgets?',
+      })
+      const expectChildFocus = () =>
+        expect(child).toContainElement(
+          canvasElement.ownerDocument.activeElement as HTMLElement
+        )
+      await waitFor(expectChildFocus)
+      await waitFor(() =>
+        expect(
+          within(child).getByRole('button', { name: 'Copy' })
+        ).toHaveFocus()
+      )
+      await userEvent.tab({ shift: true })
+      await waitFor(() =>
+        expect(
+          within(child).getByRole('button', { name: 'Cancel' })
+        ).toHaveFocus()
+      )
+      for (let i = 0; i < 3; i++) {
+        await userEvent.tab()
+        await waitFor(expectChildFocus)
+      }
+      await userEvent.keyboard('{Escape}')
+      await waitFor(() => expect(child).not.toBeVisible())
+      await expect(parent).toBeVisible()
+      await waitFor(() => expect(trigger).toHaveFocus())
 
-    await userEvent.keyboard('{Enter}')
-    const reopened = await body.findByRole('dialog', {
-      name: 'Copy all budgets?',
-    })
-    await userEvent.click(
-      within(reopened).getByRole('button', { name: 'Cancel' })
-    )
-    await waitFor(() => expect(reopened).not.toBeVisible())
-    await expect(parent).toBeVisible()
-    await waitFor(() => expect(trigger).toHaveFocus())
-    await expect(trigger.matches(':focus-visible')).toBe(false)
-    await userEvent.keyboard('{Escape}')
-    await waitFor(() => expect(parent).not.toBeVisible())
-    await waitFor(() => expect(opener).toHaveFocus())
+      await userEvent.keyboard('{Enter}')
+      const reopened = await body.findByRole('dialog', {
+        name: 'Copy all budgets?',
+      })
+      await userEvent.click(
+        within(reopened).getByRole('button', { name: 'Cancel' })
+      )
+      await waitFor(() => expect(reopened).not.toBeVisible())
+      await expect(parent).toBeVisible()
+      await waitFor(() => expect(trigger).toHaveFocus())
+      await expect(trigger.matches(':focus-visible')).toBe(false)
+      await userEvent.keyboard('{Escape}')
+      await waitFor(() => expect(parent).not.toBeVisible())
+      await waitFor(() => expect(opener).toHaveFocus())
+      expect(resizeErrors).toEqual([])
+    } finally {
+      win.removeEventListener('error', recordResizeError)
+    }
   },
 }
 

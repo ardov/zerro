@@ -3,7 +3,6 @@ import { core } from '@/zerro-core/redux'
 
 import { Link } from '@/6-shared/ui/Link'
 import { Dialog } from '@/6-shared/ui/Dialog'
-import Balancer from 'react-wrap-balancer'
 import pluralize from '@/6-shared/helpers/pluralize'
 import type { TFxAmount } from '@/6-shared/types'
 import { HelpOutlineIcon } from '@/6-shared/ui/Icons'
@@ -28,8 +27,8 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
   return (
     <>
       <div className="flex flex-col gap-2 p-6">
-        <h2 className="m-0 text-center text-title-lg">
-          <Balancer>{getPeopleArray(rate).join(' ')}</Balancer>
+        <h2 className="m-0 text-center text-title-lg text-balance">
+          {getPeopleArray(rate).join(' ')}
         </h2>
         <p className="m-0 text-center text-body">
           {`Это ${rate} ${pluralize(rate, [
@@ -47,14 +46,12 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
 
       <Dialog open={isOpenInfo} onClose={toggleInfo}>
         <div className="flex max-w-[360px] flex-col gap-6 p-6">
-          <Balancer>
-            <p className="m-0 text-body">
-              Медианная зарплата в 2024 году в России{' '}
-              <Amount value={MEDIAN_WAGE_RUB} currency="RUB" decimals="ifAny" />{' '}
-              по данным <Link href={MEDIAN_WAGE_SOURCE}>Сбериндекса</Link>. Это
-              значит, что половина россиян получают меньше этой суммы.
-            </p>
-          </Balancer>
+          <p className="m-0 text-body text-balance">
+            Медианная зарплата в 2024 году в России{' '}
+            <Amount value={MEDIAN_WAGE_RUB} currency="RUB" decimals="ifAny" />{' '}
+            по данным <Link href={MEDIAN_WAGE_SOURCE}>Сбериндекса</Link>. Это
+            значит, что половина россиян получают меньше этой суммы.
+          </p>
         </div>
       </Dialog>
     </>

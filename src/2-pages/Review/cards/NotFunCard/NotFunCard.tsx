@@ -6,7 +6,6 @@ import { CheckboxField } from '@/6-shared/ui/Checkbox'
 import { Link } from '@/6-shared/ui/Link'
 import { Chip } from '@/6-shared/ui/Chip'
 import { Dialog } from '@/6-shared/ui/Dialog'
-import Balancer from 'react-wrap-balancer'
 import pluralize from '@/6-shared/helpers/pluralize'
 import { round } from '@/6-shared/helpers/money'
 import { entries } from '@/6-shared/helpers/keys'
@@ -52,41 +51,35 @@ export function NotFunCard(props: TCardProps) {
 
   const emptyCardContent = (
     <div className="flex w-full flex-col items-center gap-4">
-      <Balancer>
-        <p className="m-0 text-center text-body">
-          Нет доходов — нет налогов 😅
-        </p>
-      </Balancer>
+      <p className="m-0 text-center text-body text-balance">
+        Нет доходов — нет налогов 😅
+      </p>
     </div>
   )
 
   const cardContent = (
     <div className="flex w-full flex-col items-center gap-4">
       <TaxesChart income={totalIncome} outcome={totalOutcome} />
-      <Balancer>
-        <p className="m-0 text-center text-body">
-          ≈{Math.round(taxesRatio * 100)}% от вашего дохода получила Россия.
-        </p>
-      </Balancer>
-      <Balancer>
-        <p className="m-0 text-center text-body">
-          <b>
-            {taxMonths} {pluralize(taxMonths, ['месяц', 'месяца', 'месяцев'])}
-          </b>{' '}
-          вы работали исключительно на государство. Если бы не налоги, вы могли
-          бы за ту же зарплату работать всего{' '}
-          <b>
-            {workWeek} {pluralize(workWeek, ['день', 'дня', 'дней'])}
-          </b>{' '}
-          в неделю.
-        </p>
-      </Balancer>
-      <Balancer>
-        <p className="m-0 text-center text-body">
-          Если вы тратите столько времени на государство, значит абсолютно
-          нормально и правильно требовать от него выполнения обязательств.
-        </p>
-      </Balancer>
+      <p className="m-0 text-center text-body text-balance">
+        ≈{Math.round(taxesRatio * 100)}% от вашего дохода получила Россия.
+      </p>
+
+      <p className="m-0 text-center text-body text-balance">
+        <b>
+          {taxMonths} {pluralize(taxMonths, ['месяц', 'месяца', 'месяцев'])}
+        </b>{' '}
+        вы работали исключительно на государство. Если бы не налоги, вы могли бы
+        за ту же зарплату работать всего{' '}
+        <b>
+          {workWeek} {pluralize(workWeek, ['день', 'дня', 'дней'])}
+        </b>{' '}
+        в неделю.
+      </p>
+
+      <p className="m-0 text-center text-body text-balance">
+        Если вы тратите столько времени на государство, значит абсолютно
+        нормально и правильно требовать от него выполнения обязательств.
+      </p>
 
       <hr className="m-0 w-full border-0 border-t border-border" />
 
@@ -120,34 +113,32 @@ export function NotFunCard(props: TCardProps) {
         ))}
       </div>
       <hr className="m-0 w-full border-0 border-t border-border" />
-      <p className="m-0 text-center text-body">
-        <Balancer>
-          Это приблизительные цифры, подробнее можно посчитать в{' '}
-          <Link
-            color="secondary"
-            href="https://journal.tinkoff.ru/fns-loves-you/"
-            target="_blank"
-            onClick={() =>
-              track('external_link_opened', {
-                destination: 'taxes_calculator',
-              })
-            }
-          >
-            калькуляторе Тинькофф журнала
-          </Link>{' '}
-          или посмотрите вот это{' '}
-          <Link
-            color="secondary"
-            href="https://youtu.be/xL8Z1mbcQ78"
-            target="_blank"
-            onClick={() =>
-              track('external_link_opened', { destination: 'taxes_video' })
-            }
-          >
-            видео про налоги
-          </Link>{' '}
-          (3 мин).
-        </Balancer>
+      <p className="m-0 text-center text-body text-balance">
+        Это приблизительные цифры, подробнее можно посчитать в{' '}
+        <Link
+          color="secondary"
+          href="https://journal.tinkoff.ru/fns-loves-you/"
+          target="_blank"
+          onClick={() =>
+            track('external_link_opened', {
+              destination: 'taxes_calculator',
+            })
+          }
+        >
+          калькуляторе Тинькофф журнала
+        </Link>{' '}
+        или посмотрите вот это{' '}
+        <Link
+          color="secondary"
+          href="https://youtu.be/xL8Z1mbcQ78"
+          target="_blank"
+          onClick={() =>
+            track('external_link_opened', { destination: 'taxes_video' })
+          }
+        >
+          видео про налоги
+        </Link>{' '}
+        (3 мин).
       </p>
     </div>
   )
