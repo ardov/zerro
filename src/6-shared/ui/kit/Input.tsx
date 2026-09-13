@@ -6,24 +6,26 @@ import { Field, fieldControlClass, type FieldPresentation } from './Field'
 export type InputProps = Omit<ComponentPropsWithRef<'input'>, 'size'> &
   FieldPresentation
 
-export function Input({
-  label,
-  labelMode = 'hidden',
-  start,
-  end,
-  error,
-  description,
-  invalid,
-  className,
-  style,
-  controlClassName,
-  controlStyle,
-  ref,
-  disabled,
-  readOnly,
-  placeholder,
-  ...props
-}: InputProps) {
+export function Input(props: InputProps) {
+  const {
+    label,
+    labelMode = 'hidden',
+    size,
+    start,
+    end,
+    error,
+    description,
+    invalid,
+    className,
+    style,
+    controlClassName,
+    controlStyle,
+    ref,
+    disabled,
+    readOnly,
+    placeholder,
+    ...restProps
+  } = props
   const controlRef = useRef<HTMLInputElement>(null)
   useImperativeHandle(ref, () => controlRef.current!)
   const fixedLabel = [
@@ -32,12 +34,13 @@ export function Input({
     'datetime-local',
     'month',
     'week',
-  ].includes(props.type ?? '')
+  ].includes(restProps.type ?? '')
   return (
     <Field
       {...{
         label,
         labelMode,
+        size,
         start,
         end,
         error,
@@ -52,7 +55,7 @@ export function Input({
       }}
     >
       <InputPrimitive
-        {...props}
+        {...restProps}
         ref={controlRef}
         readOnly={readOnly}
         placeholder={placeholder}

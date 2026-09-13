@@ -5,6 +5,12 @@
   --opacity-ui-border:   0.1;
   --opacity-ui-disabled: 0.32;
 
+  /* 📚 Z-index */
+  --z-index-drawer:  1200;
+  --z-index-modal:   1300;
+  --z-index-popover: 1400;
+  --z-index-tooltip: 1500;
+
   /* Main colors */
   /* 🎨 Surfaces */
   --color-ui-base:      oklch(0.97 0.002 214);
@@ -32,7 +38,7 @@
   --color-ui-button-primary-hover: oklch(0 0 0);
   --color-ui-on-button-primary: oklch(1 0 0);
   --color-ui-tooltip:   oklch(0.22 0 0);
-  --color-ui-on-tooltip: oklch(1.000 0.000 0);
+  --color-ui-on-tooltip: oklch(1 0 0);
 
   /* 📏 Stroke thickness */
   --stroke-ui-control: 1.5px;
@@ -46,6 +52,7 @@
 
   /* 🌚 Shadows */
   --shadow-ui-card: 0 2px 4px oklch(0 0 0 / 0.04);
+  --shadow-ui-popover: 0 8px 32px oklch(0 0 0 / 0.12), 0 2px 8px oklch(0 0 0 / 0.06);
 
   /* 💫 Easing */
   --ease-overshoot: linear(0, 1.07 9.8%, 1.36 15.4%, 1.5 21.8%, 1.51 26.4%, 1.48 31.6%, 1.17 53.8%, 1.06 66.2%, 1.01 79.2%, 1);

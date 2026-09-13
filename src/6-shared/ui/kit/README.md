@@ -9,6 +9,9 @@ File is in the main checkout and not in the public repository.
 ## Guidelines
 
 - Write documentation and stories in English.
+- Keep the props type visible in the function signature: `function Component(props: ComponentProps)`.
+  Destructure props as the first statement inside the function; name the remaining
+  properties `restProps`.
 - Don't preserve backward compatibility with previous versions of the kit.
 - Use shadcn/ui and Base UI as references, not blueprints. Keep our own theme
   and geometry; simplify APIs for actual Zerro use cases and avoid unnecessary complexity.
@@ -22,3 +25,10 @@ File is in the main checkout and not in the public repository.
   utility defines the corner shape, while the radius controls its size.
 - Preserve keyboard access, visible focus, accessible names, and reduced-motion
   behavior.
+
+## Component documentation
+
+Keep brief component documentation in its `.stories.tsx`: purpose, a minimal
+example, and important usage rules or limitations. Use prop comments for
+non-obvious options and implementation comments for technical decisions.
+This README holds shared guidelines; plans and open questions stay private.

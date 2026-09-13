@@ -11,25 +11,27 @@ export type TextareaProps = Omit<ComponentPropsWithRef<'textarea'>, 'rows'> &
     maxRows?: number
   }
 
-export function Textarea({
-  label,
-  labelMode = 'hidden',
-  start,
-  end,
-  error,
-  description,
-  invalid,
-  className,
-  style,
-  controlClassName,
-  controlStyle,
-  ref,
-  disabled,
-  readOnly,
-  minRows = 1,
-  maxRows,
-  ...props
-}: TextareaProps) {
+export function Textarea(props: TextareaProps) {
+  const {
+    label,
+    labelMode = 'hidden',
+    size,
+    start,
+    end,
+    error,
+    description,
+    invalid,
+    className,
+    style,
+    controlClassName,
+    controlStyle,
+    ref,
+    disabled,
+    readOnly,
+    minRows = 1,
+    maxRows,
+    ...restProps
+  } = props
   const controlRef = useRef<HTMLTextAreaElement>(null)
   useImperativeHandle(ref, () => controlRef.current!)
   return (
@@ -37,6 +39,7 @@ export function Textarea({
       {...{
         label,
         labelMode,
+        size,
         start,
         end,
         error,
@@ -53,7 +56,7 @@ export function Textarea({
       <FieldPrimitive.Control
         // Base UI types Control as an input, but renders and dispatches events
         // from the textarea below. Keep the native textarea types for callers.
-        {...(props as FieldPrimitive.Control.Props)}
+        {...(restProps as FieldPrimitive.Control.Props)}
         ref={controlRef}
         readOnly={readOnly}
         render={<textarea rows={minRows} />}

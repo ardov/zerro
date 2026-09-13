@@ -6,6 +6,7 @@ import type {
 } from 'react'
 import { useId } from 'react'
 import { Field as FieldPrimitive } from '@base-ui/react/field'
+import { useRender } from '@base-ui/react/use-render'
 import { cva } from 'class-variance-authority'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 
@@ -34,27 +35,35 @@ export type FieldSurfaceProps = ComponentPropsWithRef<'div'> & {
   disabled?: boolean
   readOnly?: boolean
   tall?: boolean
+  size?: 'lg' | 'sm'
 }
 
 /** Shared appearance only; each child control owns its name and value. */
-export function FieldSurface({
-  start,
-  end,
-  invalid,
-  disabled,
-  readOnly,
-  tall,
-  className,
-  children,
-  ...props
-}: FieldSurfaceProps) {
+export function FieldSurface(props: FieldSurfaceProps) {
+  const {
+    start,
+    end,
+    invalid,
+    disabled,
+    readOnly,
+    tall,
+    size = 'lg',
+    className,
+    children,
+    ...restProps
+  } = props
   return (
     <div
-      {...props}
+      {...restProps}
       data-invalid={invalid || undefined}
       data-disabled={disabled || undefined}
       data-readonly={readOnly || undefined}
-      className={cn(surfaceVariants({ tall }), className)}
+      className={cn(
+        surfaceVariants({ tall }),
+        'rounded-smooth',
+        size === 'sm' && (tall ? 'min-h-14' : 'min-h-10'),
+        className
+      )}
     >
       {start != null && (
         <div
@@ -156,6 +165,7 @@ export const fieldControlClass = cn(
 
 export type FieldPresentation = {
   label: string
+  size?: 'lg' | 'sm'
   labelMode?: 'hidden' | 'floating'
   start?: ReactNode
   end?: ReactNode
@@ -168,6 +178,65 @@ export type FieldPresentation = {
   controlStyle?: CSSProperties
 }
 
+/** Shared label geometry; callers supply the label's semantic primitive. */
+export function FieldContent(props: {
+  size?: 'lg' | 'sm'
+  floating: boolean
+  raised?: boolean
+  label: ReactNode
+  labelRender?: useRender.ComponentProps<'label'>['render']
+  children: ReactNode
+}) {
+  const { size = 'lg', floating, raised, label, labelRender, children } = props
+  const renderedLabel = useRender({
+    defaultTagName: 'label',
+    render: labelRender,
+    props: {
+      className: cn(
+        'pointer-events-none',
+        !floating ? 'sr-only' : 'absolute left-0 max-w-full truncate',
+        floating &&
+          (raised
+            ? 'top-2 text-ui-14 text-ui-secondary'
+            : 'top-1/2 -translate-y-1/2 text-ui-16 text-ui-placeholder group-focus-within/field-content:top-2 group-focus-within/field-content:translate-y-0 group-focus-within/field-content:text-ui-14 group-focus-within/field-content:text-ui-secondary')
+      ),
+      children: label,
+    },
+  })
+  return (
+    <div
+      data-field-focus="preserve"
+      className={cn(
+        'group/field-content relative min-w-0 flex-1',
+        size === 'lg' ? 'py-3' : 'py-2',
+        floating && (size === 'lg' ? 'pt-7 pb-2' : 'pt-6 pb-1')
+      )}
+    >
+      {children}
+      {renderedLabel}
+    </div>
+  )
+}
+
+export function FieldMessage(
+  props: useRender.ComponentProps<'div'> & { error?: boolean }
+) {
+  const { error, render, ref, className, ...restProps } = props
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    ref,
+    props: {
+      ...restProps,
+      className: cn(
+        'm-0 px-4 pt-1 text-ui-14',
+        error ? 'text-ui-error' : 'text-ui-secondary',
+        className
+      ),
+    },
+  })
+}
+
 type FieldProps = FieldPresentation & {
   disabled?: boolean
   readOnly?: boolean
@@ -177,22 +246,24 @@ type FieldProps = FieldPresentation & {
 }
 
 /** Base UI owns field state and accessibility; the surface owns appearance. */
-export function Field({
-  label,
-  labelMode = 'hidden',
-  start,
-  end,
-  error,
-  description,
-  invalid,
-  className,
-  style,
-  disabled,
-  readOnly,
-  fixedLabel,
-  controlRef,
-  children,
-}: FieldProps) {
+export function Field(props: FieldProps) {
+  const {
+    label,
+    labelMode = 'hidden',
+    size = 'lg',
+    start,
+    end,
+    error,
+    description,
+    invalid,
+    className,
+    style,
+    disabled,
+    readOnly,
+    fixedLabel,
+    controlRef,
+    children,
+  } = props
   const visible = labelMode === 'floating'
 
   return (
@@ -210,6 +281,7 @@ export function Field({
             disabled={state.disabled}
             readOnly={readOnly}
             tall={visible}
+            size={size}
             onMouseDown={event => {
               if (state.disabled || event.defaultPrevented) return
               const target = event.target as HTMLElement
@@ -225,42 +297,25 @@ export function Field({
               }
             }}
           >
-            <div
-              data-field-focus="preserve"
-              className={cn(
-                'relative min-w-0 flex-1 py-3',
-                visible && 'pt-7 pb-2'
-              )}
+            <FieldContent
+              size={size}
+              floating={visible}
+              raised={fixedLabel || state.filled || state.focused}
+              label={label}
+              labelRender={<FieldPrimitive.Label />}
             >
               {children}
-              <FieldPrimitive.Label
-                className={cn(
-                  !visible
-                    ? 'sr-only'
-                    : [
-                        'absolute left-0 max-w-full truncate',
-                        fixedLabel || state.filled || state.focused
-                          ? 'top-2 text-ui-14 text-ui-secondary'
-                          : 'top-1/2 -translate-y-1/2 text-ui-16 text-ui-placeholder',
-                      ]
-                )}
-              >
-                {label}
-              </FieldPrimitive.Label>
-            </div>
+            </FieldContent>
           </FieldSurface>
           {description && (
-            <FieldPrimitive.Description className="m-0 px-4 pt-1 text-ui-14 text-ui-secondary">
+            <FieldMessage render={<FieldPrimitive.Description />}>
               {description}
-            </FieldPrimitive.Description>
+            </FieldMessage>
           )}
           {error && (
-            <FieldPrimitive.Error
-              match
-              className="m-0 px-4 pt-1 text-ui-14 text-ui-error"
-            >
+            <FieldMessage error render={<FieldPrimitive.Error match />}>
               {error}
-            </FieldPrimitive.Error>
+            </FieldMessage>
           )}
         </div>
       )}
