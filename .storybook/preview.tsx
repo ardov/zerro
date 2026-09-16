@@ -10,6 +10,16 @@ import './preview.css'
 
 const viewports = {
   ...INITIAL_VIEWPORTS,
+  zerro499: {
+    name: 'Zerro 499px',
+    styles: { width: '499px', height: '800px' },
+    type: 'mobile',
+  },
+  zerro500: {
+    name: 'Zerro 500px',
+    styles: { width: '500px', height: '800px' },
+    type: 'desktop',
+  },
   zerro899: {
     name: 'Zerro 899px',
     styles: { width: '899px', height: '800px' },

@@ -45,7 +45,10 @@ if (typeof document !== 'undefined') {
  * here, because the overlay's content is gone by then and Chrome draws a ring
  * for a scripted focus that came from nowhere. So a pointer close focuses the
  * control itself with `focusVisible: false` and tells Base UI to stand down. */
-export function useOverlayFinalFocus(open: boolean) {
+export function useOverlayFinalFocus(
+  open: boolean,
+  { fallback = false }: { fallback?: boolean } = {}
+) {
   // Capture before the popup commits and its autofocus moves focus. The
   // initializer also covers forms that mount already open with a fresh key.
   // Keep this opening's target through updates and exit, then capture again on
@@ -70,7 +73,9 @@ export function useOverlayFinalFocus(open: boolean) {
   const target = opening.target
 
   return (closeType: InteractionType) => {
-    if (!target?.isConnected) return false
+    // An action menu may disappear after opening another surface. Let that
+    // surface use Base UI's restoration chain when explicitly enabled.
+    if (!target?.isConnected) return fallback
     // The most recent real input is more precise than a close type inferred
     // from the focusout caused by a backdrop press. Fall back to Base UI's
     // close type when the controlled surface saw no input of its own.

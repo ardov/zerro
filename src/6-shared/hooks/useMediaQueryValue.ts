@@ -35,10 +35,9 @@ const getServerSnapshot = () => false
 
 /** Whether a media query matches.
  *
- * For breakpoints reach for `useBreakpointDown` instead — it takes a key from
- * the one map the hook and Tailwind are both built from, so a component never
- * spells a breakpoint out. This one is for the queries that are not
- * breakpoints at all: colour scheme, device metrics. */
+ * For application layout breakpoints use `useBreakpointDown`. This hook also
+ * supports media features and component-specific layout policies; keep each
+ * shared policy in one named hook rather than repeating its query in callers. */
 export function useMediaQueryValue(query: string) {
   const { subscribe, getSnapshot } = getStore(query)
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)

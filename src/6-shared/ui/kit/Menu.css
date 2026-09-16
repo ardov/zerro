@@ -1,0 +1,21 @@
+@layer components {
+  .kit-context-trigger {
+    &:is(
+      a,
+      input,
+      textarea,
+      select,
+      [contenteditable]:not([contenteditable='false'])
+    ),
+    &
+      :is(
+        a,
+        input,
+        textarea,
+        select,
+        [contenteditable]:not([contenteditable='false'])
+      ) {
+      -webkit-touch-callout: default;
+    }
+  }
+}

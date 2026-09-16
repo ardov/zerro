@@ -1,0 +1,66 @@
+@layer components {
+  .kit-drawer-backdrop {
+    opacity: calc(1 - var(--drawer-swipe-progress, 0));
+    transition: opacity 200ms;
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+    }
+
+    @starting-style {
+      opacity: 0;
+    }
+  }
+
+  .kit-drawer-popup {
+    transition:
+      translate 250ms ease-out,
+      opacity 250ms ease-out;
+
+    &[data-side='bottom'] {
+      --drawer-exit-translate: 0 100%;
+      translate: 0 var(--drawer-swipe-movement-y, 0px);
+    }
+
+    &[data-side='right'] {
+      --drawer-exit-translate: 100% 0;
+      translate: var(--drawer-swipe-movement-x, 0px) 0;
+    }
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      translate: var(--drawer-exit-translate);
+    }
+
+    &[data-swiping] {
+      transition: none;
+    }
+
+    /* Also animate surfaces mounted with open=true. */
+    @starting-style {
+      &[data-side] {
+        translate: var(--drawer-exit-translate);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &,
+      &[data-side] {
+        translate: none;
+      }
+
+      &[data-starting-style],
+      &[data-ending-style] {
+        opacity: 0;
+      }
+
+      @starting-style {
+        &[data-side] {
+          translate: none;
+          opacity: 0;
+        }
+      }
+    }
+  }
+}

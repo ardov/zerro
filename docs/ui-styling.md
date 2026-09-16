@@ -123,8 +123,10 @@ font size is not 16px. A down query ends 0.05px before its boundary, preventing
 both sides of a breakpoint from matching simultaneously.
 
 Use `useBreakpointDown` for the named application breakpoints.
-`useMediaQueryValue` is for media features that are not layout breakpoints,
-such as color-scheme or input-capability queries.
+`useMediaQueryValue` supports media features and component-specific layout
+policies. Keep a shared component policy in one named hook. UI Kit Drawer and
+Menu use `useBottomSheetLayout`: bottom sheets below 500px, independently of
+the application's `md` layout breakpoint. Explicit Drawer sides override it.
 
 ## Typography and spacing
 
@@ -190,17 +192,92 @@ Overlay components portal to the document body and share the stacking tokens
 `z-drawer`, `z-modal`, and `z-tooltip`. They come from `--z-index-*` in
 `src/tailwind.css`, so they do not depend on a mounted provider.
 
-`Popover` and `Menu` position against an element or virtual anchor and use the
+The legacy `Popover` and `Menu` position against an element or virtual anchor and use the
 shared surface geometry in `overlaySurface`. `SideDrawer` is a modal sheet.
 `NavDrawer` is the separate docked navigation layout. `AdaptivePopover` and
 `AdaptiveDialog` select the appropriate surface for the current viewport
 without changing the caller's open-state contract.
 
-Every one of them takes `open` and `onClose` and owns neither. Openness belongs
+Each legacy surface takes `open` and `onClose` and owns neither. Openness belongs
 to `6-shared/overlays`, which is the only place that touches browser history:
 `usePopup` for a surface with its own trigger, `useAsk` for one that is asked a
 question, `defineScreen` for one a person can come back to. A surface that
 holds its own `useState` for openness is a Back press that leaves the page.
+
+### Kit surfaces
+
+Kit `Dialog`, `Popover`, `Drawer` and `Menu` accept a `trigger` and own a
+`usePopup` registration internally. Pass `popup={usePopup()}` for programmatic
+control. `usePopup(onClose?)` returns an explicit controller with `open`,
+`setOpen`, `subscribeClose`, and `release`. `setOpen` is an ordinary callback;
+wrapping it does not change lifecycle behavior.
+
+`DialogSurface`, `PopoverSurface` and `DrawerSurface` only render an existing
+owner's `controller`. They use its `open` and `setOpen`; they do not register
+history or subscribe to closing. For an asked editor, pass the `controller`
+returned by `useAsked(onClose?)`. A plain `{ open, setOpen }` is also accepted
+for rendering, but the caller must provide its own history and lifecycle.
+Do not register the same opening twice.
+
+```tsx
+<Dialog title="Details" trigger={<Button>Open</Button>} mobile="drawer">
+  <Details />
+</Dialog>
+
+<Popover label="Period" trigger={<Button>Period</Button>}>
+  <PeriodPicker />
+</Popover>
+```
+
+`children` is free content. Optional `title` supplies a visible heading and an
+accessible name; without it, `label` is required. `className` styles the panel;
+`contentClassName` styles the scrollable body. Centered Dialog shows a close button by default (`closeButton={false}` hides
+it). Bottom drawers, Popover and Confirm have no visible close button; the
+surface owns this rule, so forms do not need breakpoint logic. Popover accepts `anchor`, `side`, and `align`; its anchor controls position,
+while the trigger controls focus restoration. It is modal.
+
+Each modal surface renders its own dimming backdrop, including nested surfaces.
+Dialog, Drawer and modal Popover share `z-modal`; portal order places each child's
+backdrop above the parent and below the child. Base UI's nested-backdrop
+suppression is disabled for Dialog/Drawer. Popover and bottom Drawer retain a
+screen-reader close control without an icon; Popover also needs that primitive
+for Base UI's modal focus trap.
+
+Below **500px**, Popover and Menu default to `mobile="drawer"`; use
+`mobile="popover"` to keep them anchored. Dialog stays centered by default
+(`mobile="dialog"`) and supports `mobile="drawer"`. Drawer uses
+`side="auto" | "bottom" | "right"`. Shared application breakpoints are unchanged.
+Adaptive branches can remount content and lose local input. Keep important drafts
+above those branches. Switching presentation neither closes nor adds history.
+
+Dialog/Drawer use `bg-ui-card`; anchored Popover/Menu use `bg-ui-popover`.
+Shadow is independent from the fill. Surfaces follow the visual viewport so their
+scrollable content stays accessible above the software keyboard.
+
+**Surfaces cannot veto closing through Back.** `onClose` is a notification,
+not permission to close; return values and promises do not block history.
+Register it once in the stable owner: `usePopup(onClose)`, `useAsked(onClose)`,
+or `screen.use(onClose)`. Keep that owner and its draft above conditional or
+adaptive surface content. Popup/asked owners are notified at close start;
+screen owners observe the committed transition to a closed history state.
+Subscriptions are removed immediately when their owner unmounts.
+
+The convenience `Dialog`, `Popover` and `Drawer` also accept `onClose` when they
+are the stable owner. Do not register the same save callback on both the hook
+and the convenience component. Rendering-only Surfaces have no `onClose` prop.
+Technical unmount and adaptive remount do not save drafts; closing the browser
+has no save guarantee. No close guard is implemented.
+
+An editor can hold a local draft and commit a changed valid value in `onClose`.
+It owns validation and error handling. Never save from effect cleanup.
+Save/Cancel forms save only on explicit submission. Pending operations must not
+require their window to remain open. The component stories demonstrate close notification and explicit Save/Cancel
+separately. Application editors still use the legacy surfaces.
+
+`Confirm` is passed to `useAsk<boolean>()`. Explicit confirmation answers `true`;
+all dismissals answer `undefined`. `intent="danger"` uses AlertDialog semantics,
+a destructive action and initial focus on Cancel. Ordinary confirmation initially
+focuses the confirming action. The legacy Confirm remains separate; application callers have not migrated.
 
 When an overlay opens another overlay, preserve the opener's history and focus
 contract: closing the child returns focus to the child trigger; closing the
@@ -235,7 +312,7 @@ barrel instead of importing an icon package throughout feature code.
 Stories use the same `AppThemeProvider`, locale providers and Tailwind source as
 the application. Cover both color schemes when a token-sensitive component is
 introduced or changed, and use the 899px/900px viewports for behavior that
-switches at `md`.
+switches at `md`; kit bottom sheets use the 499px/500px viewports.
 
 Useful checks:
 
