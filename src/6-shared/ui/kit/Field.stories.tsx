@@ -10,10 +10,20 @@ import { Input } from './Input'
 import { Textarea } from './Textarea'
 
 const meta = {
-  title: 'UI Kit/Field',
+  tags: ['autodocs'],
+  title: 'UI Kit/Inputs/Text fields',
   component: Input,
-  parameters: { layout: 'fullscreen' },
-  args: { label: 'Название', labelMode: 'floating' },
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Input and Textarea share labels, validation and addon slots. Use floating labels when the label belongs inside the control. Start and end slots hold icons, text or actions; Textarea grows with its content. Try the search clear button and native date picker in the showcase.',
+      },
+    },
+    controls: { disable: true },
+    layout: 'fullscreen',
+  },
+  args: { label: 'Name', labelMode: 'floating' },
   decorators: [
     Story => (
       <main className="min-h-screen bg-ui-base p-6 font-sans text-ui-16 text-ui-primary">
@@ -30,11 +40,11 @@ type Story = StoryObj<typeof meta>
 export const Playground: Story = {}
 
 function SearchExample() {
-  const [value, setValue] = useState('Продукты')
+  const [value, setValue] = useState('Groceries')
   return (
     <Input
-      label="Поиск"
-      placeholder="Поиск"
+      label="Search"
+      placeholder="Search"
       value={value}
       onChange={event => setValue(event.target.value)}
       start={
@@ -47,7 +57,7 @@ function SearchExample() {
           <IconButton
             variant="ghost"
             size="sm"
-            label="Очистить поиск"
+            label="Clear search"
             onClick={() => setValue('')}
           >
             <CloseIcon />
@@ -67,7 +77,7 @@ function DateTimeExample() {
           <IconButton
             variant="ghost"
             size="sm"
-            label="Открыть календарь"
+            label="Open calendar"
             onClick={() => {
               dateRef.current?.focus()
               dateRef.current?.showPicker?.()
@@ -81,7 +91,7 @@ function DateTimeExample() {
       <input
         ref={dateRef}
         type="date"
-        aria-label="Дата"
+        aria-label="Date"
         defaultValue="2026-09-12"
         className={cn(
           fieldControlClass,
@@ -90,7 +100,7 @@ function DateTimeExample() {
       />
       <input
         type="time"
-        aria-label="Время"
+        aria-label="Time"
         defaultValue="18:56"
         className={cn(
           fieldControlClass,
@@ -105,11 +115,11 @@ export const Showcase: Story = {
   render: () => (
     <div className="grid gap-8">
       <section className="grid gap-4">
-        <h2 className="m-0 text-ui-16 font-medium">Геометрия · 48 px</h2>
-        <Input label="Без иконки" placeholder="Комментарий" />
+        <h2 className="m-0 text-ui-16 font-medium">Field anatomy · 48 px</h2>
+        <Input label="Without an icon" placeholder="Comment" />
         <Input
-          label="С иконкой"
-          placeholder="Комментарий"
+          label="With an icon"
+          placeholder="Comment"
           start={
             <FieldAddon kind="icon">
               <SearchIcon size={20} />
@@ -117,24 +127,24 @@ export const Showcase: Story = {
           }
         />
         <Input
-          label="С кнопкой-иконкой"
-          placeholder="Комментарий"
+          label="With an icon button"
+          placeholder="Comment"
           start={
             <FieldAddon kind="action">
-              <IconButton variant="ghost" size="sm" label="Поиск">
+              <IconButton variant="ghost" size="sm" label="Search">
                 <SearchIcon />
               </IconButton>
             </FieldAddon>
           }
         />
         <Input
-          label="С текстовым аддоном"
-          placeholder="Комментарий"
+          label="With a text addon"
+          placeholder="Comment"
           end={<FieldAddon>Addon</FieldAddon>}
         />
         <Input
-          label="С текстовой кнопкой"
-          placeholder="Комментарий"
+          label="With a text button"
+          placeholder="Comment"
           end={
             <FieldAddon kind="action">
               <Button variant="ghost" size="sm">
@@ -145,15 +155,16 @@ export const Showcase: Story = {
         />
       </section>
       <section className="grid gap-4">
-        <h2 className="m-0 text-ui-20 font-medium">Поля</h2>
+        <h2 className="m-0 text-ui-20 font-medium">Fields</h2>
         <p className="m-0 text-ui-14 text-ui-secondary">
-          Живые поля: ввод, Tab, кнопка очистки и нативный календарь.
+          Try typing, tabbing, clearing the search and opening the native
+          calendar.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Input label="Комментарий" placeholder="Комментарий" />
+          <Input label="Comment" placeholder="Comment" />
           <Input
-            label="Поиск по операциям"
-            placeholder="Поиск по операциям"
+            label="Search transactions"
+            placeholder="Search transactions"
             start={
               <FieldAddon kind="icon">
                 <SearchIcon size={20} />
@@ -165,16 +176,16 @@ export const Showcase: Story = {
         </div>
       </section>
       <section className="grid gap-4">
-        <h2 className="m-0 text-ui-16 font-medium">Label внутри</h2>
+        <h2 className="m-0 text-ui-16 font-medium">Floating labels</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Input label="Название конверта" labelMode="floating" />
+          <Input label="Envelope name" labelMode="floating" />
           <Input
-            label="Название конверта"
+            label="Envelope name"
             labelMode="floating"
-            defaultValue="Продукты"
+            defaultValue="Groceries"
           />
           <Input
-            label="Поиск"
+            label="Search"
             labelMode="floating"
             start={
               <FieldAddon kind="icon">
@@ -183,54 +194,54 @@ export const Showcase: Story = {
             }
           />
           <Input
-            label="Поиск"
+            label="Search"
             labelMode="floating"
             start={
               <FieldAddon kind="icon">
                 <SearchIcon size={20} />
               </FieldAddon>
             }
-            defaultValue="Кофе"
+            defaultValue="Coffee"
           />
         </div>
       </section>
       <section className="grid gap-4">
-        <h2 className="m-0 text-ui-16 font-medium">Состояния</h2>
+        <h2 className="m-0 text-ui-16 font-medium">States</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Input
-            label="Обязательное поле"
-            placeholder="Название"
-            error="Это поле обязательное"
+            label="Required field"
+            placeholder="Name"
+            error="This field is required"
           />
           <Input
-            label="Название"
+            label="Name"
             labelMode="floating"
-            defaultValue="Продукты"
-            error="Такое название уже есть"
+            defaultValue="Groceries"
+            error="This name already exists"
           />
           <Input
-            label="Только чтение"
+            label="Read only"
             labelMode="floating"
-            defaultValue="Можно выделить и скопировать"
+            defaultValue="You can select and copy this text"
             readOnly
           />
           <Input
-            label="Недоступное поле"
+            label="Disabled field"
             labelMode="floating"
-            defaultValue="Недоступно"
+            defaultValue="Unavailable"
             disabled
           />
         </div>
       </section>
       <section className="grid gap-4">
-        <h2 className="m-0 text-ui-16 font-medium">Несколько строк</h2>
+        <h2 className="m-0 text-ui-16 font-medium">Multiple lines</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Textarea label="Комментарий" placeholder="Комментарий" />
+          <Textarea label="Comment" placeholder="Comment" />
           <Textarea
-            label="Комментарий"
+            label="Comment"
             labelMode="floating"
-            defaultValue={'Покупки на неделю\nОвощи, фрукты и кофе'}
-            description="Label остаётся сверху при изменении высоты."
+            defaultValue={'Weekly shopping\nVegetables, fruit and coffee'}
+            description="The label stays at the top as the field grows."
           />
         </div>
       </section>

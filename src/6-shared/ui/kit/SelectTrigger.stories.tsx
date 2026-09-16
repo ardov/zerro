@@ -10,10 +10,11 @@ import { ListPanel } from './ListPanel'
 import { useListPanelPositioning } from './useListPanelPositioning'
 
 const meta = {
-  title: 'UI Kit/SelectTrigger',
+  title: 'UI Kit/Building blocks/Select trigger',
   component: SelectTrigger,
   tags: ['autodocs'],
   parameters: {
+    controls: { disable: true },
     layout: 'padded',
     docs: {
       description: {

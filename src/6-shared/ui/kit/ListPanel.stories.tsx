@@ -13,10 +13,11 @@ const accounts = Array.from(
   (_, i) => `Account ${String(i + 1).padStart(3, '0')}`
 )
 const meta = {
-  title: 'UI Kit/ListPanel',
+  title: 'UI Kit/Building blocks/List panel',
   component: ListPanel,
   tags: ['autodocs'],
   parameters: {
+    controls: { disable: true },
     layout: 'padded',
     docs: {
       description: {

@@ -5,7 +5,8 @@ import { Drawer, DrawerSurface } from './Drawer'
 import { Button } from './Button'
 
 const meta = {
-  title: 'UI Kit/Drawer',
+  tags: ['autodocs'],
+  title: 'UI Kit/Overlays/Drawer',
   component: Drawer,
   args: {
     label: 'Details',
@@ -17,6 +18,7 @@ const meta = {
     ),
   },
   parameters: {
+    controls: { disable: true },
     layout: 'centered',
     docs: {
       description: {
@@ -182,4 +184,40 @@ export const MobileMountedEntrance: Story = {
 export const ControlledReopen: Story = {
   ...MountedEntrance,
   render: () => <MountedDrawer keepMounted />,
+}
+
+export const Showcase: Story = {
+  render: () => (
+    <div className="grid gap-4">
+      <p className="max-w-lg text-ui-secondary">
+        Open a surface, explore its content and press Escape to dismiss. Try a
+        narrow viewport to compare adaptive behavior.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        <Drawer
+          title="Adaptive sheet"
+          trigger={<Button variant="secondary">Adaptive sheet</Button>}
+        >
+          <p className="mb-4">Content can include text, fields and actions.</p>
+          <p>Focus returns to the opener when this sheet closes.</p>
+        </Drawer>
+        <Drawer
+          title="Right sheet"
+          trigger={<Button variant="secondary">Right sheet</Button>}
+          side="right"
+        >
+          <p className="mb-4">Content can include text, fields and actions.</p>
+          <p>Focus returns to the opener when this sheet closes.</p>
+        </Drawer>
+        <Drawer
+          title="Bottom sheet"
+          trigger={<Button variant="secondary">Bottom sheet</Button>}
+          side="bottom"
+        >
+          <p className="mb-4">Content can include text, fields and actions.</p>
+          <p>Focus returns to the opener when this sheet closes.</p>
+        </Drawer>
+      </div>
+    </div>
+  ),
 }

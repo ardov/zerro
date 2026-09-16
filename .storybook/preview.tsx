@@ -62,7 +62,26 @@ const preview: Preview = {
     },
     options: {
       storySort: {
+        locales: 'en',
+        includeNames: true,
         order: [
+          'UI Kit',
+          [
+            'Welcome',
+            'Foundations',
+            'Actions',
+            ['*', ['Showcase', 'Docs', '*', 'Playground']],
+            'Inputs',
+            ['*', ['Showcase', 'Docs', '*', 'Playground']],
+            'Overlays',
+            ['*', ['Showcase', 'Docs', '*', 'Playground']],
+            'Data display',
+            ['*', ['Showcase', 'Docs', '*', 'Playground']],
+            'Building blocks',
+            ['*', ['Showcase', 'Docs', '*', 'Playground']],
+            'Behavior',
+            ['*', ['Showcase', 'Docs', '*', 'Playground']],
+          ],
           'Library',
           {
             Input: [

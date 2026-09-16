@@ -5,10 +5,11 @@ import { expect, userEvent, within } from 'storybook/test'
 import { ListRow, ListRowHeader, ListRowSeparator } from './ListRow'
 
 const meta = {
-  title: 'UI Kit/ListRow',
+  title: 'UI Kit/Building blocks/List row',
   component: ListRow,
   tags: ['autodocs'],
   parameters: {
+    controls: { disable: true },
     layout: 'padded',
     docs: {
       description: {

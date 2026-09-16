@@ -26,10 +26,11 @@ const items: SelectItem[] = [
   { value: 'cash', label: 'Cash', keywords: ['notes'] },
 ]
 const meta = {
-  title: 'UI Kit/MultiSelect',
+  title: 'UI Kit/Inputs/Multi select',
   component: MultiSelect,
   tags: ['autodocs'],
   parameters: {
+    controls: { disable: true },
     layout: 'padded',
     docs: {
       description: {

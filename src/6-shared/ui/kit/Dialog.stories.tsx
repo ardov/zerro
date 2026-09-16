@@ -10,9 +10,11 @@ import { Input } from './Input'
 import { usePopup } from '@/6-shared/overlays'
 
 const meta = {
-  title: 'UI Kit/Dialog',
+  tags: ['autodocs'],
+  title: 'UI Kit/Overlays/Dialog',
   component: Dialog,
   parameters: {
+    controls: { disable: true },
     layout: 'centered',
     docs: {
       description: {
@@ -381,4 +383,32 @@ export const OwnerCloseNotification: Story = {
     )
     await expect(canvas.getByLabelText('Owner closes')).toHaveTextContent('1')
   },
+}
+
+export const Showcase: Story = {
+  render: () => (
+    <div className="grid gap-4">
+      <p className="max-w-lg text-ui-secondary">
+        Open a surface, explore its content and press Escape to dismiss. Try a
+        narrow viewport to compare adaptive behavior.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        <Dialog
+          title="Centered dialog"
+          trigger={<Button variant="secondary">Centered dialog</Button>}
+        >
+          <p className="mb-4">Content can include text, fields and actions.</p>
+          <Input label="Name" placeholder="Try typing here" />
+        </Dialog>
+        <Dialog
+          title="Mobile sheet"
+          trigger={<Button variant="secondary">Mobile sheet</Button>}
+          mobile="drawer"
+        >
+          <p className="mb-4">Content can include text, fields and actions.</p>
+          <Input label="Name" placeholder="Try typing here" />
+        </Dialog>
+      </div>
+    </div>
+  ),
 }

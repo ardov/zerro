@@ -94,9 +94,11 @@ function Demo(props: {
   )
 }
 const meta = {
-  title: 'UI Kit/Select/History',
+  tags: ['autodocs'],
+  title: 'UI Kit/Behavior/Selection and history',
   component: Demo,
   parameters: {
+    controls: { disable: true },
     docs: {
       description: {
         component: `Select and MultiSelect require OverlayHost. Back closes the top popup before its parent dialog. Optional programmatic control: pass the controller returned by usePopup as **popup**; arbitrary open/onOpenChange state is not supported. Alt+Left simulates router Back in this MemoryRouter story.`,

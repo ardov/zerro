@@ -74,10 +74,12 @@ function Demo(props: { context?: boolean }) {
   )
 }
 const meta = {
-  title: 'UI Kit/Menu',
+  tags: ['autodocs'],
+  title: 'UI Kit/Overlays/Menu',
   component: Menu,
   args: { label: 'Actions', items: [], trigger: <Button>Actions</Button> },
   parameters: {
+    controls: { disable: true },
     layout: 'centered',
     docs: {
       description: {
@@ -383,4 +385,21 @@ export const FixedMobilePopover: Story = {
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(trigger).toHaveFocus())
   },
+}
+
+export const Showcase: Story = {
+  render: () => (
+    <div className="grid gap-8">
+      <section>
+        <h2 className="mb-3 text-ui-20">Dropdown actions</h2>
+        <Demo />
+      </section>
+      <section>
+        <h2 className="mb-3 text-ui-20">
+          Context actions · right click the area
+        </h2>
+        <Demo context />
+      </section>
+    </div>
+  ),
 }

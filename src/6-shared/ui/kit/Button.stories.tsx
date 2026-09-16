@@ -7,9 +7,19 @@ const variants = buttonOptions.variant
 const sizes = buttonOptions.size
 
 const meta = {
-  title: 'UI Kit/Button',
+  tags: ['autodocs'],
+  title: 'UI Kit/Actions/Button',
   component: Button,
-  parameters: { layout: 'fullscreen' },
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Use buttons for actions. Choose primary for the main action, secondary or ghost for supporting actions, and destructive for removal. IconButton needs an accessible label. Explore sizes, icons and disabled states below.',
+      },
+    },
+    controls: { disable: true },
+    layout: 'fullscreen',
+  },
   args: {
     children: 'Save changes',
     variant: 'primary',

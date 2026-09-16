@@ -2,8 +2,18 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
 
 const meta = {
+  tags: ['autodocs'],
   title: 'UI Kit/Foundations',
-  parameters: { layout: 'fullscreen' },
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'The visual foundation of the UI Kit: surfaces, text roles, spacing and emphasis. Switch between light and dark with the toolbar. Browse Actions, Inputs and Overlays for interactive examples; Building blocks documents the pieces used to compose them.',
+      },
+    },
+    controls: { disable: true },
+    layout: 'fullscreen',
+  },
 } satisfies Meta
 export default meta
 

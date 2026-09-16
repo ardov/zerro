@@ -4,12 +4,22 @@ import { Button } from './Button'
 import { Tooltip, TooltipProvider } from './Tooltip'
 
 const meta = {
-  title: 'UI Kit/Tooltip',
+  tags: ['autodocs'],
+  title: 'UI Kit/Overlays/Tooltip',
   component: Tooltip,
-  parameters: { layout: 'centered' },
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Short supporting information shown on hover or keyboard focus. Keep essential instructions visible outside the tooltip. Wrap related examples in TooltipProvider for shared timing. Use a popover for interactive content.',
+      },
+    },
+    controls: { disable: true },
+    layout: 'centered',
+  },
   args: {
-    content: 'Подсказка',
-    children: <Button>Наведи или нажми Tab</Button>,
+    content: 'Tooltip',
+    children: <Button>Hover or press Tab</Button>,
   },
   argTypes: {
     side: { control: 'select', options: ['top', 'bottom', 'left', 'right'] },
@@ -32,24 +42,24 @@ export const Showcase: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-4 p-12">
       {(['top', 'bottom', 'left', 'right'] as const).map(side => (
-        <Tooltip key={side} side={side} content={`Подсказка: ${side}`}>
+        <Tooltip key={side} side={side} content={`Tooltip: ${side}`}>
           <Button variant="secondary">{side}</Button>
         </Tooltip>
       ))}
       <Tooltip
         content={
           <>
-            <strong>Курс обмена</strong>
+            <strong>Exchange rate</strong>
             <br />1 EUR = 25 CZK
             <br />
-            Сумма в исходной валюте операции
+            Amount in the original transaction currency
           </>
         }
       >
         <Button variant="outline">€120</Button>
       </Tooltip>
-      <Tooltip disabled content="Скрыто">
-        <Button>Без подсказки</Button>
+      <Tooltip disabled content="Hidden">
+        <Button>Without tooltip</Button>
       </Tooltip>
     </div>
   ),

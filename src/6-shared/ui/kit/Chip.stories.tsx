@@ -4,9 +4,11 @@ import { CalendarIcon } from '@/6-shared/ui/Icons'
 import { Chip } from './Chip'
 
 const meta = {
-  title: 'UI Kit/Chip',
+  tags: ['autodocs'],
+  title: 'UI Kit/Data display/Chip',
   component: Chip,
   parameters: {
+    controls: { disable: true },
     layout: 'centered',
     docs: {
       description: {

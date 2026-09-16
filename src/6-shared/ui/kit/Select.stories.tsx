@@ -33,10 +33,11 @@ const items: SelectItem[] = [
   { value: 'cash', label: 'Cash' },
 ]
 const meta = {
-  title: 'UI Kit/Select',
+  title: 'UI Kit/Inputs/Select',
   component: Select,
   tags: ['autodocs'],
   parameters: {
+    controls: { disable: true },
     layout: 'padded',
     docs: {
       description: {

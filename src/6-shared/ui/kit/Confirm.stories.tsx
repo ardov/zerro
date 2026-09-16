@@ -26,9 +26,19 @@ function Confirmation(props: ConfirmProps) {
   )
 }
 const meta = {
-  title: 'UI Kit/Confirm',
+  tags: ['autodocs'],
+  title: 'UI Kit/Overlays/Confirmation',
   component: Confirm,
-  parameters: { layout: 'centered' },
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Ask for confirmation before continuing an operation. Pass Confirm to useAsk<boolean>(); only the confirm button returns true. Escape, Back and cancellation dismiss without confirming. Use danger intent for destructive actions; initial focus moves to Cancel.',
+      },
+    },
+    controls: { disable: true },
+    layout: 'centered',
+  },
   args: {
     title: 'Continue?',
     description: 'The operation starts only after confirmation.',
@@ -78,3 +88,29 @@ const checkConfirm: Story['play'] = async ({ canvasElement, args }) => {
 }
 export const Ordinary: Story = { play: checkConfirm }
 export const Danger: Story = { args: { intent: 'danger' }, play: checkConfirm }
+
+export const Showcase: Story = {
+  render: () => (
+    <div className="grid gap-8">
+      <section>
+        <h2 className="mb-3 text-ui-20">Ordinary confirmation</h2>
+        <Confirmation
+          title="Continue?"
+          description="Confirm to continue this operation."
+          okText="Continue"
+          cancelText="Cancel"
+        />
+      </section>
+      <section>
+        <h2 className="mb-3 text-ui-20">Destructive confirmation</h2>
+        <Confirmation
+          title="Delete envelope?"
+          description="This example only records your answer."
+          intent="danger"
+          okText="Delete"
+          cancelText="Keep envelope"
+        />
+      </section>
+    </div>
+  ),
+}

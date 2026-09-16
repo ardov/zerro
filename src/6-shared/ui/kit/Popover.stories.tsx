@@ -6,9 +6,11 @@ import { Button } from './Button'
 import { Input } from './Input'
 
 const meta = {
-  title: 'UI Kit/Popover',
+  tags: ['autodocs'],
+  title: 'UI Kit/Overlays/Popover',
   component: Popover,
   parameters: {
+    controls: { disable: true },
     layout: 'centered',
     docs: {
       description: {
@@ -130,4 +132,32 @@ export const AdaptWithoutClosing: Story = {
       expect(canvas.getByLabelText('Close count')).toHaveTextContent('1')
     )
   },
+}
+
+export const Showcase: Story = {
+  render: () => (
+    <div className="grid gap-4">
+      <p className="max-w-lg text-ui-secondary">
+        Open a surface, explore its content and press Escape to dismiss. Try a
+        narrow viewport to compare adaptive behavior.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        <Popover
+          title="Adaptive popover"
+          trigger={<Button variant="secondary">Adaptive popover</Button>}
+        >
+          <p className="mb-4">Content can include text, fields and actions.</p>
+          <Input label="Name" placeholder="Try typing here" />
+        </Popover>
+        <Popover
+          title="Always anchored"
+          trigger={<Button variant="secondary">Always anchored</Button>}
+          mobile="popover"
+        >
+          <p className="mb-4">Content can include text, fields and actions.</p>
+          <Input label="Name" placeholder="Try typing here" />
+        </Popover>
+      </div>
+    </div>
+  ),
 }

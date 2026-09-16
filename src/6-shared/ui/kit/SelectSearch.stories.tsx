@@ -15,7 +15,7 @@ const items: SelectItem[] = [
       {
         value: 'daily',
         label: 'Everyday account',
-        keywords: ['běžný účet'],
+        keywords: ['café account'],
         start: <Wallet />,
         description: 'Daily spending',
         end: 'CZK',
@@ -29,10 +29,11 @@ const items: SelectItem[] = [
   { value: 'travel', label: 'Travel cash' },
 ]
 const meta = {
-  title: 'UI Kit/Select/Search',
+  title: 'UI Kit/Inputs/Select search',
   component: Select,
   tags: ['autodocs'],
   parameters: {
+    controls: { disable: true },
     layout: 'padded',
     docs: {
       description: {
@@ -124,7 +125,7 @@ export const Interaction: Story = {
       name: 'Search Account',
     })
     await expect(reopened).toHaveValue('')
-    await userEvent.type(reopened, 'bezny ucet')
+    await userEvent.type(reopened, 'cafe account')
     await expect(body.getAllByRole('option')).toHaveLength(1)
     await expect(
       body.getByRole('option', { name: /Everyday account/ })
