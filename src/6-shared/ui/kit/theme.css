@@ -26,9 +26,9 @@
   --color-ui-primary:    oklch(0 0 0 / 0.95);
   --color-ui-secondary:  oklch(0 0 0 / 0.60);
   --color-ui-placeholder: oklch(0 0 0 / 0.35);
-  --color-ui-link:       oklch(0.52 0.2 240);
+  --color-ui-link:       oklch(0.5 0.2 240);
   --color-ui-success:    oklch(0.6 0.2 150);
-  --color-ui-error:      oklch(0.6 0.2 50);
+  --color-ui-error:      oklch(0.6 0.24 20);
 
   /* 🎨 Border */
   --color-ui-border:      oklch(0 0 0 / var(--opacity-ui-border));
