@@ -90,7 +90,7 @@ export function DrawerSurface(
         <MobileDrawerViewport
           className={cn(
             'flex',
-            side === 'bottom' ? 'items-end' : 'justify-end'
+            side === 'bottom' ? 'items-end' : 'justify-end p-ui-drawer-inset'
           )}
         >
           <Primitive.Popup
@@ -104,7 +104,7 @@ export function DrawerSurface(
               'kit-drawer-popup pointer-events-auto relative flex flex-col overflow-hidden rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
               side === 'bottom'
                 ? 'max-h-[calc(100%-32px)] w-full rounded-t-ui-popover'
-                : 'h-full w-90 max-w-full rounded-l-ui-popover',
+                : 'h-full w-90 max-w-full rounded-ui-popover',
               className
             )}
           >

@@ -236,7 +236,9 @@ it). Bottom drawers, Popover and Confirm have no visible close button; the
 surface owns this rule, so forms do not need breakpoint logic. Popover accepts `anchor`, `side`, and `align`; its anchor controls position,
 while the trigger controls focus restoration. It is modal.
 
-Each modal surface renders its own dimming backdrop, including nested surfaces.
+Dialog and Drawer render their own dimming backdrops, including nested surfaces.
+Anchored Popover keeps a transparent backdrop: it remains modal without dimming
+the page. Its mobile Drawer presentation retains the Drawer backdrop.
 Dialog, Drawer and modal Popover share `z-modal`; portal order places each child's
 backdrop above the parent and below the child. Base UI's nested-backdrop
 suppression is disabled for Dialog/Drawer. Popover and bottom Drawer retain a
@@ -247,6 +249,9 @@ Below **500px**, Popover and Menu default to `mobile="drawer"`; use
 `mobile="popover"` to keep them anchored. Dialog stays centered by default
 (`mobile="dialog"`) and supports `mobile="drawer"`. Drawer uses
 `side="auto" | "bottom" | "right"`. Shared application breakpoints are unchanged.
+Right drawers use the theme token `--spacing-ui-drawer-inset` (4px) on all
+viewport edges and round every corner. Bottom drawers remain flush with the
+viewport and round only their top corners.
 Adaptive branches can remount content and lose local input. Keep important drafts
 above those branches. Switching presentation neither closes nor adds history.
 

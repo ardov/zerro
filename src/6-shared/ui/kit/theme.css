@@ -40,6 +40,9 @@
   --color-ui-tooltip:   oklch(0.22 0 0);
   --color-ui-on-tooltip: oklch(1 0 0);
 
+  /* Surface spacing */
+  --spacing-ui-drawer-inset: 4px;
+
   /* 📏 Stroke thickness */
   --stroke-ui-control: 1.5px;
 

@@ -23,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Bottom or right sheet powered by Base UI. By default, the sheet opens at the bottom below 500px and on the right at 500px and above. Set side="bottom" or side="right" to fix its placement. Requires OverlayHost in a Router; pass popup={usePopup()} for programmatic control. Back, Escape, backdrop and swipe close the same history entry. Bounded scrolling and safe-area padding. Focus returns to the trigger or the focused opener automatically. DrawerSurface accepts a controller when history is already owned by its caller; finalFocus overrides automatic restoration. Example: <Drawer label="Details" trigger={<Button>Open</Button>}>Content</Drawer>.',
+          'Bottom or right sheet powered by Base UI. By default, the sheet opens at the bottom below 500px and on the right at 500px and above. Right sheets float inside the viewport with a themed inset and rounded corners on every side. Bottom sheets remain flush with the viewport. Set side="bottom" or side="right" to fix its placement. Requires OverlayHost in a Router; pass popup={usePopup()} for programmatic control. Back, Escape, backdrop and swipe close the same history entry. Bounded scrolling and safe-area padding. Focus returns to the trigger or the focused opener automatically. DrawerSurface accepts a controller when history is already owned by its caller; finalFocus overrides automatic restoration. Example: <Drawer label="Details" trigger={<Button>Open</Button>}>Content</Drawer>.',
       },
     },
   },
@@ -71,9 +71,15 @@ export const Right: Story = {
     )
     await waitFor(() => {
       const bounds = sheet.getBoundingClientRect()
-      expect(Math.abs(bounds.right - window.innerWidth)).toBeLessThan(2)
-      expect(bounds.top).toBe(0)
-      expect(Math.abs(bounds.height - window.innerHeight)).toBeLessThan(2)
+      expect(bounds.right).toBeLessThan(window.innerWidth)
+      expect(bounds.top).toBeGreaterThan(0)
+      expect(bounds.bottom).toBeLessThan(window.innerHeight)
+      expect(
+        Math.abs(bounds.top - (window.innerWidth - bounds.right))
+      ).toBeLessThan(1)
+      expect(
+        Math.abs(bounds.top - (window.innerHeight - bounds.bottom))
+      ).toBeLessThan(1)
       expect(bounds.width).toBeLessThan(window.innerWidth)
     })
     await userEvent.keyboard('{Escape}')

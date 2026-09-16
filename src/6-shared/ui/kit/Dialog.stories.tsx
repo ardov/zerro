@@ -113,7 +113,7 @@ export const Nested: Story = {
     const child = await body.findByRole('dialog', { name: 'Child' })
     await userEvent.tab()
     await expect(child).toContainElement(document.activeElement as HTMLElement)
-    await dismissOverParent(parent, child)
+    await dismissOverParent(parent, child, window.innerWidth < 500)
     await waitFor(() => expect(childTrigger).toHaveFocus())
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(trigger).toHaveFocus())
@@ -251,7 +251,11 @@ export const SaveAndCancel: Story = {
 }
 
 /** The child's backdrop must cover the parent's visible area, not just the page. */
-async function dismissOverParent(parent: HTMLElement, child: HTMLElement) {
+async function dismissOverParent(
+  parent: HTMLElement,
+  child: HTMLElement,
+  dimmed = true
+) {
   let backdrop: Element | null = null
   await waitFor(() => {
     const bounds = parent.getBoundingClientRect()
@@ -261,9 +265,9 @@ async function dismissOverParent(parent: HTMLElement, child: HTMLElement) {
     expect(y < childBounds.top || x < childBounds.left).toBe(true)
     backdrop = document.elementFromPoint(x, y)
     expect(backdrop).toHaveAttribute('role', 'presentation')
-    expect(getComputedStyle(backdrop!).backgroundColor).not.toBe(
-      'rgba(0, 0, 0, 0)'
-    )
+    const transparent =
+      getComputedStyle(backdrop!).backgroundColor === 'rgba(0, 0, 0, 0)'
+    expect(transparent).toBe(!dimmed)
   })
   await userEvent.click(backdrop!)
   await waitFor(() => expect(child).not.toBeVisible())

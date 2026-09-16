@@ -96,7 +96,7 @@ function AnchoredPopover(props: PopoverSurfaceProps) {
     <Primitive.Root open={open} onOpenChange={onOpenChange} modal>
       {trigger && <Primitive.Trigger disabled={disabled} render={trigger} />}
       <Primitive.Portal>
-        <Primitive.Backdrop className="kit-surface-fade fixed inset-0 z-modal bg-ui-backdrop" />
+        <Primitive.Backdrop className="fixed inset-0 z-modal" />
         <Primitive.Positioner
           {...positioning}
           anchor={anchor}

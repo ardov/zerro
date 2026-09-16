@@ -24,7 +24,7 @@
     }
 
     &[data-side='right'] {
-      --drawer-exit-translate: 100% 0;
+      --drawer-exit-translate: calc(100% + var(--spacing-ui-drawer-inset)) 0;
       translate: var(--drawer-swipe-movement-x, 0px) 0;
     }
 

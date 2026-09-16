@@ -15,7 +15,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Modal anchored content with optional title and free children. Default mobile="drawer" uses a bottom sheet below 500px; mobile="popover" keeps the anchored view. anchor positions the panel independently from the trigger that receives focus on closing. onClose fires once per actual close, including Back, not for adaptation or cleanup. Adaptive branches may remount content. Use PopoverSurface when visibility already belongs to an asked layer or screen.',
+          'Modal anchored content with a transparent backdrop, optional title and free children. Default mobile="drawer" uses a bottom sheet below 500px; mobile="popover" keeps the anchored view. anchor positions the panel independently from the trigger that receives focus on closing. onClose fires once per actual close, including Back, not for adaptation or cleanup. Adaptive branches may remount content. Use PopoverSurface when visibility already belongs to an asked layer or screen.',
       },
     },
   },
