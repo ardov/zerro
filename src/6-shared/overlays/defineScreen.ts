@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useOverlayMethods, useOverlayState } from './context'
 
 /** Declares an overlay a person can come back to.
@@ -21,8 +21,11 @@ export function defineScreen<T>(name: string) {
     throw new Error(`Screen name "${name}" must not read as a number`)
 
   /** Like `useState`, except the state lives in the address: `set(null)`
-   * closes, Back does the same, and a reload loses nothing. */
-  function use(): [T | undefined, (value: T | null) => void] {
+   * closes, Back does the same, and a reload loses nothing. Optional onClose
+   * belongs in the stable owner, above conditionally mounted screen content. */
+  function use(
+    onClose?: () => void
+  ): [T | undefined, (value: T | null) => void] {
     const { screens } = useOverlayState()
     const { openScreen, closeScreen } = useOverlayMethods()
     const set = useCallback(
@@ -32,6 +35,13 @@ export function defineScreen<T>(name: string) {
           : openScreen(name, value),
       [openScreen, closeScreen]
     )
+    const open = screens[name] !== undefined
+    const wasOpen = useRef(open)
+    useEffect(() => {
+      const closed = wasOpen.current && !open
+      wasOpen.current = open
+      if (closed) onClose?.()
+    }, [open, onClose])
     return [screens[name] as T | undefined, set]
   }
 

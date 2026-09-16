@@ -22,7 +22,7 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
   const paperRef = useRef(null)
   // On the overlay stack, so Back closes the month list rather than leaving
   // the page. The anchor is plain state beside it.
-  const [open, setOpen] = usePopup()
+  const { open, setOpen } = usePopup()
   const [anchorEl, setAnchorEl] = useState(null)
 
   const prevMonthDate = month > first ? prevMonth(month) : null

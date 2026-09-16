@@ -50,7 +50,7 @@ export const TagSelect2: FC<TagSelectProps> = props => {
   const { onChange, trigger, value, exclude, tagType } = props
   // Openness is on the overlay stack so Back closes the list; the anchor is
   // resolved when opening, so render never reads a mutable ref.
-  const [open, setOpen] = usePopup()
+  const { open, setOpen } = usePopup()
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
   const handleClick: React.MouseEventHandler = e => {
     setAnchorEl(e.currentTarget)

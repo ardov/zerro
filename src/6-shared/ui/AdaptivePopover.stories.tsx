@@ -192,7 +192,7 @@ export const MobileSwipe: Story = {
 }
 
 function CompletionHarness() {
-  const [open, setOpen] = usePopup()
+  const { open, setOpen } = usePopup()
   const navigate = useNavigate()
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null)
   const [opened, setOpened] = useState(0)

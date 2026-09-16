@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react'
+import { StrictMode, useEffect, useState, type ReactNode } from 'react'
+import { useOwnedPopup } from '../ui/kit/useOwnedPopup'
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useNavigate } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { OverlayHost } from './OverlayHost'
 import { defineScreen } from './defineScreen'
 import { useAsk, useAsked } from './useAsk'
@@ -27,7 +28,7 @@ function Back() {
 
 describe('usePopup', () => {
   function Menu() {
-    const [open, setOpen] = usePopup()
+    const { open, setOpen } = usePopup()
     return (
       <>
         <button onClick={() => setOpen(true)}>open menu</button>
@@ -73,8 +74,8 @@ describe('one popup handing over to another', () => {
    * the menu goes. The second one opens before the step that closes the first
    * has landed. */
   function Handover() {
-    const [menuOpen, setMenuOpen] = usePopup()
-    const [editorOpen, setEditorOpen] = usePopup()
+    const { open: menuOpen, setOpen: setMenuOpen } = usePopup()
+    const { open: editorOpen, setOpen: setEditorOpen } = usePopup()
     return (
       <>
         <button onClick={() => setMenuOpen(true)}>open menu</button>
@@ -323,5 +324,243 @@ describe('defineScreen', () => {
     await user.click(screen.getByText('close'))
     expect(screen.queryByText('preview a')).toBeNull()
     expect(screen.getByText('open a')).toBeTruthy()
+  })
+})
+
+describe('owner close notifications', () => {
+  function Editor({ onClose }: { onClose: (value: string) => void }) {
+    const [draft, setDraft] = useState('initial')
+    const popup = usePopup(() => onClose(draft))
+    const { open, setOpen } = useOwnedPopup({ popup })
+    const [branch, setBranch] = useState(false)
+    return (
+      <>
+        <button onClick={() => setOpen(true)}>edit</button>
+        {open && (
+          <div key={String(branch)}>
+            <input
+              aria-label="draft"
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+            />
+            <button onClick={() => setBranch(!branch)}>adapt</button>
+            <button onClick={() => setOpen(false)}>close editor</button>
+          </div>
+        )}
+      </>
+    )
+  }
+
+  it('delivers the latest draft once for Back and programmatic close, never for adaptation', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(
+      <StrictMode>
+        <App>
+          <Editor onClose={onClose} />
+        </App>
+      </StrictMode>
+    )
+    await user.click(screen.getByText('edit'))
+    await user.clear(screen.getByLabelText('draft'))
+    await user.type(screen.getByLabelText('draft'), 'changed')
+    await user.click(screen.getByText('adapt'))
+    expect(onClose).not.toHaveBeenCalled()
+    await user.click(screen.getByText('back'))
+    expect(onClose.mock.calls).toEqual([['changed']])
+    await user.click(screen.getByText('edit'))
+    await user.click(screen.getByText('close editor'))
+    expect(onClose.mock.calls).toEqual([['changed'], ['changed']])
+  })
+
+  it('releases an unmounted owner without saving a draft', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    function Owner() {
+      const [mounted, setMounted] = useState(true)
+      return (
+        <>
+          <button onClick={() => setMounted(false)}>remove owner</button>
+          {mounted && <Editor onClose={onClose} />}
+        </>
+      )
+    }
+    render(
+      <App>
+        <Owner />
+      </App>
+    )
+    await user.click(screen.getByText('edit'))
+    await user.click(screen.getByText('remove owner'))
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('notifies the asked owner on Back with its latest draft', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    function AskedEditor() {
+      const [draft, setDraft] = useState('initial')
+      const { open } = useAsked(() => onClose(draft))
+      return (
+        open && (
+          <input
+            aria-label="asked draft"
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+          />
+        )
+      )
+    }
+    function Launcher() {
+      const ask = useAsk()
+      return (
+        <button onClick={() => void ask(<AskedEditor />)}>ask editor</button>
+      )
+    }
+    render(
+      <App>
+        <Launcher />
+      </App>
+    )
+    await user.click(screen.getByText('ask editor'))
+    await user.clear(await screen.findByLabelText('asked draft'))
+    await user.type(screen.getByLabelText('asked draft'), 'latest')
+    await user.click(screen.getByText('back'))
+    expect(onClose.mock.calls).toEqual([['latest']])
+  })
+
+  it('notifies the stable screen owner after conditional content unmounts', async () => {
+    const editor = defineScreen<string>('close-test')
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    function ScreenOwner() {
+      const [draft, setDraft] = useState('initial')
+      const [value, setValue] = editor.use(() => onClose(draft))
+      return (
+        <>
+          <button onClick={() => setValue('open')}>open screen</button>
+          {value && (
+            <div>
+              <input
+                aria-label="screen draft"
+                value={draft}
+                onChange={e => setDraft(e.target.value)}
+              />
+              <button onClick={() => setValue(null)}>close screen</button>
+            </div>
+          )}
+        </>
+      )
+    }
+    render(
+      <StrictMode>
+        <App>
+          <ScreenOwner />
+        </App>
+      </StrictMode>
+    )
+    await user.click(screen.getByText('open screen'))
+    await user.clear(screen.getByLabelText('screen draft'))
+    await user.type(screen.getByLabelText('screen draft'), 'latest')
+    await user.click(screen.getByText('back'))
+    expect(screen.queryByLabelText('screen draft')).toBeNull()
+    expect(onClose.mock.calls).toEqual([['latest']])
+    await user.click(screen.getByText('open screen'))
+    await user.click(screen.getByText('close screen'))
+    expect(onClose.mock.calls).toEqual([['latest'], ['latest']])
+  })
+
+  it('keeps lifecycle independent from a wrapped change callback', async () => {
+    const user = userEvent.setup()
+    const closed = vi.fn()
+    const changed = vi.fn()
+    function Owner() {
+      const controller = usePopup(closed)
+      const setOpen = (open: boolean) => {
+        changed(open)
+        controller.setOpen(open)
+      }
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>open wrapped</button>
+          {controller.open && (
+            <button onClick={() => setOpen(false)}>close wrapped</button>
+          )}
+        </>
+      )
+    }
+    render(
+      <App>
+        <Owner />
+      </App>
+    )
+    await user.click(screen.getByText('open wrapped'))
+    await user.click(screen.getByText('close wrapped'))
+    expect(closed).toHaveBeenCalledTimes(1)
+    await user.click(screen.getByText('open wrapped'))
+    await user.click(screen.getByText('back'))
+    expect(closed).toHaveBeenCalledTimes(2)
+    expect(changed.mock.calls).toEqual([[true], [false], [true]])
+  })
+
+  it('unsubscribes an owner immediately when it is removed', async () => {
+    const user = userEvent.setup()
+    const closed = vi.fn()
+    const popupRef: { current?: ReturnType<typeof usePopup> } = {}
+    function Owner() {
+      const popup = usePopup(closed)
+      useEffect(() => {
+        popupRef.current = popup
+      }, [popup])
+      return <button onClick={() => popup.setOpen(true)}>open owner</button>
+    }
+    const view = render(
+      <App>
+        <Owner />
+      </App>
+    )
+    await user.click(screen.getByText('open owner'))
+    view.rerender(<App>{null}</App>)
+    act(() => popupRef.current!.setOpen(false))
+    expect(closed).not.toHaveBeenCalled()
+  })
+
+  it('keeps a nested popup subscription independent from its asked parent', async () => {
+    const user = userEvent.setup()
+    const childClosed = vi.fn()
+    const parentClosed = vi.fn()
+    function AskedParent() {
+      const { open } = useAsked(parentClosed)
+      const child = useOwnedPopup({ onClose: childClosed })
+      return (
+        open && (
+          <>
+            <button onClick={() => child.setOpen(true)}>open child</button>
+            {child.open && (
+              <button onClick={() => child.setOpen(false)}>close child</button>
+            )}
+          </>
+        )
+      )
+    }
+    function Launcher() {
+      const ask = useAsk()
+      return (
+        <button onClick={() => void ask(<AskedParent />)}>ask parent</button>
+      )
+    }
+    render(
+      <App>
+        <Launcher />
+      </App>
+    )
+    await user.click(screen.getByText('ask parent'))
+    await user.click(await screen.findByText('open child'))
+    await user.click(screen.getByText('close child'))
+    expect(childClosed).toHaveBeenCalledTimes(1)
+    expect(parentClosed).not.toHaveBeenCalled()
+    await user.click(screen.getByText('back'))
+    expect(childClosed).toHaveBeenCalledTimes(1)
+    expect(parentClosed).toHaveBeenCalledTimes(1)
   })
 })

@@ -319,7 +319,7 @@ export const EmptyAlignment: Story = {
 function ControlledAlignmentDemo() {
   const [value, setValue] = useState<string | null>('two')
   const popup = usePopup()
-  const [, setOpen] = popup
+  const { setOpen } = popup
   return (
     <div className="mx-auto mt-40 grid w-80 gap-4">
       <Button variant="secondary" onClick={() => setOpen(true)}>

@@ -38,6 +38,7 @@ This README holds shared guidelines; plans and open questions stay private.
 `Select` and `MultiSelect` require `OverlayHost` inside a Router. The host owns
 opening and closing; Back dismisses the top popup before its parent overlay.
 For programmatic control, pass `popup={popup}` where `popup = usePopup()`.
-Do not substitute a `useState` pair: the popup must participate in host history.
+The controller exposes `open`, `setOpen`, `subscribeClose`, and `release`.
+Do not substitute local state: the popup must participate in host history.
 Without this prop the select creates its own popup control. Arbitrary
 `open` / `onOpenChange` props are not part of the select API.

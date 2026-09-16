@@ -14,7 +14,7 @@ export function TransactionCreateButton({
 }) {
   const [started, setStarted] = useState(false)
   const { t } = useTranslation('transaction')
-  const [open, setOpen] = usePopup()
+  const { open, setOpen } = usePopup()
   const close = () => setOpen(false)
   return (
     <>

@@ -38,7 +38,7 @@ export const ActionsMenu: FC<
   const { t } = useTranslation(['transaction', 'transactionContextMenu'])
   // On the overlay stack, so Back closes the menu rather than the editor
   // underneath it.
-  const [open, setOpen] = usePopup()
+  const { open, setOpen } = usePopup()
   const [anchor, setAnchor] = useState<Element | null>(null)
 
   const run = (action: () => void) => () => {

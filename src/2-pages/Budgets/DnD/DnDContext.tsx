@@ -49,7 +49,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   >('toBeAssigned')
   // On the overlay stack, so Back closes the move-money dialog rather than
   // leaving the budget page.
-  const [isOpen, setMoveOpen] = usePopup()
+  const { open: isOpen, setOpen: setMoveOpen } = usePopup()
 
   const onDragEnd = useCallback(
     (e: DragEndEvent) => {

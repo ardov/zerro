@@ -336,7 +336,7 @@ export const Showcase: Story = {
 
 function ActionDemo() {
   const popup = usePopup()
-  const [, setOpen] = popup
+  const { setOpen } = popup
   const [created, setCreated] = useState(false)
   return (
     <div className="grid max-w-sm gap-4">

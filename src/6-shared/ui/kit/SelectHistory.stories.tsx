@@ -18,7 +18,7 @@ function Demo(props: {
   external?: boolean
 }) {
   const { search, multiple, external } = props
-  const [dialogOpen, setDialogOpen] = usePopup()
+  const { open: dialogOpen, setOpen: setDialogOpen } = usePopup()
   const popup = usePopup()
   const [value, setValue] = useState<string | null>('one')
   const [values, setValues] = useState(['one'])
@@ -71,7 +71,7 @@ function Demo(props: {
       >
         <DialogContent className="grid w-80 gap-4">
           {external && (
-            <Button onClick={() => popup[1](true)}>Open choice</Button>
+            <Button onClick={() => popup.setOpen(true)}>Open choice</Button>
           )}
           {mounted &&
             (multiple ? (
@@ -99,7 +99,7 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: `Select and MultiSelect require OverlayHost. Back closes the top popup before its parent dialog. Optional programmatic control: pass the pair returned by usePopup as **popup**; arbitrary open/onOpenChange state is not supported. Alt+Left simulates router Back in this MemoryRouter story.`,
+        component: `Select and MultiSelect require OverlayHost. Back closes the top popup before its parent dialog. Optional programmatic control: pass the controller returned by usePopup as **popup**; arbitrary open/onOpenChange state is not supported. Alt+Left simulates router Back in this MemoryRouter story.`,
       },
     },
   },

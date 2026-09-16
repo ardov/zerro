@@ -1,22 +1,22 @@
-import { useCallback, useId } from 'react'
+import { useMemo, useId } from 'react'
+import type { PopupController } from './controller'
+import { useCloseNotification } from './useCloseNotification'
 import { useOverlayMethods, useOverlayState } from './context'
 
-/** A popup that owns its own trigger — a select's list, a date picker's
- * calendar. All it needs from history is that Back closes it rather than
- * leaving the page.
- *
- * Nothing opens these by name, so the key is generated rather than asked for
- * at the call site: all the host needs is that no two live ones share one.
- *
- * The pair it returns is Base UI's `open` / `onOpenChange` shape, which is
- * what the popups this wraps already take. */
-export function usePopup(): [boolean, (open: boolean) => void] {
+/** History owns visibility. Keep this owner and its draft mounted while its
+ * surface adapts or unmounts on close. Technical unmount never saves a draft. */
+export function usePopup(onClose?: () => void): PopupController {
   const id = useId()
-  const { openPopup, closePopup } = useOverlayMethods()
+  const { openPopup, closePopup, subscribeClose } = useOverlayMethods()
   const { live } = useOverlayState()
-  const setOpen = useCallback(
-    (next: boolean) => (next ? openPopup(id) : closePopup(id)),
-    [id, openPopup, closePopup]
+  const methods = useMemo(
+    () => ({
+      setOpen: (next: boolean) => (next ? openPopup(id) : closePopup(id)),
+      subscribeClose: (listener: () => void) => subscribeClose(id, listener),
+      release: () => closePopup(id, false),
+    }),
+    [id, openPopup, closePopup, subscribeClose]
   )
-  return [live.includes(id), setOpen]
+  useCloseNotification(methods, onClose)
+  return { open: live.includes(id), ...methods }
 }

@@ -53,8 +53,8 @@ const Filter: FC<FilterProps> = ({
   const pendingEditingKind = useRef<EditableFilterKind | null>(null)
   // Both surfaces sit on the overlay stack, so Back closes the one on top
   // rather than leaving the page. The anchors stay plain state beside them.
-  const [menuOpen, setMenuOpen] = usePopup()
-  const [editorOpen, setEditorOpen] = usePopup()
+  const { open: menuOpen, setOpen: setMenuOpen } = usePopup()
+  const { open: editorOpen, setOpen: setEditorOpen } = usePopup()
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
   const [editingKind, setEditingKind] = useState<EditableFilterKind | null>(
     null

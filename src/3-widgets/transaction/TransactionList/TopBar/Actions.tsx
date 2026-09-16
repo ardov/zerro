@@ -50,8 +50,8 @@ const Actions: FC<ActionsProps> = ({
   const actions = getAvailableActions(transactions)
   // Both are on the overlay stack, so Back closes the dialog or the menu
   // instead of leaving the page — which is what it used to do here.
-  const [menuOpen, setMenuOpen] = usePopup()
-  const [editOpen, setEditOpen] = usePopup()
+  const { open: menuOpen, setOpen: setMenuOpen } = usePopup()
+  const { open: editOpen, setOpen: setEditOpen } = usePopup()
 
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
   const handleClick: MouseEventHandler = event => {

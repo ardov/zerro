@@ -1,3 +1,5 @@
+import type { OverlayController } from './controller'
+import { useCloseNotification } from './useCloseNotification'
 import { useContext } from 'react'
 import { AskedContext, useOverlayMethods } from './context'
 
@@ -23,14 +25,19 @@ export function useAsk() {
   return useOverlayMethods().ask
 }
 
-/** The other side of `ask`, for the element that was handed to it. `open`
- * drives the surface, and `answer` ends the question — `answer()` with nothing
- * means the same as a dismissal. */
-export function useAsked<T>(): {
+/** The asked element owns its draft and subscription; surfaces only render it.
+ * answer() without a value dismisses the question. */
+export function useAsked<T>(onClose?: () => void): {
   open: boolean
   answer: (value?: T) => void
+  controller: OverlayController
 } {
   const layer = useContext(AskedContext)
   if (!layer) throw new Error('useAsked is used outside of an asked overlay')
-  return layer as { open: boolean; answer: (value?: T) => void }
+  useCloseNotification(layer.controller, onClose)
+  return layer as {
+    open: boolean
+    answer: (value?: T) => void
+    controller: OverlayController
+  }
 }

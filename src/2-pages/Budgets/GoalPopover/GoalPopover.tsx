@@ -40,7 +40,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
 
   // On the overlay stack, so Back closes the month list rather than the goal
   // popover underneath it.
-  const [monthOpen, setMonthOpen] = usePopup()
+  const { open: monthOpen, setOpen: setMonthOpen } = usePopup()
   const [monthPopoverAnchor, setMonthPopoverAnchor] =
     useState<(typeof props)['anchorEl']>(null)
   if (!id || !month) return null

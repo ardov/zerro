@@ -69,7 +69,7 @@ export type MultiSelectProps<T extends string> = TFieldProps & {
  * `setFieldValue` for exactly this. */
 export function Select<T extends string>(props: SelectProps<T>) {
   const { value, onChange, options, ...field } = props
-  const [open, onOpenChange] = usePopup()
+  const { open, setOpen: onOpenChange } = usePopup()
   return (
     <OutlinedFieldRoot {...field}>
       <SelectPrimitive.Root
@@ -97,7 +97,7 @@ export function Select<T extends string>(props: SelectProps<T>) {
  * summary of its own. */
 export function MultiSelect<T extends string>(props: MultiSelectProps<T>) {
   const { value, onChange, options, renderValue, ...field } = props
-  const [open, onOpenChange] = usePopup()
+  const { open, setOpen: onOpenChange } = usePopup()
   return (
     <OutlinedFieldRoot {...field} shrink>
       <SelectPrimitive.Root

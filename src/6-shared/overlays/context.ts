@@ -1,11 +1,13 @@
+import type { OverlayController } from './controller'
 import type { ReactElement } from 'react'
 import { createContext, useContext } from 'react'
 
 /** Everything that opens or closes an overlay. Stable for the life of the
  * host, so a caller can hold one in a `useCallback` without it going stale. */
 export type OverlayMethods = {
+  subscribeClose: (id: string, listener: () => void) => () => void
   openPopup: (id: string) => void
-  closePopup: (id: string) => void
+  closePopup: (id: string, notify?: boolean) => void
   ask: <T>(element: ReactElement) => Promise<T | undefined>
   openScreen: (name: string, value: unknown, instead?: boolean) => void
   closeScreen: (name: string) => void
@@ -37,9 +39,10 @@ export function useOverlayState() {
 
 /** What an element handed to `ask` is given. */
 export type AskedLayer = {
-  /** False while the surface is animating out, so it can play its exit. */
+  /** False while the surface is animating out. Kept for legacy surfaces. */
   open: boolean
   answer: (value?: unknown) => void
+  controller: OverlayController
 }
 
 export const AskedContext = createContext<AskedLayer | null>(null)

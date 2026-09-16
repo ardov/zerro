@@ -32,7 +32,7 @@ export const TypeSelect: FC<{
   unavailable?: readonly TDraftType[]
 }> = ({ value, onChange, unavailable = [] }) => {
   const { t } = useTranslation('transaction')
-  const [open, setOpen] = usePopup()
+  const { open, setOpen } = usePopup()
   const [anchor, setAnchor] = useState<Element | null>(null)
 
   return (

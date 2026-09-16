@@ -53,7 +53,7 @@ export const DateTimeField: FC<DateTimeFieldProps> = ({
   const { t: tCommon } = useTranslation()
   const locale = getDateLocale()
   const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
-  const [open, setOpen] = usePopup()
+  const { open, setOpen } = usePopup()
   const [draft, setDraft] = useState(() => formatDateInput(date, locale))
   const [shown, setShown] = useState({ date, code: locale.code })
   if (shown.date !== date || shown.code !== locale.code) {

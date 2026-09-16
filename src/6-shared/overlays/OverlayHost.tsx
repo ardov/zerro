@@ -1,5 +1,12 @@
 import type { ReactElement, ReactNode } from 'react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import type { Location } from 'react-router-dom'
 import { useLocation, useNavigate, useNavigationType } from 'react-router-dom'
 import type { HistoryOp, OverlayAction, OverlayEntry } from './decide'
@@ -53,6 +60,26 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   const asksRef = useRef(asks)
   const locationRef = useRef(location)
   const timersRef = useRef(new Set<ReturnType<typeof setTimeout>>())
+  const closeListeners = useRef(new Map<string, Set<() => void>>())
+  const subscribeClose = useCallback((id: string, listener: () => void) => {
+    const listeners = closeListeners.current.get(id) ?? new Set<() => void>()
+    listeners.add(listener)
+    closeListeners.current.set(id, listeners)
+    return () => {
+      listeners.delete(listener)
+      if (!listeners.size) closeListeners.current.delete(id)
+    }
+  }, [])
+  const notifyClose = useCallback((id: string) => {
+    const listeners = closeListeners.current.get(id)
+    Array.from(listeners ?? []).forEach(listener => {
+      try {
+        listener()
+      } catch (error) {
+        globalThis.reportError(error)
+      }
+    })
+  }, [])
 
   // The step we have asked for and not seen land yet, held as its own mark
   // rather than a flag: a stuck step that wakes up to find a later one in
@@ -73,7 +100,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
 
   // Declared before the reconciling effect so that one always reads a current
   // location — effects run in the order they are written.
-  useEffect(() => {
+  useLayoutEffect(() => {
     locationRef.current = location
     entryRef.current = entry
   }, [location, entry])
@@ -153,9 +180,12 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       const dropped = liveRef.current.slice(-count)
       liveRef.current = liveRef.current.slice(0, -count)
       setLive(liveRef.current)
-      dropped.forEach(id => settleAsk(id, undefined))
+      dropped.toReversed().forEach(id => {
+        notifyClose(id)
+        settleAsk(id, undefined)
+      })
     },
-    [settleAsk]
+    [settleAsk, notifyClose]
   )
 
   /** Puts one action to `decide` — against the entry as we believe it to be,
@@ -196,14 +226,15 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   )
 
   const closePopup = useCallback(
-    (id: string) => {
+    (id: string, notify = true) => {
       if (!liveRef.current.includes(id)) return
       liveRef.current = liveRef.current.filter(one => one !== id)
       setLive(liveRef.current)
+      if (notify) notifyClose(id)
       settleAsk(id, undefined)
       perform({ kind: 'closePopup' })
     },
-    [perform, settleAsk]
+    [perform, settleAsk, notifyClose]
   )
 
   const answer = useCallback(
@@ -272,8 +303,15 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   }, [])
 
   const methods = useMemo<OverlayMethods>(
-    () => ({ openPopup, closePopup, ask, openScreen, closeScreen }),
-    [openPopup, closePopup, ask, openScreen, closeScreen]
+    () => ({
+      openPopup,
+      closePopup,
+      ask,
+      openScreen,
+      closeScreen,
+      subscribeClose,
+    }),
+    [openPopup, closePopup, ask, openScreen, closeScreen, subscribeClose]
   )
 
   const state = useMemo<OverlayState>(
@@ -286,7 +324,12 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       <OverlayStateContext.Provider value={state}>
         {children}
         {asks.map(layer => (
-          <AskedLayerView key={layer.id} layer={layer} onAnswer={answer} />
+          <AskedLayerView
+            key={layer.id}
+            layer={layer}
+            onAnswer={answer}
+            subscribeClose={subscribeClose}
+          />
         ))}
       </OverlayStateContext.Provider>
     </OverlayMethodsContext.Provider>
@@ -296,17 +339,30 @@ export function OverlayHost({ children }: { children: ReactNode }) {
 function AskedLayerView({
   layer,
   onAnswer,
+  subscribeClose,
 }: {
   layer: AskLayer
   onAnswer: (id: string, value: unknown) => void
+  subscribeClose: OverlayMethods['subscribeClose']
 }) {
   const open = useEntranceOpen(layer.open)
-  const value = useMemo(
+  const answer = useCallback(
+    (answered?: unknown) => onAnswer(layer.id, answered),
+    [layer.id, onAnswer]
+  )
+  const methods = useMemo(
     () => ({
-      open,
-      answer: (answered?: unknown) => onAnswer(layer.id, answered),
+      setOpen: (next: boolean) => {
+        if (!next) answer()
+      },
+      subscribeClose: (listener: () => void) =>
+        subscribeClose(layer.id, listener),
     }),
-    [open, layer.id, onAnswer]
+    [answer, layer.id, subscribeClose]
+  )
+  const value = useMemo(
+    () => ({ open, answer, controller: { open, ...methods } }),
+    [open, answer, methods]
   )
   return (
     <AskedContext.Provider value={value}>{layer.element}</AskedContext.Provider>
