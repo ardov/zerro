@@ -635,30 +635,47 @@ describe('restore reconciliation', () => {
     })
   })
 
-  it('replaces a transaction when immutable created differs and then converges', () => {
-    const current = makeSnapshot({
-      transaction: {
-        old: makeTransaction({ id: 'old', created: 1, outcome: 10 }),
-      },
-    })
-    const desired = makeSnapshot({
-      transaction: {
-        old: makeTransaction({ id: 'old', created: 2, outcome: 10 }),
-      },
-    })
+  it.each([
+    { field: 'created', before: 1, after: 2 },
+    { field: 'originalPayee', before: 'Old terminal', after: 'New terminal' },
+    { field: 'originalPayee', before: null, after: 'New terminal' },
+    { field: 'originalPayee', before: 'Old terminal', after: null },
+  ])(
+    'replaces a transaction when immutable $field changes from $before to $after and converges',
+    ({ field, before, after }) => {
+      const current = makeSnapshot({
+        transaction: {
+          old: makeTransaction({ id: 'old', outcome: 10, [field]: before }),
+        },
+      })
+      const desired = makeSnapshot({
+        transaction: {
+          old: makeTransaction({ id: 'old', outcome: 10, [field]: after }),
+        },
+      })
 
-    const patch = buildRestorePlan(current, desired, { allocateId }).patch
-    expect(patch.transaction).toEqual([
-      expect.objectContaining({ id: 'fresh:transaction:old', created: 2 }),
-      { id: 'old', deleted: true },
-    ])
+      const patch = buildRestorePlan(current, desired, { allocateId }).patch
+      expect(patch.transaction).toEqual([
+        expect.objectContaining({
+          id: 'fresh:transaction:old',
+          [field]: after,
+        }),
+        { id: 'old', deleted: true },
+      ])
 
-    const command = issuePatch(current, patch, 1700000000000)
-    const restored = applyPatch(current, materializeCommand(current, command))
-    expect(buildRestorePlan(restored, desired, { allocateId }).patch).toEqual(
-      {}
-    )
-  })
+      const command = issuePatch(current, patch, 1700000000000)
+      const restored = applyPatch(current, materializeCommand(current, command))
+      expect(restored.transaction.old.deleted).toBe(true)
+      expect(
+        restored.transaction['fresh:transaction:old'][
+          field as 'created' | 'originalPayee'
+        ]
+      ).toBe(after)
+      expect(buildRestorePlan(restored, desired, { allocateId }).patch).toEqual(
+        {}
+      )
+    }
+  )
 
   it('preserves explicit null, false, and zero factory fields through restore replay', () => {
     const desired = makeSnapshot({

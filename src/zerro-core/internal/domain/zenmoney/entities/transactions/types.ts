@@ -39,6 +39,7 @@ export type TZmTransaction = {
   tag: TTagId[] | null
   merchant: TMerchantId | null
   payee: string | null
+  /** Accepted at creation; later replacements and clearing are ignored. */
   originalPayee: string | null
   comment: string | null
   date: TISODate
@@ -77,7 +78,6 @@ const transactionEditableFields = [
   'tag',
   'merchant',
   'payee',
-  'originalPayee',
   'comment',
   'date',
   'mcc',
@@ -115,9 +115,15 @@ export const transactionWritableFields = [
 export type TTransactionWritableField =
   (typeof transactionWritableFields)[number]
 
+/** These values can only be supplied when creating a new transaction id. */
+export const transactionImmutableFields = [
+  'created',
+  'originalPayee',
+] as const satisfies readonly (keyof TTransaction)[]
+
 /** Upsert intent also accepts immutable creation metadata for a missing id. */
 export const transactionIntentFields = [
-  'created',
+  ...transactionImmutableFields,
   ...transactionWritableFields,
 ] as const satisfies readonly (keyof TTransaction)[]
 
@@ -129,7 +135,8 @@ export type TTransactionPatch = EntityPatch<
 >
 
 /** Fields accepted while creating a replacement transaction. */
-export type TTransactionRecreateField = 'created' | TTransactionEditableField
+export type TTransactionRecreateField =
+  (typeof transactionImmutableFields)[number] | TTransactionEditableField
 
 export type TTransactionRecreatePatch = Partial<
   Pick<TTransaction, TTransactionRecreateField>

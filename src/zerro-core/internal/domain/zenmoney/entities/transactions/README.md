@@ -25,7 +25,9 @@ Commands record intent only. `compileCreatePosting` accepts one-account income,
 expense, and debt operations; `compileCreateTransfer` accepts only the two
 accounts and amounts that a transfer needs. Both use the store's root user and
 the production factory. Restore uses a new id because server deletion is
-irreversible; changing immutable `created` also recreates the transaction.
+irreversible. `created` and `originalPayee` are creation-only metadata:
+ordinary updates and persisted-command replay preserve their canonical values.
+Restore recreates a transaction under a fresh id when either differs.
 
 A posting may additionally carry a merchant reference (`{ id }` or `{ title }`),
 payee and original payee, QR code, and an atomic original-currency
