@@ -3,13 +3,16 @@ import type {
   FocusEvent,
   InputEvent as ReactInputEvent,
   KeyboardEvent,
+  SyntheticEvent,
 } from 'react'
 import { useLayoutEffect, useRef, useState } from 'react'
+import { cleanAmountInput, formatAmountExpression } from './amountExpression'
 import {
-  amountFromExpression,
-  cleanAmountInput,
-  formatAmountExpression,
-} from '@/6-shared/helpers/money'
+  createAmountSession,
+  transitionAmountSession,
+  type AmountEditingSession,
+  type AmountSelection,
+} from './amountEditingSession'
 
 export type UseAmountExpressionOptions = {
   value: number
@@ -26,8 +29,6 @@ export type UseAmountExpressionOptions = {
   onBeforeInput?: (event: ReactInputEvent<HTMLInputElement>) => void
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void
 }
-
-type LogicalSelection = { start: number; end: number }
 
 type InputIntent = {
   position: number
@@ -55,20 +56,28 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
     onBeforeInput,
     onKeyDown,
   } = options
-  const [expression, setExpression] = useState(() =>
-    toExpression(value, format)
+  const [session, setSession] = useState(() =>
+    createAmountSession(value, toExpression(value, format))
   )
+  const { expression } = session.current
   const [focused, setFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const selection = useRef<LogicalSelection | null>(null)
+  const editorRef = useRef<HTMLDivElement>(null)
+  const selection = useRef<AmountSelection | null>(null)
   const inputIntent = useRef<InputIntent | null>(null)
+  const lastSelection = useRef<AmountSelection | null>(null)
+  const scopeFocused = useRef(false)
 
-  // A value arriving from outside replaces the text; one this field reported
-  // does not, because the text it came from is what is being typed.
-  const [prev, setPrev] = useState({ value, focused })
-  if (prev.value !== value || prev.focused !== focused) {
-    setPrev({ value, focused })
-    if (!focused) setExpression(toExpression(value, format))
+  // An echo keeps the editable expression and history. An external replacement
+  // starts a fresh session, including its undo boundary.
+  if (session.received !== value) {
+    setSession(
+      transitionAmountSession(session, {
+        type: 'receive',
+        amount: value,
+        expression: toExpression(value, format),
+      })
+    )
   }
 
   const display = focused ? formatAmountExpression(expression) : format(value)
@@ -96,13 +105,101 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
     }
   }
 
+  const apply = (next: AmountEditingSession) => {
+    selection.current = next.current.selection
+    lastSelection.current = next.current.selection
+    setSession(next)
+    if (next.current.amount !== value) onChange(next.current.amount)
+  }
+
+  const update = (expression: string, nextSelection: AmountSelection) => {
+    apply(
+      transitionAmountSession(
+        session,
+        {
+          type: 'edit',
+          expression,
+          selection: nextSelection,
+        },
+        lastSelection.current ?? undefined
+      )
+    )
+  }
+
+  const finish = () => {
+    const amount = session.current.amount
+    apply(
+      transitionAmountSession(
+        session,
+        {
+          type: 'finish',
+          expression: toExpression(amount, format),
+        },
+        lastSelection.current ?? undefined
+      )
+    )
+    return amount
+  }
+
+  const undo = (redo: boolean) => {
+    const next = transitionAmountSession(
+      session,
+      { type: redo ? 'redo' : 'undo' },
+      lastSelection.current ?? undefined
+    )
+    if (next !== session) apply(next)
+  }
+
+  // React's onBeforeInput is synthesized from text/composition events. Native
+  // beforeinput is needed for system undo and deletion on mobile keyboards.
+  useLayoutEffect(() => {
+    const input = inputRef.current
+    if (!input) return
+    const beforeInput = (event: globalThis.InputEvent) => {
+      if (event.defaultPrevented || input.readOnly || input.disabled) return
+      rememberIntent(input, event.inputType)
+      if (
+        event.inputType === 'historyUndo' ||
+        event.inputType === 'historyRedo'
+      ) {
+        if (!event.cancelable) return
+        event.preventDefault()
+        undo(event.inputType === 'historyRedo')
+      }
+    }
+    input.addEventListener('beforeinput', beforeInput)
+    return () => input.removeEventListener('beforeinput', beforeInput)
+  })
+
+  const leave = () => {
+    finish()
+    selection.current = null
+    lastSelection.current = null
+    inputIntent.current = null
+    setFocused(false)
+  }
+
+  const blurWithin = (event: FocusEvent<HTMLElement>) => {
+    if (!editorRef.current) {
+      leave()
+      return
+    }
+    scopeFocused.current = false
+    if (editorRef.current?.contains(event.relatedTarget)) return
+    // React focus events also cross portals. Let the next focus capture
+    // confirm whether a currency picker still belongs to this editor.
+    queueMicrotask(() => {
+      if (!scopeFocused.current) leave()
+    })
+  }
+
   const change = (event: ChangeEvent<HTMLInputElement>) => {
     const changedDisplay = event.currentTarget.value
     let nextExpression = cleanAmountInput(changedDisplay)
     const changedStart =
       event.currentTarget.selectionStart ?? changedDisplay.length
     const changedEnd = event.currentTarget.selectionEnd ?? changedStart
-    let nextSelection: LogicalSelection = {
+    let nextSelection: AmountSelection = {
       start: amountExpressionOffsetFromDisplay(changedDisplay, changedStart),
       end: amountExpressionOffsetFromDisplay(changedDisplay, changedEnd),
     }
@@ -132,11 +229,10 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
       }
     }
 
-    selection.current = nextSelection
-    setExpression(nextExpression)
+    update(nextExpression, nextSelection)
     if (nextExpression === expression) {
       const input = event.currentTarget
-      // No state changed, so there is no layout effect to restore selection.
+      // The display did not change, so no layout effect restores selection.
       // React puts the controlled value back before this microtask; run after
       // the native edit too, so a discarded character cannot leave the caret
       // at the end of the field.
@@ -150,32 +246,77 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
         selection.current = null
       })
     }
-    const computed = amountFromExpression(nextExpression, value)
-    if (computed !== value) onChange(computed)
   }
 
   const keyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    onKeyDown?.(event)
+    if (event.defaultPrevented || event.nativeEvent.isComposing) return
+    if (
+      !event.currentTarget.readOnly &&
+      !event.currentTarget.disabled &&
+      (event.metaKey || event.ctrlKey) &&
+      !event.altKey &&
+      ['z', 'y'].includes(event.key.toLowerCase())
+    ) {
+      event.preventDefault()
+      undo(event.shiftKey || event.key.toLowerCase() === 'y')
+      return
+    }
     if (event.key === 'Backspace') {
       rememberIntent(event.currentTarget, 'deleteContentBackward')
     } else if (event.key === 'Delete') {
       rememberIntent(event.currentTarget, 'deleteContentForward')
     }
 
-    if (onEnter && event.key === 'Enter') {
-      event.preventDefault()
-      onEnter(amountFromExpression(expression, value))
+    if (event.key === 'Enter') {
+      const amount = finish()
+      if (onEnter) {
+        event.preventDefault()
+        onEnter(amount)
+      }
     }
-    onKeyDown?.(event)
+  }
+
+  const insert = (text: string, at: AmountSelection) => {
+    const input = inputRef.current
+    if (!input || input.disabled || input.readOnly) return
+    const next = expression.slice(0, at.start) + text + expression.slice(at.end)
+    input.focus()
+    const offset = at.start + text.length
+    update(next, { start: offset, end: offset })
   }
 
   return {
     appendOperator(operator: '+' | '-' | '*' | '/') {
-      inputRef.current?.focus()
-      selection.current = {
-        start: expression.length + 1,
-        end: expression.length + 1,
-      }
-      setExpression(current => current + operator)
+      insert(operator, { start: expression.length, end: expression.length })
+    },
+    insertOperator(operator: '+' | '-' | '*' | '/') {
+      const input = inputRef.current
+      const at =
+        input && document.activeElement === input
+          ? {
+              start: amountExpressionOffsetFromDisplay(
+                input.value,
+                input.selectionStart ?? input.value.length
+              ),
+              end: amountExpressionOffsetFromDisplay(
+                input.value,
+                input.selectionEnd ?? input.value.length
+              ),
+            }
+          : (lastSelection.current ?? {
+              start: expression.length,
+              end: expression.length,
+            })
+      insert(operator, at)
+    },
+    /** Optional wrapper for addons and operator buttons in the same edit session. */
+    editorProps: {
+      ref: editorRef,
+      onBlurCapture: blurWithin,
+      onFocusCapture: () => {
+        scopeFocused.current = true
+      },
     },
     /** Spread onto the input. `tel` is what raises a numeric keypad on a
      * phone while still accepting the operators. */
@@ -186,8 +327,6 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
       inputMode: 'decimal' as const,
       autoComplete: 'off' as const,
       onBeforeInput: (event: ReactInputEvent<HTMLInputElement>) => {
-        const nativeEvent = event.nativeEvent as globalThis.InputEvent
-        rememberIntent(event.currentTarget, nativeEvent.inputType)
         onBeforeInput?.(event)
         // If none of the inserted text belongs to the amount grammar, leave
         // the native value and selection untouched. Let mixed input through:
@@ -202,18 +341,29 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
         }
       },
       onChange: change,
+      onSelect: (event: SyntheticEvent<HTMLInputElement>) => {
+        const input = event.currentTarget
+        lastSelection.current = {
+          start: amountExpressionOffsetFromDisplay(
+            input.value,
+            input.selectionStart ?? 0
+          ),
+          end: amountExpressionOffsetFromDisplay(
+            input.value,
+            input.selectionEnd ?? 0
+          ),
+        }
+      },
       onFocus: (event: FocusEvent<HTMLInputElement>) => {
         setFocused(true)
-        if (selectOnFocus) {
+        if (!focused && selectOnFocus) {
           selection.current = { start: 0, end: expression.length }
           event.currentTarget.select()
         }
         onFocus?.(event)
       },
       onBlur: (event: FocusEvent<HTMLInputElement>) => {
-        selection.current = null
-        inputIntent.current = null
-        setFocused(false)
+        if (!editorRef.current) blurWithin(event)
         onBlur?.(event)
       },
       onKeyDown: keyDown,

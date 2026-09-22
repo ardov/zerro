@@ -36,9 +36,11 @@ export type FieldSurfaceProps = ComponentPropsWithRef<'div'> & {
   readOnly?: boolean
   tall?: boolean
   size?: 'lg' | 'sm'
+  /** Optional control to focus from the background or passive addons. */
+  controlRef?: RefObject<HTMLElement | null>
 }
 
-/** Shared appearance only; each child control owns its name and value. */
+/** Shared appearance and optional click-to-focus; children own their values. */
 export function FieldSurface(props: FieldSurfaceProps) {
   const {
     start,
@@ -50,11 +52,25 @@ export function FieldSurface(props: FieldSurfaceProps) {
     size = 'lg',
     className,
     children,
+    controlRef,
+    onMouseDown,
     ...restProps
   } = props
   return (
     <div
       {...restProps}
+      onMouseDown={event => {
+        onMouseDown?.(event)
+        if (disabled || event.defaultPrevented || !controlRef?.current) return
+        const target = event.target as Element
+        if (!event.currentTarget.contains(target)) return
+        const interactive = target.closest(
+          'input, button, a, select, textarea, [tabindex], [contenteditable], [data-field-focus="preserve"]'
+        )
+        if (interactive && event.currentTarget.contains(interactive)) return
+        event.preventDefault()
+        controlRef.current.focus()
+      }}
       data-invalid={invalid || undefined}
       data-disabled={disabled || undefined}
       data-readonly={readOnly || undefined}
@@ -68,7 +84,6 @@ export function FieldSurface(props: FieldSurfaceProps) {
       {start != null && (
         <div
           inert={disabled || undefined}
-          data-field-focus="preserve"
           className="flex shrink-0 self-stretch"
         >
           {start}
@@ -86,7 +101,6 @@ export function FieldSurface(props: FieldSurfaceProps) {
       {end != null && (
         <div
           inert={disabled || undefined}
-          data-field-focus="preserve"
           className="flex shrink-0 self-stretch"
         >
           {end}
@@ -282,20 +296,7 @@ export function Field(props: FieldProps) {
             readOnly={readOnly}
             tall={visible}
             size={size}
-            onMouseDown={event => {
-              if (state.disabled || event.defaultPrevented) return
-              const target = event.target as HTMLElement
-              if (
-                target
-                  .closest('[data-field-focus]')
-                  ?.getAttribute('data-field-focus') === 'preserve'
-              )
-                return
-              if (controlRef.current) {
-                event.preventDefault()
-                controlRef.current.focus()
-              }
-            }}
+            controlRef={controlRef}
           >
             <FieldContent
               size={size}

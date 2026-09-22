@@ -4,7 +4,7 @@ import { formatMoney } from '@/6-shared/helpers/money'
 import { AutoWidthInput } from '@/6-shared/ui/AutoWidthInput'
 import type { FilledFieldState } from '@/6-shared/ui/FilledField'
 import { FilledField } from '@/6-shared/ui/FilledField'
-import { useAmountExpression } from '@/6-shared/ui/useAmountExpression'
+import { useAmountExpression } from '@/6-shared/ui/kit/useAmountExpression'
 
 export type AmountFieldProps = FilledFieldState & {
   value: number

@@ -3,7 +3,7 @@ import {
   amountFromExpression,
   cleanAmountInput,
   formatAmountExpression,
-} from './expression'
+} from './amountExpression'
 
 /** What the amount fields were doing before this moved out of one of them.
  * Every case here is reachable by typing into a field, which is why
@@ -21,6 +21,10 @@ describe('cleanAmountInput', () => {
   it('drops everything the grammar has no room for', () => {
     expect(cleanAmountInput('1 000 ₽')).toBe('1000')
     expect(cleanAmountInput('(2+3)')).toBe('2+3')
+  })
+
+  it('normalizes mathematical operator symbols without losing their meaning', () => {
+    expect(cleanAmountInput('−2×3+4÷5')).toBe('-2*3+4/5')
   })
 })
 
@@ -94,4 +98,35 @@ describe('amountFromExpression', () => {
     // Rounded at every operator this would be 0.33; the whole sum is 0.335.
     expect(amountFromExpression('0.111+0.112+0.112', 0)).toBe(0.34)
   })
+
+  it.each([
+    ['2*-3', -6],
+    ['2--3', 5],
+    ['.5+12.', 12.5],
+  ])('evaluates %s with signed operands', (expression, result) => {
+    expect(amountFromExpression(expression, 77)).toBe(result)
+  })
+
+  it.each([
+    '2*(3+4)',
+    '(12000+6000)/3',
+    '1/0',
+    '0/0',
+    '1/(1/0)',
+    '2*(3+',
+    '(2+3',
+    '2+3)',
+    '2(3)',
+    '1..2',
+    '1.2.3',
+    '2/**3',
+    '()',
+    '1e3',
+    '9'.repeat(310),
+  ])(
+    'keeps the previous amount for invalid or non-finite arithmetic: %s',
+    expression => {
+      expect(amountFromExpression(expression, 77)).toBe(77)
+    }
+  )
 })

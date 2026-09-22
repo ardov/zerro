@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { formatMoney } from '@/6-shared/helpers/money'
 import { useAmountExpression } from './useAmountExpression'
 
@@ -126,5 +126,98 @@ describe('useAmountExpression', () => {
     expect(input.value).toBe('134')
     expect(input.selectionStart).toBe(1)
     expect(screen.getByText('134')).toBeTruthy()
+  })
+})
+
+function ControlledEditor(props: {
+  value: number
+  onChange: (value: number) => void
+  onEnter?: (value: number) => void
+  readOnly?: boolean
+}) {
+  const { inputProps } = useAmountExpression({
+    ...props,
+    format: amount => formatMoney(amount, null, 2),
+  })
+  return <input {...inputProps} readOnly={props.readOnly} aria-label="Amount" />
+}
+
+describe('amount editing boundaries', () => {
+  it.each([false, true])(
+    'preserves untouched precision (readOnly=%s)',
+    async readOnly => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const onEnter = vi.fn()
+      render(
+        <ControlledEditor
+          value={12.345}
+          onChange={onChange}
+          onEnter={onEnter}
+          readOnly={readOnly}
+        />
+      )
+      await user.click(screen.getByRole('textbox'))
+      await user.keyboard('{Enter}')
+      await user.tab()
+      expect(onChange).not.toHaveBeenCalled()
+      expect(onEnter).toHaveBeenCalledWith(12.345)
+    }
+  )
+
+  it('handles native system undo and redo without keyboard shortcuts', async () => {
+    const user = userEvent.setup()
+    render(<AmountEditor initial={0} />)
+    const input = screen.getByRole<HTMLInputElement>('textbox')
+    await user.click(input)
+    await user.type(input, '1234')
+    for (const [inputType, expected] of [
+      ['historyUndo', '123'],
+      ['historyRedo', '1\u00a0234'],
+    ]) {
+      const event = new InputEvent('beforeinput', {
+        bubbles: true,
+        cancelable: true,
+        inputType,
+      })
+      act(() => {
+        input.dispatchEvent(event)
+      })
+      expect(event.defaultPrevented).toBe(true)
+      expect(input.value).toBe(expected)
+    }
+  })
+
+  it('settles edited text without parsing the resting formatter back into a value', async () => {
+    const user = userEvent.setup()
+    render(<AmountEditor initial={0} decimals={0} />)
+    const input = screen.getByRole<HTMLInputElement>('textbox')
+    await user.click(input)
+    await user.type(input, '1.5')
+    await user.keyboard('{Enter}')
+    expect(input.value).toBe('2')
+    expect(screen.getByText('1.5')).toBeTruthy()
+    await user.keyboard('{Control>}z{/Control}')
+    expect(input.value).toBe('1,5')
+    expect(screen.getByText('1.5')).toBeTruthy()
+    await user.tab()
+    expect(screen.getByText('1.5')).toBeTruthy()
+  })
+
+  it('clears history on an external replacement while preserving history on value echoes', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    const view = render(<ControlledEditor value={0} onChange={onChange} />)
+    const input = screen.getByRole<HTMLInputElement>('textbox')
+    await user.click(input)
+    await user.type(input, '12')
+    view.rerender(<ControlledEditor value={12} onChange={onChange} />)
+    await user.keyboard('{Control>}z{/Control}')
+    expect(input.value).toBe('1')
+    view.rerender(<ControlledEditor value={8000} onChange={onChange} />)
+    onChange.mockClear()
+    await user.keyboard('{Control>}z{/Control}')
+    expect(input.value).toBe('8\u00a0000,00')
+    expect(onChange).not.toHaveBeenCalled()
   })
 })

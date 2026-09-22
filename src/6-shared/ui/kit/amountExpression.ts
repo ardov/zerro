@@ -1,11 +1,14 @@
-import { round } from './currencyHelpers'
-import { groupMoneyInteger, moneyDecimalSeparator } from './format'
+import { round } from '@/6-shared/helpers/money/currencyHelpers'
+import {
+  groupMoneyInteger,
+  moneyDecimalSeparator,
+} from '@/6-shared/helpers/money/format'
 
 /** The arithmetic an amount field accepts.
  *
  * Amount fields let a sum be worked out in place — `1200/3`, `450+80` — so
  * nobody has to leave the form to add up a bill. The grammar is deliberately
- * the four operators and nothing else: no parentheses, no functions, no
+ * the four operators: no functions, percentages or
  * identifiers. That is what makes evaluating it a small parser rather than
  * anything that has to be sandboxed.
  */
@@ -13,7 +16,12 @@ import { groupMoneyInteger, moneyDecimalSeparator } from './format'
 /** Reduces typed text to the characters the grammar has. Commas become
  * points, so a decimal typed either way is the same number. */
 export function cleanAmountInput(text: string): string {
-  return text.replace(/[^0-9,.+\-/*]/g, '').replace(/,/g, '.')
+  return text
+    .replace(/−/g, '-')
+    .replace(/×/g, '*')
+    .replace(/÷/g, '/')
+    .replace(/[^0-9,.+\-/*]/g, '')
+    .replace(/,/g, '.')
 }
 
 /** Formats every number in an expression without evaluating it.
@@ -45,30 +53,27 @@ export function formatAmountExpression(text: string): string {
  * splitting 1200 three ways is a number, splitting it seven ways is not a
  * sum of money — but so is addition: `0.1 + 0.2` is not 0.3 in binary
  * floating point, and without this an amount nobody could type would be the
- * one that ends up in the transaction. Only the answer is rounded; the
- * evaluation stays exact, so the rounding happens once rather than at every
- * operator. */
+ * one that ends up in the transaction. Only the answer is rounded, rather
+ * than rounding at every operator. Invalid and non-finite results keep the
+ * last amount; callers never need a separate calculation-error state. */
 export function amountFromExpression(text: string, fallback: number): number {
   try {
     const computed = evalExpression(
-      text
-        .replace(/^0*(?=0|0.|[1-9])/g, '')
-        .replace(/[-+*/]*$/g, '')
-        .replace(/^[+*/]*/g, '')
+      text.replace(/[-+*/]*$/g, '').replace(/^[+*/]*/g, '')
     )
-    return round(computed) || 0
+    return Number.isFinite(computed) ? round(computed) || 0 : fallback
   } catch {
     return fallback
   }
 }
 
-/** Evaluates expressions with numbers and + - * / (the only characters the
- * input allows). Returns NaN for an empty string, throws on invalid input.
+/** Evaluates numbers and + - * /. Throws on invalid input.
  * Private: `amountFromExpression` is the contract, and it is the one that
  * knows what a half-typed expression is worth. */
 function evalExpression(source: string): number {
-  const tokens = source.match(/\d*\.?\d+|[+\-*/]/g) || []
-  if (!tokens.length) return NaN
+  if (source === '' || source === '.') return 0
+  const tokens = source.match(/\d+(?:\.\d*)?|\.\d+|[+\-*/]/g) || []
+  if (tokens.join('') !== source) throw new Error('Invalid expression')
   let pos = 0
   const parseFactor = (): number => {
     let sign = 1
@@ -76,25 +81,38 @@ function evalExpression(source: string): number {
       if (tokens[pos] === '-') sign = -sign
       pos++
     }
-    return sign * Number(tokens[pos++])
+    const token = tokens[pos++]
+    if (!token || !/^[\d.]/.test(token)) {
+      throw new Error('Expected a number')
+    }
+    return finite(sign * Number(token))
   }
   const parseTerm = (): number => {
     let result = parseFactor()
     while (tokens[pos] === '*' || tokens[pos] === '/') {
       const op = tokens[pos++]
       const rhs = parseFactor()
-      result = op === '*' ? result * rhs : result / rhs
+      result = finite(op === '*' ? result * rhs : result / rhs)
     }
     return result
   }
-  let result = parseTerm()
-  while (tokens[pos] === '+' || tokens[pos] === '-') {
-    const op = tokens[pos++]
-    const rhs = parseTerm()
-    result = op === '+' ? result + rhs : result - rhs
+  const parseSum = (): number => {
+    let result = parseTerm()
+    while (tokens[pos] === '+' || tokens[pos] === '-') {
+      const op = tokens[pos++]
+      const rhs = parseTerm()
+      result = finite(op === '+' ? result + rhs : result - rhs)
+    }
+    return result
   }
-  if (pos !== tokens.length || Number.isNaN(result)) {
+  const result = parseSum()
+  if (pos !== tokens.length) {
     throw new Error('Invalid expression: ' + source)
   }
   return result
+}
+
+function finite(value: number): number {
+  if (!Number.isFinite(value)) throw new Error('Non-finite amount')
+  return value
 }

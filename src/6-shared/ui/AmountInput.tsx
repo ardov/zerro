@@ -3,7 +3,7 @@ import { Button } from './Button'
 import { OutlinedField, type OutlinedFieldProps } from './OutlinedField'
 import { formatMoney, getCurrencySymbol } from '@/6-shared/helpers/money'
 import type { Modify } from '@/6-shared/types'
-import { useAmountExpression } from './useAmountExpression'
+import { useAmountExpression } from './kit/useAmountExpression'
 
 // `ref` and `type` are owned: the ref drives selectOnFocus and the sign
 // buttons, and `tel` is what raises the numeric keypad on mobile.

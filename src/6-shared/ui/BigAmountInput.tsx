@@ -3,7 +3,7 @@ import { formatMoney } from '@/6-shared/helpers/money'
 import type { Ref } from 'react'
 import { AutoWidthInput } from './AutoWidthInput'
 import { cn } from './shadcn/utils'
-import { useAmountExpression } from './useAmountExpression'
+import { useAmountExpression } from './kit/useAmountExpression'
 
 export type BigAmountInputProps = {
   value: number

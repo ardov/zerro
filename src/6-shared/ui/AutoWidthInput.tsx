@@ -28,7 +28,10 @@ export function AutoWidthInput({
       {/* One trailing sliver, so a caret at the end of the text is not
           clipped. The mirror is what the box is measured from, so it falls
           back to the placeholder when there is nothing typed. */}
-      <span aria-hidden className="invisible block pr-0.5 whitespace-pre">
+      <span
+        aria-hidden
+        className="invisible block overflow-hidden pr-0.5 whitespace-pre"
+      >
         {text || props.placeholder || '0'}
       </span>
       <InputPrimitive

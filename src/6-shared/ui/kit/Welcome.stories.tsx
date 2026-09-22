@@ -2,6 +2,8 @@ import { useRef, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
 import { Input } from './Input'
+import { AmountInput } from './AmountInput'
+import { FieldAddon } from './Field'
 import { Textarea } from './Textarea'
 import { Select } from './Select'
 import { MultiSelect } from './MultiSelect'
@@ -29,6 +31,7 @@ const accounts = [
 function Gallery() {
   const reset = useRef<HTMLButtonElement>(null)
   const [account, setAccount] = useState<string | null>('everyday')
+  const [amount, setAmount] = useState(12500)
   const [selected, setSelected] = useState(['everyday'])
   const [tags, setTags] = useState(['Groceries', 'Travel', 'Coffee'])
   const [date, setDate] = useState<TISODate | null>('2026-09-22')
@@ -112,7 +115,12 @@ function Gallery() {
               labelMode="floating"
               defaultValue="Groceries"
             />
-            <Input label="Monthly limit" placeholder="Enter an amount" />
+            <AmountInput
+              label="Monthly limit"
+              value={amount}
+              onChange={setAmount}
+              end={<FieldAddon>CZK</FieldAddon>}
+            />
             <Select
               label="Account"
               items={accounts}

@@ -5,7 +5,7 @@ import { createRef } from 'react'
 import { Input } from './Input'
 import { Textarea } from './Textarea'
 import { IconButton } from './Button'
-import { FieldAddon } from './Field'
+import { FieldAddon, FieldSurface } from './Field'
 
 afterEach(cleanup)
 
@@ -167,3 +167,52 @@ it.each([Input, Textarea])('separates field and control styling', Control => {
   expect(control).toHaveStyle({ letterSpacing: '2px' })
   expect(control.closest('.field-custom')).toHaveStyle({ marginTop: '17px' })
 })
+
+it('focuses a composed control from the surface and passive icon, ignoring outer focus markers', () => {
+  const ref = createRef<HTMLInputElement>()
+  render(
+    <div tabIndex={-1} data-field-focus="preserve">
+      <FieldSurface
+        controlRef={ref}
+        data-testid="surface"
+        start={
+          <FieldAddon kind="icon">
+            <svg aria-label="Direction">
+              <path />
+            </svg>
+          </FieldAddon>
+        }
+      >
+        <input ref={ref} aria-label="Amount" />
+      </FieldSurface>
+    </div>
+  )
+  const input = screen.getByRole('textbox')
+  fireEvent.mouseDown(screen.getByTestId('surface'))
+  expect(input).toHaveFocus()
+  input.blur()
+  fireEvent.mouseDown(screen.getByLabelText('Direction').querySelector('path')!)
+  expect(input).toHaveFocus()
+  expect(fireEvent.mouseDown(input)).toBe(true)
+})
+
+it.each(['disabled', 'cancelled', 'no-ref'])(
+  'does not redirect focus when %s',
+  mode => {
+    const ref = createRef<HTMLInputElement>()
+    render(
+      <FieldSurface
+        data-testid="surface"
+        controlRef={mode === 'no-ref' ? undefined : ref}
+        disabled={mode === 'disabled'}
+        onMouseDown={event => {
+          if (mode === 'cancelled') event.preventDefault()
+        }}
+      >
+        <input ref={ref} aria-label="Amount" />
+      </FieldSurface>
+    )
+    fireEvent.mouseDown(screen.getByTestId('surface'))
+    expect(screen.getByRole('textbox')).not.toHaveFocus()
+  }
+)
