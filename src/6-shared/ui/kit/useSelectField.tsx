@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { useOwnedPopup } from './useOwnedPopup'
 import type { SelectItem, SelectControlProps } from './Select'
 import { SelectTrigger, getSelectTriggerLabel } from './SelectTrigger'
@@ -91,5 +91,9 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
     surface,
     triggerProps,
     displayValue,
+    popupStyle: {
+      width: 'max-content',
+      minWidth: `min(var(--available-width, calc(100dvw - var(--list-panel-margin, 16px) * 2)), max(calc(var(--anchor-width) + ${2 * selectPanelOutset}px), ${typeof props.popupMinWidth === 'number' ? `${props.popupMinWidth}px` : (props.popupMinWidth ?? '0px')}))`,
+    } satisfies CSSProperties,
   }
 }

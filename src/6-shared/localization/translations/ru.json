@@ -40,6 +40,7 @@
     "openOptions": "Открыть список: {{label}}",
     "rename": "Переименовать",
     "selectMonth": "Выбрать месяц",
+    "selectYear": "Выбрать год",
     "selectDate": "Выбрать дату",
     "invalidDate": "Это не дата",
     "previousYear": "Предыдущий год",

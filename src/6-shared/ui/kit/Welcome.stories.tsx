@@ -6,6 +6,8 @@ import { Textarea } from './Textarea'
 import { Select } from './Select'
 import { MultiSelect } from './MultiSelect'
 import { Chip } from './Chip'
+import { Calendar } from './Calendar'
+import type { TISODate } from '@/6-shared/types'
 import { Dialog } from './Dialog'
 import { Drawer } from './Drawer'
 import { Popover } from './Popover'
@@ -29,6 +31,7 @@ function Gallery() {
   const [account, setAccount] = useState<string | null>('everyday')
   const [selected, setSelected] = useState(['everyday'])
   const [tags, setTags] = useState(['Groceries', 'Travel', 'Coffee'])
+  const [date, setDate] = useState<TISODate | null>('2026-09-22')
   const [message, setMessage] = useState('Ready to try an action.')
   return (
     <main className="min-h-screen bg-ui-base p-6 text-ui-16 text-ui-primary">
@@ -133,6 +136,13 @@ function Gallery() {
               error="Enter a name to continue"
             />
           </div>
+        </section>
+        <section className="grid gap-4 rounded-ui-card rounded-smooth bg-ui-card p-6">
+          <h2 className="text-ui-20 font-medium">Calendar</h2>
+          <p className="text-ui-secondary">
+            Choose a day or browse months. The six-week grid keeps its height.
+          </p>
+          <Calendar value={date} onChange={setDate} />
         </section>
         <section className="grid gap-4 rounded-ui-card bg-ui-card p-6">
           <h2 className="text-ui-20 font-medium">Overlays</h2>

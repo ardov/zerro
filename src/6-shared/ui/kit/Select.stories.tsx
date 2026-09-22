@@ -50,6 +50,7 @@ const meta = {
 - Disabled rows remain keyboard-focusable but cannot be selected.
 - **required** prevents clearing. **readOnly** keeps the field focusable; **name** includes its value in form submission.
 - **alignSelected** opts into Base UI text alignment for short lists. Touch and constrained space can fall back to ordinary positioning; native overlap closes on window resize.
+- Popup width follows its content, with a minimum of the trigger width plus side insets. **popupMinWidth** sets an additional minimum (pixels or a CSS length); available screen space caps both.
 - **trigger** accepts a custom button; **renderValue** formats the closed value, and **showValueIcon={false}** hides only its image.
 `,
       },
@@ -363,5 +364,100 @@ export const ControlledAlignment: Story = {
     await waitFor(() =>
       expect(body.queryByRole('listbox')).not.toBeInTheDocument()
     )
+  },
+}
+
+export const PopupWidth: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-start gap-4">
+      {[
+        { label: 'Compact', trigger: <Button>2026</Button> },
+        {
+          label: 'Wide trigger',
+          trigger: <Button className="w-64">2026</Button>,
+        },
+        {
+          label: 'Minimum',
+          popupMinWidth: 360,
+          trigger: <Button>2026</Button>,
+        },
+        {
+          label: 'Search minimum',
+          search: true,
+          popupMinWidth: '24rem',
+          trigger: <Button>2026</Button>,
+        },
+        {
+          label: 'Viewport limit',
+          popupMinWidth: '200vw',
+          trigger: <Button>2026</Button>,
+        },
+        { label: 'Field', className: 'w-48' },
+        {
+          label: 'Long content',
+          trigger: <Button>2026</Button>,
+          items: [
+            {
+              value: '2026',
+              label: 'A longer option that determines the popup width',
+            },
+          ],
+        },
+      ].map(example => (
+        <Select
+          key={example.label}
+          value="2026"
+          onChange={() => {}}
+          items={[{ value: '2026', label: '2026' }]}
+          {...example}
+        />
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    for (const [index, label] of [
+      'Compact',
+      'Wide trigger',
+      'Minimum',
+      'Search minimum',
+      'Viewport limit',
+      'Field',
+      'Long content',
+    ].entries()) {
+      const trigger = canvas.getAllByRole('combobox')[index]
+      await userEvent.click(trigger)
+      const list = await body.findByRole('listbox', { name: label })
+      await waitFor(() => {
+        const rect = (
+          list.closest('[role="dialog"]') ?? list
+        ).getBoundingClientRect()
+        const anchor = trigger.getBoundingClientRect()
+        const viewport = canvasElement.ownerDocument.documentElement.clientWidth
+        expect(rect.width).toBeGreaterThanOrEqual(
+          Math.min(anchor.width + 8, viewport - 32) - 1
+        )
+        expect(rect.left).toBeGreaterThanOrEqual(15)
+        expect(rect.right).toBeLessThanOrEqual(viewport - 15)
+        if (label === 'Compact') expect(rect.width).toBeLessThan(200)
+        if (label === 'Minimum')
+          expect(rect.width).toBeGreaterThanOrEqual(
+            Math.min(360, viewport - 32) - 1
+          )
+        if (label === 'Search minimum')
+          expect(rect.width).toBeGreaterThanOrEqual(
+            Math.min(384, viewport - 32) - 1
+          )
+        if (label === 'Long content')
+          expect(rect.width).toBeGreaterThan(anchor.width + 40)
+      })
+      await userEvent.click(within(list).getByRole('option'))
+      await waitFor(() =>
+        expect(
+          body.queryByRole('listbox', { name: label })
+        ).not.toBeInTheDocument()
+      )
+    }
   },
 }

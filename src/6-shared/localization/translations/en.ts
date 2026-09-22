@@ -42,6 +42,7 @@ export const en: typeof ru = {
     openOptions: 'Open options: {{label}}',
     rename: 'Rename',
     selectMonth: 'Select month',
+    selectYear: 'Select year',
     selectDate: 'Select date',
     invalidDate: 'Not a date',
     previousYear: 'Previous year',

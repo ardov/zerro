@@ -88,6 +88,7 @@ export function SelectSearch<T extends string>(
     surface,
     triggerProps,
     displayValue,
+    popupStyle,
   } = useSelectField(props)
   const input = useRef<HTMLInputElement>(null)
   const popup = useRef<HTMLDivElement>(null)
@@ -169,7 +170,7 @@ export function SelectSearch<T extends string>(
           <Combobox.Positioner
             {...positioning}
             anchor={trigger ? undefined : surface}
-            alignOffset={trigger ? 0 : -panelOutset}
+            alignOffset={-panelOutset}
             className="z-popover"
           >
             <Combobox.Popup
@@ -188,13 +189,7 @@ export function SelectSearch<T extends string>(
               render={
                 <ListPanel
                   preserveHeight={Boolean(query)}
-                  style={
-                    trigger
-                      ? undefined
-                      : {
-                          width: `calc(var(--anchor-width) + ${2 * panelOutset}px)`,
-                        }
-                  }
+                  style={popupStyle}
                   header={
                     <FieldSurface
                       size={size}

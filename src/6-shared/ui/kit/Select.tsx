@@ -67,6 +67,8 @@ export type SelectProps<T extends string = string> = Pick<
   /** Align an existing selection; empty values, touch and tight spaces fall back. */
   alignSelected?: boolean
   showValueIcon?: boolean
+  /** Popup minimum CSS length (numbers are pixels), capped by available space. */
+  popupMinWidth?: number | string
   /** Custom button. For rich content, supply its accessible name explicitly. */
   trigger?: ReactElement
   renderValue?: (item: SelectOption<T> | undefined) => ReactNode
@@ -123,6 +125,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
     surface,
     triggerProps,
     displayValue,
+    popupStyle,
   } = useSelectField(props)
   const positioning = useListPanelPositioning()
   const canAlign = () => {
@@ -206,7 +209,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
             key={alignmentEnabled ? 'aligned' : 'anchored'}
             {...positioning}
             anchor={trigger ? undefined : surface}
-            alignOffset={trigger ? 0 : -panelOutset}
+            alignOffset={-panelOutset}
             alignItemWithTrigger={alignmentEnabled}
             className="z-popover"
             style={{
@@ -219,13 +222,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
             <Primitive.Popup
               render={
                 <ListPanel
-                  style={
-                    trigger
-                      ? undefined
-                      : {
-                          width: `calc(var(--anchor-width) + ${2 * panelOutset}px)`,
-                        }
-                  }
+                  style={popupStyle}
                   scrollRender={<Primitive.List aria-label={label} />}
                   empty={
                     options.length === 0 ? (

@@ -3,13 +3,18 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { Tooltip } from './Tooltip'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 
+export const buttonPressAnimation = [
+  'will-change-transform',
+  'active:not-aria-[haspopup]:scale-x-97',
+  'active:not-aria-[haspopup]:scale-y-104',
+  'active:transition-all active:duration-50',
+  '[transition:all_150ms_ease,scale_600ms_var(--ease-overshoot)]',
+]
+
 const buttonVariants = cva(
   [
-    'group/button inline-flex shrink-0 items-center justify-center rounded-ui-control smooth border border-transparent bg-clip-padding text-ui-16 font-medium whitespace-nowrap select-none focusable will-change-transform',
-    'active:not-aria-[haspopup]:scale-x-97',
-    'active:not-aria-[haspopup]:scale-y-104',
-    'active:transition-all active:duration-50',
-    '[transition:all_150ms_ease,scale_600ms_var(--ease-overshoot)]',
+    'group/button inline-flex shrink-0 items-center justify-center rounded-ui-control smooth border border-transparent bg-clip-padding text-ui-16 font-medium whitespace-nowrap select-none focusable',
+    ...buttonPressAnimation,
     'disabled:pointer-events-none disabled:opacity-ui-disabled',
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   ],
