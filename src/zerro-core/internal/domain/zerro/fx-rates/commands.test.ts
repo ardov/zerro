@@ -1,3 +1,4 @@
+import { materializeTestInput } from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 import {
   makeAccount,
@@ -19,7 +20,10 @@ describe('FX rate commands', () => {
       },
     })
     const rates = { USD: 1, EUR: 0.9 }
-    const setPatch = compileSetFxRates(data, '2026-06', rates, ctx)
+    const setPatch = materializeTestInput(
+      data,
+      compileSetFxRates(data, '2026-06', rates, ctx)
+    )
     const withRates = applyPatch(data, setPatch)
 
     expect(getStoredFxRates(withRates.reminder)['2026-06']).toEqual({
@@ -28,7 +32,10 @@ describe('FX rate commands', () => {
       rates,
     })
 
-    const resetPatch = compileResetFxRates(withRates, '2026-06')
+    const resetPatch = materializeTestInput(
+      withRates,
+      compileResetFxRates(withRates, '2026-06', ctx)
+    )
     expect(
       getStoredFxRates(applyPatch(withRates, resetPatch).reminder)
     ).toEqual({})

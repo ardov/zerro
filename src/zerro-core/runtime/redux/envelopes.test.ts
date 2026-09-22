@@ -1,3 +1,4 @@
+import { materializeTestInput } from '@/zerro-core/support/testing/commandTestData'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { i18n } from '@/6-shared/localization'
 import { makeDemoStore } from '../../support/demo'
@@ -69,10 +70,14 @@ describe('selectEnvelopes chain', () => {
     const tagId = Object.keys(store.tag)[0]
     const envelopeId = envId.get(EnvType.Tag, tagId)
 
-    const metaPatch = compilePatchEnvelopeMeta(
+    const metaPatch = materializeTestInput(
       store,
-      { id: envelopeId, comment: 'zerro-core test comment' },
-      ctx
+      compilePatchEnvelopeMeta(
+        store,
+        { id: envelopeId, comment: 'zerro-core test comment' },
+        ctx
+      ),
+      NOW
     )
     const state = makeRootState(applyPatch(store, metaPatch))
 

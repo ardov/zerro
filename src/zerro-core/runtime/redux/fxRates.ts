@@ -1,3 +1,4 @@
+export { patchFxRates as patch } from './commands'
 export { editFxRates as edit, resetFxRates as reset } from './commands'
 import { fromGraph, graph } from './graph'
 

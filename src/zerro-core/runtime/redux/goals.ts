@@ -1,3 +1,7 @@
+export {
+  stopGoal as stop,
+  clearGoalOverride as clearOverride,
+} from './commands'
 export { setGoal as set } from './commands'
 import { fromGraph, graph } from './graph'
 

@@ -1,12 +1,10 @@
+import { prepareTestCommand as prepareCommand } from '../../../../support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 import {
   makeAccount,
   makeStore,
 } from '../../../../support/testing/zenmoneyTestData'
-import {
-  issuePatch,
-  materializeCommand,
-} from '../../../operations/materialization'
+import { materializeCommand } from '../../../operations/materialization'
 import { applyPatch } from '../model/applyPatch'
 import { compileCreateAccount, compilePatchAccount } from './accounts'
 import { makeAccount as makeCoreAccount } from './accounts'
@@ -123,7 +121,7 @@ describe('zenmoney account commands', () => {
       id: 'cash',
       title: 'Wallet',
     })
-    const command = issuePatch(data, patch, 1700000000000)
+    const command = prepareCommand(data, patch, 1700000000000)
     const next = applyPatch(data, materializeCommand(data, command))
 
     expect(data.account.cash.title).toBe('Cash')
@@ -182,7 +180,7 @@ describe('zenmoney account commands', () => {
     })
 
     const patch = { deletion: [{ id: 'cash', object: 'account' } as const] }
-    const command = issuePatch(data, patch, 1700000000000)
+    const command = prepareCommand(data, patch, 1700000000000)
     const next = applyPatch(data, materializeCommand(data, command))
 
     expect(patch).toEqual({

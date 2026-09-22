@@ -1,3 +1,4 @@
+import { materializeTestInput } from '@/zerro-core/support/testing/commandTestData'
 import { beforeAll, describe, expect, it } from 'vitest'
 import type { TISOMonth } from '@/6-shared/types'
 import { i18n } from '@/6-shared/localization'
@@ -32,12 +33,16 @@ function makeSeededStore() {
   const tagId = Object.keys(demo.tag)[0]
   const envelopeId = envId.get(EnvType.Tag, tagId)
 
-  const goalPatch = compileSetGoal(
+  const goalPatch = materializeTestInput(
     demo,
-    MONTH,
-    envelopeId,
-    { type: goalType.MONTHLY, amount: 30_000 },
-    ctx
+    compileSetGoal(
+      demo,
+      MONTH,
+      envelopeId,
+      { type: goalType.MONTHLY, amount: 30_000 },
+      ctx
+    ),
+    NOW
   )
   return { store: applyPatch(demo, goalPatch), envelopeId }
 }
@@ -77,12 +82,16 @@ describe('selectGoals chain', () => {
     const { store, envelopeId } = makeSeededStore()
     const first = selectGoals(makeRootState(store))
 
-    const goalPatch = compileSetGoal(
+    const goalPatch = materializeTestInput(
       store,
-      MONTH,
-      envelopeId,
-      { type: goalType.MONTHLY, amount: 45_000 },
-      ctx
+      compileSetGoal(
+        store,
+        MONTH,
+        envelopeId,
+        { type: goalType.MONTHLY, amount: 45_000 },
+        ctx
+      ),
+      NOW
     )
     const next = selectGoals(makeRootState(applyPatch(store, goalPatch)))
 

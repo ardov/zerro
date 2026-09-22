@@ -1,25 +1,25 @@
 import type { TDataStore } from '../../zenmoney/model/store'
-import type { TCoreContext, TIntentPatch } from '../../../../types'
-import { compileSetSimpleHiddenData, HiddenDataType } from '../hidden-data'
-import { getStoredUserSettings } from './read'
+import type { TCoreContext } from '../../../../types'
+import { prepareZerro } from '../operations/prepare'
 import type { TUserSettingsPatch } from './types'
-
 export function compilePatchUserSettings(
   data: TDataStore,
   update: TUserSettingsPatch,
   ctx: TCoreContext
-): TIntentPatch {
-  const payload = { ...getStoredUserSettings(data.reminder), ...update }
-
-  Object.keys(payload).forEach(key => {
-    const settingKey = key as keyof TUserSettingsPatch
-    if (payload[settingKey] === undefined) delete payload[settingKey]
-  })
-
-  return compileSetSimpleHiddenData(
+) {
+  return prepareZerro(
     data,
-    HiddenDataType.UserSettings,
-    payload,
+    [
+      {
+        type: 'settings.patch',
+        set: Object.fromEntries(
+          Object.entries(update).filter(([, value]) => value !== undefined)
+        ),
+        unset: (Object.keys(update) as (keyof TUserSettingsPatch)[]).filter(
+          key => update[key] === undefined
+        ),
+      },
+    ],
     ctx
   )
 }

@@ -1,3 +1,4 @@
+import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -60,8 +61,9 @@ function acknowledgePush(
 
 function makeAccountEntry(title: string, issuedAt: number): TCommand {
   return {
-    type: 'patch',
-    patch: { account: [makeAccount({ id: 'cash', title })] },
+    operations: testOperations({
+      account: [makeAccount({ id: 'cash', title })],
+    }),
     issuedAt,
   }
 }
@@ -113,9 +115,10 @@ describe('command outbox boundaries', () => {
         rootUserId: 7,
         outbox: [
           {
-            type: 'patch',
             issuedAt: 10,
-            patch: { account: [{ id: 'cash', instrument: 999 }] },
+            operations: testOperations({
+              account: [{ id: 'cash', instrument: 999 }],
+            }),
           },
         ],
         reason: 'broken checkpoint',
@@ -223,8 +226,9 @@ describe('command outbox boundaries', () => {
       transaction: [baseTransaction],
     })
     const entry: TCommand = {
-      type: 'patch',
-      patch: { transaction: [{ id: 'tr-1', viewed: false }] },
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', viewed: false }],
+      }),
       issuedAt: 200,
     }
     const pending = reducer(base, appendClientCommand(entry))
@@ -253,8 +257,9 @@ describe('command outbox boundaries', () => {
       transaction: [makeTransaction({ id: 'tr-1', viewed: false })],
     })
     const entry: TCommand = {
-      type: 'patch',
-      patch: { transaction: [{ id: 'tr-1', viewed: true }] },
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', viewed: true }],
+      }),
       issuedAt: 10,
     }
     const pending = reducer(base, appendClientCommand(entry))
@@ -271,8 +276,9 @@ describe('command outbox boundaries', () => {
       transaction: [makeTransaction({ id: 'tr-1', comment: 'Before' })],
     })
     const entry: TCommand = {
-      type: 'patch',
-      patch: { transaction: [{ id: 'tr-1', comment: '' }] },
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', comment: '' }],
+      }),
       issuedAt: 10,
     }
     const pending = reducer(base, appendClientCommand(entry))
@@ -290,13 +296,15 @@ describe('command outbox boundaries', () => {
       transaction: [makeTransaction({ id: 'tr-1', comment: null })],
     })
     const first: TCommand = {
-      type: 'patch',
-      patch: { transaction: [{ id: 'tr-1', comment: 'First' }] },
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', comment: 'First' }],
+      }),
       issuedAt: 10,
     }
     const second: TCommand = {
-      type: 'patch',
-      patch: { transaction: [{ id: 'tr-1', comment: 'Second' }] },
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', comment: 'Second' }],
+      }),
       issuedAt: 20,
     }
     const pending = reducer(
@@ -319,8 +327,9 @@ describe('command outbox boundaries', () => {
       ],
     })
     const entry: TCommand = {
-      type: 'patch',
-      patch: { transaction: [{ id: 'tr-1', viewed: true }] },
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', viewed: true }],
+      }),
       issuedAt: 10,
     }
     const pending = reducer(base, appendClientCommand(entry))

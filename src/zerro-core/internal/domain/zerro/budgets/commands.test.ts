@@ -1,3 +1,5 @@
+import { prepareTestCommand as prepareCommand } from '../../../../support/testing/commandTestData'
+import { materializeTestInput } from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -8,10 +10,7 @@ import {
   makeUser,
 } from '../../../../support/testing/zenmoneyTestData'
 import { applyPatch } from '../../zenmoney'
-import {
-  issuePatch,
-  materializeCommand,
-} from '../../../operations/materialization'
+import { materializeCommand } from '../../../operations/materialization'
 import { EnvType, envId } from '../envelope-id'
 import { HiddenDataType } from '../hidden-data'
 import { compileSetBudget, compileSetEnvBudget } from './commands'
@@ -27,17 +26,20 @@ describe('env budget commands', () => {
     })
     const ids = ['data-account', 'budget-reminder']
 
-    const patch = compileSetBudget(
+    const patch = materializeTestInput(
       data,
-      { id: foodId, month: '2026-01', value: 100 },
-      {
-        now: () => 100,
-        uuid: () => ids.shift() || 'unused',
-      }
+      compileSetBudget(
+        data,
+        { id: foodId, month: '2026-01', value: 100 },
+        {
+          now: () => 100,
+          uuid: () => ids.shift() || 'unused',
+        }
+      )
     )
     const next = applyPatch(
       data,
-      materializeCommand(data, issuePatch(data, patch, 100))
+      materializeCommand(data, prepareCommand(data, patch, 100))
     )
 
     expect(patch.budget).toBeUndefined()
@@ -62,17 +64,20 @@ describe('env budget commands', () => {
       },
     })
 
-    const patch = compileSetBudget(
+    const patch = materializeTestInput(
       data,
-      { id: foodId, month: '2026-01', value: 100 },
-      {
-        now: () => 100,
-        uuid: () => 'unused',
-      }
+      compileSetBudget(
+        data,
+        { id: foodId, month: '2026-01', value: 100 },
+        {
+          now: () => 100,
+          uuid: () => 'unused',
+        }
+      )
     )
     const next = applyPatch(
       data,
-      materializeCommand(data, issuePatch(data, patch, 100))
+      materializeCommand(data, prepareCommand(data, patch, 100))
     )
 
     expect(patch.reminder).toBeUndefined()
@@ -106,16 +111,19 @@ describe('env budget commands', () => {
       },
     })
 
-    const patch = compileSetBudget(
+    const patch = materializeTestInput(
       data,
-      [
-        { id: foodId, month: '2026-01', value: 100 },
-        { id: cashId, month: '2026-01', value: 200 },
-      ],
-      {
-        now: () => 100,
-        uuid: () => 'budget-reminder',
-      }
+      compileSetBudget(
+        data,
+        [
+          { id: foodId, month: '2026-01', value: 100 },
+          { id: cashId, month: '2026-01', value: 200 },
+        ],
+        {
+          now: () => 100,
+          uuid: () => 'budget-reminder',
+        }
+      )
     )
     const next = applyPatch(data, patch)
 
@@ -158,16 +166,19 @@ describe('env budget commands', () => {
       },
     })
 
-    const patch = compileSetEnvBudget(
+    const patch = materializeTestInput(
       data,
-      [
-        { id: foodId, month: '2026-01', value: 200 },
-        { id: rentId, month: '2026-01', value: 0 },
-      ],
-      {
-        now: () => 100,
-        uuid: () => 'unused',
-      }
+      compileSetEnvBudget(
+        data,
+        [
+          { id: foodId, month: '2026-01', value: 200 },
+          { id: rentId, month: '2026-01', value: 0 },
+        ],
+        {
+          now: () => 100,
+          uuid: () => 'unused',
+        }
+      )
     )
     const next = applyPatch(data, patch)
 
@@ -189,16 +200,19 @@ describe('env budget commands', () => {
     })
     const ids = ['data-account', 'jan-reminder', 'feb-reminder']
 
-    const patch = compileSetEnvBudget(
+    const patch = materializeTestInput(
       data,
-      [
-        { id: foodId, month: '2026-01', value: 100 },
-        { id: cashId, month: '2026-02', value: 200 },
-      ],
-      {
-        now: () => 100,
-        uuid: () => ids.shift() || 'unused',
-      }
+      compileSetEnvBudget(
+        data,
+        [
+          { id: foodId, month: '2026-01', value: 100 },
+          { id: cashId, month: '2026-02', value: 200 },
+        ],
+        {
+          now: () => 100,
+          uuid: () => ids.shift() || 'unused',
+        }
+      )
     )
     const next = applyPatch(data, patch)
 
@@ -240,13 +254,16 @@ describe('env budget commands', () => {
       },
     })
 
-    const patch = compileSetEnvBudget(
+    const patch = materializeTestInput(
       data,
-      { id: foodId, month: '2026-01', value: 0 },
-      {
-        now: () => 100,
-        uuid: () => 'unused',
-      }
+      compileSetEnvBudget(
+        data,
+        { id: foodId, month: '2026-01', value: 0 },
+        {
+          now: () => 100,
+          uuid: () => 'unused',
+        }
+      )
     )
     const next = applyPatch(data, patch)
 
@@ -256,10 +273,13 @@ describe('env budget commands', () => {
 
   it('keeps empty update lists as no-op patches', () => {
     expect(
-      compileSetEnvBudget(makeStore(), [], {
-        now: () => 100,
-        uuid: () => 'unused',
-      })
+      materializeTestInput(
+        makeStore(),
+        compileSetEnvBudget(makeStore(), [], {
+          now: () => 100,
+          uuid: () => 'unused',
+        })
+      )
     ).toEqual({})
   })
 })

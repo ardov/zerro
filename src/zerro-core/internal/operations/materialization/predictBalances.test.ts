@@ -1,3 +1,4 @@
+import { prepareTestCommand as prepareCommand } from '../../../support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -12,7 +13,7 @@ import { applyPatch } from '../../domain/zenmoney/model/applyPatch'
 import type { TISODate } from '../../domain/zenmoney/primitives'
 import type { TDataStore } from '../../domain/zenmoney/model/store'
 import { buildOutboxTransport, replayOutbox } from '../replication/outbox'
-import { issuePatch, materializeCommand } from './materializeCommand'
+import { materializeCommand } from './materializeCommand'
 
 const rootUser = makeUser({ id: 1, parent: null, currency: 2 })
 
@@ -40,7 +41,7 @@ describe('predicted account balances', () => {
         }),
       },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { transaction: [{ id: 'tr', outcome: 25 }] },
       100
@@ -66,7 +67,7 @@ describe('predicted account balances', () => {
       { id: 'income', ...draft, income: 40, outcome: 0 },
       { id: 'expense', ...draft, income: 0, outcome: 15 },
     ]
-    const command = issuePatch(snapshot, { transaction: created }, 100)
+    const command = prepareCommand(snapshot, { transaction: created }, 100)
 
     expect(
       balances(applyPatch(snapshot, materializeCommand(snapshot, command)))
@@ -93,7 +94,7 @@ describe('predicted account balances', () => {
 
     // Moving the outcome side to another account returns the amount to `from`
     // and takes it from `other`, exactly as the server recomputes both.
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { transaction: [{ id: 'tr', outcomeAccount: 'other' }] },
       100
@@ -115,7 +116,7 @@ describe('predicted account balances', () => {
         }),
       },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { transaction: [{ id: 'tr', deleted: true }] },
       100
@@ -138,7 +139,7 @@ describe('predicted account balances', () => {
         }),
       },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { transaction: [{ id: 'tr', income: 0.00001, outcome: 0.00001 }] },
       100
@@ -208,7 +209,7 @@ describe('predicted account balances', () => {
         }),
       },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         transaction: [
@@ -245,7 +246,7 @@ describe('predicted account balances', () => {
         }),
       },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         account: [
@@ -266,7 +267,7 @@ describe('predicted account balances', () => {
 
   it('gives a created account the balance its startBalance implies', () => {
     const snapshot = makeSnapshot()
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         account: [
@@ -291,7 +292,7 @@ describe('predicted account balances', () => {
 
   it('combines a created account with a transaction on it in one command', () => {
     const snapshot = makeSnapshot()
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         account: [
@@ -330,7 +331,7 @@ describe('predicted account balances', () => {
         }),
       },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { transaction: [{ id: 'tr', outcome: 25 }] },
       100
@@ -353,7 +354,7 @@ describe('predicted account balances', () => {
         }),
       },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         account: [{ id: 'acc', title: 'New' }],
@@ -381,7 +382,7 @@ describe('predicted balances across the replica pipeline', () => {
     },
   })
   const raiseTo = (outcome: number, issuedAt: number) =>
-    issuePatch(snapshot, { transaction: [{ id: 'tr', outcome }] }, issuedAt)
+    prepareCommand(snapshot, { transaction: [{ id: 'tr', outcome }] }, issuedAt)
 
   it('applies repeated writes on one field without accumulating them', () => {
     const outbox = [raiseTo(25, 100), raiseTo(40, 200)]
@@ -419,7 +420,7 @@ describe('predicted balances across the replica pipeline', () => {
   it('sends a changed startBalance but not the balance it implies', () => {
     const account = makeAccount({ id: 'acc', startBalance: 50, balance: 90 })
     const base = makeSnapshot({ account: { acc: account } })
-    const command = issuePatch(
+    const command = prepareCommand(
       base,
       { account: [{ id: 'acc', startBalance: 80 }] },
       100

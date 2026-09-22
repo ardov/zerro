@@ -1,3 +1,8 @@
+import { prepareTestCommand as prepareCommand } from '../../../support/testing/commandTestData'
+import {
+  testOperations,
+  operationPatch,
+} from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -7,7 +12,6 @@ import {
 } from '../../../support/testing/zenmoneyTestData'
 import { applyPatch } from '../../domain/zenmoney/model/applyPatch'
 import {
-  issuePatch,
   materializeCommand,
   materializePrimaryCommand,
   type TCommand,
@@ -32,13 +36,16 @@ describe('transaction creation metadata', () => {
           { id: transaction.id, originalPayee: after, payee: 'New shop' },
         ],
       }
-      const issued = issuePatch(snapshot, patch, 100)
-      expect(issued.patch).toEqual({
+      const issued = prepareCommand(snapshot, patch, 100)
+      expect(operationPatch(issued)).toEqual({
         transaction: [{ id: transaction.id, payee: 'New shop' }],
       })
 
       // Already persisted commands must obey the same rules during replay.
-      const persisted: TCommand = { type: 'patch', issuedAt: 100, patch }
+      const persisted: TCommand = {
+        issuedAt: 100,
+        operations: testOperations(patch),
+      }
       for (const command of [issued, persisted]) {
         const current = applyPatch(
           snapshot,
@@ -68,12 +75,11 @@ describe('transaction creation metadata', () => {
     const patch = {
       transaction: [{ id: transaction.id, originalPayee: 'Replacement' }],
     }
-    expect(issuePatch(snapshot, patch, 100).patch).toEqual({})
+    expect(operationPatch(prepareCommand(snapshot, patch, 100))).toEqual({})
     expect(
       materializePrimaryCommand(snapshot, {
-        type: 'patch',
         issuedAt: 100,
-        patch,
+        operations: testOperations(patch),
       })
     ).toEqual({})
   })
@@ -88,8 +94,10 @@ describe('transaction creation metadata', () => {
       originalPayee: 'Bank terminal',
       outcome: 10,
     })
-    const command = issuePatch(snapshot, { transaction: [source] }, 100)
-    expect(command.patch.transaction?.[0].originalPayee).toBe('Bank terminal')
+    const command = prepareCommand(snapshot, { transaction: [source] }, 100)
+    expect(operationPatch(command).transaction?.[0].originalPayee).toBe(
+      'Bank terminal'
+    )
     const current = applyPatch(snapshot, materializeCommand(snapshot, command))
     expect(current.transaction.new).toMatchObject({
       payee: 'Visible shop',

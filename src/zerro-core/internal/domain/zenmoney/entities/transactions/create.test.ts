@@ -1,9 +1,7 @@
+import { prepareTestCommand as prepareCommand } from '../../../../../support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
-import {
-  issuePatch,
-  materializeCommand,
-} from '../../../../operations/materialization'
+import { materializeCommand } from '../../../../operations/materialization'
 import {
   makeAccount,
   makeInstrument,
@@ -53,7 +51,7 @@ function materialize(
     type === 'posting'
       ? compileCreatePosting(data, input as TCreatePostingInput, ctx)
       : compileCreateTransfer(data, input as TCreateTransferInput, ctx)
-  const command = issuePatch(data, compiled.patch, NOW)
+  const command = prepareCommand(data, compiled.operations, NOW)
   const current = applyPatch(data, materializeCommand(data, command))
   return {
     compiled,

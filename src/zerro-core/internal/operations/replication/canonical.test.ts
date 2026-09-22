@@ -1,3 +1,4 @@
+import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -11,9 +12,8 @@ import { getSyncCursor } from './cursor'
 
 function makeAccountCommand(title: string, issuedAt: number): TCommand {
   return {
-    type: 'patch',
     issuedAt,
-    patch: { account: [{ id: 'cash', title }] },
+    operations: testOperations({ account: [{ id: 'cash', title }] }),
   }
 }
 

@@ -1,3 +1,4 @@
+import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 const { storageMock } = vi.hoisted(() => ({
@@ -28,7 +29,7 @@ import {
   resetReplicaPersistenceForTests,
 } from './replicaPersistence'
 
-const entry = { type: 'patch' as const, patch: {}, issuedAt: 10 }
+const entry = { operations: testOperations({}), issuedAt: 10 }
 
 afterEach(() => {
   vi.restoreAllMocks()

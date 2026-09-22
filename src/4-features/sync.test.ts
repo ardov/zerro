@@ -1,3 +1,8 @@
+import { prepareTestCommand as prepareCommand } from '../zerro-core/support/testing/commandTestData'
+import {
+  testOperations,
+  operationPatch,
+} from '@/zerro-core/support/testing/commandTestData'
 import { configureStore } from '@reduxjs/toolkit'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -13,7 +18,7 @@ import {
   makeAccount,
   makeUser,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
-import { issuePatch } from '@/zerro-core/headless'
+
 import {
   appendClientCommand,
   applyServerPatch,
@@ -28,8 +33,9 @@ import { continueSyncLater } from './sync'
 
 function renameCashTo(title: string, issuedAt: number) {
   return {
-    type: 'patch' as const,
-    patch: { account: [makeAccount({ id: 'cash', title })] },
+    operations: testOperations({
+      account: [makeAccount({ id: 'cash', title })],
+    }),
     issuedAt,
   }
 }
@@ -121,17 +127,16 @@ describe('syncData', () => {
       }) as any
     )
     const first = {
-      type: 'patch' as const,
-      patch: {
+      operations: testOperations({
         account: [makeAccount({ id: 'cash', title: 'Wallet' })],
-      },
+      }),
       issuedAt: 10,
     }
     const redo = {
       ...first,
-      patch: {
+      operations: testOperations({
         account: [makeAccount({ id: 'cash', title: 'Vault' })],
-      },
+      }),
       issuedAt: 20,
     }
     store.dispatch(appendClientCommand(first))
@@ -224,7 +229,7 @@ describe('syncData', () => {
         if (syncMock.mock.calls.length === 2) {
           const outbox = store.getState().data.outbox
           expect(outbox).toHaveLength(1)
-          expect(outbox[0].patch.account).toHaveLength(1)
+          expect(operationPatch(outbox[0]).account).toHaveLength(1)
         }
         responseTimestamp += 1000
         return { data: { ...request, serverTimestamp: responseTimestamp } }
@@ -294,7 +299,7 @@ describe('syncData', () => {
     )
     store.dispatch(
       appendClientCommand(
-        issuePatch(
+        prepareCommand(
           store.getState().data.current,
           { deletion: [{ id: 'cash', object: 'account' }] },
           10
@@ -439,13 +444,12 @@ function makeTwoAccountStore() {
 
 function renameBothAccounts() {
   return {
-    type: 'patch' as const,
     issuedAt: 10,
-    patch: {
+    operations: testOperations({
       account: [
         makeAccount({ id: 'cash', title: 'Wallet' }),
         makeAccount({ id: 'card', title: 'Credit card' }),
       ],
-    },
+    }),
   }
 }

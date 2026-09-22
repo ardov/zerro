@@ -1,5 +1,15 @@
+import {
+  entityOperationPatch,
+  entityOperationTarget,
+  isEntityOperation,
+  validateEntityOperation,
+} from '../../domain/zenmoney/operations'
+import { parseZerroOperation } from '../../domain/zerro/operations/types'
+import { materializeZerro } from './materializeZerro'
+import type { TOperation } from '../../../types'
 import type { intentEntityKeys } from '../../domain/zenmoney'
 import {
+  applyPatch,
   accountRequiredFields,
   accountWritableFields,
   budgetRequiredFields,
@@ -39,12 +49,9 @@ export { intentPatchKeys } from '../../domain/zenmoney'
 export type { TIntentPatch } from '../../domain/zenmoney'
 import type { TCommandLabel } from './commandLabel'
 
-const intentPatchKeySet = new Set<string>(intentPatchKeys)
-
 export type TCommand = {
-  type: 'patch'
   issuedAt: TMsTime
-  patch: TIntentPatch
+  operations: TOperation[]
   /** What the user did, for history. Inert: nothing below this line reads it. */
   label?: TCommandLabel
 }
@@ -147,19 +154,79 @@ const entityRegistry = [
   },
 ] as const satisfies readonly TEntityRow[]
 
-export function issuePatch(
+export function prepareCommand(
   snapshot: TDataStore,
-  patch: TNormalizedPatch | TIntentPatch,
+  operations: readonly TOperation[],
   issuedAt: TMsTime,
   label?: TCommandLabel
 ): TCommand {
-  const command: TCommand = {
-    type: 'patch',
-    issuedAt,
-    patch: compileIntentPatch(snapshot, patch, issuedAt),
+  // Copy each touched map once: later operations see earlier writes without
+  // mutating the caller's snapshot or copying large maps for every operation.
+  const current = { ...snapshot }
+  const copied = new Set<string>()
+  const prepared: TOperation[] = []
+  for (const input of operations) {
+    let operation: TOperation
+    if (isEntityOperation(input)) {
+      validateEntityOperation(input)
+      if (input.type === 'entity.delete') operation = { ...input }
+      else {
+        const target = entityOperationTarget(input)
+        const row = entityRegistry.find(row => row.key === target.key)!
+        const existing = current[target.key][target.id as never]
+        const value =
+          input.type.endsWith('.patch') && !existing
+            ? pickFields(
+                input.value as TEntity,
+                ['id', ...row.writableFields].filter(
+                  field => field in input.value
+                )
+              )
+            : compileEntityIntents(
+                current,
+                row,
+                [input.value as TEntity],
+                issuedAt
+              )[0]
+        if (!value) continue
+        operation = { ...input, value } as TOperation
+      }
+    } else operation = parseZerroOperation(input)
+    prepared.push(operation)
+    const target = isEntityOperation(operation)
+      ? entityOperationTarget(operation)
+      : undefined
+    if (
+      target &&
+      operation.type.endsWith('.patch') &&
+      !current[target.key][target.id as never]
+    )
+      continue
+    const intent = isEntityOperation(operation)
+      ? entityOperationPatch(operation)
+      : materializeZerro(current, operation, issuedAt)
+    const patch = materializeIntentPatch(current, intent, issuedAt)
+    const copyMap = (key: keyof TDataStore) => {
+      if (copied.has(key)) return
+      Object.assign(current, { [key]: { ...(current[key] as object) } })
+      copied.add(key)
+    }
+    for (const key of intentPatchKeys) {
+      if (key === 'deletion') continue
+      if (!patch[key]?.length) continue
+      copyMap(key)
+      for (const entity of patch[key]!) {
+        ;(current[key] as Record<string | number, unknown>)[entity.id] = entity
+      }
+    }
+    for (const deletion of patch.deletion ?? []) {
+      copyMap(deletion.object)
+      delete (current[deletion.object] as Record<string | number, unknown>)[
+        deletion.id
+      ]
+    }
   }
-  if (label) command.label = label
-  return command
+  return { issuedAt, operations: prepared, ...(label && { label }) }
 }
 
 /** Materializes one command against the latest local snapshot. */
@@ -168,17 +235,68 @@ export function materializeCommand(
   command: TCommand,
   changedAt: TMsTime = command.issuedAt
 ): TNormalizedPatch {
-  const patch = materializePrimaryCommand(snapshot, command, changedAt)
-  return withPredictedEffects(snapshot, patch, changedAt)
+  return materializeOperations(snapshot, command, changedAt, true)
 }
 
-/** Expands only persisted user intent, without predicted server side effects. */
+/** Expands persisted intent without predicted server side effects. */
 export function materializePrimaryCommand(
   snapshot: TDataStore,
   command: TCommand,
   changedAt: TMsTime = command.issuedAt
 ): TNormalizedPatch {
-  return materializeIntentPatch(snapshot, command.patch, changedAt)
+  return materializeOperations(snapshot, command, changedAt, false)
+}
+
+function materializeOperations(
+  snapshot: TDataStore,
+  command: TCommand,
+  changedAt: TMsTime,
+  predict: boolean
+): TNormalizedPatch {
+  let current = snapshot
+  let result: TNormalizedPatch = {}
+  let pending: TIntentPatch = {}
+  let group: string | undefined
+  const ids = new Set<string | number>()
+
+  const apply = (intent: TIntentPatch) => {
+    const primary = materializeIntentPatch(current, intent, changedAt)
+    const patch = predict
+      ? withPredictedEffects(current, primary, changedAt)
+      : primary
+    current = applyPatch(current, patch)
+    result = mergeApplied(result, patch)
+  }
+  const flush = () => {
+    if (ids.size) apply(pending)
+    pending = {}
+    ids.clear()
+    group = undefined
+  }
+  for (const operation of command.operations) {
+    if (!isEntityOperation(operation)) {
+      flush()
+      apply(materializeZerro(current, operation, command.issuedAt))
+      continue
+    }
+    const target = entityOperationTarget(operation)
+    const nextGroup = `${target.key}:${target.deletion ? 'delete' : 'write'}`
+    // Independent rows of one kind share one map copy and one balance pass.
+    // Repeated IDs and cross-kind dependencies retain sequential semantics.
+    if (group !== nextGroup || ids.has(target.id)) flush()
+    const existing = current[target.key][target.id as never]
+    if ((operation.type.endsWith('.patch') || target.deletion) && !existing)
+      continue
+    group = nextGroup
+    ids.add(target.id)
+    for (const [key, rows] of Object.entries(entityOperationPatch(operation))) {
+      const record = pending as Record<string, unknown[]>
+      const values = record[key] ?? (record[key] = [])
+      values.push(...rows)
+    }
+  }
+  flush()
+  return result
 }
 
 /**
@@ -300,39 +418,6 @@ function materializeIntentPatch(
     } else {
       delete result.deletion
     }
-  }
-
-  return result
-}
-
-function compileIntentPatch(
-  snapshot: TDataStore,
-  patch: TNormalizedPatch | TIntentPatch,
-  issuedAt: TMsTime
-): TIntentPatch {
-  Object.keys(patch).forEach(key => {
-    if (key !== 'serverTimestamp' && !intentPatchKeySet.has(key)) {
-      throw new Error(`Unsupported command intent: ${key}`)
-    }
-  })
-
-  const intentPatch = patch
-  const result: TIntentPatch = {}
-  const resultByKey = result as Record<string, unknown>
-  entityRegistry.forEach(row => {
-    const entities = intentPatch[row.key] as TEntity[] | undefined
-    if (!entities) return
-
-    const intents = compileEntityIntents(snapshot, row, entities, issuedAt)
-    if (intents.length) resultByKey[row.key] = intents
-    else delete resultByKey[row.key]
-  })
-
-  if (intentPatch.deletion) {
-    result.deletion = intentPatch.deletion.map(({ id, object }) => ({
-      id,
-      object,
-    }))
   }
 
   return result
@@ -509,4 +594,39 @@ function patchIsApplied(
 function nextChanged(changedAt: number, currentChanged = 0): number {
   // ZenMoney compares second-resolution entity versions strictly.
   return Math.max(changedAt, currentChanged + 1000)
+}
+
+/** Sequential operations can create, update and delete the same row. */
+function mergeApplied(
+  left: TNormalizedPatch,
+  right: TNormalizedPatch
+): TNormalizedPatch {
+  const result: TNormalizedPatch = { ...left }
+  for (const key of intentPatchKeys) {
+    if (key === 'deletion') continue
+    const removed = new Set(
+      right.deletion?.filter(row => row.object === key).map(row => row.id)
+    )
+    const replaced = new Set(right[key]?.map(row => row.id))
+    const values = [
+      ...(left[key] ?? []).filter(
+        row => !removed.has(row.id) && !replaced.has(row.id)
+      ),
+      ...(right[key] ?? []),
+    ]
+    if (values.length) (result as Record<string, unknown>)[key] = values
+    else delete result[key]
+  }
+  const deletions = [
+    ...(left.deletion ?? []).filter(
+      row =>
+        !right[row.object as keyof TIntentPatch]?.some(
+          value => value.id === row.id
+        )
+    ),
+    ...(right.deletion ?? []),
+  ]
+  if (deletions.length) result.deletion = deletions
+  else delete result.deletion
+  return result
 }

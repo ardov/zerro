@@ -1,10 +1,11 @@
+import { prepareTestCommand as prepareCommand } from '../../../support/testing/commandTestData'
 import { describe, expect, it, vi } from 'vitest'
 
 import {
   makeAccount,
   makeStore,
 } from '../../../support/testing/zenmoneyTestData'
-import { issuePatch, type TCommand } from '../materialization'
+import { type TCommand } from '../materialization'
 import { drivePush, type TPushSendResult } from './pushDriver'
 import { beginPush } from './pushRun'
 
@@ -19,7 +20,7 @@ function makeReplica() {
       card: makeAccount({ id: 'card', title: 'Card' }),
     },
   })
-  const command = issuePatch(
+  const command = prepareCommand(
     base,
     {
       account: [

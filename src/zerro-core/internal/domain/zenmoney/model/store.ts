@@ -86,8 +86,8 @@ export type TDeletionIntent = Pick<TDeletionObject, 'id' | 'object'>
 
 /**
  * Sparse user intent: entity patches carrying only the changed writable
- * fields plus deletion intents. This is the persisted command payload shape
- * and the shape domain command compilers return.
+ * fields plus deletion intents. Entity builders return this intermediate shape;
+ * command preparation turns it into explicit create, patch and delete operations.
  */
 export type TIntentPatch = {
   deletion?: TDeletionIntent[]

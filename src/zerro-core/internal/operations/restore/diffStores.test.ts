@@ -1,3 +1,4 @@
+import { prepareTestCommand as prepareCommand } from '../../../support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -16,7 +17,7 @@ import { applyPatch } from '../../domain/zenmoney/model/applyPatch'
 import type { TDataStore } from '../../domain/zenmoney/model/store'
 import { AccountType } from '../../domain/zenmoney/entities/accounts'
 import { HiddenDataType } from '../../domain/zerro/hidden-data'
-import { issuePatch, materializeCommand } from '../materialization'
+import { materializeCommand } from '../materialization'
 import { buildRestorePlan, diffStores, summarizeStoreDiff } from './diffStores'
 
 const rootUser = makeUser({ id: 1, parent: null, currency: 2 })
@@ -30,7 +31,7 @@ function applyDiff(current: TDataStore, desired: TDataStore): TDataStore {
   const patch = buildRestorePlan(current, desired, {
     allocateId: (key, id) => `restored:${key}:${id}`,
   }).patch
-  const command = issuePatch(current, patch, 1700000000000)
+  const command = prepareCommand(current, patch, 1700000000000)
   return applyPatch(current, materializeCommand(current, command))
 }
 
@@ -663,7 +664,7 @@ describe('restore reconciliation', () => {
         { id: 'old', deleted: true },
       ])
 
-      const command = issuePatch(current, patch, 1700000000000)
+      const command = prepareCommand(current, patch, 1700000000000)
       const restored = applyPatch(current, materializeCommand(current, command))
       expect(restored.transaction.old.deleted).toBe(true)
       expect(

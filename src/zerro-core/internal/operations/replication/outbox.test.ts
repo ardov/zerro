@@ -1,3 +1,7 @@
+import {
+  testOperations,
+  operationPatch,
+} from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -19,10 +23,12 @@ import {
   undoOutboxTo,
 } from './outbox'
 
-function makeCommand(issuedAt: number, patch: TCommand['patch']): TCommand {
+function makeCommand(
+  issuedAt: number,
+  patch: import('../../domain/zenmoney').TIntentPatch
+): TCommand {
   return {
-    type: 'patch',
-    patch,
+    operations: testOperations(patch),
     issuedAt,
   }
 }
@@ -46,9 +52,12 @@ describe('outbox operations', () => {
       base,
       [],
       {
-        patch: {
-          account: [{ id: 'cash', instrument: 1, title: 'Wallet' }],
-        },
+        operations: [
+          {
+            type: 'account.create',
+            value: { id: 'cash', instrument: 1, title: 'Wallet' },
+          },
+        ],
         receipt: { accountId: 'cash' },
       },
       1_000
@@ -58,20 +67,27 @@ describe('outbox operations', () => {
     expect(staged.current.account.cash.title).toBe('Wallet')
     expect(parseCommandOutbox(staged.outbox)).toEqual(staged.outbox)
     expect(() =>
-      parseCommandOutbox([{ type: 'patch', issuedAt: 1, patch: { nope: [] } }])
-    ).toThrow('patch.nope is invalid')
+      parseCommandOutbox([{ issuedAt: 1, operations: [{ type: 'nope' }] }])
+    ).toThrow()
   })
 
   it('drops a label it cannot read instead of failing the command', () => {
     const patch = { account: [makeAccount({ id: 'cash', title: 'Wallet' })] }
     const parsed = parseCommandOutbox([
-      { type: 'patch', issuedAt: 1, patch, label: { verb: 'budget-set' } },
-      { type: 'patch', issuedAt: 2, patch, label: { verb: 'from-the-future' } },
-      { type: 'patch', issuedAt: 3, patch, label: 'nonsense' },
       {
-        type: 'patch',
+        issuedAt: 1,
+        operations: testOperations(patch),
+        label: { verb: 'budget-set' },
+      },
+      {
+        issuedAt: 2,
+        operations: testOperations(patch),
+        label: { verb: 'from-the-future' },
+      },
+      { issuedAt: 3, operations: testOperations(patch), label: 'nonsense' },
+      {
         issuedAt: 4,
-        patch,
+        operations: testOperations(patch),
         label: { verb: 'goal-set', args: { id: 'tag#food', name: 5 } },
       },
     ])
@@ -85,7 +101,12 @@ describe('outbox operations', () => {
       { verb: 'goal-set', args: { id: 'tag#food' } },
     ])
     expect(parsed).toHaveLength(4)
-    expect(parsed.every(command => command.patch === patch)).toBe(true)
+    expect(parsed.map(command => operationPatch(command))).toEqual([
+      patch,
+      patch,
+      patch,
+      patch,
+    ])
   })
 
   it('keeps the label out of materialization and transport', () => {

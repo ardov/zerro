@@ -1,3 +1,4 @@
+export { patchEnvelopeMeta as patchMeta } from './commands'
 export {
   applyEnvelopeStructure as applyStructure,
   createEnvelope as create,

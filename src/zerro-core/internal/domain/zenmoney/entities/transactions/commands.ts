@@ -105,7 +105,13 @@ export function compileCreatePosting(
   )
   return {
     ...compiled,
-    patch: { ...compiled.patch, ...merchant?.patch },
+    operations: [
+      ...(merchant?.patch.merchant ?? []).map(value => ({
+        type: 'merchant.create' as const,
+        value,
+      })),
+      ...compiled.operations,
+    ],
   }
 }
 
@@ -238,7 +244,9 @@ function compileCreateTransaction(
   }
 
   return {
-    patch: { transaction: [toCreationPatch(transaction)] },
+    operations: [
+      { type: 'transaction.create', value: toCreationPatch(transaction) },
+    ],
     receipt: { transactionId: transaction.id },
   }
 }

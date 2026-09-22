@@ -1,3 +1,4 @@
+import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 
@@ -158,16 +159,18 @@ describe('paged history view', () => {
     const store = makeStoreWithState(base)
     store.dispatch(
       appendClientCommand({
-        type: 'patch',
         issuedAt: 10,
-        patch: { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
+        operations: testOperations({
+          account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+        }),
       })
     )
     store.dispatch(
       appendClientCommand({
-        type: 'patch',
         issuedAt: 20,
-        patch: { account: [makeAccount({ id: 'cash', title: 'Vault' })] },
+        operations: testOperations({
+          account: [makeAccount({ id: 'cash', title: 'Vault' })],
+        }),
       })
     )
 
@@ -186,7 +189,7 @@ describe('paged history view', () => {
     })
     const store = makeStoreWithState(first)
     store.dispatch(
-      appendClientCommand({ type: 'patch', issuedAt: 10, patch: {} })
+      appendClientCommand({ issuedAt: 10, operations: testOperations({}) })
     )
     await store.dispatch(loadHistoryPage() as any)
 
@@ -252,16 +255,18 @@ describe('paged history view', () => {
     const store = makeStoreWithState(base)
     store.dispatch(
       appendClientCommand({
-        type: 'patch',
         issuedAt: 10,
-        patch: { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
+        operations: testOperations({
+          account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+        }),
       })
     )
     store.dispatch(
       appendClientCommand({
-        type: 'patch',
         issuedAt: 20,
-        patch: { account: [makeAccount({ id: 'cash', title: 'Vault' })] },
+        operations: testOperations({
+          account: [makeAccount({ id: 'cash', title: 'Vault' })],
+        }),
       })
     )
     await store.dispatch(loadHistoryPage() as any)
@@ -278,9 +283,10 @@ describe('paged history view', () => {
     const store = makeStoreWithState(base)
     store.dispatch(
       appendClientCommand({
-        type: 'patch',
         issuedAt: 10,
-        patch: { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
+        operations: testOperations({
+          account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+        }),
       })
     )
     await store.dispatch(selectHistoryPoint({ kind: 'local', index: 0 }) as any)
@@ -288,9 +294,10 @@ describe('paged history view', () => {
 
     store.dispatch(
       appendClientCommand({
-        type: 'patch',
         issuedAt: 20,
-        patch: { account: [makeAccount({ id: 'cash', title: 'Vault' })] },
+        operations: testOperations({
+          account: [makeAccount({ id: 'cash', title: 'Vault' })],
+        }),
       })
     )
 

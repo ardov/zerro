@@ -1,3 +1,5 @@
+import { prepareTestCommand as prepareCommand } from '../../../support/testing/commandTestData'
+import { operationPatch } from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -12,7 +14,7 @@ import {
   makeUser,
 } from '../../../support/testing/zenmoneyTestData'
 import { globalBudgetTagId } from '../../domain/zenmoney'
-import { issuePatch, type TCommand } from '../materialization'
+import { type TCommand } from '../materialization'
 import { beginPush, acceptPushChunk, shrinkPushChunk } from './pushRun'
 
 const now = Date.parse('2026-08-31T12:00:00.000Z')
@@ -20,7 +22,7 @@ const now = Date.parse('2026-08-31T12:00:00.000Z')
 describe('bounded outbox push', () => {
   it('keeps a small combined upsert and cleanup in one request', () => {
     const base = makeBase()
-    const command = issuePatch(
+    const command = prepareCommand(
       base,
       {
         account: [makeAccount({ id: 'cash', title: 'Wallet' })],
@@ -53,7 +55,7 @@ describe('bounded outbox push', () => {
       incomeAccount: account.id,
       outcomeAccount: account.id,
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       base,
       {
         transaction: [transaction],
@@ -120,7 +122,7 @@ describe('bounded outbox push', () => {
         accounts.map(account => [account.id, account])
       ),
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       base,
       {
         deletion: [
@@ -185,7 +187,7 @@ describe('bounded outbox push', () => {
       reminderMarker: { [marker.id]: marker },
       transaction: { [transaction.id]: transaction },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       base,
       {
         deletion: [
@@ -229,7 +231,7 @@ describe('bounded outbox push', () => {
 
   it('collapses only the accepted prefix and preserves commands appended later', () => {
     const base = makeBase()
-    const first = issuePatch(
+    const first = prepareCommand(
       base,
       {
         merchant: [makeMerchant({ id: 'one', title: 'One' })],
@@ -239,7 +241,7 @@ describe('bounded outbox push', () => {
     )
     const prepared = beginPush({ base, outbox: [first] }, now, { maxBytes: 1 })
     if (!prepared) throw new Error('Expected a prepared push')
-    const later = issuePatch(
+    const later = prepareCommand(
       base,
       {
         account: [makeAccount({ id: 'cash', title: 'Later' })],
@@ -254,8 +256,8 @@ describe('bounded outbox push', () => {
     )
 
     expect(accepted.outbox).toHaveLength(2)
-    expect(accepted.outbox[0].patch.merchant).toBeUndefined()
-    expect(accepted.outbox[0].patch.tag).toHaveLength(1)
+    expect(operationPatch(accepted.outbox[0]).merchant).toBeUndefined()
+    expect(operationPatch(accepted.outbox[0]).tag).toHaveLength(1)
     expect(accepted.outbox[1]).toEqual(later)
     expect(accepted.redo).toEqual([])
     expect(accepted.progress).toEqual(
@@ -268,7 +270,7 @@ describe('bounded outbox push', () => {
 
   it('repackages the same unconfirmed batch after 413', () => {
     const base = makeBase()
-    const command = issuePatch(
+    const command = prepareCommand(
       base,
       {
         merchant: [
@@ -293,12 +295,12 @@ describe('bounded outbox push', () => {
 
     expect(shrunk.request.merchant).toHaveLength(1)
     expect(shrinkPushChunk({ base }, shrunk)).toBeUndefined()
-    expect(command.patch.merchant).toHaveLength(2)
+    expect(operationPatch(command).merchant).toHaveLength(2)
   })
 
   it('cleans canonical orphan relations before preparing an existing outbox', () => {
     const base = makeBase()
-    const command = issuePatch(
+    const command = prepareCommand(
       base,
       {
         budget: [
@@ -344,7 +346,7 @@ describe('bounded outbox push', () => {
 
   it('acknowledges an outbox that becomes empty after relation cleanup', () => {
     const base = makeBase()
-    const command = issuePatch(
+    const command = prepareCommand(
       base,
       {
         reminderMarker: [

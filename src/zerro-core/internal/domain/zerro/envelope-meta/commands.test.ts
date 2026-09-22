@@ -1,3 +1,4 @@
+import { materializeTestInput } from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -42,17 +43,20 @@ describe('envelope meta commands', () => {
       },
     })
 
-    const patch = compilePatchEnvelopeMeta(
+    const patch = materializeTestInput(
       data,
-      {
-        id: envelopeId,
-        visibility: envelopeVisibility.visible,
-        group: 'fixed',
-      },
-      {
-        now: () => 100,
-        uuid: () => 'unused',
-      }
+      compilePatchEnvelopeMeta(
+        data,
+        {
+          id: envelopeId,
+          visibility: envelopeVisibility.visible,
+          group: 'fixed',
+        },
+        {
+          now: () => 100,
+          uuid: () => 'unused',
+        }
+      )
     )
     const next = applyPatch(data, patch)
 
@@ -77,23 +81,26 @@ describe('envelope meta commands', () => {
     })
     const ids = ['data-account', 'meta-reminder']
 
-    const patch = compilePatchEnvelopeMeta(
+    const patch = materializeTestInput(
       data,
-      [
+      compilePatchEnvelopeMeta(
+        data,
+        [
+          {
+            id: tagEnvelopeId,
+            visibility: envelopeVisibility.hidden,
+          },
+          {
+            id: accountEnvelopeId,
+            index: 2,
+            keepIncome: true,
+          },
+        ],
         {
-          id: tagEnvelopeId,
-          visibility: envelopeVisibility.hidden,
-        },
-        {
-          id: accountEnvelopeId,
-          index: 2,
-          keepIncome: true,
-        },
-      ],
-      {
-        now: () => 100,
-        uuid: () => ids.shift() || 'unused',
-      }
+          now: () => 100,
+          uuid: () => ids.shift() || 'unused',
+        }
+      )
     )
     const next = applyPatch(data, patch)
 
