@@ -1,0 +1,160 @@
+@layer components {
+  .kit-toggle {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    vertical-align: middle;
+    color: var(--color-ui-on-control);
+    background: var(--color-ui-control-inactive);
+    outline: var(--stroke-ui-control) solid transparent;
+    outline-offset: 3px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color 150ms ease,
+      box-shadow 150ms ease;
+
+    /* A 44px target without changing the visible control's geometry. */
+    &::after {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      content: '';
+      transform: translate(-50%, -50%);
+    }
+
+    &:is([data-checked], [data-indeterminate]) {
+      background: var(--color-ui-control-active);
+    }
+
+    &:not([data-disabled], [data-readonly]):hover {
+      box-shadow: inset 0 0 0 100px var(--color-ui-toggle-hover);
+    }
+
+    &:not([data-disabled], [data-readonly]):active {
+      box-shadow: inset 0 0 0 100px var(--color-ui-toggle-pressed);
+    }
+
+    &:focus-visible {
+      outline-color: var(--color-ui-focus);
+    }
+
+    &[data-disabled] {
+      opacity: var(--opacity-ui-disabled);
+      cursor: default;
+    }
+
+    &[data-readonly] {
+      cursor: default;
+    }
+  }
+
+  .kit-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    background: transparent;
+
+    &::before {
+      position: absolute;
+      inset: 0;
+      border: var(--stroke-ui-control) solid var(--color-ui-control-inactive);
+      border-radius: inherit;
+      pointer-events: none;
+      content: '';
+      /* Keep the outline visible while the checked fill starts fading in. */
+      transition: border-color 150ms ease;
+    }
+
+    &:is([data-checked], [data-indeterminate])::before {
+      border-color: transparent;
+    }
+  }
+
+  .kit-checkbox-indicator {
+    display: flex;
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    transition: opacity 150ms ease;
+
+    &:is([data-checked], [data-indeterminate]) {
+      opacity: 1;
+    }
+
+    & svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .kit-checkbox-mixed {
+      display: none;
+    }
+
+    &[data-indeterminate] .kit-checkbox-check {
+      display: none;
+    }
+
+    &[data-indeterminate] .kit-checkbox-mixed {
+      display: block;
+    }
+  }
+
+  .kit-switch {
+    width: 40px;
+    height: 24px;
+    justify-content: flex-start;
+    padding: 2px;
+    border-radius: 999px;
+  }
+
+  .kit-switch-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--color-ui-on-control);
+    pointer-events: none;
+    transition: transform 150ms ease;
+
+    &[data-checked] {
+      transform: translateX(16px);
+    }
+
+    &:dir(rtl)[data-checked] {
+      transform: translateX(-16px);
+    }
+  }
+
+  .kit-toggle-label .kit-toggle::after {
+    /* The label supplies the target without covering adjacent rows. */
+    inset: 0;
+    width: auto;
+    height: auto;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kit-toggle,
+    .kit-checkbox::before,
+    .kit-checkbox-indicator,
+    .kit-switch-thumb {
+      transition: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .kit-toggle {
+      forced-color-adjust: none;
+      --color-ui-control-active: CanvasText;
+      --color-ui-control-inactive: CanvasText;
+      --color-ui-on-control: Canvas;
+      --color-ui-focus: CanvasText;
+    }
+  }
+}
