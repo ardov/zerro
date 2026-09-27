@@ -1,0 +1,151 @@
+.kit-toast-screen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-tooltip);
+  pointer-events: none;
+}
+
+.kit-toast-viewport {
+  position: absolute;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  width: min(380px, calc(100% - 32px));
+  height: var(--toast-frontmost-height, 0px);
+  outline: none;
+  pointer-events: auto;
+}
+
+.kit-toast {
+  --toast-gap: 12px;
+  --toast-y: calc(var(--toast-index) * -12px);
+
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: var(--toast-frontmost-height, var(--toast-height));
+  z-index: calc(100 - var(--toast-index));
+  border: 1px solid var(--color-ui-border);
+  border-radius: var(--radius-ui-popover);
+  background: var(--color-ui-popover);
+  color: var(--color-ui-primary);
+  box-shadow: var(--shadow-ui-popover);
+  font-family: inherit;
+  transform-origin: bottom center;
+  transform: translateY(var(--toast-y))
+    scale(calc(1 - var(--toast-index) * 0.04));
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 160ms ease,
+    height 220ms ease;
+  touch-action: pan-x;
+}
+
+/* The bridge keeps hover active while crossing the space between cards. */
+.kit-toast::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: var(--toast-gap);
+}
+
+.kit-toast[data-expanded] {
+  --toast-y: calc(
+    -1 * var(--toast-offset-y) - var(--toast-index) * var(--toast-gap)
+  );
+
+  height: var(--toast-height);
+  transform: translateY(var(--toast-y));
+}
+
+.kit-toast[data-starting-style],
+.kit-toast[data-ending-style] {
+  opacity: 0;
+  transform: translateY(calc(var(--toast-y) + 24px));
+}
+
+.kit-toast[data-ending-style][data-swipe-direction='right'] {
+  transform: translateX(calc(100% + 32px)) translateY(var(--toast-y));
+}
+
+.kit-toast[data-ending-style][data-swipe-direction='down'] {
+  transform: translateY(calc(var(--toast-y) + 100% + 32px));
+}
+
+.kit-toast[data-limited] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.kit-toast-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px;
+  overflow-wrap: anywhere;
+  transition: opacity 160ms ease;
+}
+
+.kit-toast-content[data-behind]:not([data-expanded]) {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.kit-toast-description:not(:empty) {
+  margin-top: 4px;
+}
+
+.kit-toast-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-ui-secondary);
+}
+
+.kit-toast[data-type='success'] .kit-toast-icon {
+  color: var(--color-ui-success);
+}
+.kit-toast[data-type='error'] .kit-toast-icon {
+  color: var(--color-ui-error);
+}
+.kit-toast[data-type='info'] .kit-toast-icon {
+  color: var(--color-ui-link);
+}
+.kit-toast[data-type='warning'] .kit-toast-icon {
+  color: var(--color-ui-warning);
+}
+.kit-toast[data-type='loading'] .kit-toast-icon {
+  animation: toast-spin 1s linear infinite;
+}
+
+@keyframes toast-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (width < 500px) {
+  .kit-toast-viewport {
+    right: 16px;
+    left: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kit-toast,
+  .kit-toast-content {
+    transition: opacity 100ms ease;
+  }
+  .kit-toast[data-type='loading'] .kit-toast-icon {
+    animation: none;
+  }
+  .kit-toast[data-starting-style],
+  .kit-toast[data-ending-style],
+  .kit-toast[data-ending-style][data-swipe-direction] {
+    transform: translateY(var(--toast-y));
+  }
+}
