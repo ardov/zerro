@@ -1,3 +1,4 @@
+import { accountSearch } from './selectSearchFixtures'
 import { usePopup } from '@/6-shared/overlays'
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
@@ -42,8 +43,8 @@ const meta = {
 \`<Select search label="Account" items={items} value={value} onChange={setValue} />\`
 
 - Search matches labels and optional **keywords** across the full source. Selection closes the popup; closing resets the query and expansion.
-- **search={{ limit: 10 }}** initially limits options. Show more is a separate button in the scrollport, reached with Tab; Shift-Tab returns to search.
-- **search.filter(items, query)** returns the final filtered/ranked items, without a second filter. Keep the full source in **items** so the closed value and icon remain available.
+- **search.filter(items, query, { expanded })** returns **{ items, hasMore }**. The selector owns expansion and resets it on close. Show more is a separate button in the scrollport, reached with Tab; Shift-Tab returns to search.
+- Custom filtering returns the final filtered/ranked items, without a second filter. Keep the full source in **items** so the closed value and icon remain available.
 - **search.autoFocus=false** focuses the popup without opening a software keyboard; Tab reaches search.
 - Localize **search.label**, **search.placeholder**, **search.showMoreLabel**, **emptyText**, and **clearLabel**.
 - **search.actions** holds consumer-owned buttons after the list. Pass **popup={usePopup()}** to close after an action.
@@ -82,7 +83,7 @@ function Demo(props: { autoFocus?: boolean; required?: boolean }) {
         value={value}
         onChange={setValue}
         required={required}
-        search={{ limit: 2, autoFocus }}
+        search={{ ...accountSearch, autoFocus }}
       />
       <Button variant="secondary">Next control</Button>
       <output aria-label="Selected value">{value ?? 'none'}</output>
@@ -159,7 +160,7 @@ export const Expansion: Story = {
     await userEvent.click(trigger)
     const search = await body.findByRole('combobox', { name: 'Search Account' })
     await userEvent.tab()
-    const more = body.getByRole('button', { name: 'Show more' })
+    const more = body.getByRole('button', { name: 'Show all accounts' })
     await expect(more).toHaveFocus()
     await expect(body.getByRole('listbox')).not.toContainElement(more)
     await userEvent.tab({ shift: true })
@@ -258,13 +259,14 @@ function RankedDemo() {
       value={value}
       onChange={setValue}
       search={{
-        filter: (source, query) =>
-          query
+        filter: (source, query) => ({
+          items: query
             ? [
                 { value: 'cash', label: 'Cash' },
                 { value: 'daily', label: 'Everyday account' },
               ]
             : source,
+        }),
       }}
     />
   )
@@ -410,7 +412,9 @@ export const ExpansionExit: Story = {
     const search = await body.findByRole('combobox', { name: 'Search Account' })
     await waitFor(() => expect(search).toHaveFocus())
     await userEvent.tab()
-    await expect(body.getByRole('button', { name: 'Show more' })).toHaveFocus()
+    await expect(
+      body.getByRole('button', { name: 'Show all accounts' })
+    ).toHaveFocus()
     await userEvent.tab()
     await waitFor(() =>
       expect(body.queryByRole('listbox')).not.toBeInTheDocument()

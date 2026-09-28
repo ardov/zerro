@@ -1,11 +1,8 @@
+import { CategorySymbol } from './CategoryIcon'
 import type { ComponentPropsWithoutRef } from 'react'
 import { cn } from './shadcn/utils'
 import { getContrastText } from './theme/color'
 import { Checkbox, type CheckboxProps } from './Checkbox'
-
-const isSvgUrl = (symbol: string): boolean => {
-  return symbol.startsWith('data:image/svg') || symbol.includes('.svg')
-}
 
 export type TagIconProps = Omit<
   ComponentPropsWithoutRef<'div'>,
@@ -36,7 +33,6 @@ export function TagIcon(props: TagIconProps) {
     ...rest
   } = props
   const isInteractive = !!onCheckedChange
-  const isSvg = isSvgUrl(symbol)
   const contentIsHidden = !!showCheckBox || !!checked
   const { className: checkboxClassName, ...restCheckboxProps } =
     checkboxProps ?? {}
@@ -69,38 +65,15 @@ export function TagIcon(props: TagIconProps) {
         ...style,
       }}
     >
-      {isSvg ? (
-        <span
-          className={cn(
-            'shrink-0 bg-current transition-opacity duration-200',
-            size === 's' ? 'size-5' : 'size-6',
-            contentIsHidden ? 'opacity-0' : 'opacity-100',
-            isInteractive ? 'group-hover:opacity-0' : 'group-hover:opacity-100'
-          )}
-          style={{
-            maskImage: `url("${symbol}")`,
-            maskPosition: 'center',
-            maskRepeat: 'no-repeat',
-            maskSize: 'contain',
-            WebkitMaskImage: `url("${symbol}")`,
-            WebkitMaskPosition: 'center',
-            WebkitMaskRepeat: 'no-repeat',
-            WebkitMaskSize: 'contain',
-          }}
-          aria-hidden
-        />
-      ) : (
-        <span
-          className={cn(
-            'shrink-0 transition-opacity duration-200',
-            size === 's' ? 'text-base' : 'text-2xl',
-            contentIsHidden ? 'opacity-0' : 'opacity-100',
-            isInteractive ? 'group-hover:opacity-0' : 'group-hover:opacity-100'
-          )}
-        >
-          {symbol}
-        </span>
-      )}
+      <CategorySymbol
+        symbol={symbol}
+        size={size}
+        className={cn(
+          'transition-opacity duration-200',
+          contentIsHidden ? 'opacity-0' : 'opacity-100',
+          isInteractive ? 'group-hover:opacity-0' : 'group-hover:opacity-100'
+        )}
+      />
       {onCheckedChange && (
         <Checkbox
           className={cn(

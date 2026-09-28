@@ -24,6 +24,8 @@ export type SelectOption<T extends string = string> = {
   start?: ReactNode
   end?: ReactNode
   disabled?: boolean
+  /** Visual nesting in a flat list of selectable options. */
+  indent?: number
   /** Additional terms used by searchable selects. */
   keywords?: readonly string[]
 }
@@ -166,6 +168,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
       render={
         <ListRow
           size={size}
+          indent={item.indent}
           start={item.start}
           end={item.end}
           description={item.description}
@@ -179,6 +182,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
 
   return (
     <Field.Root
+      className={trigger ? 'min-w-0 max-w-full' : undefined}
       invalid={invalid ?? (error ? true : undefined)}
       disabled={disabled}
     >

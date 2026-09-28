@@ -1,7 +1,7 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { Combobox } from '@base-ui/react/combobox'
 import { Field } from '@base-ui/react/field'
-import { Search } from 'lucide-react'
+import { ChevronDown, Search } from 'lucide-react'
 import type { SelectItem, SelectOption, SelectControlProps } from './Select'
 import {
   useSelectField,
@@ -20,10 +20,9 @@ export type SelectSearchOptions<T extends string> = {
   /** Receives the full source. Return a filtered/ranked result; no second filter runs. */
   filter?: (
     items: readonly SelectItem<T>[],
-    query: string
-  ) => readonly SelectItem<T>[]
-  /** Initially show this many options. Search always covers the full source. */
-  limit?: number
+    query: string,
+    context: { expanded: boolean }
+  ) => { items: readonly SelectItem<T>[]; hasMore?: boolean }
   showMoreLabel?: string
   /** Consumer-owned actions, outside the listbox, in the same scrollport. */
   actions?: ReactNode
@@ -32,22 +31,19 @@ export type SelectSearchOptions<T extends string> = {
 /** Keep groups and boundaries only when they separate visible options. */
 function visibleItems<T extends string>(
   items: readonly SelectItem<T>[],
-  matches: (item: SelectOption<T>) => boolean,
-  limit: number
+  matches: (item: SelectOption<T>) => boolean
 ) {
   const result: SelectItem<T>[] = []
-  let remaining = limit
   let separator: SelectItem<T> | undefined
   for (const item of items) {
     if ('type' in item && item.type === 'separator') {
       separator = item
       continue
     }
-    const take = (option: SelectOption<T>) => matches(option) && remaining-- > 0
     const next =
       'type' in item
-        ? { ...item, items: item.items.filter(take) }
-        : take(item)
+        ? { ...item, items: item.items.filter(matches) }
+        : matches(item)
           ? item
           : undefined
     if (!next || ('type' in next && !next.items.length)) continue
@@ -98,17 +94,15 @@ export function SelectSearch<T extends string>(
   const query = session.open === open ? session.query : ''
   const expanded = session.open === open && session.expanded
   const { contains } = Combobox.useFilter()
-  const filtered = search.filter ? search.filter(items, query) : items
+  const filtered = search.filter?.(items, query, { expanded })
   const matches = (item: SelectOption<T>) =>
     Boolean(search.filter) ||
     !query ||
     contains(item.label, query) ||
     (item.keywords?.some(term => contains(term, query)) ?? false)
-  const matching = visibleItems(filtered, matches, Infinity)
-  const limit = expanded ? Infinity : Math.max(1, search.limit ?? Infinity)
-  const visible = visibleItems(matching, () => true, limit)
+  const visible = visibleItems(filtered?.items ?? items, matches)
   const shownOptions = flatten(visible)
-  const hasMore = shownOptions.length < flatten(matching).length
+  const hasMore = !expanded && Boolean(filtered?.hasMore)
   const positioning = useListPanelPositioning()
   const searchLabel = search.label ?? `Search ${label}`
   const option = (item: SelectOption<T>) => (
@@ -119,6 +113,7 @@ export function SelectSearch<T extends string>(
       render={
         <ListRow
           size={size}
+          indent={item.indent}
           start={item.start}
           end={item.end}
           description={item.description}
@@ -131,6 +126,7 @@ export function SelectSearch<T extends string>(
   )
   return (
     <Field.Root
+      className={trigger ? 'min-w-0 max-w-full' : undefined}
       invalid={invalid ?? (error ? true : undefined)}
       disabled={disabled}
     >
@@ -223,6 +219,7 @@ export function SelectSearch<T extends string>(
                         <ListRow
                           render={<button type="button" />}
                           size={size}
+                          start={<ChevronDown aria-hidden className="size-5" />}
                           reserveStart={reserveStart}
                           className="hover:after:opacity-100 focus-visible:after:opacity-100"
                           onClick={() => {

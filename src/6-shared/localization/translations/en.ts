@@ -52,6 +52,7 @@ export const en: typeof ru = {
     today: 'Today',
     yesterday: 'Yesterday',
     selectCategory: 'Select category',
+    noCategoriesFound: 'No categories found',
     addCategory: 'Add category',
     showAllCategories: 'Show all categories',
     mixedCategories: 'Mixed categories',

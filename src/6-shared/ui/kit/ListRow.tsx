@@ -12,6 +12,8 @@ export type ListRowProps = useRender.ComponentProps<'div'> & {
   description?: ReactNode
   /** Reserve this slot for every row when the source list contains images. */
   reserveStart?: boolean
+  /** Visual indentation only; this is still a flat list, not a tree widget. */
+  indent?: number
   selected?: boolean
   highlighted?: boolean
 }
@@ -26,6 +28,8 @@ export function ListRow(props: ListRowProps) {
     end,
     description,
     reserveStart = false,
+    indent = 0,
+    style,
     selected,
     highlighted,
     className,
@@ -40,6 +44,12 @@ export function ListRow(props: ListRowProps) {
     ref,
     props: {
       ...restProps,
+      style: {
+        ...style,
+        ...(indent > 0 && {
+          paddingInlineStart: `calc(${indent} * var(--spacing) * 10)`,
+        }),
+      },
       ...(selected !== undefined && { 'data-selected': selected || undefined }),
       ...(highlighted !== undefined && {
         'data-highlighted': highlighted || undefined,

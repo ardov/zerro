@@ -2,6 +2,7 @@ import type { AppThunk, RootState } from '@/store'
 import { v1 as uuidv1 } from 'uuid'
 import {
   compileBulkEditTransactions,
+  normalizeTransactionTags,
   compileCombineToIncome,
   compileCombineToOutcome,
   compileCreatePosting,
@@ -10,6 +11,7 @@ import {
   compileDeleteTransactionsPermanently,
   compileMergeTransactionsAsTransfer,
   compileRestoreTransaction,
+  type TBulkEditTransactionsInput,
   type TCreatePostingInput,
   type TCreateTransferInput,
   type TCreateTransactionReceipt,
@@ -33,7 +35,6 @@ import type { TISOMonth } from '../../internal/domain/foundation/primitives'
 import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
 import { buildRestorePlan } from '../../internal/operations/restore/diffStores'
 import { checkBackupCompatibility } from '../../internal/operations/restore/backupCompatibility'
-import type { TTagId } from '../../internal/domain/zenmoney/entities/tags'
 import { selectData } from './state'
 import {
   compileApplyEnvelopeStructure,
@@ -414,12 +415,12 @@ export function deleteReminder(id: TReminderId): AppThunk {
 
 export function bulkEditTransactions(
   ids: TTransactionId[],
-  opts: { tags?: TTagId[]; comment?: string }
+  opts: TBulkEditTransactionsInput
 ): AppThunk {
   const label: TCommandLabel = { verb: 'transactions-bulk-edited' }
-  if (!opts.tags?.includes('mixed') && !opts.comment?.includes('$&')) {
+  if (!opts.tagsById && !opts.comment?.includes('$&')) {
     const set: TTransactionEditablePatch = {}
-    if (opts.tags) set.tag = opts.tags.filter(tag => tag !== 'null')
+    if (opts.tags) set.tag = normalizeTransactionTags(opts.tags)
     if (opts.comment) set.comment = opts.comment
     return patchTransactions(ids, set, label)
   }

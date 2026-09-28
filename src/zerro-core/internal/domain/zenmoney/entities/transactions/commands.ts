@@ -303,17 +303,22 @@ export function compileRestoreTransaction(
   }
 }
 
+export type TBulkEditTransactionsInput = { comment?: string } & (
+  | { tags?: TTagId[]; tagsById?: never }
+  | { tags?: never; tagsById: Record<TTransactionId, TTagId[]> }
+)
+
 export function compileBulkEditTransactions(
   transactions: ById<TTransaction>,
   ids: TTransactionId[],
-  opts: { tags?: TTagId[]; comment?: string }
+  opts: TBulkEditTransactionsInput
 ): TTransactionIntent {
   return {
     transaction: ids.map(id => {
       const transaction = getExistingTransaction(transactions, id)
       return {
         id,
-        tag: modifyTags(transaction.tag, opts.tags),
+        tag: modifyTags(transaction.tag, opts.tagsById?.[id] ?? opts.tags),
         comment: modifyComment(transaction.comment, opts.comment),
       }
     }),
@@ -442,20 +447,15 @@ function getExistingTransaction(
   return transaction
 }
 
+/** Remove the uncategorized sentinel and duplicates, keeping the first occurrence. */
+export function normalizeTransactionTags(tags: readonly TTagId[]): TTagId[] {
+  return [...new Set(tags.filter(id => id !== 'null'))]
+}
+
 function modifyTags(prevTags: TTagId[] | null, newTags?: TTagId[]) {
   if (!newTags) return prevTags
 
-  const result: TTagId[] = []
-  const addId = (id: TTagId) => {
-    if (!result.includes(id) && id !== 'null') result.push(id)
-  }
-
-  newTags.forEach(id => {
-    if (id === 'mixed' && prevTags) prevTags.forEach(addId)
-    else addId(id)
-  })
-
-  return result
+  return normalizeTransactionTags(newTags)
 }
 
 function modifyComment(prevComment: string | null, newComment?: string) {

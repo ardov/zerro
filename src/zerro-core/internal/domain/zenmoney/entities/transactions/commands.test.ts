@@ -17,6 +17,33 @@ import {
 import { makeTransaction as makeCoreTransaction } from './factory'
 
 describe('zenmoney transaction commands', () => {
+  it('applies per-transaction categories, including clearing, without changing unspecified rows', () => {
+    const source = makeStore({
+      transaction: {
+        first: makeTransaction({
+          id: 'first',
+          tag: ['food', 'trip'],
+          comment: 'First',
+        }),
+        second: makeTransaction({ id: 'second', tag: ['food', 'work'] }),
+        third: makeTransaction({ id: 'third', tag: ['other'] }),
+      },
+    })
+    const patch = compileBulkEditTransactions(
+      source.transaction,
+      ['first', 'second', 'third'],
+      {
+        tagsById: { first: ['cafe', 'trip', 'cafe'], second: [] },
+      }
+    )
+    const result = applyPatch(source, patch)
+    expect(result.transaction.first.tag).toEqual(['cafe', 'trip'])
+    expect(result.transaction.first.comment).toBe('First')
+    expect(result.transaction.second.tag).toEqual([])
+    expect(result.transaction.third.tag).toEqual(['other'])
+    expect(source.transaction.first.tag).toEqual(['food', 'trip'])
+  })
+
   it('creates production transaction defaults through the transaction factory', () => {
     expect(
       makeCoreTransaction(
@@ -160,7 +187,7 @@ describe('zenmoney transaction commands', () => {
     expect(patch.account).toBeUndefined()
   })
 
-  it('bulk-edits tags and comments with legacy placeholders', () => {
+  it('replaces and normalizes tags while expanding comment placeholders', () => {
     const data = makeStore({
       transaction: {
         tr: makeTransaction({
@@ -173,13 +200,13 @@ describe('zenmoney transaction commands', () => {
     })
 
     const patch = compileBulkEditTransactions(data.transaction, ['tr'], {
-      tags: ['mixed', 'work', 'null', 'food'],
+      tags: ['work', 'null', 'food', 'work'],
       comment: 'Team $&',
     })
 
     expect(patch.transaction?.[0]).toMatchObject({
       id: 'tr',
-      tag: ['food', 'cash', 'work'],
+      tag: ['work', 'food'],
       comment: 'Team Lunch',
     })
   })

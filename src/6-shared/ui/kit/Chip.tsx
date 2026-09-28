@@ -3,6 +3,7 @@ import {
   type ComponentPropsWithRef,
   type CSSProperties,
   type ReactNode,
+  type MouseEventHandler,
 } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { useTranslation } from 'react-i18next'
@@ -44,7 +45,7 @@ export type ChipProps = Omit<
   variant?: NonNullable<VariantProps<typeof chipVariants>['variant']>
   /** Decorative leading icon. */
   start?: ReactNode
-  onClick?: () => void
+  onClick?: MouseEventHandler<HTMLButtonElement>
   onRemove?: () => void
   disabled?: boolean
 }
@@ -126,7 +127,7 @@ export function Chip(props: ChipProps) {
           interactive
             ? event => {
                 event.stopPropagation()
-                if (!disabled) primaryAction?.()
+                if (!disabled) primaryAction?.(event)
               }
             : undefined
         }

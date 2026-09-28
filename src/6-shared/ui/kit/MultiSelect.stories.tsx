@@ -1,3 +1,4 @@
+import { accountSearch } from './selectSearchFixtures'
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within, waitFor } from 'storybook/test'
@@ -41,7 +42,7 @@ const meta = {
 - Each toggle updates the controlled array and keeps the panel open. Escape, Tab and outside clicks keep changes.
 - An empty array shows the placeholder; one value shows its name and icon; several values show **Selected: N**. Localize with **selectionLabel(count)** or customize with **renderValue(items)**.
 - **required** prevents removing the last selection. An initially empty field remains possible for form validation.
-- **search** enables the same filtering, limit and actions as Select. Toggling keeps the query; closing resets it. Hidden selected values stay selected.
+- **search** enables the same filtering, expansion and actions as Select. Toggling keeps the query; closing resets it. Hidden selected values stay selected.
 - Selected rows use the shared background and ARIA state, without checkboxes or chips. Selected-row alignment is available only on single Select.
 `,
       },
@@ -77,7 +78,7 @@ function Demo(props: {
         items={items}
         value={value}
         onChange={setValue}
-        search={search ? { limit: 2 } : false}
+        search={search ? accountSearch : false}
         required={required}
         selectionLabel={count => `${count} accounts selected`}
         trigger={custom ? <Button>Choose accounts</Button> : undefined}
@@ -170,7 +171,9 @@ export const SearchInteraction: Story = {
     )
     await userEvent.keyboard('{Enter}')
     await userEvent.clear(input)
-    await userEvent.click(body.getByRole('button', { name: 'Show more' }))
+    await userEvent.click(
+      body.getByRole('button', { name: 'Show all accounts' })
+    )
     await expect(input).toHaveFocus()
     await expect(body.getByRole('option', { name: 'Cash' })).toHaveAttribute(
       'aria-selected',

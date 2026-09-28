@@ -2,7 +2,7 @@ import { IconButton } from '@/6-shared/ui/Button'
 import type { TTransaction } from '@/6-shared/types'
 import { core } from '@/zerro-core/redux'
 
-import type { FC, MouseEventHandler } from 'react'
+import type { ComponentProps, FC, MouseEventHandler } from 'react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Chip } from '@/6-shared/ui/Chip'
@@ -25,7 +25,7 @@ import { useAsk, usePopup } from '@/6-shared/overlays'
 import { Confirm } from '@/6-shared/ui/Confirm'
 import { useAppDispatch, useAppSelector } from '@/store'
 
-import { TagSelect2 } from '../../TagSelect/TagSelect2'
+import { CategorySelect } from '../../../category/CategorySelect'
 import { BulkEditModal } from './BulkEditModal'
 import './transitions.css'
 
@@ -76,9 +76,7 @@ const Actions: FC<ActionsProps> = ({
   }, [visible, setMenuOpen])
 
   const handleSetTag = (id: string) => {
-    if (!id || id === 'null')
-      dispatch(core.transactions.bulkEdit(checkedIds, { tags: [] }))
-    else dispatch(core.transactions.bulkEdit(checkedIds, { tags: [id] }))
+    dispatch(core.transactions.bulkEdit(checkedIds, { tags: [id] }))
     track('transaction_tags_changed', {
       mode: 'bulk',
       source: 'bulk_toolbar',
@@ -154,12 +152,13 @@ const Actions: FC<ActionsProps> = ({
           </Tooltip>
 
           {actions.setMainTag && (
-            <TagSelect2
-              onChange={handleSetTag}
+            <CategorySelect
+              onSelect={handleSetTag}
               trigger={
-                <Tooltip title={t('setCategory')}>
-                  <IconButton children={<CategoryIcon />} />
-                </Tooltip>
+                <CategoryButton
+                  aria-label={t('setCategory')}
+                  children={<CategoryIcon />}
+                />
               }
             />
           )}
@@ -282,6 +281,14 @@ const Actions: FC<ActionsProps> = ({
         </div>
       </div>
     </>
+  )
+}
+
+function CategoryButton(props: ComponentProps<typeof IconButton>) {
+  return (
+    <Tooltip title={props['aria-label']}>
+      <IconButton {...props} />
+    </Tooltip>
   )
 }
 

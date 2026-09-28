@@ -174,6 +174,85 @@ describe('Redux semantic commands', () => {
     ).toBe(false)
   })
 
+  describe.each(['Edited', 'Edited $&'])(
+    'bulk categories with comment %s',
+    comment => {
+      it.each([
+        { tags: ['a', 'null', 'b', 'a', 'b'], expected: ['a', 'b'] },
+        { tags: [], expected: [] },
+        { tags: undefined, expected: ['original'] },
+      ])(
+        'normalizes $tags without changing omission semantics',
+        ({ tags, expected }) => {
+          const store = configureStore({
+            reducer: rootReducer,
+            preloadedState: makeTestRootState(
+              makeStore({
+                transaction: {
+                  tr: makeTransaction({
+                    id: 'tr',
+                    tag: ['original'],
+                    comment: 'Lunch',
+                  }),
+                },
+              })
+            ),
+            middleware: getDefaultMiddleware =>
+              getDefaultMiddleware({
+                immutableCheck: false,
+                serializableCheck: false,
+              }),
+          })
+          store.dispatch(bulkEditTransactions(['tr'], { tags, comment }))
+          expect(store.getState().data.current.transaction.tr.tag).toEqual(
+            expected
+          )
+        }
+      )
+    }
+  )
+
+  it('saves individual category drafts as one undoable bulk command', () => {
+    const current = makeStore({
+      transaction: {
+        first: makeTransaction({ id: 'first', tag: ['food', 'trip'] }),
+        second: makeTransaction({ id: 'second', tag: ['food', 'work'] }),
+      },
+    })
+    const store = configureStore({
+      reducer: rootReducer,
+      preloadedState: makeTestRootState(current),
+      middleware: getDefaultMiddleware =>
+        getDefaultMiddleware({
+          immutableCheck: false,
+          serializableCheck: false,
+        }),
+    })
+    store.dispatch(
+      bulkEditTransactions(['first', 'second'], {
+        tagsById: { first: ['cafe', 'trip'], second: ['cafe', 'work'] },
+      })
+    )
+    expect(store.getState().data.current.transaction.first.tag).toEqual([
+      'cafe',
+      'trip',
+    ])
+    expect(store.getState().data.current.transaction.second.tag).toEqual([
+      'cafe',
+      'work',
+    ])
+    expect(store.getState().data.outbox).toHaveLength(1)
+    store.dispatch(undoClientCommand())
+    expect(store.getState().data.current.transaction.first.tag).toEqual([
+      'food',
+      'trip',
+    ])
+    expect(store.getState().data.current.transaction.second.tag).toEqual([
+      'food',
+      'work',
+    ])
+  })
+
   it('keeps direct transaction wrappers on the same sparse outbox path', () => {
     const first = makeTransaction({ id: 'first', viewed: false })
     const second = makeTransaction({ id: 'second', viewed: false })

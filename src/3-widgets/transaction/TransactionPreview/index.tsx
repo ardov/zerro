@@ -26,7 +26,8 @@ import { SmartAmount } from '@/3-widgets/Amount'
 import { AccountField } from './AccountField'
 import { ActionsMenu } from './ActionsMenu'
 import { AmountField } from './AmountField'
-import { CategoryRow } from './CategoryRow'
+import { CategoryRow } from '../../category/CategoryRow'
+import { applyCategoryAction } from '../../category/model'
 import { DateTimeField } from './DateTimeField'
 import { MerchantField } from './MerchantField'
 import { TypeSelect, draftTypes } from './TypeSelect'
@@ -439,9 +440,12 @@ const TransactionEditor = ({
               </div>
               {categorized && (
                 <CategoryRow
-                  tags={draft.tag}
-                  tagType={draft.type === 'income' ? 'income' : 'outcome'}
-                  onChange={tag => edit({ tag })}
+                  value={draft.tag ?? []}
+                  align="center"
+                  preferredType={draft.type === 'income' ? 'income' : 'outcome'}
+                  onAction={action =>
+                    edit({ tag: applyCategoryAction(draft.tag ?? [], action) })
+                  }
                 />
               )}
             </div>
