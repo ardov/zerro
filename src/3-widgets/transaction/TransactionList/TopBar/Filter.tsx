@@ -1,9 +1,10 @@
+import { Chip } from '@/6-shared/ui/kit/Chip'
+import { CategoryMultiSelect } from '../../../category/CategoryMultiSelect'
 import { IconButton } from '@/6-shared/ui/Button'
 import type { FC, MouseEvent } from 'react'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { usePopup } from '@/6-shared/overlays'
 import { useTranslation } from 'react-i18next'
-import { Chip } from '@/6-shared/ui/Chip'
 import { InputBase } from '@/6-shared/ui/InputBase'
 import { Menu, MenuItem } from '@/6-shared/ui/Menu'
 import { MultiCombobox } from '@/6-shared/ui/MultiCombobox'
@@ -17,7 +18,10 @@ import { TransactionCreateButton } from '../../TransactionCreateButton'
 
 type Clause = core.transactions.TTransactionFilterClause
 type AddableFilterKind = Exclude<Clause['kind'], 'search' | 'date' | 'activity'>
-type EditableFilterKind = Exclude<AddableFilterKind, 'viewed' | 'deleted'>
+type SelectKind = 'tag'
+type PopoverKind = 'account' | 'type' | 'amount'
+type EditableFilterKind = SelectKind | PopoverKind
+type PopoverClause = Extract<Clause, { kind: PopoverKind }>
 
 type FilterProps = {
   query: core.transactions.TTransactionQuery
@@ -51,20 +55,28 @@ const Filter: FC<FilterProps> = ({
   const addButtonRef = useRef<HTMLButtonElement | null>(null)
   const focusAfterRemoval = useRef<{ target: HTMLElement | null } | null>(null)
   const pendingEditingKind = useRef<EditableFilterKind | null>(null)
-  // Both surfaces sit on the overlay stack, so Back closes the one on top
+  const dropEmptyClause = (kind: EditableFilterKind) => {
+    const clause = query.clauses.find(item => item.kind === kind)
+    if (!clause || !isEmptyClause(clause)) return
+    focusAfterRemoval.current = { target: addButtonRef.current }
+    onQueryChange({ clauses: query.clauses.filter(item => item.kind !== kind) })
+  }
+  // The menu and editors sit on the overlay stack, so Back closes the top one
   // rather than leaving the page. The anchors stay plain state beside them.
   const { open: menuOpen, setOpen: setMenuOpen } = usePopup()
   const { open: editorOpen, setOpen: setEditorOpen } = usePopup()
+  const categoryPopup = usePopup(() => dropEmptyClause('tag'))
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
-  const [editingKind, setEditingKind] = useState<EditableFilterKind | null>(
-    null
-  )
+  const [editingKind, setEditingKind] = useState<PopoverKind | null>(null)
   const [editorOptionsOpen, setEditorOptionsOpen] = useState(false)
   // Resolve the anchor when opening so render never reads a mutable ref.
   const [editorAnchor, setEditorAnchor] = useState<HTMLElement | null>(null)
   const appliedClauses = query.clauses
   const editingClause = editingKind
-    ? query.clauses.find(clause => clause.kind === editingKind)
+    ? query.clauses.find(
+        (clause): clause is PopoverClause =>
+          isPopoverKind(clause.kind) && clause.kind === editingKind
+      )
     : undefined
   const availableKinds = filterKinds.filter(
     kind => !appliedClauses.some(clause => clause.kind === kind)
@@ -105,6 +117,10 @@ const Filter: FC<FilterProps> = ({
     pendingEditingKind.current = null
     if (!kind) return
 
+    if (kind === 'tag') {
+      categoryPopup.setOpen(true)
+      return
+    }
     setEditorOptionsOpen(false)
     setEditorAnchor(chipRefs.current[kind] || null)
     setEditingKind(kind)
@@ -112,7 +128,7 @@ const Filter: FC<FilterProps> = ({
   }
 
   const openEditor = (clause: Clause) => {
-    if (isEditableKind(clause.kind)) {
+    if (isPopoverKind(clause.kind)) {
       setEditorOptionsOpen(false)
       setEditorAnchor(chipRefs.current[clause.kind] || null)
       setEditingKind(clause.kind)
@@ -126,28 +142,16 @@ const Filter: FC<FilterProps> = ({
   const finishEditing = () => {
     setEditorOptionsOpen(false)
     setEditingKind(null)
-    if (editingClause && isEmptyClause(editingClause)) {
-      onQueryChange({
-        clauses: query.clauses.filter(
-          clause => clause.kind !== editingClause.kind
-        ),
-      })
-    }
+    if (editingKind) dropEmptyClause(editingKind)
   }
 
   const removeClause = (clause: Clause) => {
-    const chip = chipRefs.current[clause.kind]
-    if (chip?.contains(document.activeElement) || editingKind === clause.kind) {
-      const index = query.clauses.indexOf(clause)
-      const neighbour = query.clauses[index + 1] ?? query.clauses[index - 1]
-      focusAfterRemoval.current = {
-        target: neighbour
-          ? (chipRefs.current[neighbour.kind]?.querySelector<HTMLElement>(
-              'button'
-            ) ?? null)
-          : null,
-      }
+    const index = query.clauses.indexOf(clause)
+    const neighbour = query.clauses[index + 1] ?? query.clauses[index - 1]
+    focusAfterRemoval.current = {
+      target: neighbour ? (chipRefs.current[neighbour.kind] ?? null) : null,
     }
+    if (clause.kind === 'tag') categoryPopup.release()
     if (editingKind === clause.kind) setEditorOpen(false)
     onQueryChange({
       clauses: query.clauses.filter(item => item !== clause),
@@ -191,22 +195,37 @@ const Filter: FC<FilterProps> = ({
 
       {!!appliedClauses.length && (
         <div className="flex flex-wrap items-center gap-1.5 px-1 pt-1">
-          {appliedClauses.map(clause => (
-            <Chip
-              ref={element => {
-                chipRefs.current[clause.kind] = element
-              }}
-              key={clause.kind}
-              size="small"
-              label={getClauseLabel(clause, labels)}
-              onClick={
-                isEditableKind(clause.kind)
-                  ? () => openEditor(clause)
-                  : undefined
-              }
-              onDelete={() => removeClause(clause)}
-            />
-          ))}
+          {appliedClauses.map(clause =>
+            clause.kind === 'tag' ? (
+              <CategoryMultiSelect
+                key={clause.kind}
+                value={clause.ids}
+                onChange={ids => upsertClause({ ...clause, ids })}
+                popup={categoryPopup}
+                trigger={
+                  <Chip
+                    ref={element => {
+                      chipRefs.current.tag = element
+                    }}
+                    onRemove={() => removeClause(clause)}
+                  >
+                    {getClauseLabel(clause, labels)}
+                  </Chip>
+                }
+              />
+            ) : (
+              <Chip
+                ref={element => {
+                  chipRefs.current[clause.kind] = element
+                }}
+                key={clause.kind}
+                onClick={() => openEditor(clause)}
+                onRemove={() => removeClause(clause)}
+              >
+                {getClauseLabel(clause, labels)}
+              </Chip>
+            )
+          )}
           {!!availableKinds.length && (
             <Tooltip title={t('addFilter')}>
               <IconButton
@@ -272,7 +291,7 @@ const Filter: FC<FilterProps> = ({
 }
 
 function FilterEditor(props: {
-  clause: Clause
+  clause: PopoverClause
   onChange: (clause: Clause) => void
   optionsOpen: boolean
   onOptionsOpen: () => void
@@ -281,7 +300,6 @@ function FilterEditor(props: {
   const { clause, onChange, optionsOpen, onOptionsOpen, onOptionsClose } = props
   const { t } = useTranslation('filterDrawer')
   const accounts = core.accounts.usePopulated()
-  const tags = useAppSelector(core.tags.selectPopulated)
 
   switch (clause.kind) {
     case 'account':
@@ -293,21 +311,6 @@ function FilterEditor(props: {
           options={Object.keys(accounts).map(value => ({
             value,
             label: accounts[value]?.title || value,
-          }))}
-          value={clause.ids}
-          onChange={ids => onChange({ ...clause, ids })}
-          autoFocus
-        />
-      )
-    case 'tag':
-      return (
-        <MultiCombobox
-          label={t('category')}
-          open={optionsOpen}
-          onOpenChange={open => (open ? onOptionsOpen() : onOptionsClose())}
-          options={Object.keys(tags).map(value => ({
-            value,
-            label: tags[value]?.name || value,
           }))}
           value={clause.ids}
           onChange={ids => onChange({ ...clause, ids })}
@@ -363,12 +366,6 @@ function FilterEditor(props: {
           />
         </div>
       )
-    case 'activity':
-    case 'viewed':
-    case 'deleted':
-    case 'date':
-    case 'search':
-      return null
   }
 }
 
@@ -389,10 +386,12 @@ function makeDefaultClause(kind: AddableFilterKind): Clause {
   }
 }
 
+function isPopoverKind(kind: Clause['kind']): kind is PopoverKind {
+  return kind === 'account' || kind === 'type' || kind === 'amount'
+}
+
 function isEditableKind(kind: Clause['kind']): kind is EditableFilterKind {
-  return (
-    kind === 'account' || kind === 'tag' || kind === 'type' || kind === 'amount'
-  )
+  return kind === 'tag' || isPopoverKind(kind)
 }
 
 function isEmptyClause(clause: Clause): boolean {

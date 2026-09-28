@@ -58,6 +58,17 @@ export type Category = {
 }
 export type PreferredCategoryType = 'income' | 'outcome'
 
+const UNCATEGORIZED_ID = 'null'
+
+export type CategoryChoicesOptions = {
+  value?: TTagId
+  excludeIds?: readonly TTagId[]
+  preferredType?: PreferredCategoryType
+  query?: string
+  showAll?: boolean
+  includeUncategorized?: boolean
+}
+
 /** Exclusions may reappear as selectable ancestors; the caller deduplicates. */
 export function categoryChoices<T extends Category>(
   categories: readonly T[],
@@ -67,15 +78,12 @@ export function categoryChoices<T extends Category>(
     preferredType,
     query = '',
     showAll = false,
-  }: {
-    value?: TTagId
-    excludeIds?: readonly TTagId[]
-    preferredType?: PreferredCategoryType
-    query?: string
-    showAll?: boolean
-  }
+    includeUncategorized = false,
+  }: CategoryChoicesOptions
 ): { choices: { category: T; indent: number }[]; hasMore: boolean } {
-  const available = categories.filter(category => category.id !== 'null')
+  const available = categories.filter(
+    category => includeUncategorized || category.id !== UNCATEGORIZED_ID
+  )
   const byId = new Map(available.map(category => [category.id, category]))
   const visible = new Set<TTagId>()
   const eligible = new Set<TTagId>()
@@ -86,7 +94,8 @@ export function categoryChoices<T extends Category>(
       ? `${category.name} ${category.title}`
           .toLocaleLowerCase()
           .includes(search)
-      : showAll ||
+      : (includeUncategorized && category.id === UNCATEGORIZED_ID) ||
+        showAll ||
         !preferredType ||
         category.id === value ||
         (preferredType === 'income'
@@ -103,7 +112,13 @@ export function categoryChoices<T extends Category>(
   }
   const sorted = available
     .filter(category => visible.has(category.id))
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) =>
+      a.id === UNCATEGORIZED_ID
+        ? -1
+        : b.id === UNCATEGORIZED_ID
+          ? 1
+          : a.name.localeCompare(b.name)
+    )
   const children = new Map<TTagId | null, T[]>()
   for (const category of sorted) {
     const parent =

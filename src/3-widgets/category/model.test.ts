@@ -4,6 +4,7 @@ import {
   categoryChoices,
   commonCategories,
   type Category,
+  type CategoryChoicesOptions,
 } from './model'
 
 describe('ordered category editing', () => {
@@ -140,7 +141,7 @@ describe('category choices', () => {
     },
     { id: 'null', name: 'Uncategorized', title: 'Uncategorized' },
   ]
-  const ids = (options: Parameters<typeof categoryChoices>[1]) =>
+  const ids = (options: CategoryChoicesOptions) =>
     categoryChoices(categories, options).choices.map(
       ({ category }) => category.id
     )
@@ -168,6 +169,17 @@ describe('category choices', () => {
       'food',
     ])
   })
+  it('includes uncategorized only when requested, pins it first, and searches it consistently', () => {
+    const options = { includeUncategorized: true }
+    expect(categoryChoices(categories, options).choices[0].category.id).toBe(
+      'null'
+    )
+    expect(ids({})).not.toContain('null')
+    expect(ids({ ...options, query: '  UNCATEGORIZED ' })).toEqual(['null'])
+    expect(ids({ ...options, query: 'gift' })).toEqual(['income', 'gift'])
+    expect(ids({ ...options, excludeIds: ['null'] })).not.toContain('null')
+  })
+
   it('offers expansion only when it adds an eligible category', () => {
     const options = { preferredType: 'outcome' as const }
     expect(categoryChoices(categories, options).hasMore).toBe(true)

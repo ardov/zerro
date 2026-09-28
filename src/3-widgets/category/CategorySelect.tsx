@@ -3,13 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import type { TTagId } from '@/6-shared/types'
-import { Select, type SelectOption } from '@/6-shared/ui/kit/Select'
-import {
-  categoryChoices,
-  type Category,
-  type PreferredCategoryType,
-} from './model'
-import { CategoryIcon } from '@/6-shared/ui/CategoryIcon'
+import { Select } from '@/6-shared/ui/kit/Select'
+import type { PreferredCategoryType } from './model'
+import { filterCategoryOptions, toCategoryOption } from './categoryOption'
 
 export type CategorySelectProps = {
   value?: TTagId
@@ -33,47 +29,20 @@ export function CategorySelect(props: CategorySelectProps) {
       }}
       trigger={trigger}
       popupMinWidth={280}
-      items={categories
-        .filter(category => category.id !== core.tags.nullTag.id)
-        .map(category => toCategoryOption(category))}
+      items={categories.map(toCategoryOption)}
       emptyText={t('noCategoriesFound')}
       search={{
         label: t('selectCategory'),
         showMoreLabel: t('showAllCategories'),
-        filter: (source, query, { expanded }) => {
-          const optionsById = new Map(
-            source.flatMap(item =>
-              'type' in item ? [] : [[item.value, item] as const]
-            )
-          )
-          const { choices, hasMore } = categoryChoices(categories, {
+        filter: (source, query, { expanded }) =>
+          filterCategoryOptions(source, categories, {
             value,
             excludeIds,
             preferredType,
             query,
             showAll: expanded,
-          })
-          return {
-            items: choices.flatMap(({ category, indent }) => {
-              const option = optionsById.get(category.id)
-              return option ? [{ ...option, indent }] : []
-            }),
-            hasMore,
-          }
-        },
+          }),
       }}
     />
   )
-}
-
-/** Category label, search keywords, and decorative icon for select options. */
-function toCategoryOption(
-  category: Category & { symbol: string; colorHEX?: string | null }
-): SelectOption {
-  return {
-    value: category.id,
-    label: category.name,
-    keywords: [category.title],
-    start: <CategoryIcon symbol={category.symbol} color={category.colorHEX} />,
-  }
 }
