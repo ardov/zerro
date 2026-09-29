@@ -296,12 +296,19 @@ export const PopupAddon: Story = {
       canvas.getByRole('button', { name: 'Choose currency' })
     )
     await userEvent.keyboard('{ArrowDown}')
+    const menu = within(document.body).getByRole('menu')
+    // Finish opening so closing exercises the full exit transition.
+    await Promise.all(menu.getAnimations().map(animation => animation.finished))
     await expect(input).toHaveValue('12\u00a0000/3')
     await userEvent.click(
       within(document.body).getByRole('menuitem', { name: 'CZK' })
     )
     await expect(input).toHaveValue('12\u00a0000/3')
     await userEvent.click(input)
+    await expect(input).toHaveFocus()
+    // Returning to the input during exit must survive the menu's unmount.
+    await waitFor(() => expect(menu).not.toBeInTheDocument())
+    await expect(input).toHaveFocus()
     await userEvent.keyboard('{End}+2{Enter}')
     await expect(input).toHaveValue('4\u00a0002,00')
   },

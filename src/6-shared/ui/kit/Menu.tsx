@@ -84,7 +84,9 @@ function AdaptiveMenu(props: MenuProps & { context?: boolean }) {
         <Primitive.Popup
           aria-label={label}
           aria-labelledby={undefined}
-          finalFocus={finalFocus}
+          // A regular trigger already supplies Base UI's return target. An
+          // explicit target would steal focus moved elsewhere during exit.
+          finalFocus={context ? finalFocus : undefined}
           className="kit-surface-fade max-h-(--available-height) min-w-[min(13rem,var(--available-width))] max-w-(--available-width) overflow-y-auto rounded-ui-popover rounded-smooth bg-ui-popover p-1 text-ui-primary shadow-ui-popover outline-none"
         >
           {content}
