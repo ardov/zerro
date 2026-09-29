@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { OverlayHost } from '@/6-shared/overlays'
 import { Select, MultiSelect } from './Select'
-import { MultiCombobox } from './MultiCombobox'
 import { FilledButton, FilledField, FilledInput } from './FilledField'
 import { AutoWidthInput } from './AutoWidthInput'
 
@@ -59,21 +58,6 @@ describe('outlined selection field composition', () => {
     expect(control).toHaveAccessibleDescription('Choose tags')
     expect(control.closest('[data-size]')).toHaveAttribute('data-shrink')
     expect(control.closest('[data-size]')).not.toHaveAttribute('data-filled')
-  })
-
-  it('reports combobox selections to its field even while the search text is empty', () => {
-    const props = {
-      label: 'Accounts',
-      options,
-      onChange: noop,
-      open: false,
-      onOpenChange: noop,
-    }
-    const view = render(<MultiCombobox {...props} value={['EUR']} />)
-    const input = screen.getByRole('combobox', { name: 'Accounts' })
-    expect(input.closest('[data-size]')).toHaveAttribute('data-filled')
-    view.rerender(<MultiCombobox {...props} value={[]} />)
-    expect(input.closest('[data-size]')).not.toHaveAttribute('data-filled')
   })
 })
 

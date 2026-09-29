@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { core } from '@/zerro-core/redux'
 import { AccountIcon } from './AccountIcon'
@@ -5,31 +6,32 @@ import { accountChoices, type AccountChoicesOptions } from './model'
 import type { SelectItem, SelectOption } from '@/6-shared/ui/kit/Select'
 import type { SelectSearchOptions } from '@/6-shared/ui/kit/SelectSearch'
 
+/** Select props for accounts. The option source is built once per account
+ * set; search and archive grouping come from `accountChoices`. */
 export function useAccountOptions(
   options: Pick<AccountChoicesOptions, 'selectedIds' | 'excludeIds'>,
   label: string
 ) {
   const { t } = useTranslation()
-  const accounts = Object.values(core.accounts.usePopulated()).map(account => ({
-    ...account,
-    isService: core.accounts.isZerroDataAccount(account),
-  }))
-  const items = accounts.map(account => ({
-    value: account.id,
-    label: account.title,
-    start: <AccountIcon account={account} />,
-    end: account.fxCode,
-    keywords: [account.fxCode],
-  }))
+  const populated = core.accounts.usePopulated()
+  const { accounts, items, byId } = useMemo(() => {
+    const accounts = Object.values(populated).map(account => ({
+      ...account,
+      isService: core.accounts.isZerroDataAccount(account),
+    }))
+    const items = accounts.map((account): SelectOption<string> => ({
+      value: account.id,
+      label: account.title,
+      start: <AccountIcon account={account} />,
+      end: account.fxCode,
+    }))
+    const byId = new Map(items.map(item => [item.value, item]))
+    return { accounts, items, byId }
+  }, [populated])
   const search: SelectSearchOptions<string> = {
     label,
     showMoreLabel: t('accounts:showArchived'),
-    filter: (source, query, { expanded }) => {
-      const byId = new Map(
-        source.flatMap(item =>
-          'type' in item ? [] : [[item.value, item] as const]
-        )
-      )
+    filter: (_, query, { expanded }) => {
       const result = accountChoices(accounts, { ...options, query, expanded })
       const active: SelectOption<string>[] = []
       const archived: SelectOption<string>[] = []
@@ -49,5 +51,10 @@ export function useAccountOptions(
       return { items, hasMore: result.hasMore }
     },
   }
-  return { items, search, emptyText: t('noAccountsFound') }
+  return {
+    items,
+    search,
+    emptyText: t('noAccountsFound'),
+    popupMinWidth: 280,
+  }
 }

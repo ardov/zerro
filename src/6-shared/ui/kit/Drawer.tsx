@@ -2,12 +2,12 @@ import { useId, type ReactElement, type ReactNode } from 'react'
 import { Drawer as Primitive } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
 import type { PopupController, SurfaceController } from '@/6-shared/overlays'
-import { useOverlayFinalFocus } from '../useOverlayFinalFocus'
 import { MobileDrawerViewport } from '../MobileDrawerViewport'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import {
   SurfaceContent,
   SurfaceCloseButton,
+  useSurfaceFinalFocus,
   type SurfaceName,
 } from './SurfaceContent'
 import { useOwnedPopup } from './useOwnedPopup'
@@ -38,14 +38,30 @@ export function Drawer(props: DrawerProps) {
   return <DrawerSurface {...restProps} controller={controller} />
 }
 
+type DrawerSurfaceProps = Omit<DrawerProps, 'popup' | 'onClose'> & {
+  controller: SurfaceController
+  finalFocus?: Primitive.Popup.Props['finalFocus']
+  initialFocus?: Primitive.Popup.Props['initialFocus']
+}
+
 /** Shared rendering for surfaces whose owner already registered a history entry. */
-export function DrawerSurface(
-  props: Omit<DrawerProps, 'popup' | 'onClose'> & {
-    controller: SurfaceController
-    finalFocus?: Primitive.Popup.Props['finalFocus']
-    initialFocus?: Primitive.Popup.Props['initialFocus']
-  }
-) {
+export function DrawerSurface(props: DrawerSurfaceProps) {
+  return <DrawerFrame {...props} finalFocus={useSurfaceFinalFocus(props)} />
+}
+
+/** The narrow-screen form of an adaptive dialog or popover. Its owner has
+ * already resolved final focus, and keeps it across a layout switch. */
+export function BottomSheetSurface(props: Omit<DrawerSurfaceProps, 'side'>) {
+  return (
+    <DrawerFrame
+      {...props}
+      side="bottom"
+      contentClassName={cn('p-4', props.contentClassName)}
+    />
+  )
+}
+
+function DrawerFrame(props: DrawerSurfaceProps) {
   const {
     label,
     'aria-describedby': descriptionId,
@@ -70,11 +86,6 @@ export function DrawerSurface(
         ? 'bottom'
         : 'right'
       : requestedSide
-  const capturedFinalFocus = useOverlayFinalFocus(open, { fallback: true })
-  // A Base UI trigger already owns focus restoration. Hosted surfaces need
-  // the focused opener captured before their content mounts and takes focus.
-  const resolvedFinalFocus =
-    finalFocus ?? (trigger ? undefined : capturedFinalFocus)
   return (
     <Primitive.Root
       open={open}
@@ -99,7 +110,7 @@ export function DrawerSurface(
             aria-labelledby={title != null ? titleId : undefined}
             initialFocus={initialFocus}
             data-side={side}
-            finalFocus={resolvedFinalFocus}
+            finalFocus={finalFocus}
             className={cn(
               'kit-drawer-popup pointer-events-auto relative flex flex-col overflow-hidden rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
               side === 'bottom'

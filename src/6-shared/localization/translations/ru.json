@@ -36,6 +36,8 @@
     "apply": "Применить",
     "quickAmounts": "Быстрые суммы",
     "close": "Закрыть",
+    "notifications": "Уведомления",
+    "dismissNotification": "Закрыть уведомление",
     "removeValue": "Убрать {{label}}",
     "openOptions": "Открыть список: {{label}}",
     "rename": "Переименовать",

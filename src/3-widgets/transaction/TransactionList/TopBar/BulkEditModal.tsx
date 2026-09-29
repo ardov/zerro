@@ -46,13 +46,12 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   const initialTags = Object.fromEntries(
     transactions.map(tr => [tr.id, tr.tag ?? []])
   )
+  const initialComment = sameComments ? transactions[0]?.comment || '' : ''
 
   const [tags, setTags] = useState(initialTags)
   const [originalTags, setOriginalTags] = useState(initialTags)
   const categories = commonCategories(Object.values(tags))
-  const [comment, setComment] = useState(
-    sameComments ? transactions[0]?.comment || '' : ''
-  )
+  const [comment, setComment] = useState(initialComment)
 
   const [prevState, setPrevState] = useState({ ids, open })
   if (prevState.ids !== ids || prevState.open !== open) {
@@ -60,7 +59,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
     if (open) {
       setTags(initialTags)
       setOriginalTags(initialTags)
-      setComment(sameComments ? transactions[0]?.comment || '' : '')
+      setComment(initialComment)
     }
   }
 

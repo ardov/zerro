@@ -4,8 +4,9 @@ import {
   type ComponentPropsWithRef,
   type ReactNode,
 } from 'react'
-import { Input as InputPrimitive } from '@base-ui/react/input'
 import { cn } from '@/6-shared/ui/shadcn/utils'
+import { AutoWidthInput } from '../AutoWidthInput'
+import { focusControlOnPress } from './Field'
 
 export type InlineFieldProps = Omit<
   ComponentPropsWithRef<'input'>,
@@ -43,16 +44,7 @@ export function InlineField({
       )}
       style={style}
       onMouseDown={event => {
-        if (disabled || event.defaultPrevented) return
-        const target = event.target as HTMLElement
-        if (
-          target.closest(
-            'input, button, a, select, textarea, [tabindex], [data-field-focus="preserve"]'
-          )
-        )
-          return
-        event.preventDefault()
-        inputRef.current?.focus()
+        if (!disabled) focusControlOnPress(event, inputRef.current)
       }}
     >
       {start != null && (
@@ -60,25 +52,18 @@ export function InlineField({
           {start}
         </span>
       )}
-      <span className="relative inline-block min-w-0 max-w-full shrink">
-        {/* The mirror sizes the input; trailing space leaves room for its caret. */}
-        <span
-          aria-hidden
-          className="invisible block overflow-hidden pr-0.5 whitespace-pre"
-        >
-          {value || props.placeholder || ' '}
-        </span>
-        <InputPrimitive
-          {...props}
-          ref={inputRef}
-          type="text"
-          value={value}
-          disabled={disabled}
-          aria-label={props['aria-label'] ?? label}
-          aria-invalid={invalid ?? props['aria-invalid']}
-          className="absolute inset-0 m-0 w-full rounded-ui-control-inner border-0 bg-transparent p-0 text-[length:inherit] leading-[inherit] font-[inherit] tracking-[inherit] text-current outline-none placeholder:text-ui-placeholder focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus disabled:text-current"
-        />
-      </span>
+      <AutoWidthInput
+        {...props}
+        ref={inputRef}
+        type="text"
+        value={value}
+        measure={value || props.placeholder || ' '}
+        disabled={disabled}
+        aria-label={props['aria-label'] ?? label}
+        aria-invalid={invalid ?? props['aria-invalid']}
+        className="max-w-full shrink"
+        inputClassName="rounded-ui-control-inner tracking-[inherit] placeholder:text-ui-placeholder focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus disabled:text-current"
+      />
       {end != null && (
         <span className="shrink-0" inert={disabled || undefined}>
           {end}

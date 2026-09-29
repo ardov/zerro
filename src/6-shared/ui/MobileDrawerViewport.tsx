@@ -27,16 +27,7 @@ export function MobileDrawerViewport({
         'pointer-events-none fixed top-0 left-0 z-modal h-full w-full',
         className
       )}
-      style={
-        viewport
-          ? {
-              height: viewport.height,
-              left: viewport.left,
-              top: viewport.top,
-              width: viewport.width,
-            }
-          : undefined
-      }
+      style={viewport ?? undefined}
     >
       {children}
     </Drawer.Viewport>

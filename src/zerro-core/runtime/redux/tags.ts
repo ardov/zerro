@@ -1,4 +1,4 @@
-export { nullTag, presentTags, type TTagPopulated } from './tagPresentation'
+export { presentTags, type TTagPopulated } from './tagPresentation'
 import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from '@/store'
 import * as settings from './settings'

@@ -8,22 +8,17 @@ import { useAccountOptions } from './useAccountOptions'
 export type AccountMultiSelectProps = {
   value: TAccountId[]
   onChange: (ids: TAccountId[]) => void
-  excludeIds?: readonly TAccountId[]
   trigger: ReactElement
   popup?: PopupController
 }
 export function AccountMultiSelect({
   value,
   onChange,
-  excludeIds,
   trigger,
   popup,
 }: AccountMultiSelectProps) {
   const { t } = useTranslation('filterDrawer')
-  const options = useAccountOptions(
-    { selectedIds: value, excludeIds },
-    t('account')
-  )
+  const options = useAccountOptions({ selectedIds: value }, t('account'))
   return (
     <MultiSelect
       {...options}
@@ -32,7 +27,6 @@ export function AccountMultiSelect({
       onChange={onChange}
       trigger={trigger}
       popup={popup}
-      popupMinWidth={280}
     />
   )
 }

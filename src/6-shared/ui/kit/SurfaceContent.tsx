@@ -1,6 +1,8 @@
 import type { ReactElement, ReactNode, ComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { SurfaceController } from '@/6-shared/overlays'
 import { CloseIcon } from '../Icons'
+import { useOverlayFinalFocus } from '../useOverlayFinalFocus'
 import { IconButton } from './Button'
 import { cn } from '../shadcn/utils'
 
@@ -8,6 +10,19 @@ import { cn } from '../shadcn/utils'
 export type SurfaceName =
   | { title: Exclude<ReactNode, null | undefined | boolean>; label?: string }
   | { title?: never; label: string }
+
+/** A Base UI trigger already owns focus restoration. Hosted surfaces need
+ * the focused opener captured before their content mounts and takes focus. */
+export function useSurfaceFinalFocus<F>(props: {
+  controller: SurfaceController
+  trigger?: ReactElement
+  finalFocus?: F
+}) {
+  const captured = useOverlayFinalFocus(props.controller.open, {
+    fallback: true,
+  })
+  return props.finalFocus ?? (props.trigger ? undefined : captured)
+}
 
 export function SurfaceCloseButton(
   props: Omit<ComponentProps<typeof IconButton>, 'label'>

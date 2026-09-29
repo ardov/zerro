@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { useRender } from '@base-ui/react/use-render'
 import { cn } from '@/6-shared/ui/shadcn/utils'
+import { scrollFadeEdges } from '../useScrollFade'
 
 export type ListPanelProps = useRender.ComponentProps<'div'> & {
   header?: ReactNode
@@ -43,12 +44,7 @@ export function ListPanel(props: ListPanelProps) {
     let frame = 0
     let previousHeight = scroller.clientHeight
     const edges = () => {
-      const above = scroller.scrollTop > 1
-      const below =
-        scroller.scrollTop + scroller.clientHeight < scroller.scrollHeight - 1
-      const wrapper = scroller.parentElement!
-      wrapper.dataset.fade =
-        above && below ? 'both' : above ? 'top' : below ? 'bottom' : ''
+      scroller.parentElement!.dataset.fade = scrollFadeEdges(scroller)
     }
     const measure = () => {
       // Freeze the pre-filter height, including intermediate queries that match

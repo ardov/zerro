@@ -174,9 +174,8 @@ Important groups include:
   reset, focus-visible treatment, geometry and semantic color variants.
 - Rows and menus: `ListRow`, `ActionList`, and `Menu` provide keyboard,
   typeahead, selection and disabled-row behavior for action surfaces.
-- Fields: `OutlinedField`, `InputBase`, `GrowingTextarea`, `Select`,
-  `MultiCombobox`, and date controls own labels, adornments, focus, error and
-  disabled states.
+- Fields: `OutlinedField`, `InputBase`, `GrowingTextarea`, `Select`, and date
+  controls own labels, adornments, focus, error and disabled states.
 - Feedback: `Checkbox`, `Switch`, `Chip`, `Tooltip`, `CircularProgress`,
   `SnackbarProvider`, and `SnackbarNotice` own their complete visual state.
 - Disclosure and overlays: `Collapse`, `Dialog`, `SideDrawer`, `Popover`,

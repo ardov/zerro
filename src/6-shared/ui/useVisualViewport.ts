@@ -9,7 +9,8 @@ const listeners = new Set<() => void>()
 let snapshot = readVisualViewport()
 let frame = 0
 
-/** Shared visible-screen geometry. Consumers still own their own positioning. */
+/** Shared visible-screen geometry. Consumers still own their own positioning;
+ * the rectangle doubles as an inline style that pins an element to it. */
 export function useVisualViewport() {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }

@@ -1,6 +1,7 @@
 import type {
   ComponentPropsWithRef,
   CSSProperties,
+  MouseEvent,
   ReactNode,
   RefObject,
 } from 'react'
@@ -27,6 +28,24 @@ const surfaceVariants = cva(
     },
   }
 )
+
+/** A press on a field's passive parts focuses its control. Interactive
+ * descendants keep the press, and presses bubbling out of a portal are not
+ * the field's. */
+export function focusControlOnPress(
+  event: MouseEvent<HTMLElement>,
+  control: HTMLElement | null | undefined
+) {
+  if (event.defaultPrevented || !control) return
+  const target = event.target as Element
+  if (!event.currentTarget.contains(target)) return
+  const interactive = target.closest(
+    'input, button, a, select, textarea, [tabindex], [contenteditable], [data-field-focus="preserve"]'
+  )
+  if (interactive && event.currentTarget.contains(interactive)) return
+  event.preventDefault()
+  control.focus()
+}
 
 export type FieldSurfaceProps = ComponentPropsWithRef<'div'> & {
   start?: ReactNode
@@ -61,15 +80,7 @@ export function FieldSurface(props: FieldSurfaceProps) {
       {...restProps}
       onMouseDown={event => {
         onMouseDown?.(event)
-        if (disabled || event.defaultPrevented || !controlRef?.current) return
-        const target = event.target as Element
-        if (!event.currentTarget.contains(target)) return
-        const interactive = target.closest(
-          'input, button, a, select, textarea, [tabindex], [contenteditable], [data-field-focus="preserve"]'
-        )
-        if (interactive && event.currentTarget.contains(interactive)) return
-        event.preventDefault()
-        controlRef.current.focus()
+        if (!disabled) focusControlOnPress(event, controlRef?.current)
       }}
       data-invalid={invalid || undefined}
       data-disabled={disabled || undefined}

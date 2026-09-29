@@ -73,26 +73,13 @@ const icons = {
 
 function ToastViewport() {
   const { toasts } = Primitive.useToastManager()
-  const { i18n } = useTranslation()
-  const russian = i18n.language.startsWith('ru')
+  const { t } = useTranslation()
   const viewport = useVisualViewport()
   return (
     <Primitive.Portal>
-      <div
-        className="kit-toast-screen"
-        style={
-          viewport
-            ? {
-                top: viewport.top,
-                left: viewport.left,
-                width: viewport.width,
-                height: viewport.height,
-              }
-            : undefined
-        }
-      >
+      <div className="kit-toast-screen" style={viewport ?? undefined}>
         <Primitive.Viewport
-          aria-label={russian ? 'Уведомления' : 'Notifications'}
+          aria-label={t('notifications')}
           className="kit-toast-viewport"
         >
           {toasts.map(item => {
@@ -119,11 +106,7 @@ function ToastViewport() {
                   <Primitive.Close
                     render={
                       <IconButton
-                        label={
-                          russian
-                            ? 'Закрыть уведомление'
-                            : 'Dismiss notification'
-                        }
+                        label={t('dismissNotification')}
                         tooltip={false}
                         variant="ghost"
                         size="sm"

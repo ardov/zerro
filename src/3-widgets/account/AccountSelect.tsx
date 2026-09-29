@@ -37,7 +37,6 @@ export function AccountSelect({
         if (id !== null) onChange(id)
       }}
       trigger={trigger}
-      popupMinWidth={280}
       disabled={disabled}
       readOnly={readOnly}
     />

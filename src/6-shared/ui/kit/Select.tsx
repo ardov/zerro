@@ -5,7 +5,7 @@ import { SelectSearch, type SelectSearchOptions } from './SelectSearch'
 import { Field } from '@base-ui/react/field'
 import { Select as Primitive } from '@base-ui/react/select'
 import { ListPanel } from './ListPanel'
-import { ListRow, ListRowHeader, ListRowSeparator } from './ListRow'
+import { ListRowHeader, ListRowSeparator } from './ListRow'
 import type { SelectTriggerProps } from './SelectTrigger'
 import {
   listPanelMargin,
@@ -104,29 +104,28 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
     value,
     items,
     label,
-    size = 'lg',
     name,
     id,
     form,
     alignSelected = false,
     trigger,
-    emptyText = 'No options',
     disabled,
     readOnly,
     required,
-    invalid,
-    error,
   } = props
   const {
+    size,
     options,
     selected,
-    reserveStart,
     open,
     setOpen,
     changeValue,
     surface,
+    fieldProps,
     triggerProps,
     displayValue,
+    optionRow,
+    emptyNotice,
     popupStyle,
   } = useSelectField(props)
   const positioning = useListPanelPositioning()
@@ -165,27 +164,14 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
       value={item.value}
       label={item.label}
       disabled={item.disabled}
-      render={
-        <ListRow
-          size={size}
-          indent={item.indent}
-          start={item.start}
-          end={item.end}
-          description={item.description}
-          reserveStart={reserveStart}
-        />
-      }
+      render={optionRow(item)}
     >
       <Primitive.ItemText render={<span />}>{item.label}</Primitive.ItemText>
     </Primitive.Item>
   )
 
   return (
-    <Field.Root
-      className={trigger ? 'min-w-0 max-w-full' : undefined}
-      invalid={invalid ?? (error ? true : undefined)}
-      disabled={disabled}
-    >
+    <Field.Root {...fieldProps}>
       <Primitive.Root<T, boolean>
         multiple={props.multiple}
         value={value}
@@ -228,16 +214,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
                 <ListPanel
                   style={popupStyle}
                   scrollRender={<Primitive.List aria-label={label} />}
-                  empty={
-                    options.length === 0 ? (
-                      <p
-                        role="status"
-                        className="px-4 py-3 text-ui-14 text-ui-secondary"
-                      >
-                        {emptyText}
-                      </p>
-                    ) : undefined
-                  }
+                  empty={emptyNotice(options.length)}
                 />
               }
             >

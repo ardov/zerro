@@ -14,12 +14,7 @@ export function useScrollFade<T extends HTMLElement>() {
   const [node, setNode] = useState<T | null>(null)
 
   const update = useCallback((element: HTMLElement) => {
-    // A pixel of slack: fractional scroll positions are ordinary at fractional
-    // zoom, and an edge a hair from the end still counts as the end.
-    const above = element.scrollTop > 1
-    const below =
-      element.scrollTop + element.clientHeight < element.scrollHeight - 1
-    const fade = above && below ? 'both' : above ? 'top' : below ? 'bottom' : ''
+    const fade = scrollFadeEdges(element)
     if (fade) element.dataset.fade = fade
     else delete element.dataset.fade
   }, [])
@@ -41,4 +36,14 @@ export function useScrollFade<T extends HTMLElement>() {
   }, [node, update])
 
   return setNode
+}
+
+/** Which edges of a scrollport have more content past them. */
+export function scrollFadeEdges(element: HTMLElement) {
+  // A pixel of slack: fractional scroll positions are ordinary at fractional
+  // zoom, and an edge a hair from the end still counts as the end.
+  const above = element.scrollTop > 1
+  const below =
+    element.scrollTop + element.clientHeight < element.scrollHeight - 1
+  return above && below ? 'both' : above ? 'top' : below ? 'bottom' : ''
 }

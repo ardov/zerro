@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Switch as SwitchPrimitive } from '@base-ui/react/switch'
 import { cn } from '@/6-shared/ui/shadcn/utils'
+import { ToggleLabel } from './ToggleLabel'
 import './Toggle.css'
 
 export type SwitchProps = Omit<
@@ -33,21 +34,13 @@ export type SwitchFieldProps = Omit<
 export function SwitchField(props: SwitchFieldProps) {
   const { label, className, ...restProps } = props
   return (
-    <label
-      className={cn(
-        'kit-toggle-label flex min-h-12 items-start gap-3 py-3 text-ui-16 text-ui-primary',
-        restProps.disabled || restProps.readOnly
-          ? 'cursor-default'
-          : 'cursor-pointer',
-        className
-      )}
+    <ToggleLabel
+      label={label}
+      disabled={restProps.disabled}
+      readOnly={restProps.readOnly}
+      className={className}
     >
       <Switch {...restProps} />
-      <span
-        className={cn('min-w-0', restProps.disabled && 'opacity-ui-disabled')}
-      >
-        {label}
-      </span>
-    </label>
+    </ToggleLabel>
   )
 }

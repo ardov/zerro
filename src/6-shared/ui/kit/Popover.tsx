@@ -2,10 +2,13 @@ import { useId, type ReactElement, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Popover as Primitive } from '@base-ui/react/popover'
 import type { PopupController, SurfaceController } from '@/6-shared/overlays'
-import { useOverlayFinalFocus } from '../useOverlayFinalFocus'
 import { cn } from '../shadcn/utils'
-import { DrawerSurface } from './Drawer'
-import { SurfaceContent, type SurfaceName } from './SurfaceContent'
+import { BottomSheetSurface } from './Drawer'
+import {
+  SurfaceContent,
+  useSurfaceFinalFocus,
+  type SurfaceName,
+} from './SurfaceContent'
 import { useOwnedPopup } from './useOwnedPopup'
 import { useBottomSheetLayout } from './useBottomSheetLayout'
 import { useListPanelPositioning } from './useListPanelPositioning'
@@ -46,22 +49,10 @@ export function Popover(props: PopoverProps) {
 export function PopoverSurface(props: PopoverSurfaceProps) {
   const { mobile = 'drawer', anchor, side, align, ...restProps } = props
   const narrow = useBottomSheetLayout()
-  const capturedFocus = useOverlayFinalFocus(props.controller.open, {
-    fallback: true,
-  })
-  const finalFocus =
-    props.finalFocus ?? (props.trigger ? undefined : capturedFocus)
-  if (narrow && mobile === 'drawer') {
-    return (
-      <DrawerSurface
-        {...restProps}
-        side="bottom"
-        finalFocus={finalFocus}
-        contentClassName={cn('p-4', props.contentClassName)}
-      />
-    )
-  }
-  return (
+  const finalFocus = useSurfaceFinalFocus(props)
+  return narrow && mobile === 'drawer' ? (
+    <BottomSheetSurface {...restProps} finalFocus={finalFocus} />
+  ) : (
     <AnchoredPopover
       {...restProps}
       anchor={anchor}

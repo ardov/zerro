@@ -123,7 +123,9 @@ export function categoryChoices<T extends Category>(
   for (const category of sorted) {
     const parent =
       category.parent && visible.has(category.parent) ? category.parent : null
-    children.set(parent, [...(children.get(parent) ?? []), category])
+    const siblings = children.get(parent)
+    if (siblings) siblings.push(category)
+    else children.set(parent, [category])
   }
   // Categories have exactly two levels: roots and their direct children.
   const choices = (children.get(null) ?? []).flatMap(category => [

@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useMemo, useRef, useState, type ReactNode } from 'react'
 import { Combobox } from '@base-ui/react/combobox'
 import { Field } from '@base-ui/react/field'
 import { ChevronDown, Search } from 'lucide-react'
@@ -63,27 +63,27 @@ export function SelectSearch<T extends string>(
     items,
     value,
     label,
-    size = 'lg',
     name,
     id,
     form,
     disabled,
     readOnly,
     required,
-    invalid,
-    error,
     trigger,
-    emptyText = 'No options',
   } = props
   const {
+    size,
     options,
     reserveStart,
     open,
     setOpen,
     changeValue,
     surface,
+    fieldProps,
     triggerProps,
     displayValue,
+    optionRow,
+    emptyNotice,
     popupStyle,
   } = useSelectField(props)
   const input = useRef<HTMLInputElement>(null)
@@ -91,8 +91,11 @@ export function SelectSearch<T extends string>(
   const [session, setSession] = useState({ open, query: '', expanded: false })
   // Also reset when the consumer closes the popup through its controlled prop.
   if (session.open !== open) setSession({ open, query: '', expanded: false })
-  const query = session.open === open ? session.query : ''
-  const expanded = session.open === open && session.expanded
+  const { query, expanded } = session
+  const labels = useMemo(
+    () => new Map(options.map(option => [option.value, option.label])),
+    [options]
+  )
   const { contains } = Combobox.useFilter()
   const filtered = search.filter?.(items, query, { expanded })
   const matches = (item: SelectOption<T>) =>
@@ -110,35 +113,20 @@ export function SelectSearch<T extends string>(
       key={item.value}
       value={item.value}
       disabled={item.disabled}
-      render={
-        <ListRow
-          size={size}
-          indent={item.indent}
-          start={item.start}
-          end={item.end}
-          description={item.description}
-          reserveStart={reserveStart}
-        />
-      }
+      render={optionRow(item)}
     >
       {item.label}
     </Combobox.Item>
   )
   return (
-    <Field.Root
-      className={trigger ? 'min-w-0 max-w-full' : undefined}
-      invalid={invalid ?? (error ? true : undefined)}
-      disabled={disabled}
-    >
+    <Field.Root {...fieldProps}>
       <Combobox.Root<T, boolean>
         multiple={props.multiple}
         items={shownOptions.map(item => item.value)}
         filter={null}
         value={value}
         onValueChange={changeValue}
-        itemToStringLabel={item =>
-          options.find(option => option.value === item)?.label ?? item
-        }
+        itemToStringLabel={item => labels.get(item) ?? item}
         inputValue={query}
         onInputValueChange={(next, details) => {
           // Selection must not replace a search query with the option label.
@@ -203,16 +191,7 @@ export function SelectSearch<T extends string>(
                       />
                     </FieldSurface>
                   }
-                  empty={
-                    !shownOptions.length ? (
-                      <p
-                        role="status"
-                        className="px-4 py-3 text-ui-14 text-ui-secondary"
-                      >
-                        {emptyText}
-                      </p>
-                    ) : undefined
-                  }
+                  empty={emptyNotice(shownOptions.length)}
                   actions={
                     <>
                       {hasMore && (

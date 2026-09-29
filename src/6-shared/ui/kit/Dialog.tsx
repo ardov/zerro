@@ -2,13 +2,13 @@ import { useId, type ReactElement, type ReactNode } from 'react'
 import { Dialog as Primitive } from '@base-ui/react/dialog'
 import { AlertDialog } from '@base-ui/react/alert-dialog'
 import type { PopupController, SurfaceController } from '@/6-shared/overlays'
-import { useOverlayFinalFocus } from '../useOverlayFinalFocus'
 import { useVisualViewport } from '../useVisualViewport'
 import { cn } from '../shadcn/utils'
-import { DrawerSurface } from './Drawer'
+import { BottomSheetSurface } from './Drawer'
 import {
   SurfaceContent,
   SurfaceCloseButton,
+  useSurfaceFinalFocus,
   type SurfaceName,
 } from './SurfaceContent'
 import { useOwnedPopup } from './useOwnedPopup'
@@ -50,22 +50,10 @@ export function Dialog(props: DialogProps) {
 export function DialogSurface(props: DialogSurfaceProps) {
   const { mobile = 'dialog', closeButton, ...restProps } = props
   const narrow = useBottomSheetLayout()
-  const capturedFocus = useOverlayFinalFocus(props.controller.open, {
-    fallback: true,
-  })
-  const finalFocus =
-    props.finalFocus ?? (props.trigger ? undefined : capturedFocus)
-  if (narrow && mobile === 'drawer') {
-    return (
-      <DrawerSurface
-        {...restProps}
-        side="bottom"
-        finalFocus={finalFocus}
-        contentClassName={cn('p-4', props.contentClassName)}
-      />
-    )
-  }
-  return (
+  const finalFocus = useSurfaceFinalFocus(props)
+  return narrow && mobile === 'drawer' ? (
+    <BottomSheetSurface {...restProps} finalFocus={finalFocus} />
+  ) : (
     <CenteredDialog
       {...restProps}
       closeButton={closeButton}
@@ -76,16 +64,8 @@ export function DialogSurface(props: DialogSurfaceProps) {
 
 /** Internal shared frame for Dialog and Confirm's AlertDialog primitive. */
 export function AlertDialogSurface(props: DialogSurfaceProps) {
-  const capturedFocus = useOverlayFinalFocus(props.controller.open, {
-    fallback: true,
-  })
-  return (
-    <CenteredDialog
-      {...props}
-      finalFocus={props.finalFocus ?? capturedFocus}
-      alert
-    />
-  )
+  const finalFocus = useSurfaceFinalFocus(props)
+  return <CenteredDialog {...props} finalFocus={finalFocus} alert />
 }
 
 function CenteredDialog(props: DialogSurfaceProps & { alert?: boolean }) {
@@ -120,16 +100,7 @@ function CenteredDialog(props: DialogSurfaceProps & { alert?: boolean }) {
         />
         <Primitive.Viewport
           className="pointer-events-none fixed inset-0 z-modal flex items-center justify-center p-4"
-          style={
-            viewport
-              ? {
-                  top: viewport.top,
-                  left: viewport.left,
-                  width: viewport.width,
-                  height: viewport.height,
-                }
-              : undefined
-          }
+          style={viewport ?? undefined}
         >
           <Popup
             aria-label={label}

@@ -20,9 +20,8 @@ import { TransactionCreateButton } from '../../TransactionCreateButton'
 type Clause = core.transactions.TTransactionFilterClause
 type AddableFilterKind = Exclude<Clause['kind'], 'search' | 'date' | 'activity'>
 type SelectKind = 'tag' | 'account' | 'type'
-type PopoverKind = 'amount'
-type EditableFilterKind = SelectKind | PopoverKind
-type PopoverClause = Extract<Clause, { kind: PopoverKind }>
+type EditableFilterKind = SelectKind | 'amount'
+type AmountClause = Extract<Clause, { kind: 'amount' }>
 
 type FilterProps = {
   query: core.transactions.TTransactionQuery
@@ -75,14 +74,13 @@ const Filter: FC<FilterProps> = ({
     type: typePopup,
   }
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
-  const [editingKind, setEditingKind] = useState<PopoverKind | null>(null)
+  const [editingAmount, setEditingAmount] = useState(false)
   // Resolve the anchor when opening so render never reads a mutable ref.
   const [editorAnchor, setEditorAnchor] = useState<HTMLElement | null>(null)
   const appliedClauses = query.clauses
-  const editingClause = editingKind
+  const editingClause = editingAmount
     ? query.clauses.find(
-        (clause): clause is PopoverClause =>
-          isPopoverKind(clause.kind) && clause.kind === editingKind
+        (clause): clause is AmountClause => clause.kind === 'amount'
       )
     : undefined
   const availableKinds = filterKinds.filter(
@@ -91,12 +89,12 @@ const Filter: FC<FilterProps> = ({
 
   useLayoutEffect(() => {
     // A closing editor restores focus only after its exit callback clears
-    // editingKind. The chip it opened from may already have been removed.
-    if (editingKind || !focusAfterRemoval.current) return
+    // editingAmount. The chip it opened from may already have been removed.
+    if (editingAmount || !focusAfterRemoval.current) return
     const target = focusAfterRemoval.current.target
     focusAfterRemoval.current = null
     ;(target?.isConnected ? target : addButtonRef.current)?.focus()
-  }, [query.clauses, editingKind])
+  }, [query.clauses, editingAmount])
 
   const upsertClause = (clause: Clause) => {
     onQueryChange({
@@ -119,34 +117,27 @@ const Filter: FC<FilterProps> = ({
     setMenuOpen(false)
   }
 
+  const openAmountEditor = () => {
+    setEditorAnchor(chipRefs.current.amount || null)
+    setEditingAmount(true)
+    setEditorOpen(true)
+  }
+
   const openPendingEditor = () => {
     const kind = pendingEditingKind.current
     pendingEditingKind.current = null
     if (!kind) return
 
-    if (isSelectKind(kind)) {
-      selectPopups[kind].setOpen(true)
-      return
-    }
-    setEditorAnchor(chipRefs.current[kind] || null)
-    setEditingKind(kind)
-    setEditorOpen(true)
-  }
-
-  const openEditor = (clause: Clause) => {
-    if (isPopoverKind(clause.kind)) {
-      setEditorAnchor(chipRefs.current[clause.kind] || null)
-      setEditingKind(clause.kind)
-      setEditorOpen(true)
-    }
+    if (isSelectKind(kind)) selectPopups[kind].setOpen(true)
+    else openAmountEditor()
   }
 
   // The editor has one closing path: the stack. Back does not go through a
   // click handler, so the tidy-up runs when the surface has finished leaving,
   // whichever way it was closed.
   const finishEditing = () => {
-    setEditingKind(null)
-    if (editingKind) dropEmptyClause(editingKind)
+    setEditingAmount(false)
+    if (editingAmount) dropEmptyClause('amount')
   }
 
   const removeClause = (clause: Clause) => {
@@ -155,8 +146,7 @@ const Filter: FC<FilterProps> = ({
     focusAfterRemoval.current = {
       target: neighbour ? (chipRefs.current[neighbour.kind] ?? null) : null,
     }
-    if (isSelectKind(clause.kind)) selectPopups[clause.kind].release()
-    if (editingKind === clause.kind) setEditorOpen(false)
+    if (editingAmount && clause.kind === 'amount') setEditorOpen(false)
     onQueryChange({
       clauses: query.clauses.filter(item => item !== clause),
     })
@@ -205,7 +195,9 @@ const Filter: FC<FilterProps> = ({
                 ref={element => {
                   chipRefs.current[clause.kind] = element
                 }}
-                onClick={() => openEditor(clause)}
+                onClick={() => {
+                  if (clause.kind === 'amount') openAmountEditor()
+                }}
                 onRemove={() => removeClause(clause)}
               >
                 {getClauseLabel(clause, labels)}
@@ -314,7 +306,7 @@ const Filter: FC<FilterProps> = ({
 }
 
 function AmountFilterEditor(props: {
-  clause: PopoverClause
+  clause: AmountClause
   onChange: (clause: Clause) => void
 }) {
   const { clause, onChange } = props
@@ -370,12 +362,8 @@ function isSelectKind(kind: Clause['kind']): kind is SelectKind {
   return kind === 'tag' || kind === 'account' || kind === 'type'
 }
 
-function isPopoverKind(kind: Clause['kind']): kind is PopoverKind {
-  return kind === 'amount'
-}
-
 function isEditableKind(kind: Clause['kind']): kind is EditableFilterKind {
-  return isSelectKind(kind) || isPopoverKind(kind)
+  return isSelectKind(kind) || kind === 'amount'
 }
 
 function isEmptyClause(clause: Clause): boolean {
@@ -436,7 +424,7 @@ function getClauseLabel(
 }
 
 function getAmountLabel(
-  clause: Extract<Clause, { kind: 'amount' }>,
+  clause: AmountClause,
   t: ReturnType<typeof useTranslation>['t'],
   language: string
 ): string {

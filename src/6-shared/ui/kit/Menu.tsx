@@ -16,6 +16,7 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useOwnedPopup } from './useOwnedPopup'
 import { useBottomSheetLayout } from './useBottomSheetLayout'
 import './Menu.css'
+import './Surface.css'
 
 type ItemContent = {
   id: string
@@ -84,7 +85,7 @@ function AdaptiveMenu(props: MenuProps & { context?: boolean }) {
           aria-label={label}
           aria-labelledby={undefined}
           finalFocus={finalFocus}
-          className="max-h-(--available-height) min-w-[min(13rem,var(--available-width))] max-w-(--available-width) overflow-y-auto rounded-ui-popover rounded-smooth bg-ui-popover p-1 text-ui-primary shadow-ui-popover outline-none transition-opacity duration-150 data-starting-style:opacity-0 data-ending-style:opacity-0"
+          className="kit-surface-fade max-h-(--available-height) min-w-[min(13rem,var(--available-width))] max-w-(--available-width) overflow-y-auto rounded-ui-popover rounded-smooth bg-ui-popover p-1 text-ui-primary shadow-ui-popover outline-none"
         >
           {content}
         </Primitive.Popup>

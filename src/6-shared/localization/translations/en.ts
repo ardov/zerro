@@ -38,6 +38,8 @@ export const en: typeof ru = {
     apply: 'Apply',
     quickAmounts: 'Quick amounts',
     close: 'Close',
+    notifications: 'Notifications',
+    dismissNotification: 'Dismiss notification',
     removeValue: 'Remove {{label}}',
     openOptions: 'Open options: {{label}}',
     rename: 'Rename',
