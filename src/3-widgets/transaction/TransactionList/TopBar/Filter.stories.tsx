@@ -98,7 +98,7 @@ export const ChipRemoval: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const first = canvas.getByRole('button', { name: 'Cash USD' })
+    const first = canvas.getByRole('combobox', { name: 'Cash USD' })
     const second = canvas.getByRole('combobox', { name: 'Food' })
     first.focus()
     await userEvent.keyboard('{Delete}')
@@ -238,10 +238,10 @@ export const EmptyAccountCleanup: Story = {
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(canvas.getByRole('button', { name: 'Cash USD' }))
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Cash USD' }))
     await step('Clear the account selection', async () => {
       await userEvent.click(
-        await body.findByRole('option', { name: 'Cash USD' })
+        await body.findByRole('option', { name: /^Cash USD/ })
       )
       expect(readQuery(canvasElement).clauses).toEqual([
         { kind: 'account', ids: [] },
@@ -254,7 +254,6 @@ export const EmptyAccountCleanup: Story = {
         await waitFor(() =>
           expect(body.queryByRole('listbox')).not.toBeInTheDocument()
         )
-        await userEvent.keyboard('{Escape}')
         await waitFor(() =>
           expect(readQuery(canvasElement).clauses).toEqual([])
         )
@@ -263,5 +262,25 @@ export const EmptyAccountCleanup: Story = {
         ).toHaveFocus()
       }
     )
+  },
+}
+
+export const DirectTypeSelection: Story = {
+  render: () => <FilterHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement),
+      body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
+    await userEvent.click(
+      await body.findByRole('menuitem', { name: 'Type of Transaction' })
+    )
+    await userEvent.click(await body.findByRole('option', { name: 'Income' }))
+    await userEvent.click(body.getByRole('option', { name: 'Expense' }))
+    expect(readQuery(canvasElement).clauses[0].values).toHaveLength(2)
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(body.queryByRole('listbox')).not.toBeInTheDocument()
+    )
+    await expect(canvas.getByRole('combobox', { name: /Income/ })).toHaveFocus()
   },
 }

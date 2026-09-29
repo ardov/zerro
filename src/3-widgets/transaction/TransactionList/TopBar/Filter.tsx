@@ -7,7 +7,8 @@ import { usePopup } from '@/6-shared/overlays'
 import { useTranslation } from 'react-i18next'
 import { InputBase } from '@/6-shared/ui/InputBase'
 import { Menu, MenuItem } from '@/6-shared/ui/Menu'
-import { MultiCombobox } from '@/6-shared/ui/MultiCombobox'
+import { MultiSelect } from '@/6-shared/ui/kit/MultiSelect'
+import { AccountMultiSelect } from '../../../account/AccountMultiSelect'
 import { Popover } from '@/6-shared/ui/Popover'
 import { OutlinedField } from '@/6-shared/ui/OutlinedField'
 import { core } from '@/zerro-core/redux'
@@ -18,8 +19,8 @@ import { TransactionCreateButton } from '../../TransactionCreateButton'
 
 type Clause = core.transactions.TTransactionFilterClause
 type AddableFilterKind = Exclude<Clause['kind'], 'search' | 'date' | 'activity'>
-type SelectKind = 'tag'
-type PopoverKind = 'account' | 'type' | 'amount'
+type SelectKind = 'tag' | 'account' | 'type'
+type PopoverKind = 'amount'
 type EditableFilterKind = SelectKind | PopoverKind
 type PopoverClause = Extract<Clause, { kind: PopoverKind }>
 
@@ -66,9 +67,15 @@ const Filter: FC<FilterProps> = ({
   const { open: menuOpen, setOpen: setMenuOpen } = usePopup()
   const { open: editorOpen, setOpen: setEditorOpen } = usePopup()
   const categoryPopup = usePopup(() => dropEmptyClause('tag'))
+  const accountPopup = usePopup(() => dropEmptyClause('account'))
+  const typePopup = usePopup(() => dropEmptyClause('type'))
+  const selectPopups = {
+    tag: categoryPopup,
+    account: accountPopup,
+    type: typePopup,
+  }
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
   const [editingKind, setEditingKind] = useState<PopoverKind | null>(null)
-  const [editorOptionsOpen, setEditorOptionsOpen] = useState(false)
   // Resolve the anchor when opening so render never reads a mutable ref.
   const [editorAnchor, setEditorAnchor] = useState<HTMLElement | null>(null)
   const appliedClauses = query.clauses
@@ -117,11 +124,10 @@ const Filter: FC<FilterProps> = ({
     pendingEditingKind.current = null
     if (!kind) return
 
-    if (kind === 'tag') {
-      categoryPopup.setOpen(true)
+    if (isSelectKind(kind)) {
+      selectPopups[kind].setOpen(true)
       return
     }
-    setEditorOptionsOpen(false)
     setEditorAnchor(chipRefs.current[kind] || null)
     setEditingKind(kind)
     setEditorOpen(true)
@@ -129,7 +135,6 @@ const Filter: FC<FilterProps> = ({
 
   const openEditor = (clause: Clause) => {
     if (isPopoverKind(clause.kind)) {
-      setEditorOptionsOpen(false)
       setEditorAnchor(chipRefs.current[clause.kind] || null)
       setEditingKind(clause.kind)
       setEditorOpen(true)
@@ -140,7 +145,6 @@ const Filter: FC<FilterProps> = ({
   // click handler, so the tidy-up runs when the surface has finished leaving,
   // whichever way it was closed.
   const finishEditing = () => {
-    setEditorOptionsOpen(false)
     setEditingKind(null)
     if (editingKind) dropEmptyClause(editingKind)
   }
@@ -151,7 +155,7 @@ const Filter: FC<FilterProps> = ({
     focusAfterRemoval.current = {
       target: neighbour ? (chipRefs.current[neighbour.kind] ?? null) : null,
     }
-    if (clause.kind === 'tag') categoryPopup.release()
+    if (isSelectKind(clause.kind)) selectPopups[clause.kind].release()
     if (editingKind === clause.kind) setEditorOpen(false)
     onQueryChange({
       clauses: query.clauses.filter(item => item !== clause),
@@ -195,37 +199,64 @@ const Filter: FC<FilterProps> = ({
 
       {!!appliedClauses.length && (
         <div className="flex flex-wrap items-center gap-1.5 px-1 pt-1">
-          {appliedClauses.map(clause =>
-            clause.kind === 'tag' ? (
-              <CategoryMultiSelect
-                key={clause.kind}
-                value={clause.ids}
-                onChange={ids => upsertClause({ ...clause, ids })}
-                popup={categoryPopup}
-                trigger={
-                  <Chip
-                    ref={element => {
-                      chipRefs.current.tag = element
-                    }}
-                    onRemove={() => removeClause(clause)}
-                  >
-                    {getClauseLabel(clause, labels)}
-                  </Chip>
-                }
-              />
-            ) : (
+          {appliedClauses.map(clause => {
+            const chip = (
               <Chip
                 ref={element => {
                   chipRefs.current[clause.kind] = element
                 }}
-                key={clause.kind}
                 onClick={() => openEditor(clause)}
                 onRemove={() => removeClause(clause)}
               >
                 {getClauseLabel(clause, labels)}
               </Chip>
             )
-          )}
+            switch (clause.kind) {
+              case 'tag':
+                return (
+                  <CategoryMultiSelect
+                    key={clause.kind}
+                    value={clause.ids}
+                    onChange={ids => upsertClause({ ...clause, ids })}
+                    popup={categoryPopup}
+                    trigger={chip}
+                  />
+                )
+              case 'account':
+                return (
+                  <AccountMultiSelect
+                    key={clause.kind}
+                    value={clause.ids}
+                    onChange={ids => upsertClause({ ...clause, ids })}
+                    popup={accountPopup}
+                    trigger={chip}
+                  />
+                )
+              case 'type':
+                return (
+                  <MultiSelect
+                    key={clause.kind}
+                    label={t('transactionType')}
+                    value={clause.values}
+                    onChange={values => upsertClause({ ...clause, values })}
+                    popup={typePopup}
+                    trigger={chip}
+                    items={[
+                      core.transactions.TrFilterType.Income,
+                      core.transactions.TrFilterType.Outcome,
+                      core.transactions.TrFilterType.Transfer,
+                      core.transactions.TrFilterType.Debt,
+                    ].map(value => ({ value, label: getTypeLabel(value, t) }))}
+                  />
+                )
+              default:
+                return (
+                  <span key={clause.kind} className="min-w-0 max-w-full">
+                    {chip}
+                  </span>
+                )
+            }
+          })}
           {!!availableKinds.length && (
             <Tooltip title={t('addFilter')}>
               <IconButton
@@ -265,23 +296,15 @@ const Filter: FC<FilterProps> = ({
         onCloseComplete={finishEditing}
         // The editor drops out from under its chip rather than covering it.
         placement="below"
-        // The combobox measures its popup against the surface, so its
-        // options wait until the surface has stopped scaling. Every path that
-        // closes the editor clears the flag itself, so only the entrance
-        // needs a hook here.
-        onOpenComplete={() => setEditorOptionsOpen(true)}
         aria-label={
           editingClause ? getClauseLabel(editingClause, labels) : undefined
         }
       >
         {editingClause && (
           <div className="w-[340px] max-w-[90vw] p-3">
-            <FilterEditor
+            <AmountFilterEditor
               clause={editingClause}
               onChange={upsertClause}
-              optionsOpen={editorOptionsOpen}
-              onOptionsOpen={() => setEditorOptionsOpen(true)}
-              onOptionsClose={() => setEditorOptionsOpen(false)}
             />
           </div>
         )}
@@ -290,83 +313,40 @@ const Filter: FC<FilterProps> = ({
   )
 }
 
-function FilterEditor(props: {
+function AmountFilterEditor(props: {
   clause: PopoverClause
   onChange: (clause: Clause) => void
-  optionsOpen: boolean
-  onOptionsOpen: () => void
-  onOptionsClose: () => void
 }) {
-  const { clause, onChange, optionsOpen, onOptionsOpen, onOptionsClose } = props
+  const { clause, onChange } = props
   const { t } = useTranslation('filterDrawer')
-  const accounts = core.accounts.usePopulated()
 
-  switch (clause.kind) {
-    case 'account':
-      return (
-        <MultiCombobox
-          label={t('account')}
-          open={optionsOpen}
-          onOpenChange={open => (open ? onOptionsOpen() : onOptionsClose())}
-          options={Object.keys(accounts).map(value => ({
-            value,
-            label: accounts[value]?.title || value,
-          }))}
-          value={clause.ids}
-          onChange={ids => onChange({ ...clause, ids })}
-          autoFocus
-        />
-      )
-    case 'type':
-      return (
-        <MultiCombobox
-          label={t('transactionType')}
-          open={optionsOpen}
-          onOpenChange={open => (open ? onOptionsOpen() : onOptionsClose())}
-          options={[
-            core.transactions.TrFilterType.Income,
-            core.transactions.TrFilterType.Outcome,
-            core.transactions.TrFilterType.Transfer,
-            core.transactions.TrFilterType.Debt,
-          ].map(value => ({ value, label: getTypeLabel(value, t) }))}
-          value={clause.values}
-          onChange={values => onChange({ ...clause, values })}
-          autoFocus
-        />
-      )
-    case 'amount':
-      return (
-        <div className="flex flex-row gap-2">
-          <OutlinedField
-            autoFocus
-            type="number"
-            label={t('amountFrom')}
-            value={clause.gte ?? ''}
-            onChange={event =>
-              onChange({
-                ...clause,
-                gte: event.target.value
-                  ? Number(event.target.value)
-                  : undefined,
-              })
-            }
-          />
-          <OutlinedField
-            type="number"
-            label={t('amountTo')}
-            value={clause.lte ?? ''}
-            onChange={event =>
-              onChange({
-                ...clause,
-                lte: event.target.value
-                  ? Number(event.target.value)
-                  : undefined,
-              })
-            }
-          />
-        </div>
-      )
-  }
+  return (
+    <div className="flex flex-row gap-2">
+      <OutlinedField
+        autoFocus
+        type="number"
+        label={t('amountFrom')}
+        value={clause.gte ?? ''}
+        onChange={event =>
+          onChange({
+            ...clause,
+            gte: event.target.value ? Number(event.target.value) : undefined,
+          })
+        }
+      />
+      <OutlinedField
+        type="number"
+        label={t('amountTo')}
+        value={clause.lte ?? ''}
+        onChange={event =>
+          onChange({
+            ...clause,
+            lte: event.target.value ? Number(event.target.value) : undefined,
+          })
+        }
+      />
+    </div>
+  )
 }
 
 function makeDefaultClause(kind: AddableFilterKind): Clause {
@@ -386,12 +366,16 @@ function makeDefaultClause(kind: AddableFilterKind): Clause {
   }
 }
 
+function isSelectKind(kind: Clause['kind']): kind is SelectKind {
+  return kind === 'tag' || kind === 'account' || kind === 'type'
+}
+
 function isPopoverKind(kind: Clause['kind']): kind is PopoverKind {
-  return kind === 'account' || kind === 'type' || kind === 'amount'
+  return kind === 'amount'
 }
 
 function isEditableKind(kind: Clause['kind']): kind is EditableFilterKind {
-  return kind === 'tag' || isPopoverKind(kind)
+  return isSelectKind(kind) || isPopoverKind(kind)
 }
 
 function isEmptyClause(clause: Clause): boolean {

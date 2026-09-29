@@ -100,6 +100,20 @@ export const Transfer: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     expect(canvas.queryByRole('combobox', { name: 'Place' })).toBeNull()
+    const body = within(canvasElement.ownerDocument.body)
+    const from = canvas.getByRole('combobox', { name: 'From account' })
+    const to = canvas.getByRole('combobox', { name: 'To account' })
+    const excludedTitle = to.textContent?.trim()
+    await userEvent.click(from)
+    await body.findByRole('listbox')
+    expect(excludedTitle).toBeTruthy()
+    expect(
+      body
+        .getAllByRole('option')
+        .some(option => option.textContent?.startsWith(excludedTitle!))
+    ).toBe(false)
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(from).toHaveFocus())
 
     const amount = canvas.getByRole<HTMLInputElement>('textbox', {
       name: 'Amount taken',

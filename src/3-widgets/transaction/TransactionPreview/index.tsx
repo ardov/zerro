@@ -151,29 +151,21 @@ const TransactionEditor = ({
   const instruments = core.instruments.useAll()
   const debtAccountId = useAppSelector(core.accounts.selectDebtAccountId)
 
-  /** Every account a leg may be moved to. The debt account is not one of
-   * them: it is reached by choosing a debt type, not by naming it. Creation
-   * may target archived accounts; editing offers one only while it is already
-   * used, so an old transaction stays editable without growing the list. */
-  const options = useMemo(() => {
-    const list = Object.values(accounts)
-      .filter(account => account.id !== debtAccountId)
-      .filter(
-        account =>
-          !account.archive ||
-          !tr ||
-          account.id === tr?.incomeAccount ||
-          account.id === tr?.outcomeAccount
-      )
-      .map(account => ({
-        id: account.id,
-        title: account.title,
-        fxCode: account.fxCode,
-        archive: account.archive,
-      }))
-    list.sort((a, b) => Number(a.archive) - Number(b.archive))
-    return list
-  }, [accounts, debtAccountId, tr])
+  // Debt accounts are selected through the transaction type, not the account picker.
+  const excludedAccounts = debtAccountId ? [debtAccountId] : []
+  const options = useMemo(
+    () =>
+      Object.values(accounts)
+        .filter(
+          account =>
+            account.id !== debtAccountId &&
+            (!core.accounts.isZerroDataAccount(account) ||
+              account.id === tr?.incomeAccount ||
+              account.id === tr?.outcomeAccount)
+        )
+        .sort((a, b) => Number(a.archive) - Number(b.archive)),
+    [accounts, debtAccountId, tr]
+  )
 
   const ctx: TDraftContext = useMemo(
     () => ({
@@ -365,7 +357,7 @@ const TransactionEditor = ({
                 invalid={!!marks.fromAccount}
                 label={t('accountFrom')}
                 value={draft.fromAccount}
-                options={options}
+                excludeIds={[...excludedAccounts, draft.toAccount]}
                 onChange={account =>
                   setDraft(setTransferAccount(draft, 'from', account, ctx))
                 }
@@ -391,7 +383,7 @@ const TransactionEditor = ({
                 }
                 label={t('accountTo')}
                 value={draft.toAccount}
-                options={options}
+                excludeIds={[...excludedAccounts, draft.fromAccount]}
                 onChange={account =>
                   setDraft(setTransferAccount(draft, 'to', account, ctx))
                 }
@@ -452,7 +444,7 @@ const TransactionEditor = ({
             <AccountField
               label={t('account')}
               value={draft.account}
-              options={options}
+              excludeIds={excludedAccounts}
               invalid={!!marks.account}
               onChange={account => edit({ account })}
             />

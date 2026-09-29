@@ -113,7 +113,7 @@ export const WithoutAccounts: Story = {
         name: /New transaction|Новая операция/,
       })
     )
-    const account = dialog.getByRole('button', {
+    const account = dialog.getByRole('combobox', {
       name: /^(Account|Счёт)$/,
     })
 

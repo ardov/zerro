@@ -34,3 +34,5 @@ export const useInBudget = () => useAppSelector(selectInBudget)
 export const useSaving = () => useAppSelector(selectSaving)
 export { setAccountInBalance as setInBalance } from './commands'
 export type { TAccountPopulated } from '../../internal/domain/zerro/accounts/read'
+
+export { isZerroDataAccount } from '../../internal/domain/zerro/accounts/read'
