@@ -92,11 +92,41 @@ emitted, not only those Tailwind finds used. */
   --text-ui-20--letter-spacing: 0;
 }
 
-@layer theme {
-  :root.dark {
-    --color-ui-field-hatch: oklch(1 0 0 / 0.04);
-    /* TODO: remaining dark palette */
-  }
+:root.dark {
+  --color-ui-base: oklch(0.18 0.002 214);
+  --color-ui-card: oklch(0.22 0.002 214);
+  --color-ui-popover: oklch(0.26 0.002 214);
+  --color-ui-backdrop: oklch(0 0 0 / 0.6);
+  --color-ui-field-hatch: oklch(1 0 0 / 0.04);
+
+  --color-ui-focus: oklch(1 0 0);
+  --color-ui-highlight: oklch(1 0 0 / 0.06);
+  --color-ui-pressed: oklch(1 0 0 / 0.1);
+  --color-ui-selected: oklch(0.34 0.002 214);
+
+  --color-ui-primary: oklch(1 0 0 / 0.95);
+  --color-ui-secondary: oklch(1 0 0 / 0.6);
+  --color-ui-placeholder: oklch(1 0 0 / 0.4);
+  --color-ui-link: oklch(0.75 0.13 240);
+  --color-ui-warning: oklch(0.8 0.15 70);
+  --color-ui-success: oklch(0.75 0.18 150);
+  --color-ui-error: oklch(0.72 0.18 20);
+  --color-ui-border: oklch(1 0 0 / var(--opacity-ui-border));
+
+  --color-ui-button-primary: oklch(0.95 0 0);
+  --color-ui-button-primary-hover: oklch(1 0 0);
+  --color-ui-on-button-primary: oklch(0.18 0 0);
+  --color-ui-tooltip: oklch(0.9 0 0);
+  --color-ui-on-tooltip: oklch(0.18 0 0);
+  --color-ui-control-active: oklch(0.95 0 0);
+  --color-ui-control-inactive: oklch(0.58 0 0);
+  --color-ui-on-control: oklch(0.18 0 0);
+  --color-ui-toggle-hover: oklch(1 0 0 / 0.08);
+  --color-ui-toggle-pressed: oklch(1 0 0 / 0.14);
+
+  --shadow-ui-card: 0 2px 4px oklch(0 0 0 / 0.2);
+  --shadow-ui-popover:
+    0 8px 32px oklch(0 0 0 / 0.4), 0 2px 8px oklch(0 0 0 / 0.2);
 }
 
 @utility focusable {
