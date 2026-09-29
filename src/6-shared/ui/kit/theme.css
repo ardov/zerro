@@ -1,6 +1,7 @@
+/* `static`: plain CSS files read these variables too, so every one must be
+emitted, not only those Tailwind finds used. */
 /* prettier-ignore */
-
-@theme {
+@theme static {
   /* 🪟 Opacity */
   --opacity-ui-border:   0.1;
   --opacity-ui-disabled: 0.32;
@@ -13,59 +14,71 @@
 
   /* Main colors */
   /* 🎨 Surfaces */
-  --color-ui-base:      oklch(0.97 0.002 214);
-  --color-ui-card:      oklch(1 0 0);
-  --color-ui-popover:   oklch(1 0 0);
-  --color-ui-backdrop:  oklch(0 0 0 / 0.5);
+  --color-ui-base:        oklch(0.97 0.002 214);
+  --color-ui-card:        oklch(1 0 0);
+  --color-ui-popover:     oklch(1 0 0);
+  --color-ui-backdrop:    oklch(0 0 0 / 0.5);
+  --color-ui-field-hatch: oklch(0 0 0 / 0.03);
   /* 🎨 State colors */
   --color-ui-focus:     oklch(0 0 0);
   --color-ui-highlight: oklch(0 0 0 / 0.04);
   --color-ui-pressed:   oklch(0 0 0 / 0.06);
   --color-ui-selected:  oklch(0.95 0.002 214);
   /* 🎨 Text */
-  --color-ui-primary:    oklch(0 0 0 / 0.95);
-  --color-ui-secondary:  oklch(0 0 0 / 0.60);
+  --color-ui-primary:     oklch(0 0 0 / 0.95);
+  --color-ui-secondary:   oklch(0 0 0 / 0.6);
   --color-ui-placeholder: oklch(0 0 0 / 0.35);
-  --color-ui-link:       oklch(0.5 0.2 240);
-  --color-ui-warning:    oklch(0.65 0.16 70);
-  --color-ui-success:    oklch(0.6 0.2 150);
-  --color-ui-error:      oklch(0.6 0.24 20);
+  --color-ui-link:        oklch(0.5 0.2 240);
+  --color-ui-warning:     oklch(0.65 0.16 70);
+  --color-ui-success:     oklch(0.6 0.2 150);
+  --color-ui-error:       oklch(0.6 0.24 20);
 
   /* 🎨 Border */
-  --color-ui-border:      oklch(0 0 0 / var(--opacity-ui-border));
+  --color-ui-border: oklch(0 0 0 / var(--opacity-ui-border));
 
   /* 🎨 Semantic component tokens */
-  --color-ui-button-primary: oklch(0 0 0);
+  --color-ui-button-primary:       oklch(0 0 0);
   --color-ui-button-primary-hover: oklch(0 0 0);
-  --color-ui-on-button-primary: oklch(1 0 0);
-  --color-ui-tooltip:   oklch(0.22 0 0);
-  --color-ui-on-tooltip: oklch(1 0 0);
+  --color-ui-on-button-primary:    oklch(1 0 0);
+  --color-ui-tooltip:              oklch(0.22 0 0);
+  --color-ui-on-tooltip:           oklch(1 0 0);
   /* 🎨 Control colors, checkbox and switch */
-  --color-ui-control-active: oklch(0 0 0);
+  --color-ui-control-active:   oklch(0 0 0);
   --color-ui-control-inactive: oklch(0.58 0 0);
-  --color-ui-on-control: oklch(1 0 0);
-  --color-ui-toggle-hover: oklch(0.5 0 0 / 0.12);
-  --color-ui-toggle-pressed: oklch(0.5 0 0 / 0.22);
+  --color-ui-on-control:       oklch(1 0 0);
+  --color-ui-toggle-hover:     oklch(0.5 0 0 / 0.12);
+  --color-ui-toggle-pressed:   oklch(0.5 0 0 / 0.22);
 
-  /* Surface spacing */
+  /* 📏 Surface spacing */
   --spacing-ui-drawer-inset: 4px;
 
   /* 📏 Stroke thickness */
   --stroke-ui-control: 1.5px;
 
-
   /* ⭕ Radius */
-  --radius-ui-card: 16px;
-  --radius-ui-control: 12px;
+  --radius-ui-card:         16px;
+  --radius-ui-control:      12px;
   --radius-ui-control-inner: 8px;
-  --radius-ui-popover: 16px;
+  --radius-ui-popover:      16px;
 
   /* 🌚 Shadows */
   --shadow-ui-card: 0 2px 4px oklch(0 0 0 / 0.04);
-  --shadow-ui-popover: 0 8px 32px oklch(0 0 0 / 0.12), 0 2px 8px oklch(0 0 0 / 0.06);
+  --shadow-ui-popover:
+    0 8px 32px oklch(0 0 0 / 0.12), 0 2px 8px oklch(0 0 0 / 0.06);
 
   /* 💫 Easing */
-  --ease-overshoot: linear(0, 1.07 9.8%, 1.36 15.4%, 1.5 21.8%, 1.51 26.4%, 1.48 31.6%, 1.17 53.8%, 1.06 66.2%, 1.01 79.2%, 1);
+  --ease-overshoot: linear(
+    0,
+    1.07 9.8%,
+    1.36 15.4%,
+    1.5 21.8%,
+    1.51 26.4%,
+    1.48 31.6%,
+    1.17 53.8%,
+    1.06 66.2%,
+    1.01 79.2%,
+    1
+  );
 
   /* 🅰️ Typography */
   --text-ui-14: 14px;
@@ -80,9 +93,6 @@
 }
 
 @layer theme {
-  :root {
-    --color-ui-field-hatch: oklch(0 0 0 / 0.03);
-  }
   :root.dark {
     --color-ui-field-hatch: oklch(1 0 0 / 0.04);
     /* TODO: remaining dark palette */
