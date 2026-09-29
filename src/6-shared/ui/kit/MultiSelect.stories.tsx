@@ -189,7 +189,7 @@ export const SearchInteraction: Story = {
       await body.findByRole('combobox', { name: 'Search Accounts' })
     ).toHaveValue('')
     await expect(body.getAllByRole('option')).toHaveLength(2)
-    await userEvent.click(canvas.getByRole('button', { name: 'Next control' }))
+    await userEvent.keyboard('{Escape}')
     await waitFor(() =>
       expect(body.queryByRole('listbox')).not.toBeInTheDocument()
     )

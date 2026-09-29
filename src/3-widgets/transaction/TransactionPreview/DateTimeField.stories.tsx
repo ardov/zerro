@@ -2,7 +2,6 @@ import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import type { TISODate } from '@/6-shared/types'
-import { formatDateInput, getDateLocale } from '@/6-shared/helpers/date'
 import { Button } from '@/6-shared/ui/kit/Button'
 import { DateTimeField } from './DateTimeField'
 
@@ -37,26 +36,18 @@ type Story = StoryObj<typeof meta>
 export const Editing: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const date = canvas.getByRole('textbox', { name: 'Date' })
+    const date = canvas.getByLabelText('Date')
     const time = canvas.getByLabelText('Time')
     const value = canvas.getByRole('status', { name: 'Selected date and time' })
     const outside = canvas.getByRole('button', { name: 'Outside field' })
-    const shown = (value: TISODate) => formatDateInput(value, getDateLocale())
-
-    await userEvent.clear(date)
-    await userEvent.type(date, '99/99/2026')
-    await expect(date).toHaveAttribute('aria-invalid', 'true')
+    await expect(date).toHaveAttribute('type', 'date')
+    // Native date inputs expose an empty value while a segment is incomplete.
+    await userEvent.click(date)
+    fireEvent.change(date, { target: { value: '' } })
     await expect(value).toHaveTextContent('2026-09-12 18:56')
     await userEvent.click(outside)
-    await expect(date).toHaveValue(shown('2026-09-12'))
-    await expect(date).not.toHaveAttribute('aria-invalid')
-
-    await userEvent.clear(date)
-    await userEvent.click(outside)
-    await expect(date).toHaveValue(shown('2026-09-12'))
-
-    await userEvent.clear(date)
-    await userEvent.type(date, shown('2026-09-15'))
+    await expect(date).toHaveValue('2026-09-12')
+    fireEvent.change(date, { target: { value: '2026-09-15' } })
     await userEvent.click(outside)
     await expect(value).toHaveTextContent('2026-09-15 18:56')
     await expect(time).toHaveAttribute('type', 'time')
@@ -91,5 +82,29 @@ export const CalendarSelection: Story = {
 
 export const MobileCalendar: Story = {
   ...CalendarSelection,
-  globals: { viewport: { value: 'mobile1' } },
+  globals: { viewport: { value: 'zerro499' } },
+  play: async context => {
+    const { canvasElement } = context
+    await userEvent.click(
+      within(canvasElement).getByRole('button', { name: 'Select date' })
+    )
+    const sheet = await within(canvasElement.ownerDocument.body).findByRole(
+      'dialog',
+      { name: 'Select date' }
+    )
+    await waitFor(() =>
+      expect(
+        Math.abs(sheet.getBoundingClientRect().width - window.innerWidth)
+      ).toBeLessThan(1)
+    )
+    await userEvent.keyboard('{Escape}')
+  },
+}
+
+export const NativeDateControl: Story = {
+  play: async ({ canvasElement }) => {
+    const input = within(canvasElement).getByLabelText('Date')
+    expect(input).toHaveAttribute('type', 'date')
+    expect(input).toHaveValue('2026-09-12')
+  },
 }

@@ -5,6 +5,7 @@ import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import type { TTransaction } from '@/6-shared/types'
 import { TransactionPreview, TrEmptyState } from '.'
+import { AccountField } from './AccountField'
 
 const meta = {
   title: 'App/Transactions/TransactionPreview',
@@ -37,7 +38,7 @@ function useByType() {
 }
 
 const Frame = ({ children }: { children: React.ReactNode }) => (
-  <div className="rounded-lg bg-card text-card-foreground shadow-elevation-1 w-[360px] overflow-y-auto">
+  <div className="w-90 overflow-y-auto rounded-ui-card rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover">
     {children}
   </div>
 )
@@ -101,8 +102,8 @@ export const Transfer: Story = {
     const canvas = within(canvasElement)
     expect(canvas.queryByRole('combobox', { name: 'Place' })).toBeNull()
     const body = within(canvasElement.ownerDocument.body)
-    const from = canvas.getByRole('combobox', { name: 'From account' })
-    const to = canvas.getByRole('combobox', { name: 'To account' })
+    const from = canvas.getByRole('combobox', { name: /^From account/ })
+    const to = canvas.getByRole('combobox', { name: /^To account/ })
     const excludedTitle = to.textContent?.trim()
     await userEvent.click(from)
     await body.findByRole('listbox')
@@ -219,5 +220,53 @@ export const MarkNewPreservesDraft: Story = {
     await userEvent.click(action)
 
     await waitFor(() => expect(comment).toHaveValue(draft))
+  },
+}
+
+/** Switching the type replaces the field layout without losing the draft. */
+export const ChangeTypePreservesDraft: Story = {
+  ...Bench,
+  tags: ['check'],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const comment = canvas.getByRole<HTMLTextAreaElement>('textbox', {
+      name: 'Comment',
+    })
+    await userEvent.type(comment, ' Keep this draft')
+    const draft = comment.value
+    const type = canvas.getByRole('combobox', { name: 'Transaction type' })
+    await userEvent.click(type)
+    await userEvent.click(await body.findByRole('option', { name: 'Transfer' }))
+    await waitFor(() => expect(type).toHaveFocus())
+    expect(
+      canvas.getByRole('combobox', { name: /^From account/ })
+    ).toBeInTheDocument()
+    expect(
+      canvas.getByRole('textbox', { name: 'Amount taken' })
+    ).toBeInTheDocument()
+    expect(comment).toHaveValue(draft)
+    await userEvent.click(type)
+    await userEvent.click(await body.findByRole('option', { name: 'Expense' }))
+    await waitFor(() => expect(type).toHaveFocus())
+    expect(canvas.getByRole('textbox', { name: 'Amount' })).toBeInTheDocument()
+    expect(comment).toHaveValue(draft)
+  },
+}
+
+export const EmptyAccount: StoryObj = {
+  render: () => <AccountField label="Account" value="" onChange={() => {}} />,
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('combobox', {
+      name: 'Account',
+    })
+    await expect(trigger.querySelector('[id$="-value"]')).toHaveTextContent(
+      'Account'
+    )
+    await userEvent.click(trigger)
+    await expect(
+      await within(canvasElement.ownerDocument.body).findByRole('listbox')
+    ).toBeVisible()
+    await userEvent.keyboard('{Escape}')
   },
 }

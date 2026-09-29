@@ -2,12 +2,13 @@ import type { FC, ReactNode } from 'react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TAccountId, TTransaction, TTransactionId } from '@/6-shared/types'
-import { Button, IconButton } from '@/6-shared/ui/Button'
-import { BigAmountInput } from '@/6-shared/ui/BigAmountInput'
-import { SideDrawer } from '@/6-shared/ui/SideDrawer'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Button, IconButton } from '@/6-shared/ui/kit/Button'
+import { AmountInlineField } from '@/6-shared/ui/kit/AmountInput'
+import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useShake } from '@/6-shared/ui/useShake'
-import { FilledInput } from '@/6-shared/ui/FilledField'
+import { FieldAddon } from '@/6-shared/ui/kit/Field'
+import { Textarea } from '@/6-shared/ui/kit/Textarea'
 import {
   CloseIcon,
   NotesIcon,
@@ -70,8 +71,8 @@ import {
 export const TrEmptyState = () => {
   const { t } = useTranslation('transaction')
   return (
-    <div className="flex min-h-screen items-center justify-center p-6 text-disabled-foreground">
-      <p className="m-0 text-center text-body-sm text-inherit">
+    <div className="flex min-h-screen items-center justify-center p-6 text-ui-placeholder">
+      <p className="m-0 text-center text-ui-14 text-inherit">
         {t('fullEmptyState')}
       </p>
     </div>
@@ -203,7 +204,7 @@ const TransactionEditor = ({
   // saving is refused a second time.
   const [marked, setMarked] = useState<readonly TDraftField[]>([])
   if (createOpen === false && marked.length) setMarked([])
-  const [headline, shakeHeadline] = useShake<HTMLLabelElement>()
+  const [headline, shakeHeadline] = useShake<HTMLDivElement>()
   // A transaction arriving from a sync, or the replacement a save just made,
   // replaces what is being edited. Comparing the entity rather than its id:
   // the id is the same one after a field of it changed elsewhere.
@@ -296,11 +297,11 @@ const TransactionEditor = ({
   }
 
   const content = (
-    <div className="flex min-h-full min-w-80 flex-col bg-card">
+    <div className="flex min-h-full min-w-0 flex-col bg-ui-card text-ui-primary">
       <header className="flex items-center gap-1 px-6 py-3">
         <div className="min-w-0 grow">
           {tr?.deleted && (
-            <span className="block truncate text-caption text-error">
+            <span className="block truncate text-ui-14 text-ui-error">
               {t('transactionDeleted')}
             </span>
           )}
@@ -343,7 +344,12 @@ const TransactionEditor = ({
             }
           />
         )}
-        <IconButton size="small" aria-label={t('btnClose')} onClick={onClose}>
+        <IconButton
+          variant="ghost"
+          size="sm"
+          label={t('btnClose')}
+          onClick={onClose}
+        >
           <CloseIcon size={20} />
         </IconButton>
       </header>
@@ -403,32 +409,49 @@ const TransactionEditor = ({
             {/* Centred on the seam between the two halves, and it turns the
                 transfer around rather than turning the arrow around: the
                 arrow states which way money moves, and that never changes. */}
-            <button
-              type="button"
-              aria-label={t('btnSwap')}
+            <IconButton
+              variant="secondary"
+              size="sm"
+              label={t('btnSwap')}
               onClick={() => setDraft(swapTransferSides(draft))}
-              className="absolute top-1/2 left-1/2 inline-flex size-8 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-2 border-solid border-card bg-muted p-0 text-foreground hover:bg-selected focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-ui-card"
             >
               <ArrowDownwardIcon size={20} />
-            </button>
+            </IconButton>
           </div>
         ) : (
           <>
             <div className="flex min-h-50 flex-col justify-center gap-4 py-8">
               <div className="flex flex-col items-center gap-1">
                 {tr && <OriginalAmount tr={tr} />}
-                <BigAmountInput
+                <div
                   ref={headline}
-                  autoFocus={!tr}
-                  value={draft.amount}
-                  onChange={amount => edit({ amount })}
-                  onEnter={onSave}
-                  currency={currencyOf(draft.account)}
-                  sign={isIncoming(draft.type) ? '+' : '−'}
-                  aria-label={t('amount')}
-                  invalid={!!marks.amount}
-                  error={marks.amount && t(`issue_${marks.amount}`)}
-                />
+                  className="max-w-full text-center text-4xl font-bold"
+                >
+                  <AmountInlineField
+                    label={t('amount')}
+                    autoFocus={!tr}
+                    value={draft.amount}
+                    onChange={amount => edit({ amount })}
+                    onEnter={onSave}
+                    start={
+                      <span aria-hidden>
+                        {isIncoming(draft.type) ? '+' : '−'}
+                      </span>
+                    }
+                    end={
+                      <span className="text-ui-16">
+                        {currencyOf(draft.account)}
+                      </span>
+                    }
+                    aria-label={
+                      marks.amount
+                        ? `${t('amount')}: ${t(`issue_${marks.amount}`)}`
+                        : t('amount')
+                    }
+                    invalid={!!marks.amount || undefined}
+                  />
+                </div>
               </div>
               {categorized && (
                 <CategoryRow
@@ -471,11 +494,15 @@ const TransactionEditor = ({
           />
         )}
 
-        <FilledInput
-          icon={<NotesIcon size={20} />}
+        <Textarea
+          label={t('comment')}
+          start={
+            <FieldAddon kind="icon">
+              <NotesIcon size={20} />
+            </FieldAddon>
+          }
           placeholder={t('comment')}
           aria-label={t('comment')}
-          multiline
           maxRows={6}
           value={draft.comment ?? ''}
           onChange={event => edit({ comment: event.target.value })}
@@ -486,7 +513,7 @@ const TransactionEditor = ({
             <Receipt value={tr.qrCode} />
             <Map longitude={tr.longitude} latitude={tr.latitude} />
 
-            <div className="flex flex-col items-center gap-1 py-4 text-body-sm text-muted-foreground">
+            <div className="flex flex-col items-center gap-1 py-4 text-ui-14 text-ui-secondary">
               <span>
                 {t('created', {
                   date: formatDate(tr.created, 'dd.MM.yyyy HH:mm'),
@@ -502,14 +529,8 @@ const TransactionEditor = ({
       {/* No button at all until there is something to save: a permanently
           disabled control is a question a person keeps re-reading. */}
       {dirty && (
-        <div className="sticky bottom-0 mt-auto bg-card px-6 pt-2 pb-6">
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={onSave}
-            className="h-12 rounded-xl"
-          >
+        <div className="sticky bottom-0 mt-auto bg-ui-card px-6 pt-2 pb-6">
+          <Button variant="primary" onClick={onSave} className="w-full">
             {t(tr ? 'btnSave' : 'btnCreate')}
           </Button>
         </div>
@@ -517,14 +538,18 @@ const TransactionEditor = ({
     </div>
   )
   return createQuery ? (
-    <SideDrawer
-      open={!!createOpen}
-      onClose={onClose}
-      className="w-screen sm:w-[360px]"
-      aria-label={t('newTransaction')}
+    <DrawerSurface
+      controller={{
+        open: !!createOpen,
+        setOpen: open => {
+          if (!open) onClose()
+        },
+      }}
+      contentClassName="flex-1 p-0"
+      label={t('newTransaction')}
     >
       {content}
-    </SideDrawer>
+    </DrawerSurface>
   ) : (
     content
   )
@@ -588,14 +613,14 @@ const OriginalAmount: FC<{ tr: TTransaction }> = ({ tr }) => {
   }
 
   return (
-    <Tooltip title={<RateToWords tr={tr} />} placement="top">
+    <Tooltip content={<RateToWords tr={tr} />} side="top">
       <SmartAmount
         value={original}
         instrument={instrument}
         decimals="ifAny"
         noShade
         tabIndex={0}
-        className="rounded-sm text-body-sm text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className="rounded-sm text-ui-14 text-ui-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus"
       />
     </Tooltip>
   )

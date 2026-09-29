@@ -199,3 +199,25 @@ export const MobileSearchAndCreate: Story = {
   ...SearchAndCreate,
   globals: { viewport: { value: 'mobile1' } },
 }
+
+export const EmptyDebtor: Story = {
+  args: {
+    merchant: null,
+    payee: null,
+    originalPayee: null,
+    debt: true,
+    placeholder: 'Debtor',
+    onChange: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('combobox', {
+      name: 'Debtor',
+    })
+    // The leading person icon is separate from the trailing disclosure arrow.
+    expect(
+      trigger
+        .closest('.group\\/select-field')
+        ?.querySelector('[data-field-focus="control"] .lucide-user')
+    ).toBeTruthy()
+  },
+}

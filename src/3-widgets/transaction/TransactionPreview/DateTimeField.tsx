@@ -1,12 +1,6 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TISODate } from '@/6-shared/types'
-import {
-  dateInputPlaceholder,
-  formatDateInput,
-  getDateLocale,
-  parseDateInput,
-} from '@/6-shared/helpers/date'
 import { Popover } from '@/6-shared/ui/kit/Popover'
 import { Calendar } from '@/6-shared/ui/kit/Calendar'
 import { IconButton } from '@/6-shared/ui/kit/Button'
@@ -28,7 +22,7 @@ export type DateTimeFieldProps = {
   className?: string
 }
 
-/** Date and native time share one surface. Invalid date drafts revert on blur;
+/** Native date and time share one surface. Incomplete dates revert on blur;
  * choosing a calendar day changes only the date. */
 export function DateTimeField(props: DateTimeFieldProps) {
   const { date, onDateChange, time, onTimeChange, className } = props
@@ -36,23 +30,16 @@ export function DateTimeField(props: DateTimeFieldProps) {
   // The calendar's own label belongs to the date picker's vocabulary, which
   // is shared and lives in `common`.
   const { t: tCommon } = useTranslation()
-  const locale = getDateLocale()
   const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
   const popup = usePopup()
   const dateRef = useRef<HTMLInputElement>(null)
-  const [draft, setDraft] = useState(() => formatDateInput(date, locale))
-  const [shown, setShown] = useState({ date, code: locale.code })
-  if (shown.date !== date || shown.code !== locale.code) {
-    setShown({ date, code: locale.code })
-    setDraft(formatDateInput(date, locale))
-  }
-  const invalid = draft.trim() !== '' && !parseDateInput(draft, locale)
+  const [draft, setDraft] = useState({ source: date, value: date as string })
+  if (draft.source !== date) setDraft({ source: date, value: date })
 
   return (
     <FieldSurface
       ref={setAnchor}
       controlRef={dateRef}
-      invalid={invalid}
       className={className}
       start={
         <FieldAddon kind="action">
@@ -87,28 +74,24 @@ export function DateTimeField(props: DateTimeFieldProps) {
     >
       <input
         ref={dateRef}
-        value={draft}
+        type="date"
+        value={draft.value}
         aria-label={t('date')}
-        aria-invalid={invalid || undefined}
-        placeholder={dateInputPlaceholder(locale)}
-        inputMode="numeric"
-        autoComplete="off"
         onChange={event => {
-          const text = event.target.value
-          setDraft(text)
-          const typed = parseDateInput(text, locale)
-          if (typed && typed !== date) {
-            // The parent's echo must not reformat a date mid-keystroke.
-            setShown({ date: typed, code: locale.code })
-            onDateChange(typed)
-          }
+          const next = event.target.value
+          const complete = next !== '' && event.target.validity.valid
+          setDraft({
+            source: complete ? (next as TISODate) : date,
+            value: next,
+          })
+          if (complete && next !== date) onDateChange(next as TISODate)
         }}
-        // Whatever was left half-typed is not what the field is worth.
-        onBlur={() => setDraft(formatDateInput(date, locale))}
+        onBlur={() => setDraft({ source: date, value: date })}
         className={cn(
           fieldControlClass,
-          'flex-1 py-3',
-          invalid && 'text-ui-error'
+          'flex-1 appearance-none py-3',
+          '[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-inner-spin-button]:appearance-none',
+          '[&::-webkit-datetime-edit]:p-0'
         )}
       />
       <input

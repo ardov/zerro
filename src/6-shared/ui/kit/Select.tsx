@@ -69,6 +69,8 @@ export type SelectProps<T extends string = string> = Pick<
   /** Align an existing selection; empty values, touch and tight spaces fall back. */
   alignSelected?: boolean
   showValueIcon?: boolean
+  /** Leading icon when no value has been selected. */
+  emptyIcon?: ReactNode
   /** Popup minimum CSS length (numbers are pixels), capped by available space. */
   popupMinWidth?: number | string
   /** Custom button. For rich content, supply its accessible name explicitly. */
@@ -160,6 +162,9 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
   const alignmentEnabled = alignment.enabled
   const renderOption = (item: SelectOption<T>) => (
     <Primitive.Item
+      // A row needs its own click. Releasing the press that opened the popup
+      // must not select an option appearing beneath a stationary pointer.
+      onMouseUp={event => event.preventBaseUIHandler()}
       key={item.value}
       value={item.value}
       label={item.label}
@@ -173,6 +178,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
   return (
     <Field.Root {...fieldProps}>
       <Primitive.Root<T, boolean>
+        modal
         multiple={props.multiple}
         value={value}
         onValueChange={changeValue}
@@ -193,6 +199,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
           </Primitive.Trigger>
         )}
         <Primitive.Portal>
+          <Primitive.Backdrop className="fixed inset-0 z-popover" />
           <Primitive.Positioner
             // Base UI writes inline geometry in the aligned mode; remounting
             // the positioner is what clears it when the mode changes.

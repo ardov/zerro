@@ -187,12 +187,12 @@ export const Expansion: Story = {
     await expect(body.getByRole('listbox')).toBeVisible()
     await userEvent.click(search)
     await userEvent.tab()
+    await expect(search).toHaveFocus()
+    await expect(body.getByRole('listbox')).toBeVisible()
+    await userEvent.keyboard('{Escape}')
     await waitFor(() =>
       expect(body.queryByRole('listbox')).not.toBeInTheDocument()
     )
-    await expect(
-      canvas.getByRole('button', { name: 'Next control' })
-    ).toHaveFocus()
   },
 }
 export const WithoutAutofocus: Story = {
@@ -402,7 +402,7 @@ export const ConsumerAction: Story = {
     await expect(
       await body.findByRole('combobox', { name: 'Search Merchant' })
     ).toHaveValue('')
-    await userEvent.click(canvas.getByRole('button', { name: 'Next control' }))
+    await userEvent.keyboard('{Escape}')
     await waitFor(() =>
       expect(body.queryByRole('listbox')).not.toBeInTheDocument()
     )
@@ -423,12 +423,12 @@ export const ExpansionExit: Story = {
       body.getByRole('button', { name: 'Show all accounts' })
     ).toHaveFocus()
     await userEvent.tab()
+    await expect(search).toHaveFocus()
+    await expect(body.getByRole('listbox')).toBeVisible()
+    await userEvent.keyboard('{Escape}')
     await waitFor(() =>
       expect(body.queryByRole('listbox')).not.toBeInTheDocument()
     )
-    await expect(
-      canvas.getByRole('button', { name: 'Next control' })
-    ).toHaveFocus()
   },
 }
 export const LongList: Story = {

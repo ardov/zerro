@@ -1,10 +1,11 @@
 import { usePopup } from '@/6-shared/overlays'
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, within, waitFor } from 'storybook/test'
+import { expect, fireEvent, userEvent, within, waitFor } from 'storybook/test'
 import { Wallet, Landmark, Plus } from 'lucide-react'
 import { Select, type SelectItem } from './Select'
 import { Button } from './Button'
+import { Dialog } from './Dialog'
 
 const items: SelectItem[] = [
   {
@@ -48,6 +49,7 @@ const meta = {
 - Use stable string values; **null** means empty. Options have a string **label**, optional **start**, **description**, **end**, and **disabled**.
 - Groups use **{ type: 'group', id, label, items }**; dividers use **{ type: 'separator', id }**. Groups are flat.
 - Disabled rows remain keyboard-focusable but cannot be selected.
+- The whole field opens the modal popup. Its transparent backdrop consumes the first outside click; Escape closes it.
 - **required** prevents clearing. **readOnly** keeps the field focusable; **name** includes its value in form submission.
 - **alignSelected** opts into Base UI text alignment for short lists. Touch and constrained space can fall back to ordinary positioning; native overlap closes on window resize.
 - Popup width follows its content, with a minimum of the trigger width plus side insets. **popupMinWidth** sets an additional minimum (pixels or a CSS length); available screen space caps both.
@@ -314,7 +316,7 @@ export const EmptyAlignment: Story = {
     await userEvent.click(trigger)
     await expectBelowTrigger()
     await userEvent.keyboard('{Escape}')
-    await expect(trigger).toHaveFocus()
+    await waitFor(() => expect(trigger).toHaveFocus())
   },
 }
 
@@ -457,6 +459,177 @@ export const PopupWidth: Story = {
         expect(
           body.queryByRole('listbox', { name: label })
         ).not.toBeInTheDocument()
+      )
+    }
+  },
+}
+
+function OverlappingList() {
+  const [value, setValue] = useState<string | null>('30')
+  return (
+    <div className="px-10 py-32">
+      <Select
+        label="Overlapping list"
+        alignSelected
+        required
+        value={value}
+        onChange={setValue}
+        items={Array.from({ length: 80 }, (_, index) => ({
+          value: String(index),
+          label: `Option ${index}`,
+        }))}
+      />
+    </div>
+  )
+}
+
+/** A slow release of the opening press must not select the row under the pointer. */
+export const OpeningPressDoesNotSelect: Story = {
+  render: () => <OverlappingList />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('combobox')
+    for (let opening = 0; opening < 2; opening++) {
+      fireEvent.pointerDown(trigger, {
+        pointerType: 'mouse',
+        button: 0,
+        isPrimary: true,
+      })
+      fireEvent.mouseDown(trigger, { button: 0 })
+      const list = await body.findByRole('listbox')
+      const selected = within(list).getByRole('option', { name: 'Option 30' })
+      // Base UI enables mouseup selection after 400ms, even without a new press.
+      await new Promise(resolve => setTimeout(resolve, 450))
+      fireEvent.pointerEnter(selected, { pointerType: 'mouse' })
+      fireEvent.mouseUp(selected, { button: 0 })
+      await expect(list).toBeInTheDocument()
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+      await userEvent.click(selected)
+      await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
+    }
+    await userEvent.click(trigger)
+    await userEvent.click(
+      await body.findByRole('option', { name: 'Option 31' })
+    )
+    await waitFor(() =>
+      expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    )
+    await expect(trigger).toHaveTextContent('Option 31')
+  },
+}
+
+function ModalFieldDemo() {
+  const [clicks, setClicks] = useState(0)
+  return (
+    <div className="grid max-w-sm gap-4">
+      {[false, true].map(search => (
+        <Select
+          key={String(search)}
+          label={search ? 'Search account' : 'Plain account'}
+          labelMode={search ? 'floating' : 'hidden'}
+          search={search}
+          items={items}
+          value="daily"
+          required
+          onChange={() => {}}
+        />
+      ))}
+      <Button
+        className="fixed top-4 right-4"
+        onClick={() => setClicks(count => count + 1)}
+      >
+        Outside action
+      </Button>
+      <output aria-label="Outside clicks">{clicks}</output>
+    </div>
+  )
+}
+
+export const WholeFieldAndModalDismissal: Story = {
+  render: () => <ModalFieldDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const document = canvasElement.ownerDocument
+    const body = within(document.body)
+    const outside = canvas.getByRole('button', { name: 'Outside action' })
+    let clicks = 0
+    for (const trigger of canvas.getAllByRole('combobox')) {
+      const field = trigger.closest('.group\\/select-field')!
+      const bounds = field.getBoundingClientRect()
+      // Real hit testing covers the leading icon, blank padding, and chevron.
+      for (const x of [bounds.left + 26, bounds.left + 5, bounds.right - 26]) {
+        const hit = document.elementFromPoint(
+          x,
+          bounds.top + bounds.height / 2
+        )!
+        await expect(hit.closest('button')).toBe(trigger)
+        await userEvent.click(hit)
+        await body.findByRole('listbox')
+        const target = outside.getBoundingClientRect()
+        const outsideHit = document.elementFromPoint(
+          target.left + target.width / 2,
+          target.top + target.height / 2
+        )!
+        await expect(outsideHit.closest('button')).not.toBe(outside)
+        await userEvent.click(outsideHit)
+        await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
+        await expect(canvas.getByLabelText('Outside clicks')).toHaveTextContent(
+          String(clicks)
+        )
+        await waitFor(() =>
+          expect(
+            document
+              .elementFromPoint(
+                target.left + target.width / 2,
+                target.top + target.height / 2
+              )
+              ?.closest('button')
+          ).toBe(outside)
+        )
+        await userEvent.click(outside)
+        clicks += 1
+        await expect(canvas.getByLabelText('Outside clicks')).toHaveTextContent(
+          String(clicks)
+        )
+      }
+    }
+  },
+}
+
+export const NestedModalDismissal: Story = {
+  render: () => (
+    <Dialog title="Editor" trigger={<Button>Open editor</Button>}>
+      <div className="grid gap-4">
+        {[false, true].map(search => (
+          <Select
+            key={String(search)}
+            search={search}
+            label={search ? 'Search account' : 'Plain account'}
+            items={items}
+            value="daily"
+            onChange={() => {}}
+          />
+        ))}
+      </div>
+    </Dialog>
+  ),
+  play: async ({ canvasElement }) => {
+    const document = canvasElement.ownerDocument
+    const body = within(document.body)
+    for (const name of [/Plain account/, /Search account/]) {
+      await userEvent.click(
+        within(canvasElement).getByRole('button', { name: 'Open editor' })
+      )
+      const editor = await body.findByRole('dialog', { name: 'Editor' })
+      await userEvent.click(within(editor).getByRole('combobox', { name }))
+      await body.findByRole('listbox')
+      await userEvent.click(document.elementFromPoint(5, 5)!)
+      await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
+      await expect(editor).toBeVisible()
+      await userEvent.click(document.elementFromPoint(5, 5)!)
+      await waitFor(() =>
+        expect(body.queryByRole('dialog', { name: 'Editor' })).toBeNull()
       )
     }
   },

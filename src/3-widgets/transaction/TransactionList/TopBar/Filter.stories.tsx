@@ -132,7 +132,8 @@ export const DirectCategorySelection: Story = {
         await body.findByRole('combobox', { name: 'Select category' })
       ).toHaveFocus()
       await expect(body.getAllByRole('listbox')).toHaveLength(1)
-      await expect(body.getAllByRole('combobox')).toHaveLength(2)
+      // The modal search is the only exposed combobox while its popup is open.
+      await expect(body.getAllByRole('combobox')).toHaveLength(1)
     })
     await step(
       'Selection applies immediately and survives closing',

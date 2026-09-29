@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
-import { SideDrawer } from '@/6-shared/ui/SideDrawer'
+import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { defineScreen } from '@/6-shared/overlays'
 import type { TTransactionId } from '@/6-shared/types'
@@ -82,14 +82,17 @@ export const TransactionPreviewDrawer = () => {
   if (docked) return null
 
   return (
-    <SideDrawer
-      onClose={onClose}
-      open={!!id}
-      // Full-width on phones, fixed-width from the small breakpoint.
-      className="w-screen sm:w-[360px]"
-      aria-label={t('transaction')}
+    <DrawerSurface
+      controller={{
+        open: !!id,
+        setOpen: open => {
+          if (!open) onClose()
+        },
+      }}
+      contentClassName="flex-1 p-0"
+      label={t('transaction')}
     >
-      <div className="flex min-h-full min-w-80 flex-col">
+      <div className="flex min-h-full min-w-0 flex-col">
         {id && (
           <TransactionPreview
             id={id}
@@ -99,6 +102,6 @@ export const TransactionPreviewDrawer = () => {
           />
         )}
       </div>
-    </SideDrawer>
+    </DrawerSurface>
   )
 }

@@ -123,6 +123,9 @@ export function SelectSearch<T extends string>(
   const searchLabel = search.label ?? `Search ${label}`
   const option = (item: SelectOption<T>) => (
     <Combobox.Item
+      // A row needs its own click. Releasing the press that opened the popup
+      // must not select an option appearing beneath a stationary pointer.
+      onMouseUp={event => event.preventBaseUIHandler()}
       key={item.value}
       value={item.value}
       disabled={item.disabled}
@@ -134,6 +137,7 @@ export function SelectSearch<T extends string>(
   return (
     <Field.Root {...fieldProps}>
       <Combobox.Root<T, boolean>
+        modal
         multiple={props.multiple}
         autoHighlight={search.autoHighlight}
         items={shownOptions.map(item => item.value)}
@@ -169,6 +173,7 @@ export function SelectSearch<T extends string>(
           <Combobox.Trigger {...triggerProps}>{displayValue}</Combobox.Trigger>
         )}
         <Combobox.Portal>
+          <Combobox.Backdrop className="fixed inset-0 z-popover" />
           <Combobox.Positioner
             {...positioning}
             anchor={trigger ? undefined : surface}

@@ -315,3 +315,38 @@ export const GrowingTextarea: Story = {
     await waitFor(() => expect(height(textarea)).toBe(initial))
   },
 }
+
+export const MultilineIconAlignment: Story = {
+  render: () => (
+    <div className="grid gap-4">
+      {(['lg', 'sm'] as const).map(size => (
+        <Textarea
+          key={size}
+          size={size}
+          label={`Multiline comment ${size}`}
+          defaultValue={'First line\nSecond line\nThird line'}
+          start={
+            <FieldAddon kind="icon">
+              <SearchIcon data-testid={`comment-icon-${size}`} size={20} />
+            </FieldAddon>
+          }
+        />
+      ))}
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    for (const size of ['lg', 'sm']) {
+      const control = canvas.getByRole('textbox', {
+        name: `Multiline comment ${size}`,
+      })
+      const icon = canvas.getByTestId(`comment-icon-${size}`)
+      const firstLineCenter =
+        control.getBoundingClientRect().top +
+        parseFloat(getComputedStyle(control).lineHeight) / 2
+      const bounds = icon.getBoundingClientRect()
+      expect(
+        Math.abs(bounds.top + bounds.height / 2 - firstLineCenter)
+      ).toBeLessThan(2)
+    }
+  },
+}

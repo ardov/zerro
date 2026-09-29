@@ -14,7 +14,7 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 const surfaceVariants = cva(
   [
     // Layout and typography
-    'relative flex min-h-12 w-full items-center rounded-ui-control text-ui-16 text-ui-primary',
+    'relative flex min-h-(--field-row-height) [--field-row-height:--spacing(12)] w-full items-center rounded-ui-control text-ui-16 text-ui-primary',
     // Surface and interaction
     'border-0 bg-ui-highlight inset-ring-(length:--stroke-ui-control) inset-ring-transparent',
     'hover:not-focus-within:inset-ring-ui-border focus-within:inset-ring-ui-focus focus-within:bg-ui-card',
@@ -55,6 +55,7 @@ export type FieldSurfaceProps = ComponentPropsWithRef<'div'> & {
   readOnly?: boolean
   tall?: boolean
   size?: 'lg' | 'sm'
+  addonAlign?: 'stretch' | 'first-line'
   /** Optional control to focus from the background or passive addons. */
   controlRef?: RefObject<HTMLElement | null>
 }
@@ -69,6 +70,7 @@ export function FieldSurface(props: FieldSurfaceProps) {
     readOnly,
     tall,
     size = 'lg',
+    addonAlign = 'stretch',
     className,
     children,
     controlRef,
@@ -88,14 +90,20 @@ export function FieldSurface(props: FieldSurfaceProps) {
       className={cn(
         surfaceVariants({ tall }),
         'rounded-smooth',
-        size === 'sm' && (tall ? 'min-h-14' : 'min-h-10'),
+        size === 'sm' && '[--field-row-height:--spacing(10)]',
+        size === 'sm' && tall && 'min-h-14',
         className
       )}
     >
       {start != null && (
         <div
           inert={disabled || undefined}
-          className="flex shrink-0 self-stretch"
+          className={cn(
+            'flex shrink-0',
+            addonAlign === 'first-line'
+              ? 'h-(--field-row-height) self-start'
+              : 'self-stretch'
+          )}
         >
           {start}
         </div>
@@ -112,7 +120,12 @@ export function FieldSurface(props: FieldSurfaceProps) {
       {end != null && (
         <div
           inert={disabled || undefined}
-          className="flex shrink-0 self-stretch"
+          className={cn(
+            'flex shrink-0',
+            addonAlign === 'first-line'
+              ? 'h-(--field-row-height) self-start'
+              : 'self-stretch'
+          )}
         >
           {end}
         </div>
@@ -205,6 +218,7 @@ export type FieldPresentation = {
 
 /** Shared label geometry; callers supply the label's semantic primitive. */
 export function FieldContent(props: {
+  as?: 'div' | 'span'
   size?: 'lg' | 'sm'
   floating: boolean
   raised?: boolean
@@ -212,7 +226,15 @@ export function FieldContent(props: {
   labelRender?: useRender.ComponentProps<'label'>['render']
   children: ReactNode
 }) {
-  const { size = 'lg', floating, raised, label, labelRender, children } = props
+  const {
+    as: Content = 'div',
+    size = 'lg',
+    floating,
+    raised,
+    label,
+    labelRender,
+    children,
+  } = props
   const renderedLabel = useRender({
     defaultTagName: 'label',
     render: labelRender,
@@ -229,7 +251,7 @@ export function FieldContent(props: {
     },
   })
   return (
-    <div
+    <Content
       data-field-focus="preserve"
       className={cn(
         'group/field-content relative min-w-0 flex-1',
@@ -239,7 +261,7 @@ export function FieldContent(props: {
     >
       {children}
       {renderedLabel}
-    </div>
+    </Content>
   )
 }
 
@@ -263,6 +285,7 @@ export function FieldMessage(
 }
 
 type FieldProps = FieldPresentation & {
+  addonAlign?: FieldSurfaceProps['addonAlign']
   disabled?: boolean
   readOnly?: boolean
   fixedLabel?: boolean
@@ -286,6 +309,7 @@ export function Field(props: FieldProps) {
     disabled,
     readOnly,
     fixedLabel,
+    addonAlign,
     controlRef,
     children,
   } = props
@@ -302,6 +326,7 @@ export function Field(props: FieldProps) {
           <FieldSurface
             start={start}
             end={end}
+            addonAlign={addonAlign}
             invalid={state.valid === false}
             disabled={state.disabled}
             readOnly={readOnly}

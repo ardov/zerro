@@ -52,6 +52,7 @@ export function Textarea(props: TextareaProps) {
         readOnly,
       }}
       fixedLabel
+      addonAlign={labelMode === 'hidden' ? 'first-line' : 'stretch'}
     >
       <FieldPrimitive.Control
         // Base UI types Control as an input, but renders and dispatches events

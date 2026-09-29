@@ -276,7 +276,11 @@ An editor can hold a local draft and commit a changed valid value in `onClose`.
 It owns validation and error handling. Never save from effect cleanup.
 Save/Cancel forms save only on explicit submission. Pending operations must not
 require their window to remain open. The component stories demonstrate close notification and explicit Save/Cancel
-separately. Application editors still use the legacy surfaces.
+separately. The transaction editor uses kit fields, selection controls, menus
+and an adaptive `DrawerSurface`; its existing popup or screen owns history.
+The editor opens as a full-width bottom sheet below 500px and a right drawer
+on wider screens. Its date and time inputs retain native segmented editing.
+Other application editors may still use legacy surfaces.
 
 `Confirm` is passed to `useAsk<boolean>()`. Explicit confirmation answers `true`;
 all dismissals answer `undefined`. `intent="danger"` uses AlertDialog semantics,

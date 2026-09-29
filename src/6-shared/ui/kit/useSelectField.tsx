@@ -65,7 +65,13 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
         required={props.required}
         invalid={props.invalid}
         error={props.error}
-        start={props.showValueIcon !== false ? selected?.start : undefined}
+        start={
+          props.showValueIcon !== false
+            ? values.length === 0
+              ? props.emptyIcon
+              : selected?.start
+            : undefined
+        }
         onClear={() => changeValue(props.multiple ? [] : null)}
       />
     ),

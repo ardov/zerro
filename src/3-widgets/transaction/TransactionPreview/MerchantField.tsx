@@ -106,6 +106,7 @@ export function MerchantField(props: MerchantFieldProps) {
       label={placeholder}
       placeholder={placeholder}
       clearLabel={t('clearMerchant')}
+      emptyIcon={debt ? <PersonIcon size={20} /> : <PlaceIcon size={20} />}
       value={value}
       items={items}
       renderValue={() =>

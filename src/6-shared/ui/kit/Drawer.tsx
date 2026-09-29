@@ -116,7 +116,9 @@ function DrawerFrame(props: DrawerSurfaceProps) {
               side === 'bottom'
                 ? 'max-h-[calc(100%-32px)] w-full rounded-t-ui-popover'
                 : 'h-full w-90 max-w-full rounded-ui-popover',
-              className
+              className,
+              // Desktop popup widths must not shrink their mobile sheet.
+              side === 'bottom' && 'w-full max-w-none'
             )}
           >
             {side === 'bottom' && (

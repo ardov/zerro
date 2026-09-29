@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { linkClass } from '@/6-shared/ui/Link'
+import { Button } from '@/6-shared/ui/kit/Button'
 import { Collapse } from '@/6-shared/ui/Collapse'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { QRCodeSVG as QRCode } from 'qrcode.react'
@@ -31,14 +31,14 @@ export const Receipt: FC<ReceiptProps> = ({ value, className }) => {
 
       <div className="mt-auto">
         <Collapse open={!showMore}>
-          <button
-            type="button"
-            // Reset the native button so the control reads visually as text.
-            className={`${linkClass} m-0 border-0 bg-transparent p-0 align-middle font-sans text-caption select-none`}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-ml-3 text-ui-14"
             onClick={() => setShowMore(true)}
           >
             {t('showMore', { ns: 'common' })}
-          </button>
+          </Button>
         </Collapse>
       </div>
 
@@ -51,13 +51,13 @@ export const Receipt: FC<ReceiptProps> = ({ value, className }) => {
       </Collapse>
     </>
   ) : (
-    <p className="m-0 text-body">{t('unknown')}</p>
+    <p className="m-0 text-ui-16">{t('unknown')}</p>
   )
 
   return (
     <div
       className={cn(
-        'rounded-lg bg-card text-card-foreground shadow-elevation-1 flex p-4',
+        'rounded-ui-control rounded-smooth bg-ui-highlight text-ui-primary flex p-4',
         className
       )}
     >
@@ -65,8 +65,8 @@ export const Receipt: FC<ReceiptProps> = ({ value, className }) => {
       <div className="ml-auto">
         <QRCode
           value={value}
-          bgColor="var(--card)"
-          fgColor="var(--foreground)"
+          bgColor="var(--color-ui-card)"
+          fgColor="var(--color-ui-primary)"
           includeMargin
         />
       </div>
@@ -81,7 +81,7 @@ interface LineProps {
 
 const Line: FC<LineProps> = ({ name, value }) => (
   <div className="mb-2">
-    <span className="block text-caption text-muted-foreground">{name}</span>
-    <p className="m-0 text-body">{value}</p>
+    <span className="block text-ui-14 text-ui-secondary">{name}</span>
+    <p className="m-0 text-ui-16">{value}</p>
   </div>
 )

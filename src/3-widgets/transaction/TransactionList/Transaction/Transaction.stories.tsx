@@ -119,10 +119,10 @@ export const TypeSwitchRegression: Story = {
     const body = within(canvasElement.ownerDocument.body)
     await expect(canvas.getByTestId('type')).toHaveTextContent(/^outcome$/)
     await userEvent.click(canvas.getByRole('button', { name: 'Edit expense' }))
-    await userEvent.click(await body.findByRole('button', { name: /Expense/ }))
     await userEvent.click(
-      await body.findByRole('menuitem', { name: 'Transfer' })
+      await body.findByRole('combobox', { name: 'Transaction type' })
     )
+    await userEvent.click(await body.findByRole('option', { name: 'Transfer' }))
     await userEvent.click(await body.findByRole('button', { name: 'Save' }))
     await waitFor(() =>
       expect(canvas.getByTestId('type')).toHaveTextContent(/^transfer$/)

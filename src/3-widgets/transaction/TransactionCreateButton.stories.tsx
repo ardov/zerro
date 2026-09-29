@@ -40,11 +40,18 @@ export const SaveAndReopen: Story = {
       name: /New transaction|Новая операция/,
     })
     await userEvent.click(trigger)
-    const dialog = within(
-      await body.findByRole('dialog', {
-        name: /New transaction|Новая операция/,
-      })
-    )
+    const surface = await body.findByRole('dialog', {
+      name: /New transaction|Новая операция/,
+    })
+    const dialog = within(surface)
+    if (window.innerWidth < 500) {
+      await expect(surface).toHaveAttribute('data-side', 'bottom')
+      await waitFor(() =>
+        expect(
+          Math.abs(surface.getBoundingClientRect().width - window.innerWidth)
+        ).toBeLessThan(1)
+      )
+    }
     const amount = dialog.getByRole('textbox', { name: /^(Amount|Сумма)$/ })
     await userEvent.click(
       dialog.getByRole('button', {
@@ -108,11 +115,18 @@ export const WithoutAccounts: Story = {
         name: /New transaction|Новая операция/,
       })
     )
-    const dialog = within(
-      await body.findByRole('dialog', {
-        name: /New transaction|Новая операция/,
-      })
-    )
+    const surface = await body.findByRole('dialog', {
+      name: /New transaction|Новая операция/,
+    })
+    const dialog = within(surface)
+    if (window.innerWidth < 500) {
+      await expect(surface).toHaveAttribute('data-side', 'bottom')
+      await waitFor(() =>
+        expect(
+          Math.abs(surface.getBoundingClientRect().width - window.innerWidth)
+        ).toBeLessThan(1)
+      )
+    }
     const account = dialog.getByRole('combobox', {
       name: /^(Account|Счёт)$/,
     })
@@ -125,4 +139,9 @@ export const WithoutAccounts: Story = {
 
     await expect(account).toHaveAttribute('aria-invalid', 'true')
   },
+}
+
+export const MobileSaveAndReopen: Story = {
+  ...SaveAndReopen,
+  globals: { viewport: { value: 'zerro499' } },
 }

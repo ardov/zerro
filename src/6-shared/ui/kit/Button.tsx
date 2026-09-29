@@ -5,8 +5,8 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 
 export const buttonPressAnimation = [
   'will-change-transform',
-  'active:not-aria-[haspopup]:scale-x-97',
-  'active:not-aria-[haspopup]:scale-y-104',
+  'motion-safe:active:scale-x-97',
+  'motion-safe:active:scale-y-104',
   'active:transition-all active:duration-50',
   '[transition:all_150ms_ease,scale_600ms_var(--ease-overshoot)]',
 ]

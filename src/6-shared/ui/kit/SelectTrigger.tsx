@@ -111,15 +111,24 @@ export function SelectTrigger(props: SelectTriggerProps) {
         'before:absolute before:inset-0 before:rounded-[inherit]'
       ),
       children: (
-        <span
-          id={`${controlId}-value`}
-          className={cn(
-            'min-w-0 flex-1 wrap-anywhere',
-            !filled && 'text-ui-placeholder'
-          )}
+        <FieldContent
+          as="span"
+          size={size}
+          floating={floating}
+          raised={filled || Boolean(placeholder)}
+          label={label}
+          labelRender={<span id={labelId} />}
         >
-          {filled ? children : (placeholder ?? (floating ? '\u00a0' : label))}
-        </span>
+          <span
+            id={`${controlId}-value`}
+            className={cn(
+              'min-w-0 flex-1 wrap-anywhere',
+              !filled && 'text-ui-placeholder'
+            )}
+          >
+            {filled ? children : (placeholder ?? (floating ? '\u00a0' : label))}
+          </span>
+        </FieldContent>
       ),
     },
   })
@@ -170,15 +179,7 @@ export function SelectTrigger(props: SelectTriggerProps) {
           ) : undefined
         }
       >
-        <FieldContent
-          size={size}
-          floating={floating}
-          raised={filled || Boolean(placeholder)}
-          label={label}
-          labelRender={<label id={labelId} htmlFor={controlId} />}
-        >
-          {trigger}
-        </FieldContent>
+        {trigger}
       </FieldSurface>
       {description && (
         <FieldMessage id={descriptionId}>{description}</FieldMessage>
