@@ -672,7 +672,6 @@ export const en: typeof ru = {
     account: 'Account',
     accountFrom: 'From account',
     accountTo: 'To account',
-    accountMissing: 'Choose an account',
     date: 'Date',
     time: 'Time',
     payee: 'Place',

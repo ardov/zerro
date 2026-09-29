@@ -632,7 +632,6 @@
     "account": "Счёт",
     "accountFrom": "Счёт списания",
     "accountTo": "Счёт зачисления",
-    "accountMissing": "Выберите счёт",
     "date": "Дата",
     "time": "Время",
     "payee": "Место",

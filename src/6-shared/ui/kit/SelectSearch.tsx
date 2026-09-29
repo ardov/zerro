@@ -6,6 +6,7 @@ import type { SelectItem, SelectOption, SelectControlProps } from './Select'
 import {
   useSelectField,
   flattenSelectItems as flatten,
+  preventMouseUpSelection,
   selectPanelOutset as panelOutset,
 } from './useSelectField'
 import { FieldAddon, FieldSurface, fieldControlClass } from './Field'
@@ -123,9 +124,7 @@ export function SelectSearch<T extends string>(
   const searchLabel = search.label ?? `Search ${label}`
   const option = (item: SelectOption<T>) => (
     <Combobox.Item
-      // A row needs its own click. Releasing the press that opened the popup
-      // must not select an option appearing beneath a stationary pointer.
-      onMouseUp={event => event.preventBaseUIHandler()}
+      onMouseUp={preventMouseUpSelection}
       key={item.value}
       value={item.value}
       disabled={item.disabled}

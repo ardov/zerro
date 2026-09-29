@@ -11,9 +11,6 @@ export type LinkProps = ComponentPropsWithoutRef<'a'> & {
 const linkBase =
   'cursor-pointer text-primary [-webkit-tap-highlight-color:transparent]'
 
-/** Link styling without the anchor, for the control that uses button semantics. */
-export const linkClass = `${linkBase} underline decoration-link-underline hover:decoration-[inherit]`
-
 export function Link({ underline = 'always', className, ...props }: LinkProps) {
   return (
     <a

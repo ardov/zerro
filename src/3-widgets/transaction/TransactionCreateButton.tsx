@@ -13,8 +13,7 @@ export function TransactionCreateButton({
 }) {
   const [started, setStarted] = useState(false)
   const { t } = useTranslation('transaction')
-  const { open, setOpen } = usePopup()
-  const close = () => setOpen(false)
+  const popup = usePopup()
   return (
     <>
       <IconButton
@@ -23,18 +22,17 @@ export function TransactionCreateButton({
         size="sm"
         onClick={() => {
           setStarted(true)
-          setOpen(true)
+          popup.setOpen(true)
         }}
       >
         <AddIcon />
       </IconButton>
       {started && (
         <TransactionCreate
-          open={open}
-          onClose={close}
+          popup={popup}
           query={query}
           onCreated={() => {
-            close()
+            popup.setOpen(false)
             setStarted(false)
           }}
         />

@@ -30,6 +30,22 @@ function CreationCheck() {
   )
 }
 
+/** Narrow screens show the editor as a full-width bottom sheet. */
+async function findCreateSurface(body: ReturnType<typeof within>) {
+  const surface = await body.findByRole('dialog', {
+    name: /New transaction|Новая операция/,
+  })
+  if (window.innerWidth < 500) {
+    await expect(surface).toHaveAttribute('data-side', 'bottom')
+    await waitFor(() =>
+      expect(
+        Math.abs(surface.getBoundingClientRect().width - window.innerWidth)
+      ).toBeLessThan(1)
+    )
+  }
+  return within(surface)
+}
+
 export const SaveAndReopen: Story = {
   tags: ['check'],
   render: () => <CreationCheck />,
@@ -40,18 +56,7 @@ export const SaveAndReopen: Story = {
       name: /New transaction|Новая операция/,
     })
     await userEvent.click(trigger)
-    const surface = await body.findByRole('dialog', {
-      name: /New transaction|Новая операция/,
-    })
-    const dialog = within(surface)
-    if (window.innerWidth < 500) {
-      await expect(surface).toHaveAttribute('data-side', 'bottom')
-      await waitFor(() =>
-        expect(
-          Math.abs(surface.getBoundingClientRect().width - window.innerWidth)
-        ).toBeLessThan(1)
-      )
-    }
+    const dialog = await findCreateSurface(body)
     const amount = dialog.getByRole('textbox', { name: /^(Amount|Сумма)$/ })
     await userEvent.click(
       dialog.getByRole('button', {
@@ -115,18 +120,7 @@ export const WithoutAccounts: Story = {
         name: /New transaction|Новая операция/,
       })
     )
-    const surface = await body.findByRole('dialog', {
-      name: /New transaction|Новая операция/,
-    })
-    const dialog = within(surface)
-    if (window.innerWidth < 500) {
-      await expect(surface).toHaveAttribute('data-side', 'bottom')
-      await waitFor(() =>
-        expect(
-          Math.abs(surface.getBoundingClientRect().width - window.innerWidth)
-        ).toBeLessThan(1)
-      )
-    }
+    const dialog = await findCreateSurface(body)
     const account = dialog.getByRole('combobox', {
       name: /^(Account|Счёт)$/,
     })

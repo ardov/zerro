@@ -60,7 +60,7 @@ export function InlineField({
         measure={value || props.placeholder || ' '}
         disabled={disabled}
         aria-label={props['aria-label'] ?? label}
-        aria-invalid={invalid ?? props['aria-invalid']}
+        aria-invalid={invalid || props['aria-invalid']}
         className="max-w-full shrink"
         inputClassName="rounded-ui-control-inner tracking-[inherit] placeholder:text-ui-placeholder focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus disabled:text-current"
       />

@@ -114,7 +114,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
             className={cn(
               'kit-drawer-popup pointer-events-auto relative flex flex-col overflow-hidden rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
               side === 'bottom'
-                ? 'max-h-[calc(100%-32px)] w-full rounded-t-ui-popover'
+                ? 'max-h-[calc(100%-32px)] rounded-t-ui-popover'
                 : 'h-full w-90 max-w-full rounded-ui-popover',
               className,
               // Desktop popup widths must not shrink their mobile sheet.

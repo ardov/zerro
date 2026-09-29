@@ -92,7 +92,7 @@ export const TransactionPreviewDrawer = () => {
       contentClassName="flex-1 p-0"
       label={t('transaction')}
     >
-      <div className="flex min-h-full min-w-0 flex-col">
+      <div className="flex min-h-full flex-col">
         {id && (
           <TransactionPreview
             id={id}

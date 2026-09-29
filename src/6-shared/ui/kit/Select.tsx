@@ -14,6 +14,7 @@ import {
 
 import {
   useSelectField,
+  preventMouseUpSelection,
   selectPanelOutset as panelOutset,
 } from './useSelectField'
 
@@ -162,9 +163,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
   const alignmentEnabled = alignment.enabled
   const renderOption = (item: SelectOption<T>) => (
     <Primitive.Item
-      // A row needs its own click. Releasing the press that opened the popup
-      // must not select an option appearing beneath a stationary pointer.
-      onMouseUp={event => event.preventBaseUIHandler()}
+      onMouseUp={preventMouseUpSelection}
       key={item.value}
       value={item.value}
       label={item.label}

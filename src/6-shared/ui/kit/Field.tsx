@@ -77,6 +77,12 @@ export function FieldSurface(props: FieldSurfaceProps) {
     onMouseDown,
     ...restProps
   } = props
+  const addonClass = cn(
+    'flex shrink-0',
+    addonAlign === 'first-line'
+      ? 'h-(--field-row-height) self-start'
+      : 'self-stretch'
+  )
   return (
     <div
       {...restProps}
@@ -96,15 +102,7 @@ export function FieldSurface(props: FieldSurfaceProps) {
       )}
     >
       {start != null && (
-        <div
-          inert={disabled || undefined}
-          className={cn(
-            'flex shrink-0',
-            addonAlign === 'first-line'
-              ? 'h-(--field-row-height) self-start'
-              : 'self-stretch'
-          )}
-        >
+        <div inert={disabled || undefined} className={addonClass}>
           {start}
         </div>
       )}
@@ -118,15 +116,7 @@ export function FieldSurface(props: FieldSurfaceProps) {
         {children}
       </div>
       {end != null && (
-        <div
-          inert={disabled || undefined}
-          className={cn(
-            'flex shrink-0',
-            addonAlign === 'first-line'
-              ? 'h-(--field-row-height) self-start'
-              : 'self-stretch'
-          )}
-        >
+        <div inert={disabled || undefined} className={addonClass}>
           {end}
         </div>
       )}

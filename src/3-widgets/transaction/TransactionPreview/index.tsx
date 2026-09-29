@@ -7,6 +7,7 @@ import { AmountInlineField } from '@/6-shared/ui/kit/AmountInput'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useShake } from '@/6-shared/ui/useShake'
+import type { SurfaceController } from '@/6-shared/overlays'
 import { FieldAddon } from '@/6-shared/ui/kit/Field'
 import { Textarea } from '@/6-shared/ui/kit/Textarea'
 import {
@@ -98,21 +99,19 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
 }
 
 export const TransactionCreate = ({
-  onClose,
+  popup,
   query,
-  open,
   onCreated,
 }: {
-  onClose: () => void
+  popup: SurfaceController
   query: core.transactions.TTransactionQuery
-  open: boolean
   onCreated: () => void
 }) => (
   <TransactionEditor
-    onClose={onClose}
+    onClose={() => popup.setOpen(false)}
     onOpenOther={() => {}}
     createQuery={query}
-    createOpen={open}
+    createPopup={popup}
     onCreated={onCreated}
   />
 )
@@ -123,7 +122,7 @@ const TransactionEditor = ({
   onOpenOther,
   onSelectSimilar,
   createQuery,
-  createOpen,
+  createPopup,
   onCreated,
 }: {
   tr?: TTransaction
@@ -131,7 +130,7 @@ const TransactionEditor = ({
   onOpenOther: (id: TTransactionId) => void
   onSelectSimilar?: (date: number) => void
   createQuery?: core.transactions.TTransactionQuery
-  createOpen?: boolean
+  createPopup?: SurfaceController
   onCreated?: () => void
 }) => {
   const id = tr?.id ?? ''
@@ -203,7 +202,7 @@ const TransactionEditor = ({
   // its field is right — breaking the same field again says nothing until
   // saving is refused a second time.
   const [marked, setMarked] = useState<readonly TDraftField[]>([])
-  if (createOpen === false && marked.length) setMarked([])
+  if (createPopup?.open === false && marked.length) setMarked([])
   const [headline, shakeHeadline] = useShake<HTMLDivElement>()
   // A transaction arriving from a sync, or the replacement a save just made,
   // replaces what is being edited. Comparing the entity rather than its id:
@@ -447,9 +446,9 @@ const TransactionEditor = ({
                     aria-label={
                       marks.amount
                         ? `${t('amount')}: ${t(`issue_${marks.amount}`)}`
-                        : t('amount')
+                        : undefined
                     }
-                    invalid={!!marks.amount || undefined}
+                    invalid={!!marks.amount}
                   />
                 </div>
               </div>
@@ -502,7 +501,6 @@ const TransactionEditor = ({
             </FieldAddon>
           }
           placeholder={t('comment')}
-          aria-label={t('comment')}
           maxRows={6}
           value={draft.comment ?? ''}
           onChange={event => edit({ comment: event.target.value })}
@@ -537,14 +535,9 @@ const TransactionEditor = ({
       )}
     </div>
   )
-  return createQuery ? (
+  return createPopup ? (
     <DrawerSurface
-      controller={{
-        open: !!createOpen,
-        setOpen: open => {
-          if (!open) onClose()
-        },
-      }}
+      controller={createPopup}
       contentClassName="flex-1 p-0"
       label={t('newTransaction')}
     >

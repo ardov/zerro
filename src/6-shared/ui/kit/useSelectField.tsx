@@ -15,6 +15,14 @@ export function flattenSelectItems<T extends string>(
   )
 }
 
+/** Option rows select on their own click. Releasing the press that opened the
+ * popup must not select an option appearing beneath a stationary pointer. */
+export function preventMouseUpSelection(event: {
+  preventBaseUIHandler: () => void
+}) {
+  event.preventBaseUIHandler()
+}
+
 /** Shared field rules; each primitive owns its popup and keyboard behavior. */
 export function useSelectField<T extends string>(props: SelectControlProps<T>) {
   const size = props.size ?? 'lg'
@@ -31,6 +39,7 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
     return option ? [option] : []
   })
   const selected = values.length === 1 ? selectedItems[0] : undefined
+  const valueIcon = values.length === 0 ? props.emptyIcon : selected?.start
   const reserveStart = options.some(item => item.start != null)
   const unavailable = props.disabled || props.readOnly
   const { open, setOpen } = useOwnedPopup({ popup: props.popup, unavailable })
@@ -65,13 +74,7 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
         required={props.required}
         invalid={props.invalid}
         error={props.error}
-        start={
-          props.showValueIcon !== false
-            ? values.length === 0
-              ? props.emptyIcon
-              : selected?.start
-            : undefined
-        }
+        start={props.showValueIcon === false ? undefined : valueIcon}
         onClear={() => changeValue(props.multiple ? [] : null)}
       />
     ),

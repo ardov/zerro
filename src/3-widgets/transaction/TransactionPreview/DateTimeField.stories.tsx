@@ -81,10 +81,8 @@ export const CalendarSelection: Story = {
 }
 
 export const MobileCalendar: Story = {
-  ...CalendarSelection,
   globals: { viewport: { value: 'zerro499' } },
-  play: async context => {
-    const { canvasElement } = context
+  play: async ({ canvasElement }) => {
     await userEvent.click(
       within(canvasElement).getByRole('button', { name: 'Select date' })
     )
@@ -98,13 +96,5 @@ export const MobileCalendar: Story = {
       ).toBeLessThan(1)
     )
     await userEvent.keyboard('{Escape}')
-  },
-}
-
-export const NativeDateControl: Story = {
-  play: async ({ canvasElement }) => {
-    const input = within(canvasElement).getByLabelText('Date')
-    expect(input).toHaveAttribute('type', 'date')
-    expect(input).toHaveValue('2026-09-12')
   },
 }

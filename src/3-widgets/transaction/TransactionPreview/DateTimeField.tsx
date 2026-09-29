@@ -22,6 +22,14 @@ export type DateTimeFieldProps = {
   className?: string
 }
 
+// Native segmented editing without the browser's picker chrome.
+const nativeControlClass = cn(
+  fieldControlClass,
+  'appearance-none py-3',
+  '[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-inner-spin-button]:appearance-none',
+  '[&::-webkit-datetime-edit]:p-0'
+)
+
 /** Native date and time share one surface. Incomplete dates revert on blur;
  * choosing a calendar day changes only the date. */
 export function DateTimeField(props: DateTimeFieldProps) {
@@ -33,8 +41,8 @@ export function DateTimeField(props: DateTimeFieldProps) {
   const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
   const popup = usePopup()
   const dateRef = useRef<HTMLInputElement>(null)
-  const [draft, setDraft] = useState({ source: date, value: date as string })
-  if (draft.source !== date) setDraft({ source: date, value: date })
+  // A native date input reads as empty while a segment is incomplete.
+  const [blankedDate, setBlankedDate] = useState<TISODate | null>(null)
 
   return (
     <FieldSurface
@@ -75,24 +83,16 @@ export function DateTimeField(props: DateTimeFieldProps) {
       <input
         ref={dateRef}
         type="date"
-        value={draft.value}
+        value={blankedDate === date ? '' : date}
         aria-label={t('date')}
         onChange={event => {
           const next = event.target.value
           const complete = next !== '' && event.target.validity.valid
-          setDraft({
-            source: complete ? (next as TISODate) : date,
-            value: next,
-          })
+          setBlankedDate(complete ? null : date)
           if (complete && next !== date) onDateChange(next as TISODate)
         }}
-        onBlur={() => setDraft({ source: date, value: date })}
-        className={cn(
-          fieldControlClass,
-          'flex-1 appearance-none py-3',
-          '[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-inner-spin-button]:appearance-none',
-          '[&::-webkit-datetime-edit]:p-0'
-        )}
+        onBlur={() => setBlankedDate(null)}
+        className={cn(nativeControlClass, 'flex-1')}
       />
       <input
         type="time"
@@ -100,10 +100,8 @@ export function DateTimeField(props: DateTimeFieldProps) {
         value={time}
         onChange={event => onTimeChange(event.target.value)}
         className={cn(
-          fieldControlClass,
-          'ml-3 w-auto shrink-0 appearance-none py-3 text-right text-ui-secondary',
-          '[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-inner-spin-button]:appearance-none',
-          '[&::-webkit-datetime-edit]:p-0 [&::-webkit-date-and-time-value]:text-right'
+          nativeControlClass,
+          'ml-3 w-auto shrink-0 text-right text-ui-secondary [&::-webkit-date-and-time-value]:text-right'
         )}
       />
     </FieldSurface>
