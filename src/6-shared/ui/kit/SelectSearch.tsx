@@ -17,6 +17,10 @@ export type SelectSearchOptions<T extends string> = {
   label?: string
   placeholder?: string
   autoFocus?: boolean
+  /** Query restored on each opening; changes while open do not replace typing. */
+  initialQuery?: string
+  /** Highlight matches while typing; Enter also accepts a sole initial result. */
+  autoHighlight?: boolean
   /** Receives the full source. Return a filtered/ranked result; no second filter runs. */
   filter?: (
     items: readonly SelectItem<T>[],
@@ -88,9 +92,18 @@ export function SelectSearch<T extends string>(
   } = useSelectField(props)
   const input = useRef<HTMLInputElement>(null)
   const popup = useRef<HTMLDivElement>(null)
-  const [session, setSession] = useState({ open, query: '', expanded: false })
+  const [session, setSession] = useState({
+    open,
+    query: search.initialQuery ?? '',
+    expanded: false,
+  })
   // Also reset when the consumer closes the popup through its controlled prop.
-  if (session.open !== open) setSession({ open, query: '', expanded: false })
+  if (session.open !== open)
+    setSession({
+      open,
+      query: open ? (search.initialQuery ?? '') : '',
+      expanded: false,
+    })
   const { query, expanded } = session
   const labels = useMemo(
     () => new Map(options.map(option => [option.value, option.label])),
@@ -122,11 +135,16 @@ export function SelectSearch<T extends string>(
     <Field.Root {...fieldProps}>
       <Combobox.Root<T, boolean>
         multiple={props.multiple}
+        autoHighlight={search.autoHighlight}
         items={shownOptions.map(item => item.value)}
         filter={null}
         value={value}
         onValueChange={changeValue}
-        itemToStringLabel={item => labels.get(item) ?? item}
+        itemToStringLabel={item =>
+          shownOptions.find(option => option.value === item)?.label ??
+          labels.get(item) ??
+          item
+        }
         inputValue={query}
         onInputValueChange={(next, details) => {
           // Selection must not replace a search query with the option label.
@@ -185,6 +203,28 @@ export function SelectSearch<T extends string>(
                     >
                       <Combobox.Input
                         ref={input}
+                        onKeyDown={event => {
+                          // Base UI highlights while typing, not for a query
+                          // supplied on opening. Enter can still take its sole match.
+                          if (
+                            search.autoHighlight &&
+                            !props.multiple &&
+                            event.key === 'Enter' &&
+                            !event.nativeEvent.isComposing &&
+                            event.keyCode !== 229 &&
+                            !event.defaultPrevented &&
+                            !event.currentTarget.getAttribute(
+                              'aria-activedescendant'
+                            ) &&
+                            shownOptions.length === 1 &&
+                            !shownOptions[0].disabled
+                          ) {
+                            event.preventDefault()
+                            event.preventBaseUIHandler()
+                            changeValue(shownOptions[0].value)
+                            setOpen(false)
+                          }
+                        }}
                         aria-label={searchLabel}
                         placeholder={search.placeholder ?? searchLabel}
                         className={fieldControlClass}

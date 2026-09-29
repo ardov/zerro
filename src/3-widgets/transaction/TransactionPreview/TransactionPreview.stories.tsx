@@ -158,45 +158,34 @@ export const MerchantPicker: Story = {
     const canvas = within(canvasElement)
     const body = within(document.body)
     await userEvent.click(
-      await canvas.findByRole('combobox', { name: 'Place' })
+      await canvas.findByRole('combobox', { name: /^Place/ })
     )
-
-    const list = await body.findByRole('listbox')
     const search = await body.findByRole('combobox', { name: 'Find or create' })
-    const field = search.closest('[data-slot="filled-field"]')!
-    // The surface arrives scaled, so nothing is measured until it has settled:
-    // a rect read mid-entrance is not the layout.
-    const surface = field.closest('.scroll-fade')!
+    await userEvent.clear(search)
+    const showAll = body.queryByRole('button', { name: 'Show all' })
+    if (showAll) await userEvent.click(showAll)
+    const list = await body.findByRole('listbox')
+    // Find the scroll owner by behavior rather than the old field's CSS classes.
+    let scroller = list
+    while (
+      getComputedStyle(scroller).overflowY !== 'auto' &&
+      scroller.parentElement
+    ) {
+      scroller = scroller.parentElement
+    }
     await waitFor(() =>
-      expect(getComputedStyle(surface).transform).toBe('none')
+      expect(scroller.scrollHeight).toBeGreaterThan(scroller.clientHeight)
     )
+    const before = search.getBoundingClientRect().top
+    scroller.scrollTop = scroller.scrollHeight
+    await waitFor(() => expect(scroller.scrollTop).toBeGreaterThan(0))
+    await expect(search.getBoundingClientRect().top).toBeCloseTo(before, 0)
+    await expect(search).toBeVisible()
+    scroller.scrollTop = 0
     await waitFor(() =>
-      expect(list.scrollHeight).toBeGreaterThan(list.clientHeight)
-    )
-
-    const rowTop = () =>
-      within(list).getAllByRole('option')[0].getBoundingClientRect().top
-    const fieldBox = () => field.getBoundingClientRect()
-
-    // Everything stays inside the paper, and the search sits above the rows
-    // rather than over them.
-    const paper = surface.getBoundingClientRect()
-    expect(fieldBox().top).toBeGreaterThanOrEqual(paper.top)
-    expect(list.getBoundingClientRect().bottom).toBeLessThanOrEqual(
-      paper.bottom + 1
-    )
-    expect(fieldBox().bottom).toBeLessThanOrEqual(rowTop() + 1)
-
-    // Scrolling the rows leaves the search where it was, and the top of the
-    // list comes back.
-    const before = fieldBox().top
-    list.scrollTop = list.scrollHeight
-    await waitFor(() => expect(fieldBox().top).toBeCloseTo(before, 0))
-    // Rows running off the top are faded there, not cut.
-    await waitFor(() => expect(list.dataset.fade).toBe('top'))
-    list.scrollTop = 0
-    await waitFor(() =>
-      expect(fieldBox().bottom).toBeLessThanOrEqual(rowTop() + 1)
+      expect(
+        within(list).getAllByRole('option')[0].getBoundingClientRect().top
+      ).toBeGreaterThanOrEqual(search.getBoundingClientRect().bottom)
     )
   },
 }

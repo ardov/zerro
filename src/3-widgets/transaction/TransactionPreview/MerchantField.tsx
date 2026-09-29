@@ -1,50 +1,25 @@
-import type { FC } from 'react'
-import { Field } from '@base-ui/react/field'
-import { Combobox } from '@base-ui/react/combobox'
-import { useMemo, useRef, useState } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TMerchantId } from '@/6-shared/types'
-import { usePopup } from '@/6-shared/overlays'
 import { AddIcon, PersonIcon, PlaceIcon } from '@/6-shared/ui/Icons'
-import type { FilledFieldState } from '@/6-shared/ui/FilledField'
 import {
-  FilledButton,
-  filledFieldClass,
-  filledControlClass,
-} from '@/6-shared/ui/FilledField'
-import {
-  ListRowBacking,
-  ListRowIcon,
-  listRowClass,
-  ListRowText,
-} from '@/6-shared/ui/ListRow'
-import {
-  surfacePadding,
-  popupPositioning,
-  anchoredSurfaceClass,
-  overAnchor,
-} from '@/6-shared/ui/overlaySurface'
-import { cn } from '@/6-shared/ui/shadcn/utils'
-import { useScrollFade } from '@/6-shared/ui/useScrollFade'
+  Select,
+  type SelectOption,
+  type SelectProps,
+} from '@/6-shared/ui/kit/Select'
 import { core } from '@/zerro-core/redux'
 import type { TDraftMerchant, TNamedMerchant } from './draft'
 import { MerchantFavicon } from './MerchantFavicon'
 import { initialMerchantSearch, merchantMatchPriority } from './merchantSearch'
 
-type TMerchantOption = { id: TMerchantId; title: string }
-
-/** What a row does when it is chosen. */
-type TRow =
-  | { kind: 'merchant'; merchant: TMerchantOption }
-  | { kind: 'create'; title: string }
-  | { kind: 'clear' }
-
-export type MerchantFieldProps = FilledFieldState & {
+export type MerchantFieldProps = Pick<
+  SelectProps,
+  'invalid' | 'error' | 'disabled' | 'readOnly'
+> & {
   merchant: TDraftMerchant
-  /** The free text an old transaction may carry instead of a merchant. */
+  /** Legacy text is preserved until the user explicitly chooses or clears. */
   payee: string | null
   originalPayee: string | null
-  /** Debts and everything else are with different people. */
   debt: boolean
   onChange: (named: TNamedMerchant | null) => void
   placeholder: string
@@ -52,266 +27,147 @@ export type MerchantFieldProps = FilledFieldState & {
 }
 
 const { normalizePayee } = core.merchants
+// Prefix every persisted ID too, so transient choices cannot collide with one.
+const merchantKey = (id: string) => `merchant:${id}`
+const createKey = (title: string) => `create:${title}`
 
-/** Who the operation is with, chosen from the merchants ZenMoney knows.
- *
- * A picker rather than a text field: typing searches, and a name that matches
- * nothing offers to become a merchant instead of settling for a bare payee.
- * The list opens on the people the operation is likely to be with — the ones
- * debts have been with, the places money has been spent — and everything else
- * is one row away. */
-export const MerchantField: FC<MerchantFieldProps> = ({
-  merchant,
-  payee,
-  originalPayee,
-  debt,
-  onChange,
-  placeholder,
-  className,
-  ...state
-}) => {
+/** The kit owns selection mechanics; merchant history and draft intent stay here. */
+export function MerchantField(props: MerchantFieldProps) {
+  const {
+    merchant,
+    payee,
+    originalPayee,
+    debt,
+    onChange,
+    placeholder,
+    ...restProps
+  } = props
   const { t } = useTranslation('transaction')
   const merchants = core.merchants.useAll()
   const usage = core.merchants.useUsage()
-  const { open, setOpen } = usePopup()
-  const [search, setSearch] = useState('')
-  const [showAll, setShowAll] = useState(false)
-  const searchRef = useRef<HTMLInputElement>(null)
-  const fadeRef = useScrollFade<HTMLDivElement>()
-
   const all = useMemo(
     () =>
-      Object.values(merchants)
-        .map(option => ({ id: option.id, title: option.title }))
-        .sort((a, b) => a.title.localeCompare(b.title)),
+      Object.values(merchants).sort((a, b) => a.title.localeCompare(b.title)),
     [merchants]
   )
-
   const chosen = merchant && 'id' in merchant ? merchant.id : undefined
   const pending = merchant && 'title' in merchant ? merchant.title : undefined
   const shown = pending ?? (chosen && merchants[chosen]?.title) ?? payee ?? ''
-  const unlinkedPayee = !merchant && !!payee
-  const unlinkedDomain = useMemo(() => {
-    if (merchant) return undefined
-    return core.merchants.findWebsiteDomain(payee, originalPayee)
-  }, [merchant, originalPayee, payee])
-
-  // Searching looks through every merchant: the operation's kind decides what
-  // the list opens on, not what it can reach.
-  const query = normalizePayee(search)
-  const found = query
-    ? all
-        .map(option => ({
-          option,
-          priority: merchantMatchPriority(
-            normalizePayee(option.title),
-            usage[option.id],
-            query
-          ),
-        }))
-        .filter(match => Number.isFinite(match.priority))
-        .sort(
-          (a, b) =>
-            a.priority - b.priority ||
-            a.option.title.localeCompare(b.option.title)
-        )
-        .map(match => match.option)
-    : null
-  const fits = all.filter(option =>
-    debt ? usage[option.id]?.debt : usage[option.id]?.regular
-  )
-  // The kind is a preference, not a wall: an operation whose kind has met
-  // nobody yet opens on everyone rather than on an empty list.
-  const narrowed = !showAll && fits.length > 0 && fits.length < all.length
-  const listed = found ?? (narrowed ? fits : all)
-  const creating =
-    query && !all.some(option => normalizePayee(option.title) === query)
-      ? search.trim()
-      : null
-
-  const rows: TRow[] = [
-    ...(!query && shown ? [{ kind: 'clear' as const }] : []),
-    ...listed.map(option => ({ kind: 'merchant' as const, merchant: option })),
-    ...(creating ? [{ kind: 'create' as const, title: creating }] : []),
-  ]
-
-  // Matching merchants precede the create action so Base UI's automatic
-  // highlight commits an existing match on Enter.
-  const [wasOpen, setWasOpen] = useState(open)
-  if (wasOpen !== open) {
-    setWasOpen(open)
-    if (open) {
-      setSearch(initialMerchantSearch(Boolean(merchant), payee))
-      setShowAll(false)
-    }
-  }
-
-  const choose = (row: TRow) => {
-    if (row.kind === 'clear') return onChange(null)
-    if (row.kind === 'create') return onChange({ title: row.title })
-    onChange({ id: row.merchant.id, title: row.merchant.title })
-  }
-
-  /** A merchant money has been spent with is a place; one only ever met over
-   * a debt is a person. One that does not exist yet takes the glyph of the
-   * operation naming it. */
+  const unlinked = !merchant && !!payee
   const glyph = (id?: TMerchantId) =>
     (id ? usage[id]?.regular : !debt) ? (
       <PlaceIcon size={20} />
     ) : (
       <PersonIcon size={20} />
     )
-
-  const rowIcon = (row: TRow) => {
-    if (row.kind === 'create') return <AddIcon size={20} />
-    if (row.kind === 'merchant') {
-      return (
-        <MerchantFavicon
-          domain={usage[row.merchant.id]?.website?.domain}
-          fallback={glyph(row.merchant.id)}
-        />
-      )
-    }
-    return null
-  }
-
-  const rowLabel = (row: TRow) => {
-    if (row.kind === 'merchant') return row.merchant.title
-    if (row.kind === 'create') return t('createMerchant', { title: row.title })
-    return t('clearMerchant')
-  }
+  const toOption = (option: (typeof all)[number]): SelectOption => ({
+    value: merchantKey(option.id),
+    label: option.title,
+    start: (
+      <MerchantFavicon
+        domain={usage[option.id]?.website?.domain}
+        fallback={glyph(option.id)}
+      />
+    ),
+  })
+  const options = all.map(toOption)
+  const value = chosen
+    ? merchantKey(chosen)
+    : pending
+      ? createKey(pending)
+      : shown
+        ? 'unlinked'
+        : null
+  // A draft or bare payee needs a closed-field representation, not a search result.
+  const items =
+    chosen || !value
+      ? options
+      : [
+          ...options,
+          {
+            value,
+            label: shown,
+            start: (
+              <MerchantFavicon
+                domain={
+                  unlinked
+                    ? core.merchants.findWebsiteDomain(payee, originalPayee)
+                    : undefined
+                }
+                fallback={glyph()}
+              />
+            ),
+          },
+        ]
 
   return (
-    <Field.Root
-      invalid={state.invalid}
-      disabled={state.disabled}
-      className="contents"
-    >
-      <Combobox.Root<TRow>
-        readOnly={state.readOnly}
-        items={rows}
-        filter={null}
-        autoHighlight
-        value={
-          chosen
-            ? { kind: 'merchant', merchant: { id: chosen, title: shown } }
-            : null
+    <Select
+      {...restProps}
+      label={placeholder}
+      placeholder={placeholder}
+      clearLabel={t('clearMerchant')}
+      value={value}
+      items={items}
+      renderValue={() =>
+        shown ? (
+          <span className={unlinked ? 'italic' : undefined}>{shown}</span>
+        ) : null
+      }
+      onChange={next => {
+        if (next === null) onChange(null)
+        else if (next.startsWith('create:'))
+          onChange({ title: next.slice('create:'.length) })
+        else if (next.startsWith('merchant:')) {
+          const selected = merchants[next.slice('merchant:'.length)]
+          if (selected) onChange({ id: selected.id, title: selected.title })
         }
-        isItemEqualToValue={(a, b) => rowKey(a) === rowKey(b)}
-        itemToStringLabel={rowLabel}
-        inputValue={search}
-        onInputValueChange={(value, details) => {
-          if (
-            details.reason === 'input-change' ||
-            details.reason === 'input-clear'
-          )
-            setSearch(value)
-        }}
-        open={open}
-        onOpenChange={setOpen}
-        onValueChange={row => {
-          if (row) choose(row)
-        }}
-        modal
-      >
-        <Combobox.Trigger
-          render={
-            <FilledButton
-              {...state}
-              aria-label={placeholder}
-              icon={
-                <MerchantFavicon
-                  domain={
-                    chosen ? usage[chosen]?.website?.domain : unlinkedDomain
-                  }
-                  fallback={glyph(chosen)}
-                />
-              }
-              className={className}
-            >
-              {shown ? (
-                <span className={cn(unlinkedPayee && 'italic')}>{shown}</span>
-              ) : (
-                <span className="text-muted-foreground">{placeholder}</span>
-              )}
-            </FilledButton>
+      }}
+      emptyText={t('noMerchants')}
+      search={{
+        label: t('findMerchant'),
+        placeholder: t('findMerchant'),
+        initialQuery: initialMerchantSearch(Boolean(merchant), payee),
+        autoHighlight: true,
+        showMoreLabel: t('showAllMerchants'),
+        filter: (_items, search, { expanded }) => {
+          const query = normalizePayee(search)
+          if (query) {
+            const matches = all
+              .map(option => ({
+                option,
+                priority: merchantMatchPriority(
+                  normalizePayee(option.title),
+                  usage[option.id],
+                  query
+                ),
+              }))
+              .filter(match => Number.isFinite(match.priority))
+              .sort(
+                (a, b) =>
+                  a.priority - b.priority ||
+                  a.option.title.localeCompare(b.option.title)
+              )
+              .map(match => toOption(match.option))
+            if (!all.some(option => normalizePayee(option.title) === query)) {
+              matches.push({
+                value: createKey(search.trim()),
+                label: t('createMerchant', { title: search.trim() }),
+                start: <AddIcon size={20} />,
+              })
+            }
+            return { items: matches }
           }
-        />
-        <Combobox.Portal>
-          <Combobox.Positioner
-            {...popupPositioning}
-            side="bottom"
-            align="start"
-            alignOffset={-surfacePadding}
-            sideOffset={data => overAnchor(data) - surfacePadding}
-            collisionAvoidance={{ side: 'shift', align: 'shift' }}
-          >
-            <Combobox.Popup
-              aria-label={placeholder}
-              className={cn(
-                anchoredSurfaceClass,
-                'min-w-[calc(var(--anchor-width)+8px)] p-1'
-              )}
-            >
-              <div className="flex max-h-[60vh] flex-col">
-                <div
-                  data-slot="filled-field"
-                  className={cn(filledFieldClass, 'mb-1 shrink-0')}
-                >
-                  <Combobox.Input
-                    ref={searchRef}
-                    placeholder={t('findMerchant')}
-                    aria-label={t('findMerchant')}
-                    className={filledControlClass}
-                  />
-                </div>
-                <Combobox.List
-                  ref={fadeRef}
-                  className="scroll-fade hidden-scroll -mx-1 my-0 block min-h-0 list-none overflow-x-hidden overflow-y-auto px-1 py-0 outline-none"
-                >
-                  {(row: TRow) => {
-                    const selected =
-                      row.kind === 'merchant' && row.merchant.id === chosen
-                    const icon = rowIcon(row)
-                    return (
-                      <Combobox.Item
-                        key={rowKey(row)}
-                        value={row}
-                        className={listRowClass}
-                      >
-                        <ListRowBacking selected={selected} />
-                        {icon && <ListRowIcon>{icon}</ListRowIcon>}
-                        <ListRowText className="truncate">
-                          {rowLabel(row)}
-                        </ListRowText>
-                      </Combobox.Item>
-                    )
-                  }}
-                </Combobox.List>
-                <Combobox.Empty className="m-0 px-3 py-2 text-body-sm text-muted-foreground">
-                  {t('noMerchants')}
-                </Combobox.Empty>
-                {!found && narrowed && (
-                  <button
-                    type="button"
-                    className={listRowClass}
-                    onClick={() => {
-                      setShowAll(true)
-                      searchRef.current?.focus()
-                    }}
-                  >
-                    {t('showAllMerchants')}
-                  </button>
-                )}
-              </div>
-            </Combobox.Popup>
-          </Combobox.Positioner>
-        </Combobox.Portal>
-      </Combobox.Root>
-    </Field.Root>
+          const fits = all.filter(option =>
+            debt ? usage[option.id]?.debt : usage[option.id]?.regular
+          )
+          const narrowed =
+            !expanded && fits.length > 0 && fits.length < all.length
+          return {
+            items: (narrowed ? fits : all).map(toOption),
+            hasMore: narrowed,
+          }
+        },
+      }}
+    />
   )
-}
-
-function rowKey(row: TRow): string {
-  return row.kind === 'merchant' ? row.merchant.id : row.kind
 }

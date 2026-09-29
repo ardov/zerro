@@ -3,7 +3,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { core } from '@/zerro-core/redux'
 import type { TNamedMerchant } from './draft'
-import { expect, within, userEvent, waitFor, fireEvent } from 'storybook/test'
+import {
+  expect,
+  within,
+  userEvent,
+  waitFor,
+  fireEvent,
+  fn,
+} from 'storybook/test'
 import { MerchantField } from './MerchantField'
 
 const meta = {
@@ -26,7 +33,7 @@ export const BarePayee: Story = {
     originalPayee: null,
     debt: false,
     placeholder: 'Place',
-    onChange: () => {},
+    onChange: fn(),
   },
   play: async ({ canvasElement }) => {
     const payee = within(canvasElement).getByText('Temporary place')
@@ -75,7 +82,7 @@ export const SearchAndCreate: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(document.body)
-    const trigger = canvas.getByRole('combobox', { name: 'Place' })
+    const trigger = canvas.getByRole('combobox', { name: /^Place/ })
     const firstName = canvas.getByTestId('first-name').textContent!
     await userEvent.click(trigger)
     let input = await body.findByRole('combobox', { name: 'Find or create' })
@@ -102,6 +109,7 @@ export const SearchAndCreate: Story = {
     await userEvent.click(trigger)
     input = await body.findByRole('combobox', { name: 'Find or create' })
     await userEvent.type(input, 'Unique new merchant 987')
+    await expect(body.getAllByRole('option')).toHaveLength(1)
     await waitFor(() => expect(input).toHaveAttribute('aria-activedescendant'))
     fireEvent.keyDown(input, {
       key: 'Enter',
@@ -125,12 +133,69 @@ export const SearchAndCreate: Story = {
     await expect(canvas.getByTestId('chosen')).toHaveTextContent(
       'Unique new merchant 987'
     )
-    await userEvent.click(trigger)
-    await userEvent.click(
-      await body.findByRole('option', { name: 'Leave empty' })
-    )
+    await userEvent.click(canvas.getByRole('button', { name: 'Leave empty' }))
     await waitFor(() =>
       expect(canvas.getByTestId('chosen')).toHaveTextContent('none')
     )
+    await expect(body.queryByRole('listbox')).not.toBeInTheDocument()
   },
+}
+
+export const CreateWithArrowKeys: Story = {
+  args: BarePayee.args,
+  render: () => <PickerHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+    const name = canvas.getByTestId('first-name').textContent!
+    const trigger = canvas.getByRole('combobox', { name: /^Place/ })
+    await userEvent.click(trigger)
+    const input = await body.findByRole('combobox', { name: 'Find or create' })
+    await userEvent.type(input, name)
+    await expect(body.queryByRole('option', { name: /^Create / })).toBeNull()
+    await userEvent.clear(input)
+    await userEvent.type(input, name.slice(0, -1))
+    const create = await body.findByRole('option', { name: /^Create / })
+    const options = body.getAllByRole('option')
+    await expect(options.length).toBeGreaterThan(1)
+    // The first match is already active; arrows can reach the final create choice.
+    for (let i = 1; i < options.length; i++)
+      await userEvent.keyboard('{ArrowDown}')
+    await expect(input).toHaveAttribute('aria-activedescendant', create.id)
+    await userEvent.keyboard('{Enter}')
+    await expect(canvas.getByTestId('chosen')).toHaveTextContent(
+      JSON.stringify({ title: name.slice(0, -1) })
+    )
+    await waitFor(() => expect(trigger).toHaveFocus())
+  },
+}
+
+export const LegacySearch: Story = {
+  ...BarePayee,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+    const trigger = canvas.getByRole('combobox', { name: /^Place/ })
+    await userEvent.click(trigger)
+    const input = await body.findByRole('combobox', { name: 'Find or create' })
+    await expect(input).toHaveValue('Temporary place')
+    await userEvent.clear(input)
+    await userEvent.type(input, 'Another search')
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(input).not.toBeInTheDocument())
+    await userEvent.click(trigger)
+    await expect(
+      await body.findByRole('combobox', { name: 'Find or create' })
+    ).toHaveValue('Temporary place')
+    await userEvent.keyboard('{Enter}')
+    await expect(args.onChange).toHaveBeenCalledWith({
+      title: 'Temporary place',
+    })
+    await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
+  },
+}
+
+export const MobileSearchAndCreate: Story = {
+  ...SearchAndCreate,
+  globals: { viewport: { value: 'mobile1' } },
 }

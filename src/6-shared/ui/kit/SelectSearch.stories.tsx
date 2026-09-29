@@ -2,7 +2,14 @@ import { accountSearch } from './selectSearchFixtures'
 import { usePopup } from '@/6-shared/overlays'
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, within, waitFor } from 'storybook/test'
+import {
+  expect,
+  fireEvent,
+  fn,
+  userEvent,
+  within,
+  waitFor,
+} from 'storybook/test'
 import { Plus, Wallet } from 'lucide-react'
 import { Select, type SelectItem } from './Select'
 import { Button, IconButton } from './Button'
@@ -433,5 +440,64 @@ export const LongList: Story = {
       start: index % 3 ? undefined : <Wallet />,
     })),
     search: true,
+  },
+}
+
+export const InitialQuerySelection: Story = {
+  args: {
+    items: [{ value: 'unique', label: 'Unique account' }],
+    onChange: fn(),
+    search: { initialQuery: 'Unique', autoHighlight: true },
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('combobox', { name: 'Account' })
+    await userEvent.click(trigger)
+    let search = await body.findByRole('combobox', { name: 'Search Account' })
+    await expect(search).toHaveValue('Unique')
+    await expect(search).not.toHaveAttribute('aria-activedescendant')
+    await fireEvent.keyDown(search, { key: 'Enter', isComposing: true })
+    await fireEvent.keyDown(search, { key: 'Enter', keyCode: 229 })
+    await expect(args.onChange).not.toHaveBeenCalled()
+    await expect(body.getByRole('listbox')).toBeVisible()
+    await userEvent.type(search, ' edited')
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(body.queryByRole('listbox')).not.toBeInTheDocument()
+    )
+    await expect(args.onChange).not.toHaveBeenCalled()
+    await userEvent.click(trigger)
+    search = await body.findByRole('combobox', { name: 'Search Account' })
+    await expect(search).toHaveValue('Unique')
+    await expect(search).not.toHaveAttribute('aria-activedescendant')
+    await userEvent.keyboard('{Enter}')
+    await expect(args.onChange).toHaveBeenCalledTimes(1)
+    await expect(args.onChange).toHaveBeenCalledWith('unique')
+    await waitFor(() =>
+      expect(body.queryByRole('listbox')).not.toBeInTheDocument()
+    )
+  },
+}
+
+export const InitialQueryDisabled: Story = {
+  args: {
+    items: [{ value: 'unique', label: 'Unique account', disabled: true }],
+    onChange: fn(),
+    search: { initialQuery: 'Unique', autoHighlight: true },
+  },
+  play: async ({ canvasElement, args }) => {
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      within(canvasElement).getByRole('combobox', { name: 'Account' })
+    )
+    const search = await body.findByRole('combobox', { name: 'Search Account' })
+    await expect(search).toHaveValue('Unique')
+    await expect(search).not.toHaveAttribute('aria-activedescendant')
+    await userEvent.keyboard('{Enter}')
+    await expect(args.onChange).not.toHaveBeenCalled()
+    await waitFor(() =>
+      expect(body.queryByRole('listbox')).not.toBeInTheDocument()
+    )
   },
 }
