@@ -9,7 +9,7 @@ import {
 } from '@/6-shared/ui/kit/Select'
 import { core } from '@/zerro-core/redux'
 import type { TDraftMerchant, TNamedMerchant } from './draft'
-import { MerchantFavicon } from './MerchantFavicon'
+import { Favicon } from '@/6-shared/ui/kit/Favicon'
 import { initialMerchantSearch, merchantMatchPriority } from './merchantSearch'
 
 export type MerchantFieldProps = Pick<
@@ -64,7 +64,7 @@ export function MerchantField(props: MerchantFieldProps) {
     value: merchantKey(option.id),
     label: option.title,
     start: (
-      <MerchantFavicon
+      <Favicon
         domain={usage[option.id]?.website?.domain}
         fallback={glyph(option.id)}
       />
@@ -88,7 +88,7 @@ export function MerchantField(props: MerchantFieldProps) {
             value,
             label: shown,
             start: (
-              <MerchantFavicon
+              <Favicon
                 domain={
                   unlinked
                     ? core.merchants.findWebsiteDomain(payee, originalPayee)

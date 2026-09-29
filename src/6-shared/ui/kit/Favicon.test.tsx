@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom'
 import { fireEvent, render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { MerchantFavicon } from './MerchantFavicon'
+import { Favicon } from './Favicon'
 
 const fallback = <span data-testid="fallback">fallback</span>
 
@@ -11,11 +11,15 @@ function favicon(container: HTMLElement) {
   return image
 }
 
-describe('MerchantFavicon', () => {
+describe('Favicon', () => {
+  it('keeps the fallback without requesting an image when no domain exists', () => {
+    const view = render(<Favicon fallback={fallback} />)
+    expect(view.container.querySelector('img')).toBeNull()
+    expect(view.getByTestId('fallback')).toBeVisible()
+  })
+
   it('tries 48px, then 32px, then keeps the fallback', () => {
-    const view = render(
-      <MerchantFavicon domain="amazon.com" fallback={fallback} />
-    )
+    const view = render(<Favicon domain="amazon.com" fallback={fallback} />)
 
     expect(favicon(view.container).src).toContain('amazon.com&sz=48')
     expect(view.getByTestId('fallback')).toBeVisible()
@@ -29,14 +33,12 @@ describe('MerchantFavicon', () => {
   })
 
   it('shows the favicon only after it loads and retries for a new domain', () => {
-    const view = render(
-      <MerchantFavicon domain="amazon.com" fallback={fallback} />
-    )
+    const view = render(<Favicon domain="amazon.com" fallback={fallback} />)
 
     fireEvent.load(favicon(view.container))
-    expect(view.queryByTestId('fallback')).toBeNull()
+    expect(view.getByTestId('fallback').parentElement).toHaveClass('opacity-0')
 
-    view.rerender(<MerchantFavicon domain="paypal.com" fallback={fallback} />)
+    view.rerender(<Favicon domain="paypal.com" fallback={fallback} />)
     expect(favicon(view.container).src).toContain('paypal.com&sz=48')
     expect(view.getByTestId('fallback')).toBeVisible()
   })
