@@ -364,7 +364,7 @@ const TransactionEditor = ({
                 value={draft.fromAccount}
                 excludeIds={[...excludedAccounts, draft.toAccount]}
                 onChange={account =>
-                  setDraft(setTransferAccount(draft, 'from', account, ctx))
+                  setDraft(setTransferAccount(draft, 'from', account))
                 }
               />
               <AmountField
@@ -390,7 +390,7 @@ const TransactionEditor = ({
                 value={draft.toAccount}
                 excludeIds={[...excludedAccounts, draft.fromAccount]}
                 onChange={account =>
-                  setDraft(setTransferAccount(draft, 'to', account, ctx))
+                  setDraft(setTransferAccount(draft, 'to', account))
                 }
               />
               <AmountField
@@ -408,15 +408,17 @@ const TransactionEditor = ({
             {/* Centred on the seam between the two halves, and it turns the
                 transfer around rather than turning the arrow around: the
                 arrow states which way money moves, and that never changes. */}
-            <IconButton
-              variant="secondary"
-              size="sm"
-              label={t('btnSwap')}
-              onClick={() => setDraft(swapTransferSides(draft))}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-ui-card"
-            >
-              <ArrowDownwardIcon size={20} />
-            </IconButton>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ui-card p-0.5">
+              <IconButton
+                variant="secondary"
+                size="sm"
+                label={t('btnSwap')}
+                onClick={() => setDraft(swapTransferSides(draft))}
+                className="rounded-full border-0"
+              >
+                <ArrowDownwardIcon size={20} />
+              </IconButton>
+            </div>
           </div>
         ) : (
           <>

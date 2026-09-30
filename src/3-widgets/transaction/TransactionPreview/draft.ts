@@ -219,24 +219,28 @@ export function setDraftType(
   if (type === draft.type) return draft
 
   if (type === TrType.Transfer) {
-    const fromAccount = draft.account
-    const toAccount =
-      draft.toAccount && draft.toAccount !== fromAccount
-        ? draft.toAccount
-        : otherAccount(fromAccount, ctx)
-    const fromAmount = draft.amount || draft.fromAmount
+    const arriving = isIncoming(draft.type)
+    const account = draft.account
+    const previousOther = arriving ? draft.fromAccount : draft.toAccount
+    const other =
+      previousOther && previousOther !== account
+        ? previousOther
+        : otherAccount(account, ctx)
+    const amount = draft.amount
+    const previousAmount = arriving ? draft.fromAmount : draft.toAmount
+    const otherAmount =
+      draft.fromAmount !== draft.toAmount
+        ? previousAmount
+        : sameCurrency(account, other, ctx)
+          ? amount
+          : previousAmount || amount
     return {
       ...draft,
       type,
-      fromAccount,
-      toAccount,
-      fromAmount,
-      // One currency makes the two sides one number. Two make them two, and
-      // the second is whatever the transfer last had rather than a conversion
-      // nothing here knows the rate for.
-      toAmount: sameCurrency(fromAccount, toAccount, ctx)
-        ? fromAmount
-        : draft.toAmount || fromAmount,
+      fromAccount: arriving ? other : account,
+      toAccount: arriving ? account : other,
+      fromAmount: arriving ? otherAmount : amount,
+      toAmount: arriving ? amount : otherAmount,
     }
   }
 
@@ -282,21 +286,17 @@ export function swapTransferSides(draft: TTransactionDraft): TTransactionDraft {
   }
 }
 
-/** Sets one side of a transfer's amount, and follows it with the other when
- * the two are one number rather than two.
- *
- * One currency on both ends makes them one: 500 roubles into roubles cannot
- * be 500 out and 400 in. Across currencies they are two even when they read
- * the same — 100 → 100 between roubles and euros is a placeholder, and the
- * first real figure typed into one side is the one that must not be copied
- * over the other. */
+/** Equal amounts in the same currency follow outgoing edits. Incoming edits
+ * stay independent, as do transfers whose amounts already differ. */
 export function setTransferAmount(
   draft: TTransactionDraft,
   side: 'from' | 'to',
   amount: number,
   ctx: TDraftContext
 ): TTransactionDraft {
-  const mirrored = sameCurrency(draft.fromAccount, draft.toAccount, ctx)
+  const mirrored =
+    draft.fromAmount === draft.toAmount &&
+    sameCurrency(draft.fromAccount, draft.toAccount, ctx)
   if (side === 'from') {
     return {
       ...draft,
@@ -307,7 +307,6 @@ export function setTransferAmount(
   return {
     ...draft,
     toAmount: amount,
-    fromAmount: mirrored ? amount : draft.fromAmount,
   }
 }
 
@@ -316,21 +315,14 @@ export function setTransferAmount(
 export function setTransferAccount(
   draft: TTransactionDraft,
   side: 'from' | 'to',
-  account: TAccountId,
-  ctx: TDraftContext
+  account: TAccountId
 ): TTransactionDraft {
   const other = side === 'from' ? draft.toAccount : draft.fromAccount
-  const next =
-    account === other
-      ? swapTransferSides(draft)
-      : side === 'from'
-        ? { ...draft, fromAccount: account }
-        : { ...draft, toAccount: account }
-  // The currencies may have just come together, and then the two amounts are
-  // one number again.
-  return sameCurrency(next.fromAccount, next.toAccount, ctx)
-    ? { ...next, toAmount: next.fromAmount }
-    : next
+  return account === other
+    ? swapTransferSides(draft)
+    : side === 'from'
+      ? { ...draft, fromAccount: account }
+      : { ...draft, toAccount: account }
 }
 
 // ---------------------------------------------------------------------------

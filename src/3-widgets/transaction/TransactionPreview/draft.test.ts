@@ -159,15 +159,49 @@ describe('setDraftType', () => {
     expect(back).toMatchObject({ tag: ['food'], account: 'card', amount: 100 })
   })
 
-  it('seeds a transfer from the account being edited', () => {
-    const transfer = setDraftType(toDraft(expense, ctx), 'transfer', ctx)
-    expect(transfer).toMatchObject({
-      fromAccount: 'card',
-      toAccount: 'cash',
-      fromAmount: 100,
-      toAmount: 100,
-    })
-  })
+  it.each(['outcome', 'outcomeDebt'] as const)(
+    'seeds the sending side from %s',
+    type => {
+      const draft = { ...toDraft(expense, ctx), type, amount: 150 }
+      expect(setDraftType(draft, 'transfer', ctx)).toMatchObject({
+        fromAccount: 'card',
+        toAccount: 'cash',
+        fromAmount: 150,
+        toAmount: 150,
+      })
+    }
+  )
+
+  it.each([
+    ['income', 'outcome'],
+    ['outcome', 'income'],
+  ] as const)(
+    'switches %s to %s without changing the account or magnitude',
+    (from, to) => {
+      const draft = { ...toDraft(expense, ctx), type: from, amount: 150 }
+      const next = setDraftType(draft, to, ctx)
+      expect(next).toEqual({ ...draft, type: to })
+      expect(toLegs(next, ctx)).toMatchObject({
+        incomeAccount: 'card',
+        outcomeAccount: 'card',
+        income: to === 'income' ? 150 : 0,
+        outcome: to === 'outcome' ? 150 : 0,
+      })
+    }
+  )
+
+  it.each(['income', 'incomeDebt'] as const)(
+    'seeds the receiving side from %s',
+    type => {
+      const draft = { ...toDraft(expense, ctx), type, amount: 150 }
+      expect(setDraftType(draft, 'transfer', ctx)).toMatchObject({
+        fromAccount: 'cash',
+        toAccount: 'card',
+        fromAmount: 150,
+        toAmount: 150,
+      })
+    }
+  )
 
   it('does not mirror the amount across currencies', () => {
     const draft = { ...toDraft(expense, ctx), toAccount: 'euro', toAmount: 3 }
@@ -177,51 +211,80 @@ describe('setDraftType', () => {
     })
   })
 
-  it('leaves a transfer by the side the new type is about', () => {
-    const transfer = {
-      ...toDraft(expense, ctx),
-      type: 'transfer' as const,
-      fromAccount: 'card',
-      toAccount: 'euro',
-      fromAmount: 100,
-      toAmount: 1,
+  it.each([
+    ['income', 'euro', 1],
+    ['incomeDebt', 'euro', 1],
+    ['outcome', 'card', 100],
+    ['outcomeDebt', 'card', 100],
+  ] as const)(
+    'leaves a transfer for %s using the matching side',
+    (type, account, amount) => {
+      const transfer = {
+        ...toDraft(expense, ctx),
+        type: 'transfer' as const,
+        fromAccount: 'card',
+        toAccount: 'euro',
+        fromAmount: 100,
+        toAmount: 1,
+      }
+      expect(setDraftType(transfer, type, ctx)).toMatchObject({
+        type,
+        account,
+        amount,
+      })
     }
-    expect(setDraftType(transfer, 'income', ctx)).toMatchObject({
-      account: 'euro',
-      amount: 1,
-    })
-    expect(setDraftType(transfer, 'outcome', ctx)).toMatchObject({
-      account: 'card',
-      amount: 100,
-    })
-  })
+  )
 
-  it('restores the transfer that was left', () => {
-    const transfer = setDraftType(toDraft(expense, ctx), 'transfer', ctx)
-    const income = setDraftType(transfer, 'income', ctx)
-    expect(setDraftType(income, 'transfer', ctx)).toMatchObject({
-      fromAccount: 'cash',
-      toAccount: 'card',
-    })
-  })
+  it.each(['income', 'incomeDebt', 'outcome', 'outcomeDebt'] as const)(
+    'restores both transfer sides after switching through %s',
+    type => {
+      for (const toAmount of [150, 100, 0]) {
+        const transfer = {
+          ...setDraftType(toDraft(expense, ctx), 'transfer', ctx),
+          fromAmount: 150,
+          toAmount,
+        }
+        const single = setDraftType(transfer, type, ctx)
+        expect(setDraftType(single, 'transfer', ctx)).toMatchObject({
+          fromAccount: 'card',
+          toAccount: 'cash',
+          fromAmount: 150,
+          toAmount,
+        })
+      }
+    }
+  )
 })
 
 describe('transfer editing', () => {
   const transfer = setDraftType(toDraft(expense, ctx), 'transfer', ctx)
 
-  it('follows the other side in one currency', () => {
+  it('only follows outgoing edits when amounts and currencies match', () => {
     expect(setTransferAmount(transfer, 'from', 250, ctx)).toMatchObject({
       fromAmount: 250,
       toAmount: 250,
     })
     expect(setTransferAmount(transfer, 'to', 250, ctx)).toMatchObject({
-      fromAmount: 250,
+      fromAmount: 100,
       toAmount: 250,
     })
   })
 
+  it('preserves unequal amounts through outgoing edits and account changes', () => {
+    const uneven = setTransferAmount(transfer, 'to', 80, ctx)
+    expect(setTransferAmount(uneven, 'from', 150, ctx)).toMatchObject({
+      fromAmount: 150,
+      toAmount: 80,
+    })
+    expect(setTransferAccount(uneven, 'to', 'card')).toMatchObject({
+      fromAmount: 80,
+      toAmount: 100,
+    })
+    expect(toLegs(uneven, ctx)).toMatchObject({ outcome: 100, income: 80 })
+  })
+
   it('leaves the other side alone across currencies', () => {
-    const cross = setTransferAccount(transfer, 'to', 'euro', ctx)
+    const cross = setTransferAccount(transfer, 'to', 'euro')
     expect(setTransferAmount(cross, 'from', 250, ctx)).toMatchObject({
       fromAmount: 250,
       toAmount: 100,
@@ -229,12 +292,12 @@ describe('transfer editing', () => {
   })
 
   it('swaps rather than putting one account on both ends', () => {
-    const swapped = setTransferAccount(transfer, 'to', 'card', ctx)
+    const swapped = setTransferAccount(transfer, 'to', 'card')
     expect(swapped).toMatchObject({ fromAccount: 'cash', toAccount: 'card' })
   })
 
   it('turns the transfer around with its amounts', () => {
-    const cross = setTransferAccount(transfer, 'to', 'euro', ctx)
+    const cross = setTransferAccount(transfer, 'to', 'euro')
     const uneven = setTransferAmount(cross, 'to', 1, ctx)
     expect(swapTransferSides(uneven)).toMatchObject({
       fromAccount: 'euro',
