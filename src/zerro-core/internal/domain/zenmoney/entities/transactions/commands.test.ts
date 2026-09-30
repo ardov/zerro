@@ -44,6 +44,24 @@ describe('zenmoney transaction commands', () => {
     expect(source.transaction.first.tag).toEqual(['food', 'trip'])
   })
 
+  it.each([
+    { comment: undefined, expected: 'Lunch' },
+    { comment: '', expected: '' },
+    { comment: 'Edited $&', expected: 'Edited Lunch' },
+  ])(
+    'applies bulk comment $comment with omission semantics',
+    ({ comment, expected }) => {
+      const source = makeStore({
+        transaction: { tr: makeTransaction({ id: 'tr', comment: 'Lunch' }) },
+      })
+      const patch = compileBulkEditTransactions(source.transaction, ['tr'], {
+        comment,
+      })
+      expect(applyPatch(source, patch).transaction.tr.comment).toBe(expected)
+      expect(source.transaction.tr.comment).toBe('Lunch')
+    }
+  )
+
   it('creates production transaction defaults through the transaction factory', () => {
     expect(
       makeCoreTransaction(

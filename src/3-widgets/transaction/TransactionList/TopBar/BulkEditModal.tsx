@@ -1,18 +1,14 @@
-import { Button } from '@/6-shared/ui/Button'
-import type { DialogProps } from '@/6-shared/ui/Dialog'
-import type { Modify, TTransaction } from '@/6-shared/types'
+import { Button } from '@/6-shared/ui/kit/Button'
+import type { SurfaceController } from '@/6-shared/overlays'
+import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
+import type { TTransaction } from '@/6-shared/types'
 
 import type { FC } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from '@/6-shared/ui/Dialog'
-import { OutlinedField } from '@/6-shared/ui/OutlinedField'
+import { FieldAddon, FieldSurface } from '@/6-shared/ui/kit/Field'
+import { NotesIcon, CategoryIcon } from '@/6-shared/ui/Icons'
+import { Textarea } from '@/6-shared/ui/kit/Textarea'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { track } from '@/6-shared/analytics'
 import { core } from '@/zerro-core/redux'
@@ -20,18 +16,19 @@ import { core } from '@/zerro-core/redux'
 import { CategoryRow } from '../../../category/CategoryRow'
 import { applyCategoryAction, commonCategories } from '../../../category/model'
 
-type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
+type BulkEditModalProps = {
+  controller: SurfaceController
   ids: string[]
   onApply: () => void
 }
 
 export const BulkEditModal: FC<BulkEditModalProps> = ({
   ids,
-  onClose,
+  controller,
   onApply,
-  open = false,
-  ...rest
 }) => {
+  const { open, setOpen } = controller
+  const onClose = () => setOpen(false)
   const { t } = useTranslation('transactionsBulkEdit')
   const dispatch = useAppDispatch()
   const allTransactions = useAppSelector(core.transactions.selectAll)
@@ -52,6 +49,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   const [originalTags, setOriginalTags] = useState(initialTags)
   const categories = commonCategories(Object.values(tags))
   const [comment, setComment] = useState(initialComment)
+  const [commentChanged, setCommentChanged] = useState(false)
 
   const [prevState, setPrevState] = useState({ ids, open })
   if (prevState.ids !== ids || prevState.open !== open) {
@@ -60,6 +58,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
       setTags(initialTags)
       setOriginalTags(initialTags)
       setComment(initialComment)
+      setCommentChanged(false)
     }
   }
 
@@ -69,8 +68,8 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
         ([id, value]) => !equalArrays(originalTags[id] ?? [], value)
       )
     )
-    const opts = { tagsById, comment }
-    if (Object.keys(tagsById).length || opts.comment) {
+    const opts = { tagsById, comment: commentChanged ? comment : undefined }
+    if (Object.keys(tagsById).length || commentChanged) {
       track('transaction_tags_changed', {
         mode: 'bulk',
         source: 'bulk_modal',
@@ -81,12 +80,24 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} {...rest}>
-      <DialogTitle>{t('editTransactions')}</DialogTitle>
-      <DialogContent>
+    <DialogSurface
+      controller={controller}
+      title={t('editTransactions')}
+      mobile="drawer"
+      disablePointerDismissal
+    >
+      <div className="flex flex-col gap-3">
         {types.transfer === 0 && (
-          <>
-            <DialogContentText>{t('categories')}</DialogContentText>
+          <FieldSurface
+            role="group"
+            aria-label={t('categories')}
+            addonAlign="first-line"
+            start={
+              <FieldAddon kind="icon">
+                <CategoryIcon size={20} />
+              </FieldAddon>
+            }
+          >
             <CategoryRow
               {...categories}
               preferredType={preferredType}
@@ -100,31 +111,36 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
                   )
                 )
               }
-              className="rounded-lg bg-background p-4"
+              className="min-w-0 flex-1 py-2"
             />
-          </>
+          </FieldSurface>
         )}
 
-        <div className="pt-4">
-          <OutlinedField
-            value={comment}
-            onChange={e => setComment(e.target.value)}
-            label={t('comment')}
-            multiline
-            maxRows={4}
-            fullWidth
-          />
-        </div>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="primary">
+        <Textarea
+          label={t('comment')}
+          placeholder={t('comment')}
+          start={
+            <FieldAddon kind="icon">
+              <NotesIcon size={20} />
+            </FieldAddon>
+          }
+          value={comment}
+          onChange={event => {
+            setComment(event.target.value)
+            setCommentChanged(true)
+          }}
+          maxRows={6}
+        />
+      </div>
+      <div className="mt-6 flex justify-end gap-2">
+        <Button onClick={onClose} variant="secondary">
           {t('cancel')}
         </Button>
-        <Button onClick={onSave} color="primary" variant="contained" autoFocus>
+        <Button onClick={onSave} variant="primary" autoFocus>
           {t('save')}
         </Button>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </DialogSurface>
   )
 }
 

@@ -212,6 +212,43 @@ describe('Redux semantic commands', () => {
     }
   )
 
+  it.each([undefined, {}])(
+    'clears a bulk comment and supports undo with tagsById %s',
+    tagsById => {
+      const store = configureStore({
+        reducer: rootReducer,
+        preloadedState: makeTestRootState(
+          makeStore({
+            transaction: {
+              first: makeTransaction({ id: 'first', comment: 'Lunch' }),
+              second: makeTransaction({ id: 'second', comment: 'Dinner' }),
+            },
+          })
+        ),
+        middleware: getDefaultMiddleware =>
+          getDefaultMiddleware({
+            immutableCheck: false,
+            serializableCheck: false,
+          }),
+      })
+      store.dispatch(
+        bulkEditTransactions(
+          ['first', 'second'],
+          tagsById ? { tagsById, comment: '' } : { comment: '' }
+        )
+      )
+      expect(store.getState().data.current.transaction.first.comment).toBe('')
+      expect(store.getState().data.current.transaction.second.comment).toBe('')
+      store.dispatch(undoClientCommand())
+      expect(store.getState().data.current.transaction.first.comment).toBe(
+        'Lunch'
+      )
+      expect(store.getState().data.current.transaction.second.comment).toBe(
+        'Dinner'
+      )
+    }
+  )
+
   it('saves individual category drafts as one undoable bulk command', () => {
     const current = makeStore({
       transaction: {

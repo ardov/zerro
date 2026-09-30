@@ -270,3 +270,32 @@ export const EmptyAccount: StoryObj = {
     await userEvent.keyboard('{Escape}')
   },
 }
+
+/** A synthetic fiscal receipt and location on a demo transaction. The map uses
+ * the same Google embed as the app and needs network access. */
+export const ReceiptAndMap: Story = {
+  ...Bench,
+  parameters: { app: { scenario: 'receipt-and-map', route: '/budget' } },
+  render: args => {
+    const transactions = useAppSelector(core.transactions.selectAll)
+    const transaction = Object.values(transactions).find(tr => tr.qrCode)
+    return (
+      <Frame>
+        {transaction ? (
+          <TransactionPreview {...args} id={transaction.id} />
+        ) : (
+          <TrEmptyState />
+        )}
+      </Frame>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.getByTitle('geo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('37.6173')
+    )
+    await userEvent.click(canvas.getByRole('button', { name: 'Show more' }))
+    await expect(canvas.getByText('9287440301110113')).toBeVisible()
+  },
+}

@@ -1,14 +1,12 @@
-import { IconButton } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
 import type { TTransaction } from '@/6-shared/types'
 import { core } from '@/zerro-core/redux'
 
-import type { ComponentProps, FC, MouseEventHandler } from 'react'
+import type { FC } from 'react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Chip } from '@/6-shared/ui/Chip'
-import { Menu, MenuItem } from '@/6-shared/ui/Menu'
-import { ListRowIcon, ListRowText } from '@/6-shared/ui/ListRow'
-import { Divider } from '@/6-shared/ui/Divider'
+import { Chip } from '@/6-shared/ui/kit/Chip'
+import { Menu, type MenuItem } from '@/6-shared/ui/kit/Menu'
 import {
   EditIcon,
   CategoryIcon,
@@ -18,11 +16,10 @@ import {
   MergeTypeIcon,
   DeleteIcon,
 } from '@/6-shared/ui/Icons'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
 import { addFxAmount, createFxAmount } from '@/6-shared/helpers/money'
 import { track } from '@/6-shared/analytics'
 import { useAsk, usePopup } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/Confirm'
+import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useAppDispatch, useAppSelector } from '@/store'
 
 import { CategorySelect } from '../../../category/CategorySelect'
@@ -50,15 +47,10 @@ const Actions: FC<ActionsProps> = ({
   const actions = getAvailableActions(transactions)
   // Both are on the overlay stack, so Back closes the dialog or the menu
   // instead of leaving the page — which is what it used to do here.
-  const { open: menuOpen, setOpen: setMenuOpen } = usePopup()
-  const { open: editOpen, setOpen: setEditOpen } = usePopup()
-
-  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  const handleClick: MouseEventHandler = event => {
-    setAnchorEl(event.currentTarget)
-    setMenuOpen(true)
-  }
-  const closeMenu = () => setMenuOpen(false)
+  const menuPopup = usePopup()
+  const editPopup = usePopup()
+  const closeMenu = () => menuPopup.setOpen(false)
+  const setMenuOpen = menuPopup.setOpen
 
   const [prevChecked, setPrevChecked] = useState({ visible, checkedIds })
   if (
@@ -89,6 +81,7 @@ const Actions: FC<ActionsProps> = ({
   const handleDelete = async () => {
     const confirmed = await ask(
       <Confirm
+        intent="danger"
         title={t('delete', { count: ids.length })}
         okText={t('deleteBtn')}
         cancelText={t('cancelDeletion')}
@@ -117,178 +110,147 @@ const Actions: FC<ActionsProps> = ({
     onUncheckAll()
   }
 
+  const items: MenuItem[] = []
+  if (actions.markViewed)
+    items.push({
+      id: 'viewed',
+      label: t('markViewed'),
+      start: <VisibilityIcon />,
+      onSelect: handleMarkViewed,
+    })
+  items.push({
+    id: 'edit',
+    label: t('edit'),
+    start: <EditIcon />,
+    onSelect: () => editPopup.setOpen(true),
+  })
+  if (actions.combineToOutcome)
+    items.push({
+      id: 'outcome',
+      label: t('combineToOutcome'),
+      description: t('combineToOutcomeComment'),
+      start: <MergeTypeIcon />,
+      onSelect: () => {
+        dispatch(core.transactions.combineToOutcome(ids))
+        track('transactions_combined', {
+          result_type: 'outcome',
+          source: 'bulk_toolbar',
+        })
+        onUncheckAll()
+      },
+    })
+  if (actions.combineToIncome)
+    items.push({
+      id: 'income',
+      label: t('combineToIncome'),
+      description: t('combineToIncomeComment'),
+      start: <MergeTypeIcon />,
+      onSelect: () => {
+        dispatch(core.transactions.combineToIncome(ids))
+        track('transactions_combined', {
+          result_type: 'income',
+          source: 'bulk_toolbar',
+        })
+        onUncheckAll()
+      },
+    })
+  if (actions.collapseTransactionsEasy)
+    items.push({
+      id: 'collapse',
+      label: t('mergeTransactions'),
+      description: t('mergeTransactionsComment'),
+      start: <MergeTypeIcon />,
+      onSelect: handleDelete,
+    })
+  if (actions.canMergeAsTransfer)
+    items.push({
+      id: 'transfer',
+      label: t('mergeAsTransfer'),
+      description: t('mergeAsTransferComment'),
+      start: <MergeTypeIcon />,
+      onSelect: () => {
+        dispatch(core.transactions.mergeAsTransfer(ids))
+        track('transactions_combined', {
+          result_type: 'transfer',
+          source: 'bulk_toolbar',
+        })
+        onUncheckAll()
+      },
+    })
+  items.push(
+    { id: 'separator', type: 'separator' },
+    {
+      id: 'all',
+      label: t('selectAll'),
+      start: <DoneAllIcon />,
+      onSelect: handleCheckAll,
+    }
+  )
+
   return (
     <>
       <BulkEditModal
         ids={checkedIds}
-        onClose={() => setEditOpen(false)}
+        controller={editPopup}
         onApply={() => {
-          setEditOpen(false)
-          closeMenu()
+          editPopup.setOpen(false)
           onUncheckAll()
         }}
-        open={editOpen}
       />
       <div
         style={{ transform: 'translateX(-50%)' }}
-        className="absolute bottom-4 left-1/2 z-[1000]"
+        className="absolute bottom-4 left-1/2 z-[1000] max-w-full px-2"
       >
         <div
           data-visible={visible ? '' : undefined}
           aria-hidden={!visible}
           inert={!visible}
-          className="actions-transition flex items-center rounded-full bg-info pl-2 shadow-elevation-4"
+          className="actions-transition flex items-center gap-1 rounded-ui-card rounded-smooth bg-ui-card p-2 text-ui-primary shadow-ui-popover"
         >
           <Chip
-            label={t('selected', { count: ids.length })}
-            onDelete={onUncheckAll}
-            variant="outlined"
-          />
-
-          <Tooltip title={t('deleteSelected')}>
-            <IconButton onClick={handleDelete}>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-
+            className="min-w-0 shrink"
+            onRemove={onUncheckAll}
+            variant="outline"
+          >
+            {t('selected', { count: ids.length })}
+          </Chip>
+          <IconButton
+            variant="ghost"
+            size="sm"
+            label={t('deleteSelected')}
+            onClick={handleDelete}
+          >
+            <DeleteIcon />
+          </IconButton>
           {actions.setMainTag && (
             <CategorySelect
               onSelect={handleSetTag}
               trigger={
-                <CategoryButton
-                  aria-label={t('setCategory')}
-                  children={<CategoryIcon />}
-                />
+                <IconButton variant="ghost" size="sm" label={t('setCategory')}>
+                  <CategoryIcon />
+                </IconButton>
               }
             />
           )}
-
-          <Tooltip title={t('actions')}>
-            <IconButton
-              children={<MoreVertIcon />}
-              aria-haspopup="true"
-              onClick={handleClick}
-            />
-          </Tooltip>
-
           <Menu
-            anchorEl={anchorEl}
-            open={visible && menuOpen}
-            onClose={closeMenu}
-            placement="top-end"
-            aria-label={t('actions')}
-          >
-            {actions.markViewed && (
-              <MenuItem onClick={handleMarkViewed}>
-                <ListRowIcon>
-                  <VisibilityIcon />
-                </ListRowIcon>
-                <ListRowText>{t('markViewed')}</ListRowText>
-              </MenuItem>
-            )}
-
-            {actions.bulkEdit && (
-              <MenuItem onClick={() => setEditOpen(true)}>
-                <ListRowIcon>
-                  <EditIcon />
-                </ListRowIcon>
-                <ListRowText>{t('edit')}</ListRowText>
-              </MenuItem>
-            )}
-
-            {actions.combineToOutcome && (
-              <MenuItem
-                onClick={() => {
-                  dispatch(core.transactions.combineToOutcome(ids))
-                  track('transactions_combined', {
-                    result_type: 'outcome',
-                    source: 'bulk_toolbar',
-                  })
-                  onUncheckAll()
-                }}
+            label={t('actions')}
+            popup={menuPopup}
+            disabled={!visible}
+            items={items}
+            trigger={
+              <IconButton
+                variant="ghost"
+                size="sm"
+                label={t('actions')}
+                tooltip={!menuPopup.open && !editPopup.open}
               >
-                <ListRowIcon>
-                  <MergeTypeIcon />
-                </ListRowIcon>
-                <ListRowText secondary={t('combineToOutcomeComment')}>
-                  {t('combineToOutcome')}
-                </ListRowText>
-              </MenuItem>
-            )}
-
-            {actions.combineToIncome && (
-              <MenuItem
-                onClick={() => {
-                  dispatch(core.transactions.combineToIncome(ids))
-                  track('transactions_combined', {
-                    result_type: 'income',
-                    source: 'bulk_toolbar',
-                  })
-                  onUncheckAll()
-                }}
-              >
-                <ListRowIcon>
-                  <MergeTypeIcon />
-                </ListRowIcon>
-                <ListRowText secondary={t('combineToIncomeComment')}>
-                  {t('combineToIncome')}
-                </ListRowText>
-              </MenuItem>
-            )}
-
-            {actions.collapseTransactionsEasy && (
-              <MenuItem onClick={handleDelete}>
-                <ListRowIcon>
-                  <MergeTypeIcon />
-                </ListRowIcon>
-                <ListRowText secondary={t('mergeTransactionsComment')}>
-                  {t('mergeTransactions')}
-                </ListRowText>
-              </MenuItem>
-            )}
-
-            {actions.canMergeAsTransfer && (
-              <MenuItem
-                onClick={() => {
-                  dispatch(core.transactions.mergeAsTransfer(ids))
-                  track('transactions_combined', {
-                    result_type: 'transfer',
-                    source: 'bulk_toolbar',
-                  })
-                  onUncheckAll()
-                }}
-              >
-                <ListRowIcon>
-                  <MergeTypeIcon />
-                </ListRowIcon>
-                <ListRowText secondary={t('mergeAsTransferComment')}>
-                  {t('mergeAsTransfer')}
-                </ListRowText>
-              </MenuItem>
-            )}
-
-            <div className="my-2">
-              <Divider />
-            </div>
-
-            <MenuItem onClick={handleCheckAll}>
-              <ListRowIcon>
-                <DoneAllIcon />
-              </ListRowIcon>
-              <ListRowText>{t('selectAll')}</ListRowText>
-            </MenuItem>
-          </Menu>
+                <MoreVertIcon />
+              </IconButton>
+            }
+          />
         </div>
       </div>
     </>
-  )
-}
-
-function CategoryButton(props: ComponentProps<typeof IconButton>) {
-  return (
-    <Tooltip title={props['aria-label']}>
-      <IconButton {...props} />
-    </Tooltip>
   )
 }
 

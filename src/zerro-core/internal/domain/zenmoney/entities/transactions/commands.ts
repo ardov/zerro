@@ -459,7 +459,7 @@ function modifyTags(prevTags: TTagId[] | null, newTags?: TTagId[]) {
 }
 
 function modifyComment(prevComment: string | null, newComment?: string) {
-  if (!newComment) return prevComment
+  if (newComment === undefined) return prevComment
   return newComment.replaceAll('$&', prevComment || '')
 }
 

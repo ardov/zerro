@@ -148,7 +148,7 @@ export const DirectCategorySelection: Story = {
           expect(body.queryByRole('listbox')).not.toBeInTheDocument()
         )
         const chip = canvas.getByRole('combobox', { name: /Food/ })
-        await expect(chip).toHaveFocus()
+        await waitFor(() => expect(chip).toHaveFocus())
         await userEvent.click(chip)
         await expect(
           await body.findByRole('option', { name: 'Food' })
@@ -284,4 +284,46 @@ export const DirectTypeSelection: Story = {
     )
     await expect(canvas.getByRole('combobox', { name: /Income/ })).toHaveFocus()
   },
+}
+
+export const AmountRange: Story = {
+  render: () => <FilterHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement),
+      body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
+    await userEvent.click(await body.findByText('Amount', { exact: true }))
+    const from = await body.findByRole('spinbutton', { name: 'Amount from' })
+    await userEvent.type(from, '100')
+    await userEvent.type(
+      body.getByRole('spinbutton', { name: 'Amount up to' }),
+      '500'
+    )
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(body.queryByRole('dialog')).not.toBeInTheDocument()
+    )
+    expect(readQuery(canvasElement).clauses).toEqual([
+      { kind: 'amount', gte: 100, lte: 500 },
+    ])
+    const chip = canvas.getByRole('button', { name: 'Amount: 100–500' })
+    await waitFor(() => expect(chip).toHaveFocus())
+    await userEvent.click(chip)
+    await userEvent.clear(
+      await body.findByRole('spinbutton', { name: 'Amount from' })
+    )
+    await userEvent.clear(
+      body.getByRole('spinbutton', { name: 'Amount up to' })
+    )
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(readQuery(canvasElement).clauses).toEqual([]))
+    await expect(
+      canvas.getByRole('button', { name: 'Add filter' })
+    ).toHaveFocus()
+  },
+}
+
+export const MobileAmountRange: Story = {
+  ...AmountRange,
+  globals: { viewport: { value: 'zerro499' } },
 }

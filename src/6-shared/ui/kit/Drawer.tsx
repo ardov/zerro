@@ -23,6 +23,8 @@ export type DrawerProps = SurfaceName & {
   children: ReactNode
   onClose?: () => void
   disabled?: boolean
+  /** Keep the editor open when its backdrop is pressed. */
+  disablePointerDismissal?: boolean
   trigger?: ReactElement
   popup?: PopupController
 }
@@ -72,6 +74,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
     controller,
     finalFocus,
     disabled,
+    disablePointerDismissal,
     side: requestedSide = 'auto',
     className,
     contentClassName,
@@ -90,6 +93,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
     <Primitive.Root
       open={open}
       onOpenChange={onOpenChange}
+      disablePointerDismissal={disablePointerDismissal}
       swipeDirection={side === 'bottom' ? 'down' : 'right'}
     >
       {trigger && <Primitive.Trigger disabled={disabled} render={trigger} />}

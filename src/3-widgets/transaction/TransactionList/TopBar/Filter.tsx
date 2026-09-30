@@ -1,20 +1,19 @@
 import { Chip } from '@/6-shared/ui/kit/Chip'
 import { CategoryMultiSelect } from '../../../category/CategoryMultiSelect'
-import { IconButton } from '@/6-shared/ui/Button'
-import type { FC, MouseEvent } from 'react'
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import type { FC } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import { usePopup } from '@/6-shared/overlays'
 import { useTranslation } from 'react-i18next'
-import { InputBase } from '@/6-shared/ui/InputBase'
-import { Menu, MenuItem } from '@/6-shared/ui/Menu'
+import { Input } from '@/6-shared/ui/kit/Input'
+import { FieldAddon } from '@/6-shared/ui/kit/Field'
+import { Menu } from '@/6-shared/ui/kit/Menu'
 import { MultiSelect } from '@/6-shared/ui/kit/MultiSelect'
 import { AccountMultiSelect } from '../../../account/AccountMultiSelect'
-import { Popover } from '@/6-shared/ui/Popover'
-import { OutlinedField } from '@/6-shared/ui/OutlinedField'
+import { Popover } from '@/6-shared/ui/kit/Popover'
 import { core } from '@/zerro-core/redux'
 import { useAppSelector } from '@/store'
-import { AddIcon, CloseIcon, FilterListIcon } from '@/6-shared/ui/Icons'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { CloseIcon, FilterListIcon } from '@/6-shared/ui/Icons'
 import { TransactionCreateButton } from '../../TransactionCreateButton'
 
 type Clause = core.transactions.TTransactionFilterClause
@@ -61,10 +60,8 @@ const Filter: FC<FilterProps> = ({
     focusAfterRemoval.current = { target: addButtonRef.current }
     onQueryChange({ clauses: query.clauses.filter(item => item.kind !== kind) })
   }
-  // The menu and editors sit on the overlay stack, so Back closes the top one
-  // rather than leaving the page. The anchors stay plain state beside them.
-  const { open: menuOpen, setOpen: setMenuOpen } = usePopup()
-  const { open: editorOpen, setOpen: setEditorOpen } = usePopup()
+  const menuPopup = usePopup()
+  const amountPopup = usePopup(() => dropEmptyClause('amount'))
   const categoryPopup = usePopup(() => dropEmptyClause('tag'))
   const accountPopup = usePopup(() => dropEmptyClause('account'))
   const typePopup = usePopup(() => dropEmptyClause('type'))
@@ -73,28 +70,17 @@ const Filter: FC<FilterProps> = ({
     account: accountPopup,
     type: typePopup,
   }
-  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
-  const [editingAmount, setEditingAmount] = useState(false)
-  // Resolve the anchor when opening so render never reads a mutable ref.
-  const [editorAnchor, setEditorAnchor] = useState<HTMLElement | null>(null)
   const appliedClauses = query.clauses
-  const editingClause = editingAmount
-    ? query.clauses.find(
-        (clause): clause is AmountClause => clause.kind === 'amount'
-      )
-    : undefined
   const availableKinds = filterKinds.filter(
     kind => !appliedClauses.some(clause => clause.kind === kind)
   )
 
   useLayoutEffect(() => {
-    // A closing editor restores focus only after its exit callback clears
-    // editingAmount. The chip it opened from may already have been removed.
-    if (editingAmount || !focusAfterRemoval.current) return
+    if (!focusAfterRemoval.current) return
     const target = focusAfterRemoval.current.target
     focusAfterRemoval.current = null
     ;(target?.isConnected ? target : addButtonRef.current)?.focus()
-  }, [query.clauses, editingAmount])
+  }, [query.clauses])
 
   const upsertClause = (clause: Clause) => {
     onQueryChange({
@@ -105,40 +91,19 @@ const Filter: FC<FilterProps> = ({
     })
   }
 
-  const openAddMenu = (event: MouseEvent<HTMLElement>) => {
-    pendingEditingKind.current = null
-    setMenuAnchor(event.currentTarget)
-    setMenuOpen(true)
-  }
-
   const chooseKind = (kind: AddableFilterKind) => {
-    upsertClause(makeDefaultClause(kind))
     pendingEditingKind.current = isEditableKind(kind) ? kind : null
-    setMenuOpen(false)
+    upsertClause(makeDefaultClause(kind))
   }
 
-  const openAmountEditor = () => {
-    setEditorAnchor(chipRefs.current.amount || null)
-    setEditingAmount(true)
-    setEditorOpen(true)
-  }
-
-  const openPendingEditor = () => {
+  // Wait for the new chip to mount before opening its popup and moving focus.
+  useLayoutEffect(() => {
     const kind = pendingEditingKind.current
-    pendingEditingKind.current = null
     if (!kind) return
-
+    pendingEditingKind.current = null
     if (isSelectKind(kind)) selectPopups[kind].setOpen(true)
-    else openAmountEditor()
-  }
-
-  // The editor has one closing path: the stack. Back does not go through a
-  // click handler, so the tidy-up runs when the surface has finished leaving,
-  // whichever way it was closed.
-  const finishEditing = () => {
-    setEditingAmount(false)
-    if (editingAmount) dropEmptyClause('amount')
-  }
+    else amountPopup.setOpen(true)
+  })
 
   const removeClause = (clause: Clause) => {
     const index = query.clauses.indexOf(clause)
@@ -146,7 +111,7 @@ const Filter: FC<FilterProps> = ({
     focusAfterRemoval.current = {
       target: neighbour ? (chipRefs.current[neighbour.kind] ?? null) : null,
     }
-    if (editingAmount && clause.kind === 'amount') setEditorOpen(false)
+    if (clause.kind === 'amount') amountPopup.setOpen(false)
     onQueryChange({
       clauses: query.clauses.filter(item => item !== clause),
     })
@@ -158,34 +123,48 @@ const Filter: FC<FilterProps> = ({
   )
 
   return (
-    <div className="rounded-lg bg-card text-card-foreground shadow-elevation-10 flex flex-col p-[6px]">
-      <div className="flex min-h-9 items-center px-2">
-        <InputBase
-          value={search}
-          placeholder={t('searchComments')}
-          onChange={event => onSearchChange(event.target.value)}
-          className="grow"
-        />
-        {Boolean(search) && (
-          <Tooltip title={t('clearField')}>
-            <IconButton
-              size="small"
-              onClick={() => onSearchChange('')}
-              children={<CloseIcon />}
+    <div className="flex flex-col gap-2 rounded-ui-card rounded-smooth bg-ui-card p-2 text-ui-primary shadow-ui-card">
+      <Input
+        label={t('searchComments')}
+        placeholder={t('searchComments')}
+        value={search}
+        onChange={event => onSearchChange(event.target.value)}
+        end={
+          <FieldAddon kind="action">
+            {Boolean(search) && (
+              <IconButton
+                size="sm"
+                variant="ghost"
+                label={t('clearField')}
+                onClick={() => onSearchChange('')}
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
+            <TransactionCreateButton query={query} />
+            <Menu
+              label={t('addFilter')}
+              popup={menuPopup}
+              disabled={!availableKinds.length}
+              trigger={
+                <IconButton
+                  ref={addButtonRef}
+                  size="sm"
+                  variant="ghost"
+                  label={t('addFilter')}
+                >
+                  <FilterListIcon />
+                </IconButton>
+              }
+              items={availableKinds.map(kind => ({
+                id: kind,
+                label: getKindLabel(kind, t),
+                onSelect: () => chooseKind(kind),
+              }))}
             />
-          </Tooltip>
-        )}
-        <TransactionCreateButton query={query} />
-        {!appliedClauses.length && (
-          <Tooltip title={t('addFilter')}>
-            <IconButton
-              ref={addButtonRef}
-              onClick={openAddMenu}
-              children={<FilterListIcon />}
-            />
-          </Tooltip>
-        )}
-      </div>
+          </FieldAddon>
+        }
+      />
 
       {!!appliedClauses.length && (
         <div className="flex flex-wrap items-center gap-1.5 px-1 pt-1">
@@ -195,15 +174,27 @@ const Filter: FC<FilterProps> = ({
                 ref={element => {
                   chipRefs.current[clause.kind] = element
                 }}
-                onClick={() => {
-                  if (clause.kind === 'amount') openAmountEditor()
-                }}
+                onClick={() => {}}
                 onRemove={() => removeClause(clause)}
               >
                 {getClauseLabel(clause, labels)}
               </Chip>
             )
             switch (clause.kind) {
+              case 'amount':
+                return (
+                  <Popover
+                    key={clause.kind}
+                    label={t('amount')}
+                    popup={amountPopup}
+                    trigger={chip}
+                  >
+                    <AmountFilterEditor
+                      clause={clause}
+                      onChange={upsertClause}
+                    />
+                  </Popover>
+                )
               case 'tag':
                 return (
                   <CategoryMultiSelect
@@ -249,58 +240,8 @@ const Filter: FC<FilterProps> = ({
                 )
             }
           })}
-          {!!availableKinds.length && (
-            <Tooltip title={t('addFilter')}>
-              <IconButton
-                ref={addButtonRef}
-                size="small"
-                color="primary"
-                onClick={openAddMenu}
-                children={<AddIcon />}
-              />
-            </Tooltip>
-          )}
         </div>
       )}
-
-      <Menu
-        anchorEl={menuAnchor}
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        onCloseComplete={openPendingEditor}
-        // The clause editor opens the moment this menu is gone, so the menu
-        // does not animate out. `utilities` is the later layer, so this beats
-        // the transition the stylesheet gives every other menu.
-        className="transition-none"
-        aria-label={t('addFilter')}
-      >
-        {availableKinds.map(kind => (
-          <MenuItem key={kind} onClick={() => chooseKind(kind)}>
-            {getKindLabel(kind, t)}
-          </MenuItem>
-        ))}
-      </Menu>
-
-      <Popover
-        anchorEl={editorAnchor}
-        open={editorOpen}
-        onClose={() => setEditorOpen(false)}
-        onCloseComplete={finishEditing}
-        // The editor drops out from under its chip rather than covering it.
-        placement="below"
-        aria-label={
-          editingClause ? getClauseLabel(editingClause, labels) : undefined
-        }
-      >
-        {editingClause && (
-          <div className="w-[340px] max-w-[90vw] p-3">
-            <AmountFilterEditor
-              clause={editingClause}
-              onChange={upsertClause}
-            />
-          </div>
-        )}
-      </Popover>
     </div>
   )
 }
@@ -314,7 +255,9 @@ function AmountFilterEditor(props: {
 
   return (
     <div className="flex flex-row gap-2">
-      <OutlinedField
+      <Input
+        labelMode="floating"
+        className="min-w-0 flex-1"
         autoFocus
         type="number"
         label={t('amountFrom')}
@@ -326,7 +269,9 @@ function AmountFilterEditor(props: {
           })
         }
       />
-      <OutlinedField
+      <Input
+        labelMode="floating"
+        className="min-w-0 flex-1"
         type="number"
         label={t('amountTo')}
         value={clause.lte ?? ''}

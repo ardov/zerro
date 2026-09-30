@@ -1,3 +1,4 @@
+import { usePopup } from '@/6-shared/overlays'
 import { useState, type ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
@@ -80,12 +81,14 @@ function Fixtures(props: { children: ReactNode }) {
           transaction: {
             first: makeTransaction({
               id: 'first',
+              comment: 'Lunch',
               tag: ['food', 'trip'],
               income: 0,
               outcome: 10,
             }),
             second: makeTransaction({
               id: 'second',
+              comment: 'Dinner',
               tag: ['food', 'work'],
               income: 0,
               outcome: 20,
@@ -272,17 +275,20 @@ export const Expansion: Story = {
 }
 
 function BulkDemo() {
-  const [open, setOpen] = useState(false)
+  const popup = usePopup()
+  const { setOpen } = popup
   const transactions = useAppSelector(core.transactions.selectAll)
   return (
     <>
       <button onClick={() => setOpen(true)}>Edit selection</button>
       <BulkEditModal
         ids={ids}
-        open={open}
-        onClose={() => setOpen(false)}
+        controller={popup}
         onApply={() => setOpen(false)}
       />
+      <output aria-label="Saved comments">
+        {JSON.stringify(ids.map(id => transactions[id].comment))}
+      </output>
       <output aria-label="Saved categories">
         {JSON.stringify(ids.map(id => transactions[id].tag))}
       </output>
@@ -314,6 +320,9 @@ export const BulkSaveAndCancel: Story = {
         })
       )
       await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+      expect(canvas.getByLabelText('Saved comments')).toHaveTextContent(
+        '["Lunch","Dinner"]'
+      )
     }
     await expect(canvas.getByLabelText('Saved categories')).toHaveTextContent(
       '[["cafe","trip"],["cafe","work"]]'

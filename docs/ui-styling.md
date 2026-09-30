@@ -285,7 +285,7 @@ Other application editors may still use legacy surfaces.
 `Confirm` is passed to `useAsk<boolean>()`. Explicit confirmation answers `true`;
 all dismissals answer `undefined`. `intent="danger"` uses AlertDialog semantics,
 a destructive action and initial focus on Cancel. Ordinary confirmation initially
-focuses the confirming action. The legacy Confirm remains separate; application callers have not migrated.
+focuses the confirming action. The transaction bulk actions use the kit Confirm. Other application callers may still use the separate legacy Confirm.
 
 When an overlay opens another overlay, preserve the opener's history and focus
 contract: closing the child returns focus to the child trigger; closing the

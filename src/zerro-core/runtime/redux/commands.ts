@@ -421,7 +421,7 @@ export function bulkEditTransactions(
   if (!opts.tagsById && !opts.comment?.includes('$&')) {
     const set: TTransactionEditablePatch = {}
     if (opts.tags) set.tag = normalizeTransactionTags(opts.tags)
-    if (opts.comment) set.comment = opts.comment
+    if (opts.comment !== undefined) set.comment = opts.comment
     return patchTransactions(ids, set, label)
   }
 

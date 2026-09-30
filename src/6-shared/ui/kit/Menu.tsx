@@ -21,6 +21,7 @@ import './Surface.css'
 type ItemContent = {
   id: string
   label: string
+  description?: string
   start?: ReactNode
   disabled?: boolean
 }
@@ -305,6 +306,7 @@ function MenuRow(
       {...restProps}
       size={mobile ? 'lg' : 'sm'}
       start={item.start}
+      description={item.description}
       className={cn(
         mobile && [
           'cursor-pointer focusable',

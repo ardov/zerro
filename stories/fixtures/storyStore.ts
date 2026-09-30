@@ -4,13 +4,37 @@ import { createEmptyDataStore } from '@/zerro-core/replica'
 import { rootReducer } from '@/store/rootReducer'
 
 export type StoryScenario =
-  'demo' | 'off-budget-transfers' | 'empty' | 'recovery' | 'persistence-warning'
+  | 'receipt-and-map'
+  | 'demo'
+  | 'off-budget-transfers'
+  | 'empty'
+  | 'recovery'
+  | 'persistence-warning'
 
 export function makeStoryStore(scenario: StoryScenario = 'demo') {
   const demoState = makeCoreNextDemoRootState()
 
   const preloadedState = (() => {
     switch (scenario) {
+      case 'receipt-and-map': {
+        const current = demoState.data.current
+        const transaction = Object.values(current.transaction).find(
+          item => item.outcome > 0 && item.income === 0 && !item.deleted
+        )!
+        return makeCoreNextDemoRootState({
+          ...current,
+          transaction: {
+            ...current.transaction,
+            [transaction.id]: {
+              ...transaction,
+              qrCode:
+                't=20260320T1430&s=1299.00&fn=9287440301110113&i=19313&fp=1992968429&n=1',
+              latitude: 55.7558,
+              longitude: 37.6173,
+            },
+          },
+        })
+      }
       case 'off-budget-transfers': {
         // Transfers between two budget accounts cancel out in the overview.
         // An off-budget destination keeps the transfer card visible.

@@ -20,6 +20,8 @@ type DialogOptions = SurfaceName & {
   children: ReactNode
   trigger?: ReactElement
   disabled?: boolean
+  /** Keep the editor open when its backdrop is pressed. */
+  disablePointerDismissal?: boolean
   mobile?: 'dialog' | 'drawer'
   /** Centered dialogs show a close button; bottom sheets never do. */
   closeButton?: boolean
@@ -75,6 +77,7 @@ function CenteredDialog(props: DialogSurfaceProps & { alert?: boolean }) {
     children,
     trigger,
     disabled,
+    disablePointerDismissal,
     controller,
     className,
     contentClassName,
@@ -91,7 +94,11 @@ function CenteredDialog(props: DialogSurfaceProps & { alert?: boolean }) {
   const Popup = alert ? AlertDialog.Popup : Primitive.Popup
   const Close = alert ? AlertDialog.Close : Primitive.Close
   return (
-    <Root open={open} onOpenChange={onOpenChange}>
+    <Root
+      open={open}
+      onOpenChange={onOpenChange}
+      {...(alert ? {} : { disablePointerDismissal })}
+    >
       {trigger && <Primitive.Trigger render={trigger} disabled={disabled} />}
       <Primitive.Portal>
         <Primitive.Backdrop
