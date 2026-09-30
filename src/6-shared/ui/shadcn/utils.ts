@@ -6,6 +6,7 @@ const twMerge = extendTailwindMerge({
     theme: {
       // Parse 'ui-14' as a text size
       text: [(value: string) => /^ui-\d+$/.test(value)],
+      radius: ['ui-card', 'ui-control', 'ui-control-inner', 'ui-popover'],
     },
   },
 })

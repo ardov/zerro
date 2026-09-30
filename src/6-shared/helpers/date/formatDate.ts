@@ -36,6 +36,20 @@ export function formatTimeAgo(date: TDateDraft): string {
   return formatDistanceToNow(d, { addSuffix: true, locale: getDateLocale() })
 }
 
+/** Compact timestamp shared by transaction creation and update metadata. */
+export function formatTransactionTimestamp(date: TDateDraft): string {
+  const d = parseDate(date)
+  const elapsed = Date.now() - d.getTime()
+  if (elapsed >= 0 && elapsed < 60_000) return t('common:justNow')
+  if (elapsed >= 0 && elapsed < 3_600_000)
+    return t('common:minutesAgo', { count: Math.floor(elapsed / 60_000) })
+  const time = formatDate(d, 'HH:mm')
+  if (isToday(d)) return `${t('common:today')}, ${time}`
+  if (isYesterday(d)) return `${t('common:yesterday')}, ${time}`
+  const day = formatDate(d, isThisYear(d) ? 'd MMM' : 'd MMM yyyy')
+  return `${day.replace(/\./g, '')}, ${time}`
+}
+
 /** The `date-fns` locale the interface is currently in. Read at call time
  * rather than held, so a language change is one re-render away — the calendar
  * reads it the same way this file's own formatting does. */

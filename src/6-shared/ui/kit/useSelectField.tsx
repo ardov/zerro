@@ -111,6 +111,7 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
     /** The row an option renders into, whichever primitive owns the option. */
     optionRow: (item: SelectOption<T>) => (
       <ListRow
+        className="[&+[role=option]]:mt-px"
         size={size}
         indent={item.indent}
         start={item.start}

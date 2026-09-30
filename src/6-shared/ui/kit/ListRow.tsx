@@ -64,7 +64,7 @@ export function ListRow(props: ListRowProps) {
         (reserveStart || start != null) && 'pl-0',
         // Selection is the base; highlight is a separate translucent layer.
         'before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-[inherit] before:bg-ui-selected before:opacity-0',
-        'data-selected:before:opacity-100 aria-selected:before:opacity-100',
+        'data-selected:before:opacity-100',
         'after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] after:bg-ui-highlight after:opacity-0',
         'data-highlighted:after:opacity-100',
         // Only the backing moves. Disabled rows never respond to a press.
@@ -75,6 +75,10 @@ export function ListRow(props: ListRowProps) {
         '[&:active:not(:disabled):not([aria-disabled=true]):not([data-disabled])]:after:opacity-100',
         'motion-reduce:before:transition-none motion-reduce:after:transition-none motion-reduce:before:scale-100! motion-reduce:after:scale-100!',
         'data-disabled:opacity-ui-disabled aria-disabled:opacity-ui-disabled disabled:opacity-ui-disabled',
+        // Adjacent selected rows share smaller corners at their seam.
+        '[&[data-selected]:has(+[data-selected])]:rounded-b-sm',
+        '[&[data-selected]+[data-selected]]:rounded-t-sm',
+        'transition-[border-radius] duration-150 ease-in-out motion-reduce:transition-none',
         className
       ),
       children: (

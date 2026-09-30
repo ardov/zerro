@@ -18,7 +18,7 @@ import {
   ArrowDownwardIcon,
 } from '@/6-shared/ui/Icons'
 import { cn } from '@/6-shared/ui/shadcn/utils'
-import { formatDate, formatTimeAgo } from '@/6-shared/helpers/date'
+import { formatTransactionTimestamp } from '@/6-shared/helpers/date'
 import { rateToWords } from '@/6-shared/helpers/money'
 import { track } from '@/6-shared/analytics'
 import { useAppCommand, useAppSelector } from '@/store'
@@ -358,7 +358,7 @@ const TransactionEditor = ({
           <div className="relative flex flex-col gap-3">
             <FieldGroup>
               <AccountField
-                className="rounded-b-md"
+                className="rounded-b-sm"
                 invalid={!!marks.fromAccount}
                 label={t('accountFrom')}
                 value={draft.fromAccount}
@@ -368,7 +368,7 @@ const TransactionEditor = ({
                 }
               />
               <AmountField
-                className="rounded-t-md"
+                className="rounded-t-sm"
                 invalid={!!marks.fromAmount}
                 label={t('amountFrom')}
                 icon={<MoneyOutIcon size={20} />}
@@ -381,7 +381,7 @@ const TransactionEditor = ({
             </FieldGroup>
             <FieldGroup>
               <AccountField
-                className="rounded-b-md"
+                className="rounded-b-sm"
                 invalid={!!marks.toAccount}
                 error={
                   marks.toAccount === 'sameAccount' && t('issue_sameAccount')
@@ -394,7 +394,7 @@ const TransactionEditor = ({
                 }
               />
               <AmountField
-                className="rounded-t-md"
+                className="rounded-t-sm"
                 invalid={!!marks.toAmount}
                 label={t('amountTo')}
                 icon={<MoneyInIcon size={20} />}
@@ -414,7 +414,7 @@ const TransactionEditor = ({
                 size="sm"
                 label={t('btnSwap')}
                 onClick={() => setDraft(swapTransferSides(draft))}
-                className="rounded-full border-0"
+                className="rounded-full"
               >
                 <ArrowDownwardIcon size={20} />
               </IconButton>
@@ -516,10 +516,16 @@ const TransactionEditor = ({
             <div className="flex flex-col items-center gap-1 py-4 text-ui-14 text-ui-secondary">
               <span>
                 {t('created', {
-                  date: formatDate(tr.created, 'dd.MM.yyyy HH:mm'),
+                  date: formatTransactionTimestamp(tr.created),
                 })}
               </span>
-              <span>{t('changedAgo', { ago: formatTimeAgo(tr.changed) })}</span>
+              {tr.changed !== tr.created && (
+                <span>
+                  {t('changedAgo', {
+                    ago: formatTransactionTimestamp(tr.changed),
+                  })}
+                </span>
+              )}
               <RateToWords tr={tr} />
             </div>
           </>

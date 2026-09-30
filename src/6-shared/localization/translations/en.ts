@@ -51,6 +51,8 @@ export const en: typeof ru = {
     nextYear: 'Next year',
     previousMonth: 'Previous month',
     nextMonth: 'Next month',
+    justNow: 'just now',
+    minutesAgo: '{{count}} min ago',
     today: 'Today',
     yesterday: 'Yesterday',
     selectCategory: 'Select category',

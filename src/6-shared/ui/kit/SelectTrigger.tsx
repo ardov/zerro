@@ -133,10 +133,10 @@ export function SelectTrigger(props: SelectTriggerProps) {
     },
   })
   return (
-    <div className={className} style={style}>
+    <div className={cn('rounded-ui-control', className)} style={style}>
       <FieldSurface
         ref={surfaceRef}
-        className="group/select-field"
+        className="group/select-field rounded-[inherit]"
         size={size}
         tall={floating}
         start={

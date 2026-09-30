@@ -49,6 +49,8 @@
     "nextYear": "Следующий год",
     "previousMonth": "Предыдущий месяц",
     "nextMonth": "Следующий месяц",
+    "justNow": "только что",
+    "minutesAgo": "{{count}} мин назад",
     "today": "Сегодня",
     "yesterday": "Вчера",
     "selectCategory": "Выберите категорию",
