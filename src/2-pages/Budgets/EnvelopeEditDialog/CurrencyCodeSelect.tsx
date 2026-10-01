@@ -3,12 +3,12 @@ import { core } from '@/zerro-core/redux'
 
 import type { TFxCode, TInstrument } from '@/6-shared/types'
 import { getCurrencySymbol } from '@/6-shared/helpers/money'
-import { Select } from '@/6-shared/ui/Select'
+import { Select } from '@/6-shared/ui/kit/Select'
 
 type CurrencyCodeSelectProps = {
   value: TFxCode
   onChange: (value: TFxCode) => void
-  label?: string
+  label: string
   className?: string
 }
 
@@ -26,10 +26,14 @@ export const CurrencyCodeSelect: FC<CurrencyCodeSelectProps> = props => {
   return (
     <Select
       {...rest}
+      required
       value={value}
-      onChange={onChange}
+      labelMode="floating"
+      onChange={next => {
+        if (next !== null) onChange(next)
+      }}
       // The closed field shows the code alone; the rows carry the full name.
-      options={instruments.map(instr => ({
+      items={instruments.map(instr => ({
         value: instr.shortTitle,
         label: instr.shortTitle,
         description: describe(instr),

@@ -1,19 +1,19 @@
-import { Button, ButtonBase } from '@/6-shared/ui/Button'
+import { Button, IconButton } from '@/6-shared/ui/kit/Button'
+import { FieldAddon } from '@/6-shared/ui/kit/Field'
 import type { FC, MouseEvent } from 'react'
 import { shallowEqual } from 'react-redux'
 import { useFormik } from 'formik'
-import { CheckboxField } from '@/6-shared/ui/Checkbox'
-import { Dialog, DialogContent, DialogTitle } from '@/6-shared/ui/Dialog'
-import { OutlinedField } from '@/6-shared/ui/OutlinedField'
+import { Select } from '@/6-shared/ui/kit/Select'
+import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
+import { Input } from '@/6-shared/ui/kit/Input'
 import { ColorPicker } from '@/3-widgets/ColorPicker'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 
-// import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisibilitySelect'
 import { defineScreen, useAsk } from '@/6-shared/overlays'
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 /** A screen: the envelope it edits is an id, and the envelope itself is looked
@@ -45,6 +45,7 @@ const EnvelopeEditDialogForm: FC<{
   envelope: core.envelopes.TPresentedEnvelope
   onClose: () => void
 }> = ({ envelope, onClose }) => {
+  const nameRef = useRef<HTMLInputElement>(null)
   const dispatch = useAppDispatch()
   const { t } = useTranslation('envelopeEditDialog')
   const id = envelope.id
@@ -85,65 +86,71 @@ const EnvelopeEditDialogForm: FC<{
   })
 
   return (
-    <Dialog
-      open
-      onClose={() => {
-        // A dismissal with unsaved edits is ignored; Back closes it regardless,
-        // which is the one closing path there is.
-        if (shallowEqual(values, initialValues)) onClose()
+    <DialogSurface
+      title={t('titleEdit')}
+      mobile="drawer"
+      closeButton={false}
+      initialFocus={nameRef}
+      className="max-w-100"
+      controller={{
+        open: true,
+        setOpen: open => {
+          // Preserve dirty drafts on surface dismissal; Back still closes the screen.
+          if (!open && shallowEqual(values, initialValues)) onClose()
+        },
       }}
     >
-      <DialogTitle>{t('titleEdit')}</DialogTitle>
-      <DialogContent>
-        <form
-          onSubmit={handleSubmit}
-          className="mt-2 flex max-w-[360px] flex-col gap-4"
-        >
-          <OutlinedField
-            label={t('nameLabel')}
-            error={!!errors.originalName}
-            helperText={errors.originalName}
-            autoFocus
-            name="originalName"
-            value={values.originalName}
-            onChange={handleChange}
-            autoComplete="off"
-            endAdornment={
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <Input
+          label={t('nameLabel')}
+          placeholder={t('nameLabel')}
+          error={errors.originalName}
+          ref={nameRef}
+          autoFocus
+          name="originalName"
+          value={values.originalName}
+          onChange={handleChange}
+          autoComplete="off"
+          end={
+            <FieldAddon kind="action">
               <Color
                 value={values.colorHex}
                 onChange={v => setFieldValue('colorHex', v)}
               />
-            }
-          />
+            </FieldAddon>
+          }
+        />
 
-          <CurrencyCodeSelect
-            label={t('currencyLabel')}
-            value={values.currency}
-            onChange={v => setFieldValue('currency', v)}
-          />
-          <VisibilitySelect
-            label={t('visibilityLabel')}
-            value={values.visibility}
-            onChange={v => setFieldValue('visibility', v)}
-          />
-          <div className="flex flex-col">
-            <CheckboxField
-              name="keepIncome"
-              label={t('keepIncomeLabel')}
-              checked={values.keepIncome}
-              onCheckedChange={checked => setFieldValue('keepIncome', checked)}
-            />
-          </div>
+        <CurrencyCodeSelect
+          label={t('currencyLabel')}
+          value={values.currency}
+          onChange={v => setFieldValue('currency', v)}
+        />
+        <VisibilitySelect
+          label={t('visibilityLabel')}
+          value={values.visibility}
+          onChange={v => setFieldValue('visibility', v)}
+        />
+        <Select
+          label={t('incomeLabel')}
+          labelMode="floating"
+          required
+          value={values.keepIncome ? 'category' : 'outside'}
+          onChange={value => setFieldValue('keepIncome', value === 'category')}
+          items={[
+            { value: 'category', label: t('keepIncomeLabel') },
+            { value: 'outside', label: t('excludeIncomeLabel') },
+          ]}
+        />
 
-          <Button type="submit" size="large" variant="contained">
-            {t('btnSave')}
-          </Button>
-          <Button onClick={onClose} size="large">
-            {t('btnCancel')}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <Button type="submit" size="lg" variant="primary">
+          {t('btnSave')}
+        </Button>
+        <Button onClick={onClose} size="lg" variant="secondary">
+          {t('btnCancel')}
+        </Button>
+      </form>
+    </DialogSurface>
   )
 }
 
@@ -163,11 +170,12 @@ const Color: FC<ColorProps> = ({ value, onChange }) => {
     if (color !== undefined) onChange(color)
   }
   return (
-    <ButtonBase
-      onClick={pick}
-      aria-label={t('color')}
-      style={{ backgroundColor: value ?? undefined }}
-      className="size-6 rounded-full [box-shadow:inset_0_0_0_1px_rgba(0,0,0,.1)]"
-    />
+    <IconButton onClick={pick} label={t('color')} variant="ghost" size="sm">
+      <span
+        aria-hidden
+        className="size-7 rounded-full border border-ui-border"
+        style={{ backgroundColor: value ?? undefined }}
+      />
+    </IconButton>
   )
 }

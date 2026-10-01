@@ -1,12 +1,12 @@
 import { core } from '@/zerro-core/redux'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Select } from '@/6-shared/ui/Select'
+import { Select } from '@/6-shared/ui/kit/Select'
 
 type VisibilitySelectProps = {
   value: core.envelopes.envelopeVisibility
   onChange: (value: core.envelopes.envelopeVisibility) => void
-  label?: string
+  label: string
   className?: string
 }
 
@@ -17,9 +17,13 @@ export const VisibilitySelect: FC<VisibilitySelectProps> = props => {
   return (
     <Select
       {...rest}
+      required
       value={value}
-      onChange={onChange}
-      options={[
+      labelMode="floating"
+      onChange={next => {
+        if (next !== null) onChange(next)
+      }}
+      items={[
         { value: visibility.auto, label: t('visibility.auto') },
         { value: visibility.visible, label: t('visibility.visible') },
         { value: visibility.hidden, label: t('visibility.hidden') },

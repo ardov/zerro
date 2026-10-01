@@ -14,11 +14,6 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-/** The two selects in this form are the reason this story exists. The shared
- * `Select` reports values directly, so the form adapter rebuilds the event
- * shape that Formik's `handleChange` expects; the shared
- * one hands over the value and the form uses `setFieldValue`. Nothing else
- * checks that the picked value reaches the form. */
 function EditHarness() {
   const open = useEditDialog()
   // The same selector the envelope preview edits from: the metrics entry for
@@ -119,11 +114,68 @@ export const PickingColor: Story = {
       within(picker).getByRole('button', { name: '#CC3077' })
     )
     await waitFor(() => expect(trigger).toHaveFocus())
-    await expect(trigger).toHaveStyle({ backgroundColor: '#CC3077' })
+    await expect(trigger.querySelector('span[aria-hidden]')).toHaveStyle({
+      backgroundColor: '#CC3077',
+    })
     await userEvent.click(trigger)
     await body.findByRole('dialog', { name: /^Color$|^Цвет$/ })
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(trigger).toHaveFocus())
-    await expect(trigger).toHaveStyle({ backgroundColor: '#CC3077' })
+    await expect(trigger.querySelector('span[aria-hidden]')).toHaveStyle({
+      backgroundColor: '#CC3077',
+    })
   },
+}
+
+export const SaveAndValidate: Story = {
+  render: PickingFromTheSelects.render,
+  play: async ({ canvasElement }) => {
+    const body = await openDialog(canvasElement)
+    const dialog = body.getByRole('dialog')
+    const form = within(dialog)
+    const name = form.getByRole('textbox', { name: 'Name' })
+    await userEvent.clear(name)
+    await userEvent.click(form.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(name).toHaveAttribute('aria-invalid', 'true'))
+    await expect(dialog).toBeVisible()
+    await userEvent.type(name, 'Food')
+    const income = form.getByRole('combobox', { name: /^Income/ })
+    const before = income.textContent
+    await userEvent.click(income)
+    const list = await body.findByRole('listbox')
+    const next = within(list)
+      .getAllByRole('option')
+      .find(option => option.textContent !== before)!
+    const selected = next.textContent!
+    await userEvent.click(next)
+    await expect(
+      form.queryByRole('button', { name: 'Clear selection' })
+    ).toBeNull()
+    await userEvent.click(form.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(dialog).not.toBeVisible())
+    await userEvent.click(
+      within(canvasElement).getByRole('button', { name: 'Edit envelope' })
+    )
+    const reopened = await body.findByRole('dialog')
+    await expect(
+      within(reopened).getByRole('combobox', { name: /^Income/ })
+    ).toHaveTextContent(selected)
+  },
+}
+
+export const Mobile: Story = {
+  ...PickingFromTheSelects,
+  globals: { viewport: { value: 'zerro499' } },
+}
+export const MobileSave: Story = {
+  ...SaveAndValidate,
+  globals: { viewport: { value: 'zerro499' } },
+}
+export const MobileCancel: Story = {
+  ...ReturnsFocusAfterRemount,
+  globals: { viewport: { value: 'zerro499' } },
+}
+export const MobileColor: Story = {
+  ...PickingColor,
+  globals: { viewport: { value: 'zerro499' } },
 }
