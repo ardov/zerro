@@ -48,7 +48,6 @@ export type SelectProps<T extends string = string> = Pick<
   | 'labelMode'
   | 'size'
   | 'placeholder'
-  | 'required'
   | 'disabled'
   | 'readOnly'
   | 'description'
@@ -60,7 +59,6 @@ export type SelectProps<T extends string = string> = Pick<
   | 'ref'
 > & {
   value: T | null
-  onChange: (value: T | null) => void
   items: readonly SelectItem<T>[]
   name?: string
   id?: string
@@ -80,14 +78,26 @@ export type SelectProps<T extends string = string> = Pick<
   emptyText?: string
   /** Search inside the popup; selected-row alignment applies only without search. */
   search?: boolean | SelectSearchOptions<T>
-}
+} & SelectionChange<T>
+
+/** Required fields cannot be cleared. Optional fields are clearable by default. */
+export type SelectRequirement =
+  | { required: true; clearable?: false }
+  | { required?: false; clearable?: boolean }
+
+type SelectionChange<T> =
+  | { required: true; clearable?: false; onChange: (value: T) => void }
+  | { required?: false; clearable: false; onChange: (value: T) => void }
+  | { required?: false; clearable?: true; onChange: (value: T | null) => void }
 
 /** Internal modes share rendering while preserving the public value contracts. */
 export type SelectControlProps<T extends string> =
   | (SelectProps<T> & { multiple?: false })
   | (MultiSelectProps<T> & { multiple: true; alignSelected?: never })
 
-/** Controlled single selection. null represents an empty field. */
+/** null represents an initially empty field. Required selections cannot be
+ * cleared. clearable=false also guarantees non-null answers without requiring
+ * a value for form submission. onChange only reports changed values. */
 export function Select<T extends string>(props: SelectProps<T>) {
   return <SelectControl {...props} />
 }

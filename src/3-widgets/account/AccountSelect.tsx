@@ -4,13 +4,7 @@ import { useAccountOptions } from './useAccountOptions'
 
 export type AccountSelectProps = Pick<
   SelectProps,
-  | 'trigger'
-  | 'required'
-  | 'invalid'
-  | 'error'
-  | 'disabled'
-  | 'readOnly'
-  | 'className'
+  'trigger' | 'invalid' | 'error' | 'disabled' | 'readOnly' | 'className'
 > & {
   value: TAccountId | null
   onChange: (id: TAccountId) => void
@@ -32,9 +26,8 @@ export function AccountSelect(props: AccountSelectProps) {
       {...restProps}
       label={label}
       value={value}
-      onChange={id => {
-        if (id !== null) onChange(id)
-      }}
+      required
+      onChange={onChange}
     />
   )
 }

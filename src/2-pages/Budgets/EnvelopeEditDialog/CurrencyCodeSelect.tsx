@@ -29,9 +29,7 @@ export const CurrencyCodeSelect: FC<CurrencyCodeSelectProps> = props => {
       required
       value={value}
       labelMode="floating"
-      onChange={next => {
-        if (next !== null) onChange(next)
-      }}
+      onChange={onChange}
       // The closed field shows the code alone; the rows carry the full name.
       items={instruments.map(instr => ({
         value: instr.shortTitle,

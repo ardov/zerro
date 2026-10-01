@@ -19,9 +19,8 @@ export function CategorySelect(props: CategorySelectProps) {
     <Select
       {...options}
       value={value ?? null}
-      onChange={id => {
-        if (id !== null) onSelect(id)
-      }}
+      clearable={false}
+      onChange={onSelect}
       trigger={trigger}
     />
   )

@@ -14,6 +14,8 @@ export type InlineFieldProps = Omit<
 > & {
   label: string
   value: string
+  /** Reports the text after the native onChange handler. */
+  onValueChange?: (value: string) => void
   invalid?: boolean
   start?: ReactNode
   end?: ReactNode
@@ -31,6 +33,8 @@ export function InlineField({
   style,
   ref,
   disabled,
+  onChange,
+  onValueChange,
   ...props
 }: InlineFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -62,6 +66,11 @@ export function InlineField({
         </span>
         <InputPrimitive
           {...props}
+          onChange={event => {
+            const value = event.currentTarget.value
+            onChange?.(event)
+            onValueChange?.(value)
+          }}
           ref={inputRef}
           type="text"
           value={value}

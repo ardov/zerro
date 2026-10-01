@@ -505,7 +505,7 @@ const TransactionEditor = ({
           placeholder={t('comment')}
           maxRows={6}
           value={draft.comment ?? ''}
-          onChange={event => edit({ comment: event.target.value })}
+          onValueChange={comment => edit({ comment })}
         />
 
         {tr && (

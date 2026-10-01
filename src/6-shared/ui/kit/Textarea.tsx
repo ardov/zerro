@@ -5,6 +5,8 @@ import { Field, fieldControlClass, type FieldPresentation } from './Field'
 
 export type TextareaProps = Omit<ComponentPropsWithRef<'textarea'>, 'rows'> &
   FieldPresentation & {
+    /** Reports the text after the native onChange handler. */
+    onValueChange?: (value: string) => void
     /** Minimum height in lines. Defaults to one. */
     minRows?: number
     /** Maximum height in lines; additional content scrolls. */
@@ -30,6 +32,8 @@ export function Textarea(props: TextareaProps) {
     readOnly,
     minRows = 1,
     maxRows,
+    onChange,
+    onValueChange,
     ...restProps
   } = props
   const controlRef = useRef<HTMLTextAreaElement>(null)
@@ -60,7 +64,16 @@ export function Textarea(props: TextareaProps) {
         {...(restProps as FieldPrimitive.Control.Props)}
         ref={controlRef}
         readOnly={readOnly}
-        render={<textarea rows={minRows} />}
+        render={
+          <textarea
+            rows={minRows}
+            onChange={event => {
+              const value = event.currentTarget.value
+              onChange?.(event)
+              onValueChange?.(value)
+            }}
+          />
+        }
         className={cn(
           fieldControlClass,
           'field-sizing-content resize-none overflow-y-auto',

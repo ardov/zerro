@@ -52,7 +52,7 @@ export function ColorPickerPanel(props: ColorPickerPanelProps) {
         }
         value={draft}
         onFocus={event => event.currentTarget.select()}
-        onChange={event => onDraftChange(event.target.value)}
+        onValueChange={onDraftChange}
         placeholder="#000000"
         spellCheck={false}
         autoComplete="off"

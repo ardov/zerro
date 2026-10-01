@@ -20,9 +20,7 @@ export const VisibilitySelect: FC<VisibilitySelectProps> = props => {
       required
       value={value}
       labelMode="floating"
-      onChange={next => {
-        if (next !== null) onChange(next)
-      }}
+      onChange={onChange}
       items={[
         { value: visibility.auto, label: t('visibility.auto') },
         { value: visibility.visible, label: t('visibility.visible') },

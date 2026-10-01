@@ -203,11 +203,7 @@ function ExplicitSave() {
         trigger={<Button onClick={() => setDraft(saved)}>Edit name</Button>}
       >
         <div className="space-y-4">
-          <Input
-            label="Name"
-            value={draft}
-            onChange={event => setDraft(event.target.value)}
-          />
+          <Input label="Name" value={draft} onValueChange={setDraft} />
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => popup.setOpen(false)}>
               Cancel
@@ -353,11 +349,7 @@ function OwnerDraft() {
           label="Owned draft"
           controller={{ ...popup, setOpen: next => popup.setOpen(next) }}
         >
-          <Input
-            label="Owned name"
-            value={draft}
-            onChange={event => setDraft(event.target.value)}
-          />
+          <Input label="Owned name" value={draft} onValueChange={setDraft} />
         </DialogSurface>
       )}
     </>

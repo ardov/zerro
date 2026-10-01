@@ -4,7 +4,10 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import { Field, fieldControlClass, type FieldPresentation } from './Field'
 
 export type InputProps = Omit<ComponentPropsWithRef<'input'>, 'size'> &
-  FieldPresentation
+  FieldPresentation & {
+    /** Reports the text after the native onChange handler. */
+    onValueChange?: (value: string) => void
+  }
 
 export function Input(props: InputProps) {
   const {
@@ -24,6 +27,8 @@ export function Input(props: InputProps) {
     disabled,
     readOnly,
     placeholder,
+    onChange,
+    onValueChange,
     ...restProps
   } = props
   const controlRef = useRef<HTMLInputElement>(null)
@@ -56,6 +61,11 @@ export function Input(props: InputProps) {
     >
       <InputPrimitive
         {...restProps}
+        onChange={event => {
+          const value = event.currentTarget.value
+          onChange?.(event)
+          onValueChange?.(value)
+        }}
         ref={controlRef}
         readOnly={readOnly}
         placeholder={placeholder}

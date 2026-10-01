@@ -43,15 +43,26 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
   const reserveStart = options.some(item => item.start != null)
   const unavailable = props.disabled || props.readOnly
   const { open, setOpen } = useOwnedPopup({ popup: props.popup, unavailable })
+  const canClear = !props.required && props.clearable !== false
   const changeValue = (next: T | T[] | null) => {
     if (unavailable) return
     if (props.multiple) {
-      if (Array.isArray(next) && !(props.required && next.length === 0))
-        props.onChange(next)
-    } else if (!Array.isArray(next) && !(props.required && next === null)) {
+      if (!Array.isArray(next) || (!canClear && next.length === 0)) return
+      if (
+        next.length === props.value.length &&
+        next.every((value, index) => value === props.value[index])
+      )
+        return
       props.onChange(next)
+    } else if (!Array.isArray(next) && next !== props.value) {
+      if (props.required || props.clearable === false) {
+        if (next !== null) props.onChange(next)
+      } else {
+        props.onChange(next)
+      }
     }
   }
+
   const triggerProps = {
     ref: props.ref,
     'aria-label': props.trigger
@@ -75,7 +86,9 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
         invalid={props.invalid}
         error={props.error}
         start={props.showValueIcon === false ? undefined : valueIcon}
-        onClear={() => changeValue(props.multiple ? [] : null)}
+        onClear={
+          canClear ? () => changeValue(props.multiple ? [] : null) : undefined
+        }
       />
     ),
   }

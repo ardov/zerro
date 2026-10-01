@@ -11,7 +11,7 @@ import {
   waitFor,
 } from 'storybook/test'
 import { Plus, Wallet } from 'lucide-react'
-import { Select, type SelectItem } from './Select'
+import { Select, type SelectProps, type SelectItem } from './Select'
 import { Button, IconButton } from './Button'
 
 const items: SelectItem[] = [
@@ -75,6 +75,13 @@ function Demo(props: { autoFocus?: boolean; required?: boolean }) {
   const { autoFocus, required } = props
   const [value, setValue] = useState<string | null>('daily')
   const [submits, setSubmits] = useState(0)
+  const selection: Pick<SelectProps<string>, 'value'> &
+    (
+      | { required: true; onChange: (value: string) => void }
+      | { required: false; onChange: (value: string | null) => void }
+    ) = required
+    ? { required: true, value, onChange: setValue }
+    : { required: false, value, onChange: setValue }
   return (
     <form
       className="grid max-w-sm gap-4"
@@ -87,9 +94,7 @@ function Demo(props: { autoFocus?: boolean; required?: boolean }) {
         label="Account"
         name="account"
         items={items}
-        value={value}
-        onChange={setValue}
-        required={required}
+        {...selection}
         search={{ ...accountSearch, autoFocus }}
       />
       <Button variant="secondary">Next control</Button>

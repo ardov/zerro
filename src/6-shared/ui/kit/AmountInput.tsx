@@ -21,6 +21,7 @@ type AmountEditingProps = {
 export type AmountInputProps = Omit<
   InputProps,
   | keyof AmountEditingProps
+  | 'onValueChange'
   | 'defaultValue'
   | 'type'
   | 'inputMode'
@@ -32,7 +33,12 @@ export type AmountInputProps = Omit<
 
 export type AmountInlineFieldProps = Omit<
   InlineFieldProps,
-  keyof AmountEditingProps | 'inputMode' | 'min' | 'max' | 'step'
+  | keyof AmountEditingProps
+  | 'onValueChange'
+  | 'inputMode'
+  | 'min'
+  | 'max'
+  | 'step'
 > &
   AmountEditingProps
 

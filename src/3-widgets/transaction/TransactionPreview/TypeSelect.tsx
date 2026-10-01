@@ -33,9 +33,7 @@ export function TypeSelect(props: {
         label: t(`type_${type}`),
         disabled: unavailable.includes(type),
       }))}
-      onChange={next => {
-        if (next !== null && next !== value) onChange(next)
-      }}
+      onChange={onChange}
       trigger={
         <Button
           variant="ghost"

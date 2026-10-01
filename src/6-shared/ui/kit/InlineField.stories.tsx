@@ -32,10 +32,7 @@ export const Bench: Story = {
   render: function Bench(args) {
     const [, updateArgs] = useArgs()
     return (
-      <InlineField
-        {...args}
-        onChange={event => updateArgs({ value: event.target.value })}
-      />
+      <InlineField {...args} onValueChange={value => updateArgs({ value })} />
     )
   },
 }
@@ -71,7 +68,7 @@ function Examples() {
         <InlineField
           label="Budget title"
           value={title}
-          onChange={event => setTitle(event.target.value)}
+          onValueChange={setTitle}
         />
       </h2>
       <table className="w-full table-fixed text-left">
@@ -87,7 +84,7 @@ function Examples() {
               <InlineField
                 label="Category name"
                 value={category}
-                onChange={event => setCategory(event.target.value)}
+                onValueChange={setCategory}
               />
             </td>
             <td>2 500 CZK</td>

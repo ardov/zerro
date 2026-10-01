@@ -6,12 +6,12 @@ import {
 
 export type AccountFieldProps = Omit<
   AccountSelectProps,
-  'value' | 'required' | 'trigger'
+  'value' | 'trigger'
 > & {
   value: TAccountId
 }
 
 export function AccountField(props: AccountFieldProps) {
   const { value, ...restProps } = props
-  return <AccountSelect {...restProps} required value={value || null} />
+  return <AccountSelect {...restProps} value={value || null} />
 }

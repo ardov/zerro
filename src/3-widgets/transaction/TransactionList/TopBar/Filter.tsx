@@ -128,7 +128,7 @@ const Filter: FC<FilterProps> = ({
         label={t('searchComments')}
         placeholder={t('searchComments')}
         value={search}
-        onChange={event => onSearchChange(event.target.value)}
+        onValueChange={onSearchChange}
         end={
           <FieldAddon kind="action">
             {Boolean(search) && (

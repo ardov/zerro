@@ -46,7 +46,7 @@ function SearchExample() {
       label="Search"
       placeholder="Search"
       value={value}
-      onChange={event => setValue(event.target.value)}
+      onValueChange={setValue}
       start={
         <FieldAddon kind="icon">
           <SearchIcon size={20} />
@@ -257,7 +257,7 @@ function FloatingLabelExample() {
         label="Floating label"
         labelMode="floating"
         value={value}
-        onChange={event => setValue(event.target.value)}
+        onValueChange={setValue}
       />
       <Button onClick={() => setValue('Updated')}>Set value</Button>
       <Button onClick={() => setValue('')}>Clear value</Button>
