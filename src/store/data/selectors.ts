@@ -24,9 +24,6 @@ export const getOutboxRecoveryReason = (state: RootState) =>
 export const getPersistenceWarning = (state: RootState) =>
   state.data.persistenceWarning
 
-export const getRestoredOutboxCount = (state: RootState) =>
-  state.data.restoredOutboxCount
-
 /**
  * Either recovery state means the durable replica cannot accept a local write:
  * the canonical base is unusable, or the outbox those commands would join is
@@ -54,10 +51,6 @@ export const getCanRedoClientCommand = (state: RootState) =>
 
 /** Commands, not entities: how many undoable actions are waiting to be sent. */
 export const getChangedNum = (state: RootState) => getOutbox(state).length
-
-export const getLastChangeTime = createSelector([getOutbox], outbox =>
-  outbox.reduce((latest, command) => Math.max(latest, command.issuedAt), 0)
-)
 
 export const getLastSyncTime = (state: RootState) => {
   return state.data.current.serverTimestamp

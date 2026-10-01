@@ -3,7 +3,6 @@ import { TransactionPreviewDrawer } from '@/3-widgets/global/TransactionPreviewD
 import { EnvTransactionsDrawer } from '@/3-widgets/global/EnvTransactionsDrawer'
 import { JournalRecoveryNotice } from '@/3-widgets/JournalRecoveryNotice'
 import { HistoryPanel } from '@/3-widgets/History/HistoryPanel'
-import { RestoredOutboxNotice } from '@/3-widgets/History/RestoredOutboxNotice'
 import { PersistenceWarningNotice } from '@/3-widgets/PersistenceWarningNotice'
 import { OutboxRecoveryNotice } from '@/3-widgets/OutboxRecoveryNotice'
 import { SyncProgressDialog } from '@/3-widgets/SyncProgressDialog'
@@ -19,7 +18,6 @@ export const GlobalWidgets = () => {
       <JournalRecoveryNotice />
       <OutboxRecoveryNotice />
       <PersistenceWarningNotice />
-      <RestoredOutboxNotice />
       <SyncProgressDialog />
 
       <HistoryPanel />

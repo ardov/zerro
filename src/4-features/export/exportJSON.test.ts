@@ -31,7 +31,6 @@ describe('getBackupContent', () => {
         journalRecoveryReason: null,
         outboxRecoveryReason: null,
         persistenceWarning: null,
-        restoredOutboxCount: 0,
       },
     })
 

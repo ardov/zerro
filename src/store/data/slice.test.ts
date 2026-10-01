@@ -9,11 +9,7 @@ import {
 } from '@/zerro-core/support/testing/zenmoneyTestData'
 import { acceptPushChunk, beginPush, type TCommand } from '@/zerro-core/replica'
 import { AccountType, type TNormalizedPatch } from '@/6-shared/types'
-import {
-  getChangedNum,
-  getLastChangeTime,
-  getPendingSyncDiff,
-} from './selectors'
+import { getChangedNum, getPendingSyncDiff } from './selectors'
 import reducer, {
   acceptClientPushChunk,
   appendClientCommand,
@@ -83,7 +79,6 @@ describe('command outbox boundaries', () => {
     expect(hydrated.base).toBe(base)
     expect(hydrated.current.account.cash.title).toBe('Wallet')
     expect(hydrated.outbox).toEqual(outbox)
-    expect(hydrated.restoredOutboxCount).toBe(1)
   })
 
   it('clears recovery after the cursor-zero canonical snapshot is accepted', () => {
@@ -188,7 +183,6 @@ describe('command outbox boundaries', () => {
     // Two commands touched the same account, so the count is the number of
     // undoable commands (2), not the one entity they collapse to in the diff.
     expect(getChangedNum(getRootState(appended))).toBe(2)
-    expect(getLastChangeTime(getRootState(appended))).toBe(20)
 
     const undone = reducer(appended, undoClientCommand())
     expect(undone.current.account.cash.title).toBe('Wallet')

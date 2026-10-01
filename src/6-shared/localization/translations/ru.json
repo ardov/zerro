@@ -609,14 +609,7 @@
     "undo": "Отменить",
     "redo": "Вернуть",
     "stepBack": "Шаг назад",
-    "stepForward": "Шаг вперёд",
-    "dismissNotice": "Закрыть уведомление",
-    "restoredOutboxTitle": "Есть неотправленные изменения",
-    "restoredOutboxDescription_zero": "Изменений нет",
-    "restoredOutboxDescription_one": "{{count}} изменение сохранилось с прошлого раза и ещё не отправлено в Дзен-мани.",
-    "restoredOutboxDescription_few": "{{count}} изменения сохранились с прошлого раза и ещё не отправлены в Дзен-мани.",
-    "restoredOutboxDescription_many": "{{count}} изменений сохранились с прошлого раза и ещё не отправлены в Дзен-мани.",
-    "restoredOutboxDescription_other": "{{count}} изменений сохранились с прошлого раза и ещё не отправлены в Дзен-мани."
+    "stepForward": "Шаг вперёд"
   },
 
   "transactions": {

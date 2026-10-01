@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import { useCallback, useEffect, useRef } from 'react'
 import { getLoginState } from '@/store/token'
 import { refreshData } from '@/4-features/sync'
-import { getLastSyncTime, getLastChangeTime } from '@/store/data'
+import { getLastSyncTime, getPersistenceWarning } from '@/store/data'
 import { selectIsSyncPending } from '@/store/sync'
 import { loadLocalData } from '@/4-features/localData'
 import useLocalStorageState from 'use-local-storage-state'
@@ -43,26 +43,30 @@ function useConditionalSync() {
   return trySyncing
 }
 
-/** Alert about unsaved changes when user tries to close the window */
-function useUnsavedChangesAlert() {
-  const lastChange = useAppSelector(getLastChangeTime)
+/**
+ * Asks before closing only when local saving has failed. Unsent changes alone
+ * are no reason: they are already stored locally and come back after reload.
+ * After a failure local storage is frozen at that moment, so anything since
+ * then lives only in this tab.
+ */
+function usePersistenceFailureAlert() {
+  const persistenceFailed = useAppSelector(getPersistenceWarning) !== null
   useEffect(() => {
+    if (!persistenceFailed) return
     const beforeUnload = (e: BeforeUnloadEvent) => {
-      if (lastChange) {
-        e.preventDefault()
-        e.returnValue = true
-        return true
-      }
+      e.preventDefault()
+      e.returnValue = true
+      return true
     }
     window.addEventListener('beforeunload', beforeUnload)
     return () => {
       window.removeEventListener('beforeunload', beforeUnload)
     }
-  }, [lastChange])
+  }, [persistenceFailed])
 }
 
 export const RegularSyncHandler: FC = () => {
-  useUnsavedChangesAlert()
+  usePersistenceFailureAlert()
   const dispatch = useAppDispatch()
   const sync = useConditionalSync()
 

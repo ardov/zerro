@@ -36,10 +36,6 @@ interface DataSlice {
   /** Primary persistence is best-effort and stays disabled after its first
    * failure until reload, while Redux remains usable. */
   persistenceWarning: string | null
-  /** How many commands came back from persistence at load and have not been
-   * pushed since. Session-only: it exists so the app can say the outbox
-   * survived a reload, which pull-only sync made possible. */
-  restoredOutboxCount: number
 }
 
 export type TAcceptedPushReplica = Omit<TAcceptedPushChunk, 'next' | 'progress'>
@@ -61,7 +57,6 @@ const initialState: DataSlice = {
   journalRecoveryReason: null,
   outboxRecoveryReason: null,
   persistenceWarning: null,
-  restoredOutboxCount: 0,
 }
 
 // SLICE
@@ -86,7 +81,6 @@ const { reducer, actions } = createSlice({
         state.outbox = [...payload.outbox]
         state.redo = []
         state.current = replayOutbox(payload.base, payload.outbox)
-        state.restoredOutboxCount = payload.outbox.length
         state.journalRecoveryRequired = false
         state.journalRecoveryReason = null
         state.outboxRecoveryReason = null
@@ -109,7 +103,6 @@ const { reducer, actions } = createSlice({
         state.current = payload.base
         state.outbox = []
         state.redo = []
-        state.restoredOutboxCount = 0
         state.journalRecoveryRequired = false
         state.journalRecoveryReason = null
         state.outboxRecoveryReason = payload.reason
@@ -133,7 +126,6 @@ const { reducer, actions } = createSlice({
         state.current = empty
         state.outbox = []
         state.redo = []
-        state.restoredOutboxCount = 0
         state.journalRecoveryRequired = true
         state.journalRecoveryReason = payload.journalReason
         state.outboxRecoveryReason = payload.outboxReason
@@ -155,7 +147,6 @@ const { reducer, actions } = createSlice({
           if (rootUserChanged) {
             state.outbox = []
             state.redo = []
-            state.restoredOutboxCount = 0
           }
           if (recoveringJournal) {
             const replayed = replayAndValidateOutbox(checkpoint, state.outbox)
@@ -164,7 +155,6 @@ const { reducer, actions } = createSlice({
               state.current = checkpoint
               state.outbox = []
               state.redo = []
-              state.restoredOutboxCount = 0
               state.outboxRecoveryReason = replayed.reason
               return
             }
@@ -202,7 +192,6 @@ const { reducer, actions } = createSlice({
         state.outbox = payload.outbox
         state.redo = payload.redo
         state.rootUserId = getRootUserId(payload.base.user) ?? state.rootUserId
-        state.restoredOutboxCount = 0
       }
     ),
     appendClientCommand: withPerf(
@@ -219,9 +208,6 @@ const { reducer, actions } = createSlice({
     ),
     prepareClientSync: withPerf('prepareClientSync', state => {
       state.redo = []
-      // The user is pushing: whatever survived the reload is on its way out,
-      // so the notice about it has nothing left to say.
-      state.restoredOutboxCount = 0
     }),
     undoClientCommand: withPerf('undoClientCommand', state => {
       if (!state.outbox.length) return
@@ -252,7 +238,6 @@ const { reducer, actions } = createSlice({
         state.rootUserId = payload.rootUserId
         state.outbox = [...payload.outbox]
         state.redo = []
-        state.restoredOutboxCount = payload.outbox.length
         state.journalRecoveryRequired = true
         state.journalRecoveryReason = payload.reason
         state.outboxRecoveryReason = null

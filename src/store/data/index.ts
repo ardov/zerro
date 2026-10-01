@@ -36,9 +36,7 @@ export {
   getPersistenceWarning,
   getJournalRecoveryRequired,
   getReplicaWriteBlocked,
-  getRestoredOutboxCount,
   getChangedNum,
-  getLastChangeTime,
   getLastSyncTime,
   getSyncCursor,
 } from './selectors'

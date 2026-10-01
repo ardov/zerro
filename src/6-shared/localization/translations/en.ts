@@ -645,17 +645,6 @@ export const en: typeof ru = {
     redo: 'Redo',
     stepBack: 'Step back',
     stepForward: 'Step forward',
-    dismissNotice: 'Dismiss',
-    restoredOutboxTitle: 'Unsent changes',
-    restoredOutboxDescription_zero: 'No changes',
-    restoredOutboxDescription_one:
-      '{{count}} change was kept from last time and has not been sent to ZenMoney yet.',
-    restoredOutboxDescription_few:
-      '{{count}} changes were kept from last time and have not been sent to ZenMoney yet.',
-    restoredOutboxDescription_many:
-      '{{count}} changes were kept from last time and have not been sent to ZenMoney yet.',
-    restoredOutboxDescription_other:
-      '{{count}} changes were kept from last time and have not been sent to ZenMoney yet.',
   },
 
   transactions: {
