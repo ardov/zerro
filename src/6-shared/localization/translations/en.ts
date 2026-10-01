@@ -162,7 +162,13 @@ export const en: typeof ru = {
     btnCreate: 'Create category',
     btnCancel: 'Cancel',
     color: 'Color',
-    removeColor: 'Remove color',
+  },
+
+  colorPicker: {
+    title: 'Color',
+    input: 'HEX color',
+    remove: 'No color',
+    apply: 'Apply',
   },
 
   transactionContextMenu: {

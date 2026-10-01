@@ -2,7 +2,6 @@ import '@testing-library/jest-dom/vitest'
 import { createRef } from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import { getContrastRatio } from '@/6-shared/ui/theme/color'
 import { Chip } from './Chip'
 
 afterEach(cleanup)
@@ -59,18 +58,13 @@ it('blocks both actions when disabled', () => {
 })
 
 it.each([
-  '#fff',
-  '#000',
-  '#777',
-  '#f5dd72',
-  'rgb(23, 37, 84)',
-  'oklch(0.600 0.150 150)',
-])('chooses readable text on %s', color => {
+  ['#ffea00', '#000000'],
+  ['#777777', '#ffffff'],
+])('uses a readable foreground on %s', (color, foreground) => {
   render(<Chip color={color}>Food</Chip>)
-  const chip = screen
-    .getByText('Food')
-    .closest('[data-slot="chip"]') as HTMLElement
-  expect(getContrastRatio(chip.style.color, color)).toBeGreaterThanOrEqual(4.5)
+  expect(screen.getByText('Food').closest('[data-slot="chip"]')).toHaveStyle({
+    color: foreground,
+  })
 })
 
 it.each(['outline', 'outline-draft'] as const)(

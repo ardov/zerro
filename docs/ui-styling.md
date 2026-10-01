@@ -105,6 +105,11 @@ as an arbitrary value.
 the concrete and semantic scales, the scheme's neutral levels, status roles,
 interaction states, representative controls and chart colors in both themes.
 
+## Dynamic color input and foregrounds
+
+Choose dynamic foreground colors through `getContrastText` from
+`6-shared/helpers/color`; do not add local contrast heuristics.
+
 ## Breakpoints
 
 `src/6-shared/ui/theme/breakpoints.ts` is the TypeScript source of truth:

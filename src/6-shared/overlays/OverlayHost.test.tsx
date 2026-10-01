@@ -564,3 +564,61 @@ describe('owner close notifications', () => {
     expect(parentClosed).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('asked close answers', () => {
+  it.each(['back', 'surface', 'explicit', 'unanswered'] as const)(
+    'keeps the first answer when closed through %s',
+    async mode => {
+      const user = userEvent.setup()
+      const result = vi.fn()
+      const notified = vi.fn()
+      function Editor() {
+        const [draft, setDraft] = useState('initial')
+        const { open, controller, answer } = useAsked<string>(answer => {
+          notified()
+          answer(draft)
+        })
+        return (
+          open && (
+            <>
+              <input
+                aria-label="draft"
+                value={draft}
+                onChange={event => setDraft(event.target.value)}
+              />
+              <button onClick={() => controller.setOpen(false)}>surface</button>
+              <button onClick={() => answer('explicit')}>explicit</button>
+              <button onClick={() => answer()}>unanswered</button>
+            </>
+          )
+        )
+      }
+      function Launcher() {
+        const ask = useAsk()
+        return (
+          <button onClick={async () => result(await ask(<Editor />))}>
+            launch
+          </button>
+        )
+      }
+      render(
+        <App>
+          <Launcher />
+        </App>
+      )
+      await user.click(screen.getByText('launch'))
+      const input = await screen.findByLabelText('draft')
+      await user.clear(input)
+      await user.type(input, 'latest')
+      await user.click(screen.getByText(mode))
+      expect(result).toHaveBeenCalledExactlyOnceWith(
+        mode === 'explicit'
+          ? 'explicit'
+          : mode === 'unanswered'
+            ? undefined
+            : 'latest'
+      )
+      expect(notified).toHaveBeenCalledTimes(1)
+    }
+  )
+})

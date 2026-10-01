@@ -5,7 +5,7 @@ import { useFormik } from 'formik'
 import { CheckboxField } from '@/6-shared/ui/Checkbox'
 import { Dialog, DialogContent, DialogTitle } from '@/6-shared/ui/Dialog'
 import { OutlinedField } from '@/6-shared/ui/OutlinedField'
-import { ColorPicker } from '@/6-shared/ui/ColorPickerPopover'
+import { ColorPicker } from '@/3-widgets/ColorPicker'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 
@@ -153,6 +153,7 @@ type ColorProps = {
 }
 
 const Color: FC<ColorProps> = ({ value, onChange }) => {
+  const { t } = useTranslation('envelopeEditDialog')
   const ask = useAsk()
   const pick = async (e: MouseEvent<HTMLElement>) => {
     const color = await ask<string | null>(
@@ -164,6 +165,7 @@ const Color: FC<ColorProps> = ({ value, onChange }) => {
   return (
     <ButtonBase
       onClick={pick}
+      aria-label={t('color')}
       style={{ backgroundColor: value ?? undefined }}
       className="size-6 rounded-full [box-shadow:inset_0_0_0_1px_rgba(0,0,0,.1)]"
     />

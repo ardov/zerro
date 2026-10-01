@@ -8,7 +8,7 @@ import {
 import { cva, type VariantProps } from 'class-variance-authority'
 import { useTranslation } from 'react-i18next'
 import { CloseIcon } from '@/6-shared/ui/Icons'
-import { getLuminance } from '@/6-shared/ui/theme/color'
+import { getContrastText } from '@/6-shared/helpers/color'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 
 const chipVariants = cva(
@@ -73,11 +73,7 @@ export function Chip(props: ChipProps) {
   const interactive = Boolean(primaryAction)
   const Label = interactive ? 'button' : 'span'
   const foreground =
-    color && variant === 'filled'
-      ? getLuminance(color) > 0.179
-        ? '#000'
-        : '#fff'
-      : undefined
+    color && variant === 'filled' ? getContrastText(color) : undefined
   const palette = foreground
     ? ({
         backgroundColor: color,

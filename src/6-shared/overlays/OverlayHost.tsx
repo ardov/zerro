@@ -328,6 +328,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
             key={layer.id}
             layer={layer}
             onAnswer={answer}
+            onClose={closePopup}
             subscribeClose={subscribeClose}
           />
         ))}
@@ -339,10 +340,12 @@ export function OverlayHost({ children }: { children: ReactNode }) {
 function AskedLayerView({
   layer,
   onAnswer,
+  onClose,
   subscribeClose,
 }: {
   layer: AskLayer
   onAnswer: (id: string, value: unknown) => void
+  onClose: (id: string) => void
   subscribeClose: OverlayMethods['subscribeClose']
 }) {
   const open = useEntranceOpen(layer.open)
@@ -353,12 +356,12 @@ function AskedLayerView({
   const methods = useMemo(
     () => ({
       setOpen: (next: boolean) => {
-        if (!next) answer()
+        if (!next) onClose(layer.id)
       },
       subscribeClose: (listener: () => void) =>
         subscribeClose(layer.id, listener),
     }),
-    [answer, layer.id, subscribeClose]
+    [onClose, layer.id, subscribeClose]
   )
   const value = useMemo(
     () => ({ open, answer, controller: { open, ...methods } }),

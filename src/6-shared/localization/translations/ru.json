@@ -154,8 +154,14 @@
     "btnSave": "Сохранить категорию",
     "btnCreate": "Создать категорию",
     "btnCancel": "Отменить",
-    "color": "Цвет",
-    "removeColor": "Убрать цвет"
+    "color": "Цвет"
+  },
+
+  "colorPicker": {
+    "title": "Цвет",
+    "input": "HEX-цвет",
+    "remove": "Без цвета",
+    "apply": "Применить"
   },
 
   "transactionContextMenu": {

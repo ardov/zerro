@@ -1,7 +1,7 @@
 import { CategorySymbol } from './CategoryIcon'
 import type { ComponentPropsWithoutRef } from 'react'
 import { cn } from './shadcn/utils'
-import { getContrastText } from './theme/color'
+import { getContrastText } from '@/6-shared/helpers/color'
 import { Checkbox, type CheckboxProps } from './Checkbox'
 
 export type TagIconProps = Omit<

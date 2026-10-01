@@ -103,3 +103,27 @@ export const ReturnsFocusAfterRemount: Story = {
     }
   },
 }
+
+export const PickingColor: Story = {
+  render: () => (
+    <MonthProvider>
+      <EditHarness />
+    </MonthProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const body = await openDialog(canvasElement)
+    const trigger = body.getByRole('button', { name: /^Color$|^Цвет$/ })
+    await userEvent.click(trigger)
+    const picker = await body.findByRole('dialog', { name: /^Color$|^Цвет$/ })
+    await userEvent.click(
+      within(picker).getByRole('button', { name: '#CC3077' })
+    )
+    await waitFor(() => expect(trigger).toHaveFocus())
+    await expect(trigger).toHaveStyle({ backgroundColor: '#CC3077' })
+    await userEvent.click(trigger)
+    await body.findByRole('dialog', { name: /^Color$|^Цвет$/ })
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(trigger).toHaveFocus())
+    await expect(trigger).toHaveStyle({ backgroundColor: '#CC3077' })
+  },
+}

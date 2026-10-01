@@ -26,15 +26,22 @@ export function useAsk() {
 }
 
 /** The asked element owns its draft and subscription; surfaces only render it.
- * answer() without a value dismisses the question. */
-export function useAsked<T>(onClose?: () => void): {
+ * The first answer wins, including an explicit answer(undefined).
+ * Closing through controller.setOpen(false) or Back notifies onClose before
+ * settling unanswered; onClose receives answer and may submit a draft. An explicit answer
+ * is settled before onClose and cannot be replaced by that notification.
+ * Technical unmount does not notify onClose. */
+export function useAsked<T>(onClose?: (answer: (value?: T) => void) => void): {
   open: boolean
   answer: (value?: T) => void
   controller: OverlayController
 } {
   const layer = useContext(AskedContext)
   if (!layer) throw new Error('useAsked is used outside of an asked overlay')
-  useCloseNotification(layer.controller, onClose)
+  useCloseNotification(
+    layer.controller,
+    onClose ? () => onClose(layer.answer) : undefined
+  )
   return layer as {
     open: boolean
     answer: (value?: T) => void

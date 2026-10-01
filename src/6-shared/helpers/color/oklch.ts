@@ -256,8 +256,7 @@ export function formatOklch(color: Oklch): string {
 }
 
 /** Serializes to the sRGB notations the theme is written in today: `#rrggbb`
- * when opaque, `rgba(r, g, b, a)` otherwise — the exact spelling `alpha()` in
- * `ui/theme/color.ts` produces. */
+ * when opaque, `rgba(r, g, b, a)` otherwise. */
 export function formatRgb(color: Rgb): string {
   const r = Math.round(clamp01(color.r) * 255)
   const g = Math.round(clamp01(color.g) * 255)

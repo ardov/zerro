@@ -1,4 +1,4 @@
-import { getContrastText } from './theme/color'
+import { getContrastText } from '@/6-shared/helpers/color'
 import { cn } from './shadcn/utils'
 
 type CategoryIconProps = { symbol: string; color?: string | null }
