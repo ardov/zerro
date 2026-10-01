@@ -8,6 +8,10 @@ import { applyPatch } from '../model/applyPatch'
 import { compileDeleteReminder, compileSetReminder } from './reminders'
 import { makeReminder } from './reminders'
 
+// Default reminder dates are the local calendar day of `now`, so the fixture
+// is local noon on 2023-11-14 rather than a fixed UTC instant.
+const NOW = new Date(2023, 10, 14, 12).getTime()
+
 describe('zenmoney reminder commands', () => {
   it('creates reminders with root user and deterministic id/time', () => {
     const data = makeStore({
@@ -24,13 +28,13 @@ describe('zenmoney reminder commands', () => {
         comment: 'Rent',
         startDate: '2026-02',
       },
-      { now: () => 1700000000000, uuid: () => 'reminder-new' }
+      { now: () => NOW, uuid: () => 'reminder-new' }
     )
 
     expect(patch.reminder?.[0]).toEqual(
       makeTestReminder({
         id: 'reminder-new',
-        changed: 1700000000000,
+        changed: NOW,
         user: 1,
         incomeAccount: 'cash',
         outcomeAccount: 'card',
@@ -74,14 +78,14 @@ describe('zenmoney reminder commands', () => {
           outcomeAccount: 'card',
         },
         {
-          now: () => 1700000000000,
+          now: () => NOW,
           uuid: () => 'reminder-new',
         }
       )
     ).toEqual(
       makeTestReminder({
         id: 'reminder-new',
-        changed: 1700000000000,
+        changed: NOW,
         user: 1,
         incomeAccount: 'cash',
         outcomeAccount: 'card',

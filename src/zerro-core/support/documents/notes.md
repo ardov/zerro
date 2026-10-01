@@ -28,6 +28,8 @@ flows; this page is only a navigation aid.
 - `incomeBankID` and `outcomeBankID` are opaque plugin operation IDs, not
   company references.
 - Date shape guards do not establish calendar validity.
+- Dates are local calendar days. `toISODate` and `toISOMonth` read a timestamp
+  in the local timezone, and `parseDate` reads `YYYY-MM[-DD]` as local midnight.
 - Dynamic entity-map plumbing contains localized type assertions. Follow the
   behavioral tests before replacing it with broader generic machinery.
 
