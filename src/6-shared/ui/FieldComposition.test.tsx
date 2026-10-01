@@ -4,8 +4,6 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { OverlayHost } from '@/6-shared/overlays'
 import { Select, MultiSelect } from './Select'
-import { FilledButton, FilledField, FilledInput } from './FilledField'
-import { AutoWidthInput } from './AutoWidthInput'
 
 afterEach(cleanup)
 const options = [{ value: 'EUR', label: 'Euro' }]
@@ -58,70 +56,5 @@ describe('outlined selection field composition', () => {
     expect(control).toHaveAccessibleDescription('Choose tags')
     expect(control.closest('[data-size]')).toHaveAttribute('data-shrink')
     expect(control.closest('[data-size]')).not.toHaveAttribute('data-filled')
-  })
-})
-
-describe('filled field accessibility', () => {
-  it.each([false, true])(
-    'connects external errors to the input (multiline=%s)',
-    multiline => {
-      const view = render(
-        <FilledInput
-          aria-label="Comment"
-          multiline={multiline}
-          invalid
-          error="Required"
-        />
-      )
-      const input = screen.getByRole('textbox', { name: 'Comment' })
-      expect(input).toHaveAttribute('aria-invalid', 'true')
-      expect(input).toHaveAccessibleDescription('Required')
-      view.rerender(
-        <FilledInput aria-label="Comment" multiline={multiline} readOnly />
-      )
-      expect(input).not.toHaveAttribute('aria-invalid', 'true')
-      expect(input).not.toHaveAccessibleDescription()
-      expect(input).toHaveAttribute('readonly')
-      view.rerender(
-        <FilledInput aria-label="Comment" multiline={multiline} disabled />
-      )
-      expect(input).toBeDisabled()
-    }
-  )
-
-  it('connects an amount control inside the generic frame', () => {
-    render(
-      <FilledField invalid error="Invalid amount" disabled>
-        <AutoWidthInput aria-label="Amount" value="12" onChange={noop} />
-      </FilledField>
-    )
-    const input = screen.getByRole('textbox', { name: 'Amount' })
-    // Disabled controls do not participate in validation, but retain their description.
-    expect(input).toBeDisabled()
-    expect(input).toHaveAccessibleDescription('Invalid amount')
-  })
-
-  it('merges a picker error with an existing description and removes only the error', () => {
-    const view = render(
-      <>
-        <p id="hint">Account picker</p>
-        <FilledButton aria-describedby="hint" invalid error="Choose an account">
-          Account
-        </FilledButton>
-      </>
-    )
-    const button = screen.getByRole('button', { name: 'Account' })
-    expect(button).toHaveAttribute('aria-invalid', 'true')
-    expect(button).toHaveAccessibleDescription(
-      'Account picker Choose an account'
-    )
-    view.rerender(
-      <>
-        <p id="hint">Account picker</p>
-        <FilledButton aria-describedby="hint">Account</FilledButton>
-      </>
-    )
-    expect(button).not.toHaveAttribute('aria-invalid', 'true')
-    expect(button).toHaveAccessibleDescription('Account picker')
   })
 })

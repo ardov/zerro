@@ -48,3 +48,8 @@ Use the public command tiers and change-routing matrix in
 `docs/agents/verification.md`. Run focused tests during the implementation loop,
 then the required aggregate verification tier once before handoff. Changed or
 related-test selection is a convenience, not proof that every required gate ran.
+
+Browser tests use two workers. Run only task-relevant stories in both themes by
+default. Full browser runs require an explicit user request or genuinely global
+UI changes; explain that scope before starting. See the verification guide for
+commands and examples.

@@ -331,11 +331,12 @@ Useful checks:
 
 ```sh
 pnpm verify
-pnpm verify:ui
-pnpm verify:all
+pnpm test:storybook src/6-shared/ui/kit/InlineField.stories.tsx
 ```
 
-Run focused component or theme tests while developing. `verify:ui` is the
-additional app/Storybook gate after the baseline `verify`; `verify:all` composes
-both and adds the dependency audit. The routing matrix lives in
-`docs/agents/verification.md`.
+Run only task-relevant stories in both themes with the configured two-worker
+limit. Include direct consumers of a changed shared component. Full browser
+runs (`verify:ui`, `verify:all`, or unfiltered `test:storybook`) are reserved for
+an explicit user request or genuinely global UI changes. Explain the global
+impact before starting one. See `docs/agents/verification.md` for the routing
+matrix; CI configuration is unchanged.

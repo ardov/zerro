@@ -9,7 +9,7 @@ export default mergeConfig(
     test: {
       // Unbounded browser workers contend for CPU and make timed transitions
       // both slower and flaky on high-core machines.
-      maxWorkers: 4,
+      maxWorkers: 2,
       projects: ['light', 'dark'].map(theme => ({
         extends: true,
         plugins: [

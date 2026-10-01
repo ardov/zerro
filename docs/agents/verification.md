@@ -13,9 +13,19 @@ CI. Commands are deterministic and fail on the first unsuccessful gate.
 | `pnpm verify:ui`  | Build the app and Storybook, then test eligible stories in both themes. |
 | `pnpm verify:all` | Run both verification tiers and the Knip dependency check.              |
 
-`verify:ui` is an additional tier: run it after `verify`, or use `verify:all`
-when both are required. It deliberately keeps the light and dark Storybook
-projects; a passing story in one theme does not substitute for the other.
+Browser tests use at most two workers. For ordinary local work, run only the
+story files relevant to the task, in both light and dark themes. Include direct
+consumers when changing a shared component. A passing story in one theme does
+not substitute for the other.
+
+Run the full browser suite (`pnpm test:storybook` without file filters,
+`pnpm verify:ui`, or `pnpm verify:all`) only when the user explicitly requests it
+or changes are genuinely global: for example, app-wide theme/token changes,
+shared overlay infrastructure, or a framework upgrade affecting the whole UI.
+A local component cleanup, a single shared control, or any dependency change
+by itself is not a reason for a full run. State the global impact before
+starting one. Keep full runs available locally; this policy does not move them
+to CI or change CI configuration.
 
 ## Implementation loop
 
@@ -25,6 +35,7 @@ Run the narrow test that observes the changed contract while implementing:
 pnpm exec vitest run path/to/test.ts --reporter=agent --silent=passed-only
 pnpm test:related path/to/source.ts
 pnpm test:changed
+pnpm test:storybook src/6-shared/ui/kit/InlineField.stories.tsx
 ```
 
 `test:related` and `test:changed` use Vitest's dependency graph. They save time,
@@ -33,13 +44,13 @@ smoke. Do not repeat a successful broad gate while its inputs are unchanged.
 
 ## Handoff routing
 
-| Changed surface                          | Final verification                                     |
-| ---------------------------------------- | ------------------------------------------------------ |
-| Documentation only                       | Touched-file Prettier plus `pnpm verify:whitespace`    |
-| Application, Core, store, or local tool  | Focused contract tests, then `pnpm verify`             |
-| UI, styles, stories, or UI configuration | Focused tests, then `pnpm verify` and `pnpm verify:ui` |
-| Cross-cutting or dependency change       | Focused tests, then `pnpm verify:all`                  |
-| Replica persistence or sync              | `pnpm verify` plus the policy-required manual smoke    |
+| Changed surface                          | Final verification                                                              |
+| ---------------------------------------- | ------------------------------------------------------------------------------- |
+| Documentation only                       | Touched-file Prettier plus `pnpm verify:whitespace`                             |
+| Application, Core, store, or local tool  | Focused contract tests, then `pnpm verify`                                      |
+| UI, styles, stories, or UI configuration | `pnpm verify` plus task-relevant stories in both themes                         |
+| Cross-cutting or dependency change       | `pnpm verify`, `pnpm knip`, relevant stories; full UI only under the rule above |
+| Replica persistence or sync              | `pnpm verify` plus the policy-required manual smoke                             |
 
 The formatting commands enumerate tracked public files. Generated files and
 lockfiles listed in `.prettierignore` are outside that formatting surface, and
