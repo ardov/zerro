@@ -8,8 +8,10 @@ import {
 import { Menu as Primitive } from '@base-ui/react/menu'
 import { ContextMenu as ContextPrimitive } from '@base-ui/react/context-menu'
 import { Checkbox } from '@base-ui/react/checkbox'
-import type { PopupController } from '@/6-shared/overlays'
+import { Link } from 'react-router-dom'
+import type { PopupController, SurfaceController } from '@/6-shared/overlays'
 import { DrawerSurface } from './Drawer'
+import { useSurfaceFinalFocus } from './SurfaceContent'
 import { ListRow, ListRowHeader, ListRowSeparator } from './ListRow'
 import { useListPanelPositioning } from './useListPanelPositioning'
 import { cn } from '@/6-shared/ui/shadcn/utils'
@@ -36,6 +38,9 @@ export type MenuItem =
       checked: boolean
       onCheckedChange: (checked: boolean) => void
     })
+  /** Navigates within the app. Leaving the entry dismisses the menu, so the
+   * link never closes it: that would be a Back step racing the push. */
+  | (Omit<ItemContent, 'disabled'> & { type: 'link'; to: string })
   | { id: string; type: 'separator' }
   | { id: string; type: 'group'; label: string; items: readonly MenuItem[] }
 
@@ -72,28 +77,19 @@ function AdaptiveMenu(props: MenuProps & { context?: boolean }) {
   const narrow = useBottomSheetLayout()
   const mobile = narrow && mobileMode === 'drawer'
   const sourceRef = useRef<HTMLElement | null>(null)
-  const positioning = useListPanelPositioning()
-  const select = (action: () => void) => {
-    setOpen(false)
-    action()
-  }
-  const content = <MenuItems items={items} mobile={mobile} select={select} />
+  const content = (
+    <MenuItems items={items} mobile={mobile} close={() => setOpen(false)} />
+  )
   const finalFocus = () => sourceRef.current ?? true
   const desktop = (
-    <Primitive.Portal>
-      <Primitive.Positioner {...positioning} className="z-popover">
-        <Primitive.Popup
-          aria-label={label}
-          aria-labelledby={undefined}
-          // A regular trigger already supplies Base UI's return target. An
-          // explicit target would steal focus moved elsewhere during exit.
-          finalFocus={context ? finalFocus : undefined}
-          className="kit-surface-fade max-h-(--available-height) min-w-[min(13rem,var(--available-width))] max-w-(--available-width) overflow-y-auto rounded-ui-popover rounded-smooth bg-ui-popover p-1 text-ui-primary shadow-ui-popover outline-none"
-        >
-          {content}
-        </Primitive.Popup>
-      </Primitive.Positioner>
-    </Primitive.Portal>
+    <MenuPopup
+      label={label}
+      // A regular trigger already supplies Base UI's return target. An
+      // explicit target would steal focus moved elsewhere during exit.
+      finalFocus={context ? finalFocus : undefined}
+    >
+      {content}
+    </MenuPopup>
   )
   const sheet = (
     <DrawerSurface
@@ -140,6 +136,77 @@ function AdaptiveMenu(props: MenuProps & { context?: boolean }) {
       />
       {desktop}
     </Primitive.Root>
+  )
+}
+
+export type MenuSurfaceProps = {
+  label: string
+  controller: SurfaceController
+  items: readonly MenuItem[]
+  anchor: Primitive.Positioner.Props['anchor']
+}
+
+/** A menu opened by an existing overlay owner, such as an asked context menu.
+ * Items behave as in Menu: selecting one closes the surface, then runs it. */
+export function MenuSurface(props: MenuSurfaceProps) {
+  const { label, controller, items, anchor } = props
+  const mobile = useBottomSheetLayout()
+  const finalFocus =
+    useSurfaceFinalFocus<Primitive.Popup.Props['finalFocus']>(props)
+  const content = (
+    <MenuItems
+      items={items}
+      mobile={mobile}
+      close={() => controller.setOpen(false)}
+    />
+  )
+  return mobile ? (
+    <DrawerSurface
+      label={label}
+      side="bottom"
+      controller={controller}
+      finalFocus={finalFocus}
+    >
+      {content}
+    </DrawerSurface>
+  ) : (
+    <Primitive.Root
+      loopFocus={false}
+      open={controller.open}
+      onOpenChange={controller.setOpen}
+    >
+      <MenuPopup label={label} anchor={anchor} finalFocus={finalFocus}>
+        {content}
+      </MenuPopup>
+    </Primitive.Root>
+  )
+}
+
+function MenuPopup(props: {
+  label: string
+  children: ReactNode
+  anchor?: Primitive.Positioner.Props['anchor']
+  finalFocus?: Primitive.Popup.Props['finalFocus']
+}) {
+  const { label, children, anchor, finalFocus } = props
+  const positioning = useListPanelPositioning()
+  return (
+    <Primitive.Portal>
+      <Primitive.Positioner
+        {...positioning}
+        anchor={anchor}
+        className="z-popover"
+      >
+        <Primitive.Popup
+          aria-label={label}
+          aria-labelledby={undefined}
+          finalFocus={finalFocus}
+          className="kit-surface-fade max-h-(--available-height) min-w-[min(13rem,var(--available-width))] max-w-(--available-width) overflow-y-auto rounded-ui-popover rounded-smooth bg-ui-popover p-1 text-ui-primary shadow-ui-popover outline-none"
+        >
+          {children}
+        </Primitive.Popup>
+      </Primitive.Positioner>
+    </Primitive.Portal>
   )
 }
 
@@ -233,9 +300,13 @@ function ContextMenuTrigger(props: {
 function MenuItems(props: {
   items: readonly MenuItem[]
   mobile: boolean
-  select: (action: () => void) => void
+  close: () => void
 }) {
-  const { items, mobile, select } = props
+  const { items, mobile, close } = props
+  const select = (action: () => void) => {
+    close()
+    action()
+  }
   return items.map(item => {
     if (item.type === 'separator') return <ListRowSeparator key={item.id} />
     if (item.type === 'group')
@@ -244,10 +315,35 @@ function MenuItems(props: {
           <ListRowHeader size={mobile ? 'lg' : 'sm'}>
             {item.label}
           </ListRowHeader>
-          <MenuItems items={item.items} mobile={mobile} select={select} />
+          <MenuItems items={item.items} mobile={mobile} close={close} />
         </div>
       )
     const row = <MenuRow item={item} mobile={mobile} />
+    if (item.type === 'link') {
+      return mobile ? (
+        <MenuRow
+          key={item.id}
+          item={item}
+          mobile
+          render={<Link to={item.to} />}
+        >
+          {item.label}
+        </MenuRow>
+      ) : (
+        <Primitive.LinkItem
+          key={item.id}
+          render={
+            <MenuRow
+              item={item}
+              mobile={false}
+              render={<Link to={item.to} />}
+            />
+          }
+        >
+          {item.label}
+        </Primitive.LinkItem>
+      )
+    }
     if (item.type === 'checkbox') {
       return mobile ? (
         <Checkbox.Root
@@ -318,7 +414,10 @@ function MenuRow(
           'cursor-pointer focusable',
           'hover:[&:not(:disabled):not([aria-disabled=true]):not([data-disabled])]:after:opacity-100',
         ],
-        item.type !== 'checkbox' && item.destructive && 'text-ui-error',
+        item.type !== 'checkbox' &&
+          item.type !== 'link' &&
+          item.destructive &&
+          'text-ui-error',
         className
       )}
       end={

@@ -9,9 +9,7 @@ import { TableRow, useIsSmall } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
 import { ToBeAssigned } from './ToBeAssigned'
 import { useColumns } from '../models/useMetric'
-import type { TableMenuChoice } from './TableMenu'
-import { TableMenu } from './TableMenu'
-import { useAsk } from '@/6-shared/overlays'
+import { Menu } from '@/6-shared/ui/kit/Menu'
 
 type HeaderProps = {
   month: TISOMonth
@@ -42,18 +40,6 @@ export const Header: FC<HeaderProps> = props => {
   } = props
   const { t } = useTranslation('common')
   const isSmall = useIsSmall()
-  const ask = useAsk()
-  const openOnClick = async (e: React.MouseEvent) => {
-    const choice = await ask<TableMenuChoice>(
-      <TableMenu
-        isAllShown={isAllShown}
-        isReordering={isReordering}
-        anchorEl={e.currentTarget}
-      />
-    )
-    if (choice === 'showAllToggle') onShowAllToggle()
-    if (choice === 'reorderModeToggle') onReorderModeToggle()
-  }
 
   const { nextColumn } = useColumns()
 
@@ -72,19 +58,37 @@ export const Header: FC<HeaderProps> = props => {
         <TableRow
           name={
             <div>
-              <Button
-                size="small"
-                onClick={openOnClick}
-                className="-ml-2 px-2 py-0"
-              >
-                <span className="truncate text-overline uppercase text-muted-foreground">
-                  {t('categories', {
-                    ns: 'budgets',
-                    context: isAllShown ? 'all' : '',
-                  })}
-                </span>
-                <ChevronDownIcon />
-              </Button>
+              <Menu
+                label={t('actions')}
+                trigger={
+                  <Button size="small" className="-ml-2 px-2 py-0">
+                    <span className="truncate text-overline uppercase text-muted-foreground">
+                      {t('categories', {
+                        ns: 'budgets',
+                        context: isAllShown ? 'all' : '',
+                      })}
+                    </span>
+                    <ChevronDownIcon />
+                  </Button>
+                }
+                items={[
+                  {
+                    id: 'showAll',
+                    label: t(
+                      isAllShown ? 'showPrtiallyEnvelopes' : 'showAllEnvelopes',
+                      { ns: 'envelopeTableMenu' }
+                    ),
+                    onSelect: onShowAllToggle,
+                  },
+                  {
+                    id: 'reorder',
+                    label: t(isReordering ? 'leaveEditMode' : 'goToEditMode', {
+                      ns: 'envelopeTableMenu',
+                    }),
+                    onSelect: onReorderModeToggle,
+                  },
+                ]}
+              />
             </div>
           }
           assigned={<ColumnTitle name={t('assigned')} onClick={nextColumn} />}

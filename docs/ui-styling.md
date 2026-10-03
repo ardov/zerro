@@ -177,7 +177,7 @@ Important groups include:
 
 - Buttons and links: `Button`, `IconButton`, `ButtonBase`, and `Link` own the
   reset, focus-visible treatment, geometry and semantic color variants.
-- Rows and menus: `ListRow`, `ActionList`, and `Menu` provide keyboard,
+- Rows and menus: `ListRow`, `ActionList`, and kit `Menu` provide keyboard,
   typeahead, selection and disabled-row behavior for action surfaces.
 - Fields: `OutlinedField`, `InputBase`, `GrowingTextarea`, kit `Select`/`MultiSelect`, and date
   controls own labels, adornments, focus, error and disabled states.
@@ -196,7 +196,7 @@ Overlay components portal to the document body and share the stacking tokens
 `z-drawer`, `z-modal`, and `z-tooltip`. They come from `--z-index-*` in
 `src/tailwind.css`, so they do not depend on a mounted provider.
 
-The legacy `Popover` and `Menu` position against an element or virtual anchor and use the
+The legacy `Popover` positions against an element or virtual anchor and uses the
 shared surface geometry in `overlaySurface`. `SideDrawer` is a modal sheet.
 `NavDrawer` is the separate docked navigation layout. `AdaptivePopover` and
 `AdaptiveDialog` select the appropriate surface for the current viewport
@@ -216,12 +216,21 @@ control. `usePopup(onClose?)` returns an explicit controller with `open`,
 `setOpen`, `subscribeClose`, and `release`. `setOpen` is an ordinary callback;
 wrapping it does not change lifecycle behavior.
 
-`DialogSurface`, `PopoverSurface` and `DrawerSurface` only render an existing
+`DialogSurface`, `PopoverSurface`, `DrawerSurface` and `MenuSurface` only render an existing
 owner's `controller`. They use its `open` and `setOpen`; they do not register
 history or subscribe to closing. For an asked editor, pass the `controller`
 returned by `useAsked(onClose?)`. A plain `{ open, setOpen }` is also accepted
 for rendering, but the caller must provide its own history and lifecycle.
 Do not register the same opening twice.
+
+A menu with its own button is a kit `Menu`. A context menu opened from an
+event, such as a right click on a list row, is asked: its component renders
+`MenuSurface` with the `controller` from `useAsked()` and a point anchor, and
+answers nothing. In both, selecting an item closes the menu, then runs its
+`onSelect`. A checkbox item keeps the menu open. A `link` item navigates with
+the router and leaves closing to the navigation: closing first would be a Back
+step racing the push. Answers belong to surfaces that ask a question: a confirmation, a
+date, a colour.
 
 ```tsx
 <Dialog title="Details" trigger={<Button>Open</Button>} mobile="drawer">

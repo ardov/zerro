@@ -4,7 +4,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { TagIcon } from '@/6-shared/ui/TagIcon'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 
@@ -109,7 +109,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
         <AmountsWrapper type="outcome" {...rest}>
           {!!tr.opOutcome && !!tr.opOutcomeInstrument && (
             <Tooltip
-              title={
+              content={
                 <ExchangeRate
                   sum1={tr.opOutcome}
                   inst1={tr.opOutcomeInstrument}
@@ -117,7 +117,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                   inst2={tr.outcomeInstrument}
                 />
               }
-              placement="top"
+              side="top"
             >
               <span className="text-body-sm text-muted-foreground">
                 <SmartAmount
@@ -137,7 +137,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
         <AmountsWrapper type="income" {...rest}>
           {!!tr.opIncome && !!tr.opIncomeInstrument && (
             <Tooltip
-              title={
+              content={
                 <ExchangeRate
                   sum1={tr.opIncome}
                   inst1={tr.opIncomeInstrument}
@@ -145,7 +145,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                   inst2={tr.incomeInstrument}
                 />
               }
-              placement="top"
+              side="top"
             >
               <span className="text-body-sm text-muted-foreground">
                 <SmartAmount

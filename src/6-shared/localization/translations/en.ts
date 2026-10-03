@@ -37,6 +37,7 @@ export const en: typeof ru = {
     edit: 'Edit',
     apply: 'Apply',
     quickAmounts: 'Quick amounts',
+    actions: 'Actions',
     close: 'Close',
     notifications: 'Notifications',
     dismissNotification: 'Dismiss notification',

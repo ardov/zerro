@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within, waitFor } from 'storybook/test'
 import { usePopup } from '@/6-shared/overlays'
@@ -24,16 +23,11 @@ function Demo(props: {
   const [values, setValues] = useState(['one'])
   const [mounted, setMounted] = useState(true)
   const [disabled, setDisabled] = useState(false)
-  const navigate = useNavigate()
-  // Storybook uses MemoryRouter: these shortcuts drive its history without
-  // an outside click dismissing the popup before Back is exercised.
+  // Shortcuts, not buttons: an outside click would dismiss the popup before
+  // unmounting or disabling its owner is exercised.
   useEffect(() => {
     const keydown = (event: KeyboardEvent) => {
       if (!event.altKey) return
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault()
-        navigate(-1)
-      }
       if (event.key === 'u') {
         event.preventDefault()
         setMounted(false)
@@ -45,7 +39,7 @@ function Demo(props: {
     }
     window.addEventListener('keydown', keydown, true)
     return () => window.removeEventListener('keydown', keydown, true)
-  }, [navigate])
+  }, [])
   const common = {
     label: 'Choice',
     items,
@@ -99,6 +93,7 @@ const meta = {
   component: Demo,
   parameters: {
     controls: { disable: true },
+    historyShortcuts: true,
     docs: {
       description: {
         component: `Select and MultiSelect require OverlayHost. Back closes the top popup before its parent dialog. Optional programmatic control: pass the controller returned by usePopup as **popup**; arbitrary open/onOpenChange state is not supported. Alt+Left simulates router Back in this MemoryRouter story.`,

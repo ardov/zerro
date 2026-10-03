@@ -13,13 +13,12 @@ import { useTranslation } from 'react-i18next'
 import { track } from '@/6-shared/analytics'
 import { useDebounce } from '@/6-shared/hooks/useDebounce'
 
-import { getEventPosition } from '@/3-widgets/global/shared/helpers'
+import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
 
 import { GroupedList } from './GroupedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
-import type { TransactionMenuChoice } from '@/3-widgets/global/TrContextMenu'
 import { TransactionMenu } from '@/3-widgets/global/TrContextMenu'
 import { useAsk } from '@/6-shared/overlays'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -149,13 +148,15 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   }, [trList])
 
   const onContextMenu = useCallback(
-    async (e: React.MouseEvent | React.TouchEvent, id: TTransactionId) => {
-      const choice = await ask<TransactionMenuChoice>(
-        <TransactionMenu id={id} inList anchorPosition={getEventPosition(e)} />
-      )
-      if (choice?.kind === 'selectSimilar') onSelectSimilar(choice.changed)
-      if (choice?.kind === 'markOlderViewed') onMarkOlderViewed(id)
-    },
+    (e: React.MouseEvent | React.TouchEvent, id: TTransactionId) =>
+      ask(
+        <TransactionMenu
+          id={id}
+          anchor={getEventAnchor(e)}
+          onSelectSimilar={onSelectSimilar}
+          onMarkOlderViewed={() => onMarkOlderViewed(id)}
+        />
+      ),
     [ask, onSelectSimilar, onMarkOlderViewed]
   )
 

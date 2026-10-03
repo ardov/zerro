@@ -7,9 +7,9 @@ import { ListRowSubheader } from '@/6-shared/ui/ListRow'
 import { formatDate } from '@/6-shared/helpers/date'
 import type { TDateDraft, TISODate, TTransactionId } from '@/6-shared/types'
 import { toISODate } from '@/6-shared/helpers/date'
-import { AdaptiveDialog } from '@/6-shared/ui/AdaptiveDialog'
+import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
 import { useAsk, useAsked } from '@/6-shared/overlays'
-import { Calendar } from '@/6-shared/ui/Calendar'
+import { Calendar } from '@/6-shared/ui/kit/Calendar'
 import { useTranslation } from 'react-i18next'
 
 type GroupNode = {
@@ -262,14 +262,16 @@ type TDateDialogProps = {
  * `await` — no callback rides along, and nothing has to reach a stale close. */
 const DateDialog = ({ value, minDate, maxDate }: TDateDialogProps) => {
   const { t } = useTranslation()
-  const { open, answer } = useAsked<TISODate>()
+  const { controller, answer } = useAsked<TISODate>()
   return (
-    <AdaptiveDialog
-      open={open}
-      onClose={() => answer()}
-      aria-label={t('selectDate')}
+    <DialogSurface
+      controller={controller}
+      label={t('selectDate')}
+      closeButton={false}
+      mobile="drawer"
+      className="w-max"
     >
-      <div className="flex justify-center p-2">
+      <div className="flex justify-center">
         <Calendar
           autoFocus
           value={value}
@@ -278,6 +280,6 @@ const DateDialog = ({ value, minDate, maxDate }: TDateDialogProps) => {
           onChange={date => answer(date)}
         />
       </div>
-    </AdaptiveDialog>
+    </DialogSurface>
   )
 }

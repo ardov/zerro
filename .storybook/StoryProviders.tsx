@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { useLayoutEffect, useMemo } from 'react'
-import { MemoryRouter } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useMemo } from 'react'
+import { MemoryRouter, useNavigate } from 'react-router-dom'
 import { GlobalWidgets } from '@/1-app/GlobalWidgets'
 import { Providers } from '@/1-app/Providers'
 import { OverlayHost } from '@/6-shared/overlays'
@@ -19,6 +19,8 @@ export type AppStoryParameters = {
     route?: string
     globalWidgets?: boolean
   }
+  /** Alt+ArrowLeft and Alt+ArrowRight drive the story's router history. */
+  historyShortcuts?: boolean
 }
 
 type StoryContextLike = {
@@ -84,9 +86,31 @@ function StoryRouter(props: {
 
   return (
     <MemoryRouter initialEntries={[route]}>
+      {props.context.parameters.historyShortcuts && <HistoryShortcuts />}
       <OverlayHost>{props.children}</OverlayHost>
     </MemoryRouter>
   )
+}
+
+/** MemoryRouter does not hear the browser's Back and Forward. These keys stand
+ * in for them, on `window` in the capture phase: a popup is drawn by the
+ * overlay host, outside the story, and must not see the press first.
+ * Opt-in, because Alt+Arrow also moves the caret by word on macOS. */
+function HistoryShortcuts() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    const keydown = (event: KeyboardEvent) => {
+      if (!event.altKey) return
+      const delta =
+        event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowRight' ? 1 : 0
+      if (!delta) return
+      event.preventDefault()
+      navigate(delta)
+    }
+    window.addEventListener('keydown', keydown, true)
+    return () => window.removeEventListener('keydown', keydown, true)
+  }, [navigate])
+  return null
 }
 
 function getTheme(context: StoryContextLike): ThemeMode {

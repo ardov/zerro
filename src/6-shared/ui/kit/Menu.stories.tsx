@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, userEvent, within, waitFor } from 'storybook/test'
-import { useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { usePopup } from '@/6-shared/overlays'
 import { Menu, ContextMenu, type MenuItem } from './Menu'
 import { Drawer } from './Drawer'
@@ -11,17 +11,6 @@ function Demo(props: { context?: boolean }) {
   const { context } = props
   const [checked, setChecked] = useState(false)
   const dialog = usePopup()
-  const navigate = useNavigate()
-  useEffect(() => {
-    const key = (event: KeyboardEvent) => {
-      if (event.altKey && event.key === 'ArrowLeft') {
-        event.preventDefault()
-        navigate(-1)
-      }
-    }
-    window.addEventListener('keydown', key, true)
-    return () => window.removeEventListener('keydown', key, true)
-  }, [navigate])
   const items: MenuItem[] = [
     { id: 'edit', label: 'Edit', onSelect: () => dialog.setOpen(true) },
     {
@@ -73,6 +62,22 @@ function Demo(props: { context?: boolean }) {
     </>
   )
 }
+function LinkDemo() {
+  const { pathname } = useLocation()
+  return (
+    <>
+      <Menu
+        label="Go to"
+        trigger={<Button>Go to</Button>}
+        items={[
+          { id: 'accounts', type: 'link', label: 'Accounts', to: '/accounts' },
+          { id: 'about', type: 'link', label: 'About', to: '/about' },
+        ]}
+      />
+      <output aria-label="Path">{pathname}</output>
+    </>
+  )
+}
 const meta = {
   tags: ['autodocs'],
   title: 'UI Kit/Overlays/Menu',
@@ -81,10 +86,11 @@ const meta = {
   parameters: {
     controls: { disable: true },
     layout: 'centered',
+    historyShortcuts: true,
     docs: {
       description: {
         component:
-          'Menu and ContextMenu share items. Desktop uses Base UI menus; screens below 500px use a modal Drawer with buttons and checkboxes. Set mobile="popover" to keep the anchored menu. Actions run immediately while the surface closes; checkbox items keep the surface open. History requires OverlayHost in a Router. Context areas support right click, long press and Shift+F10; always provide a visible alternative. Example: <Menu label="Actions" trigger={<Button>Actions</Button>} items={items} />.',
+          'Menu and ContextMenu share items. MenuSurface renders the same items for a menu opened by an existing overlay owner, such as an asked context menu: pass controller, items and an element or virtual anchor. Desktop uses Base UI menus; screens below 500px use a modal Drawer with buttons and checkboxes. Set mobile="popover" to keep the anchored menu. Actions run immediately while the surface closes; checkbox items keep the surface open; link items navigate with the router, and leaving the page dismisses the surface. History requires OverlayHost in a Router. Context areas support right click, long press and Shift+F10; always provide a visible alternative. Example: <Menu label="Actions" trigger={<Button>Actions</Button>} items={items} />.',
       },
     },
   },
@@ -402,6 +408,38 @@ export const FixedMobilePopover: Story = {
   },
 }
 
+const followLink: Story['play'] = async ({ canvasElement }) => {
+  const canvas = within(canvasElement)
+  const body = within(canvasElement.ownerDocument.body)
+  const path = canvas.getByLabelText('Path')
+  await userEvent.click(canvas.getByRole('button', { name: 'Go to' }))
+  const link = await waitFor(() => {
+    const item =
+      body.queryByRole('menuitem', { name: 'Accounts' }) ??
+      body.queryByRole('link', { name: 'Accounts' })
+    expect(item).not.toBeNull()
+    return item!
+  })
+  await userEvent.click(link)
+  await waitFor(() => expect(path).toHaveTextContent('/accounts'))
+  await waitFor(() => expect(link).not.toBeInTheDocument())
+  // Back returns to the page the menu was opened on, without reopening it.
+  await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
+  await waitFor(() => expect(path).toHaveTextContent(/^\/$/))
+  await new Promise(resolve => setTimeout(resolve, 350))
+  await expect(body.queryByRole('menu')).not.toBeInTheDocument()
+  await expect(body.queryByRole('dialog')).not.toBeInTheDocument()
+}
+export const LinksDesktop: Story = {
+  globals: { viewport: { value: 'zerro500' } },
+  render: () => <LinkDemo />,
+  play: followLink,
+}
+export const LinksMobile: Story = {
+  globals: { viewport: { value: 'zerro499' } },
+  render: () => <LinkDemo />,
+  play: followLink,
+}
 export const Showcase: Story = {
   render: () => (
     <div className="grid gap-8">

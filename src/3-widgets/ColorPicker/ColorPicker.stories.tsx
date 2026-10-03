@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { useAsk } from '@/6-shared/overlays'
@@ -9,19 +8,8 @@ import { ColorPicker } from './index'
 
 function Demo() {
   const ask = useAsk()
-  const navigate = useNavigate()
   const [value, setValue] = useState<string | null>('#CC3077')
   const [commits, setCommits] = useState(0)
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.altKey && event.key === 'ArrowLeft') {
-        event.preventDefault()
-        navigate(-1)
-      }
-    }
-    window.addEventListener('keydown', onKeyDown, true)
-    return () => window.removeEventListener('keydown', onKeyDown, true)
-  }, [navigate])
   return (
     <Dialog title="Editor" trigger={<Button>Open editor</Button>}>
       <Button
@@ -45,7 +33,7 @@ function Demo() {
 const meta = {
   title: 'Widgets/ColorPicker',
   component: Demo,
-  parameters: { layout: 'centered' },
+  parameters: { layout: 'centered', historyShortcuts: true },
 } satisfies Meta<typeof Demo>
 export default meta
 type Story = StoryObj<typeof meta>

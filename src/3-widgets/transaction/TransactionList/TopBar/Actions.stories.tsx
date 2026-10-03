@@ -1,6 +1,5 @@
-import { useNavigate } from 'react-router-dom'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { core } from '@/zerro-core/redux'
 import { useAppSelector } from '@/store'
@@ -13,23 +12,13 @@ const meta = {
   parameters: {
     layout: 'centered',
     app: { scenario: 'demo', route: '/transactions' },
+    historyShortcuts: true,
   },
 } satisfies Meta<typeof Actions>
 export default meta
 type Story = StoryObj
 
 function Harness() {
-  const navigate = useNavigate()
-  useEffect(() => {
-    const back = (event: KeyboardEvent) => {
-      if (event.altKey && event.key === 'ArrowLeft') {
-        event.preventDefault()
-        navigate(-1)
-      }
-    }
-    window.addEventListener('keydown', back, true)
-    return () => window.removeEventListener('keydown', back, true)
-  }, [navigate])
   const transactions = useAppSelector(core.transactions.selectAll)
   const candidates = Object.values(transactions)
     .filter(tr => !tr.deleted && core.transactions.getType(tr) === 'outcome')

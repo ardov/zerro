@@ -1,18 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { useEffect } from 'react'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import { MonthProvider, useMonth } from '../MonthProvider'
 import { useBudgetPopover } from './Context'
-import { useNavigate } from 'react-router-dom'
 import { BudgetCell } from '../EnvelopeTable/Row/BudgetCell'
 import { SideContent, useSideContent } from '../SideContent'
 
 const meta = {
   title: 'App/Budgets/BudgetPopover',
   tags: ['autodocs'],
-  parameters: { app: { scenario: 'demo', route: '/budget' } },
+  parameters: {
+    app: { scenario: 'demo', route: '/budget' },
+    historyShortcuts: true,
+  },
 } satisfies Meta
 
 export default meta
@@ -25,7 +26,6 @@ function AssignmentHarness({
   table?: boolean
   edge?: boolean
 }) {
-  const navigate = useNavigate()
   const [displayCurrency, setCurrency] = core.currency.useDisplayCurrency()
   const [month] = useMonth()
   const open = useBudgetPopover()
@@ -37,20 +37,6 @@ function AssignmentHarness({
     envelope => envelope.name === 'Food'
   )!.id
   const envelope = metrics[id]
-
-  // On `window`, not on this element: the popover is drawn by the overlay
-  // host, which is above this harness in the tree, so its keystrokes never
-  // pass through here.
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (!event.altKey || !['ArrowLeft', 'ArrowRight'].includes(event.key))
-        return
-      event.preventDefault()
-      navigate(event.key === 'ArrowLeft' ? -1 : 1)
-    }
-    window.addEventListener('keydown', onKeyDown, true)
-    return () => window.removeEventListener('keydown', onKeyDown, true)
-  }, [navigate])
 
   return (
     <div

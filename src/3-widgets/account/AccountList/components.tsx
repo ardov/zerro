@@ -15,7 +15,7 @@ import { useTransactionDrawer } from '@/3-widgets/global/TransactionListDrawer'
 import { AccountMenu } from '@/3-widgets/global/AccountContextMenu'
 import { useAsk } from '@/6-shared/overlays'
 import { useContextMenu } from '@/6-shared/hooks/useContextMenu'
-import { getEventPosition } from '@/3-widgets/global/shared/helpers'
+import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
 
 export const Account: FC<
   { account: core.accounts.TAccountPopulated } & Omit<
@@ -37,7 +37,7 @@ export const Account: FC<
   )
   const propsToPass = useContextMenu({
     onContextMenu: e =>
-      ask(<AccountMenu id={account.id} anchorPosition={getEventPosition(e)} />),
+      ask(<AccountMenu id={account.id} anchor={getEventAnchor(e)} />),
     onClick: showTransactions,
   })
   return (

@@ -1,6 +1,6 @@
 import type { TAccountId } from '@/6-shared/types'
 import type { FC } from 'react'
-import { Menu, MenuItem } from '@/6-shared/ui/Menu'
+import { MenuSurface, type MenuSurfaceProps } from '@/6-shared/ui/kit/Menu'
 import { useAppDispatch } from '@/store'
 import { useAsked } from '@/6-shared/overlays'
 import { track } from '@/6-shared/analytics'
@@ -9,37 +9,25 @@ import { core } from '@/zerro-core/redux'
 
 export type AccountMenuProps = {
   id: TAccountId
-  anchorPosition?: { left: number; top: number }
+  anchor: MenuSurfaceProps['anchor']
 }
 
-/** The account's context menu. Every item acts on the account itself, so it
- * answers nothing — the answer is the account being changed. */
-export const AccountMenu: FC<AccountMenuProps> = ({ id, anchorPosition }) => {
+/** The account's context menu, asked from a context gesture. */
+export const AccountMenu: FC<AccountMenuProps> = ({ id, anchor }) => {
   const { t } = useTranslation('accountContextMenu')
-  const { open, answer } = useAsked<void>()
+  const { controller } = useAsked<void>()
   const dispatch = useAppDispatch()
   const account = core.accounts.useAll()[id]
 
-  const options = account
+  const items = account
     ? [
         {
-          label: t('moveFromBalance'),
-          condition: account.inBalance,
-          action: () => {
-            dispatch(core.accounts.setInBalance(id, false))
+          id: 'inBalance',
+          label: t(account.inBalance ? 'moveFromBalance' : 'moveInBalance'),
+          onSelect: () => {
+            dispatch(core.accounts.setInBalance(id, !account.inBalance))
             track('account_budget_membership_changed', {
-              in_budget: false,
-              source: 'context_menu',
-            })
-          },
-        },
-        {
-          label: t('moveInBalance'),
-          condition: !account.inBalance,
-          action: () => {
-            dispatch(core.accounts.setInBalance(id, true))
-            track('account_budget_membership_changed', {
-              in_budget: true,
+              in_budget: !account.inBalance,
               source: 'context_menu',
             })
           },
@@ -48,20 +36,11 @@ export const AccountMenu: FC<AccountMenuProps> = ({ id, anchorPosition }) => {
     : []
 
   return (
-    <Menu open={open} onClose={() => answer()} anchorPosition={anchorPosition}>
-      {options
-        .filter(({ condition }) => condition)
-        .map(({ label, action }) => (
-          <MenuItem
-            key={label}
-            onClick={() => {
-              answer()
-              action()
-            }}
-          >
-            {label}
-          </MenuItem>
-        ))}
-    </Menu>
+    <MenuSurface
+      label={t('common:actions')}
+      controller={controller}
+      anchor={anchor}
+      items={items}
+    />
   )
 }

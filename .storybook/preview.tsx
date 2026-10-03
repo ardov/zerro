@@ -92,7 +92,6 @@ const preview: Preview = {
               'InputBase',
               'OutlinedField',
               'DatePicker',
-              'Calendar',
               'MonthSelect',
             ],
             Overlays: [
@@ -100,7 +99,6 @@ const preview: Preview = {
               'AdaptivePopover',
               'SideDrawer',
               'Dialog',
-              'Menu',
               'Tooltip',
               'Snackbar',
             ],
