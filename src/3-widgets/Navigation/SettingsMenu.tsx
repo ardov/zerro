@@ -46,7 +46,7 @@ import { ImportBackupItem } from '@/4-features/import/ImportBackupItem'
 import { reloadData } from '@/4-features/sync'
 import { convertZmBudgetsToZerro } from '@/4-features/budget/convertZmBudgetsToZerro'
 import { useAsk, useAsked } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/Confirm'
+import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useColorScheme } from '@/6-shared/ui/theme'
 
 type SettingsMenuProps = { showLinks?: boolean; anchorEl?: Element | null }

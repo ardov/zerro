@@ -19,7 +19,7 @@ vi.mock('@/6-shared/overlays', () => ({
   useAsked: () => ({ open: false, answer: () => {} }),
 }))
 
-vi.mock('@/6-shared/ui/Confirm', () => ({ Confirm: () => null }))
+vi.mock('@/6-shared/ui/kit/Confirm', () => ({ Confirm: () => null }))
 
 vi.mock('@/4-features/sync', () => ({
   reloadData: () => ({ type: 'journal/reload' }),

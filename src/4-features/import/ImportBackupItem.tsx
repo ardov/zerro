@@ -26,7 +26,7 @@ import { resetData } from '@/store/data'
 import type { core } from '@/zerro-core/redux'
 import { clearLocalData } from '@/4-features/localData'
 import { useAsk, useAsked } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/Confirm'
+import { Confirm } from '@/6-shared/ui/kit/Confirm'
 
 import {
   checkBackupCompatibility,

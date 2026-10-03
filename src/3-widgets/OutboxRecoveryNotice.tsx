@@ -4,7 +4,7 @@ import { SnackbarNotice } from '@/6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
 import { discardCorruptOutbox } from '@/4-features/localData'
 import { useAsk } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/Confirm'
+import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { getOutboxRecoveryReason } from '@/store/data'
 

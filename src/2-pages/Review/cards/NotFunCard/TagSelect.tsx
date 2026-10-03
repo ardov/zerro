@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { formatMoney } from '@/6-shared/helpers/money'
 import type { TTagId } from '@/6-shared/types'
-import { MultiSelect } from '@/6-shared/ui/Select'
+import { MultiSelect } from '@/6-shared/ui/kit/MultiSelect'
 
 type TagSelectProps = {
   options: { id: TTagId; name: string; amount: number }[]
@@ -27,8 +27,9 @@ export function TagSelect(props: TagSelectProps) {
       label={label}
       value={selected}
       onChange={onChange}
-      renderValue={renderText}
-      options={options
+      placeholder={t('tagSelected', { count: 0 })}
+      renderValue={() => renderText(selected)}
+      items={options
         .filter(tag => tag.amount)
         .map(tag => ({
           value: tag.id,

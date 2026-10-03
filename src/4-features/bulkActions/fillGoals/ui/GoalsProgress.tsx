@@ -11,7 +11,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 
 import { fillGoals } from '../model/fillGoals'
 import { useAsk } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/Confirm'
+import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useTranslation } from 'react-i18next'
 
 type TGoalsProgressProps = ButtonBaseProps & {

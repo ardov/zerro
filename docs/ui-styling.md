@@ -179,12 +179,12 @@ Important groups include:
   reset, focus-visible treatment, geometry and semantic color variants.
 - Rows and menus: `ListRow`, `ActionList`, and `Menu` provide keyboard,
   typeahead, selection and disabled-row behavior for action surfaces.
-- Fields: `OutlinedField`, `InputBase`, `GrowingTextarea`, `Select`, and date
+- Fields: `OutlinedField`, `InputBase`, `GrowingTextarea`, kit `Select`/`MultiSelect`, and date
   controls own labels, adornments, focus, error and disabled states.
 - Feedback: `Checkbox`, `Switch`, `Chip`, `Tooltip`, `CircularProgress`,
   `SnackbarProvider`, and `SnackbarNotice` own their complete visual state.
 - Disclosure and overlays: `Collapse`, `Dialog`, `SideDrawer`, `Popover`,
-  `AdaptivePopover`, `AdaptiveDialog`, and `Confirm` own focus, dismissal,
+  `AdaptivePopover`, `AdaptiveDialog`, and kit `Confirm` own focus, dismissal,
   transition and portal behavior.
 
 Prefer native semantics. Interactive rows and links should remain real buttons
@@ -290,7 +290,7 @@ Other application editors may still use legacy surfaces.
 `Confirm` is passed to `useAsk<boolean>()`. Explicit confirmation answers `true`;
 all dismissals answer `undefined`. `intent="danger"` uses AlertDialog semantics,
 a destructive action and initial focus on Cancel. Ordinary confirmation initially
-focuses the confirming action. The transaction bulk actions use the kit Confirm. Other application callers may still use the separate legacy Confirm.
+focuses the confirming action. All application confirmations use the kit Confirm.
 
 When an overlay opens another overlay, preserve the opener's history and focus
 contract: closing the child returns focus to the child trigger; closing the

@@ -24,7 +24,7 @@ import { core } from '@/zerro-core/redux'
 
 import { fillGoals } from '@/4-features/bulkActions/fillGoals'
 import { useAsk } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/Confirm'
+import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useTranslation } from 'react-i18next'
 
 type MonthInfoProps = HTMLAttributes<HTMLDivElement> & { onClose: () => void }

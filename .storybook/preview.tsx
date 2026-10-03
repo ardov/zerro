@@ -91,9 +91,6 @@ const preview: Preview = {
               'Switch',
               'InputBase',
               'OutlinedField',
-              'AmountInput',
-              'Select',
-              'MultiSelect',
               'DatePicker',
               'Calendar',
               'MonthSelect',
@@ -105,7 +102,6 @@ const preview: Preview = {
               'Dialog',
               'Menu',
               'Tooltip',
-              'Confirm',
               'Snackbar',
             ],
             Display: [

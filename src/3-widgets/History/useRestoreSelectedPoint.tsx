@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useAsk } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/Confirm'
+import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { restoreOutboxPosition } from '@/store/data'
