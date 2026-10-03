@@ -1,4 +1,5 @@
 import type { KeyboardEvent } from 'react'
+import { isPlainKey } from '@/6-shared/helpers/keyboard'
 import { useCallback, useRef } from 'react'
 
 /** How long a typed prefix keeps accumulating before it starts over. */
@@ -19,13 +20,7 @@ export function useRovingListKeys(itemSelector: string) {
 
   return useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
-      if (
-        event.defaultPrevented ||
-        event.altKey ||
-        event.ctrlKey ||
-        event.metaKey
-      )
-        return
+      if (!isPlainKey(event, true)) return
 
       const isTypeahead = event.key.length === 1 && event.key !== ' '
       const isEdgeKey = event.key === 'Home' || event.key === 'End'

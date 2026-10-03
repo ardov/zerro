@@ -52,7 +52,7 @@ export const Bench: Story = {
   render: args => <Harness disablePast={args.disablePast} />,
 }
 
-export const BoundsAndKeyboard: Story = {
+export const SelectionAndReopening: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
@@ -62,28 +62,29 @@ export const BoundsAndKeyboard: Story = {
     await userEvent.click(trigger)
     const popup = await body.findByRole('dialog', { name: 'Select month' })
     const inside = within(popup)
-    await expect(inside.getByRole('button', { name: 'JAN' })).toBeDisabled()
-    await expect(inside.getByRole('button', { name: 'FEB' })).toBeDisabled()
-    await expect(inside.getByRole('button', { name: 'MAR' })).toBeEnabled()
-    await expect(inside.getByRole('button', { name: 'JUN' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
+    await expect(inside.getByRole('button', { name: 'Jan' })).toBeDisabled()
+    await waitFor(() =>
+      expect(inside.getByRole('button', { name: 'Jun' })).toHaveFocus()
     )
-    await expect(
-      inside.getByRole('button', { name: 'Previous year' })
-    ).toBeDisabled()
     await userEvent.click(inside.getByRole('button', { name: 'Next year' }))
-    await expect(
-      inside.getByRole('button', { name: 'Next year' })
-    ).toBeDisabled()
-    await expect(inside.getByRole('button', { name: 'MAY' })).toBeDisabled()
-    const april = inside.getByRole('button', { name: 'APR' })
+    await expect(inside.getByRole('button', { name: 'May' })).toBeDisabled()
+    const april = inside.getByRole('button', { name: 'Apr' })
     april.focus()
     await userEvent.keyboard('{Enter}')
     await waitFor(() => expect(popup).not.toBeVisible())
     await expect(canvas.getByTestId('selected-month')).toHaveTextContent(
       '2031-04'
     )
+    await waitFor(() => expect(trigger).toHaveFocus())
+    await userEvent.click(trigger)
+    const reopened = await body.findByRole('dialog', { name: 'Select month' })
+    await waitFor(() =>
+      expect(
+        within(reopened).getByRole('button', { name: 'Apr' })
+      ).toHaveFocus()
+    )
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(reopened).not.toBeVisible())
     await waitFor(() => expect(trigger).toHaveFocus())
   },
 }
@@ -100,7 +101,7 @@ export const PastMonths: Story = {
     const today = new Date()
     for (let m = 0; m < 12; m++) {
       const button = within(popup).getByRole('button', {
-        name: formatDate(new Date(today.getFullYear(), m), 'LLL').toUpperCase(),
+        name: formatDate(new Date(today.getFullYear(), m), 'LLL'),
       })
       if (m < today.getMonth()) await expect(button).toBeDisabled()
       else await expect(button).toBeEnabled()

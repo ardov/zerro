@@ -213,14 +213,14 @@ export const GoalDraftAndNestedMonth: Story = {
     // A nested list is anchored to the field inside the animated surface.
     // Wait for that surface to settle before measuring/opening its child.
     await waitFor(() =>
-      expect(
-        getComputedStyle(amount.closest('[data-slot=popover]')!).opacity
-      ).toBe('1')
+      expect(getComputedStyle(amount.closest('[role=dialog]')!).opacity).toBe(
+        '1'
+      )
     )
     const initialAmount = (amount as HTMLInputElement).value
     await userEvent.clear(amount)
     await userEvent.type(amount, '1234')
-    await userEvent.click(body.getByRole('combobox', { name: 'Type of goal' }))
+    await userEvent.click(body.getByRole('combobox', { name: /^Type of goal/ }))
     await userEvent.click(
       await body.findByRole('option', { name: 'Save a sum' })
     )
@@ -228,7 +228,7 @@ export const GoalDraftAndNestedMonth: Story = {
     await userEvent.click(dateTrigger)
     const month = toISOMonth(new Date())
     const monthButton = await body.findByRole('button', {
-      name: formatDate(month, 'LLL').toUpperCase(),
+      name: formatDate(month, 'LLL'),
     })
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(monthButton).not.toBeVisible())
@@ -237,7 +237,7 @@ export const GoalDraftAndNestedMonth: Story = {
     await userEvent.click(dateTrigger)
     await userEvent.click(
       await body.findByRole('button', {
-        name: formatDate(month, 'LLL').toUpperCase(),
+        name: formatDate(month, 'LLL'),
       })
     )
     await waitFor(() =>
@@ -254,17 +254,17 @@ export const GoalDraftAndNestedMonth: Story = {
     await userEvent.click(trigger)
     const fresh = await body.findByPlaceholderText('0')
     await waitFor(() =>
-      expect(
-        getComputedStyle(fresh.closest('[data-slot=popover]')!).opacity
-      ).toBe('1')
+      expect(getComputedStyle(fresh.closest('[role=dialog]')!).opacity).toBe(
+        '1'
+      )
     )
     await expect(fresh).toHaveValue(initialAmount)
     await expect(
-      body.getByRole('combobox', { name: 'Type of goal' })
+      body.getByRole('combobox', { name: /^Type of goal/ })
     ).toHaveTextContent('Monthly amount')
     await userEvent.clear(fresh)
     await userEvent.type(fresh, '250')
-    await userEvent.click(body.getByRole('combobox', { name: 'Type of goal' }))
+    await userEvent.click(body.getByRole('combobox', { name: /^Type of goal/ }))
     await userEvent.click(
       await body.findByRole('option', { name: 'Save a sum' })
     )
@@ -273,7 +273,7 @@ export const GoalDraftAndNestedMonth: Story = {
     )
     await userEvent.click(
       await body.findByRole('button', {
-        name: formatDate(month, 'LLL').toUpperCase(),
+        name: formatDate(month, 'LLL'),
       })
     )
     await userEvent.click(body.getByRole('button', { name: 'Save goal' }))
@@ -319,7 +319,7 @@ export const GoalInsideDrawer: Story = {
     await waitFor(() => expect(getComputedStyle(goal).opacity).toBe('1'))
     await expect(within(goal).getByPlaceholderText('0')).toHaveFocus()
     await userEvent.click(
-      within(goal).getByRole('combobox', { name: 'Type of goal' })
+      within(goal).getByRole('combobox', { name: /^Type of goal/ })
     )
     const list = await body.findByRole('listbox')
     await waitFor(() =>
@@ -358,4 +358,39 @@ export const MobileGoalInsideDrawer: Story = {
   ...GoalInsideDrawer,
   tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
+}
+
+export const PercentageGoal: Story = {
+  render: () => (
+    <MonthProvider>
+      <GoalDraftHarness />
+    </MonthProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('button', { name: 'Edit goal' })
+    await userEvent.click(trigger)
+    await userEvent.click(
+      await body.findByRole('combobox', { name: /^Type of goal/ })
+    )
+    await userEvent.click(
+      await body.findByRole('option', { name: 'Percentage of income' })
+    )
+    const input = body.getByPlaceholderText('0')
+    await userEvent.clear(input)
+    await userEvent.type(input, '25/2{Enter}')
+    await waitFor(() => expect(input).not.toBeVisible())
+    await expect(
+      JSON.parse(canvas.getByTestId('saved-goal').textContent!)
+    ).toEqual({
+      type: core.goals.goalType.INCOME_PERCENT,
+      amount: 0.125,
+    })
+    await userEvent.click(trigger)
+    const reopened = await body.findByPlaceholderText('0')
+    await expect(reopened).toHaveValue('12,50')
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(reopened).not.toBeVisible())
+  },
 }

@@ -136,6 +136,7 @@ export function SelectSearch<T extends string>(
   return (
     <Field.Root {...fieldProps}>
       <Combobox.Root<T, boolean>
+        loopFocus={false}
         modal
         multiple={props.multiple}
         autoHighlight={search.autoHighlight}

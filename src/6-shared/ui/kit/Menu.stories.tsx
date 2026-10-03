@@ -99,6 +99,14 @@ export const Desktop: Story = {
     const body = within(canvasElement.ownerDocument.body)
     await userEvent.click(canvas.getByRole('button', { name: 'Actions' }))
     const menu = await body.findByRole('menu')
+    await userEvent.keyboard('{Home}')
+    const first = canvasElement.ownerDocument.activeElement
+    await userEvent.keyboard('{ArrowUp}')
+    await expect(canvasElement.ownerDocument.activeElement).toBe(first)
+    await userEvent.keyboard('{End}')
+    const last = canvasElement.ownerDocument.activeElement
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(canvasElement.ownerDocument.activeElement).toBe(last)
     await userEvent.click(within(menu).getByRole('menuitemcheckbox'))
     await expect(canvasElement.querySelector('output')).toHaveTextContent(
       'true'
@@ -161,6 +169,13 @@ export const ContextDesktop: Story = {
     const body = within(canvasElement.ownerDocument.body)
     fireEvent.contextMenu(area, { clientX: 100, clientY: 100 })
     const menu = await body.findByRole('menu')
+    const items = within(menu)
+      .getAllByRole('menuitem')
+      .filter(item => item.getAttribute('aria-disabled') !== 'true')
+    await userEvent.keyboard('{End}{ArrowDown}')
+    await expect(items.at(-1)).toHaveFocus()
+    await userEvent.keyboard('{Home}{ArrowUp}')
+    await expect(items[0]).toHaveFocus()
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(menu).not.toBeVisible())
     area.focus()

@@ -1,4 +1,4 @@
-import { useImperativeHandle } from 'react'
+import { useImperativeHandle, type ReactNode } from 'react'
 import { formatMoney } from '@/6-shared/helpers/money/format'
 import { useAmountExpression } from './useAmountExpression'
 import { cn } from '@/6-shared/ui/shadcn/utils'
@@ -7,13 +7,14 @@ import { InlineField, type InlineFieldProps } from './InlineField'
 import { Input, type InputProps } from './Input'
 
 type AmountEditingProps = {
+  /** Related actions stay in the same editing session, preserving the expression
+   * while keyboard focus moves between them and the input. */
+  children?: ReactNode
   value: number
   onChange: (value: number) => void
   /** Finishes the expression before handing its amount to the form. */
   onEnter?: (value: number) => void
   selectOnFocus?: boolean
-  /** Resting precision only. Typing never pads or truncates the fraction. */
-  fractionDigits?: 2 | 'auto'
   /** Shows buttons for arithmetic on keyboards without operator keys. */
   operators?: boolean
 }
@@ -44,27 +45,13 @@ export type AmountInlineFieldProps = Omit<
 
 /** A numeric value with an editable, live-formatted arithmetic expression. */
 export function AmountInput(props: AmountInputProps) {
-  const { fractionDigits = 2, ...restProps } = props
-  return (
-    <AmountEditor
-      {...restProps}
-      fractionDigits={fractionDigits}
-      presentation="field"
-    />
-  )
+  return <AmountEditor {...props} presentation="field" />
 }
 
 /** An amount that inherits typography and grows with its text. Start/end
  * content sits next to the amount, including in a transaction headline. */
 export function AmountInlineField(props: AmountInlineFieldProps) {
-  const { fractionDigits = 'auto', ...restProps } = props
-  return (
-    <AmountEditor
-      {...restProps}
-      fractionDigits={fractionDigits}
-      presentation="inline"
-    />
-  )
+  return <AmountEditor {...props} presentation="inline" />
 }
 
 const operators = [
@@ -81,10 +68,10 @@ function AmountEditor(
 ) {
   const {
     value,
+    children,
     onChange,
     onEnter,
     selectOnFocus = false,
-    fractionDigits,
     operators: showOperators,
     presentation,
     ref,
@@ -111,8 +98,7 @@ function AmountEditor(
     onChange,
     onEnter,
     selectOnFocus,
-    format: amount =>
-      formatMoney(amount, null, fractionDigits === 'auto' ? 'ifAny' : 2),
+    format: amount => formatMoney(amount, null, 'ifAny'),
     onFocus,
     onBlur,
     onBeforeInput,
@@ -172,6 +158,7 @@ function AmountEditor(
           ))}
         </div>
       )}
+      {children}
     </div>
   )
 }

@@ -216,3 +216,21 @@ it.each(['disabled', 'cancelled', 'no-ref'])(
     expect(screen.getByRole('textbox')).not.toHaveFocus()
   }
 )
+
+it.each([Input, Textarea])(
+  'focuses a floating control from its label area',
+  Control => {
+    render(
+      <Control label="Amount label" labelMode="floating" defaultValue="125" />
+    )
+    const control = screen.getByRole('textbox', { name: 'Amount label' })
+    const label = screen.getByText('Amount label', { selector: 'label' })
+    // The visual label ignores pointer events; its content container receives
+    // the hit. It must not be treated as an interactive addon.
+    fireEvent.mouseDown(label.parentElement!)
+    expect(control).toHaveFocus()
+    control.blur()
+    fireEvent.mouseDown(label)
+    expect(control).toHaveFocus()
+  }
+)

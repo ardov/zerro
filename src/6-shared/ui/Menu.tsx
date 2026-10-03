@@ -63,6 +63,7 @@ export function Menu({
 
   return (
     <MenuPrimitive.Root
+      loopFocus={false}
       open={open}
       onOpenChange={next => {
         if (!next) onClose?.()

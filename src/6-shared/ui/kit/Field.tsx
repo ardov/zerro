@@ -17,14 +17,17 @@ const surfaceVariants = cva(
     'relative flex min-h-(--field-row-height) [--field-row-height:--spacing(12)] w-full items-center rounded-ui-control text-ui-16 text-ui-primary',
     // Surface and interaction
     'border-0 bg-ui-highlight inset-ring-(length:--stroke-ui-control) inset-ring-transparent',
-    'hover:not-focus-within:inset-ring-ui-border focus-within:inset-ring-ui-focus focus-within:bg-ui-card',
+    'hover:not-focus-within:inset-ring-ui-border has-[>[data-field-control]:focus-within]:inset-ring-ui-focus has-[>[data-field-control]:focus-within]:bg-ui-card',
     // Validation and availability
-    'data-invalid:focus-within:inset-ring-ui-error',
+    'data-invalid:has-[>[data-field-control]:focus-within]:inset-ring-ui-error',
     'data-disabled:pointer-events-none data-disabled:opacity-ui-disabled data-disabled:inset-ring-transparent',
   ],
   {
     variants: {
-      tall: { true: 'min-h-16', false: '' },
+      tall: {
+        true: 'min-h-16 [--field-addon-label-space:--spacing(5)]',
+        false: '[--field-addon-label-space:0px]',
+      },
     },
   }
 )
@@ -102,11 +105,16 @@ export function FieldSurface(props: FieldSurfaceProps) {
       )}
     >
       {start != null && (
-        <div inert={disabled || undefined} className={addonClass}>
+        <div
+          data-field-addon-side="start"
+          inert={disabled || undefined}
+          className={addonClass}
+        >
           {start}
         </div>
       )}
       <div
+        data-field-control
         className={cn(
           'flex min-w-0 flex-1 items-center px-4',
           start != null && 'pl-0',
@@ -116,7 +124,11 @@ export function FieldSurface(props: FieldSurfaceProps) {
         {children}
       </div>
       {end != null && (
-        <div inert={disabled || undefined} className={addonClass}>
+        <div
+          data-field-addon-side="end"
+          inert={disabled || undefined}
+          className={addonClass}
+        >
           {end}
         </div>
       )}
@@ -176,7 +188,10 @@ export function FieldAddon({
       data-field-focus={kind === 'action' ? 'preserve' : 'control'}
       className={cn(
         'flex shrink-0 items-center justify-center text-ui-secondary',
-        kind === 'text' && 'px-4',
+        // The surface supplies the side: keep the outer inset and tighten only
+        // the gap next to the editable value. Standalone addons stay symmetric.
+        kind === 'text' &&
+          'px-4 pt-(--field-addon-label-space) in-data-[field-addon-side=start]:pe-2 in-data-[field-addon-side=end]:ps-2',
         kind === 'icon' && 'w-12',
         kind === 'action' && 'p-1',
         className
@@ -242,7 +257,6 @@ export function FieldContent(props: {
   })
   return (
     <Content
-      data-field-focus="preserve"
       className={cn(
         'group/field-content relative min-w-0 flex-1',
         size === 'lg' ? 'py-3' : 'py-2',

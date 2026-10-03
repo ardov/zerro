@@ -26,6 +26,9 @@ File is in the main checkout and not in the public repository.
 - Preserve keyboard access, visible focus, accessible names, and reduced-motion
   behavior.
 
+Arrow navigation in lists stops at either end. Menu, ContextMenu, SelectSearch
+and ActionList pass `loopFocus={false}`; Base UI Select does not loop by default.
+
 ## Component documentation
 
 Keep brief component documentation in its `.stories.tsx`: purpose, a minimal

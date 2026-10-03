@@ -310,7 +310,7 @@ export const PopupAddon: Story = {
     await waitFor(() => expect(menu).not.toBeInTheDocument())
     await expect(input).toHaveFocus()
     await userEvent.keyboard('{End}+2{Enter}')
-    await expect(input).toHaveValue('4\u00a0002,00')
+    await expect(input).toHaveValue('4\u00a0002')
   },
 }
 
@@ -366,7 +366,7 @@ export const Editing: Story = {
     await userEvent.click(
       canvas.getByRole('button', { name: 'Outside editor' })
     )
-    await expect(input).toHaveValue('12,00')
+    await expect(input).toHaveValue('12')
   },
 }
 

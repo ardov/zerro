@@ -23,8 +23,13 @@ import {
 import type { TISODate } from '@/6-shared/types'
 import { ChevronLeftIcon, ChevronRightIcon } from '@/6-shared/ui/Icons'
 import { cn } from '@/6-shared/ui/shadcn/utils'
-import { Button, IconButton, buttonPressAnimation } from './Button'
+import { Button, IconButton } from './Button'
 import { Select } from './Select'
+import {
+  calendarCellClass,
+  calendarNavClass,
+  calendarCaptionClass,
+} from './CalendarParts'
 import './Calendar.css'
 
 export type CalendarProps = {
@@ -104,7 +109,7 @@ export function Calendar(props: CalendarProps) {
 
 const classNames: Partial<ClassNames> = {
   month: 'grid w-full grid-cols-[auto_1fr_auto] items-center gap-y-2',
-  month_caption: 'flex h-12 min-w-0 items-center justify-center px-2',
+  month_caption: calendarCaptionClass,
   caption_label: 'truncate text-ui-16 font-medium first-letter:uppercase',
   month_grid: 'col-span-3 w-full table-fixed border-collapse',
   weekday:
@@ -217,11 +222,7 @@ function CalendarNavButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
       tooltip={false}
       variant="ghost"
       size="lg"
-      className={cn(
-        'relative z-1 rounded-smooth text-ui-secondary',
-        'aria-disabled:pointer-events-none aria-disabled:opacity-ui-disabled',
-        className
-      )}
+      className={cn(calendarNavClass, className)}
     />
   )
 }
@@ -239,16 +240,12 @@ function CalendarDay(props: DayButtonProps) {
       {...restProps}
       modifiers={modifiers}
       className={cn(
-        'focusable relative flex h-12 w-full items-center justify-center rounded-ui-control-inner rounded-smooth text-ui-16 tabular-nums select-none',
-        'hover:bg-ui-highlight active:bg-ui-pressed',
-        buttonPressAnimation,
-        'motion-reduce:scale-100! motion-reduce:transition-none!',
-        modifiers.outside && 'text-ui-secondary',
-        modifiers.today &&
-          'font-medium after:absolute after:bottom-2 after:size-1 after:rounded-full after:bg-current',
-        modifiers.selected &&
-          'bg-ui-button-primary text-ui-on-button-primary hover:bg-ui-button-primary active:bg-ui-button-primary',
-        modifiers.disabled && 'pointer-events-none opacity-ui-disabled',
+        calendarCellClass({
+          selected: modifiers.selected,
+          current: modifiers.today,
+          disabled: modifiers.disabled,
+          outside: modifiers.outside,
+        }),
         className
       )}
     />

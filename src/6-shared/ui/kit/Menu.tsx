@@ -126,7 +126,12 @@ function AdaptiveMenu(props: MenuProps & { context?: boolean }) {
   }
   if (mobile) return sheet
   return (
-    <Primitive.Root open={open} disabled={disabled} onOpenChange={setOpen}>
+    <Primitive.Root
+      loopFocus={false}
+      open={open}
+      disabled={disabled}
+      onOpenChange={setOpen}
+    >
       <Primitive.Trigger
         ref={(node: HTMLElement | null) => {
           sourceRef.current = node
@@ -153,6 +158,7 @@ function ContextMenuTrigger(props: {
   const suppressClick = useRef(false)
   return (
     <ContextPrimitive.Root
+      loopFocus={false}
       open={mobile ? false : open}
       disabled={disabled}
       onOpenChange={(next, details) => {

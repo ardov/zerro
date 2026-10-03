@@ -54,10 +54,24 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     expect(input).toHaveValue('12\u00a0000+3\u00a0000/2')
     expect(screen.getByTestId('amount')).toHaveTextContent(/^13500$/)
     await user.keyboard('{Enter}')
-    expect(input).toHaveValue(
-      Control === AmountInput ? '13\u00a0500,00' : '13\u00a0500'
-    )
+    expect(input).toHaveValue('13\u00a0500')
     expect(input).toHaveFocus()
+  })
+
+  it('hides zero fractions after editing without losing fractional amounts', async () => {
+    const user = userEvent.setup()
+    render(<Editor value={0} />)
+    const input = screen.getByRole('textbox', { name: 'Amount' })
+    expect(input).toHaveValue('0')
+    await user.clear(input)
+    await user.type(input, '12,00')
+    expect(input).toHaveValue('12,00')
+    await user.tab()
+    expect(input).toHaveValue('12')
+    await user.clear(input)
+    await user.type(input, '12,50{Enter}')
+    expect(input).toHaveValue('12,50')
+    expect(screen.getByTestId('amount')).toHaveTextContent(/^12.5$/)
   })
 
   it('reverts invalid arithmetic to the last valid result on Enter or blur', async () => {
@@ -70,10 +84,10 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     expect(screen.getByTestId('amount')).toHaveTextContent(/^12$/)
     await user.keyboard('{Enter}')
     expect(onEnter).toHaveBeenLastCalledWith(12)
-    expect(input).toHaveValue(Control === AmountInput ? '12,00' : '12')
+    expect(input).toHaveValue('12')
     await user.keyboard('{End}/0')
     await user.tab()
-    expect(input).toHaveValue(Control === AmountInput ? '12,00' : '12')
+    expect(input).toHaveValue('12')
     expect(input).not.toHaveAttribute('aria-invalid')
   })
 
@@ -147,9 +161,7 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     expect(screen.getByRole('button', { name: 'Choose EUR' })).toHaveFocus()
     expect(input).toHaveValue('12\u00a0000/3')
     await user.click(screen.getByRole('button', { name: 'Reset amount' }))
-    expect(input).toHaveValue(
-      Control === AmountInput ? '8\u00a0000,00' : '8\u00a0000'
-    )
+    expect(input).toHaveValue('8\u00a0000')
   })
 
   it('accepts an external value while focused without replacing its own expression echoes', () => {
@@ -164,9 +176,7 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     view.rerender(<Control label="Amount" value={15} onChange={onChange} />)
     expect(input).toHaveValue('12+3')
     view.rerender(<Control label="Amount" value={8000} onChange={onChange} />)
-    expect(input).toHaveValue(
-      Control === AmountInput ? '8\u00a0000,00' : '8\u00a0000'
-    )
+    expect(input).toHaveValue('8\u00a0000')
   })
 
   it('preserves accessible labels, external errors and the input ref', () => {

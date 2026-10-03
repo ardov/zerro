@@ -1,30 +1,30 @@
-import { Button, IconButton } from '@/6-shared/ui/Button'
+import { Button, IconButton } from '@/6-shared/ui/kit/Button'
 import type { FC } from 'react'
 import { useState } from 'react'
-import { Popover, type PopoverProps } from '@/6-shared/ui/Popover'
-import { Select } from '@/6-shared/ui/Select'
+import { PopoverSurface } from '@/6-shared/ui/kit/Popover'
+import { Select } from '@/6-shared/ui/kit/Select'
 import { useTranslation } from 'react-i18next'
-import { AmountInput } from '@/6-shared/ui/AmountInput'
+import { AmountInput } from '@/6-shared/ui/kit/AmountInput'
 import { CloseIcon } from '@/6-shared/ui/Icons'
 import MonthSelectPopover from '@/6-shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '@/6-shared/helpers/date'
 import { track } from '@/6-shared/analytics'
-import type { Modify, TDateDraft, TISOMonth } from '@/6-shared/types'
+import type { TDateDraft, TISOMonth } from '@/6-shared/types'
 
 import { useAppDispatch, useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import { usePopup } from '@/6-shared/overlays'
 
-export type TGoalPopoverProps = Modify<
-  PopoverProps,
-  { onClose: () => void }
-> & {
+export type TGoalPopoverProps = {
+  open: boolean
+  anchorEl?: Element | null
+  onClose: () => void
   id: core.envelopes.TEnvelopeId
   month: TISOMonth
 }
 
 export const GoalPopover: FC<TGoalPopoverProps> = props => {
-  const { id, month, onClose, ...rest } = props
+  const { id, month, onClose, open, anchorEl } = props
   const { t } = useTranslation('goals')
   const dispatch = useAppDispatch()
   const envelope = useAppSelector(core.envelopes.selectAll)[id]
@@ -42,7 +42,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   // popover underneath it.
   const { open: monthOpen, setOpen: setMonthOpen } = usePopup()
   const [monthPopoverAnchor, setMonthPopoverAnchor] =
-    useState<(typeof props)['anchorEl']>(null)
+    useState<HTMLButtonElement | null>(null)
   if (!id || !month) return null
 
   const closeMonthPopover = () => setMonthOpen(false)
@@ -52,8 +52,8 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   }
   const removeDate = () => handleDateChange(undefined)
 
-  const save = () => {
-    const amount = getAmount(rawValue)
+  const save = (value = rawValue) => {
+    const amount = getAmount(value)
     const hasChanges =
       amount !== goal?.amount || type !== goal?.type || endDate !== goal?.end
 
@@ -86,18 +86,24 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   }
 
   return (
-    <Popover
-      aria-label={t('goal', { ns: 'budgets' })}
-      onClose={onClose}
-      {...rest}
+    <PopoverSurface
+      label={t('goal', { ns: 'budgets' })}
+      controller={{
+        open,
+        setOpen: next => {
+          if (!next) onClose()
+        },
+      }}
+      anchor={anchorEl}
     >
-      <div className="grid min-w-80 gap-y-4 p-4">
+      <div className="grid gap-4">
         <Select
           label={t('goalType')}
-          fullWidth
+          labelMode="floating"
           value={type}
           onChange={setType}
-          options={[
+          required
+          items={[
             { value: core.goals.goalType.MONTHLY, label: t('names.monthly') },
             {
               value: core.goals.goalType.MONTHLY_SPEND,
@@ -116,48 +122,51 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
 
         <AmountInput
           autoFocus
-          onFocus={e => e.target.select()}
           selectOnFocus
           value={rawValue}
           label={amountLabels[type]}
-          fullWidth
+          prefix={isInPercents ? undefined : envelope.currency}
+          suffix={isInPercents ? '%' : undefined}
+          labelMode="floating"
           onChange={value => setRawValue(+value)}
-          onEnter={value => {
-            setRawValue(+value)
-            save()
-          }}
-          currency={isInPercents ? '%' : envelope.currency}
+          onEnter={save}
           placeholder="0"
         />
 
         {showDateBlock && (
           <div className="flex">
             <Button
-              size="large"
+              ref={setMonthPopoverAnchor}
+              variant="secondary"
               // The calendar hangs off this button, not off whatever opened
               // the goal: it is a nested surface, and it lands over its own
               // control rather than over the form it belongs to.
-              onClick={event => {
-                setMonthPopoverAnchor(event.currentTarget)
-                setMonthOpen(true)
-              }}
-              fullWidth={!endDate}
+              onClick={() => setMonthOpen(true)}
+              className="min-w-0 flex-1"
             >
               {endDate
                 ? formatDate(endDate, 'LLLL yyyy').toUpperCase()
                 : t('tillDate')}
             </Button>
             {endDate && (
-              <IconButton onClick={removeDate} children={<CloseIcon />} />
+              <IconButton
+                tooltip={false}
+                variant="ghost"
+                label={t('removeValue', {
+                  ns: 'common',
+                  label: formatDate(endDate, 'LLLL yyyy'),
+                })}
+                onClick={removeDate}
+              >
+                <CloseIcon />
+              </IconButton>
             )}
           </div>
         )}
 
-        <Button onClick={save} variant="contained" color="primary">
-          {t('save')}
-        </Button>
+        <Button onClick={() => save()}>{t('save')}</Button>
         {!!goal?.amount && (
-          <Button onClick={removeGoal} variant="outlined" color="error">
+          <Button onClick={removeGoal} variant="destructive">
             {t('remove')}
           </Button>
         )}
@@ -170,7 +179,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
         value={endDate}
         disablePast
       />
-    </Popover>
+    </PopoverSurface>
   )
 
   function getAmount(input: string | number) {

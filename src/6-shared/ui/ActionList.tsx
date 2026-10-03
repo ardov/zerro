@@ -21,7 +21,7 @@ export function ActionList({
   return (
     <Toolbar.Root
       orientation="vertical"
-      loopFocus
+      loopFocus={false}
       data-slot="action-list"
       className={cn('m-0 flex flex-col py-2 outline-none', className)}
       {...props}

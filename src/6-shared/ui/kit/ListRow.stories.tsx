@@ -18,6 +18,7 @@ const meta = {
 - Compose with a semantic element or Base UI item through **render**; the owner handles keyboard interaction, disabled behavior and accessible selection.
 - Keep **reserveStart** on every row of a mixed-image list, even while filtering. Start images are decorative.
 - Selection is a background; the owner supplies one pointer/keyboard highlight. Pressing moves only the background, respecting reduced motion.
+- Trailing values use the same typography and first-line baseline as the label. Wrap secondary metadata in its own smaller text style when needed.
 - **ListRowHeader** provides a group label's layout; connect it to the group. **ListRowSeparator** is decorative.
 
 See **Playground** for a minimal row and **Interaction** for Base UI composition.`,
@@ -89,6 +90,7 @@ export const Showcase: Story = {
             <ListRow
               size={size}
               description="An explanatory sentence that wraps naturally when the available width is limited."
+              end="12 345,67 €"
             >
               A long account name for shared household expenses and recurring
               payments

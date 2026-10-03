@@ -25,6 +25,10 @@ function AmountHarness() {
   const id = Object.values(useAppSelector(core.envelopes.selectAll)).find(
     envelope => envelope.name === 'Food'
   )!.id
+  const metrics = useAppSelector(core.activity.selectEnvelopeMetrics)[month][id]
+  const [currency] = core.currency.useDisplayCurrency()
+  const convert = useAppSelector(core.currency.selectConvertFx)
+  const assigned = convert(metrics.totalAssigned, currency, month)
   const commands = useAppSelector(state => state.data.outbox.length)
   return (
     <>
@@ -32,7 +36,9 @@ function AmountHarness() {
         Open amount editor
       </button>
       <output data-testid="commands">{commands}</output>
+      <output data-testid="assigned">{assigned}</output>
       <MoveMoneyModal
+        key={String(!!anchor)}
         month={month}
         source="toBeAssigned"
         destination={id}
@@ -54,10 +60,24 @@ export const MoveMoneyAmountRegression: Story = {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
     const commands = Number(canvas.getByTestId('commands').textContent)
+    const assigned = Number(canvas.getByTestId('assigned').textContent)
     await userEvent.click(
       canvas.getByRole('button', { name: 'Open amount editor' })
     )
-    const input = await body.findByPlaceholderText('0')
+    let input = await body.findByPlaceholderText('0')
+    await userEvent.clear(input)
+    await userEvent.type(input, '99{Escape}')
+    await waitFor(() => expect(input).not.toBeVisible())
+    await expect(Number(canvas.getByTestId('commands').textContent)).toBe(
+      commands
+    )
+    await expect(Number(canvas.getByTestId('assigned').textContent)).toBe(
+      assigned
+    )
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Open amount editor' })
+    )
+    input = await body.findByPlaceholderText('0')
     await userEvent.click(input)
     await userEvent.clear(input)
     await userEvent.type(input, '25,5+4.5{Enter}')
@@ -65,5 +85,13 @@ export const MoveMoneyAmountRegression: Story = {
     await expect(Number(canvas.getByTestId('commands').textContent)).toBe(
       commands + 1
     )
+    await expect(
+      Number(canvas.getByTestId('assigned').textContent)
+    ).toBeCloseTo(assigned + 30)
   },
+}
+
+export const MobileMoveMoneyAmountRegression: Story = {
+  ...MoveMoneyAmountRegression,
+  globals: { viewport: { value: 'iphone13' } },
 }

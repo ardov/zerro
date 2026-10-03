@@ -9,7 +9,8 @@ import { Select } from './Select'
 import { MultiSelect } from './MultiSelect'
 import { Chip } from './Chip'
 import { Calendar } from './Calendar'
-import type { TISODate } from '@/6-shared/types'
+import { MonthPicker } from './MonthPicker'
+import type { TISODate, TISOMonth } from '@/6-shared/types'
 import { Dialog } from './Dialog'
 import { Drawer } from './Drawer'
 import { Popover } from './Popover'
@@ -34,6 +35,7 @@ function Gallery() {
   const [amount, setAmount] = useState(12500)
   const [selected, setSelected] = useState(['everyday'])
   const [tags, setTags] = useState(['Groceries', 'Travel', 'Coffee'])
+  const [month, setMonth] = useState<TISOMonth | null>('2026-09')
   const [date, setDate] = useState<TISODate | null>('2026-09-22')
   const [message, setMessage] = useState('Ready to try an action.')
   return (
@@ -151,6 +153,13 @@ function Gallery() {
             Choose a day or browse months. The six-week grid keeps its height.
           </p>
           <Calendar value={date} onChange={setDate} />
+        </section>
+        <section className="grid gap-4 rounded-ui-card rounded-smooth bg-ui-card p-6">
+          <h2 className="text-ui-20 font-medium">Month picker</h2>
+          <p className="text-ui-secondary">
+            Choose a month with the same states and navigation as the calendar.
+          </p>
+          <MonthPicker value={month} onChange={setMonth} />
         </section>
         <section className="grid gap-4 rounded-ui-card bg-ui-card p-6">
           <h2 className="text-ui-20 font-medium">Overlays</h2>

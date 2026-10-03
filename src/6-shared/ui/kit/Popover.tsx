@@ -22,6 +22,9 @@ type PopoverOptions = SurfaceName & {
   anchor?: Primitive.Positioner.Props['anchor']
   side?: Primitive.Positioner.Props['side']
   align?: Primitive.Positioner.Props['align']
+  sideOffset?: Primitive.Positioner.Props['sideOffset']
+  alignOffset?: Primitive.Positioner.Props['alignOffset']
+  collisionAvoidance?: Primitive.Positioner.Props['collisionAvoidance']
   className?: string
   contentClassName?: string
   initialFocus?: Primitive.Popup.Props['initialFocus']
@@ -47,7 +50,16 @@ export function Popover(props: PopoverProps) {
 }
 
 export function PopoverSurface(props: PopoverSurfaceProps) {
-  const { mobile = 'drawer', anchor, side, align, ...restProps } = props
+  const {
+    mobile = 'drawer',
+    anchor,
+    side,
+    align,
+    sideOffset,
+    alignOffset,
+    collisionAvoidance,
+    ...restProps
+  } = props
   const narrow = useBottomSheetLayout()
   const finalFocus = useSurfaceFinalFocus(props)
   return narrow && mobile === 'drawer' ? (
@@ -58,6 +70,9 @@ export function PopoverSurface(props: PopoverSurfaceProps) {
       anchor={anchor}
       side={side}
       align={align}
+      sideOffset={sideOffset}
+      alignOffset={alignOffset}
+      collisionAvoidance={collisionAvoidance}
       finalFocus={finalFocus}
     />
   )
@@ -74,6 +89,9 @@ function AnchoredPopover(props: PopoverSurfaceProps) {
     anchor,
     side = 'bottom',
     align = 'start',
+    sideOffset,
+    alignOffset,
+    collisionAvoidance = { side: 'flip', align: 'shift' },
     className,
     contentClassName,
     initialFocus,
@@ -93,7 +111,9 @@ function AnchoredPopover(props: PopoverSurfaceProps) {
           anchor={anchor}
           side={side}
           align={align}
-          collisionAvoidance={{ side: 'flip', align: 'shift' }}
+          sideOffset={sideOffset ?? positioning.sideOffset}
+          alignOffset={alignOffset}
+          collisionAvoidance={collisionAvoidance}
           className="z-modal"
         >
           <Primitive.Popup

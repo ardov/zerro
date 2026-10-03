@@ -1,33 +1,47 @@
 import type { TFxAmount, TISOMonth } from '@/6-shared/types'
 import { core } from '@/zerro-core/redux'
 
-import type { FC, HTMLAttributes } from 'react'
-import { useState } from 'react'
-import { IconButton } from '@/6-shared/ui/Button'
-import { ActionList, ActionListItem } from '@/6-shared/ui/ActionList'
+import type { FC } from 'react'
+import { useRef, useState } from 'react'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import {
+  ActionList,
+  ActionListItem,
+  type ActionListHandle,
+} from '@/6-shared/ui/kit/ActionList'
+import { isPlainKey } from '@/6-shared/helpers/keyboard'
+import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
+import { FieldAddon } from '@/6-shared/ui/kit/Field'
 import { useTranslation } from 'react-i18next'
 import { ArrowForwardIcon } from '@/6-shared/ui/Icons'
-import { AmountInput } from '@/6-shared/ui/AmountInput'
+import { AmountInput } from '@/6-shared/ui/kit/AmountInput'
 import { formatMoney } from '@/6-shared/helpers/money'
 import { track } from '@/6-shared/analytics'
-import {
-  AdaptivePopover,
-  type AdaptivePopoverProps,
-} from '@/6-shared/ui/AdaptivePopover'
+import { PopoverSurface } from '@/6-shared/ui/kit/Popover'
 
 import { useAppDispatch, useAppSelector } from '@/store'
 import { setTotalBudget } from '@/4-features/budget/setTotalBudget'
 import { useQuickActions } from './useQuickActions'
+import { useAmountAlignment } from './useAmountAlignment'
 
-export type TBudgetPopoverProps = Omit<AdaptivePopoverProps, 'onClose'> & {
+export type TBudgetPopoverProps = {
+  open: boolean
+  anchor?: Element | null
+  /** Table amount line box; align the editable value over it on desktop. */
+  alignAmount?: boolean
   onClose: () => void
   id: core.envelopes.TEnvelopeId
   month: TISOMonth
 }
 
 export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
-  const { id, month, onClose, ...rest } = props
+  const { id, month, onClose, open, anchor, alignAmount } = props
   const { t } = useTranslation()
+  const quickAmountsRef = useRef<ActionListHandle>(null)
+  const narrow = useBottomSheetLayout()
+  const { inputRef, positioning, controlClassName } = useAmountAlignment(
+    Boolean(alignAmount && !narrow)
+  )
   const quickActions = useQuickActions(month, id)
   const [dispCurrency] = core.currency.useDisplayCurrency()
   const dispatch = useAppDispatch()
@@ -103,40 +117,61 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
     )
 
   return (
-    <AdaptivePopover
-      {...rest}
-      onClose={() => changeAndClose(+inputValue)}
-      drawerSide="top"
-      aria-label={envelopeName || t('budget')}
+    <PopoverSurface
+      controller={{
+        open,
+        setOpen: next => {
+          if (!next) changeAndClose(inputValue)
+        },
+      }}
+      anchor={anchor}
+      {...positioning}
+      label={envelopeName || t('budget')}
+      contentClassName="p-1"
     >
-      <div className="p-2">
-        <AmountInput
-          autoFocus
-          value={inputValue}
-          fullWidth
-          onChange={value => setInputValue(+value)}
-          onEnter={value => changeAndClose(+value)}
-          helperText={helperText}
-          signButtons="auto"
-          placeholder="0"
-          aria-label={t('assigned')}
-          startAdornment={currency.env}
-          endAdornment={
+      <AmountInput
+        ref={inputRef}
+        autoFocus
+        controlClassName={controlClassName}
+        operators={narrow}
+        value={inputValue}
+        onChange={value => setInputValue(+value)}
+        onEnter={value => changeAndClose(+value)}
+        onKeyDown={event => {
+          if (event.key === 'ArrowDown' && isPlainKey(event)) {
+            event.preventDefault()
+            quickAmountsRef.current?.focus()
+          }
+        }}
+        description={helperText}
+        placeholder="0"
+        label={t('assigned')}
+        start={<FieldAddon>{currency.env}</FieldAddon>}
+        end={
+          <FieldAddon kind="action">
             <IconButton
-              edge="end"
-              aria-label={t('apply')}
+              size="sm"
+              tooltip={false}
+              variant="ghost"
+              label={t('apply')}
               onClick={() => changeAndClose(+inputValue)}
             >
               <ArrowForwardIcon />
             </IconButton>
-          }
-        />
-
-        <ActionList aria-label={t('quickAmounts')}>
+          </FieldAddon>
+        }
+      >
+        <ActionList
+          ref={quickAmountsRef}
+          onNavigateBefore={() => inputRef.current?.focus()}
+          aria-label={t('quickAmounts')}
+          className="mt-2"
+        >
           {quickActions.map(({ text, amount }, index) => (
             <ActionListItem
-              key={text}
               selected={inputValue === amount}
+              end={format.env(amount)}
+              key={text}
               onClick={() => {
                 changeAndClose(amount)
                 track('budget_quick_amount_selected', {
@@ -144,25 +179,11 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
                 })
               }}
             >
-              <NameValueRow name={text} value={format.env(amount)} />
+              {text}
             </ActionListItem>
           ))}
         </ActionList>
-      </div>
-    </AdaptivePopover>
-  )
-}
-
-const NameValueRow: FC<
-  HTMLAttributes<HTMLDivElement> & { name: string; value: string }
-> = ({ name, value, ...rest }) => {
-  return (
-    <div
-      className="flex w-full gap-4 [&>:first-child]:grow [&>:last-child]:text-muted-foreground"
-      {...rest}
-    >
-      <span>{name}</span>
-      <span>{value}</span>
-    </div>
+      </AmountInput>
+    </PopoverSurface>
   )
 }

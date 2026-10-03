@@ -6,6 +6,7 @@ import { core } from '@/zerro-core/redux'
 import { MonthProvider, useMonth } from '../MonthProvider'
 import { useBudgetPopover } from './Context'
 import { useNavigate } from 'react-router-dom'
+import { BudgetCell } from '../EnvelopeTable/Row/BudgetCell'
 import { SideContent, useSideContent } from '../SideContent'
 
 const meta = {
@@ -17,9 +18,15 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-function AssignmentHarness() {
+function AssignmentHarness({
+  table = false,
+  edge = false,
+}: {
+  table?: boolean
+  edge?: boolean
+}) {
   const navigate = useNavigate()
-  const [, setCurrency] = core.currency.useDisplayCurrency()
+  const [displayCurrency, setCurrency] = core.currency.useDisplayCurrency()
   const [month] = useMonth()
   const open = useBudgetPopover()
   const envelopes = useAppSelector(core.envelopes.selectAll)
@@ -46,10 +53,27 @@ function AssignmentHarness() {
   }, [navigate])
 
   return (
-    <div>
-      <button type="button" onClick={event => open(id, event.currentTarget)}>
-        Assign budget
-      </button>
+    <div
+      style={
+        table
+          ? edge
+            ? { position: 'fixed', right: 16, bottom: 16 }
+            : { width: 400, margin: '100px auto' }
+          : undefined
+      }
+    >
+      {table ? (
+        <div data-testid="budget-cell">
+          <BudgetCell
+            value={convert(envelope.totalAssigned, displayCurrency, month)}
+            onBudgetClick={anchor => open(id, anchor, { alignAmount: true })}
+          />
+        </div>
+      ) : (
+        <button type="button" onClick={event => open(id, event.currentTarget)}>
+          Assign budget
+        </button>
+      )}
       <output data-testid="assigned">
         {convert(envelope.totalAssigned, envelope.currency, month)}
       </output>
@@ -69,13 +93,7 @@ const checkAssignment: Story['play'] = async ({ canvasElement }) => {
   const initialCommands = commandCount()
   await userEvent.click(trigger)
   let input = await body.findByPlaceholderText('0')
-  const popup = input.closest<HTMLElement>(
-    // A drawer on a phone, the owned `Popover` above the breakpoint.
-    '[data-slot="adaptive-popup"], [data-slot="popover"]'
-  )!
-  await expect(popup.getAttribute('data-placement')).toBe(
-    window.innerWidth < 900 ? 'top' : null
-  )
+  const popup = input.closest<HTMLElement>('[role=dialog]')!
   await waitFor(() => {
     const rect = popup.getBoundingClientRect()
     expect(rect.left).toBeGreaterThanOrEqual(0)
@@ -85,16 +103,10 @@ const checkAssignment: Story['play'] = async ({ canvasElement }) => {
   // The surface, its field and its quick-amount list each carry a name of
   // their own, and the apply button sits over the field's own padding.
   const dialog = input.closest<HTMLElement>('[role="dialog"]')!
-  const list = popup.querySelector<HTMLElement>('[data-slot="action-list"]')!
-  const names = [
-    dialog.getAttribute('aria-label'),
-    input.getAttribute('aria-label'),
-    list.getAttribute('aria-label'),
-  ]
-  await expect(new Set(names).size).toBe(3)
-  await expect(names.every(Boolean)).toBe(true)
-  const apply = body.getByRole('button', { name: 'Apply' })
-  await expect(getComputedStyle(apply).marginRight).toBe('-12px')
+  const list = popup.querySelector<HTMLElement>('[role=toolbar]')!
+  await expect(dialog).toHaveAccessibleName('Food')
+  await expect(input).toHaveAccessibleName('Assigned')
+  await expect(list).toHaveAccessibleName('Quick amounts')
 
   await userEvent.clear(input)
   await userEvent.type(input, '1,5+2*3{Enter}')
@@ -130,12 +142,47 @@ const checkAssignment: Story['play'] = async ({ canvasElement }) => {
   await userEvent.tab()
   await expect(body.getByRole('button', { name: 'Apply' })).toHaveFocus()
   await userEvent.tab()
+  if (window.innerWidth < 500) {
+    for (let i = 0; i < 4; i++) await userEvent.tab()
+  }
   // Toolbar semantics, not menu: scoped to the list so the field's own Apply
   // button does not count as one of the quick amounts.
   const quickAmounts = body.getByRole('toolbar', { name: 'Quick amounts' })
   const actions = within(quickAmounts).getAllByRole('button')
   await expect(actions[0]).toHaveFocus()
+  // The field also offers a direct route, without applying the typed amount.
+  await userEvent.click(input)
+  await userEvent.clear(input)
+  await userEvent.type(input, '100+50{ArrowLeft}{ArrowLeft}')
+  const draftText = (input as HTMLInputElement).value
+  const caret = (input as HTMLInputElement).selectionStart
+  await userEvent.keyboard('{ArrowDown}')
+  await expect(actions[0]).toHaveFocus()
+  await userEvent.keyboard('{ArrowUp}')
+  await expect(input).toHaveFocus()
+  await expect(input).toHaveValue(draftText)
+  await expect((input as HTMLInputElement).selectionStart).toBe(caret)
+  // userEvent does not emulate native Shift+Arrow selection in browser mode.
+  ;(input as HTMLInputElement).setSelectionRange(1, 4)
+  const selection = [
+    (input as HTMLInputElement).selectionStart,
+    (input as HTMLInputElement).selectionEnd,
+  ]
+  await expect(selection[0]).not.toBe(selection[1])
+  await userEvent.keyboard('{ArrowDown}{ArrowUp}')
+  await expect(input).toHaveFocus()
+  await expect(input).toHaveValue(draftText)
+  await expect([
+    (input as HTMLInputElement).selectionStart,
+    (input as HTMLInputElement).selectionEnd,
+  ]).toEqual(selection)
+  await userEvent.keyboard('{ArrowDown}')
+  await expect(actions[0]).toHaveFocus()
+  await expect(commandCount()).toBe(initialCommands + 2)
+  await expect(getComputedStyle(actions[0], '::after').opacity).toBe('1')
   await userEvent.keyboard('{End}')
+  await expect(actions.at(-1)).toHaveFocus()
+  await userEvent.keyboard('{ArrowDown}')
   await expect(actions.at(-1)).toHaveFocus()
   await userEvent.keyboard('{Home}')
   await expect(actions[0]).toHaveFocus()
@@ -174,14 +221,39 @@ export const Mobile: Story = {
   globals: { viewport: { value: 'iphone13' } },
 }
 
+const checkBreakpoint: Story['play'] = async ({ canvasElement }) => {
+  const canvas = within(canvasElement)
+  const body = within(canvasElement.ownerDocument.body)
+  await userEvent.click(canvas.getByRole('button', { name: 'Assign budget' }))
+  const input = await body.findByRole('textbox', { name: 'Assigned' })
+  const popup = input.closest('[role="dialog"]')!
+  const operator = within(popup as HTMLElement).queryByRole('button', {
+    name: '+',
+  })
+  if (window.innerWidth < 500) await expect(operator).toBeVisible()
+  else await expect(operator).not.toBeInTheDocument()
+  const assigned = canvas.getByTestId('assigned').textContent
+  await userEvent.clear(input)
+  await userEvent.type(input, '42')
+  await expect(input).toHaveValue('42')
+  await expect(canvas.getByTestId('assigned').textContent).toBe(assigned)
+  await userEvent.keyboard('{Enter}')
+  await waitFor(() => expect(input).not.toBeVisible())
+  await expect(canvas.getByTestId('assigned')).toHaveTextContent(/^42$/)
+}
+
 export const BelowBreakpoint: Story = {
   ...Desktop,
-  globals: { viewport: { value: 'zerro899' } },
+  tags: ['!dev', '!autodocs'],
+  play: checkBreakpoint,
+  globals: { viewport: { value: 'zerro499' } },
 }
 
 export const AtBreakpoint: Story = {
   ...Desktop,
-  globals: { viewport: { value: 'zerro900' } },
+  tags: ['!dev', '!autodocs'],
+  play: checkBreakpoint,
+  globals: { viewport: { value: 'zerro500' } },
 }
 
 /** Back closes the popover and commits nothing, and Forward does not bring it
@@ -291,4 +363,73 @@ export const ForeignDisplayCurrency: Story = {
     await expect(input).toHaveAccessibleDescription(/\$.*Balance.*₽.*\$/)
     await userEvent.keyboard('{Escape}')
   },
+}
+
+const checkTableAlignment =
+  (foreign = false, edge = false): Story['play'] =>
+  async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = within(canvas.getByTestId('budget-cell')).getByRole(
+      'button'
+    )
+    // Seed a nonzero amount so the foreign-currency case really changes
+    // the displayed number while the editor retains the envelope amount.
+    await userEvent.click(trigger)
+    const draft = await body.findByRole('textbox', { name: 'Assigned' })
+    await userEvent.clear(draft)
+    await userEvent.type(draft, '1234{Enter}')
+    await waitFor(() => expect(draft).not.toBeVisible())
+    const localAmount = trigger.textContent
+    if (foreign) {
+      await userEvent.click(canvas.getByRole('button', { name: 'Display USD' }))
+      await waitFor(() => expect(trigger.textContent).not.toBe(localAmount))
+    }
+    const anchor = trigger.querySelector('span')!
+    await userEvent.click(trigger)
+    const input = await body.findByRole('textbox', { name: 'Assigned' })
+    await expect(input).toHaveValue('1\u00a0234')
+    const popup = input.closest('[role="dialog"]')!
+    await waitFor(() => {
+      const panel = popup.getBoundingClientRect()
+      expect(panel.left).toBeGreaterThanOrEqual(15)
+      expect(panel.right).toBeLessThanOrEqual(window.innerWidth - 15)
+      expect(panel.top).toBeGreaterThanOrEqual(15)
+      expect(panel.bottom).toBeLessThanOrEqual(window.innerHeight - 15)
+      if (!edge) {
+        const target = anchor.getBoundingClientRect()
+        const field = input.getBoundingClientRect()
+        expect(Math.abs(field.right - target.right)).toBeLessThan(1)
+        expect(
+          Math.abs(
+            field.top + field.height / 2 - target.top - target.height / 2
+          )
+        ).toBeLessThan(1)
+      }
+    })
+    if (foreign)
+      await expect(input).toHaveAccessibleDescription(/\$.*Balance.*₽.*\$/)
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(trigger).toHaveFocus())
+  }
+
+export const TableAlignment: Story = {
+  render: () => (
+    <MonthProvider>
+      <AssignmentHarness table />
+    </MonthProvider>
+  ),
+  play: checkTableAlignment(),
+}
+export const TableForeignCurrency: Story = {
+  ...TableAlignment,
+  play: checkTableAlignment(true),
+}
+export const TableScreenEdge: Story = {
+  render: () => (
+    <MonthProvider>
+      <AssignmentHarness table edge />
+    </MonthProvider>
+  ),
+  play: checkTableAlignment(false, true),
 }

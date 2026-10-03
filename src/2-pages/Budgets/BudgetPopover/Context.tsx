@@ -13,8 +13,19 @@ export const useBudgetPopover = () => {
   const [month] = useMonth()
   const ask = useAsk()
   return useCallback(
-    (id: core.envelopes.TEnvelopeId, anchorEl?: Element) =>
-      ask(<AskedBudgetPopover id={id} month={month} anchorEl={anchorEl} />),
+    (
+      id: core.envelopes.TEnvelopeId,
+      anchor?: Element,
+      { alignAmount }: { alignAmount?: boolean } = {}
+    ) =>
+      ask(
+        <AskedBudgetPopover
+          id={id}
+          month={month}
+          anchor={anchor}
+          alignAmount={alignAmount}
+        />
+      ),
     [ask, month]
   )
 }
@@ -22,8 +33,9 @@ export const useBudgetPopover = () => {
 const AskedBudgetPopover: FC<{
   id: core.envelopes.TEnvelopeId
   month: TISOMonth
-  anchorEl?: Element | null
-}> = ({ id, month, anchorEl }) => {
+  anchor?: Element | null
+  alignAmount?: boolean
+}> = ({ id, month, anchor, alignAmount }) => {
   const { open, answer } = useAsked<void>()
   // Built at the moment of the question, so the draft amount starts fresh
   // without a key to force it.
@@ -31,7 +43,8 @@ const AskedBudgetPopover: FC<{
     <BudgetPopover
       open={open}
       onClose={() => answer()}
-      anchorEl={anchorEl}
+      anchor={anchor}
+      alignAmount={alignAmount}
       month={month}
       id={id}
     />

@@ -8,6 +8,7 @@ export type ListRowSize = 'lg' | 'sm'
 export type ListRowProps = useRender.ComponentProps<'div'> & {
   size?: ListRowSize
   start?: ReactNode
+  /** Trailing value inherits the first line's typography; style metadata explicitly. */
   end?: ReactNode
   description?: ReactNode
   /** Reserve this slot for every row when the source list contains images. */
@@ -106,7 +107,7 @@ export function ListRow(props: ListRowProps) {
             )}
           </span>
           {end != null && (
-            <span className="ml-3 shrink-0 self-start text-ui-14 leading-6 text-ui-secondary">
+            <span className="ml-3 shrink-0 self-start text-ui-secondary">
               {end}
             </span>
           )}

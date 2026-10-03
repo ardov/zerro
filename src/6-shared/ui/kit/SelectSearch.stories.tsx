@@ -121,7 +121,12 @@ export const Interaction: Story = {
       body.getByRole('option', { name: 'Travel cash' })
     ).toBeVisible()
     await expect(body.queryByRole('group')).not.toBeInTheDocument()
-    await userEvent.keyboard('{ArrowDown}{Enter}')
+    await userEvent.keyboard('{ArrowDown}')
+    const active = search.getAttribute('aria-activedescendant')
+    await expect(active).toBeTruthy()
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(search.getAttribute('aria-activedescendant')).toBe(active)
+    await userEvent.keyboard('{Enter}')
     await waitFor(() =>
       expect(body.queryByRole('listbox')).not.toBeInTheDocument()
     )

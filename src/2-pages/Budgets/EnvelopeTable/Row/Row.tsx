@@ -203,7 +203,9 @@ export const Row: FC<EnvelopeRowProps> = props => {
             <BudgetCell
               isSelf={isSelf}
               value={assigned}
-              onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
+              onBudgetClick={anchor =>
+                openBudgetPopover(id, anchor, { alignAmount: true })
+              }
             />
           }
           outcome={
