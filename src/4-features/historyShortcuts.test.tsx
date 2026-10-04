@@ -1,3 +1,4 @@
+import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import { configureStore } from '@reduxjs/toolkit'
 import { act, render } from '@testing-library/react'
 import { Provider } from 'react-redux'
@@ -115,8 +116,7 @@ describe('history shortcuts', () => {
     })
     store.dispatch(
       appendClientCommand({
-        type: 'patch',
-        patch: {},
+        operations: testOperations({}),
         issuedAt: 1,
       })
     )
@@ -148,7 +148,7 @@ describe('history shortcuts', () => {
       reducer: { data: dataReducer, sync: syncReducer },
     })
     store.dispatch(
-      appendClientCommand({ type: 'patch', patch: {}, issuedAt: 1 })
+      appendClientCommand({ operations: testOperations({}), issuedAt: 1 })
     )
     store.dispatch(syncStarted())
     const view = render(

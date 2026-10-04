@@ -4,22 +4,17 @@ import { appendClientCommand, getReplicaWriteBlocked } from '@/store/data'
 import { selectIsHistoryPointVisible } from '@/store/history'
 
 import {
-  issuePatch,
+  prepareCommand,
   materializeCommand,
   type TCommandLabel,
 } from '../../internal/operations/materialization'
-import {
-  isCompiled,
-  type TCompiled,
-  type TCoreContext,
-  type TIntentPatch,
-} from '../../types'
+import { type TCompiled, type TCoreContext } from '../../types'
 import { selectData } from './state'
 
 export type TReduxCommandCompiler<TReceipt = unknown> = (
   state: RootState,
   ctx: TCoreContext
-) => TIntentPatch | TCompiled<TReceipt>
+) => TCompiled<TReceipt>
 
 export type TCommandExecution<TReceipt> = {
   applied: boolean
@@ -70,43 +65,33 @@ export function executeReduxCommandWithStatus<TReceipt = unknown>(
       return { applied: false, receipt: undefined }
     }
     const result = compile(state, coreContext)
-    const patch = isCompiled(result) ? result.patch : result
     const applied =
-      !isEmptyPatch(patch) && appendIntentPatch(dispatch, state, patch, options)
+      result.operations.length > 0 &&
+      appendCommand(dispatch, state, result, options)
 
     return {
       applied,
-      receipt: isCompiled(result) ? result.receipt : undefined,
+      receipt: result.receipt,
     }
   }
 }
 
-export function executeReduxPatch(
-  patch: TIntentPatch,
-  options: TExecuteOptions = {}
-): AppThunk {
-  return (dispatch, getState) => {
-    const state = getState()
-    if (!getReplicaWriteBlocked(state) && !selectIsHistoryPointVisible(state))
-      appendIntentPatch(dispatch, state, patch, options)
-  }
-}
-
-function appendIntentPatch(
+function appendCommand(
   dispatch: AppDispatch,
   state: RootState,
-  patch: TIntentPatch,
+  compiled: TCompiled<unknown>,
   { allowHistory = false, label }: TExecuteOptions = {}
 ): boolean {
   const data = selectData(state, allowHistory ? 'live' : 'displayed')
-  const command = issuePatch(data, patch, coreContext.now(), label)
+  const command = prepareCommand(
+    data,
+    compiled.operations,
+    coreContext.now(),
+    label
+  )
   const materialized = materializeCommand(data, command)
-  if (isEmptyPatch(materialized)) return false
+  if (!Object.keys(materialized).length) return false
 
   dispatch(appendClientCommand(command))
   return true
-}
-
-function isEmptyPatch(patch: TIntentPatch): boolean {
-  return Object.keys(patch).length === 0
 }

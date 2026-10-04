@@ -1,15 +1,11 @@
 import { toISODate } from '../../foundation/date'
 import type { TDataStore } from '../../zenmoney/model/store'
 import type { TISOMonth } from '../../zenmoney/primitives'
-import type { TCoreContext, TIntentPatch } from '../../../../types'
+import type { TCoreContext } from '../../../../types'
 import type { TEnvelopeId } from '../envelope-id'
-import {
-  applyIntentPatch,
-  compileSetMonthlyHiddenData,
-  HiddenDataType,
-  mergePatches,
-} from '../hidden-data'
-import { getRawGoals, type TGoals } from './read'
+import { prepareZerro } from '../operations/prepare'
+import type { TZerroIntent } from '../operations/types'
+import { getRawGoals } from './read'
 import { goalType, type TGoal } from './types'
 
 export function compileSetGoal(
@@ -18,28 +14,19 @@ export function compileSetGoal(
   id: TEnvelopeId,
   goal: TGoal | null | undefined,
   ctx: TCoreContext
-): TIntentPatch {
+) {
   const goals = getRawGoals(data.reminder)
   const newGoal = normalizeGoal(goal)
-  const patches: TIntentPatch[] = []
-  let state = data
-
-  const addMonthPatch = (targetMonth: TISOMonth, payload: TGoals) => {
-    const patch = compileSetMonthlyHiddenData(
-      state,
-      HiddenDataType.Goals,
-      payload,
-      targetMonth,
-      ctx
-    )
-    patches.push(patch)
-    state = applyIntentPatch(state, patch)
-  }
-
-  addMonthPatch(month, {
-    ...(goals[month] || {}),
-    [id]: newGoal,
-  })
+  const intents: TZerroIntent[] = [
+    newGoal
+      ? {
+          type: 'goals.set',
+          month,
+          envelopeId: id,
+          goal: newGoal as Extract<TZerroIntent, { type: 'goals.set' }>['goal'],
+        }
+      : { type: 'goals.stop', month, envelopeId: id },
+  ]
 
   if (newGoal) {
     const futureBlock = Object.keys(goals)
@@ -52,13 +39,15 @@ export function compileSetGoal(
       }) as TISOMonth | undefined
 
     if (futureBlock && goals[futureBlock][id] === null) {
-      const payload = { ...goals[futureBlock] }
-      delete payload[id]
-      addMonthPatch(futureBlock, payload)
+      intents.push({
+        type: 'goals.clearOverride',
+        month: futureBlock,
+        envelopeId: id,
+      })
     }
   }
 
-  return mergePatches(...patches)
+  return prepareZerro(data, intents, ctx)
 }
 
 function normalizeGoal(goalDraft?: TGoal | null): TGoal | null {

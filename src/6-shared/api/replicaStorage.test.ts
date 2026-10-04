@@ -1,3 +1,4 @@
+import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import 'fake-indexeddb/auto'
 import { describe, expect, it } from 'vitest'
 import { openDB } from 'idb'
@@ -25,6 +26,22 @@ describe('ReplicaStorage', () => {
       base: snapshot,
       outbox: { status: 'ready', commands: [] },
     })
+  })
+
+  it('quarantines an old command envelope without overwriting its stored data', async () => {
+    const dbName = uniqueDatabaseName()
+    const storage = createReplicaStorage(dbName)
+    await seedReplica(storage, validSnapshot(100, 'Cash'))
+    await storage.saveOutbox(7, [
+      { type: 'patch', issuedAt: 1, patch: {} },
+    ] as never)
+    const loaded = await createReplicaStorage(dbName).loadCurrent()
+    expect(loaded?.outbox).toMatchObject({
+      status: 'corrupt',
+      reason: expect.stringContaining('unsupported format'),
+    })
+    const again = await createReplicaStorage(dbName).loadCurrent()
+    expect(again?.outbox).toEqual(loaded?.outbox)
   })
 
   it('atomically commits canonical changes and the remaining outbox', async () => {
@@ -231,9 +248,10 @@ describe('ReplicaStorage', () => {
     await seedReplica(storage, validSnapshot(100, 'Cash'))
     await storage.saveOutbox(7, [
       {
-        type: 'patch',
         issuedAt: 123,
-        patch: { account: [{ id: 'cash', instrument: 999 }] },
+        operations: testOperations({
+          account: [{ id: 'cash', instrument: 999 }],
+        }),
       },
     ])
 
@@ -336,5 +354,5 @@ function validSnapshot(
 }
 
 function command(issuedAt: number) {
-  return { type: 'patch' as const, issuedAt, patch: {} }
+  return { issuedAt, operations: testOperations({}) }
 }

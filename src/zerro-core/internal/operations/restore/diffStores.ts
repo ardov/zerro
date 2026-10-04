@@ -23,6 +23,7 @@ import {
   reminderWritableFields,
   tagWritableFields,
   toBudgetId,
+  transactionImmutableFields,
   transactionIntentFields,
   transactionWritableFields,
   userWritableFields,
@@ -151,7 +152,7 @@ const entityDefinitions: Record<TIntentEntityKey, TEntityDefinition> = {
     writableFields: transactionWritableFields,
     creationFields: transactionIntentFields,
     semanticFields: transactionIntentFields,
-    immutableFields: ['created'],
+    immutableFields: transactionImmutableFields,
     removal: 'softDelete',
     generatedId: true,
     skip: row => row.deleted === true,
@@ -266,7 +267,7 @@ export function buildRestorePlan(
     const actualByDesired = (mappings[row.key] ??= {})
 
     // A live same-id row is the only case where the backup identity is safe to
-    // keep. Immutable transaction creation time deliberately breaks this match.
+    // keep. Immutable transaction metadata deliberately breaks this match.
     activeDesired.forEach(rawDesired => {
       if (isAbsent(row, rawDesired)) return
       const desiredId = String(rawDesired.id)

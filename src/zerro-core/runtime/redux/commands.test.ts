@@ -1,3 +1,4 @@
+import { operationPatch } from '@/zerro-core/support/testing/commandTestData'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 import type { RootState } from '@/store'
@@ -67,7 +68,7 @@ describe('Redux semantic commands', () => {
     expect(transactionId).toBe(UUID)
     expect(store.getState().data.outbox).toHaveLength(1)
     expect(
-      store.getState().data.outbox[0].patch.transaction?.[0]
+      operationPatch(store.getState().data.outbox[0]).transaction?.[0]
     ).toMatchObject({
       id: UUID,
       date: '2026-07-29',
@@ -137,7 +138,9 @@ describe('Redux semantic commands', () => {
       expect.objectContaining({
         type: appendClientCommand.type,
         payload: expect.objectContaining({
-          patch: { account: [{ id: 'cash', inBalance: true }] },
+          operations: [
+            { type: 'account.patch', value: { id: 'cash', inBalance: true } },
+          ],
         }),
       })
     )
@@ -355,5 +358,5 @@ function appendedPatches(dispatch: any) {
   return dispatch.mock.calls
     .map(([action]: [any]) => action)
     .filter((action: any) => action?.type === appendClientCommand.type)
-    .map((action: any) => action.payload.patch)
+    .map((action: any) => operationPatch(action.payload))
 }

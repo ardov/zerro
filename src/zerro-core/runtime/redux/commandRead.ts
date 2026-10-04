@@ -13,7 +13,6 @@ import { selectData } from './state'
 // already populated rather than recomputing.
 
 export const getCommandDomainEnvelopes = fromGraph(graph.envelopes)
-export const getCommandFxRates = fromGraph(graph.fxRatesGetter)
 
 export function getCommandPresentedEnvelopes(state: RootState) {
   const data = selectData(state)

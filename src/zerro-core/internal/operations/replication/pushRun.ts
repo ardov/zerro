@@ -1,4 +1,9 @@
 import {
+  entityOperationTarget,
+  entityOperations,
+  isEntityOperation,
+} from '../../domain/zenmoney/operations'
+import {
   clearAbsentReferences,
   entityCleanupOrder,
   entityProgressOrder,
@@ -8,12 +13,11 @@ import {
   type TDataEntityKey,
   type TDataStore,
   type TIntentEntityKey,
-  type TIntentPatch,
   type TNormalizedPatch,
   type TRowPresence,
 } from '../../domain/zenmoney'
 import { applyPatch } from '../../domain/zenmoney'
-import { issuePatch, type TCommand } from '../materialization'
+import { prepareCommand, type TCommand } from '../materialization'
 import { getSyncCursor } from './cursor'
 import { buildOutboxTransport, replayOutbox } from './outbox'
 
@@ -91,10 +95,13 @@ export function beginPush(
     replica.outbox,
     sentAt
   )
-  if (!rawTransport) return undefined
-  const transport = sanitizePushReferences(replica.base, rawTransport)
+  const transport = sanitizePushReferences(replica.base, rawTransport ?? {})
 
-  const command = issuePatch(replica.base, transport, sentAt)
+  const command = prepareCommand(
+    replica.base,
+    entityOperations(replica.base, transport),
+    sentAt
+  )
   const maxBytes = options.maxBytes ?? DEFAULT_PUSH_MAX_BYTES
   requirePositiveByteLimit(maxBytes)
   const measure = options.measure ?? measureNormalizedBytes
@@ -541,27 +548,23 @@ function removeItems(
   identities: readonly TPushItemIdentity[]
 ): TCommand {
   const sent = new Set(identities.map(identityKey))
-  const patch: TIntentPatch = {}
-  entityUpsertOrder.forEach(key => {
-    const values = command.patch[key]
-    if (!values) return
-    const remaining = values.filter(
-      value => !sent.has(identityKey({ kind: 'upsert', key, id: value.id }))
-    )
-    if (remaining.length) (patch as Record<string, unknown>)[key] = remaining
-  })
-  const deletions = command.patch.deletion?.filter(
-    value =>
-      !sent.has(
+  return {
+    ...command,
+    operations: command.operations.filter(operation => {
+      if (!isEntityOperation(operation))
+        throw new Error(
+          'Push remainder must contain materialized entity operations'
+        )
+      const target = entityOperationTarget(operation)
+      return !sent.has(
         identityKey({
-          kind: 'deletion',
-          key: value.object,
-          id: value.id,
+          kind: target.deletion ? 'deletion' : 'upsert',
+          key: target.key as TIntentEntityKey,
+          id: target.id,
         })
       )
-  )
-  if (deletions?.length) patch.deletion = deletions
-  return { type: 'patch', issuedAt: command.issuedAt, patch }
+    }),
+  }
 }
 
 function normalizeRemainingCommand(
@@ -571,19 +574,20 @@ function normalizeRemainingCommand(
 ): TCommand | undefined {
   if (!commandItemCount(command)) return undefined
   const transport = buildOutboxTransport(base, [command], sentAt)
-  return transport ? issuePatch(base, transport, command.issuedAt) : undefined
+  return transport
+    ? prepareCommand(base, entityOperations(base, transport), command.issuedAt)
+    : undefined
 }
 
 function countCommandItems(
   command: TCommand
 ): Partial<Record<TDataEntityKey, number>> {
   const counts: Partial<Record<TDataEntityKey, number>> = {}
-  entityUpsertOrder.forEach(key => {
-    const count = command.patch[key]?.length ?? 0
-    if (count) counts[key] = count
-  })
-  command.patch.deletion?.forEach(item => {
-    counts[item.object] = (counts[item.object] ?? 0) + 1
+  command.operations.forEach(operation => {
+    if (!isEntityOperation(operation))
+      throw new Error('Push command was not materialized')
+    const { key } = entityOperationTarget(operation)
+    counts[key] = (counts[key] ?? 0) + 1
   })
   return counts
 }

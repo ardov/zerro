@@ -1,3 +1,4 @@
+import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { appendClientCommand } from '@/store/data'
@@ -61,8 +62,7 @@ describe('reminder Redux commands', () => {
       expect.objectContaining({
         type: appendClientCommand.type,
         payload: expect.objectContaining({
-          type: 'patch',
-          patch: {
+          operations: testOperations({
             reminder: [
               {
                 id: UUID,
@@ -71,7 +71,7 @@ describe('reminder Redux commands', () => {
                 comment: 'Rent',
               },
             ],
-          },
+          }),
         }),
       })
     )
@@ -92,9 +92,12 @@ describe('reminder Redux commands', () => {
       expect.objectContaining({
         type: appendClientCommand.type,
         payload: expect.objectContaining({
-          patch: {
-            reminder: [{ id: 'existing', comment: 'Updated' }],
-          },
+          operations: [
+            {
+              type: 'reminder.patch',
+              value: { id: 'existing', comment: 'Updated' },
+            },
+          ],
         }),
       })
     )
@@ -111,15 +114,9 @@ describe('reminder Redux commands', () => {
       expect.objectContaining({
         type: appendClientCommand.type,
         payload: expect.objectContaining({
-          type: 'patch',
-          patch: {
-            deletion: [
-              expect.objectContaining({
-                id: 'existing',
-                object: 'reminder',
-              }),
-            ],
-          },
+          operations: [
+            { type: 'entity.delete', entity: 'reminder', id: 'existing' },
+          ],
         }),
       })
     )

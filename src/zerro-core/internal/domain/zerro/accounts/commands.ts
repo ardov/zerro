@@ -1,6 +1,7 @@
 import type { TDataStore } from '../../zenmoney/model/store'
 import { ZERRO_DATA_ACCOUNT_NAME } from '../../../../constants'
-import type { TCompiled, TCoreContext } from '../../../../types'
+import type { TIntentPatch } from '../../zenmoney/model/store'
+import type { TCoreContext } from '../../../../types'
 import { makeAccount, type TAccountId } from '../../zenmoney/entities/accounts'
 import { getRootUser } from '../../zenmoney/entities/users'
 import { getZerroDataAccountId } from './read'
@@ -8,7 +9,7 @@ import { getZerroDataAccountId } from './read'
 export function compileEnsureZerroDataAccount(
   data: TDataStore,
   ctx: TCoreContext
-): TCompiled<{ accountId: TAccountId }> {
+): { patch: TIntentPatch; receipt: { accountId: TAccountId } } {
   const existingId = getZerroDataAccountId(data.account)
   if (existingId) return { patch: {}, receipt: { accountId: existingId } }
 

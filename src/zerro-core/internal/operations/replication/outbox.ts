@@ -1,3 +1,8 @@
+import {
+  isEntityOperation,
+  validateEntityOperation,
+} from '../../domain/zenmoney/operations'
+import { parseZerroOperation } from '../../domain/zerro/operations/types'
 /**
  * Engine core: the pure replica operations over durable `base + outbox` and
  * session-only `redo`.
@@ -16,13 +21,12 @@ import {
 import {
   applyPatch,
   dataEntityKeys,
-  intentPatchKeys,
   type TDataEntityKey,
   type TDataStore,
   type TDeletionObject,
   type TNormalizedPatch,
 } from '../../domain/zenmoney'
-import { issuePatch } from '../materialization'
+import { prepareCommand } from '../materialization'
 import type { TCompiled } from '../../../types'
 
 export type { TCommand } from '../materialization'
@@ -38,7 +42,7 @@ export type TStagedCompiledCommand<TReceipt> = {
   current: TDataStore
   outbox: TCommand[]
   command: TCommand
-  receipt: TReceipt
+  receipt: TReceipt | undefined
 }
 
 /**
@@ -51,32 +55,19 @@ export function parseCommandOutbox(value: unknown): TCommand[] {
   return value.map((entry, index) => {
     if (!isRecord(entry))
       throw new Error(`Command outbox[${index}] must be an object`)
-    if (entry.type !== 'patch' || !isFiniteNumber(entry.issuedAt))
-      throw new Error(`Command outbox[${index}] metadata is invalid`)
-    if (!isRecord(entry.patch))
-      throw new Error(`Command outbox[${index}].patch must be an object`)
-
-    Object.entries(entry.patch).forEach(([key, entities]) => {
-      if (!(intentPatchKeys as readonly string[]).includes(key))
-        throw new Error(`Command outbox[${index}].patch.${key} is invalid`)
-      if (
-        !Array.isArray(entities) ||
-        entities.some(
-          entity =>
-            !isRecord(entity) ||
-            (typeof entity.id !== 'string' && typeof entity.id !== 'number')
-        )
-      )
-        throw new Error(`Command outbox[${index}].patch.${key} is invalid`)
-      if (
-        key === 'deletion' &&
-        entities.some(
-          entity =>
-            !isRecord(entity) ||
-            !dataEntityKeys.includes(entity.object as TDataEntityKey)
-        )
-      )
-        throw new Error(`Command outbox[${index}].patch.${key} is invalid`)
+    if (
+      !isFiniteNumber(entry.issuedAt) ||
+      !Array.isArray(entry.operations) ||
+      'patch' in entry ||
+      'type' in entry
+    )
+      throw new Error(`Command outbox[${index}] uses an unsupported format`)
+    entry.operations.forEach(operation => {
+      if (!isRecord(operation) || typeof operation.type !== 'string')
+        throw new Error('Invalid operation')
+      if (isEntityOperation(operation as { type: string }))
+        validateEntityOperation(operation as never)
+      else parseZerroOperation(operation)
     })
 
     // The label is decoration over a durable command: an unrecognized one is
@@ -98,7 +89,7 @@ export function stageCompiledCommand<TReceipt>(
   issuedAt: number
 ): TStagedCompiledCommand<TReceipt> {
   const current = replayOutbox(base, outbox)
-  const command = issuePatch(current, compiled.patch, issuedAt)
+  const command = prepareCommand(current, compiled.operations, issuedAt)
   const materialized = materializeCommand(current, command)
   if (!Object.keys(materialized).length)
     throw new Error('Compiled command did not change the snapshot')

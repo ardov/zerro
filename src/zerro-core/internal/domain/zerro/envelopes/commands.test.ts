@@ -1,3 +1,4 @@
+import { materializeTestInput } from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -41,7 +42,7 @@ describe('envelope commands', () => {
       },
       { now: () => 100, uuid: () => ids.shift() || 'unexpected-id' }
     )
-    const next = applyPatch(data, result.patch)
+    const next = applyPatch(data, materializeTestInput(data, result.operations))
     const id = envId.get(EnvType.Tag, 'new-tag')
 
     expect(result.receipt.envelopeId).toBe(id)
@@ -79,33 +80,39 @@ describe('envelope commands', () => {
     const ctx = { now: () => 100, uuid: () => 'meta-reminder' }
 
     expect(
+      materializeTestInput(
+        data,
+        compileUpdateEnvelopeSettings(
+          data,
+          envelopes,
+          {
+            id,
+            name: 'Food',
+            colorHex: null,
+            currency: 'USD',
+            visibility: envelopeVisibility.auto,
+            keepIncome: false,
+          },
+          ctx
+        )
+      )
+    ).toEqual({})
+
+    const patch = materializeTestInput(
+      data,
       compileUpdateEnvelopeSettings(
         data,
         envelopes,
         {
           id,
-          name: 'Food',
-          colorHex: null,
-          currency: 'USD',
-          visibility: envelopeVisibility.auto,
-          keepIncome: false,
+          name: 'Groceries',
+          colorHex: '#00ff00',
+          currency: 'EUR',
+          visibility: envelopeVisibility.hidden,
+          keepIncome: true,
         },
         ctx
       )
-    ).toEqual({})
-
-    const patch = compileUpdateEnvelopeSettings(
-      data,
-      envelopes,
-      {
-        id,
-        name: 'Groceries',
-        colorHex: '#00ff00',
-        currency: 'EUR',
-        visibility: envelopeVisibility.hidden,
-        keepIncome: true,
-      },
-      ctx
     )
     const next = applyPatch(data, patch)
 
@@ -130,17 +137,26 @@ describe('envelope commands', () => {
     })
     const ctx = { now: () => 100, uuid: () => 'meta-reminder' }
 
-    expect(compileSetEnvelopeComment(data, { id, comment: '' }, ctx)).toEqual(
-      {}
-    )
+    expect(
+      materializeTestInput(
+        data,
+        compileSetEnvelopeComment(data, { id, comment: '' }, ctx)
+      )
+    ).toEqual({})
 
     const withComment = applyPatch(
       data,
-      compileSetEnvelopeComment(data, { id, comment: 'Notes' }, ctx)
+      materializeTestInput(
+        data,
+        compileSetEnvelopeComment(data, { id, comment: 'Notes' }, ctx)
+      )
     )
     const cleared = applyPatch(
       withComment,
-      compileSetEnvelopeComment(withComment, { id, comment: '' }, ctx)
+      materializeTestInput(
+        withComment,
+        compileSetEnvelopeComment(withComment, { id, comment: '' }, ctx)
+      )
     )
 
     expect(getEnvelopeMeta(withComment.reminder)[id]?.comment).toBe('Notes')
@@ -157,16 +173,27 @@ describe('envelope commands', () => {
     const id = envId.get(EnvType.Tag, 'food')
     const colored = applyPatch(
       data,
-      compileSetEnvelopeColor(data, { id, colorHex: '#00ff00' })
+      materializeTestInput(
+        data,
+        compileSetEnvelopeColor(data, { id, colorHex: '#00ff00' })
+      )
     )
     const cleared = applyPatch(
       coloredData,
-      compileSetEnvelopeColor(coloredData, { id, colorHex: null })
+      materializeTestInput(
+        coloredData,
+        compileSetEnvelopeColor(coloredData, { id, colorHex: null })
+      )
     )
 
     expect(colored.tag.food.color).toBe(0x00ff00)
     expect(cleared.tag.food.color).toBeNull()
-    expect(compileSetEnvelopeColor(data, { id, colorHex: null })).toEqual({})
+    expect(
+      materializeTestInput(
+        data,
+        compileSetEnvelopeColor(data, { id, colorHex: null })
+      )
+    ).toEqual({})
   })
 
   it('rejects invalid, uncategorized, and non-tag envelope colors', () => {
@@ -174,22 +201,31 @@ describe('envelope commands', () => {
       tag: { food: makeTag({ id: 'food', title: 'Food' }) },
     })
     expect(() =>
-      compileSetEnvelopeColor(data, {
-        id: envId.get(EnvType.Tag, 'food'),
-        colorHex: 'red',
-      })
+      materializeTestInput(
+        data,
+        compileSetEnvelopeColor(data, {
+          id: envId.get(EnvType.Tag, 'food'),
+          colorHex: 'red',
+        })
+      )
     ).toThrow('Invalid envelope color')
     expect(() =>
-      compileSetEnvelopeColor(data, {
-        id: envId.get(EnvType.Tag, null),
-        colorHex: '#ff0000',
-      })
+      materializeTestInput(
+        data,
+        compileSetEnvelopeColor(data, {
+          id: envId.get(EnvType.Tag, null),
+          colorHex: '#ff0000',
+        })
+      )
     ).toThrow('Uncategorized envelope color cannot be changed')
     expect(() =>
-      compileSetEnvelopeColor(data, {
-        id: envId.get(EnvType.Account, 'cash'),
-        colorHex: '#ff0000',
-      })
+      materializeTestInput(
+        data,
+        compileSetEnvelopeColor(data, {
+          id: envId.get(EnvType.Account, 'cash'),
+          colorHex: '#ff0000',
+        })
+      )
     ).toThrow('Only tag envelopes have configurable colors')
   })
 
@@ -201,24 +237,33 @@ describe('envelope commands', () => {
     })
     const renamedTag = applyPatch(
       data,
-      compileRenameEnvelope(data, {
-        id: envId.get(EnvType.Tag, 'food'),
-        name: 'Groceries',
-      })
+      materializeTestInput(
+        data,
+        compileRenameEnvelope(data, {
+          id: envId.get(EnvType.Tag, 'food'),
+          name: 'Groceries',
+        })
+      )
     )
     const renamedAccount = applyPatch(
       data,
-      compileRenameEnvelope(data, {
-        id: envId.get(EnvType.Account, 'cash'),
-        name: 'Wallet',
-      })
+      materializeTestInput(
+        data,
+        compileRenameEnvelope(data, {
+          id: envId.get(EnvType.Account, 'cash'),
+          name: 'Wallet',
+        })
+      )
     )
     const renamedMerchant = applyPatch(
       data,
-      compileRenameEnvelope(data, {
-        id: envId.get(EnvType.Merchant, 'shop'),
-        name: 'Market',
-      })
+      materializeTestInput(
+        data,
+        compileRenameEnvelope(data, {
+          id: envId.get(EnvType.Merchant, 'shop'),
+          name: 'Market',
+        })
+      )
     )
 
     expect(renamedTag.tag.food.title).toBe('Groceries')
@@ -231,16 +276,22 @@ describe('envelope commands', () => {
       tag: { food: makeTag({ id: 'food', title: 'Food' }) },
     })
     expect(
-      compileRenameEnvelope(data, {
-        id: envId.get(EnvType.Tag, 'food'),
-        name: 'Food',
-      })
+      materializeTestInput(
+        data,
+        compileRenameEnvelope(data, {
+          id: envId.get(EnvType.Tag, 'food'),
+          name: 'Food',
+        })
+      )
     ).toEqual({})
     expect(() =>
-      compileRenameEnvelope(data, {
-        id: envId.get(EnvType.Payee, 'Alex'),
-        name: 'Alexander',
-      })
+      materializeTestInput(
+        data,
+        compileRenameEnvelope(data, {
+          id: envId.get(EnvType.Payee, 'Alex'),
+          name: 'Alexander',
+        })
+      )
     ).toThrow('Payee envelopes cannot be renamed')
   })
 
@@ -267,58 +318,61 @@ describe('envelope commands', () => {
     })
     const timestamps = [100, 200, 300, 400]
 
-    const patch = compilePatchEnvelope(
+    const patch = materializeTestInput(
       data,
-      {
-        [tagId]: makeEnvelope({
-          id: tagId,
-          type: EnvType.Tag,
-          entityId: 'food',
-          originalName: 'Food',
-          colorHex: null,
-          parent: null,
-        }),
-        [tagParentId]: makeEnvelope({
-          id: tagParentId,
-          type: EnvType.Tag,
-          entityId: 'parent',
-          parent: null,
-        }),
-        [accountId]: makeEnvelope({
-          id: accountId,
-          type: EnvType.Account,
-          entityId: 'cash',
-          originalName: 'Cash',
-          keepIncome: false,
-        }),
-        [merchantId]: makeEnvelope({
-          id: merchantId,
-          type: EnvType.Merchant,
-          entityId: 'shop',
-          originalName: 'Shop',
-        }),
-      },
-      [
+      compilePatchEnvelope(
+        data,
         {
-          id: tagId,
-          originalName: 'Groceries',
-          colorHex: '#00ff00',
-          parent: tagParentId,
+          [tagId]: makeEnvelope({
+            id: tagId,
+            type: EnvType.Tag,
+            entityId: 'food',
+            originalName: 'Food',
+            colorHex: null,
+            parent: null,
+          }),
+          [tagParentId]: makeEnvelope({
+            id: tagParentId,
+            type: EnvType.Tag,
+            entityId: 'parent',
+            parent: null,
+          }),
+          [accountId]: makeEnvelope({
+            id: accountId,
+            type: EnvType.Account,
+            entityId: 'cash',
+            originalName: 'Cash',
+            keepIncome: false,
+          }),
+          [merchantId]: makeEnvelope({
+            id: merchantId,
+            type: EnvType.Merchant,
+            entityId: 'shop',
+            originalName: 'Shop',
+          }),
         },
+        [
+          {
+            id: tagId,
+            originalName: 'Groceries',
+            colorHex: '#00ff00',
+            parent: tagParentId,
+          },
+          {
+            id: accountId,
+            originalName: 'Wallet',
+            keepIncome: true,
+          },
+          {
+            id: merchantId,
+            originalName: 'Market',
+          },
+        ],
         {
-          id: accountId,
-          originalName: 'Wallet',
-          keepIncome: true,
-        },
-        {
-          id: merchantId,
-          originalName: 'Market',
-        },
-      ],
-      {
-        now: () => timestamps.shift() || 0,
-        uuid: () => 'meta-reminder',
-      }
+          now: () => timestamps.shift() || 0,
+          uuid: () => 'meta-reminder',
+        }
+      )
     )
     const next = applyPatch(data, patch)
 
@@ -391,17 +445,20 @@ describe('envelope commands', () => {
       }),
     }
 
-    const patch = compileApplyEnvelopeStructure(
+    const patch = materializeTestInput(
       data,
-      envelopes,
-      [
-        {
-          group: 'Costs',
-          children: [{ id: parentId, children: [{ id: foodId }] }],
-        },
-        { group: 'Savings', children: [{ id: cashId }, { id: funId }] },
-      ],
-      { now: () => 100, uuid: () => 'meta-reminder' }
+      compileApplyEnvelopeStructure(
+        data,
+        envelopes,
+        [
+          {
+            group: 'Costs',
+            children: [{ id: parentId, children: [{ id: foodId }] }],
+          },
+          { group: 'Savings', children: [{ id: cashId }, { id: funId }] },
+        ],
+        { now: () => 100, uuid: () => 'meta-reminder' }
+      )
     )
     const next = applyPatch(data, patch)
     const meta = getEnvelopeMeta(next.reminder)
@@ -472,19 +529,22 @@ describe('envelope commands', () => {
       }),
     }
 
-    const patch = compileApplyEnvelopeStructure(
+    const patch = materializeTestInput(
       data,
-      envelopes,
-      [
-        {
-          group: 'G',
-          children: [
-            { id: virtId, children: [{ id: tId }] },
-            { id: pId, children: [{ id: c1Id, children: [{ id: c2Id }] }] },
-          ],
-        },
-      ],
-      { now: () => 100, uuid: () => 'meta-reminder' }
+      compileApplyEnvelopeStructure(
+        data,
+        envelopes,
+        [
+          {
+            group: 'G',
+            children: [
+              { id: virtId, children: [{ id: tId }] },
+              { id: pId, children: [{ id: c1Id, children: [{ id: c2Id }] }] },
+            ],
+          },
+        ],
+        { now: () => 100, uuid: () => 'meta-reminder' }
+      )
     )
     const next = applyPatch(data, patch)
     const meta = getEnvelopeMeta(next.reminder)
@@ -529,26 +589,32 @@ describe('envelope commands', () => {
     const ctx = { now: () => 100, uuid: () => 'meta-reminder' }
 
     expect(
+      materializeTestInput(
+        data,
+        compileApplyEnvelopeStructure(
+          data,
+          envelopes,
+          [
+            { group: 'A', children: [{ id: foodId }] },
+            { group: 'B', children: [{ id: funId }] },
+          ],
+          ctx
+        )
+      )
+    ).toEqual({})
+
+    const merged = materializeTestInput(
+      data,
       compileApplyEnvelopeStructure(
         data,
         envelopes,
         [
           { group: 'A', children: [{ id: foodId }] },
-          { group: 'B', children: [{ id: funId }] },
+          { group: 'Empty', children: [] },
+          { group: 'A', children: [{ id: funId }] },
         ],
         ctx
       )
-    ).toEqual({})
-
-    const merged = compileApplyEnvelopeStructure(
-      data,
-      envelopes,
-      [
-        { group: 'A', children: [{ id: foodId }] },
-        { group: 'Empty', children: [] },
-        { group: 'A', children: [{ id: funId }] },
-      ],
-      ctx
     )
     const next = applyPatch(data, merged)
     const meta = getEnvelopeMeta(next.reminder)
@@ -560,16 +626,19 @@ describe('envelope commands', () => {
 
   it('rejects structures with unknown envelopes', () => {
     expect(() =>
-      compileApplyEnvelopeStructure(
+      materializeTestInput(
         makeStore(),
-        {},
-        [
-          {
-            group: 'A',
-            children: [{ id: envId.get(EnvType.Tag, 'ghost') }],
-          },
-        ],
-        { now: () => 100, uuid: () => 'unused' }
+        compileApplyEnvelopeStructure(
+          makeStore(),
+          {},
+          [
+            {
+              group: 'A',
+              children: [{ id: envId.get(EnvType.Tag, 'ghost') }],
+            },
+          ],
+          { now: () => 100, uuid: () => 'unused' }
+        )
       )
     ).toThrow('Envelope not found')
   })
@@ -579,28 +648,31 @@ describe('envelope commands', () => {
     const accountId = envId.get(EnvType.Account, 'cash')
 
     expect(() =>
-      compilePatchEnvelope(
+      materializeTestInput(
         makeStore(),
-        {
-          [tagId]: makeEnvelope({
+        compilePatchEnvelope(
+          makeStore(),
+          {
+            [tagId]: makeEnvelope({
+              id: tagId,
+              type: EnvType.Tag,
+              parent: null,
+            }),
+            [accountId]: makeEnvelope({
+              id: accountId,
+              type: EnvType.Account,
+              parent: null,
+            }),
+          },
+          {
             id: tagId,
-            type: EnvType.Tag,
-            parent: null,
-          }),
-          [accountId]: makeEnvelope({
-            id: accountId,
-            type: EnvType.Account,
-            parent: null,
-          }),
-        },
-        {
-          id: tagId,
-          parent: accountId,
-        },
-        {
-          now: () => 100,
-          uuid: () => 'unused',
-        }
+            parent: accountId,
+          },
+          {
+            now: () => 100,
+            uuid: () => 'unused',
+          }
+        )
       )
     ).toThrow('Parent is not tag')
   })

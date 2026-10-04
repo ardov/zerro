@@ -1,3 +1,9 @@
+import { entityOperations } from '../../internal/domain/zenmoney/operations'
+import { prepareZerro } from '../../internal/domain/zerro/operations/prepare'
+import type {
+  TZerroInput,
+  TZerroIntent,
+} from '../../internal/domain/zerro/operations/types'
 import type { AppThunk, RootState } from '@/store'
 import { v1 as uuidv1 } from 'uuid'
 import {
@@ -61,13 +67,11 @@ import { getDomainEnvelopeGroup } from './envelopePresentation'
 import {
   getCommandDomainEnvelopes,
   getCommandEnvelopeLabels,
-  getCommandFxRates,
   getCommandPresentedEnvelopes,
 } from './commandRead'
 import {
   coreContext,
   executeReduxCommand,
-  executeReduxPatch,
   executeReduxCommandWithStatus,
   type TReduxCommandCompiler,
 } from './executeCommand'
@@ -87,6 +91,47 @@ function executeCommand<TReceipt = undefined>(
   return executeReduxCommand(compile, { label })
 }
 
+function executeZerro(intent: TZerroIntent, label: TCommandLabel): AppThunk {
+  return executeCommand(
+    (state, ctx) => prepareZerro(selectData(state), [intent], ctx),
+    label
+  )
+}
+export function patchEnvelopeMeta(
+  input: TZerroInput<'envelopes.patchMeta'>
+): AppThunk {
+  return executeZerro(
+    { type: 'envelopes.patchMeta', ...input },
+    { verb: 'envelope-settings-changed', args: { id: input.envelopeId } }
+  )
+}
+export function patchSettings(input: TZerroInput<'settings.patch'>): AppThunk {
+  return executeZerro(
+    { type: 'settings.patch', ...input },
+    { verb: 'settings-changed' }
+  )
+}
+export function patchFxRates(input: TZerroInput<'fxRates.patch'>): AppThunk {
+  return executeZerro(
+    { type: 'fxRates.patch', ...input },
+    { verb: 'fx-rates-set' }
+  )
+}
+export function stopGoal(input: TZerroInput<'goals.stop'>): AppThunk {
+  return executeZerro(
+    { type: 'goals.stop', ...input },
+    { verb: 'goal-set', args: { id: input.envelopeId } }
+  )
+}
+export function clearGoalOverride(
+  input: TZerroInput<'goals.clearOverride'>
+): AppThunk {
+  return executeZerro(
+    { type: 'goals.clearOverride', ...input },
+    { verb: 'goal-set', args: { id: input.envelopeId } }
+  )
+}
+
 export function setBudget(updates: TBudgetUpdate[]): AppThunk {
   return executeCommand(
     (state, ctx) => compileSetBudget(selectData(state), updates, ctx),
@@ -96,21 +141,22 @@ export function setBudget(updates: TBudgetUpdate[]): AppThunk {
 
 export function editFxRates(month: TISOMonth, patch: TFxRates): AppThunk {
   return executeCommand(
-    (state, ctx) => {
-      const current = getCommandFxRates(state)(month)
-      const rates = { ...current.rates }
-      Object.entries(patch).forEach(([code, rate]) => {
-        if (rate > 0) rates[code] = rate
-      })
-      return compileSetFxRates(selectData(state), month, rates, ctx)
-    },
+    (state, ctx) =>
+      compileSetFxRates(
+        selectData(state),
+        month,
+        Object.fromEntries(
+          Object.entries(patch).filter(([, rate]) => rate > 0)
+        ),
+        ctx
+      ),
     { verb: 'fx-rates-set' }
   )
 }
 
 export function resetFxRates(month: TISOMonth): AppThunk {
   return executeCommand(
-    state => compileResetFxRates(selectData(state), month),
+    (state, ctx) => compileResetFxRates(selectData(state), month, ctx),
     { verb: 'fx-rates-reset' }
   )
 }
@@ -235,7 +281,12 @@ export function updateEnvelopeSettings(
 
 export function deleteTransactions(ids: TTransactionId[]): AppThunk {
   return executeCommand(
-    state => compileDeleteTransactions(selectData(state).transaction, ids),
+    state => ({
+      operations: entityOperations(
+        selectData(state),
+        compileDeleteTransactions(selectData(state).transaction, ids)
+      ),
+    }),
     { verb: 'transactions-deleted' }
   )
 }
@@ -274,16 +325,24 @@ function executeCreatedTransaction(
 
 export function deleteTransactionsPermanently(ids: TTransactionId[]): AppThunk {
   return executeCommand(
-    state =>
-      compileDeleteTransactionsPermanently(selectData(state).transaction, ids),
+    state => ({
+      operations: entityOperations(
+        selectData(state),
+        compileDeleteTransactionsPermanently(selectData(state).transaction, ids)
+      ),
+    }),
     { verb: 'transactions-purged' }
   )
 }
 
 export function restoreTransaction(id: TTransactionId): AppThunk {
   return executeCommand(
-    (state, ctx) =>
-      compileRestoreTransaction(selectData(state).transaction, id, ctx),
+    (state, ctx) => ({
+      operations: entityOperations(
+        selectData(state),
+        compileRestoreTransaction(selectData(state).transaction, id, ctx)
+      ),
+    }),
     { verb: 'transaction-restored', args: { id } }
   )
 }
@@ -300,8 +359,12 @@ function patchTransactions(
   set: TTransactionEditablePatch,
   label: TCommandLabel
 ): AppThunk {
-  return executeReduxPatch(
-    { transaction: [...new Set(ids)].map(id => ({ id, ...set })) },
+  return executeReduxCommand(
+    state => ({
+      operations: entityOperations(selectData(state), {
+        transaction: [...new Set(ids)].map(id => ({ id, ...set })),
+      }),
+    }),
     { label }
   )
 }
@@ -323,14 +386,16 @@ export function applyChangesToTransaction(
           )
         : null
       return {
-        ...merchant?.patch,
-        transaction: [
-          {
-            id,
-            ...set,
-            ...(merchant && { merchant: merchant.receipt.merchantId }),
-          },
-        ],
+        operations: entityOperations(selectData(state), {
+          ...merchant?.patch,
+          transaction: [
+            {
+              id,
+              ...set,
+              ...(merchant && { merchant: merchant.receipt.merchantId }),
+            },
+          ],
+        }),
       }
     },
     { verb: 'transaction-edited', args: { id } }
@@ -361,14 +426,16 @@ export function recreateTransaction(
       id: replacementId,
       deleted: false,
     }
-    const execute = executeReduxPatch(
-      {
-        ...merchant?.patch,
-        transaction: [
-          { id: sourceId, income: 0.00001, outcome: 0.00001 },
-          replacement,
-        ],
-      },
+    const execute = executeReduxCommand(
+      () => ({
+        operations: entityOperations(data, {
+          ...merchant?.patch,
+          transaction: [
+            { id: sourceId, income: 0.00001, outcome: 0.00001 },
+            replacement,
+          ],
+        }),
+      }),
       { label: { verb: 'transaction-recreated', args: { id: sourceId } } }
     )
     execute(dispatch, getState, extra)
@@ -381,7 +448,12 @@ export function setAccountInBalance(
   inBalance: boolean
 ): AppThunk {
   return executeCommand(
-    state => compilePatchAccount(selectData(state).account, { id, inBalance }),
+    state => ({
+      operations: entityOperations(
+        selectData(state),
+        compilePatchAccount(selectData(state).account, { id, inBalance })
+      ),
+    }),
     { verb: 'account-in-balance-set', args: { id } }
   )
 }
@@ -398,7 +470,10 @@ export function setReminder(
         draft,
         ctx
       )
-      return { patch, receipt: patch.reminder || [] }
+      return {
+        operations: entityOperations(data, patch),
+        receipt: patch.reminder || [],
+      }
     },
     { verb: 'reminder-set' }
   )
@@ -408,7 +483,12 @@ export function setReminder(
 
 export function deleteReminder(id: TReminderId): AppThunk {
   return executeCommand(
-    state => compileDeleteReminder(selectData(state).reminder, id),
+    state => ({
+      operations: entityOperations(
+        selectData(state),
+        compileDeleteReminder(selectData(state).reminder, id)
+      ),
+    }),
     { verb: 'reminder-deleted', args: { id } }
   )
 }
@@ -426,30 +506,48 @@ export function bulkEditTransactions(
   }
 
   return executeCommand(
-    state =>
-      compileBulkEditTransactions(selectData(state).transaction, ids, opts),
+    state => ({
+      operations: entityOperations(
+        selectData(state),
+        compileBulkEditTransactions(selectData(state).transaction, ids, opts)
+      ),
+    }),
     label
   )
 }
 
 export function combineTransactionsToOutcome(ids: TTransactionId[]): AppThunk {
   return executeCommand(
-    state => compileCombineToOutcome(selectData(state).transaction, ids),
+    state => ({
+      operations: entityOperations(
+        selectData(state),
+        compileCombineToOutcome(selectData(state).transaction, ids)
+      ),
+    }),
     { verb: 'transactions-combined-outcome' }
   )
 }
 
 export function combineTransactionsToIncome(ids: TTransactionId[]): AppThunk {
   return executeCommand(
-    state => compileCombineToIncome(selectData(state).transaction, ids),
+    state => ({
+      operations: entityOperations(
+        selectData(state),
+        compileCombineToIncome(selectData(state).transaction, ids)
+      ),
+    }),
     { verb: 'transactions-combined-income' }
   )
 }
 
 export function mergeTransactionsAsTransfer(ids: TTransactionId[]): AppThunk {
   return executeCommand(
-    state =>
-      compileMergeTransactionsAsTransfer(selectData(state).transaction, ids),
+    state => ({
+      operations: entityOperations(
+        selectData(state),
+        compileMergeTransactionsAsTransfer(selectData(state).transaction, ids)
+      ),
+    }),
     { verb: 'transactions-merged-transfer' }
   )
 }
@@ -471,10 +569,14 @@ export function restoreDataStore(desired: TDataStore): AppThunk<boolean> {
       if (!compatibility.ok) return false
 
       return executeReduxCommandWithStatus(
-        (state, ctx) =>
-          buildRestorePlan(selectData(state, 'live'), desired, {
-            allocateId: (_key, _desiredId) => ctx.uuid(),
-          }).patch,
+        (state, ctx) => ({
+          operations: entityOperations(
+            selectData(state, 'live'),
+            buildRestorePlan(selectData(state, 'live'), desired, {
+              allocateId: (_key, _desiredId) => ctx.uuid(),
+            }).patch
+          ),
+        }),
         { allowHistory: true, label: { verb: 'data-restored' } }
       )(dispatch, getState, extra).applied
     })()

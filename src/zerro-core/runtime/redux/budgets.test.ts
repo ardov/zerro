@@ -1,3 +1,4 @@
+import { materializeTestInput } from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 import type { TISOMonth } from '@/6-shared/types'
 import { makeDemoStore } from '../../support/demo'
@@ -30,13 +31,17 @@ function makeSeededStore() {
   const [tagA, tagB] = Object.keys(demo.tag)
   const userId = Object.values(demo.user)[0].id
 
-  const envBudgetPatch = compileSetBudget(
+  const envBudgetPatch = materializeTestInput(
     demo,
-    [
-      { id: envId.get(EnvType.Tag, tagA), month: MONTH, value: 10_000 },
-      { id: envId.get(EnvType.Tag, tagB), month: NEXT_MONTH, value: 5_000 },
-    ],
-    ctx
+    compileSetBudget(
+      demo,
+      [
+        { id: envId.get(EnvType.Tag, tagA), month: MONTH, value: 10_000 },
+        { id: envId.get(EnvType.Tag, tagB), month: NEXT_MONTH, value: 5_000 },
+      ],
+      ctx
+    ),
+    NOW
   )
   const withEnvBudgets = applyPatch(demo, envBudgetPatch)
 
@@ -77,10 +82,10 @@ describe('selectBudgets', () => {
 
   it('uses ZenMoney tag budgets when preferZmBudgets is enabled', () => {
     const { store, tagB } = makeSeededStore()
-    const settingsPatch = compilePatchUserSettings(
+    const settingsPatch = materializeTestInput(
       store,
-      { preferZmBudgets: true },
-      ctx
+      compilePatchUserSettings(store, { preferZmBudgets: true }, ctx),
+      NOW
     )
     const state = makeRootState(applyPatch(store, settingsPatch))
 
@@ -108,10 +113,14 @@ describe('selectBudgets', () => {
     const first = selectBudgets(makeRootState(store))
     expect(first[MONTH][envelopeId]).toBe(10_000)
 
-    const budgetPatch = compileSetBudget(
+    const budgetPatch = materializeTestInput(
       store,
-      [{ id: envelopeId, month: MONTH, value: 12_000 }],
-      ctx
+      compileSetBudget(
+        store,
+        [{ id: envelopeId, month: MONTH, value: 12_000 }],
+        ctx
+      ),
+      NOW
     )
     const next = selectBudgets(makeRootState(applyPatch(store, budgetPatch)))
 

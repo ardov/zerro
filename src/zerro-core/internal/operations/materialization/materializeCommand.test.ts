@@ -1,3 +1,8 @@
+import { prepareTestCommand as prepareCommand } from '../../../support/testing/commandTestData'
+import {
+  operationPatch,
+  testOperations,
+} from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -19,7 +24,6 @@ import {
 } from '../../domain/zerro/hidden-data'
 import { applyPatch } from '../../domain/zenmoney/model/applyPatch'
 import {
-  issuePatch,
   materializeCommand,
   materializePrimaryCommand,
   type TCommand,
@@ -36,13 +40,13 @@ describe('materializeCommand', () => {
       paidTill: 500,
     })
     const snapshot = makeStore({ user: { 1: user } })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { user: [{ id: 1, currency: 9, monthStartDay: 15 }] },
       100
     )
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       user: [{ id: 1, currency: 9, monthStartDay: 15 }],
     })
     expect(materializePrimaryCommand(snapshot, command)).toEqual({
@@ -52,7 +56,7 @@ describe('materializeCommand', () => {
 
   it('rejects creation of a user', () => {
     expect(() =>
-      issuePatch(makeStore(), { user: [{ id: 1, monthStartDay: 15 }] }, 100)
+      prepareCommand(makeStore(), { user: [{ id: 1, monthStartDay: 15 }] }, 100)
     ).toThrow('Cannot create user')
   })
 
@@ -67,7 +71,7 @@ describe('materializeCommand', () => {
       user: { 1: user },
       reminderMarker: { existing },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         reminderMarker: [
@@ -84,7 +88,7 @@ describe('materializeCommand', () => {
       100
     )
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       reminderMarker: [
         { id: 'existing', notify: true },
         {
@@ -120,7 +124,7 @@ describe('materializeCommand', () => {
       viewed: true,
     })
     const snapshot = makeStore({ transaction: { 'tr-1': current } })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { transaction: [{ id: 'tr-1', viewed: false }] },
       100
@@ -136,7 +140,7 @@ describe('materializeCommand', () => {
     const second = makeTransaction({ id: 'second', viewed: true })
     const deleted = makeTransaction({ id: 'deleted', deleted: true })
     const snapshot = makeStore({ transaction: { first, second, deleted } })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         transaction: ['first', 'second', 'deleted'].map(id => ({
@@ -159,17 +163,19 @@ describe('materializeCommand', () => {
     const snapshot = makeStore({ transaction: { 'tr-1': current } })
 
     expect(
-      issuePatch(
-        snapshot,
-        { transaction: [{ id: 'tr-1', tag: ['home', 'food'] }] },
-        100
-      ).patch
+      operationPatch(
+        prepareCommand(
+          snapshot,
+          { transaction: [{ id: 'tr-1', tag: ['home', 'food'] }] },
+          100
+        )
+      )
     ).toEqual({})
   })
 
   it('rejects incomplete transaction creation intent before persistence', () => {
     expect(() =>
-      issuePatch(
+      prepareCommand(
         makeStore(),
         { transaction: [{ id: 'missing', viewed: true }] },
         100
@@ -186,11 +192,10 @@ describe('materializeCommand', () => {
       comment: 'Before',
     })
     const command = {
-      type: 'patch',
       issuedAt: 300,
-      patch: {
+      operations: testOperations({
         transaction: [{ id: 'tr-1', created: 500, comment: 'After' }],
-      },
+      }),
     } as unknown as TCommand
 
     expect(
@@ -204,13 +209,13 @@ describe('materializeCommand', () => {
   it('preserves transaction lifecycle intent while filtering system fields', () => {
     const current = makeTransaction({ id: 'tr-1', deleted: false })
     const snapshot = makeStore({ transaction: { 'tr-1': current } })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       compileDeleteTransactions(snapshot.transaction, current.id),
       100
     )
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       transaction: [{ id: 'tr-1', deleted: true }],
     })
     expect(materializeCommand(snapshot, command).transaction?.[0]).toEqual({
@@ -241,7 +246,7 @@ describe('materializeCommand', () => {
       user: { 1: rootUser },
       transaction: { source },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         transaction: [
@@ -252,7 +257,7 @@ describe('materializeCommand', () => {
       300
     )
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       transaction: [
         { id: 'source', income: 0.00001, outcome: 0.00001 },
         {
@@ -318,7 +323,7 @@ describe('materializeCommand', () => {
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
       transaction: { source },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         transaction: [{ id: source.id, income: 0.00001, outcome: 0.00001 }],
@@ -342,7 +347,7 @@ describe('materializeCommand', () => {
     const snapshot = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         transaction: [
@@ -384,7 +389,7 @@ describe('materializeCommand', () => {
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
       transaction: { source },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { transaction: [{ id: source.id, income: 0.00004, outcome: 0.001 }] },
       300
@@ -410,7 +415,7 @@ describe('materializeCommand', () => {
     })
     // At exactly 0.00005 the server stored 0 on one side and 0.0001 on the
     // other, so the prediction stays out of it and waits for the diff.
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { transaction: [{ id: source.id, income: 0.00005, outcome: 0.00005 }] },
       300
@@ -436,7 +441,7 @@ describe('materializeCommand', () => {
     })
     // `income == outcome == 0` is a 400 on the submitted numbers, so nothing
     // is written and nothing is purged.
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { transaction: [{ id: source.id, outcome: 0 }] },
       300
@@ -451,13 +456,13 @@ describe('materializeCommand', () => {
   it('compiles an existing account result to sparse intent', () => {
     const account = makeAccount({ id: 'cash', changed: 500, title: 'Cash' })
     const snapshot = makeStore({ account: { cash: account } })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { account: [{ ...account, title: 'Wallet' }] },
       100
     )
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       account: [{ id: 'cash', title: 'Wallet' }],
     })
     expect(materializeCommand(snapshot, command).account?.[0]).toMatchObject({
@@ -469,13 +474,13 @@ describe('materializeCommand', () => {
   it('compiles an existing reminder result to sparse intent', () => {
     const reminder = makeReminder('rent', { comment: 'Before', notify: false })
     const snapshot = makeStore({ reminder: { rent: reminder } })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { reminder: [{ ...reminder, comment: 'After', notify: true }] },
       100
     )
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       reminder: [{ id: 'rent', comment: 'After', notify: true }],
     })
     expect(materializeCommand(snapshot, command).reminder?.[0]).toMatchObject({
@@ -492,7 +497,7 @@ describe('materializeCommand', () => {
       merchant: { shop: merchant },
       tag: { food: tag },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         merchant: [{ ...merchant, title: 'Market' }],
@@ -501,7 +506,7 @@ describe('materializeCommand', () => {
       100
     )
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       merchant: [{ id: 'shop', title: 'Market' }],
       tag: [{ id: 'food', title: 'Groceries', color: 0x00ff00 }],
     })
@@ -519,7 +524,7 @@ describe('materializeCommand', () => {
       outcome: 100,
     })
     const snapshot = makeStore({ budget: { [budget.id]: budget } })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         budget: [
@@ -537,7 +542,7 @@ describe('materializeCommand', () => {
       100
     )
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       budget: [
         {
           id: budget.id,
@@ -564,9 +569,10 @@ describe('materializeCommand', () => {
 
   it('stores deletion identity and materializes protocol metadata', () => {
     const snapshot = makeStore({
+      reminder: { rent: makeReminder({ id: 'rent' }) },
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         deletion: [
@@ -581,7 +587,7 @@ describe('materializeCommand', () => {
       100
     )
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       deletion: [{ id: 'rent', object: 'reminder' }],
     })
     expect(materializeCommand(snapshot, command)).toEqual({
@@ -619,7 +625,7 @@ describe('materializeCommand', () => {
       account: { [deleted.id]: deleted, [survivor.id]: survivor },
       transaction: { [contained.id]: contained, [transfer.id]: transfer },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { deletion: [{ id: deleted.id, object: 'account' }] },
       100
@@ -667,7 +673,7 @@ describe('materializeCommand', () => {
       account: { [deleted.id]: deleted, [survivor.id]: survivor },
       transaction: { [transfer.id]: transfer },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { deletion: [{ id: deleted.id, object: 'account' }] },
       100
@@ -713,7 +719,7 @@ describe('materializeCommand', () => {
       account: { [deleted.id]: deleted, [debt.id]: debt },
       transaction: { [debtOperation.id]: debtOperation },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { deletion: [{ id: deleted.id, object: 'account' }] },
       100
@@ -741,7 +747,7 @@ describe('materializeCommand', () => {
     const snapshot = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         account: [{ id: 'deleted', instrument: 2, title: 'Disposable' }],
@@ -776,7 +782,7 @@ describe('materializeCommand', () => {
     const snapshot = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       {
         account: [{ id: 'deleted', instrument: 2, title: 'Disposable' }],
@@ -811,7 +817,7 @@ describe('materializeCommand', () => {
       reminderMarker: { [marker.id]: marker },
       budget: { [budget.id]: budget },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { deletion: [{ id: deleted.id, object: 'tag' }] },
       100
@@ -877,7 +883,7 @@ describe('materializeCommand', () => {
       reminder: { [reminder.id]: reminder },
       reminderMarker: { [marker.id]: marker },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { deletion: [{ id: deleted.id, object: 'merchant' }] },
       100
@@ -941,7 +947,7 @@ describe('materializeCommand', () => {
       merchant: { [merchant.id]: merchant },
       transaction: { [transaction.id]: transaction },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { deletion: [{ id: merchant.id, object: 'merchant' }] },
       100
@@ -972,7 +978,7 @@ describe('materializeCommand', () => {
       merchant: { [merchant.id]: merchant },
       transaction: { [transaction.id]: transaction },
     })
-    const command = issuePatch(
+    const command = prepareCommand(
       snapshot,
       { deletion: [{ id: merchant.id, object: 'merchant' }] },
       100
@@ -1004,9 +1010,9 @@ describe('materializeCommand', () => {
       instrument: 2,
       title: 'Wallet',
     })
-    const command = issuePatch(snapshot, { account: [account] }, 100)
+    const command = prepareCommand(snapshot, { account: [account] }, 100)
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       account: [
         {
           id: 'new-account',
@@ -1032,9 +1038,9 @@ describe('materializeCommand', () => {
       startDate: '1970-01-01',
       endDate: '1970-01-01',
     })
-    const command = issuePatch(snapshot, { reminder: [reminder] }, 100)
+    const command = prepareCommand(snapshot, { reminder: [reminder] }, 100)
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       reminder: [
         {
           id: 'new-reminder',
@@ -1059,9 +1065,9 @@ describe('materializeCommand', () => {
       user: 1,
       title: 'Market',
     })
-    const command = issuePatch(snapshot, { merchant: [merchant] }, 100)
+    const command = prepareCommand(snapshot, { merchant: [merchant] }, 100)
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       merchant: [{ id: 'new-merchant', title: 'Market' }],
     })
     expect(materializeCommand(snapshot, command).merchant?.[0]).toEqual(
@@ -1080,9 +1086,9 @@ describe('materializeCommand', () => {
       title: 'Food',
       showOutcome: true,
     })
-    const command = issuePatch(snapshot, { tag: [tag] }, 100)
+    const command = prepareCommand(snapshot, { tag: [tag] }, 100)
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       tag: [{ id: 'new-tag', title: 'Food', showOutcome: true }],
     })
     expect(materializeCommand(snapshot, command).tag?.[0]).toEqual(tag)
@@ -1105,9 +1111,9 @@ describe('materializeCommand', () => {
       outcomeLock: false,
       isOutcomeForecast: true,
     })
-    const command = issuePatch(snapshot, { budget: [budget] }, 100)
+    const command = prepareCommand(snapshot, { budget: [budget] }, 100)
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       budget: [
         {
           id: '2026-01-01#null',
@@ -1136,9 +1142,9 @@ describe('materializeCommand', () => {
       { emojiIcons: true },
       { now: () => 100, uuid: () => ids.shift() || 'unused' }
     )
-    const command = issuePatch(snapshot, patch, 100)
+    const command = prepareCommand(snapshot, patch, 100)
 
-    expect(command.patch).toEqual({
+    expect(operationPatch(command)).toEqual({
       account: [
         {
           id: 'data-account',
@@ -1170,34 +1176,34 @@ describe('materializeCommand', () => {
     })
 
     expect(() =>
-      issuePatch(
+      prepareCommand(
         snapshot,
         { account: [{ id: 'new-account', title: 'Wallet' }] },
         100
       )
     ).toThrow('Cannot create account: missing instrument')
     expect(() =>
-      issuePatch(
+      prepareCommand(
         snapshot,
         { reminder: [{ id: 'new-reminder', incomeAccount: 'cash' }] },
         100
       )
     ).toThrow('Cannot create reminder: missing outcomeAccount')
     expect(() =>
-      issuePatch(snapshot, { merchant: [{ id: 'new-merchant' }] }, 100)
+      prepareCommand(snapshot, { merchant: [{ id: 'new-merchant' }] }, 100)
     ).toThrow('Cannot create merchant: missing title')
     expect(() =>
-      issuePatch(snapshot, { tag: [{ id: 'new-tag' }] }, 100)
+      prepareCommand(snapshot, { tag: [{ id: 'new-tag' }] }, 100)
     ).toThrow('Cannot create tag: missing title')
     expect(() =>
-      issuePatch(
+      prepareCommand(
         snapshot,
         { budget: [{ id: '2026-01-01#food', tag: 'food' }] },
         100
       )
     ).toThrow('Cannot create budget: missing date')
     expect(() =>
-      issuePatch(
+      prepareCommand(
         snapshot,
         {
           budget: [
@@ -1214,7 +1220,7 @@ describe('materializeCommand', () => {
   })
 
   it('rejects server-owned entity families at the command boundary', () => {
-    expect(() => issuePatch(makeStore(), { instrument: [] }, 100)).toThrow(
+    expect(() => prepareCommand(makeStore(), { instrument: [] }, 100)).toThrow(
       'Unsupported command intent: instrument'
     )
   })

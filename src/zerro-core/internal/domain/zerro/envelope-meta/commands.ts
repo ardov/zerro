@@ -1,26 +1,25 @@
 import type { TDataStore } from '../../zenmoney/model/store'
-import type { TCoreContext, TIntentPatch } from '../../../../types'
-import { compileSetSimpleHiddenData, HiddenDataType } from '../hidden-data'
-import { getEnvelopeMeta } from './read'
+import type { TCoreContext } from '../../../../types'
+import { prepareZerro } from '../operations/prepare'
+import type { TZerroInput } from '../operations/types'
 import type { TEnvelopeMetaPatch } from './types'
-
 export function compilePatchEnvelopeMeta(
   data: TDataStore,
   updates: TEnvelopeMetaPatch | TEnvelopeMetaPatch[],
   ctx: TCoreContext
-): TIntentPatch {
-  const currentData = getEnvelopeMeta(data.reminder)
-  const payload = { ...currentData }
-
-  const list = Array.isArray(updates) ? updates : [updates]
-  list.forEach(update => {
-    payload[update.id] = { ...currentData[update.id], ...update }
-  })
-
-  return compileSetSimpleHiddenData(
+) {
+  return prepareZerro(
     data,
-    HiddenDataType.EnvelopeMeta,
-    payload,
+    (Array.isArray(updates) ? updates : [updates]).map(({ id, ...fields }) => ({
+      type: 'envelopes.patchMeta',
+      envelopeId: id,
+      set: Object.fromEntries(
+        Object.entries(fields).filter(([, value]) => value !== undefined)
+      ),
+      unset: Object.keys(fields).filter(
+        key => fields[key as keyof typeof fields] === undefined
+      ) as TZerroInput<'envelopes.patchMeta'>['unset'],
+    })),
     ctx
   )
 }

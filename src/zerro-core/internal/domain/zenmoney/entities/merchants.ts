@@ -3,7 +3,7 @@ import type {
   ById,
   OptionalExceptFor,
 } from '../../foundation/types'
-import type { TCompiled, TCoreContext } from '../../../../types'
+import type { TCoreContext } from '../../../../types'
 import type { TMsTime, TUnixTime } from '../../foundation/primitives'
 import { compileExistingEntityPatch } from './patch'
 import type { TUserId } from './users'
@@ -64,7 +64,7 @@ export function compileCreateMerchant(
   merchants: ById<TMerchant>,
   rawTitle: string,
   ctx: TCoreContext
-): TCompiled<TCreateMerchantReceipt> {
+): { patch: Partial<TMerchantIntent>; receipt: TCreateMerchantReceipt } {
   const title = rawTitle.trim()
   if (!title) throw new Error('Trying to create merchant without title')
 

@@ -1,7 +1,9 @@
+import { prepareTestCommand as prepareCommand } from '../../support/testing/commandTestData'
+import { materializeTestInput } from '@/zerro-core/support/testing/commandTestData'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { RootState } from '@/store'
 import { appendClientCommand } from '@/store/data'
-import { issuePatch } from '../../internal/operations/materialization'
+
 import { makeDemoStore } from '../../support/demo'
 import { applyPatch } from '../../internal/domain/zenmoney'
 import { makeTestRootState } from '@/store/testing'
@@ -41,16 +43,20 @@ describe('budget and goal Redux commands', () => {
     const base = makeDemoStore({ now: NOW })
     const current = applyPatch(
       base,
-      compilePatchUserSettings(
+      materializeTestInput(
         base,
-        { preferZmBudgets: true },
-        {
-          now: () => NOW,
-          uuid: (() => {
-            const ids = ['data-account', 'settings-reminder']
-            return () => ids.shift() || 'unused'
-          })(),
-        }
+        compilePatchUserSettings(
+          base,
+          { preferZmBudgets: true },
+          {
+            now: () => NOW,
+            uuid: (() => {
+              const ids = ['data-account', 'settings-reminder']
+              return () => ids.shift() || 'unused'
+            })(),
+          }
+        ),
+        NOW
       )
     )
     const [tagId] = Object.keys(current.tag)
@@ -72,8 +78,7 @@ describe('budget and goal Redux commands', () => {
       expect.objectContaining({
         type: appendClientCommand.type,
         payload: expect.objectContaining({
-          type: 'patch',
-          patch: issuePatch(current, expected, NOW).patch,
+          operations: prepareCommand(current, expected, NOW).operations,
         }),
       })
     )
@@ -86,13 +91,17 @@ describe('budget and goal Redux commands', () => {
     const id = envId.get(EnvType.Tag, tagId)
     const current = applyPatch(
       base,
-      compileSetGoal(base, NEXT_MONTH, id, null, {
-        now: () => NOW,
-        uuid: (() => {
-          const ids = ['data-account', 'blocker-reminder']
-          return () => ids.shift() || 'unused'
-        })(),
-      })
+      materializeTestInput(
+        base,
+        compileSetGoal(base, NEXT_MONTH, id, null, {
+          now: () => NOW,
+          uuid: (() => {
+            const ids = ['data-account', 'blocker-reminder']
+            return () => ids.shift() || 'unused'
+          })(),
+        }),
+        NOW
+      )
     )
     const goal = { type: goalType.MONTHLY, amount: 100 }
     const expected = compileSetGoal(current, MONTH, id, goal, {
@@ -104,13 +113,17 @@ describe('budget and goal Redux commands', () => {
 
     setGoal(MONTH, id, goal)(dispatch, () => state, undefined)
 
-    expect(expected.deletion).toHaveLength(1)
+    expect(expected.operations).toContainEqual(
+      expect.objectContaining({
+        type: 'goals.clearOverride',
+        month: NEXT_MONTH,
+      })
+    )
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: appendClientCommand.type,
         payload: expect.objectContaining({
-          type: 'patch',
-          patch: issuePatch(current, expected, NOW).patch,
+          operations: prepareCommand(current, expected, NOW).operations,
         }),
       })
     )

@@ -62,7 +62,7 @@ export {
 } from './internal/domain/zerro/activity/transactionRouting'
 
 export {
-  issuePatch,
+  prepareCommand,
   type TCommand,
 } from './internal/operations/materialization'
 

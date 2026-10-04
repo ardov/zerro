@@ -1,3 +1,4 @@
+import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import { configureStore } from '@reduxjs/toolkit'
 import { describe, expect, it, vi } from 'vitest'
 import {
@@ -26,14 +27,16 @@ describe('canonical response acceptance', () => {
       })
     )
     const rename = {
-      type: 'patch' as const,
       issuedAt: 10,
-      patch: { account: [{ id: 'cash', title: 'Wallet' }] },
+      operations: testOperations({
+        account: [{ id: 'cash', title: 'Wallet' }],
+      }),
     }
     const secondRename = {
-      type: 'patch' as const,
       issuedAt: 20,
-      patch: { account: [{ id: 'cash', title: 'Pocket' }] },
+      operations: testOperations({
+        account: [{ id: 'cash', title: 'Pocket' }],
+      }),
     }
     store.dispatch(appendClientCommand(rename))
     store.dispatch(appendClientCommand(secondRename))

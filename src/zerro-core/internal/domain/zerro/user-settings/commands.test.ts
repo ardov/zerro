@@ -1,3 +1,4 @@
+import { materializeTestInput } from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -36,17 +37,20 @@ describe('user settings commands', () => {
       },
     })
 
-    const patch = compilePatchUserSettings(
+    const patch = materializeTestInput(
       data,
-      {
-        preferZmBudgets: undefined,
-        sawMigrationAlert: true,
-        emojiIcons: false,
-      },
-      {
-        now: () => 100,
-        uuid: () => 'unused',
-      }
+      compilePatchUserSettings(
+        data,
+        {
+          preferZmBudgets: undefined,
+          sawMigrationAlert: true,
+          emojiIcons: false,
+        },
+        {
+          now: () => 100,
+          uuid: () => 'unused',
+        }
+      )
     )
     const next = applyPatch(data, patch)
 
@@ -79,13 +83,16 @@ describe('user settings commands', () => {
     })
     const ids = ['data-account', 'settings-reminder']
 
-    const patch = compilePatchUserSettings(
+    const patch = materializeTestInput(
       data,
-      { preferZmBudgets: true },
-      {
-        now: () => 100,
-        uuid: () => ids.shift() || 'unused',
-      }
+      compilePatchUserSettings(
+        data,
+        { preferZmBudgets: true },
+        {
+          now: () => 100,
+          uuid: () => ids.shift() || 'unused',
+        }
+      )
     )
     const next = applyPatch(data, patch)
 

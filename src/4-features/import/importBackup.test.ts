@@ -709,9 +709,12 @@ describe('importBackup', () => {
     expect(runner.commands()[0]).toEqual(
       expect.objectContaining({
         payload: expect.objectContaining({
-          patch: expect.objectContaining({
-            user: [{ id: 1, currency: 1, monthStartDay: 15 }],
-          }),
+          operations: expect.arrayContaining([
+            {
+              type: 'user.patch',
+              value: { id: 1, currency: 1, monthStartDay: 15 },
+            },
+          ]),
         }),
       })
     )

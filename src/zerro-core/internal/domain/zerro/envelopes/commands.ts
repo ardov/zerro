@@ -1,8 +1,9 @@
+import { entityOperations } from '../../zenmoney/operations'
 import { hex2int, isHEX } from '../../zenmoney/model/color'
 import type { ById } from '../../foundation/types'
 import type { TFxCode } from '../../zenmoney/entities/instruments'
 import type { TDataStore } from '../../zenmoney/model/store'
-import type { TCompiled, TCoreContext, TIntentPatch } from '../../../../types'
+import type { TCompiled, TCoreContext } from '../../../../types'
 import {
   compilePatchAccount,
   type TAccountPatch,
@@ -24,7 +25,6 @@ import {
   getEnvelopeMeta,
   type TEnvelopeMetaPatch,
 } from '../envelope-meta'
-import { mergePatches } from '../hidden-data'
 import type { TEnvelope, TEnvNode, TGroupNode } from './build'
 
 type TEnvelopePatchInput = {
@@ -124,10 +124,13 @@ export function compileCreateEnvelope(
   const metadataPatch =
     Object.keys(metadata).length > 1
       ? compilePatchEnvelopeMeta(data, metadata, ctx)
-      : {}
+      : { operations: [] }
 
   return {
-    patch: mergePatches(tagPatch, metadataPatch),
+    operations: [
+      ...entityOperations(data, tagPatch),
+      ...metadataPatch.operations,
+    ],
     receipt: { envelopeId },
   }
 }
@@ -161,7 +164,7 @@ export function compileApplyEnvelopeStructure(
   envelopes: ById<TEnvelope>,
   input: TApplyEnvelopeStructureInput,
   ctx: TCoreContext
-): TIntentPatch {
+): TCompiled {
   const drafts: TEnvelopePatchInput[] = []
   // Index counts every flattened node, group nodes included, matching the
   // index order the structure projector assigns after `flattenStructure`.
@@ -241,19 +244,34 @@ function flattenStructureDescendants(
 export function compileRenameEnvelope(
   data: TDataStore,
   input: TRenameEnvelopeInput
-): TIntentPatch {
+): TCompiled {
   const { type, id } = envId.parse(input.id)
 
   switch (type) {
     case EnvType.Tag:
-      if (data.tag[id]?.title === input.name) return {}
-      return compilePatchTag(data.tag, { id, title: input.name })
+      if (data.tag[id]?.title === input.name) return { operations: [] }
+      return {
+        operations: entityOperations(
+          data,
+          compilePatchTag(data.tag, { id, title: input.name })
+        ),
+      }
     case EnvType.Account:
-      if (data.account[id]?.title === input.name) return {}
-      return compilePatchAccount(data.account, { id, title: input.name })
+      if (data.account[id]?.title === input.name) return { operations: [] }
+      return {
+        operations: entityOperations(
+          data,
+          compilePatchAccount(data.account, { id, title: input.name })
+        ),
+      }
     case EnvType.Merchant:
-      if (data.merchant[id]?.title === input.name) return {}
-      return compilePatchMerchant(data.merchant, { id, title: input.name })
+      if (data.merchant[id]?.title === input.name) return { operations: [] }
+      return {
+        operations: entityOperations(
+          data,
+          compilePatchMerchant(data.merchant, { id, title: input.name })
+        ),
+      }
     case EnvType.Payee:
       // TODO: Resolve the payee envelope to all debtor.payeeNames variants and
       // patch `transaction.payee` for every matching transaction. Merchant
@@ -265,7 +283,7 @@ export function compileRenameEnvelope(
 export function compileSetEnvelopeColor(
   data: TDataStore,
   input: TSetEnvelopeColorInput
-): TIntentPatch {
+): TCompiled {
   const { type, id } = envId.parse(input.id)
   if (type !== EnvType.Tag) {
     throw new Error('Only tag envelopes have configurable colors')
@@ -278,17 +296,22 @@ export function compileSetEnvelopeColor(
   }
 
   const color = hex2int(input.colorHex)
-  if (data.tag[id]?.color === color) return {}
-  return compilePatchTag(data.tag, { id, color })
+  if (data.tag[id]?.color === color) return { operations: [] }
+  return {
+    operations: entityOperations(
+      data,
+      compilePatchTag(data.tag, { id, color })
+    ),
+  }
 }
 
 export function compileSetEnvelopeComment(
   data: TDataStore,
   input: TSetEnvelopeCommentInput,
   ctx: TCoreContext
-): TIntentPatch {
+): TCompiled {
   const currentComment = getEnvelopeMeta(data.reminder)[input.id]?.comment || ''
-  if (currentComment === input.comment) return {}
+  if (currentComment === input.comment) return { operations: [] }
 
   return compilePatchEnvelopeMeta(data, input, ctx)
 }
@@ -298,7 +321,7 @@ export function compileUpdateEnvelopeSettings(
   envelopes: ById<TEnvelope>,
   input: TUpdateEnvelopeSettingsInput,
   ctx: TCoreContext
-): TIntentPatch {
+): TCompiled {
   const current = envelopes[input.id]
   if (!current) throw new Error('Envelope not found')
 
@@ -338,19 +361,32 @@ export function compilePatchEnvelope(
   envelopes: ById<TEnvelope>,
   draft: TEnvelopePatchInput | TEnvelopePatchInput[],
   ctx: TCoreContext
-): TIntentPatch {
+): TCompiled {
   const patches = getEnvelopePatches(draft, envelopes)
 
-  return mergePatches(
-    patches.tag.length ? compilePatchTag(data.tag, patches.tag) : {},
-    patches.account.length
-      ? compilePatchAccount(data.account, patches.account)
-      : {},
-    patches.merchant.length
-      ? compilePatchMerchant(data.merchant, patches.merchant)
-      : {},
-    patches.meta.length ? compilePatchEnvelopeMeta(data, patches.meta, ctx) : {}
-  )
+  return {
+    operations: [
+      ...entityOperations(
+        data,
+        patches.tag.length ? compilePatchTag(data.tag, patches.tag) : {}
+      ),
+      ...entityOperations(
+        data,
+        patches.account.length
+          ? compilePatchAccount(data.account, patches.account)
+          : {}
+      ),
+      ...entityOperations(
+        data,
+        patches.merchant.length
+          ? compilePatchMerchant(data.merchant, patches.merchant)
+          : {}
+      ),
+      ...(patches.meta.length
+        ? compilePatchEnvelopeMeta(data, patches.meta, ctx).operations
+        : []),
+    ],
+  }
 }
 
 function getEnvelopePatches(

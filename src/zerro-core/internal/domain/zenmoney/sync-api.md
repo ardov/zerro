@@ -82,19 +82,19 @@ Zerro repair workflow.
 
 ## Field mutability
 
-| Field or entity                       | Observed behavior                                                                                                |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `account.balance`                     | Ignored on write; recomputed from transactions                                                                   |
-| Ordinary account `instrument`         | Mutable without converting the balance; transaction instruments are coerced to the account instrument without FX |
-| Ordinary account `type`               | Cash/checking/ccard transitions accepted; a second debt account rejected                                         |
-| Account creation                      | Cash/checking/ccard accepted; emoney rejected; deposit/loan require their schedule and interest fields           |
-| Entity `user`                         | Immutable; changes rejected                                                                                      |
-| `instrument`, `company`               | Read-only; full dictionaries returned in tested accounts                                                         |
-| `transaction.date`                    | Mutable; moving between accounts recalculates both balances                                                      |
-| `transaction.created`                 | Accepted on creation, unchanged by later writes                                                                  |
-| Tag `parent`                          | Required, null allowed; self-reference dropped; no depth limit found                                             |
-| Tag `color`                           | No validation observed                                                                                           |
-| `user.monthStartDay`, `user.paidTill` | Client writes accepted                                                                                           |
+| Field or entity                        | Observed behavior                                                                                                |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `account.balance`                      | Ignored on write; recomputed from transactions                                                                   |
+| Ordinary account `instrument`          | Mutable without converting the balance; transaction instruments are coerced to the account instrument without FX |
+| Ordinary account `type`                | Cash/checking/ccard transitions accepted; a second debt account rejected                                         |
+| Account creation                       | Cash/checking/ccard accepted; emoney rejected; deposit/loan require their schedule and interest fields           |
+| Entity `user`                          | Immutable; changes rejected                                                                                      |
+| `instrument`, `company`                | Read-only; full dictionaries returned in tested accounts                                                         |
+| `transaction.date`                     | Mutable; moving between accounts recalculates both balances                                                      |
+| `transaction.created`, `originalPayee` | Accepted on creation, unchanged by later writes                                                                  |
+| Tag `parent`                           | Required, null allowed; self-reference dropped; no depth limit found                                             |
+| Tag `color`                            | No validation observed                                                                                           |
+| `user.monthStartDay`, `user.paidTill`  | Client writes accepted                                                                                           |
 
 Deposit/loan creation required `startDate`, `endDateOffset`,
 `endDateOffsetInterval`, `capitalization`, `percent`, and `payoffStep`.
@@ -171,8 +171,13 @@ Renaming a merchant updates linked transaction `payee` and `changed`, retaining
 Zerro resolves display names through the merchant rather than predicting a
 rename across the transaction history.
 
-On transaction creation, a non-null payee supplies `originalPayee`, even when
-null was submitted. Payee edges are trimmed; Unicode and embedded newlines
+On transaction creation, an explicit non-null `originalPayee` is retained;
+otherwise a non-null payee supplies it, even when null was submitted. Later
+writes cannot replace, clear, or populate `originalPayee`: HTTP 200 can still
+leave the canonical value unchanged. Editing `payee` does not change it, even
+when the original value is null.
+
+Payee edges are trimmed; Unicode and embedded newlines
 survive. Empty payee and comment strings become null. Merchant titles are not
 trimmed or case-folded; empty and duplicate titles were accepted.
 

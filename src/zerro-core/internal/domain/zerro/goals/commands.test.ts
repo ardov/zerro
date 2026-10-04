@@ -1,3 +1,4 @@
+import { materializeTestInput } from '@/zerro-core/support/testing/commandTestData'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -34,10 +35,13 @@ function setGoal(
   // uuid/now are provided so the command can run, but nothing asserts on the
   // values — the test is not coupled to the generated ids.
   let n = 0
-  const patch = compileSetGoal(data, month, envelopeId, goal, {
-    now: () => 100,
-    uuid: () => `generated-${n++}`,
-  })
+  const patch = materializeTestInput(
+    data,
+    compileSetGoal(data, month, envelopeId, goal, {
+      now: () => 100,
+      uuid: () => `generated-${n++}`,
+    })
+  )
   return getRawGoals(applyPatch(data, patch).reminder)
 }
 

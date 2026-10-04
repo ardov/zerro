@@ -1,3 +1,4 @@
+import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { storageMock } = vi.hoisted(() => ({
@@ -38,8 +39,9 @@ describe('loadLocalData', () => {
     })
     const outbox = [
       {
-        type: 'patch' as const,
-        patch: { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
+        operations: testOperations({
+          account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+        }),
         issuedAt: 10,
       },
     ]
@@ -113,7 +115,7 @@ describe('loadLocalData', () => {
 
   it('preserves a readable outbox and requests recovery if replay fails', async () => {
     storageMock.loadCurrent.mockRejectedValue(new Error('broken checkpoint'))
-    const outbox = [{ type: 'patch' as const, patch: {}, issuedAt: 10 }]
+    const outbox = [{ operations: testOperations({}), issuedAt: 10 }]
     storageMock.loadOutboxForRecovery.mockResolvedValue({
       rootUserId: 7,
       outbox: { status: 'ready', commands: outbox },
@@ -194,9 +196,10 @@ describe('loadLocalData', () => {
         rootUserId: 7,
         outbox: [
           {
-            type: 'patch',
             issuedAt: 10,
-            patch: { account: [{ id: 'cash', instrument: 999 }] },
+            operations: testOperations({
+              account: [{ id: 'cash', instrument: 999 }],
+            }),
           },
         ],
         reason: 'broken checkpoint',

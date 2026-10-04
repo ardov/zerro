@@ -13,7 +13,7 @@ Three layers must stay distinct:
 
 | Layer            | Owner            | Sent to server | Notes                                    |
 | ---------------- | ---------------- | -------------- | ---------------------------------------- |
-| Primary intent   | command compiler | yes            | the persisted sparse patch               |
+| Primary intent   | command compiler | yes            | the persisted ordered operations         |
 | Predicted effect | materializer     | **no**         | local-only, so the UI is correct at once |
 | Canonical effect | ZenMoney         | n/a            | arrives in the diff, bypasses this layer |
 
