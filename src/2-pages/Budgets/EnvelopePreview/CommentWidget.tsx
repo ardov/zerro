@@ -1,9 +1,9 @@
 import type { FC } from 'react'
 import { useState } from 'react'
-import { InputBase } from '@/6-shared/ui/InputBase'
+import { FieldAddon } from '@/6-shared/ui/kit/Field'
+import { Textarea } from '@/6-shared/ui/kit/Textarea'
 import { NotesIcon } from '@/6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { cardClass } from './shared'
 import { core } from '@/zerro-core/redux'
 
 import { useDebouncedCallback } from '@/6-shared/hooks/useDebouncedCallback'
@@ -34,16 +34,19 @@ export const CommentWidget: FC<{ id: core.envelopes.TEnvelopeId }> = ({
   }
 
   return (
-    <InputBase
-      className={cardClass}
+    <Textarea
+      label={t('comment')}
       placeholder={t('comment')}
+      start={
+        <FieldAddon kind="icon">
+          <NotesIcon size={20} />
+        </FieldAddon>
+      }
       value={value}
-      onChange={e => {
-        setValue(e.target.value)
-        applyChanges(e.target.value)
+      onValueChange={value => {
+        setValue(value)
+        applyChanges(value)
       }}
-      multiline
-      startAdornment={<NotesIcon />}
     />
   )
 }

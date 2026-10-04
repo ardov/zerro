@@ -4,7 +4,9 @@ import { core } from '@/zerro-core/redux'
 
 import type { FC } from 'react'
 import { useState } from 'react'
-import { OutlinedField } from '@/6-shared/ui/OutlinedField'
+import { FieldAddon } from '@/6-shared/ui/kit/Field'
+import { Input } from '@/6-shared/ui/kit/Input'
+import { Button as KitButton } from '@/6-shared/ui/kit/Button'
 import { useTranslation } from 'react-i18next'
 import { keys } from '@/6-shared/helpers/keys'
 import { useDebouncedCallback } from '@/6-shared/hooks/useDebouncedCallback'
@@ -81,6 +83,7 @@ const FxRateInput: FC<{
   onChange: (rate: number) => void
 }> = props => {
   const { code, mainCode, rates, onChange } = props
+  const { t } = useTranslation('fxRates')
 
   const [isSwapped, swap] = useToggle()
   const [focused, setFocused] = useState(false)
@@ -108,19 +111,30 @@ const FxRateInput: FC<{
   )
 
   return (
-    <OutlinedField
-      key={code}
-      size="small"
+    <Input
+      label={`${leftCode} / ${rightCode}`}
+      size="sm"
       type="tel"
       value={value}
-      onChange={e => {
-        setValue(e.target.value)
-        onChg(e.target.value)
+      onValueChange={value => {
+        setValue(value)
+        onChg(value)
       }}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
-      startAdornment={`1 ${leftCode} =`}
-      endAdornment={<span onClick={swap}>{rightCode}</span>}
+      prefix={`1 ${leftCode} =`}
+      end={
+        <FieldAddon kind="action">
+          <KitButton
+            variant="ghost"
+            size="sm"
+            aria-label={t('swap', { from: rightCode, to: leftCode })}
+            onClick={swap}
+          >
+            {rightCode}
+          </KitButton>
+        </FieldAddon>
+      }
     />
   )
 }

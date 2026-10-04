@@ -417,6 +417,7 @@ export const en: typeof ru = {
     title_current: 'Current exchange rates on {{date}}',
     reset: 'Reset',
     download: 'Download exchange rates',
+    swap: 'Swap {{from}} and {{to}}',
   },
 
   goals: {
