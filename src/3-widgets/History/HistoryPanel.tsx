@@ -1,8 +1,8 @@
-import { Button, IconButton } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/Button'
 import { useEffect } from 'react'
-import { SideDrawer } from '@/6-shared/ui/SideDrawer'
+import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { useTranslation } from 'react-i18next'
-import { CloseIcon, HistoryIcon } from '@/6-shared/ui/Icons'
+import { HistoryIcon } from '@/6-shared/ui/Icons'
 import { defineScreen } from '@/6-shared/overlays'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
@@ -58,24 +58,14 @@ export function HistoryPanel() {
   }
 
   return (
-    <SideDrawer
-      open={open}
-      onClose={() => setOpened(null)}
-      // The sheet width is responsive in CSS, so no media-query hook is needed.
-      className="w-full md:w-[380px]"
-      aria-label={t('panelTitle')}
+    <DrawerSurface
+      side="right"
+      title={t('panelTitle')}
+      controller={{ open, setOpen: next => !next && setOpened(null) }}
+      className="w-95"
+      contentClassName="flex flex-1 flex-col overflow-hidden p-0"
     >
-      <div className="flex items-center justify-between px-4 py-2">
-        <h2 className="m-0 text-title">{t('panelTitle')}</h2>
-        <IconButton
-          size="small"
-          onClick={() => setOpened(null)}
-          aria-label={t('closePanel')}
-        >
-          <CloseIcon size={20} />
-        </IconButton>
-      </div>
-      <hr className="m-0 border-0 border-t border-border" />
+      <hr className="m-0 mt-3 border-0 border-t border-border" />
       <HistoryControls />
       <hr className="m-0 border-0 border-t border-border" />
       {rows.length === 0 ? (
@@ -103,7 +93,7 @@ export function HistoryPanel() {
       {/* Pinned under the list: it belongs to the selection, not to the row
           that happens to be scrolled into view. */}
       <HistoryRestorePreview />
-    </SideDrawer>
+    </DrawerSurface>
   )
 }
 

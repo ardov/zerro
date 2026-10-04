@@ -1,10 +1,8 @@
-import { IconButton } from '@/6-shared/ui/Button'
 import type { TTransactionId } from '@/6-shared/types'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SideDrawer } from '@/6-shared/ui/SideDrawer'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
-import { CloseIcon } from '@/6-shared/ui/Icons'
+import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
+import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
 import { defineScreen } from '@/6-shared/overlays'
 import type { core } from '@/zerro-core/redux'
 
@@ -34,37 +32,27 @@ export const TransactionListDrawer = () => {
   const [value, setValue] = transactionListScreen.use()
   const showTransaction = useTransactionPreview()
   const onClose = useCallback(() => setValue(null), [setValue])
-  const { title, ids, initialQuery, initialDate } = value ?? {}
+  // The screen value is gone while the drawer slides out. Keep showing what
+  // it showed, so the closing list keeps its title and its filter.
+  const shown = useCachedValue(value, !!value)
+  const { title, ids, initialQuery, initialDate } = shown ?? {}
 
   return (
-    <SideDrawer
-      onClose={onClose}
-      open={!!value}
-      // Full-width on phones, fixed-width from the small breakpoint.
-      className="w-screen sm:w-[360px]"
-      aria-label={title || t('transactions')}
+    // A side sheet on every width: the virtualized list needs a definite
+    // height, which a bottom sheet sized by its content would not give it.
+    <DrawerSurface
+      side="right"
+      title={title || t('transactions')}
+      controller={{ open: !!value, setOpen: open => !open && onClose() }}
+      contentClassName="flex flex-1 flex-col overflow-hidden p-0"
     >
-      <div className="flex h-screen min-w-80 flex-col">
-        <div className="flex items-center px-6 py-2">
-          <div className="grow">
-            <h2 className="m-0 truncate text-title">
-              {title || t('transactions')}
-            </h2>
-          </div>
-
-          <Tooltip title={t('close')}>
-            <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
-          </Tooltip>
-        </div>
-
-        <TransactionList
-          transactionIds={ids}
-          initialQuery={initialQuery}
-          initialDate={initialDate}
-          onTrOpen={showTransaction}
-          className="grow"
-        />
-      </div>
-    </SideDrawer>
+      <TransactionList
+        transactionIds={ids}
+        initialQuery={initialQuery}
+        initialDate={initialDate}
+        onTrOpen={showTransaction}
+        className="grow"
+      />
+    </DrawerSurface>
   )
 }

@@ -601,7 +601,6 @@
     "restoreNoChanges": "Текущее состояние уже совпадает с этой точкой",
     "pointUnavailable": "Эта точка больше недоступна — она объединена со старой историей",
     "openPanel": "Открыть историю",
-    "closePanel": "Закрыть историю",
     "sendChanges": "Отправить",
     "pendingCount_zero": "Нет изменений",
     "pendingCount_one": "{{count}} изменение",

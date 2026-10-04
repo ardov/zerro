@@ -636,7 +636,6 @@ export const en: typeof ru = {
     pointUnavailable:
       'This point is no longer available — it was compacted into history',
     openPanel: 'Open history',
-    closePanel: 'Close history',
     sendChanges: 'Send',
     pendingCount_zero: 'No changes',
     pendingCount_one: '{{count}} change',
