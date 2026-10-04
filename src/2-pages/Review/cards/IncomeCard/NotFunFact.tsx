@@ -1,7 +1,7 @@
 import { IconButton } from '@/6-shared/ui/Button'
 import { core } from '@/zerro-core/redux'
 
-import { Link } from '@/6-shared/ui/Link'
+import { Link } from '@/6-shared/ui/kit/Link'
 import { Dialog } from '@/6-shared/ui/Dialog'
 import pluralize from '@/6-shared/helpers/pluralize'
 import type { TFxAmount } from '@/6-shared/types'
@@ -39,7 +39,7 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
           <br />
           Если сложить их зарплаты — получится ваша.{' '}
           <IconButton size="small" onClick={toggleInfo}>
-            <HelpOutlineIcon size={20} />
+            <HelpOutlineIcon />
           </IconButton>
         </p>
       </div>

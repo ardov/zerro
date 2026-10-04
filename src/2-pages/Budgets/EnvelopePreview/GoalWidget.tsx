@@ -29,7 +29,7 @@ export const GoalWidget: FC<{
       addonAlign="first-line"
       start={
         <FieldAddon kind="icon">
-          <EmojiFlagsIcon size={20} />
+          <EmojiFlagsIcon />
         </FieldAddon>
       }
     >

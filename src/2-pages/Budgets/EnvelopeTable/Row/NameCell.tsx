@@ -1,4 +1,4 @@
-import { IconButton } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
 import type { FC, ReactNode } from 'react'
 import { memo, useRef } from 'react'
 import { core } from '@/zerro-core/redux'
@@ -49,7 +49,13 @@ export const NameCell: FC<{
     >
       {isReordering && (
         <EnvDraggable id={id}>
-          <IconButton size="small" className="-my-2 grid place-items-center">
+          <IconButton
+            size="xs"
+            variant="ghost"
+            label={t('reorderCategory', { name })}
+            tooltip={false}
+            className="-my-2"
+          >
             <DragIndicatorIcon />
           </IconButton>
         </EnvDraggable>

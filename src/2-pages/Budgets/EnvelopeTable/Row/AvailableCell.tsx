@@ -42,7 +42,6 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
             }
           >
             <WarningIcon
-              size={20}
               color="warning"
               className="-translate-x-[6px] translate-y-1"
             />

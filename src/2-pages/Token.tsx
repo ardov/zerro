@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { getToken } from '@/store/token'
@@ -22,8 +22,8 @@ export default function Token() {
 
           <div className="mt-6">
             <Button
-              variant="contained"
-              color="primary"
+              size="sm"
+              variant="primary"
               onClick={() => setTokenVisibility(!tokenIsVisible)}
             >
               {t(tokenIsVisible ? 'btnHide' : 'btnShow')}

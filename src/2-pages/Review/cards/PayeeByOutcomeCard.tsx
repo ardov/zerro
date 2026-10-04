@@ -1,4 +1,5 @@
-import { ButtonBase, IconButton } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import { useState } from 'react'
 import { core } from '@/zerro-core/redux'
 
@@ -12,6 +13,7 @@ import { entries } from '@/6-shared/helpers/keys'
 import { ArrowBackIcon, ArrowForwardIcon } from '@/6-shared/ui/Icons'
 
 export function PayeeByOutcomeCard(props: TCardProps) {
+  const { t: uiT } = useTranslation('common')
   const { t } = useTranslation('yearReview', { keyPrefix: 'payeeByOutcome' })
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
@@ -58,11 +60,21 @@ export function PayeeByOutcomeCard(props: TCardProps) {
         </ButtonBase>
 
         <div className="flex flex-row items-center gap-2 opacity-30 transition-opacity duration-200 hover:opacity-100">
-          <IconButton size="small" onClick={prev}>
+          <IconButton
+            label={uiT('previousItem')}
+            variant="ghost"
+            size="sm"
+            onClick={prev}
+          >
             <ArrowBackIcon />
           </IconButton>
 
-          <IconButton size="small" onClick={next}>
+          <IconButton
+            label={uiT('nextItem')}
+            variant="ghost"
+            size="sm"
+            onClick={next}
+          >
             <ArrowForwardIcon />
           </IconButton>
         </div>

@@ -349,7 +349,7 @@ const TransactionEditor = ({
           label={t('btnClose')}
           onClick={onClose}
         >
-          <CloseIcon size={20} />
+          <CloseIcon />
         </IconButton>
       </header>
 
@@ -371,7 +371,7 @@ const TransactionEditor = ({
                 className="rounded-t-sm"
                 invalid={!!marks.fromAmount}
                 label={t('amountFrom')}
-                icon={<MoneyOutIcon size={20} />}
+                icon={<MoneyOutIcon />}
                 value={draft.fromAmount}
                 currency={currencyOf(draft.fromAccount)}
                 onChange={amount =>
@@ -397,7 +397,7 @@ const TransactionEditor = ({
                 className="rounded-t-sm"
                 invalid={!!marks.toAmount}
                 label={t('amountTo')}
-                icon={<MoneyInIcon size={20} />}
+                icon={<MoneyInIcon />}
                 value={draft.toAmount}
                 currency={currencyOf(draft.toAccount)}
                 onChange={amount =>
@@ -416,7 +416,7 @@ const TransactionEditor = ({
                 onClick={() => setDraft(swapTransferSides(draft))}
                 className="rounded-full"
               >
-                <ArrowDownwardIcon size={20} />
+                <ArrowDownwardIcon />
               </IconButton>
             </div>
           </div>
@@ -499,7 +499,7 @@ const TransactionEditor = ({
           label={t('comment')}
           start={
             <FieldAddon kind="icon">
-              <NotesIcon size={20} />
+              <NotesIcon />
             </FieldAddon>
           }
           placeholder={t('comment')}

@@ -16,7 +16,7 @@ const buttonVariants = cva(
     'group/button inline-flex shrink-0 items-center justify-center rounded-ui-control smooth border border-transparent bg-clip-padding text-ui-16 font-medium whitespace-nowrap select-none focusable',
     ...buttonPressAnimation,
     'disabled:pointer-events-none disabled:opacity-ui-disabled',
-    "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+    '[&_svg]:pointer-events-none [&_svg]:shrink-0',
   ],
   {
     variants: {
@@ -53,10 +53,12 @@ const buttonVariants = cva(
 
 const geometry = {
   regular: {
+    xs: 'h-8 gap-1 px-2 rounded-ui-control-inner text-ui-14',
     lg: 'h-12 gap-1.5 px-6 has-data-[icon=inline-end]:pr-5 has-data-[icon=inline-start]:pl-5',
     sm: 'h-10 gap-1.5 px-3 rounded-ui-control-inner has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
   },
   icon: {
+    xs: 'size-8 rounded-ui-control-inner',
     lg: 'size-12',
     sm: 'size-10 rounded-ui-control-inner',
   },
@@ -75,6 +77,8 @@ export type ButtonProps = Omit<ButtonPrimitive.Props, 'className'> &
 export type IconButtonProps = Omit<ButtonProps, 'aria-label'> & {
   label: string
   tooltip?: boolean
+  /** Rounded rectangle by default; circle for standalone icon actions. */
+  shape?: 'rounded' | 'circle'
 }
 
 /** Values for stories */
@@ -82,7 +86,7 @@ const buttonOptions: {
   [K in keyof ButtonVariants]: NonNullable<ButtonVariants[K]>[]
 } = {
   variant: ['primary', 'secondary', 'outline', 'ghost', 'destructive'],
-  size: ['lg', 'sm'],
+  size: ['lg', 'sm', 'xs'],
 }
 
 function Button({ className, variant, size = 'lg', ...props }: ButtonProps) {
@@ -102,6 +106,7 @@ function Button({ className, variant, size = 'lg', ...props }: ButtonProps) {
 function IconButton({
   label,
   tooltip = true,
+  shape = 'rounded',
   className,
   variant,
   size = 'lg',
@@ -114,6 +119,7 @@ function IconButton({
         className={cn(
           buttonVariants({ variant }),
           geometry.icon[size],
+          shape === 'circle' && 'rounded-full [corner-shape:round]',
           className
         )}
         {...props}

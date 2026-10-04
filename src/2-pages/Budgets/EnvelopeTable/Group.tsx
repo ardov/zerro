@@ -1,4 +1,5 @@
-import { ButtonBase, IconButton } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC } from 'react'
 import React, { useRef } from 'react'
 import { core } from '@/zerro-core/redux'
@@ -9,7 +10,6 @@ import {
   ArrowDownwardIcon,
   ArrowUpwardIcon,
 } from '@/6-shared/ui/Icons'
-import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 
 import { useAppDispatch, useAppSelector } from '@/store/index'
 import { renameGroup } from '@/4-features/envelope/renameGroup'
@@ -62,35 +62,35 @@ export const Group: FC<TGroupProps> = ({
   const Actions = (
     <>
       {nextIdx !== undefined && (
-        <Tooltip content={t('moveDown')}>
-          <IconButton
-            aria-label={t('moveDown')}
-            onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}
-          >
-            <ArrowDownwardIcon />
-          </IconButton>
-        </Tooltip>
+        <IconButton
+          variant="ghost"
+          size="xs"
+          label={t('moveDown')}
+          onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}
+        >
+          <ArrowDownwardIcon />
+        </IconButton>
       )}
 
       {prevIdx !== undefined && (
-        <Tooltip content={t('moveUp')}>
-          <IconButton
-            aria-label={t('moveUp')}
-            onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}
-          >
-            <ArrowUpwardIcon />
-          </IconButton>
-        </Tooltip>
+        <IconButton
+          variant="ghost"
+          size="xs"
+          label={t('moveUp')}
+          onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}
+        >
+          <ArrowUpwardIcon />
+        </IconButton>
       )}
 
-      <Tooltip content={t('createEnvelope')}>
-        <IconButton
-          aria-label={t('createEnvelope')}
-          onClick={() => dispatch(createEnvelopeInGroup(name))}
-        >
-          <AddIcon />
-        </IconButton>
-      </Tooltip>
+      <IconButton
+        variant="ghost"
+        size="xs"
+        label={t('createEnvelope')}
+        onClick={() => dispatch(createEnvelopeInGroup(name))}
+      >
+        <AddIcon />
+      </IconButton>
     </>
   )
 

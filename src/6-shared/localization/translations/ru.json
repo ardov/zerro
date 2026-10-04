@@ -46,6 +46,8 @@
     "selectYear": "Выбрать год",
     "selectDate": "Выбрать дату",
     "invalidDate": "Это не дата",
+    "previousItem": "Предыдущий элемент",
+    "nextItem": "Следующий элемент",
     "previousYear": "Предыдущий год",
     "nextYear": "Следующий год",
     "previousMonth": "Предыдущий месяц",
@@ -249,6 +251,9 @@
   },
 
   "budgets": {
+    "expandCategory": "Развернуть категорию",
+    "collapseCategory": "Свернуть категорию",
+    "reorderCategory": "Переместить категорию: {{name}}",
     "pageTitle": "Бюджет на {{month}}",
     "assignedThisMonth": "Выделено в этом месяце",
     "leftoverFromLastMonth": "Остаток с прошлого месяца",

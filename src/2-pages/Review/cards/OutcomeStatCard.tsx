@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import type { FC } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import { core } from '@/zerro-core/redux'
@@ -100,13 +100,12 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
           onShowTransactions={handleShowTransactions}
         />
 
-        <div className="mt-2 flex justify-center gap-4">
+        <div className="mt-2 flex flex-wrap justify-center gap-4">
           <Tooltip content={t('combineIntoParentCategories')}>
             <Button
               onClick={() => setShowParentOnly(!showParentOnly)}
-              size="small"
-              color="primary"
-              variant={showParentOnly ? 'contained' : 'outlined'}
+              size="sm"
+              variant={showParentOnly ? 'primary' : 'outline'}
             >
               {t('parentCategories')}
             </Button>
@@ -115,9 +114,8 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
           {hasMoreNodes && (
             <Button
               onClick={() => setShowAll(!showAll)}
-              size="small"
-              color="primary"
-              variant="outlined"
+              size="sm"
+              variant="outline"
             >
               {showAll ? t('showLess') : t('showAll', { count: nodes.length })}
             </Button>

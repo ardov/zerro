@@ -94,7 +94,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
             addonAlign="first-line"
             start={
               <FieldAddon kind="icon">
-                <CategoryIcon size={20} />
+                <CategoryIcon />
               </FieldAddon>
             }
           >
@@ -121,7 +121,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
           placeholder={t('comment')}
           start={
             <FieldAddon kind="icon">
-              <NotesIcon size={20} />
+              <NotesIcon />
             </FieldAddon>
           }
           value={comment}

@@ -55,11 +55,7 @@ export function MerchantField(props: MerchantFieldProps) {
   const shown = pending ?? (chosen && merchants[chosen]?.title) ?? payee ?? ''
   const unlinked = !merchant && !!payee
   const glyph = (id?: TMerchantId) =>
-    (id ? usage[id]?.regular : !debt) ? (
-      <PlaceIcon size={20} />
-    ) : (
-      <PersonIcon size={20} />
-    )
+    (id ? usage[id]?.regular : !debt) ? <PlaceIcon /> : <PersonIcon />
   const toOption = (option: (typeof all)[number]): SelectOption => ({
     value: merchantKey(option.id),
     label: option.title,
@@ -153,7 +149,7 @@ export function MerchantField(props: MerchantFieldProps) {
               matches.push({
                 value: createKey(search.trim()),
                 label: t('createMerchant', { title: search.trim() }),
-                start: <AddIcon size={20} />,
+                start: <AddIcon />,
               })
             }
             return { items: matches }

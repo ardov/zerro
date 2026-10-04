@@ -1,7 +1,8 @@
-import { IconButton } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
 import type { core } from '@/zerro-core/redux'
 import React from 'react'
-import { Collapse } from '@/6-shared/ui/Collapse'
+import { useTranslation } from 'react-i18next'
+import { Collapse } from '@/6-shared/ui/kit/Collapse'
 import { ChevronRightIcon } from '@/6-shared/ui/Icons'
 
 type ParentProps = {
@@ -27,6 +28,7 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
       ...rest
     } = props
 
+    const { t } = useTranslation('budgets')
     const hasChildren = !!children && children.length > 0
 
     const handleExpand = (
@@ -44,11 +46,18 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
       >
         {hasChildren && (
           <IconButton
-            size="small"
-            className={`absolute -left-[6px] top-[10px] z-[1] transition-transform duration-300 ${isExpanded ? 'rotate-90' : 'rotate-0'}`}
+            size="xs"
+            shape="circle"
+            variant="ghost"
+            label={t(isExpanded ? 'collapseCategory' : 'expandCategory')}
+            aria-expanded={isExpanded}
+            className="absolute -left-[7px] top-[9px] z-[1]"
             onClick={handleExpand}
           >
-            <ChevronRightIcon size={20} />
+            <ChevronRightIcon
+              size={16}
+              className={`transition-transform duration-300 motion-reduce:transition-none ${isExpanded ? 'rotate-90' : 'rotate-0'}`}
+            />
           </IconButton>
         )}
         {parent}

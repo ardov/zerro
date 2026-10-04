@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import RefreshButton from '@/3-widgets/RefreshButton'
 import { MenuButton } from './MenuButton'
 import { ListRowIcon, ListRowText, listItemClass } from '@/6-shared/ui/ListRow'
-import { Divider } from '@/6-shared/ui/Divider'
+import { Divider } from '@/6-shared/ui/kit/Divider'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import {
   AccountBalanceIcon,
@@ -59,7 +59,7 @@ export default function NavigationDrawer() {
             <Logo fill="var(--primary)" width="100" />
             <div className="ml-auto flex items-center">
               <RefreshButton />
-              <MenuButton edge="end" />
+              <MenuButton />
             </div>
           </div>
         </div>

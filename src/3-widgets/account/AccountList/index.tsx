@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Collapse } from '@/6-shared/ui/Collapse'
+import { Collapse } from '@/6-shared/ui/kit/Collapse'
 import { ListRows, listItemDenseClass } from '@/6-shared/ui/ListRow'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { ActionList, ActionListItem } from './ActionList'
-import { Divider } from './Divider'
+import { Divider } from './kit/Divider'
 import { ListRowIcon, ListRowSubheader, ListRowText } from './ListRow'
 import { AddIcon } from './Icons'
 

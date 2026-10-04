@@ -1,12 +1,12 @@
-import type { ButtonBaseProps } from '@/6-shared/ui/Button'
-import { ButtonBase } from '@/6-shared/ui/Button'
+import type { ButtonBaseProps } from '@/6-shared/ui/kit/ButtonBase'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import { useAppSelector } from '@/store'
 
 import { useTranslation } from 'react-i18next'
-import { Divider } from '@/6-shared/ui/Divider'
+import { Divider } from '@/6-shared/ui/kit/Divider'
 import { sub } from '@/6-shared/helpers/money'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { Amount } from '@/6-shared/ui/Amount'
@@ -59,7 +59,7 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
             '👌'
           )}
         </p>
-        <ArrowForwardIcon size={20} />
+        <ArrowForwardIcon />
       </ButtonBase>
     </Tooltip>
   )

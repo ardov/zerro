@@ -1,9 +1,10 @@
-import { IconButton } from '@/6-shared/ui/Button'
+import { useTranslation } from 'react-i18next'
+import { IconButton } from '@/6-shared/ui/kit/Button'
 import { useMemo, useState } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import { CheckboxField } from '@/6-shared/ui/Checkbox'
-import { Link } from '@/6-shared/ui/Link'
+import { Link } from '@/6-shared/ui/kit/Link'
 import { Chip } from '@/6-shared/ui/Chip'
 import { Dialog } from '@/6-shared/ui/Dialog'
 import pluralize from '@/6-shared/helpers/pluralize'
@@ -24,6 +25,7 @@ import { TaxesChart } from './Chart'
 import { getTaxes } from './getTaxesByIncome'
 
 export function NotFunCard(props: TCardProps) {
+  const { t: uiT } = useTranslation('common')
   const [settings, toggleSettings] = useToggle(false)
   const [onlyRUB, toggleRUB] = useToggle(false)
   const { income, outcome } = useIncomeOutcome(onlyRUB, props.year)
@@ -147,6 +149,9 @@ export function NotFunCard(props: TCardProps) {
     <>
       <Card className="relative">
         <IconButton
+          label={uiT('navigation:settings')}
+          variant="ghost"
+          size="sm"
           onClick={() => {
             track('external_link_opened', { destination: 'taxes_settings' })
             toggleSettings()

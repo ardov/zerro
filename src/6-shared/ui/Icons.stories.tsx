@@ -31,7 +31,7 @@ export const Showcase: Story = {
         >
           <div className="flex items-end gap-3">
             <Icon size={16} />
-            <Icon size={20} />
+            <Icon />
             <Icon size={24} />
           </div>
           <span className="text-caption text-muted-foreground">

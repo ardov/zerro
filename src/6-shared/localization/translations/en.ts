@@ -48,6 +48,8 @@ export const en: typeof ru = {
     selectYear: 'Select year',
     selectDate: 'Select date',
     invalidDate: 'Not a date',
+    previousItem: 'Previous item',
+    nextItem: 'Next item',
     previousYear: 'Previous year',
     nextYear: 'Next year',
     previousMonth: 'Previous month',
@@ -261,6 +263,9 @@ export const en: typeof ru = {
   },
 
   budgets: {
+    expandCategory: 'Expand category',
+    collapseCategory: 'Collapse category',
+    reorderCategory: 'Move category: {{name}}',
     pageTitle: 'Budget for {{month}}',
     assignedThisMonth: 'Assigned This Month',
     leftoverFromLastMonth: 'Leftover from Last Month',

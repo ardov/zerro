@@ -11,7 +11,7 @@ const content = (
 )
 
 const meta = {
-  title: 'Library/Display/Collapse',
+  title: 'UI Kit/Building blocks/Collapse',
   component: Collapse,
   tags: ['autodocs'],
   parameters: { layout: 'padded' },

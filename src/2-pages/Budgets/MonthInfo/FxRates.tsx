@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import type { TFxCode, TISOMonth } from '@/6-shared/types'
 import { core } from '@/zerro-core/redux'
 
@@ -62,12 +62,22 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
           })}
         </p>
         {isSaved && (
-          <Button fullWidth onClick={() => dispatch(core.fxRates.reset(month))}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full"
+            onClick={() => dispatch(core.fxRates.reset(month))}
+          >
             {t('reset')}
           </Button>
         )}
         {canFetch && !isSaved && (
-          <Button fullWidth onClick={() => dispatch(loadFxRates(month))}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full"
+            onClick={() => dispatch(loadFxRates(month))}
+          >
             {t('download')}
           </Button>
         )}

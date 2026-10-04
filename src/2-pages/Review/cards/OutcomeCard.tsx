@@ -1,4 +1,4 @@
-import { IconButton } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
 import { useState } from 'react'
 import { formatDate } from '@/6-shared/helpers/date'
 import { useAppSelector } from '@/store'
@@ -13,6 +13,7 @@ import { ArrowBackIcon, ArrowForwardIcon } from '@/6-shared/ui/Icons'
 import { useTranslation } from 'react-i18next'
 
 export function OutcomeCard(props: TCardProps) {
+  const { t: uiT } = useTranslation('common')
   const { t } = useTranslation('yearReview', { keyPrefix: 'outcomeCard' })
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
@@ -57,11 +58,21 @@ export function OutcomeCard(props: TCardProps) {
         )}
 
         <div className="flex flex-row items-center gap-2 opacity-30 transition-opacity duration-200 hover:opacity-100">
-          <IconButton size="small" onClick={prev}>
+          <IconButton
+            label={uiT('previousItem')}
+            variant="ghost"
+            size="sm"
+            onClick={prev}
+          >
             <ArrowBackIcon />
           </IconButton>
 
-          <IconButton size="small" onClick={next}>
+          <IconButton
+            label={uiT('nextItem')}
+            variant="ghost"
+            size="sm"
+            onClick={next}
+          >
             <ArrowForwardIcon />
           </IconButton>
         </div>

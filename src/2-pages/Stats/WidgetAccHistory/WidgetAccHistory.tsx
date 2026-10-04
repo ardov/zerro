@@ -3,7 +3,7 @@ import React, { useState, useMemo, useCallback, memo } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Collapse } from '@/6-shared/ui/Collapse'
+import { Collapse } from '@/6-shared/ui/kit/Collapse'
 import { ListRows, ListRowSubheader } from '@/6-shared/ui/ListRow'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
 import { formatDate, toISOMonth } from '@/6-shared/helpers/date'

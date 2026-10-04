@@ -1,4 +1,5 @@
-import { Button, ButtonBase } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { CSSProperties } from 'react'
 import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
@@ -59,9 +60,8 @@ export default function Auth() {
         <Button
           className="auth-reveal"
           style={reveal(1000)}
-          variant="contained"
-          color="primary"
-          size="large"
+          variant="primary"
+          size="lg"
           onClick={() => dispatch(logIn('ru'))}
           children={t('btnLogin')}
         />
@@ -83,16 +83,14 @@ export default function Auth() {
           <Button
             render={<RouterLink to="/about" />}
             nativeButton={false}
-            variant="text"
-            color="primary"
-            size="large"
+            variant="ghost"
+            size="lg"
           >
             {t('btnAbout')}
           </Button>
           <Button
-            variant="text"
-            color="primary"
-            size="large"
+            variant="ghost"
+            size="lg"
             onClick={() => dispatch(loadDemoData())}
           >
             {t('btnDemoMode')}

@@ -193,18 +193,3 @@ export function IconButton({
     />
   )
 }
-
-export type ButtonBaseProps = Omit<ButtonPrimitive.Props, 'className'> & {
-  className?: string
-}
-
-/** A reset native button for call sites that bring their own styling. */
-export function ButtonBase({ className, ...props }: ButtonBaseProps) {
-  return (
-    <ButtonPrimitive
-      data-slot="button-base"
-      className={cn(RESET, 'border-0 p-0', className)}
-      {...props}
-    />
-  )
-}

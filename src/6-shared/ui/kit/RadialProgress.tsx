@@ -48,7 +48,7 @@ export function RadialProgress(props: RadialProgressProps) {
         cx="32"
         cy="32"
         stroke={moving ? colorMain : completed ? colorSuccess : colorMain}
-        strokeWidth={moving ? 3 : 2}
+        strokeWidth="3"
         strokeDasharray={moving ? '8 16' : '24 0'}
         strokeLinecap="round"
         opacity={moving ? 1 : completed ? 0.15 : 1}

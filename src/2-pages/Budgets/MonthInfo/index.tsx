@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import type { FC, HTMLAttributes } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isZero } from '@/6-shared/helpers/money'
@@ -88,12 +88,22 @@ export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
             <p className="m-0 text-center text-body">{t('actions')}</p>
           </div>
 
-          <Button fullWidth color="secondary" onClick={copyAllBudgets}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto min-h-10 w-full whitespace-normal py-2"
+            onClick={copyAllBudgets}
+          >
             {t('copyAllBudgets.trigger')}
           </Button>
 
           {!isZero(overspend) && (
-            <Button fullWidth color="secondary" onClick={fixOverspends}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto min-h-10 w-full whitespace-normal py-2"
+              onClick={fixOverspends}
+            >
               <span>
                 {t('fixOverspends.trigger')} (
                 <DisplayAmount value={overspend} month={month} />)
@@ -103,7 +113,12 @@ export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
 
           <GoalAction month={month} />
 
-          <Button fullWidth color="secondary" onClick={startAgain}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto min-h-10 w-full whitespace-normal py-2"
+            onClick={startAgain}
+          >
             {t('startAgain.trigger')}
           </Button>
         </div>
@@ -140,7 +155,12 @@ function GoalAction(props: { month: TISOMonth }) {
   if (!canComplete) return null
 
   return (
-    <Button fullWidth color="secondary" onClick={completeAll}>
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-auto min-h-10 w-full whitespace-normal py-2"
+      onClick={completeAll}
+    >
       {t('trigger')}
     </Button>
   )

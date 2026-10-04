@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import './index.css'
@@ -51,7 +51,7 @@ export default function Review() {
           <OutcomeStatCard year={year} onShowTransactions={showTransactions} />
           <QRCard year={year} onShowTransactions={showTransactions} />
           <NoCategoryCard year={year} onShowTransactions={showTransactions} />
-          <Button onClick={() => setYear(y => y - 1)}>
+          <Button variant="ghost" size="sm" onClick={() => setYear(y => y - 1)}>
             {t('whatWasInPreviousYear')}
           </Button>
         </div>

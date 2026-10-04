@@ -1,8 +1,8 @@
-import { ButtonBase } from '@/6-shared/ui/Button'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import { useCallback } from 'react'
 import { core } from '@/zerro-core/redux'
 
-import { Collapse } from '@/6-shared/ui/Collapse'
+import { Collapse } from '@/6-shared/ui/kit/Collapse'
 import { useTranslation } from 'react-i18next'
 import { useToggle } from '@/6-shared/hooks/useToggle'
 import type { TISOMonth } from '@/6-shared/types'

@@ -1,5 +1,5 @@
-import type { IconButtonProps } from '@/6-shared/ui/Button'
-import { IconButton } from '@/6-shared/ui/Button'
+import type { IconButtonProps } from '@/6-shared/ui/kit/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
 import type { FC, ReactNode } from 'react'
 import React, { useCallback } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
@@ -7,7 +7,6 @@ import { core } from '@/zerro-core/redux'
 
 import { useDroppable } from '@dnd-kit/core'
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { EmojiFlagsIcon } from '@/6-shared/ui/Icons'
 import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import type { TFxCode, TISOMonth } from '@/6-shared/types'
@@ -267,26 +266,22 @@ const GoalButton: FC<GoalButtonProps> = props => {
   const { goal, currency, goalProgress, onClick } = props
   const { t } = useTranslation('budgets')
 
-  if (!goal) {
-    return (
-      <span className={'addGoal'}>
-        <Tooltip content={t('addGoal')}>
-          <IconButton aria-label={t('addGoal')} size="small" onClick={onClick}>
-            <EmojiFlagsIcon size={20} />
-          </IconButton>
-        </Tooltip>
-      </span>
-    )
-  }
-
-  const label = core.goals.formatGoal(goal, currency)
+  const label = goal ? core.goals.formatGoal(goal, currency) : t('addGoal')
   return (
-    <span>
-      <Tooltip content={label}>
-        <IconButton aria-label={label} size="small" onClick={onClick}>
-          <RadialProgress value={goalProgress || 0} fontSize="inherit" />
-        </IconButton>
-      </Tooltip>
+    <span className={cn('flex justify-center', !goal && 'addGoal')}>
+      <IconButton
+        label={label}
+        size="xs"
+        variant="ghost"
+        onClick={onClick}
+        shape="circle"
+      >
+        {goal ? (
+          <RadialProgress value={goalProgress || 0} size={16} />
+        ) : (
+          <EmojiFlagsIcon />
+        )}
+      </IconButton>
     </span>
   )
 }

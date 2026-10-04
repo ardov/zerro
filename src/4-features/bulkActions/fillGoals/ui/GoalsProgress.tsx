@@ -1,5 +1,5 @@
-import type { ButtonBaseProps } from '@/6-shared/ui/Button'
-import { ButtonBase } from '@/6-shared/ui/Button'
+import type { ButtonBaseProps } from '@/6-shared/ui/kit/ButtonBase'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC } from 'react'
 import { core } from '@/zerro-core/redux'
 

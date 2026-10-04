@@ -1,7 +1,7 @@
 import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Divider } from '@/6-shared/ui/Divider'
+import { Divider } from '@/6-shared/ui/kit/Divider'
 import {
   ResponsiveContainer,
   AreaChart,

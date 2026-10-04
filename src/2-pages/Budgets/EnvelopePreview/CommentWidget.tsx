@@ -39,7 +39,7 @@ export const CommentWidget: FC<{ id: core.envelopes.TEnvelopeId }> = ({
       placeholder={t('comment')}
       start={
         <FieldAddon kind="icon">
-          <NotesIcon size={20} />
+          <NotesIcon />
         </FieldAddon>
       }
       value={value}

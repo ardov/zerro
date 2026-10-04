@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import type { FC } from 'react'
 import { core } from '@/zerro-core/redux'
 
@@ -51,8 +51,9 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
         <p className="m-0 text-body-sm">{t('description')}</p>
 
         <Button
+          variant="ghost"
+          size="sm"
           className="-ml-2 mt-2"
-          color="secondary"
           onClick={fixOverspends}
         >
           {t('btn')}

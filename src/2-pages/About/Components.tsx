@@ -1,4 +1,4 @@
-import { ButtonBase } from '@/6-shared/ui/Button'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import { useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'

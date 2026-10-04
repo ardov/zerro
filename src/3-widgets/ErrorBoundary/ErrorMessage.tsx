@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import type { FC } from 'react'
 import { SyncIcon } from '@/6-shared/ui/Icons'
 import { useTranslation } from 'react-i18next'
@@ -19,15 +19,15 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
 
         <div className="mt-6">
           <Button
-            variant="contained"
-            color="primary"
-            startIcon={<SyncIcon />}
+            size="sm"
+            variant="primary"
             onClick={() => window.location.reload()}
           >
+            <SyncIcon data-icon="inline-start" />
             {t('btnRefresh')}
           </Button>
 
-          <Button onClick={onLogOut} className="ml-4">
+          <Button variant="ghost" size="sm" onClick={onLogOut} className="ml-4">
             {t('btnLogOut')}
           </Button>
 

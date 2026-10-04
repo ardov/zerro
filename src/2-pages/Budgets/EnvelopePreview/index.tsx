@@ -1,9 +1,8 @@
-import { IconButton } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
 import type { FC, MouseEvent } from 'react'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TagIcon } from '@/6-shared/ui/TagIcon'
-import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { CloseIcon, EditIcon } from '@/6-shared/ui/Icons'
 import { ColorPicker } from '@/3-widgets/ColorPicker'
 import { useAsk } from '@/6-shared/overlays'
@@ -91,21 +90,22 @@ const Header: FC<{
         />
         <h2 className="m-0 truncate text-title">{name}</h2>
       </div>
-      <Tooltip content={t('edit')}>
-        <IconButton
-          aria-label={t('edit')}
-          onClick={() => openEditDialog(envelope.id)}
-          children={<EditIcon />}
-        />
-      </Tooltip>
-      <Tooltip content={t('close')}>
-        <IconButton
-          aria-label={t('close')}
-          edge="end"
-          onClick={onClose}
-          children={<CloseIcon />}
-        />
-      </Tooltip>
+      <IconButton
+        variant="ghost"
+        size="sm"
+        label={t('edit')}
+        onClick={() => openEditDialog(envelope.id)}
+        children={<EditIcon />}
+      />
+
+      <IconButton
+        variant="ghost"
+        size="sm"
+        label={t('close')}
+        onClick={onClose}
+        children={<CloseIcon />}
+      />
+
       <EnvelopeEditDialog />
     </header>
   )

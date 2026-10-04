@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import { useEffect } from 'react'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { useTranslation } from 'react-i18next'
@@ -80,10 +80,11 @@ export function HistoryPanel() {
           />
           {canLoadOlder && (
             <Button
-              fullWidth
+              variant="ghost"
+              size="sm"
               disabled={pageStatus === 'loading'}
               onClick={() => void dispatch(loadHistoryPage())}
-              className="my-2"
+              className="w-full my-2"
             >
               {t('loadOlder')}
             </Button>

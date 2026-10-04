@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import type { ChangeEvent } from 'react'
 import { useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -215,8 +215,15 @@ function BackupImportDialog({ pending }: { pending: TPending }) {
         </div>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => answer()}>{t('importCancel')}</Button>
-        <Button onClick={() => answer(true)} variant="contained" autoFocus>
+        <Button variant="ghost" size="sm" onClick={() => answer()}>
+          {t('importCancel')}
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => answer(true)}
+          variant="primary"
+          autoFocus
+        >
           {t(pending.warnings.length ? 'importConfirmAnyway' : 'importConfirm')}
         </Button>
       </DialogActions>

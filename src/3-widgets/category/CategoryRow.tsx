@@ -72,7 +72,7 @@ export function CategoryRow(props: CategoryRowProps) {
             aria-label={t('addCategory')}
             className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-ui-secondary hover:bg-ui-highlight focusable"
           >
-            <AddIcon size={20} />
+            <AddIcon />
           </button>
         )
       }

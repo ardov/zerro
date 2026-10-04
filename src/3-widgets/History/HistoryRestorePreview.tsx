@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -88,12 +88,11 @@ export function HistoryRestorePreview() {
         )}
       </div>
       <Button
-        fullWidth
-        size="small"
-        variant="contained"
+        size="sm"
+        variant="primary"
         disabled={!canRestore}
         onClick={restore}
-        className="mt-3"
+        className="w-full mt-3"
       >
         {tHistory('restorePoint')}
       </Button>

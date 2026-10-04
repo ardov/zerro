@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@/6-shared/ui/Button'
+import { Button, IconButton } from '@/6-shared/ui/kit/Button'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { RedoIcon, SendIcon, UndoIcon } from '@/6-shared/ui/Icons'
@@ -33,36 +33,40 @@ export function HistoryControls() {
       <Tooltip content={t('undo')}>
         <span>
           <IconButton
-            aria-label={t('undo')}
-            size="small"
+            variant="ghost"
+            tooltip={false}
+            label={t('undo')}
+            size="sm"
             disabled={!canUndo}
             onClick={() => dispatch(undoClientCommand())}
           >
-            <UndoIcon size={20} />
+            <UndoIcon />
           </IconButton>
         </span>
       </Tooltip>
       <Tooltip content={t('redo')}>
         <span>
           <IconButton
-            aria-label={t('redo')}
-            size="small"
+            variant="ghost"
+            tooltip={false}
+            label={t('redo')}
+            size="sm"
             disabled={!canRedo}
             onClick={() => dispatch(redoClientCommand())}
           >
-            <RedoIcon size={20} />
+            <RedoIcon />
           </IconButton>
         </span>
       </Tooltip>
       <div className="grow" />
       <Button
-        size="small"
-        variant="text"
-        startIcon={<SendIcon size={20} />}
+        size="sm"
+        variant="ghost"
         disabled={!pending || isSyncing}
         onClick={() => dispatch(syncData())}
         className="shrink-0 whitespace-nowrap"
       >
+        <SendIcon data-icon="inline-start" />
         {pending ? t('sendCount', { count: pending }) : t('sendChanges')}
       </Button>
     </div>

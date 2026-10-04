@@ -27,7 +27,7 @@ import {
   ListRowSubheader,
   ListRowText,
 } from '@/6-shared/ui/ListRow'
-import { Divider } from '@/6-shared/ui/Divider'
+import { Divider } from '@/6-shared/ui/kit/Divider'
 import { track } from '@/6-shared/analytics'
 import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
 import { AdaptivePopover } from '@/6-shared/ui/AdaptivePopover'

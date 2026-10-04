@@ -1,4 +1,4 @@
-import { ButtonBase } from '@/6-shared/ui/Button'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC, ReactNode } from 'react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'

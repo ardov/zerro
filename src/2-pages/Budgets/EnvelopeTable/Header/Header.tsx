@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDownIcon } from '@/6-shared/ui/Icons'
@@ -61,7 +61,7 @@ export const Header: FC<HeaderProps> = props => {
               <Menu
                 label={t('actions')}
                 trigger={
-                  <Button size="small" className="-ml-2 px-2 py-0">
+                  <Button variant="ghost" size="xs" className="-ml-2 px-2 py-0">
                     <span className="truncate text-overline uppercase text-muted-foreground">
                       {t('categories', {
                         ns: 'budgets',

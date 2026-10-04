@@ -1,4 +1,6 @@
-import { ButtonBase, IconButton } from '@/6-shared/ui/Button'
+import { useTranslation } from 'react-i18next'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC, HTMLAttributes } from 'react'
 import { useState, useRef, useCallback } from 'react'
 import { useAppSelector } from '@/store'
@@ -14,6 +16,7 @@ import { usePopup } from '@/6-shared/overlays'
 import { useMonth } from '../../MonthProvider'
 
 export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
+  const { t: uiT } = useTranslation('common')
   const [month, setMonth] = useMonth()
   const list = useAppSelector(core.months.selectList)
   const first = list[0]
@@ -55,6 +58,9 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
 
         <div className="flex">
           <IconButton
+            label={uiT('previousMonth')}
+            variant="ghost"
+            size="xs"
             onClick={goPrevMonth}
             disabled={isFirst}
             className="text-muted-foreground"
@@ -62,6 +68,9 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
             <ChevronLeftIcon />
           </IconButton>
           <IconButton
+            label={uiT('nextMonth')}
+            variant="ghost"
+            size="xs"
             onClick={goNextMonth}
             disabled={isLast}
             className="-ml-2 text-muted-foreground"

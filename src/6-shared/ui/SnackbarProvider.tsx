@@ -54,7 +54,7 @@ function SnackbarContents({ children }: { children: React.ReactNode }) {
                 color="inherit"
                 onClick={() => close(toast.id)}
               >
-                <CloseIcon size={20} />
+                <CloseIcon />
               </IconButton>
             </Toast.Root>
           ))}

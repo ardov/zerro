@@ -1,4 +1,4 @@
-import { IconButton } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { Chip } from '@/6-shared/ui/Chip'
@@ -114,13 +114,13 @@ function HistoryRowItem({
           />
         </button>
         <IconButton
-          size="small"
+          variant="ghost"
+          size="sm"
           className="absolute top-1/2 right-2 -translate-y-1/2"
-          aria-label={row.expanded ? t('collapseRun') : t('expandRun')}
+          label={row.expanded ? t('collapseRun') : t('expandRun')}
           onClick={toggle}
         >
           <ChevronDownIcon
-            size={20}
             className={row.expanded ? 'rotate-180' : undefined}
           />
         </IconButton>
