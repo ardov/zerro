@@ -1,0 +1,28 @@
+@layer components {
+  .kit-press {
+    --press-scale-x: 0.97;
+    --press-scale-y: 1.04;
+
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease,
+      opacity 150ms ease,
+      box-shadow 150ms ease,
+      scale 600ms var(--ease-overshoot);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .kit-press:not(:disabled, [aria-disabled='true']):active {
+      scale: var(--press-scale-x) var(--press-scale-y);
+      transition-duration: 50ms;
+      transition-timing-function: ease;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kit-press {
+      transition: none;
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { cn } from '@/6-shared/ui/shadcn/utils'
-import { buttonPressAnimation } from './Button'
+import './Press.css'
 
 /** Shared visual states for date and month cells. */
 export function calendarCellClass(states: {
@@ -11,8 +11,7 @@ export function calendarCellClass(states: {
   return cn(
     'focusable relative flex h-12 w-full items-center justify-center rounded-ui-control-inner rounded-smooth text-ui-16 tabular-nums select-none',
     'hover:bg-ui-highlight active:bg-ui-pressed',
-    buttonPressAnimation,
-    'motion-reduce:scale-100! motion-reduce:transition-none!',
+    'kit-press',
     states.outside && 'text-ui-secondary',
     states.current &&
       'font-medium after:absolute after:bottom-2 after:size-1 after:rounded-full after:bg-current',

@@ -2,19 +2,13 @@ import { Button as ButtonPrimitive } from '@base-ui/react/button'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Tooltip } from './Tooltip'
 import { cn } from '@/6-shared/ui/shadcn/utils'
-
-export const buttonPressAnimation = [
-  'will-change-transform',
-  'motion-safe:active:scale-x-97',
-  'motion-safe:active:scale-y-104',
-  'active:transition-all active:duration-50',
-  '[transition:all_150ms_ease,scale_600ms_var(--ease-overshoot)]',
-]
+import './Press.css'
+import './Button.css'
 
 const buttonVariants = cva(
   [
     'group/button inline-flex shrink-0 items-center justify-center rounded-ui-control smooth border border-transparent bg-clip-padding text-ui-16 font-medium whitespace-nowrap select-none focusable',
-    ...buttonPressAnimation,
+    'kit-press',
     'disabled:pointer-events-none disabled:opacity-ui-disabled',
     '[&_svg]:pointer-events-none [&_svg]:shrink-0',
   ],
@@ -37,8 +31,8 @@ const buttonVariants = cva(
           'aria-expanded:bg-ui-highlight aria-expanded:text-ui-primary',
         ],
         ghost: [
-          'hover:bg-ui-highlight hover:text-ui-primary',
-          'aria-expanded:bg-ui-highlight aria-expanded:text-ui-primary',
+          'kit-button-ghost hover:text-ui-primary',
+          'aria-expanded:text-ui-primary',
         ],
         destructive: [
           'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
@@ -119,6 +113,7 @@ function IconButton({
         className={cn(
           buttonVariants({ variant }),
           geometry.icon[size],
+          'kit-button-icon',
           shape === 'circle' && 'rounded-full [corner-shape:round]',
           className
         )}
