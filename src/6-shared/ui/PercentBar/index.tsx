@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, FC } from 'react'
 import { cn } from '../shadcn/utils'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useTranslation } from 'react-i18next'
 
 export interface PercentBarItem {
@@ -46,7 +46,7 @@ export const PercentBar: FC<PercentBarProps> = ({
       style={{ height, ...style }}
     >
       {displayData.map((bar, i) => (
-        <Tooltip title={bar.name} key={bar.id}>
+        <Tooltip content={bar.name} key={bar.id}>
           <div
             className="min-w-[2px]"
             style={{
@@ -59,7 +59,7 @@ export const PercentBar: FC<PercentBarProps> = ({
         </Tooltip>
       ))}
       {!showAll && hiddenSum > 0 && (
-        <Tooltip title={t('otherCategories')}>
+        <Tooltip content={t('otherCategories')}>
           <div
             className="min-w-[2px] pl-px"
             style={{

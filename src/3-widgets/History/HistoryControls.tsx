@@ -1,6 +1,6 @@
 import { Button, IconButton } from '@/6-shared/ui/Button'
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { RedoIcon, SendIcon, UndoIcon } from '@/6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
@@ -30,9 +30,10 @@ export function HistoryControls() {
 
   return (
     <div className="flex flex-row items-center gap-1 px-2 py-1">
-      <Tooltip title={t('undo')}>
+      <Tooltip content={t('undo')}>
         <span>
           <IconButton
+            aria-label={t('undo')}
             size="small"
             disabled={!canUndo}
             onClick={() => dispatch(undoClientCommand())}
@@ -41,9 +42,10 @@ export function HistoryControls() {
           </IconButton>
         </span>
       </Tooltip>
-      <Tooltip title={t('redo')}>
+      <Tooltip content={t('redo')}>
         <span>
           <IconButton
+            aria-label={t('redo')}
             size="small"
             disabled={!canRedo}
             onClick={() => dispatch(redoClientCommand())}

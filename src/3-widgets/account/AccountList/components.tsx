@@ -8,7 +8,7 @@ import { ListRowSubheader, listItemDenseClass } from '@/6-shared/ui/ListRow'
 import { toISOMonth } from '@/6-shared/helpers/date'
 import { Amount } from '@/6-shared/ui/Amount'
 import type { TFxAmount } from '@/6-shared/types'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 
 import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import { useTransactionDrawer } from '@/3-widgets/global/TransactionListDrawer'
@@ -64,11 +64,10 @@ export const Account: FC<
         )}
       >
         <Tooltip
-          title={
+          content={
             <Amount value={account.balance} currency={account.fxCode} noShade />
           }
-          disableInteractive
-          placement="right"
+          side="right"
         >
           <div>
             <Amount

@@ -7,7 +7,7 @@ import { core } from '@/zerro-core/redux'
 
 import { useDroppable } from '@dnd-kit/core'
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { EmojiFlagsIcon } from '@/6-shared/ui/Icons'
 import { RadialProgress } from '@/6-shared/ui/RadialProgress'
 import type { TFxCode, TISOMonth } from '@/6-shared/types'
@@ -270,8 +270,8 @@ const GoalButton: FC<GoalButtonProps> = props => {
   if (!goal) {
     return (
       <span className={'addGoal'}>
-        <Tooltip title={t('addGoal')}>
-          <IconButton size="small" onClick={onClick}>
+        <Tooltip content={t('addGoal')}>
+          <IconButton aria-label={t('addGoal')} size="small" onClick={onClick}>
             <EmojiFlagsIcon size={20} />
           </IconButton>
         </Tooltip>
@@ -279,10 +279,11 @@ const GoalButton: FC<GoalButtonProps> = props => {
     )
   }
 
+  const label = core.goals.formatGoal(goal, currency)
   return (
     <span>
-      <Tooltip title={core.goals.formatGoal(goal, currency)}>
-        <IconButton size="small" onClick={onClick}>
+      <Tooltip content={label}>
+        <IconButton aria-label={label} size="small" onClick={onClick}>
           <RadialProgress value={goalProgress || 0} fontSize="inherit" />
         </IconButton>
       </Tooltip>

@@ -8,7 +8,7 @@ import { useAppSelector } from '@/store'
 import { useTranslation } from 'react-i18next'
 import { Divider } from '@/6-shared/ui/Divider'
 import { sub } from '@/6-shared/helpers/money'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { Amount } from '@/6-shared/ui/Amount'
 import { DataLine } from '@/3-widgets/DataLine'
 import { ArrowForwardIcon } from '@/6-shared/ui/Icons'
@@ -37,7 +37,7 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
   const color = `var(--${msgType}-foreground)`
 
   return (
-    <Tooltip arrow title={<TooltipContent />}>
+    <Tooltip content={<TooltipContent />}>
       <ButtonBase
         className="flex gap-2 rounded-lg py-2 pl-4 pr-2"
         style={{ background: bg, color }}

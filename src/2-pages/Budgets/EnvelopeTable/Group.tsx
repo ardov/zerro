@@ -10,7 +10,7 @@ import {
   ArrowUpwardIcon,
 } from '@/6-shared/ui/Icons'
 import { useFloatingInput } from '@/6-shared/ui/FloatingInput'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 
 import { useAppDispatch, useAppSelector } from '@/store/index'
 import { renameGroup } from '@/4-features/envelope/renameGroup'
@@ -58,23 +58,32 @@ export const Group: FC<TGroupProps> = ({
   const Actions = (
     <>
       {nextIdx !== undefined && (
-        <Tooltip title={t('moveDown')}>
-          <IconButton onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}>
+        <Tooltip content={t('moveDown')}>
+          <IconButton
+            aria-label={t('moveDown')}
+            onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}
+          >
             <ArrowDownwardIcon />
           </IconButton>
         </Tooltip>
       )}
 
       {prevIdx !== undefined && (
-        <Tooltip title={t('moveUp')}>
-          <IconButton onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}>
+        <Tooltip content={t('moveUp')}>
+          <IconButton
+            aria-label={t('moveUp')}
+            onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}
+          >
             <ArrowUpwardIcon />
           </IconButton>
         </Tooltip>
       )}
 
-      <Tooltip title={t('createEnvelope')}>
-        <IconButton onClick={() => dispatch(createEnvelopeInGroup(name))}>
+      <Tooltip content={t('createEnvelope')}>
+        <IconButton
+          aria-label={t('createEnvelope')}
+          onClick={() => dispatch(createEnvelopeInGroup(name))}
+        >
           <AddIcon />
         </IconButton>
       </Tooltip>

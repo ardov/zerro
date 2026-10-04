@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Collapse } from '@/6-shared/ui/Collapse'
 import { ListRows, listItemDenseClass } from '@/6-shared/ui/ListRow'
 import { cn } from '@/6-shared/ui/shadcn/utils'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useToggle } from '@/6-shared/hooks/useToggle'
 import type { TFxAmount } from '@/6-shared/types'
 import { addFxAmount } from '@/6-shared/helpers/money'
@@ -43,7 +43,7 @@ export default function AccountList({ className = '' }) {
       <ListRows>
         <Subheader
           name={
-            <Tooltip title={t('inBalanceDescription')}>
+            <Tooltip content={t('inBalanceDescription')}>
               <span>{t('inBalance')}</span>
             </Tooltip>
           }
@@ -58,7 +58,7 @@ export default function AccountList({ className = '' }) {
       <ListRows>
         <Subheader
           name={
-            <Tooltip title={t('otherDescription')}>
+            <Tooltip content={t('otherDescription')}>
               <span>{t('other')}</span>
             </Tooltip>
           }

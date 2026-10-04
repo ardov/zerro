@@ -10,7 +10,7 @@ import {
   DoneIcon,
   WarningIcon,
 } from '@/6-shared/ui/Icons'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 
 import { getChangedNum } from '@/store/data'
@@ -92,6 +92,9 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
   const actionLabel = hasDetails
     ? t('syncProgress:detailsTitle')
     : t('common:refresh')
+  const iconLabel = hasDetails
+    ? t('syncProgress:detailsTitle')
+    : t('common:refreshData')
 
   return isMobile ? (
     <button
@@ -104,13 +107,13 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
       <span>{actionLabel}</span>
     </button>
   ) : (
-    <Tooltip
-      title={
-        hasDetails ? t('syncProgress:detailsTitle') : t('common:refreshData')
-      }
-    >
+    <Tooltip content={iconLabel}>
       <SyncBadge count={changedNum}>
-        <IconButton {...menuProps} className={rest.className}>
+        <IconButton
+          {...menuProps}
+          aria-label={iconLabel}
+          className={rest.className}
+        >
           {components[state]}
         </IconButton>
       </SyncBadge>
@@ -134,7 +137,7 @@ type SyncBadgeProps = ComponentProps<'span'> & { count: number }
 
 /** The root spreads what it is handed: `Tooltip` renders its trigger through
  * this element, and a component that keeps its props to itself would swallow
- * the handlers, the id and the label and leave the tooltip inert. */
+ * the handlers and leave the tooltip inert. */
 function SyncBadge({ count, children, className, ...props }: SyncBadgeProps) {
   return (
     <span {...props} className={cn('relative inline-flex', className)}>

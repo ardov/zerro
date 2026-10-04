@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useTranslation } from 'react-i18next'
 import { TagIcon } from '@/6-shared/ui/TagIcon'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from '@/6-shared/ui/Icons'
 import { ColorPicker } from '@/3-widgets/ColorPicker'
 import { useAsk } from '@/6-shared/overlays'
@@ -112,14 +112,20 @@ const Header: FC<{
         />
         <h2 className="m-0 truncate text-title">{name}</h2>
       </div>
-      <Tooltip title={t('edit')}>
+      <Tooltip content={t('edit')}>
         <IconButton
+          aria-label={t('edit')}
           onClick={() => openEditDialog(envelope.id)}
           children={<EditIcon />}
         />
       </Tooltip>
-      <Tooltip title={t('close')}>
-        <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
+      <Tooltip content={t('close')}>
+        <IconButton
+          aria-label={t('close')}
+          edge="end"
+          onClick={onClose}
+          children={<CloseIcon />}
+        />
       </Tooltip>
       <EnvelopeEditDialog />
     </header>

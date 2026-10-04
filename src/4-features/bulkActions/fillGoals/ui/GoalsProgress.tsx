@@ -5,7 +5,7 @@ import { core } from '@/zerro-core/redux'
 
 import type { TISOMonth } from '@/6-shared/types'
 import { formatMoney } from '@/6-shared/helpers/money'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { RadialProgress } from '@/6-shared/ui/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@/store'
 
@@ -54,8 +54,7 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
 
   return (
     <Tooltip
-      arrow
-      title={t('progressOnTagret', {
+      content={t('progressOnTagret', {
         assigned: formatSum(targetValue - needValue),
         target: formatSum(targetValue),
       })}

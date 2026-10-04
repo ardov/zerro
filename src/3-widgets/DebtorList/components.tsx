@@ -8,7 +8,7 @@ import type { TFxAmount, TFxCode } from '@/6-shared/types'
 import { Amount } from '@/6-shared/ui/Amount'
 import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import { toISOMonth } from '@/6-shared/helpers/date'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 
 export const Debtor: FC<
   { name: string; currency: TFxCode; balance: number } & Omit<
@@ -36,9 +36,8 @@ export const Debtor: FC<
         )}
       >
         <Tooltip
-          title={<Amount value={balance} currency={currency} noShade />}
-          disableInteractive
-          placement="right"
+          content={<Amount value={balance} currency={currency} noShade />}
+          side="right"
         >
           <div>
             <Amount

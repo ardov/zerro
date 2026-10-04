@@ -3,7 +3,7 @@ import { Provider } from 'react-redux'
 import { store } from '@/store'
 import { AppThemeProvider } from '@/6-shared/ui/theme'
 import { SnackbarProvider } from '@/6-shared/ui/SnackbarProvider'
-import { TooltipProvider } from '@/6-shared/ui/Tooltip'
+import { TooltipProvider } from '@/6-shared/ui/kit/Tooltip'
 import type { AppThemeProviderProps } from '@/6-shared/ui/theme'
 
 export function Providers(props: {

@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { TagIcon } from '@/6-shared/ui/TagIcon'
 import { DragIndicatorIcon } from '@/6-shared/ui/Icons'
 import type { TFxCode } from '@/6-shared/types'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { getCurrencySymbol } from '@/6-shared/helpers/money'
 import { useFloatingInput } from '@/6-shared/ui/FloatingInput'
 import { useAppDispatch } from '@/store/index'
@@ -119,7 +119,7 @@ const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
   const { t } = useTranslation('budgets')
   if (!currency) return null
   return (
-    <Tooltip title={t('envelopeCurrencyTooltip', { currency })}>
+    <Tooltip content={t('envelopeCurrencyTooltip', { currency })}>
       <Chip label={getCurrencySymbol(currency)} size="small" />
     </Tooltip>
   )

@@ -7,7 +7,7 @@ import { formatDate } from '@/6-shared/helpers/date'
 import { startFresh } from '@/4-features/bulkActions/startFresh'
 import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { CloseIcon } from '@/6-shared/ui/Icons'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import type { TDateDraft, TISOMonth } from '@/6-shared/types'
 
 import { DisplayAmount } from '@/3-widgets/DisplayAmount'
@@ -89,8 +89,8 @@ export const MonthInfo: FC<MonthInfoProps> = ({
             <h2 className="m-0 truncate text-title">{getMonthName(month)}</h2>
           </div>
 
-          <Tooltip title={t('close')}>
-            <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
+          <Tooltip content={t('close')}>
+            <IconButton aria-label={t('close')} edge="end" onClick={onClose} children={<CloseIcon />} />
           </Tooltip>
         </div>
       )}

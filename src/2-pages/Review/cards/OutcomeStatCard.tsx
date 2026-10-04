@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import type { TDateDraft, TFxAmount, TTransaction } from '@/6-shared/types'
 import type { PercentBarItem } from '@/6-shared/ui/PercentBar'
 import { PercentBar } from '@/6-shared/ui/PercentBar'
@@ -101,7 +101,7 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
         />
 
         <div className="mt-2 flex justify-center gap-4">
-          <Tooltip title={t('combineIntoParentCategories')}>
+          <Tooltip content={t('combineIntoParentCategories')}>
             <Button
               onClick={() => setShowParentOnly(!showParentOnly)}
               size="small"

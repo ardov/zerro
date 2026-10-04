@@ -11,7 +11,7 @@ import { round } from '@/6-shared/helpers/money'
 import { entries } from '@/6-shared/helpers/keys'
 import { useToggle } from '@/6-shared/hooks/useToggle'
 import { SettingsIcon } from '@/6-shared/ui/Icons'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { track } from '@/6-shared/analytics'
 import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import type { TCardProps } from '../../shared/Card'
@@ -93,7 +93,7 @@ export function NotFunCard(props: TCardProps) {
       <div className="text-center">
         {taxes.map(info => (
           <span key={info.name} className="m-1 inline-block">
-            <Tooltip title={info.comment}>
+            <Tooltip content={info.comment}>
               <Chip
                 variant={'outlined'}
                 label={

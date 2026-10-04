@@ -12,7 +12,7 @@ import {
   Line,
   ReferenceLine,
 } from 'recharts'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { round } from '@/6-shared/helpers/money'
 import { formatDate, GroupBy } from '@/6-shared/helpers/date'
 
@@ -239,7 +239,7 @@ function SurviveFact() {
 
   return (
     <span>
-      <Tooltip title={tooltipContent}>
+      <Tooltip content={tooltipContent}>
         <span
           style={{
             borderBottom: '1px dashed rgb(from currentColor r g b / .5)',

@@ -3,7 +3,7 @@ import { IconButton } from '@/6-shared/ui/Button'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SettingsIcon } from '@/6-shared/ui/Icons'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 
 import { useAsk } from '@/6-shared/overlays'
 import { SettingsMenu } from './SettingsMenu'
@@ -16,8 +16,9 @@ export const MenuButton: FC<MenuButtonProps> = ({ showLinks, ...rest }) => {
   const { t } = useTranslation('navigation')
   const ask = useAsk()
   return (
-    <Tooltip title={t('settings')}>
+    <Tooltip content={t('settings')}>
       <IconButton
+        aria-label={t('settings')}
         onClick={e =>
           ask(<SettingsMenu showLinks={showLinks} anchorEl={e.currentTarget} />)
         }

@@ -11,7 +11,7 @@ import {
   Tooltip as RechartsTooltip,
   CartesianGrid,
 } from 'recharts'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { formatMoney } from '@/6-shared/helpers/money'
 import { formatDate, parseDate } from '@/6-shared/helpers/date'
 import type { TISODate } from '@/6-shared/types'
@@ -212,7 +212,7 @@ function Summary(props: { income: number; outcome: number }) {
   )
 
   return (
-    <Tooltip arrow placement={'bottom'} title={tooltip}>
+    <Tooltip side={'bottom'} content={tooltip}>
       <span>
         <DisplayAmount
           value={netIncome}

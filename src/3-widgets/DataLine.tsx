@@ -2,8 +2,8 @@ import type { FC, HTMLAttributes, ReactNode } from 'react'
 import React from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import type { AmountProps } from '@/6-shared/ui/Amount'
-import type { TooltipProps } from '@/6-shared/ui/Tooltip'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import type { TooltipProps } from '@/6-shared/ui/kit/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 // TODO: use Amount instead
 import type { TSmartAmountProps } from '@/3-widgets/Amount'
 import { SmartAmount } from '@/3-widgets/Amount'
@@ -16,7 +16,7 @@ type DataLineProps = HTMLAttributes<HTMLDivElement> & {
   sign?: AmountProps['sign']
   color?: string
   colorOpacity?: number
-  tooltip?: TooltipProps['title']
+  tooltip?: TooltipProps['content']
   variant?: 'body1' | 'body2' | 'caption' | 'h6'
 }
 
@@ -46,7 +46,7 @@ export const DataLine: FC<DataLineProps> = ({
     <div className={cn('flex flex-row', className)} {...rest}>
       <div className="mr-2 flex min-w-0 grow items-center">
         {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
-        <Tooltip title={tooltip}>
+        <Tooltip content={tooltip}>
           <span className={cn('truncate', typographyClassName)}>{name}</span>
         </Tooltip>
       </div>

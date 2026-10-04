@@ -3,7 +3,7 @@ import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from '@/6-shared/ui/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { formatMoney } from '@/6-shared/helpers/money'
 import { WarningIcon } from '@/6-shared/ui/Icons'
 import { Amount } from '@/6-shared/ui/Amount'
@@ -33,7 +33,7 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
       <p className="m-0 text-right text-body">
         {!!hiddenOverspend && (
           <Tooltip
-            title={
+            content={
               <span>
                 {t('parentOverspend', {
                   amount: formatMoney(-hiddenOverspend),

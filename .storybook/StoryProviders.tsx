@@ -7,7 +7,7 @@ import { OverlayHost } from '@/6-shared/overlays'
 import { i18n } from '@/6-shared/localization'
 import { SnackbarProvider } from '@/6-shared/ui/SnackbarProvider'
 import { AppThemeProvider } from '@/6-shared/ui/theme'
-import { TooltipProvider } from '@/6-shared/ui/Tooltip'
+import { TooltipProvider } from '@/6-shared/ui/kit/Tooltip'
 import { makeStoryStore, type StoryScenario } from 'stories/fixtures/storyStore'
 
 type ThemeMode = 'light' | 'dark'
