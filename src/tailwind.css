@@ -138,7 +138,6 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-icon-foreground: var(--icon-foreground);
   --color-disabled-control-foreground: var(--disabled-control-foreground);
-  --color-disabled-border: var(--disabled-border);
   --color-focus-surface: var(--focus-surface);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
@@ -195,8 +194,7 @@
      --color-info-surface, --color-info-border
 
      In use, but through the token rather than the utility: a chart hands its
-     colour to an SVG attribute, and the outlined field owns its whole border
-     shorthand, so neither can go through a class:
-     --color-disabled-border, --color-data-primary, --color-data-primary-alt,
-     --color-data-success, --color-data-error, --color-data-error-alt */
+     colour to an SVG attribute, so it cannot go through a class:
+     --color-data-primary, --color-data-primary-alt, --color-data-success,
+     --color-data-error, --color-data-error-alt */
 }

@@ -1,8 +1,5 @@
 import type { TISOMonth } from '@/6-shared/types'
 
-/** The surface the preview's own boxes sit on. */
-export const cardClass = 'w-full rounded-lg bg-background px-4 py-2'
-
 export function getDateRange(
   dates: TISOMonth[],
   range: number,

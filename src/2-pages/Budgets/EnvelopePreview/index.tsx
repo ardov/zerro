@@ -1,11 +1,10 @@
-import { ButtonBase, IconButton } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/Button'
 import type { FC, MouseEvent } from 'react'
 import { useCallback } from 'react'
-import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useTranslation } from 'react-i18next'
 import { TagIcon } from '@/6-shared/ui/TagIcon'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
-import { CloseIcon, EditIcon, EmojiFlagsIcon } from '@/6-shared/ui/Icons'
+import { CloseIcon, EditIcon } from '@/6-shared/ui/Icons'
 import { ColorPicker } from '@/3-widgets/ColorPicker'
 import { useAsk } from '@/6-shared/overlays'
 import { track } from '@/6-shared/analytics'
@@ -18,8 +17,7 @@ import { useMonth } from '../MonthProvider'
 import { EnvelopeEditDialog, useEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
 import { CommentWidget } from './CommentWidget'
-import { cardClass } from './shared'
-import { useGoalPopover } from '../GoalPopover'
+import { GoalWidget } from './GoalWidget'
 import { BurndownWidget } from './BurndownWidget'
 import { EnvelopeInfo } from './EnvelopeInfo'
 import { StatisticWidget } from './StatisticWidget'
@@ -30,16 +28,12 @@ type EnvelopePreviewProps = {
 }
 
 export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
-  const { t } = useTranslation('budgets')
   const [month] = useMonth()
-  const openGoalPopover = useGoalPopover()
 
   const envMetrics = useAppSelector(core.activity.selectEnvelopeMetrics)[month][
     id
   ]
   const env = useAppSelector(core.envelopes.selectAll)[id]
-
-  const goalInfo = useAppSelector(core.goals.selectAll)[month][id]
   if (!envMetrics) return null
 
   const { currency } = envMetrics
@@ -50,22 +44,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
       <div className="grid gap-4 px-6 pb-10 pt-6">
         <CommentWidget key={id} id={id} />
 
-        <ButtonBase
-          onClick={e => openGoalPopover(id, e.currentTarget)}
-          className={cn(cardClass, 'flex justify-start gap-2')}
-        >
-          <EmojiFlagsIcon />
-          <span
-            className={cn(
-              'text-body font-sans text-left',
-              goalInfo ? 'text-foreground' : 'text-disabled-foreground'
-            )}
-          >
-            {goalInfo
-              ? core.goals.formatGoal(goalInfo.goal, currency)
-              : t('goal')}
-          </span>
-        </ButtonBase>
+        <GoalWidget id={id} currency={currency} />
 
         <EnvelopeInfo month={month} id={id} />
 

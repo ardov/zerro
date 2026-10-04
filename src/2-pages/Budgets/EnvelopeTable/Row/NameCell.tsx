@@ -1,6 +1,6 @@
 import { IconButton } from '@/6-shared/ui/Button'
 import type { FC, ReactNode } from 'react'
-import { memo, useCallback, useRef } from 'react'
+import { memo, useRef } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import { useDraggable } from '@dnd-kit/core'
@@ -12,8 +12,9 @@ import { DragIndicatorIcon } from '@/6-shared/ui/Icons'
 import type { TFxCode } from '@/6-shared/types'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { getCurrencySymbol } from '@/6-shared/helpers/money'
-import { useFloatingInput } from '@/6-shared/ui/FloatingInput'
 import { useAppDispatch } from '@/store/index'
+import { useAsk } from '@/6-shared/overlays'
+import { RenamePopover } from '../RenamePopover'
 
 import { DragTypes } from '@/2-pages/Budgets/DnD'
 
@@ -33,13 +34,13 @@ export const NameCell: FC<{
 
   const dispatch = useAppDispatch()
   const ref = useRef<HTMLSpanElement>(null)
-  const updateName = useCallback(
-    (v: string) => {
-      dispatch(core.envelopes.rename(id, v))
-    },
-    [dispatch, id]
-  )
-  const floating = useFloatingInput(ref, updateName)
+  const ask = useAsk()
+  const rename = async () => {
+    const next = await ask<string>(
+      <RenamePopover value={originalName} anchor={ref.current} />
+    )
+    if (next !== undefined) dispatch(core.envelopes.rename(id, next))
+  }
 
   return (
     <div
@@ -69,7 +70,7 @@ export const NameCell: FC<{
             if (e.altKey) {
               e.preventDefault()
               e.stopPropagation()
-              floating.open(originalName)
+              void rename()
             }
           }}
         >
@@ -85,7 +86,6 @@ export const NameCell: FC<{
           {comment}
         </span>
       )}
-      {floating.render()}
     </div>
   )
 })

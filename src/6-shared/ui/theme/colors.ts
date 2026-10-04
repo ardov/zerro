@@ -189,10 +189,6 @@ function createColorTokens(mode: ColorScheme) {
       semanticScales.neutral,
       TEXT_DISABLED + (isLight ? 0.115 : -0.07)
     ),
-    '--disabled-border': transparentAt(
-      semanticScales.neutral,
-      TEXT_DISABLED + (isLight ? 0.115 : -0.07)
-    ),
     '--disabled-background': transparentAt(semanticScales.neutral, BORDER),
     '--disabled-foreground': transparentAt(
       semanticScales.neutral,

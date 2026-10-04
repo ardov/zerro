@@ -326,6 +326,7 @@ export const en: typeof ru = {
       'The budget of this category is set in {{currency}}. It will be automatically recalculated at the current exchange rate.',
     addGoal: 'Add goal',
     goal: 'Goal',
+    goalValue: 'Goal: {{goal}}',
     activityStats: {
       incomes: 'Incomes',
       outcomes: 'Expenses',

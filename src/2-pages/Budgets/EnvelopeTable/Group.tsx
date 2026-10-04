@@ -9,7 +9,6 @@ import {
   ArrowDownwardIcon,
   ArrowUpwardIcon,
 } from '@/6-shared/ui/Icons'
-import { useFloatingInput } from '@/6-shared/ui/FloatingInput'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 
 import { useAppDispatch, useAppSelector } from '@/store/index'
@@ -23,6 +22,8 @@ import { addFxAmount } from '@/6-shared/helpers/money'
 import { useMonth } from '../MonthProvider'
 import { Amount } from '@/6-shared/ui/Amount'
 import { useTranslation } from 'react-i18next'
+import { useAsk } from '@/6-shared/overlays'
+import { RenamePopover } from './RenamePopover'
 
 type TGroupProps = {
   name: string
@@ -49,11 +50,14 @@ export const Group: FC<TGroupProps> = ({
   const { t } = useTranslation('budgets')
   const dispatch = useAppDispatch()
   const { assigned, available, activity } = useGroupTotals(name)
-  const ref = useRef<HTMLDivElement>(null)
-
-  const floating = useFloatingInput(ref, val =>
-    dispatch(renameGroup(name, val))
-  )
+  const ref = useRef<HTMLHeadingElement>(null)
+  const ask = useAsk()
+  const rename = async () => {
+    const next = await ask<string>(
+      <RenamePopover value={name} anchor={ref.current} />
+    )
+    if (next !== undefined) dispatch(renameGroup(name, next))
+  }
 
   const Actions = (
     <>
@@ -91,12 +95,11 @@ export const Group: FC<TGroupProps> = ({
   )
 
   const NameCell = (
-    <div ref={ref} className="flex min-w-0 items-center justify-start">
-      <ButtonBase
-        className="-ml-2 min-w-0 shrink p-2"
-        onClick={() => floating.open(name)}
-      >
-        <h6 className="m-0 truncate text-title font-sans font-black">{name}</h6>
+    <div className="flex min-w-0 items-center justify-start">
+      <ButtonBase className="-ml-2 min-w-0 shrink p-2" onClick={rename}>
+        <h6 ref={ref} className="m-0 truncate text-title font-sans font-black">
+          {name}
+        </h6>
       </ButtonBase>
 
       {isReordering && Actions}
@@ -105,7 +108,6 @@ export const Group: FC<TGroupProps> = ({
 
   return (
     <>
-      {floating.render()}
       <TableRow
         className="items-baseline border-b-[0.5px] border-border pt-4 last:border-0"
         name={NameCell}

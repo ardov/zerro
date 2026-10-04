@@ -57,7 +57,7 @@ const ColorSchemeMetadata: FC<{ pinned: boolean }> = ({ pinned }) => {
      recalculation, and that is not free to anyone else on the page: an element
      mounting into a transitioned state stops starting there and animates into
      it instead, because the recalculation gives the transition a previous
-     value to run from. `OutlinedField`'s floating label is one.
+     value to run from. A floating field label is one.
      Reading the value here keeps colours inside the module that owns them,
      which is the point — no feature code imports a scale or level. */
   return <meta name="theme-color" content={getThemeColor(mode)} />

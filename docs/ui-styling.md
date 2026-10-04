@@ -179,13 +179,17 @@ Important groups include:
   reset, focus-visible treatment, geometry and semantic color variants.
 - Rows and menus: `ListRow`, `ActionList`, and kit `Menu` provide keyboard,
   typeahead, selection and disabled-row behavior for action surfaces.
-- Fields: `OutlinedField`, `InputBase`, `GrowingTextarea`, kit `Select`/`MultiSelect`, and date
-  controls own labels, adornments, focus, error and disabled states.
-- Feedback: `Checkbox`, `Switch`, `Chip`, `Tooltip`, `CircularProgress`,
+- Fields: kit `Input`, `Textarea`, `InlineField`, `Select`/`MultiSelect`, and
+  date controls own labels, adornments, focus, error and disabled states.
+- Feedback: `Checkbox`, `Switch`, `Chip`, kit `Tooltip`, `CircularProgress`,
   `SnackbarProvider`, and `SnackbarNotice` own their complete visual state.
-- Disclosure and overlays: `Collapse`, `Dialog`, `SideDrawer`, `Popover`,
-  `AdaptivePopover`, `AdaptiveDialog`, and kit `Confirm` own focus, dismissal,
-  transition and portal behavior.
+- Disclosure and overlays: `Collapse`, legacy `Dialog`, `Popover` and
+  `AdaptivePopover`, and kit `Dialog`, `Drawer`, `Popover`, `Menu` and
+  `Confirm` own focus, dismissal, transition and portal behavior.
+
+Kit `Tooltip` opens on hover and focus only, and it does not name its trigger:
+the control owns its accessible name, so an icon-only button takes the same
+text as its `aria-label`. A tooltip does not open on touch.
 
 Prefer native semantics. Interactive rows and links should remain real buttons
 or anchors; decorative controls must not become accidental tab stops.
@@ -197,10 +201,9 @@ Overlay components portal to the document body and share the stacking tokens
 `src/tailwind.css`, so they do not depend on a mounted provider.
 
 The legacy `Popover` positions against an element or virtual anchor and uses the
-shared surface geometry in `overlaySurface`. `SideDrawer` is a modal sheet.
-`NavDrawer` is the separate docked navigation layout. `AdaptivePopover` and
-`AdaptiveDialog` select the appropriate surface for the current viewport
-without changing the caller's open-state contract.
+shared surface geometry in `overlaySurface`. `NavDrawer` is the separate docked
+navigation layout. `AdaptivePopover` selects the appropriate surface for the
+current viewport without changing the caller's open-state contract.
 
 Each legacy surface takes `open` and `onClose` and owns neither. Openness belongs
 to `6-shared/overlays`, which is the only place that touches browser history:

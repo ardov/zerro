@@ -306,6 +306,7 @@
     "isSelf": "(основная)",
     "envelopeCurrencyTooltip": "Бюджет этой категории задаётся в {{currency}}. Он автоматически будет пересчитываться по текущему курсу.",
     "goal": "Цель",
+    "goalValue": "Цель: {{goal}}",
     "addGoal": "Добавить цель",
     "activityStats": {
       "incomes": "Доходы",
