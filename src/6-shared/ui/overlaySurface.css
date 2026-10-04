@@ -27,10 +27,9 @@
     }
   }
 
-  /* A surface that slides in off an edge and can be swiped back out. Two of
-     them: the adaptive popover on a phone, and a dialog on a phone. They
-     differ only in how round the leading corners are, so that is a variable
-     and the placement decides which corners it lands on. */
+  /* A surface that slides in off an edge and can be swiped back out: the
+     adaptive popover on a phone. How round the leading corners are is a
+     variable, and the placement decides which corners it lands on. */
   .drawer-slide {
     transform: translate(
       var(--drawer-swipe-movement-x, 0),

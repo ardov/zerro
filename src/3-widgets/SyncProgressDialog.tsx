@@ -2,15 +2,8 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { continueSyncLater, retryStoppedSync } from '@/4-features/sync'
-import { Button, IconButton } from '@/6-shared/ui/Button'
-import { AdaptiveDialog } from '@/6-shared/ui/AdaptiveDialog'
-import {
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from '@/6-shared/ui/Dialog'
-import { CloseIcon } from '@/6-shared/ui/Icons'
+import { Button } from '@/6-shared/ui/kit/Button'
+import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
 import { RadialProgress } from '@/6-shared/ui/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
@@ -66,85 +59,66 @@ export function SyncProgressDialogView({
       ? t('syncProgress:gatewayTimeoutError')
       : progress.errorMessage
 
-  return (
-    <AdaptiveDialog
-      open={open}
-      onClose={onClose}
-      aria-labelledby="sync-progress-title"
-      className="w-full"
-    >
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 pr-3">
-        <DialogTitle id="sync-progress-title" className="min-w-0 pr-0">
-          {title}
-        </DialogTitle>
-        <IconButton edge="end" aria-label={t('common:close')} onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </div>
-      <DialogContent className="pt-0">
-        {phase === 'sending' && (
-          <DialogContentText>
-            {t('syncProgress:sendingDescription')}
-          </DialogContentText>
-        )}
-        {phase === 'waiting' && (
-          <DialogContentText>
-            {t('syncProgress:waitingDescription', {
-              count: seconds,
-              error,
-            })}
-          </DialogContentText>
-        )}
-        {phase === 'stopped' && (
-          <DialogContentText>
-            {t('syncProgress:stoppedDescription', {
-              entity: current ? entityLabel(t, current.key) : '',
-              error,
-            })}
-          </DialogContentText>
-        )}
+  const description =
+    phase === 'sending'
+      ? t('syncProgress:sendingDescription')
+      : phase === 'waiting'
+        ? t('syncProgress:waitingDescription', { count: seconds, error })
+        : t('syncProgress:stoppedDescription', {
+            entity: current ? entityLabel(t, current.key) : '',
+            error,
+          })
 
-        <ul className="m-0 mt-5 grid list-none gap-3 p-0">
-          {progress.rows.map(row => (
-            <li
-              key={row.key}
-              className="flex items-center gap-3"
-              role="progressbar"
-              aria-label={entityLabel(t, row.key)}
-              aria-valuemin={0}
-              aria-valuemax={row.total}
-              aria-valuenow={row.confirmed}
-            >
-              <RadialProgress
-                aria-hidden
-                size={24}
-                value={row.confirmed / row.total}
-                active={phase === 'sending' && current?.key === row.key}
-              />
-              <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 text-body">
-                <span>{entityLabel(t, row.key)}</span>
-                <span className="shrink-0 tabular-nums text-muted-foreground">
-                  {t('syncProgress:count', {
-                    confirmed: row.confirmed,
-                    total: row.total,
-                  })}
-                </span>
+  // Sync owns this surface's openness in the store, so it renders without a
+  // history entry of its own.
+  return (
+    <DialogSurface
+      title={title}
+      controller={{ open, setOpen: next => !next && onClose() }}
+    >
+      <p className="text-ui-secondary">{description}</p>
+
+      <ul className="m-0 mt-5 grid list-none gap-3 p-0">
+        {progress.rows.map(row => (
+          <li
+            key={row.key}
+            className="flex items-center gap-3"
+            role="progressbar"
+            aria-label={entityLabel(t, row.key)}
+            aria-valuemin={0}
+            aria-valuemax={row.total}
+            aria-valuenow={row.confirmed}
+          >
+            <RadialProgress
+              aria-hidden
+              size={24}
+              value={row.confirmed / row.total}
+              active={phase === 'sending' && current?.key === row.key}
+            />
+            <span className="flex min-w-0 flex-wrap items-baseline gap-x-2">
+              <span>{entityLabel(t, row.key)}</span>
+              <span className="shrink-0 tabular-nums text-ui-secondary">
+                {t('syncProgress:count', {
+                  confirmed: row.confirmed,
+                  total: row.total,
+                })}
               </span>
-            </li>
-          ))}
-        </ul>
-      </DialogContent>
+            </span>
+          </li>
+        ))}
+      </ul>
+
       {phase === 'stopped' && (
-        <DialogActions>
-          <Button variant="text" color="secondary" onClick={onContinue}>
+        <div className="mt-6 flex flex-wrap justify-end gap-2">
+          <Button variant="secondary" onClick={onContinue}>
             {t('syncProgress:continueLater')}
           </Button>
-          <Button variant="contained" onClick={onRetry}>
+          <Button variant="primary" onClick={onRetry}>
             {t('syncProgress:retryNow')}
           </Button>
-        </DialogActions>
+        </div>
       )}
-    </AdaptiveDialog>
+    </DialogSurface>
   )
 }
 
