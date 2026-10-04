@@ -5,6 +5,19 @@
     transform-box: view-box;
     transform-origin: center;
     animation: radial-progress-activity 3s linear infinite;
+    transition: 0.5s ease-out 0.1s;
+  }
+
+  .radial-progress-activity ~ circle {
+    transition: 0.5s ease-out;
+  }
+
+  .radial-progress-activity ~ path {
+    transition: 0.3s ease-out;
+  }
+
+  .radial-progress-activity ~ path[data-completed] {
+    transition-delay: 0.4s;
   }
 
   @keyframes radial-progress-activity {
@@ -14,6 +27,11 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .radial-progress-activity ~ circle,
+    .radial-progress-activity ~ path,
+    .radial-progress-activity {
+      transition: none;
+    }
     .radial-progress-activity {
       animation: none;
     }

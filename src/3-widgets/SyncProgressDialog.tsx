@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { continueSyncLater, retryStoppedSync } from '@/4-features/sync'
 import { Button } from '@/6-shared/ui/kit/Button'
 import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
-import { RadialProgress } from '@/6-shared/ui/RadialProgress'
+import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   selectSyncDetailsOpen,

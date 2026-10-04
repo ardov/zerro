@@ -6,7 +6,7 @@ import { core } from '@/zerro-core/redux'
 import type { TISOMonth } from '@/6-shared/types'
 import { formatMoney } from '@/6-shared/helpers/money'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
-import { RadialProgress } from '@/6-shared/ui/RadialProgress'
+import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@/store'
 
 import { fillGoals } from '../model/fillGoals'

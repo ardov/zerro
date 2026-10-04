@@ -9,7 +9,7 @@ import { useDroppable } from '@dnd-kit/core'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { EmojiFlagsIcon } from '@/6-shared/ui/Icons'
-import { RadialProgress } from '@/6-shared/ui/RadialProgress'
+import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import type { TFxCode, TISOMonth } from '@/6-shared/types'
 
 import { useAppSelector } from '@/store'

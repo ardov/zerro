@@ -1,27 +1,28 @@
-import type { FC } from 'react'
-import React from 'react'
+import type { SVGProps } from 'react'
 import './RadialProgress.css'
 
-export type RadialProgressProps = React.SVGProps<SVGSVGElement> & {
+export type RadialProgressProps = SVGProps<SVGSVGElement> & {
   size?: number
-  value: number
+  /** Omit when the amount of work is unknown. Numeric values range from 0 to 1. */
+  value?: number
   /** Marks an in-flight step without replacing its determinate value. */
   active?: boolean
 }
 
-export const RadialProgress: FC<RadialProgressProps> = ({
-  size = 16,
-  value,
-  active = false,
-  style,
-  ...rest
-}) => {
+export function RadialProgress(props: RadialProgressProps) {
+  const { size = 16, value, active = false, style, ...restProps } = props
+  const accessible = !!(restProps['aria-label'] || restProps['aria-labelledby'])
+  const indeterminate = value === undefined
+  const moving = indeterminate || active
   // A caller dividing by a total it did not check hands over NaN, which would
   // silently become `strokeDasharray="NaN …"` and draw nothing.
-  const ratio = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0
-  const completed = ratio >= 1
-  const colorSuccess = 'var(--success)'
-  const colorMain = 'var(--muted-foreground)'
+  const ratio =
+    value !== undefined && Number.isFinite(value)
+      ? Math.min(1, Math.max(0, value))
+      : 0
+  const completed = !indeterminate && ratio >= 1
+  const colorSuccess = 'var(--color-ui-success)'
+  const colorMain = 'var(--color-ui-secondary)'
 
   const r = 12
   const length = 2 * Math.PI * r
@@ -30,7 +31,12 @@ export const RadialProgress: FC<RadialProgressProps> = ({
       height={size}
       width={size}
       viewBox="0 0 64 64"
-      {...rest}
+      role={accessible ? 'progressbar' : undefined}
+      aria-hidden={accessible ? undefined : true}
+      aria-valuemin={accessible ? 0 : undefined}
+      aria-valuemax={accessible ? 1 : undefined}
+      aria-valuenow={accessible && !indeterminate ? ratio : undefined}
+      {...restProps}
       /* The global `svg { max-width: 100% }` reset shrinks this icon's width
          alone when its button is narrower than `size`, distorting the circle.
          A fixed-size UI icon isn't responsive content, so it opts out. */
@@ -41,26 +47,24 @@ export const RadialProgress: FC<RadialProgressProps> = ({
         r="30"
         cx="32"
         cy="32"
-        stroke={active ? colorMain : completed ? colorSuccess : colorMain}
-        strokeWidth={active ? 3 : 2}
-        strokeDasharray={active ? '8 16' : '24 0'}
+        stroke={moving ? colorMain : completed ? colorSuccess : colorMain}
+        strokeWidth={moving ? 3 : 2}
+        strokeDasharray={moving ? '8 16' : '24 0'}
         strokeLinecap="round"
-        opacity={active ? 1 : completed ? 0.15 : 1}
+        opacity={moving ? 1 : completed ? 0.15 : 1}
         fill={completed ? colorSuccess : 'transparent'}
-        style={{ transition: '0.5s ease-out 0.1s' }}
       />
 
       <circle
         r={r}
         cx="32"
         cy="32"
-        opacity="1"
+        opacity={indeterminate ? 0 : 1}
         fill="transparent"
         stroke={completed ? colorSuccess : colorMain}
         strokeWidth={completed ? 0 : r * 2}
         strokeDasharray={`${ratio * length} ${length}`}
         transform="rotate(-90, 32, 32)"
-        style={{ transition: '0.5s ease-out' }}
       />
 
       <path
@@ -69,7 +73,7 @@ export const RadialProgress: FC<RadialProgressProps> = ({
         strokeDasharray={completed ? '60 60' : '0 60'}
         stroke={colorSuccess}
         fill="none"
-        style={{ transition: `0.3s ease-out ${completed ? 0.4 : 0}s` }}
+        data-completed={completed || undefined}
       />
     </svg>
   )

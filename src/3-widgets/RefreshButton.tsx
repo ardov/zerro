@@ -1,16 +1,9 @@
-import { IconButton } from '@/6-shared/ui/Button'
-import type { ComponentProps, FC } from 'react'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import type { FC, ReactNode } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CircularProgress } from '@/6-shared/ui/CircularProgress'
-import { RadialProgress } from '@/6-shared/ui/RadialProgress'
-import {
-  SyncIcon,
-  SyncDisabledIcon,
-  DoneIcon,
-  WarningIcon,
-} from '@/6-shared/ui/Icons'
-import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
+import { SyncIcon, SyncDisabledIcon, WarningIcon } from '@/6-shared/ui/Icons'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 
 import { getChangedNum } from '@/store/data'
@@ -44,7 +37,6 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
     if (hasDetails) dispatch(syncDetailsOpened())
     else dispatch(syncData())
   }, [dispatch, hasDetails])
-  const menuProps = { onClick: handleClick }
   const lastResult = useAppSelector(selectLastSyncResult)
   const finishedAt = lastResult?.finishedAt || 0
   const [regular] = useRegularSync()
@@ -78,15 +70,15 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
     pending: progress ? (
       <RadialProgress
         aria-hidden
-        size={24}
+        size={20}
         value={progressValue}
         active={progress.kind === 'pushing' && progress.phase === 'sending'}
       />
     ) : (
-      <CircularProgress size={24} />
+      <RadialProgress size={20} />
     ),
     stopped: <WarningIcon className="text-error" />,
-    success: <DoneIcon className="text-success" />,
+    success: <RadialProgress size={20} value={1} />,
     fail: <WarningIcon className="text-error" />,
   }
   const actionLabel = hasDetails
@@ -101,23 +93,23 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
       type="button"
       aria-label={actionLabel}
       className={cn(rest.className, 'text-caption')}
-      {...menuProps}
+      onClick={handleClick}
     >
       <SyncBadge count={changedNum}>{components[state]}</SyncBadge>
       <span>{actionLabel}</span>
     </button>
   ) : (
-    <Tooltip content={iconLabel}>
-      <SyncBadge count={changedNum}>
-        <IconButton
-          {...menuProps}
-          aria-label={iconLabel}
-          className={rest.className}
-        >
-          {components[state]}
-        </IconButton>
-      </SyncBadge>
-    </Tooltip>
+    <SyncBadge count={changedNum}>
+      <IconButton
+        onClick={handleClick}
+        label={iconLabel}
+        variant="ghost"
+        size="sm"
+        className={rest.className}
+      >
+        {components[state]}
+      </IconButton>
+    </SyncBadge>
   )
 }
 
@@ -133,14 +125,11 @@ function progressRatio(
   return total ? confirmed / total : 0
 }
 
-type SyncBadgeProps = ComponentProps<'span'> & { count: number }
+type SyncBadgeProps = { count: number; children: ReactNode }
 
-/** The root spreads what it is handed: `Tooltip` renders its trigger through
- * this element, and a component that keeps its props to itself would swallow
- * the handlers and leave the tooltip inert. */
-function SyncBadge({ count, children, className, ...props }: SyncBadgeProps) {
+function SyncBadge({ count, children }: SyncBadgeProps) {
   return (
-    <span {...props} className={cn('relative inline-flex', className)}>
+    <span className="relative inline-flex">
       {children}
       {count > 0 && (
         <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full bg-info px-0.5 text-[0.625rem]/4 font-medium text-info-foreground">

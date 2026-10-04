@@ -8,7 +8,7 @@ import {
   useLocation,
 } from 'react-router-dom'
 import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
-import { CircularProgress } from '@/6-shared/ui/CircularProgress'
+import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import { useTranslation } from 'react-i18next'
 import {
   initAnalytics,
@@ -134,11 +134,14 @@ const Layout: FC<{
   )
 }
 
-const FallbackLoader = () => (
-  <div className="grid h-full place-content-center">
-    <CircularProgress />
-  </div>
-)
+function FallbackLoader() {
+  const { t } = useTranslation('loadingHints')
+  return (
+    <div className="grid h-full place-content-center">
+      <RadialProgress size={40} aria-label={t('hint')} />
+    </div>
+  )
+}
 
 const Navigation = React.memo(() => {
   const isMobile = useBreakpointDown('md')
@@ -166,7 +169,7 @@ function MainLoader() {
   }, [t])
   return (
     <div className="flex h-full flex-col items-center justify-center">
-      <CircularProgress />
+      <RadialProgress size={40} aria-label={t('hint')} />
       <div className="mt-8 w-[200px]">
         <p className="m-0 text-center text-body">{hint}</p>
       </div>
