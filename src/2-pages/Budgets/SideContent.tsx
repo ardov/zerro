@@ -1,10 +1,14 @@
 import type { core } from '@/zerro-core/redux'
 import type { FC } from 'react'
-import type { CSSProperties } from 'react'
 import { memo, useCallback } from 'react'
-import { SideDrawer } from '@/6-shared/ui/SideDrawer'
+import { useTranslation } from 'react-i18next'
+import { formatDate } from '@/6-shared/helpers/date'
+import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
+import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
+import type { SurfaceName } from '@/6-shared/ui/kit/SurfaceContent'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
+import { useMonth } from './MonthProvider'
 import { defineScreen } from '@/6-shared/overlays'
 
 type TDrawerId = core.envelopes.TEnvelopeId | 'overview'
@@ -15,16 +19,15 @@ const envelopeScreen = defineScreen<TDrawerId>('envelope')
 
 export const useSideContent = () => envelopeScreen.useOpen()
 
-export const SideContent: FC<{ docked?: boolean; width: number }> = props => {
+export const SideContent: FC<{ docked?: boolean }> = props => {
   const [id, setId] = envelopeScreen.use()
   const onClose = useCallback(() => setId(null), [setId])
   return (
-    <MemoSideDrawer
+    <MemoSideContent
       open={!!id}
       onClose={onClose}
       id={id}
       docked={props.docked}
-      width={props.width}
     />
   )
 }
@@ -34,30 +37,41 @@ type TSideContentProps = {
   onClose: () => void
   id?: TDrawerId
   docked?: boolean
-  width: number
 }
-const MemoSideDrawer = memo<TSideContentProps>(props => {
-  const { open, onClose, id, docked, width } = props
 
-  const drawerContent =
-    !id || id === 'overview' ? (
-      <MonthInfo onClose={onClose} />
-    ) : (
-      <EnvelopePreview onClose={onClose} id={id} />
-    )
+/** Docked beside the table, the month overview is part of the page and has no
+ * header. As a drawer it is modal, so it takes the drawer's header and close
+ * button. An envelope draws its own header either way. */
+const MemoSideContent = memo<TSideContentProps>(props => {
+  const { open, onClose, id, docked } = props
+  const { t } = useTranslation('common')
+  const [month] = useMonth()
+  // The screen value is gone while the drawer slides out. Keep showing what
+  // it showed, so a closing envelope does not turn into the month overview.
+  const shownId = useCachedValue(id, !!id)
+  const current = docked ? id : shownId
+  const envelopeId = current && current !== 'overview' ? current : null
 
-  if (docked) {
-    return open ? drawerContent : <MonthInfo onClose={onClose} />
-  }
+  const content = envelopeId ? (
+    <EnvelopePreview onClose={onClose} id={envelopeId} />
+  ) : (
+    <MonthInfo />
+  )
+  if (docked) return content
 
+  const name: SurfaceName = envelopeId
+    ? { label: t('category') }
+    : { title: formatDate(month, 'LLLL').toUpperCase() }
   return (
-    <SideDrawer open={open} onClose={onClose}>
-      <div
-        className="w-screen sm:w-[var(--side-content-width)]"
-        style={{ '--side-content-width': `${width}px` } as CSSProperties}
-      >
-        {drawerContent}
-      </div>
-    </SideDrawer>
+    <DrawerSurface
+      {...name}
+      side="right"
+      controller={{ open, setOpen: next => !next && onClose() }}
+      // The content is drawn on the card colour, as in the docked column.
+      className="bg-card"
+      contentClassName="p-0"
+    >
+      {content}
+    </DrawerSurface>
   )
 })

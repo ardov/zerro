@@ -29,7 +29,7 @@ function MonthConfirmationHarness() {
       <button type="button" onClick={() => openSide('overview')}>
         Open month overview
       </button>
-      <SideContent width={360} />
+      <SideContent />
     </>
   )
 }
@@ -187,7 +187,7 @@ function GoalDraftHarness({ inDrawer = false }: { inDrawer?: boolean }) {
       <output className="sr-only" data-testid="saved-goal">
         {JSON.stringify(goal ?? null)}
       </output>
-      {inDrawer && <SideContent width={360} />}
+      {inDrawer && <SideContent />}
     </>
   )
 }

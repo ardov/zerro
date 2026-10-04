@@ -1,14 +1,9 @@
-import { Button, IconButton } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/Button'
 import type { FC, HTMLAttributes } from 'react'
-import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isZero } from '@/6-shared/helpers/money'
-import { formatDate } from '@/6-shared/helpers/date'
 import { startFresh } from '@/4-features/bulkActions/startFresh'
-import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
-import { CloseIcon } from '@/6-shared/ui/Icons'
-import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
-import type { TDateDraft, TISOMonth } from '@/6-shared/types'
+import type { TISOMonth } from '@/6-shared/types'
 
 import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import {
@@ -27,16 +22,14 @@ import { useAsk } from '@/6-shared/overlays'
 import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useTranslation } from 'react-i18next'
 
-type MonthInfoProps = HTMLAttributes<HTMLDivElement> & { onClose: () => void }
-
-export const MonthInfo: FC<MonthInfoProps> = ({
-  onClose,
+/** The month's overview. It has no header of its own: docked beside the table
+ * it is part of the page, and the drawer that shows it modally supplies one. */
+export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
   className,
   ...rest
 }) => {
   const { t } = useTranslation('budgets', { keyPrefix: 'actions' })
   const [month] = useMonth()
-  const isMobile = useBreakpointDown('md')
   const { overspend } = useAppSelector(core.months.selectTotals)[month]
 
   const dispatch = useAppDispatch()
@@ -82,18 +75,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({
   }
 
   return (
-    <div {...rest} className={cn('min-h-screen', className)}>
-      {isMobile && (
-        <div className="flex items-center px-6 py-2">
-          <div className="grow">
-            <h2 className="m-0 truncate text-title">{getMonthName(month)}</h2>
-          </div>
-
-          <Tooltip content={t('close')}>
-            <IconButton aria-label={t('close')} edge="end" onClick={onClose} children={<CloseIcon />} />
-          </Tooltip>
-        </div>
-      )}
+    <div {...rest} className={className}>
       <div className="flex flex-col gap-4 p-6">
         <OverspendNotice month={month} />
 
@@ -129,9 +111,6 @@ export const MonthInfo: FC<MonthInfoProps> = ({
     </div>
   )
 }
-
-const getMonthName = (date: TDateDraft) =>
-  formatDate(new Date(date), 'LLLL').toUpperCase()
 
 function GoalAction(props: { month: TISOMonth }) {
   const { t } = useTranslation('budgets', {

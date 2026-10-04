@@ -71,7 +71,6 @@ function Budgets() {
   )
 }
 
-const sideWidth = 360
 const BudgetLayout: FC<{
   mainContent: ReactElement
 }> = props => {
@@ -85,10 +84,10 @@ const BudgetLayout: FC<{
       </div>
 
       {isMD ? (
-        <SideContent width={sideWidth} />
+        <SideContent />
       ) : (
         <div className="w-[360px] shrink-0 overflow-auto bg-card">
-          <SideContent width={sideWidth} docked />
+          <SideContent docked />
         </div>
       )}
     </div>

@@ -262,9 +262,10 @@ Below **500px**, Popover and Menu default to `mobile="drawer"`; use
 `mobile="popover"` to keep them anchored. Dialog stays centered by default
 (`mobile="dialog"`) and supports `mobile="drawer"`. Drawer uses
 `side="auto" | "bottom" | "right"`. Shared application breakpoints are unchanged.
-Right drawers use the theme token `--spacing-ui-drawer-inset` (4px) on all
-viewport edges and round every corner. Bottom drawers remain flush with the
-viewport and round only their top corners.
+From 500px, right drawers use the theme token `--spacing-ui-drawer-inset` (4px)
+on all viewport edges and round every corner; below 500px a right drawer fills
+the screen as a page, without inset or radius. Bottom drawers remain flush with
+the viewport and round only their top corners.
 Adaptive branches can remount content and lose local input. Keep important drafts
 above those branches. Switching presentation neither closes nor adds history.
 

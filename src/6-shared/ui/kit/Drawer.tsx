@@ -16,7 +16,8 @@ import './Drawer.css'
 
 export type DrawerProps = SurfaceName & {
   'aria-describedby'?: string
-  /** Auto uses bottom below 500px and right on wider screens. */
+  /** Auto uses bottom below 500px and right on wider screens. Below 500px a
+   * right sheet fills the screen as a page. */
   side?: 'auto' | 'bottom' | 'right'
   className?: string
   contentClassName?: string
@@ -89,6 +90,9 @@ function DrawerFrame(props: DrawerSurfaceProps) {
         ? 'bottom'
         : 'right'
       : requestedSide
+  // On a phone a side sheet is a page of its own: it fills the screen, and
+  // from 500px it floats beside the page with an inset.
+  const page = side === 'right' && bottomSheet
   return (
     <Primitive.Root
       open={open}
@@ -105,7 +109,11 @@ function DrawerFrame(props: DrawerSurfaceProps) {
         <MobileDrawerViewport
           className={cn(
             'flex',
-            side === 'bottom' ? 'items-end' : 'justify-end p-ui-drawer-inset'
+            side === 'bottom'
+              ? 'items-end'
+              : page
+                ? 'justify-end'
+                : 'justify-end p-ui-drawer-inset'
           )}
         >
           <Primitive.Popup
@@ -122,7 +130,9 @@ function DrawerFrame(props: DrawerSurfaceProps) {
                 : 'h-full w-90 max-w-full rounded-ui-popover',
               className,
               // Desktop popup widths must not shrink their mobile sheet.
-              side === 'bottom' && 'w-full max-w-none'
+              side === 'bottom' && 'w-full max-w-none',
+              page &&
+                'w-full max-w-none rounded-none pt-[env(safe-area-inset-top)]'
             )}
           >
             {side === 'bottom' && (

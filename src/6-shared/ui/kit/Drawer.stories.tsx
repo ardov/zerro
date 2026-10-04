@@ -23,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Bottom or right sheet powered by Base UI. By default, the sheet opens at the bottom below 500px and on the right at 500px and above. Right sheets float inside the viewport with a themed inset and rounded corners on every side. Bottom sheets remain flush with the viewport. Set side="bottom" or side="right" to fix its placement. Requires OverlayHost in a Router; pass popup={usePopup()} for programmatic control. Back, Escape, backdrop and swipe close the same history entry. Bounded scrolling and safe-area padding. Focus returns to the trigger or the focused opener automatically. DrawerSurface accepts a controller when history is already owned by its caller; finalFocus overrides automatic restoration. Example: <Drawer label="Details" trigger={<Button>Open</Button>}>Content</Drawer>.',
+          'Bottom or right sheet powered by Base UI. By default, the sheet opens at the bottom below 500px and on the right at 500px and above. From 500px, right sheets float inside the viewport with a themed inset and rounded corners on every side; below 500px a right sheet fills the screen as a page. Bottom sheets remain flush with the viewport. Set side="bottom" or side="right" to fix its placement. Requires OverlayHost in a Router; pass popup={usePopup()} for programmatic control. Back, Escape, backdrop and swipe close the same history entry. Bounded scrolling and safe-area padding. Focus returns to the trigger or the focused opener automatically. DrawerSurface accepts a controller when history is already owned by its caller; finalFocus overrides automatic restoration. Example: <Drawer label="Details" trigger={<Button>Open</Button>}>Content</Drawer>.',
       },
     },
   },
@@ -84,6 +84,26 @@ export const Right: Story = {
     })
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(trigger).toHaveFocus())
+  },
+}
+
+export const RightPage: Story = {
+  globals: { viewport: { value: 'zerro499' } },
+  args: { side: 'right' },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(
+      within(canvasElement).getByRole('button', { name: 'Open drawer' })
+    )
+    const sheet = await within(canvasElement.ownerDocument.body).findByRole(
+      'dialog'
+    )
+    await waitFor(() => {
+      const bounds = sheet.getBoundingClientRect()
+      expect(bounds.left).toBe(0)
+      expect(bounds.top).toBe(0)
+      expect(bounds.width).toBe(window.innerWidth)
+      expect(bounds.height).toBe(window.innerHeight)
+    })
   },
 }
 

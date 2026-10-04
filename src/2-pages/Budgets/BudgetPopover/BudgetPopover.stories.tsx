@@ -287,7 +287,7 @@ function NestedAssignmentHarness() {
       <button type="button" onClick={() => openSide(id)}>
         Open category details
       </button>
-      <SideContent width={360} />
+      <SideContent />
     </>
   )
 }
