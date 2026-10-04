@@ -10,6 +10,7 @@ import { Field as FieldPrimitive } from '@base-ui/react/field'
 import { useRender } from '@base-ui/react/use-render'
 import { cva } from 'class-variance-authority'
 import { cn } from '@/6-shared/ui/shadcn/utils'
+import '../inputModality'
 
 const surfaceVariants = cva(
   [
@@ -17,9 +18,10 @@ const surfaceVariants = cva(
     'relative flex min-h-(--field-row-height) [--field-row-height:--spacing(12)] w-full items-center rounded-ui-control text-ui-16 text-ui-primary',
     // Surface and interaction
     'border-0 bg-ui-highlight inset-ring-(length:--stroke-ui-control) inset-ring-transparent',
-    'hover:not-focus-within:inset-ring-ui-border has-[>[data-field-control]:focus-within]:inset-ring-ui-focus has-[>[data-field-control]:focus-within]:bg-ui-card',
+    // The focus ring outranks the hover ring by specificity.
+    'hover:inset-ring-ui-border field-focus:inset-ring-ui-focus field-focus:bg-ui-card',
     // Validation and availability
-    'data-invalid:has-[>[data-field-control]:focus-within]:inset-ring-ui-error',
+    'data-invalid:field-focus:inset-ring-ui-error',
     'data-disabled:pointer-events-none data-disabled:opacity-ui-disabled data-disabled:inset-ring-transparent',
   ],
   {
@@ -250,15 +252,16 @@ export function FieldContent(props: {
         floating &&
           (raised
             ? 'top-2 text-ui-14 text-ui-secondary'
-            : 'top-1/2 -translate-y-1/2 text-ui-16 text-ui-placeholder group-focus-within/field-content:top-2 group-focus-within/field-content:translate-y-0 group-focus-within/field-content:text-ui-14 group-focus-within/field-content:text-ui-secondary')
+            : 'top-1/2 -translate-y-1/2 text-ui-16 text-ui-placeholder in-field-focus:top-2 in-field-focus:translate-y-0 in-field-focus:text-ui-14 in-field-focus:text-ui-secondary')
       ),
       children: label,
     },
   })
   return (
     <Content
+      data-field-content
       className={cn(
-        'group/field-content relative min-w-0 flex-1',
+        'relative min-w-0 flex-1',
         size === 'lg' ? 'py-3' : 'py-2',
         floating && (size === 'lg' ? 'pt-7 pb-2' : 'pt-6 pb-1')
       )}

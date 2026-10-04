@@ -158,3 +158,10 @@ emitted, not only those Tailwind finds used. */
     black 100%
   );
 }
+
+/* A field shows focus a person should see: any focus in its text, and
+   keyboard focus on a trigger. A trigger that gets focus back after a pointer
+   closed its popup stays quiet, as a plain button does. The modality comes
+   from `6-shared/ui/inputModality.ts`; before any input, visible focus counts. */
+@custom-variant field-focus (&:has(> [data-field-control] :is(input, textarea):focus), :root:not([data-input-modality='pointer']) &:has(> [data-field-control] :focus-visible));
+@custom-variant in-field-focus (:where([data-field-content]:has(:is(input, textarea):focus)) &, :root:not([data-input-modality='pointer']) :where([data-field-content]:has(:focus-visible)) &);

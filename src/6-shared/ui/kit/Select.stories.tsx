@@ -546,6 +546,34 @@ function ModalFieldDemo() {
   )
 }
 
+/** A pointer that opens and closes the popup leaves focus on the trigger
+ * without the field's focus ring; keyboard focus still shows it. */
+export const QuietFocusAfterPointer: Story = {
+  render: () => <Demo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const document = canvasElement.ownerDocument
+    const body = within(document.body)
+    const trigger = canvas.getByRole('combobox')
+    const field = trigger.closest('.group\\/select-field')!
+    const look = () => {
+      const style = getComputedStyle(field)
+      return [style.boxShadow, style.backgroundColor].join(' | ')
+    }
+    const quiet = look()
+    await userEvent.click(trigger)
+    await body.findByRole('listbox')
+    await userEvent.click(document.body)
+    await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
+    await waitFor(() => expect(trigger).toHaveFocus())
+    await expect(look()).toBe(quiet)
+    await userEvent.tab()
+    await userEvent.tab({ shift: true })
+    await waitFor(() => expect(trigger).toHaveFocus())
+    await waitFor(() => expect(look()).not.toBe(quiet))
+  },
+}
+
 export const WholeFieldAndModalDismissal: Story = {
   render: () => <ModalFieldDemo />,
   play: async ({ canvasElement }) => {

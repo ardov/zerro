@@ -1,34 +1,9 @@
 import { useEffect, useState } from 'react'
-
-type InteractionType = 'mouse' | 'touch' | 'pen' | 'keyboard' | ''
-
-/** The last real input, tracked once for the whole document.
- *
- * Base UI keeps the same thing for its own dismissals, but does not expose it,
- * and a surface this app closes by setting `open={false}` — Back, a call site's
- * `onClose` — emits no `openchange` at all, so the close type Base UI hands to
- * `finalFocus` is an empty string. This is the answer for those. */
-let lastInteraction: InteractionType = ''
-
-if (typeof document !== 'undefined') {
-  document.addEventListener(
-    'pointerdown',
-    event => {
-      lastInteraction =
-        event.pointerType === 'touch' || event.pointerType === 'pen'
-          ? event.pointerType
-          : 'mouse'
-    },
-    true
-  )
-  document.addEventListener(
-    'keydown',
-    () => {
-      lastInteraction = 'keyboard'
-    },
-    true
-  )
-}
+import {
+  forgetLastInteraction,
+  getLastInteraction,
+  type InteractionType,
+} from './inputModality'
 
 /** Zerro overlays are controlled without a Base UI Trigger, and globally
  * hosted children may sit outside their parent's React tree. Capture the exact
@@ -67,7 +42,7 @@ export function useOverlayFinalFocus(
   // An opening starts its own modality: what closes this surface is whatever
   // happens from here on, not whatever last happened on the page before it.
   useEffect(() => {
-    if (open) lastInteraction = ''
+    if (open) forgetLastInteraction()
   }, [open])
 
   const target = opening.target
@@ -79,7 +54,7 @@ export function useOverlayFinalFocus(
     // The most recent real input is more precise than a close type inferred
     // from the focusout caused by a backdrop press. Fall back to Base UI's
     // close type when the controlled surface saw no input of its own.
-    if ((lastInteraction || closeType) === 'keyboard') return target
+    if ((getLastInteraction() || closeType) === 'keyboard') return target
     queueMicrotask(() =>
       target.focus({ preventScroll: true, focusVisible: false })
     )

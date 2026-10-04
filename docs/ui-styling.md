@@ -307,8 +307,14 @@ focuses the confirming action. All application confirmations use the kit Confirm
 
 When an overlay opens another overlay, preserve the opener's history and focus
 contract: closing the child returns focus to the child trigger; closing the
-parent returns focus to the parent trigger. `useOverlayFocus` contains the
+parent returns focus to the parent trigger. `useOverlayFinalFocus` contains the
 shared focus helpers.
+
+A field shows its focus ring for any focus in its text, and for keyboard focus
+on a trigger. A popup closed by a pointer returns focus to its trigger by
+script, and Chrome still treats that focus as visible. `inputModality.ts`
+records the last kind of input on the root as `data-input-modality`, and the
+`field-focus` variant in the kit theme keeps such focus quiet.
 
 Transitions must have a reduced-motion variant. Reduced motion may keep an
 opacity change when it conveys visibility, but must remove spatial movement and
