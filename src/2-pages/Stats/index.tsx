@@ -17,7 +17,7 @@ export default function Stats() {
   return (
     <>
       <title>{`${t('pageTitle')} | Zerro`}</title>
-      <div className="flex flex-col gap-4 p-6 pb-20">
+      <div className="flex flex-col gap-4 p-6">
         <WidgetNetWorth period={period} onTogglePeriod={togglePeriod} />
         <WidgetCashflow period={period} onTogglePeriod={togglePeriod} />
         <WidgetAccHistory period={period} />

@@ -34,7 +34,7 @@ export default function Review() {
     <>
       <title>{`${t('pageTitle')} | Zerro`}</title>
       <div className="review-container">
-        <div className="flex flex-col gap-4 p-6 pb-20">
+        <div className="flex flex-col gap-4 p-6">
           <CardTitle year={year} />
           <IncomeCard year={year} onShowTransactions={showTransactions} />
           <SavingsCard year={year} onShowTransactions={showTransactions} />

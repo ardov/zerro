@@ -15,7 +15,7 @@ import { useDebounce } from '@/6-shared/hooks/useDebounce'
 
 import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
 
-import { GroupedList } from './GroupedList'
+import { GroupedList, LIST_MAX_WIDTH } from './GroupedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
@@ -192,7 +192,10 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     <>
       <div className={cn('relative flex flex-col pt-2', className)}>
         {!hideFilter && (
-          <div className="relative z-10 mx-auto w-full max-w-[576px] px-2">
+          <div
+            className="relative z-10 mx-auto w-full px-2"
+            style={{ maxWidth: LIST_MAX_WIDTH }}
+          >
             <Filter
               query={query}
               onQueryChange={onQueryChange}

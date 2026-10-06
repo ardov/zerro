@@ -1,10 +1,9 @@
-import { IconButton } from '@/6-shared/ui/kit/Button'
+import { IconButton, type IconButtonProps } from '@/6-shared/ui/kit/Button'
 import type { FC, ReactNode } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import { SyncIcon, SyncDisabledIcon, WarningIcon } from '@/6-shared/ui/Icons'
-import { cn } from '@/6-shared/ui/shadcn/utils'
 
 import { getChangedNum } from '@/store/data'
 import {
@@ -18,12 +17,12 @@ import { syncData } from '@/4-features/sync'
 import { useRegularSync } from '@/3-widgets/RegularSyncHandler'
 
 type ButtonState = 'idle' | 'pending' | 'stopped' | 'success' | 'fail'
-type RefreshButtonProps = {
-  isMobile?: boolean
-  className?: string
-}
+type RefreshButtonProps = Pick<
+  IconButtonProps,
+  'className' | 'shape' | 'tooltipSide'
+>
 
-const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
+const RefreshButton: FC<RefreshButtonProps> = props => {
   const { t } = useTranslation(['common', 'syncProgress'])
   const dispatch = useAppDispatch()
   // Sync only. History used to hang off a right-click here, which made the
@@ -81,31 +80,18 @@ const RefreshButton: FC<RefreshButtonProps> = ({ isMobile, ...rest }) => {
     success: <RadialProgress size={20} value={1} />,
     fail: <WarningIcon className="text-error" />,
   }
-  const actionLabel = hasDetails
-    ? t('syncProgress:detailsTitle')
-    : t('common:refresh')
-  const iconLabel = hasDetails
+  const label = hasDetails
     ? t('syncProgress:detailsTitle')
     : t('common:refreshData')
 
-  return isMobile ? (
-    <button
-      type="button"
-      aria-label={actionLabel}
-      className={cn(rest.className, 'text-caption')}
-      onClick={handleClick}
-    >
-      <SyncBadge count={changedNum}>{components[state]}</SyncBadge>
-      <span>{actionLabel}</span>
-    </button>
-  ) : (
+  return (
     <SyncBadge count={changedNum}>
       <IconButton
         onClick={handleClick}
-        label={iconLabel}
+        label={label}
         variant="ghost"
         size="sm"
-        className={rest.className}
+        {...props}
       >
         {components[state]}
       </IconButton>

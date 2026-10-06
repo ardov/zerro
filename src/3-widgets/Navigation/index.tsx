@@ -1,2 +1,3 @@
 export { Rail } from './Rail'
-export { MobileNavigation } from './MobileNavigation'
+export { MobileNavigation, useBottomBarHeight } from './MobileNavigation'
+export { useBottomBarShown } from './destinations'

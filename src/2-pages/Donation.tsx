@@ -10,7 +10,7 @@ export default function Donation() {
       <meta name="description" content={t('pageDescription')} />
       <link rel="canonical" href="https://zerro.app/donation" />
       <div className="flex h-full items-center justify-center">
-        <div className="mx-auto max-w-[480px] p-6 pb-16">
+        <div className="mx-auto max-w-[480px] p-6">
           <h1 className="mt-0 mb-4 text-center text-title-lg">
             {t('heading')}
           </h1>

@@ -46,7 +46,7 @@ describe('RefreshButton', () => {
   })
 
   it('opens details instead of starting another push while syncing', async () => {
-    render(<RefreshButton isMobile />)
+    render(<RefreshButton />)
 
     const button = screen.getByRole('button', {
       name: 'syncProgress:detailsTitle',

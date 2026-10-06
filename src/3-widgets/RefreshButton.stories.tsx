@@ -4,12 +4,12 @@ import { useAppDispatch } from '@/store'
 import { syncStatusChanged, syncFinished } from '@/store/sync'
 import RefreshButton from './RefreshButton'
 
-function StateHarness({ isMobile = false }: { isMobile?: boolean }) {
+function StateHarness() {
   const dispatch = useAppDispatch()
   return (
     <div>
       <div data-testid="refresh">
-        <RefreshButton isMobile={isMobile} />
+        <RefreshButton />
       </div>
       <button
         onClick={() =>

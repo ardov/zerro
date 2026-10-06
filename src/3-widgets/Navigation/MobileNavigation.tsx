@@ -9,6 +9,18 @@ import { useAsk } from '@/6-shared/overlays'
 import { SettingsMenu } from './SettingsMenu'
 import { useDestinations } from './destinations'
 
+/** The bar's geometry, in pixels: the gap above it, its own height, and the
+ * gap under it — wider over a home indicator. */
+const BAR = { top: 4, height: 48, bottom: 4, bottomOverHomeBar: 20 }
+
+/** How much of the window the bottom bar covers. */
+export function useBottomBarHeight() {
+  const hasHomeBar = useHomeBar()
+  return (
+    BAR.top + BAR.height + (hasHomeBar ? BAR.bottomOverHomeBar : BAR.bottom)
+  )
+}
+
 /** The bottom bar of a narrow window: destinations and settings as icons, and
  * Sync beside them as a separate round button — it is an action, not a
  * place. About moves into the settings menu. */
@@ -16,21 +28,25 @@ export const MobileNavigation: FC = () => {
   const { t } = useTranslation('navigation')
   const path = useLocation().pathname
   const ask = useAsk()
-  const destinations = useDestinations({ includeAbout: false })
+  const destinations = useDestinations()
   const current = destinations.find(d => path.startsWith(d.path))
-
   const hasHomeBar = useHomeBar()
-  const paddingBottom = hasHomeBar ? '20px' : '4px'
 
   return (
     <nav
       aria-label={t('main')}
       // Transparent and click-through around the bar and the button: the page
       // scrolls on under them.
-      className="pointer-events-none fixed bottom-0 z-[5] flex w-full items-center gap-2 px-2 pt-1 *:pointer-events-auto"
-      style={{ paddingBottom }}
+      className="pointer-events-none fixed bottom-0 z-[5] flex w-full items-center gap-2 px-2 *:pointer-events-auto"
+      style={{
+        paddingTop: BAR.top,
+        paddingBottom: hasHomeBar ? BAR.bottomOverHomeBar : BAR.bottom,
+      }}
     >
-      <div className="flex h-12 grow items-stretch overflow-hidden rounded-lg bg-card shadow-elevation-1">
+      <div
+        className="flex grow items-stretch overflow-hidden rounded-lg bg-card shadow-elevation-1"
+        style={{ height: BAR.height }}
+      >
         {destinations.map(destination => {
           const selected = current?.path === destination.path
           return (
@@ -48,16 +64,14 @@ export const MobileNavigation: FC = () => {
         <button
           type="button"
           aria-label={t('settings')}
-          onClick={e =>
-            ask(<SettingsMenu showAbout anchorEl={e.currentTarget} />)
-          }
+          onClick={e => ask(<SettingsMenu anchorEl={e.currentTarget} />)}
           className={navigationActionClass(false)}
         >
           <SettingsIcon />
         </button>
       </div>
       <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-card shadow-elevation-1">
-        <RefreshButton className="rounded-full" />
+        <RefreshButton shape="circle" />
       </div>
     </nav>
   )

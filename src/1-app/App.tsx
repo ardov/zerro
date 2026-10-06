@@ -7,7 +7,6 @@ import {
   Routes,
   useLocation,
 } from 'react-router-dom'
-import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import { useTranslation } from 'react-i18next'
 import {
@@ -24,10 +23,15 @@ import { core } from '@/zerro-core/redux'
 import { HistoryShortcuts } from '@/4-features/historyShortcuts'
 import { RegularSyncHandler } from '@/3-widgets/RegularSyncHandler'
 import { HistoryTopBar } from '@/3-widgets/History/HistoryTopBar'
-import { MobileNavigation, Rail } from '@/3-widgets/Navigation'
+import {
+  MobileNavigation,
+  Rail,
+  useBottomBarHeight,
+  useBottomBarShown,
+} from '@/3-widgets/Navigation'
+import { panelWidths } from '@/6-shared/ui/layout/panelWidths'
 import { Panel, scrollInsetClass } from '@/6-shared/ui/layout/Panel'
 import { cn } from '@/6-shared/ui/shadcn/utils'
-import { useHomeBar } from '@/6-shared/hooks/useHomeBar'
 import ErrorBoundary from '@/3-widgets/ErrorBoundary'
 import Transactions from '@/2-pages/Transactions'
 import Auth from '@/2-pages/Auth'
@@ -122,32 +126,29 @@ const Layout: FC<{
   children: React.ReactNode
 }> = props => {
   const { isLoggedIn, hasData, children } = props
-  const isPhone = useBreakpointDown('sm')
-  const hasHomeBar = useHomeBar()
+  const bottomBar = useBottomBarShown()
+  const bottomBarHeight = useBottomBarHeight()
   if (!isLoggedIn) return <div className="min-h-screen">{children}</div>
 
+  const canvas = {
+    // The canvas padding and the gap between panels: none under the bottom
+    // bar, where panels run edge to edge.
+    '--canvas-gap': `${bottomBar ? 0 : panelWidths.gap}px`,
+    // How much of the window the bottom bar covers; each page scroller adds
+    // it inside its scroll (see `scrollInsetClass`).
+    '--bottom-inset': `${bottomBar ? bottomBarHeight : 0}px`,
+  } as React.CSSProperties
+
   return (
-    // The canvas. `--canvas-gap` is its padding and the gap between panels:
-    // none on a phone, where panels run edge to edge. It matches
-    // `panelWidths.gap`, which the layout thresholds are summed from.
-    // `--bottom-inset` is how much of the window the bottom bar covers; each
-    // scroller adds it inside its scroll (see `scrollInsetClass`).
-    <div
-      className="flex h-dvh bg-background [--canvas-gap:0px] sm:[--canvas-gap:8px]"
-      style={
-        {
-          '--bottom-inset': isPhone ? (hasHomeBar ? '72px' : '56px') : '0px',
-        } as React.CSSProperties
-      }
-    >
-      {!isPhone && <Rail />}
+    <div className="flex h-dvh bg-background" style={canvas}>
+      {!bottomBar && <Rail />}
       <div className="flex min-w-0 grow flex-col">
         {hasData && <HistoryTopBar />}
         <main className="flex min-h-0 grow gap-(--canvas-gap) p-(--canvas-gap)">
           {children}
         </main>
       </div>
-      {isPhone && <MobileNavigation />}
+      {bottomBar && <MobileNavigation />}
     </div>
   )
 }

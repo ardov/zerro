@@ -7,7 +7,6 @@ export const en: typeof ru = {
     haveTrouble: 'Not loading?',
     btnAlternativeSignIn: 'Try this',
     btnDemoMode: 'Demo mode',
-    refresh: 'Refresh',
     refreshData: 'Refresh Data',
     leftover: 'Balance',
     category: 'Category',

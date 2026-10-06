@@ -232,11 +232,14 @@ const Day = (props: RowComponentProps<DayData>): React.ReactElement => {
   )
 }
 
+/** The widest the list's rows and its filter grow, side padding included. */
+export const LIST_MAX_WIDTH = 576
+
 /** The side padding is the row's own, not the list's: padding around the
  * scroller would cut content off short of the panel edge. */
 const groupStyle: React.CSSProperties = {
   position: 'relative',
-  maxWidth: 576,
+  maxWidth: LIST_MAX_WIDTH,
   paddingInline: 8,
   marginLeft: 'auto',
   marginRight: 'auto',

@@ -47,13 +47,14 @@ import { convertZmBudgetsToZerro } from '@/4-features/budget/convertZmBudgetsToZ
 import { useAsk, useAsked } from '@/6-shared/overlays'
 import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useColorScheme } from '@/6-shared/ui/theme'
+import { useBottomBarShown } from './destinations'
 
-type SettingsMenuProps = { showAbout?: boolean; anchorEl?: Element | null }
+type SettingsMenuProps = { anchorEl?: Element | null }
 
 /** The settings menu, asked rather than mounted. Items act on the app
  * themselves, so it answers nothing. */
 export const SettingsMenu: FC<SettingsMenuProps> = props => {
-  const { showAbout, anchorEl } = props
+  const { anchorEl } = props
   const { t } = useTranslation('settings')
   const { open, answer } = useAsked<void>()
   return (
@@ -64,18 +65,18 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
       aria-label={t('settings')}
     >
       <ActionList aria-label={t('settings')}>
-        <Settings showAbout={showAbout} onClose={() => answer()} />
+        <Settings onClose={() => answer()} />
       </ActionList>
     </AdaptivePopover>
   )
 }
 
-const Settings = (props: { onClose: () => void; showAbout?: boolean }) => {
+const Settings = (props: { onClose: () => void }) => {
   const { t } = useTranslation('settings')
   const [isExpanded, setExpanded] = useState(false)
   return (
     <>
-      <NavItems onClose={props.onClose} showAbout={props.showAbout} />
+      <NavItems onClose={props.onClose} />
       <ListRowSubheader>{t('settings')}</ListRowSubheader>
       <ThemeItem onClose={props.onClose} />
       <ReloadDataItem onClose={props.onClose} />
@@ -226,9 +227,10 @@ function LangItem(_props: ItemProps) {
 }
 
 /** The destinations the rail and the bottom bar leave out. About is one of
- * them only on a phone: the rail shows it. */
-function NavItems(props: ItemProps & { showAbout?: boolean }) {
+ * them only under the bottom bar: the rail shows it. */
+function NavItems(_props: ItemProps) {
   const { t } = useTranslation('navigation')
+  const showAbout = useBottomBarShown()
   const navigate = useNavigate()
   // Leaving the page takes the menu with it, so navigating is the whole of
   // it: closing first would be a Back step racing a push.
@@ -250,7 +252,7 @@ function NavItems(props: ItemProps & { showAbout?: boolean }) {
         </ListRowIcon>
         <ListRowText>{t('yearWrapped')}</ListRowText>
       </ActionListItem>
-      {props.showAbout && (
+      {showAbout && (
         <ActionListItem
           onClick={handleNav('/about')}
           render={<Link to="/about" />}

@@ -7,11 +7,9 @@ import { SettingsIcon } from '@/6-shared/ui/Icons'
 import { useAsk } from '@/6-shared/overlays'
 import { SettingsMenu } from './SettingsMenu'
 
-interface MenuButtonProps extends Omit<IconButtonProps, 'label'> {
-  showAbout?: boolean
-}
+type MenuButtonProps = Omit<IconButtonProps, 'label'>
 
-export const MenuButton: FC<MenuButtonProps> = ({ showAbout, ...rest }) => {
+export const MenuButton: FC<MenuButtonProps> = props => {
   const { t } = useTranslation('navigation')
   const ask = useAsk()
   return (
@@ -19,10 +17,8 @@ export const MenuButton: FC<MenuButtonProps> = ({ showAbout, ...rest }) => {
       variant="ghost"
       size="sm"
       label={t('settings')}
-      onClick={e =>
-        ask(<SettingsMenu showAbout={showAbout} anchorEl={e.currentTarget} />)
-      }
-      {...rest}
+      onClick={e => ask(<SettingsMenu anchorEl={e.currentTarget} />)}
+      {...props}
     >
       <SettingsIcon />
     </IconButton>

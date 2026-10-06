@@ -13,11 +13,11 @@ export const panelWidths = {
   transactionList: 400,
   transactionDetail: 360,
   envelopeList: 480,
-  budgetSide: 360,
+  monthOverview: 360,
 } as const
 
 /** The narrowest window that holds the rail and these panels side by side. */
-export function windowWidthFor(...panels: number[]) {
+function windowWidthFor(...panels: number[]) {
   const { rail, gap } = panelWidths
   return panels.reduce((sum, panel) => sum + panel + gap, rail + gap)
 }
@@ -27,8 +27,7 @@ export function useWindowFits(...panels: number[]) {
   return useMediaQueryValue(`(min-width: ${windowWidthFor(...panels)}px)`)
 }
 
-/** Whether the accounts panel fits beside the transaction list. Navigation
- * offers Accounts as a destination exactly while it does not. */
+/** Whether the accounts panel fits beside the transaction list. */
 export function useAccountsPanelFits() {
   return useWindowFits(panelWidths.accounts, panelWidths.transactionList)
 }

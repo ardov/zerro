@@ -72,23 +72,27 @@ function Budgets() {
   )
 }
 
-/** The envelope list and, while the window holds both, the right column
- * beside it. Without the room the column becomes a drawer. */
+/** The envelope list and, while the window holds both, the month overview
+ * beside it. Without the room the overview becomes a drawer. An envelope's
+ * detail takes the overview's place either way. */
 const BudgetLayout: FC<{
   mainContent: ReactElement
 }> = props => {
   const { mainContent } = props
-  const sideFits = useWindowFits(
+  const monthOverviewFits = useWindowFits(
     panelWidths.envelopeList,
-    panelWidths.budgetSide
+    panelWidths.monthOverview
   )
 
   return (
     <>
       <Panel className="flex min-w-0 grow justify-center">{mainContent}</Panel>
 
-      {sideFits ? (
-        <Panel className="shrink-0" style={{ width: panelWidths.budgetSide }}>
+      {monthOverviewFits ? (
+        <Panel
+          className="shrink-0"
+          style={{ width: panelWidths.monthOverview }}
+        >
           <SideContent docked />
         </Panel>
       ) : (
