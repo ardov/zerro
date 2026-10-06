@@ -133,6 +133,41 @@ policies. Keep a shared component policy in one named hook. UI Kit Drawer and
 Menu use `useBottomSheetLayout`: bottom sheets below 500px, independently of
 the application's `md` layout breakpoint. Explicit Drawer sides override it.
 
+## Canvas, panels and scrolling
+
+The logged-in layout is a canvas (`--background`) with panels (`--card`) on it.
+`src/6-shared/ui/layout/panelWidths.ts` holds the minimum widths of the rail,
+the canvas gap and each panel. A page decides its arrangement by asking
+whether the window fits a set of panels side by side (`useWindowFits`). It
+does not use a named breakpoint for this. A panel that does not fit opens as
+a drawer instead, or is not shown.
+
+A scrolling surface follows four rules. Each one prevents a specific artifact:
+
+- **The scroller is the surface.** `overflow`, the corner radius and the
+  background sit on one element. Padding on a non-scrolling wrapper around a
+  scroller moves the scroll edge inside the visible surface. Content then
+  vanishes at an invisible line instead of passing under the edge.
+- **Padding lives inside the scroll.** A scroller takes no horizontal padding.
+  Its content or its rows carry it. A sticky element cannot leave its parent's
+  content box, so padding on the scroller insets every sticky header.
+- **Nothing between a sticky element and its scroller clips.** A sticky
+  element sticks to its nearest ancestor with an `overflow` other than
+  `visible`. An `overflow: hidden` wrapper added for rounding becomes that
+  ancestor, and it never scrolls. A sticky element's parent should also span
+  the whole scrolled content, or the element leaves with it.
+- **Overlaps are insets inside the scroll.** The phone's bottom bar covers
+  `--bottom-inset` of the window. A scroller adds it as padding at the end of
+  its content and as `scroll-padding-bottom`, both through
+  `scrollInsetClass`. Content then scrolls on under the bar instead of
+  stopping above it. `Panel` applies this itself. A panel whose content brings
+  its own scroller, such as a virtual list, sets `contentScrolls` and hands
+  the class to that scroller.
+
+Every flex ancestor between `h-dvh` and a scroller needs `min-h-0` (or
+`min-w-0` across). Without it the item grows to its content, and the window
+scrolls instead of the panel.
+
 ## Typography and spacing
 
 The application font is IBM Plex Sans. Typography recipes are defined as
