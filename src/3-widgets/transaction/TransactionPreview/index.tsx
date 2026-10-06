@@ -72,7 +72,7 @@ import {
 export const TrEmptyState = () => {
   const { t } = useTranslation('transaction')
   return (
-    <div className="flex min-h-screen items-center justify-center p-6 text-ui-placeholder">
+    <div className="flex min-h-full grow items-center justify-center p-6 text-ui-placeholder">
       <p className="m-0 text-center text-ui-14 text-inherit">
         {t('fullEmptyState')}
       </p>

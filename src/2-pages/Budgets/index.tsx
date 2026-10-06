@@ -86,7 +86,9 @@ const BudgetLayout: FC<{
 
   return (
     <>
-      <Panel className="flex min-w-0 grow justify-center">{mainContent}</Panel>
+      <Panel className="min-w-0 grow" contentClassName="flex justify-center">
+        {mainContent}
+      </Panel>
 
       {monthOverviewFits ? (
         <Panel

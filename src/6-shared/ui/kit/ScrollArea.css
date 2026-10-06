@@ -3,11 +3,13 @@
      that never goes away is most of what a person sees down the side of a
      short list. Base UI sets both attributes on the scrollbar, and drops
      `data-scrolling` half a second after the last scroll. */
+  /* The thumb sits 4px from the edge and widens inward on hover; the rest
+     of the track's width is there to be grabbed. */
   .kit-scrollbar {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     width: 10px;
-    margin: 4px 2px;
+    margin: 4px 4px calc(4px + var(--kit-scroll-bottom-inset, 0px));
     opacity: 0;
     transition: opacity 300ms ease;
 
@@ -21,12 +23,24 @@
   .kit-scrollbar-thumb {
     width: 4px;
     border-radius: 2px;
-    background: var(--color-ui-placeholder);
+    background: var(--color-ui-scrollbar);
     transition: width 100ms ease;
 
     .kit-scrollbar:hover & {
       width: 6px;
       border-radius: 3px;
+    }
+  }
+
+  /* The bottom inset sits inside the scroll, so content passes under the
+     cover and the last row can still be scrolled clear of it. The content
+     resets it: an area nested inside does not reach the cover. */
+  .kit-scroll-viewport {
+    padding-bottom: var(--kit-scroll-bottom-inset, 0px);
+    scroll-padding-bottom: var(--kit-scroll-bottom-inset, 0px);
+
+    & > * {
+      --kit-scroll-bottom-inset: 0px;
     }
   }
 
@@ -49,7 +63,8 @@
       var(--kit-fade-size)
     );
 
-    scroll-padding-block: var(--kit-fade-size);
+    scroll-padding-block: var(--kit-fade-size)
+      calc(var(--kit-fade-size) + var(--kit-scroll-bottom-inset, 0px));
     mask-image: linear-gradient(
       to bottom,
       transparent,

@@ -1,13 +1,14 @@
 import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import './ScrollArea.css'
 
 export type ScrollAreaProps = Omit<
   ScrollAreaPrimitive.Root.Props,
-  'className' | 'children' | 'render'
+  'className' | 'children' | 'render' | 'style'
 > & {
   children?: ReactNode
+  style?: CSSProperties
   /** The surface itself: its size, background and radius. The viewport fills
    * it edge to edge, so content scrolls out of sight at the surface's edge. */
   className?: string
@@ -22,6 +23,12 @@ export type ScrollAreaProps = Omit<
    * everything that scrolls, so a sticky header inside the area fades with
    * the rows: put a header above the area, in the surface, instead. */
   fade?: boolean
+  /** Room at the end for something that covers the bottom of the area, such
+   * as the phone's bottom bar; a CSS length. It goes inside the scroll and
+   * into the scroll padding, and lifts the thumb's track, so the last row and
+   * the thumb stop above the cover while content still passes under it.
+   * Areas nested in the content do not inherit it. */
+  bottomInset?: string
 }
 
 /** A vertically scrolling surface.
@@ -39,6 +46,8 @@ export function ScrollArea(props: ScrollAreaProps) {
     contentClassName,
     scrollbar = 'overlay',
     fade = false,
+    bottomInset,
+    style,
     ...restProps
   } = props
   return (
@@ -47,6 +56,14 @@ export function ScrollArea(props: ScrollAreaProps) {
         'relative flex min-h-0 flex-col overflow-hidden',
         className
       )}
+      style={
+        bottomInset
+          ? ({
+              '--kit-scroll-bottom-inset': bottomInset,
+              ...style,
+            } as CSSProperties)
+          : style
+      }
       {...restProps}
     >
       <ScrollAreaPrimitive.Viewport
@@ -55,7 +72,7 @@ export function ScrollArea(props: ScrollAreaProps) {
         // vertical axis.
         style={{ overflowX: 'hidden' }}
         className={cn(
-          'min-h-0 flex-auto overscroll-contain outline-none',
+          'kit-scroll-viewport min-h-0 flex-auto overscroll-contain outline-none',
           fade && 'kit-edge-fade'
         )}
       >

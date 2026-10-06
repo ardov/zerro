@@ -27,7 +27,7 @@ export const MobileBottomNavigation: Story = {
   globals: { viewport: { value: 'iphone13' } },
   render: () => (
     <div className="flex min-h-[600px] flex-col bg-background">
-      <MobileNavigation />
+      <MobileNavigation onHeightChange={() => {}} />
     </div>
   ),
 }

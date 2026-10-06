@@ -48,11 +48,13 @@ export default function TransactionsView() {
       <meta name="description" content={t('pageDescription')} />
       <link rel="canonical" href="https://zerro.app/transactions" />
       {accountsPanelFits && (
-        <Panel className="shrink-0" style={{ width: panelWidths.accounts }}>
-          <div className="p-2">
-            <AccountList />
-            <DebtorList />
-          </div>
+        <Panel
+          className="shrink-0"
+          style={{ width: panelWidths.accounts }}
+          contentClassName="p-2"
+        >
+          <AccountList />
+          <DebtorList />
         </Panel>
       )}
 
@@ -70,6 +72,7 @@ export default function TransactionsView() {
         <Panel
           className="shrink-0"
           style={{ width: panelWidths.transactionDetail }}
+          contentClassName="flex min-h-full flex-col"
         >
           <DockedPreview onSelectSimilar={setCheckedDate} />
         </Panel>

@@ -26,12 +26,11 @@ import { HistoryTopBar } from '@/3-widgets/History/HistoryTopBar'
 import {
   MobileNavigation,
   Rail,
-  useBottomBarHeight,
   useBottomBarShown,
 } from '@/3-widgets/Navigation'
 import { panelWidths } from '@/6-shared/ui/layout/panelWidths'
-import { Panel, scrollInsetClass } from '@/6-shared/ui/layout/Panel'
-import { cn } from '@/6-shared/ui/shadcn/utils'
+import { Panel, bottomBarInset } from '@/6-shared/ui/layout/Panel'
+import { ScrollArea } from '@/6-shared/ui/kit/ScrollArea'
 import ErrorBoundary from '@/3-widgets/ErrorBoundary'
 import Transactions from '@/2-pages/Transactions'
 import Auth from '@/2-pages/Auth'
@@ -127,16 +126,18 @@ const Layout: FC<{
 }> = props => {
   const { isLoggedIn, hasData, children } = props
   const bottomBar = useBottomBarShown()
-  const bottomBarHeight = useBottomBarHeight()
+  // Measured by the bar itself, which can change height.
+  const [bottomBarHeight, setBottomBarHeight] = useState(0)
   if (!isLoggedIn) return <div className="min-h-screen">{children}</div>
 
   const canvas = {
     // The canvas padding and the gap between panels: none under the bottom
     // bar, where panels run edge to edge.
     '--canvas-gap': `${bottomBar ? 0 : panelWidths.gap}px`,
-    // How much of the window the bottom bar covers; each page scroller adds
-    // it inside its scroll (see `scrollInsetClass`).
-    '--bottom-inset': `${bottomBar ? bottomBarHeight : 0}px`,
+    // How much of the window the bottom bar covers. Set here rather than on
+    // the document so that it reaches every page scroller and no overlay;
+    // panels add it inside their scroll (see `bottomBarInset`).
+    '--bottom-inset': `${bottomBarHeight}px`,
   } as React.CSSProperties
 
   return (
@@ -148,7 +149,7 @@ const Layout: FC<{
           {children}
         </main>
       </div>
-      {bottomBar && <MobileNavigation />}
+      {bottomBar && <MobileNavigation onHeightChange={setBottomBarHeight} />}
     </div>
   )
 }
@@ -160,9 +161,9 @@ const inPanel = (page: React.ReactNode) => (
 
 /** A page made of its own cards, laid straight on the canvas. */
 const onCanvas = (page: React.ReactNode) => (
-  <div className={cn('min-h-0 min-w-0 grow overflow-auto', scrollInsetClass)}>
+  <ScrollArea className="min-w-0 grow" bottomInset={bottomBarInset}>
     {page}
-  </div>
+  </ScrollArea>
 )
 
 function FallbackLoader() {

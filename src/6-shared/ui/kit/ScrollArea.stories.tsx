@@ -220,3 +220,29 @@ export const FadeFollowsOverflow: Story = {
     await waitFor(() => expect(area).toHaveAttribute('data-overflow-y-start'))
   },
 }
+
+/** The bottom inset pads the area's own scroll and lifts its track; an area
+ * nested in the content starts from none. */
+export const BottomInset: Story = {
+  tags: ['!dev', '!autodocs'],
+  render: () => (
+    <ScrollArea
+      className={`h-60 w-72 ${surface}`}
+      bottomInset="40px"
+      data-testid="outer"
+    >
+      {rows(10)}
+      <ScrollArea className="h-20" data-testid="inner">
+        {rows(5)}
+      </ScrollArea>
+    </ScrollArea>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const outer = viewportOf(canvas.getByTestId('outer'))
+    const inner = viewportOf(canvas.getByTestId('inner'))
+    await expect(getComputedStyle(outer).paddingBottom).toBe('40px')
+    await expect(getComputedStyle(outer).scrollPaddingBottom).toBe('40px')
+    await expect(getComputedStyle(inner).paddingBottom).toBe('0px')
+  },
+}

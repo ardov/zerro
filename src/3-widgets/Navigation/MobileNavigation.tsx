@@ -1,4 +1,5 @@
 import type { FC } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { SettingsIcon } from '@/6-shared/ui/Icons'
@@ -13,19 +14,29 @@ import { useDestinations } from './destinations'
  * gap under it — wider over a home indicator. */
 const BAR = { top: 4, height: 48, bottom: 4, bottomOverHomeBar: 20 }
 
-/** How much of the window the bottom bar covers. */
-export function useBottomBarHeight() {
-  const hasHomeBar = useHomeBar()
-  return (
-    BAR.top + BAR.height + (hasHomeBar ? BAR.bottomOverHomeBar : BAR.bottom)
-  )
-}
-
 /** The bottom bar of a narrow window: destinations and settings as icons, and
  * Sync beside them as a separate round button — it is an action, not a
- * place. About moves into the settings menu. */
-export const MobileNavigation: FC = () => {
+ * place. About moves into the settings menu.
+ *
+ * It reports how much of the window it covers as it changes, so the page
+ * can keep room for it at the end of every scroller. */
+export const MobileNavigation: FC<{
+  onHeightChange: (height: number) => void
+}> = ({ onHeightChange }) => {
   const { t } = useTranslation('navigation')
+  const nav = useRef<HTMLElement>(null)
+  useLayoutEffect(() => {
+    const element = nav.current
+    if (!element) return
+    const report = () => onHeightChange(element.offsetHeight)
+    report()
+    const observer = new ResizeObserver(report)
+    observer.observe(element)
+    return () => {
+      observer.disconnect()
+      onHeightChange(0)
+    }
+  }, [onHeightChange])
   const path = useLocation().pathname
   const ask = useAsk()
   const destinations = useDestinations()
@@ -34,6 +45,7 @@ export const MobileNavigation: FC = () => {
 
   return (
     <nav
+      ref={nav}
       aria-label={t('main')}
       // Transparent and click-through around the bar and the button: the page
       // scrolls on under them.
@@ -64,7 +76,7 @@ export const MobileNavigation: FC = () => {
         <button
           type="button"
           aria-label={t('settings')}
-          onClick={e => ask(<SettingsMenu anchorEl={e.currentTarget} />)}
+          onClick={() => ask(<SettingsMenu />)}
           className={navigationActionClass(false)}
         >
           <SettingsIcon />
