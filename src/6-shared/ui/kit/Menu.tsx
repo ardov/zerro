@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom'
 import type { PopupController, SurfaceController } from '@/6-shared/overlays'
 import { DrawerSurface } from './Drawer'
 import { useSurfaceFinalFocus } from './SurfaceContent'
+import { ScrollArea } from './ScrollArea'
 import { ListRow, ListRowHeader, ListRowSeparator } from './ListRow'
 import { useListPanelPositioning } from './useListPanelPositioning'
 import { cn } from '@/6-shared/ui/shadcn/utils'
@@ -201,9 +202,16 @@ function MenuPopup(props: {
           aria-label={label}
           aria-labelledby={undefined}
           finalFocus={finalFocus}
-          className="kit-surface-fade max-h-(--available-height) min-w-[min(13rem,var(--available-width))] max-w-(--available-width) overflow-y-auto rounded-ui-popover rounded-smooth bg-ui-popover p-1 text-ui-primary shadow-ui-popover outline-none"
+          className="kit-surface-fade flex max-h-(--available-height) min-w-[min(13rem,var(--available-width))] max-w-(--available-width) flex-col overflow-hidden rounded-ui-popover rounded-smooth bg-ui-popover text-ui-primary shadow-ui-popover outline-none"
         >
-          {children}
+          <ScrollArea
+            className="min-h-0"
+            contentClassName="p-1"
+            scrollbar="none"
+            fade
+          >
+            {children}
+          </ScrollArea>
         </Primitive.Popup>
       </Primitive.Positioner>
     </Primitive.Portal>

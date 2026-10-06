@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { useRender } from '@base-ui/react/use-render'
 import { cn } from '@/6-shared/ui/shadcn/utils'
-import { scrollFadeEdges } from '../useScrollFade'
 
 export type ListPanelProps = useRender.ComponentProps<'div'> & {
   header?: ReactNode
@@ -156,4 +155,19 @@ export function ListPanel(props: ListPanelProps) {
       ),
     },
   })
+}
+
+/** Which edges of a scrollport have more content past them.
+ *
+ * The list panel keeps its own scrollport rather than a ScrollArea: the
+ * scroller has to be the list primitive's own element, which owns
+ * scroll-to-selected and keyboard navigation, and a ScrollArea viewport
+ * rendered as that element would replace its listbox role. */
+function scrollFadeEdges(element: HTMLElement) {
+  // A pixel of slack: fractional scroll positions are ordinary at fractional
+  // zoom, and an edge a hair from the end still counts as the end.
+  const above = element.scrollTop > 1
+  const below =
+    element.scrollTop + element.clientHeight < element.scrollHeight - 1
+  return above && below ? 'both' : above ? 'top' : below ? 'bottom' : ''
 }

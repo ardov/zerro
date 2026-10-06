@@ -4,6 +4,7 @@ import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { Popover, type PopoverProps } from './Popover'
 import { useOverlayFinalFocus } from './useOverlayFinalFocus'
 import { cn } from './shadcn/utils'
+import { ScrollArea } from './kit/ScrollArea'
 import { drawerBackdropClass, drawerSurfaceClass } from './overlaySurface'
 import { MobileDrawerViewport } from './MobileDrawerViewport'
 
@@ -96,14 +97,18 @@ function PopoverDrawer({
             finalFocus={finalFocus}
             className={cn(
               drawerSurfaceClass,
-              'pointer-events-auto relative max-h-[calc(100%-48px)] overflow-y-auto bg-popover text-popover-foreground shadow-elevation-16 outline-none',
+              'pointer-events-auto relative flex max-h-[calc(100%-48px)] flex-col overflow-hidden bg-popover text-popover-foreground shadow-elevation-16 outline-none',
               drawerSide === 'top' || drawerSide === 'bottom'
                 ? 'w-full'
                 : 'h-full',
               className
             )}
           >
-            <Drawer.Content>{children}</Drawer.Content>
+            <Drawer.Content className="flex min-h-0 flex-col">
+              <ScrollArea className="min-h-0" scrollbar="none" fade>
+                {children}
+              </ScrollArea>
+            </Drawer.Content>
             {/* A Close part enables Base UI's modal focus trap. It is also an
                 accessible escape hatch for assistive technology, so both
                 responsive variants carry one. */}

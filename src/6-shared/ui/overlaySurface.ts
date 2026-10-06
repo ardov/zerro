@@ -23,17 +23,17 @@ export const popupPositioning = {
  * and `AdaptivePopover` above the
  * mobile breakpoint.
  *
- * The 16px minimums, clipped horizontal axis and 32px viewport margin keep the
- * paper within the viewport. An anchored paper only grows
- * downwards, so sideways overflow is a layout mistake rather than something
- * to scroll.
+ * The 16px minimums and 32px viewport margin keep the paper within the
+ * viewport. The paper does not scroll itself: its content scrolls in a
+ * ScrollArea inside it, which fades the rows into the paper and leaves the
+ * paper alone.
  *
  * Its entrance is slower and shallower than a menu's, and grows out of the
  * corner it hangs from rather than wherever collision handling left it: this
  * surface only ever shifts, it does not flip to another side. Which corner
  * that is depends on the alignment, so `--grow-origin` is set by `Popover`
  * and not here. */
-export const anchoredSurfaceClass = `${growSurfaceClass} scroll-fade hidden-scroll [--grow-duration:225ms] [--grow-from:0.9] min-h-4 min-w-4 max-h-[calc(100dvh-32px)] overflow-x-hidden overflow-y-auto rounded-2xl bg-popover text-popover-foreground shadow-elevation-8 outline-none`
+export const anchoredSurfaceClass = `${growSurfaceClass} [--grow-duration:225ms] [--grow-from:0.9] flex min-h-4 min-w-4 max-h-[calc(100dvh-32px)] flex-col overflow-hidden rounded-2xl bg-popover text-popover-foreground shadow-elevation-8 outline-none`
 
 /** A surface that slides in off an edge: the adaptive popover on a phone.
  * `--drawer-radius` rounds its leading corners, and the

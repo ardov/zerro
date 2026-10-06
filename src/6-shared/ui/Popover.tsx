@@ -9,7 +9,7 @@ import {
   popupPositioning,
 } from './overlaySurface'
 import { cn } from './shadcn/utils'
-import { useScrollFade } from './useScrollFade'
+import { ScrollArea } from './kit/ScrollArea'
 
 /** A surface grows out of the corner selected by its alignment. */
 const growOrigins = {
@@ -74,7 +74,6 @@ export function Popover({
       ? lastAnchor
       : null
   const finalFocus = useOverlayFinalFocus(open)
-  const fadeRef = useScrollFade<HTMLDivElement>()
   return (
     <PopoverPrimitive.Root
       open={open}
@@ -109,12 +108,13 @@ export function Popover({
         >
           <PopoverPrimitive.Popup
             {...props}
-            ref={fadeRef}
             data-slot="popover"
             finalFocus={finalFocus}
             className={cn(anchoredSurfaceClass, growOrigins[align], className)}
           >
-            {children}
+            <ScrollArea className="min-h-0" scrollbar="none" fade>
+              {children}
+            </ScrollArea>
             {/* A Close part enables Base UI's modal focus trap. It is also an
                 accessible escape hatch for assistive technology. */}
             <PopoverPrimitive.Close className="sr-only">

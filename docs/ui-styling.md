@@ -246,8 +246,12 @@ date, a colour.
 ```
 
 `children` is free content. Optional `title` supplies a visible heading and an
-accessible name; without it, `label` is required. `className` styles the panel;
-`contentClassName` styles the scrollable body. Centered Dialog shows a close button by default (`closeButton={false}` hides
+accessible name; without it, `label` is required. `className` styles the panel.
+The body scrolls in a kit `ScrollArea` that fills the rest of the panel;
+`contentClassName` is the padding and layout of the content inside that
+scroll. A Drawer whose children bring their own scroller, such as a virtual
+list, sets `contentScrolls`: the body is then a plain column they fill.
+Centered Dialog shows a close button by default (`closeButton={false}` hides
 it). Bottom drawers, Popover and Confirm have no visible close button; the
 surface owns this rule, so forms do not need breakpoint logic. Popover accepts `anchor`, `side`, and `align`; its anchor controls position,
 while the trigger controls focus restoration. It is modal.
@@ -319,6 +323,22 @@ records the last kind of input on the root as `data-input-modality`, and the
 Transitions must have a reduced-motion variant. Reduced motion may keep an
 opacity change when it conveys visibility, but must remove spatial movement and
 decorative transforms.
+
+### Scrolling
+
+Surfaces scroll in the kit `ScrollArea` (`src/6-shared/ui/kit/ScrollArea.tsx`):
+the thumb shows only while the area is hovered or scrolled, the viewport is
+never a tab stop, and the area scrolls only vertically. Drawers, dialogs and
+popovers use the thumb; menus and anchored popovers use `scrollbar="none"`
+with `fade`, a mask over the content at an edge with more past it. The mask
+covers everything that scrolls, sticky headers included, so a surface with
+`fade` keeps its header above the area rather than inside it.
+
+Two scrollers stay native, with the scrollbar hidden. `ListPanel` scrolls the
+list primitive's own element, which owns scroll-to-selected and keyboard
+navigation; a ScrollArea viewport rendered as that element would replace its
+listbox role. The transaction list is virtualized by react-window, whose list
+element is its own scroller and takes no outside ref.
 
 ## Component CSS
 
