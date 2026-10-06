@@ -1,6 +1,7 @@
 import { Button } from '@/6-shared/ui/kit/Button'
 import { useEffect } from 'react'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
+import { ScrollArea } from '@/6-shared/ui/kit/ScrollArea'
 import { useTranslation } from 'react-i18next'
 import { HistoryIcon } from '@/6-shared/ui/Icons'
 import { defineScreen } from '@/6-shared/overlays'
@@ -63,7 +64,7 @@ export function HistoryPanel() {
       title={t('panelTitle')}
       controller={{ open, setOpen: next => !next && setOpened(null) }}
       className="w-95"
-      contentClassName="flex flex-1 flex-col overflow-hidden p-0"
+      contentScrolls
     >
       <hr className="m-0 mt-3 border-0 border-t border-border" />
       <HistoryControls />
@@ -71,7 +72,7 @@ export function HistoryPanel() {
       {rows.length === 0 ? (
         <EmptyHistory loading={pageStatus === 'loading'} />
       ) : (
-        <div className="grow overflow-y-auto">
+        <ScrollArea className="grow">
           <HistoryRowList
             rows={rows}
             selected={selected}
@@ -89,7 +90,7 @@ export function HistoryPanel() {
               {t('loadOlder')}
             </Button>
           )}
-        </div>
+        </ScrollArea>
       )}
       {/* Pinned under the list: it belongs to the selection, not to the row
           that happens to be scrolled into view. */}

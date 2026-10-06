@@ -89,7 +89,7 @@ export const TransactionPreviewDrawer = () => {
           if (!open) onClose()
         },
       }}
-      contentClassName="flex-1 p-0"
+      contentClassName="p-0"
       label={t('transaction')}
     >
       <div className="flex min-h-full flex-col">

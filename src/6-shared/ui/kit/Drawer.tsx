@@ -21,6 +21,9 @@ export type DrawerProps = SurfaceName & {
   side?: 'auto' | 'bottom' | 'right'
   className?: string
   contentClassName?: string
+  /** The children bring their own scroller, such as a virtual list, and fill
+   * the drawer's body instead of scrolling in it. */
+  contentScrolls?: boolean
   children: ReactNode
   onClose?: () => void
   disabled?: boolean
@@ -79,6 +82,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
     side: requestedSide = 'auto',
     className,
     contentClassName,
+    contentScrolls,
   } = props
   const { open, setOpen: onOpenChange } = controller
   const { t } = useTranslation()
@@ -148,6 +152,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
                 title={title}
                 titleId={titleId}
                 className={cn(title == null && 'px-2 py-0', contentClassName)}
+                contentScrolls={contentScrolls}
                 close={
                   side === 'right' && title != null ? (
                     <Primitive.Close render={<SurfaceCloseButton />} />

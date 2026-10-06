@@ -546,7 +546,7 @@ const TransactionEditor = ({
   return createPopup ? (
     <DrawerSurface
       controller={createPopup}
-      contentClassName="flex-1 p-0"
+      contentClassName="p-0"
       label={t('newTransaction')}
     >
       {content}

@@ -4,6 +4,7 @@ import type { SurfaceController } from '@/6-shared/overlays'
 import { CloseIcon } from '../Icons'
 import { useOverlayFinalFocus } from '../useOverlayFinalFocus'
 import { IconButton } from './Button'
+import { ScrollArea } from './ScrollArea'
 import { cn } from '../shadcn/utils'
 
 /** Every surface has a visible title or an explicit accessible name. */
@@ -41,15 +42,20 @@ export function SurfaceCloseButton(
   )
 }
 
-/** Internal layout, not a set of required slots for callers. */
+/** Internal layout, not a set of required slots for callers. The body
+ * scrolls in a ScrollArea that fills the rest of the surface; `className` is
+ * the padding and layout of the content inside that scroll. */
 export function SurfaceContent(props: {
   title?: ReactNode
   titleId: string
   close?: ReactElement
   children: ReactNode
   className?: string
+  /** The children bring their own scroller, such as a virtual list. The body
+   * is then a plain column they fill, with no padding and no scroll. */
+  contentScrolls?: boolean
 }) {
-  const { title, titleId, close, children, className } = props
+  const { title, titleId, close, children, className, contentScrolls } = props
   return (
     <>
       {(title != null || close) && (
@@ -70,14 +76,18 @@ export function SurfaceContent(props: {
           {close}
         </div>
       )}
-      <div
-        className={cn(
-          'min-h-0 overflow-y-auto overscroll-contain p-4',
-          className
-        )}
-      >
-        {children}
-      </div>
+      {contentScrolls ? (
+        <div className={cn('flex min-h-0 flex-auto flex-col', className)}>
+          {children}
+        </div>
+      ) : (
+        <ScrollArea
+          className="min-h-0 flex-auto"
+          contentClassName={cn('p-4', className)}
+        >
+          {children}
+        </ScrollArea>
+      )}
     </>
   )
 }
