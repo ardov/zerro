@@ -296,7 +296,9 @@ const TransactionEditor = ({
   }
 
   const content = (
-    <div className="flex min-h-full min-w-0 flex-col bg-ui-card text-ui-primary">
+    // `min-h-full` fills a column it is laid out in; `grow` fills a drawer's
+    // scroll content, which is a flex column with no height of its own.
+    <div className="flex min-h-full min-w-0 grow flex-col bg-ui-card text-ui-primary">
       <header className="flex items-center gap-1 px-6 py-3">
         <div className="min-w-0 grow">
           {tr?.deleted && (
@@ -546,7 +548,7 @@ const TransactionEditor = ({
   return createPopup ? (
     <DrawerSurface
       controller={createPopup}
-      contentClassName="p-0"
+      contentClassName="flex min-h-full flex-col p-0"
       label={t('newTransaction')}
     >
       {content}

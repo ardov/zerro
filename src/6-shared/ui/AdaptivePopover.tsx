@@ -105,7 +105,7 @@ function PopoverDrawer({
             )}
           >
             <Drawer.Content className="flex min-h-0 flex-col">
-              <ScrollArea className="min-h-0" scrollbar="none" fade>
+              <ScrollArea scrollbar="none" fade>
                 {children}
               </ScrollArea>
             </Drawer.Content>

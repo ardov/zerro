@@ -73,9 +73,8 @@ export function DialogTitle({
 }
 
 /** The scrolling middle drops its top padding when a title sits above it,
- * which is a sibling rule rather than something the caller passes. The
- * padding is inside the scroll, so the rule sets it through a variable on
- * the scroll area that the content reads. */
+ * which is a sibling rule rather than something the caller passes; see
+ * `.dialog-content` in Dialog.css. */
 export function DialogContent({
   className,
   children,
@@ -86,7 +85,7 @@ export function DialogContent({
   return (
     <ScrollArea
       data-slot="dialog-content"
-      className="min-h-0 flex-auto [--dialog-content-top:1.25rem] [[data-slot=dialog-title]+&]:[--dialog-content-top:0px]"
+      className="dialog-content flex-auto"
       contentClassName={cn('px-6 pt-(--dialog-content-top) pb-5', className)}
     >
       {children}

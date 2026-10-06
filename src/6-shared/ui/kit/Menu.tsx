@@ -202,14 +202,13 @@ function MenuPopup(props: {
           aria-label={label}
           aria-labelledby={undefined}
           finalFocus={finalFocus}
-          className="kit-surface-fade flex max-h-(--available-height) min-w-[min(13rem,var(--available-width))] max-w-(--available-width) flex-col overflow-hidden rounded-ui-popover rounded-smooth bg-ui-popover text-ui-primary shadow-ui-popover outline-none"
+          className={cn(
+            'kit-surface-fade flex flex-col overflow-hidden outline-none',
+            'max-h-(--available-height) max-w-(--available-width) min-w-[min(13rem,var(--available-width))]',
+            'rounded-ui-popover rounded-smooth bg-ui-popover text-ui-primary shadow-ui-popover'
+          )}
         >
-          <ScrollArea
-            className="min-h-0"
-            contentClassName="p-1"
-            scrollbar="none"
-            fade
-          >
+          <ScrollArea contentClassName="p-1" scrollbar="none" fade>
             {children}
           </ScrollArea>
         </Primitive.Popup>

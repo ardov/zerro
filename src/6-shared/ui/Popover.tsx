@@ -112,7 +112,7 @@ export function Popover({
             finalFocus={finalFocus}
             className={cn(anchoredSurfaceClass, growOrigins[align], className)}
           >
-            <ScrollArea className="min-h-0" scrollbar="none" fade>
+            <ScrollArea scrollbar="none" fade>
               {children}
             </ScrollArea>
             {/* A Close part enables Base UI's modal focus trap. It is also an

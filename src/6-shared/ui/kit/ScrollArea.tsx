@@ -1,5 +1,5 @@
 import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area'
-import type { ReactNode, Ref } from 'react'
+import type { ReactNode } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import './ScrollArea.css'
 
@@ -15,8 +15,6 @@ export type ScrollAreaProps = Omit<
    * content has sticky headers and put it on the rows: a sticky element
    * cannot leave its parent's content box. */
   contentClassName?: string
-  /** The element that scrolls, for `scrollTo` and restoring a position. */
-  viewportRef?: Ref<HTMLDivElement>
   /** `overlay` shows a thin thumb while the area is hovered or scrolled.
    * `none` is for small popups, where `fade` says the list goes on. */
   scrollbar?: 'overlay' | 'none'
@@ -39,7 +37,6 @@ export function ScrollArea(props: ScrollAreaProps) {
     children,
     className,
     contentClassName,
-    viewportRef,
     scrollbar = 'overlay',
     fade = false,
     ...restProps
@@ -53,14 +50,13 @@ export function ScrollArea(props: ScrollAreaProps) {
       {...restProps}
     >
       <ScrollAreaPrimitive.Viewport
-        ref={viewportRef}
         tabIndex={-1}
         // After Base UI's own `overflow: scroll`, which this narrows to the
         // vertical axis.
         style={{ overflowX: 'hidden' }}
         className={cn(
           'min-h-0 flex-auto overscroll-contain outline-none',
-          fade && 'kit-scroll-fade'
+          fade && 'kit-edge-fade'
         )}
       >
         <ScrollAreaPrimitive.Content

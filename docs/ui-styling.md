@@ -328,11 +328,18 @@ decorative transforms.
 
 Surfaces scroll in the kit `ScrollArea` (`src/6-shared/ui/kit/ScrollArea.tsx`):
 the thumb shows only while the area is hovered or scrolled, the viewport is
-never a tab stop, and the area scrolls only vertically. Drawers, dialogs and
-popovers use the thumb; menus and anchored popovers use `scrollbar="none"`
-with `fade`, a mask over the content at an edge with more past it. The mask
-covers everything that scrolls, sticky headers included, so a surface with
-`fade` keeps its header above the area rather than inside it.
+never a tab stop, and the area scrolls only vertically. Drawers and dialogs
+use the thumb. Menus and popovers — the kit `Menu` and `Popover`, the legacy
+`Popover` and `AdaptivePopover` — use `scrollbar="none"` with `fade` (a
+popover shown as a bottom sheet on a phone is a drawer and uses the thumb), a mask
+over the content at an edge with more past it. The mask covers everything
+that scrolls, sticky headers included, so a surface with `fade` keeps its
+header above the area rather than inside it; its scroll padding keeps a row
+brought into view clear of the fade.
+
+The content has its natural height, so percentages inside it have nothing
+to resolve against. To pin a footer to the bottom of short content, the
+content takes `flex min-h-full flex-col` and the footer `mt-auto`.
 
 Two scrollers stay native, with the scrollbar hidden. `ListPanel` scrolls the
 list primitive's own element, which owns scroll-to-selected and keyboard

@@ -22,7 +22,8 @@ export type DrawerProps = SurfaceName & {
   className?: string
   contentClassName?: string
   /** The children bring their own scroller, such as a virtual list, and fill
-   * the drawer's body instead of scrolling in it. */
+   * the drawer's body instead of scrolling in it. The body then has no
+   * padding of its own; `contentClassName` styles it. */
   contentScrolls?: boolean
   children: ReactNode
   onClose?: () => void
@@ -151,7 +152,10 @@ function DrawerFrame(props: DrawerSurfaceProps) {
               <SurfaceContent
                 title={title}
                 titleId={titleId}
-                className={cn(title == null && 'px-2 py-0', contentClassName)}
+                className={cn(
+                  title == null && !contentScrolls && 'px-2 py-0',
+                  contentClassName
+                )}
                 contentScrolls={contentScrolls}
                 close={
                   side === 'right' && title != null ? (

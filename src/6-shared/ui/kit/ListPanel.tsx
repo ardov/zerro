@@ -99,6 +99,10 @@ export function ListPanel(props: ListPanelProps) {
     }
   }, [panel, preserveHeight])
 
+  // Its own scrollport rather than a ScrollArea: the scroller has to be the
+  // list primitive's element, which owns scroll-to-selected and keyboard
+  // navigation, and a ScrollArea viewport rendered as that element would
+  // replace its listbox role.
   const scrollport = useRender({
     defaultTagName: 'div',
     render: scrollRender,
@@ -157,12 +161,7 @@ export function ListPanel(props: ListPanelProps) {
   })
 }
 
-/** Which edges of a scrollport have more content past them.
- *
- * The list panel keeps its own scrollport rather than a ScrollArea: the
- * scroller has to be the list primitive's own element, which owns
- * scroll-to-selected and keyboard navigation, and a ScrollArea viewport
- * rendered as that element would replace its listbox role. */
+/** Which edges of a scrollport have more content past them. */
 function scrollFadeEdges(element: HTMLElement) {
   // A pixel of slack: fractional scroll positions are ordinary at fractional
   // zoom, and an edge a hair from the end still counts as the end.
