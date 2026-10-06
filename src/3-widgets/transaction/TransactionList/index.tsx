@@ -190,9 +190,9 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   return (
     <>
-      <div className={cn('relative flex flex-col px-2 pt-2', className)}>
+      <div className={cn('relative flex flex-col pt-2', className)}>
         {!hideFilter && (
-          <div className="relative z-10 mx-auto w-full max-w-[560px]">
+          <div className="relative z-10 mx-auto w-full max-w-[576px] px-2">
             <Filter
               query={query}
               onQueryChange={onQueryChange}

@@ -4,6 +4,8 @@ import type { ListImperativeAPI, RowComponentProps } from 'react-window'
 import { List } from 'react-window'
 import { AutoSizer } from 'react-virtualized-auto-sizer'
 import { ListRowSubheader } from '@/6-shared/ui/ListRow'
+import { scrollInsetClass } from '@/6-shared/ui/layout/Panel'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 import { formatDate } from '@/6-shared/helpers/date'
 import type { TDateDraft, TISODate, TTransactionId } from '@/6-shared/types'
 import { toISODate } from '@/6-shared/helpers/date'
@@ -162,7 +164,7 @@ export const GroupedList: FC<GroupedListProps> = props => {
             if (!height) return null
             return (
               <List
-                className="hidden-scroll"
+                className={cn('hidden-scroll', scrollInsetClass)}
                 style={{ height }}
                 listRef={listRef}
                 rowCount={groups.length}
@@ -230,9 +232,12 @@ const Day = (props: RowComponentProps<DayData>): React.ReactElement => {
   )
 }
 
+/** The side padding is the row's own, not the list's: padding around the
+ * scroller would cut content off short of the panel edge. */
 const groupStyle: React.CSSProperties = {
   position: 'relative',
-  maxWidth: 560,
+  maxWidth: 576,
+  paddingInline: 8,
   marginLeft: 'auto',
   marginRight: 'auto',
 }

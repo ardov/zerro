@@ -45,7 +45,7 @@ export const Header: FC<HeaderProps> = props => {
 
   return (
     <>
-      <div className="sticky top-0 z-[99] rounded-t-lg border-b border-border bg-card">
+      <div className="sticky top-0 z-[99] border-b border-border bg-card">
         <div className="sticky top-0 z-[9] flex flex-wrap justify-between gap-4 p-2">
           <MonthSelect />
 

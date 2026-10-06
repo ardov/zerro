@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
-import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
+import { panelWidths, useWindowFits } from '@/6-shared/ui/layout/panelWidths'
 import { defineScreen } from '@/6-shared/overlays'
 import type { TTransactionId } from '@/6-shared/types'
 import { TransactionPreview } from '../transaction/TransactionPreview'
@@ -50,9 +50,13 @@ function useTransactionGone(id: string | undefined) {
  * stand aside. Keeping it in one place is what stops the two from disagreeing
  * and showing the transaction twice, or not at all. */
 export function useTransactionScreenDocked() {
-  const isNarrow = useBreakpointDown('md')
+  const fits = useWindowFits(
+    panelWidths.accounts,
+    panelWidths.transactionList,
+    panelWidths.transactionDetail
+  )
   const { pathname } = useLocation()
-  return !isNarrow && pathname.startsWith('/transactions')
+  return fits && pathname.startsWith('/transactions')
 }
 
 export const TransactionPreviewDrawer = () => {

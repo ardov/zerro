@@ -3,7 +3,8 @@ import { useCallback } from 'react'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 
-import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
+import { Panel } from '@/6-shared/ui/layout/Panel'
+import { panelWidths, useWindowFits } from '@/6-shared/ui/layout/panelWidths'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '@/6-shared/helpers/date'
@@ -46,7 +47,7 @@ function Budgets() {
   )
 
   const mainContent = (
-    <div className="relative flex h-fit w-full max-w-[800px] flex-col gap-4 py-6">
+    <div className="relative flex h-fit w-full max-w-[800px] flex-col gap-4 pb-6">
       <EnvelopeTable
         month={month}
         onShowTransactions={openTransactions}
@@ -71,26 +72,29 @@ function Budgets() {
   )
 }
 
+/** The envelope list and, while the window holds both, the right column
+ * beside it. Without the room the column becomes a drawer. */
 const BudgetLayout: FC<{
   mainContent: ReactElement
 }> = props => {
   const { mainContent } = props
-  const isMD = useBreakpointDown('lg')
+  const sideFits = useWindowFits(
+    panelWidths.envelopeList,
+    panelWidths.budgetSide
+  )
 
   return (
-    <div className="flex h-screen">
-      <div className="flex h-full min-w-0 grow justify-center overflow-auto px-2 pb-12 md:px-6">
-        {mainContent}
-      </div>
+    <>
+      <Panel className="flex min-w-0 grow justify-center">{mainContent}</Panel>
 
-      {isMD ? (
-        <SideContent />
-      ) : (
-        <div className="w-[360px] shrink-0 overflow-auto bg-card">
+      {sideFits ? (
+        <Panel className="shrink-0" style={{ width: panelWidths.budgetSide }}>
           <SideContent docked />
-        </div>
+        </Panel>
+      ) : (
+        <SideContent />
       )}
-    </div>
+    </>
   )
 }
 

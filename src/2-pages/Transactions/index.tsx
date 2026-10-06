@@ -12,12 +12,20 @@ import {
 import type { TTransactionId } from '@/6-shared/types'
 import { track } from '@/6-shared/analytics'
 import { useTranslation } from 'react-i18next'
+import { Panel } from '@/6-shared/ui/layout/Panel'
+import {
+  panelWidths,
+  useAccountsPanelFits,
+} from '@/6-shared/ui/layout/panelWidths'
+import AccountList from '@/3-widgets/account/AccountList'
+import { DebtorList } from '@/3-widgets/DebtorList'
 
 import { useTransactionsPageView } from './useTransactionsPageView'
 
 export default function TransactionsView() {
   const { t } = useTranslation('transactions')
   const docked = useTransactionScreenDocked()
+  const accountsPanelFits = useAccountsPanelFits()
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const view = useTransactionsPageView()
   // The same screen the drawer shows elsewhere. On a phone the drawer draws
@@ -39,25 +47,33 @@ export default function TransactionsView() {
       <title>{`${t('pageTitle')} | Zerro`}</title>
       <meta name="description" content={t('pageDescription')} />
       <link rel="canonical" href="https://zerro.app/transactions" />
-      <div className="flex h-screen">
-        <div className="flex min-w-0 grow justify-center p-0 md:p-4">
-          <div className="rounded-lg bg-card text-card-foreground shadow-elevation-1 flex max-w-[560px] flex-1 overflow-hidden pb-14 md:pb-0">
-            <TransactionList
-              checkedDate={checkedDate}
-              view={view}
-              className="grow"
-              onTrOpen={handleTrOpen}
-              opened={opened}
-            />
+      {accountsPanelFits && (
+        <Panel className="shrink-0" style={{ width: panelWidths.accounts }}>
+          <div className="p-2">
+            <AccountList />
+            <DebtorList />
           </div>
-        </div>
+        </Panel>
+      )}
 
-        {docked && (
-          <div className="w-[360px] shrink-0 overflow-auto bg-card">
-            <DockedPreview onSelectSimilar={setCheckedDate} />
-          </div>
-        )}
-      </div>
+      <Panel contentScrolls className="flex min-w-0 flex-1">
+        <TransactionList
+          checkedDate={checkedDate}
+          view={view}
+          className="grow"
+          onTrOpen={handleTrOpen}
+          opened={opened}
+        />
+      </Panel>
+
+      {docked && (
+        <Panel
+          className="shrink-0"
+          style={{ width: panelWidths.transactionDetail }}
+        >
+          <DockedPreview onSelectSimilar={setCheckedDate} />
+        </Panel>
+      )}
     </>
   )
 }
