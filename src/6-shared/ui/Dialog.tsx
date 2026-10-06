@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { useOverlayFinalFocus } from './useOverlayFinalFocus'
 import { cn } from './shadcn/utils'
+import { ScrollArea } from './kit/ScrollArea'
 import './Dialog.css'
 
 export type DialogProps = {
@@ -72,20 +73,23 @@ export function DialogTitle({
 }
 
 /** The scrolling middle drops its top padding when a title sits above it,
- * which is a sibling rule rather than something the caller passes. */
+ * which is a sibling rule rather than something the caller passes; see
+ * `.dialog-content` in Dialog.css. */
 export function DialogContent({
   className,
-  ...props
-}: ComponentPropsWithoutRef<'div'>) {
+  children,
+}: {
+  className?: string
+  children?: ReactNode
+}) {
   return (
-    <div
+    <ScrollArea
       data-slot="dialog-content"
-      className={cn(
-        'flex-auto overflow-y-auto px-6 py-5 [[data-slot=dialog-title]+&]:pt-0',
-        className
-      )}
-      {...props}
-    />
+      className="dialog-content flex-auto"
+      contentClassName={cn('px-6 pt-(--dialog-content-top) pb-5', className)}
+    >
+      {children}
+    </ScrollArea>
   )
 }
 

@@ -130,6 +130,7 @@ function AnchoredPopover(props: PopoverSurfaceProps) {
               title={title}
               titleId={titleId}
               className={contentClassName}
+              scroll={{ scrollbar: 'none', fade: true }}
             >
               {children}
             </SurfaceContent>

@@ -14,6 +14,18 @@
     }
   }
 
+  /* The content's top padding, dropped when a title sits above it. The
+     padding is inside the scroll, on an element the sibling selector cannot
+     reach, so the rule sets a variable on the scroll area that the content
+     reads. */
+  .dialog-content {
+    --dialog-content-top: 1.25rem;
+
+    [data-slot='dialog-title'] + & {
+      --dialog-content-top: 0px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .dialog-fade {
       transition: none;

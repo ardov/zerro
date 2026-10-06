@@ -1,3 +1,4 @@
+import { ScrollArea } from '@/6-shared/ui/kit/ScrollArea'
 import { Button } from '@/6-shared/ui/kit/Button'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -61,7 +62,7 @@ export function HistoryRestorePreview() {
       </p>
       {/* Its own scroll: with every entity type present the list would
           otherwise push the button it belongs to off the panel. */}
-      <div className="max-h-40 overflow-y-auto">
+      <ScrollArea className="max-h-40">
         {missing ? (
           <p className="m-0 text-body-sm text-muted-foreground">
             {tHistory('pointUnavailable')}
@@ -86,7 +87,7 @@ export function HistoryRestorePreview() {
             ))}
           </div>
         )}
-      </div>
+      </ScrollArea>
       <Button
         size="sm"
         variant="primary"

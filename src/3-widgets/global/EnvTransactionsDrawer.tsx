@@ -74,7 +74,7 @@ export const EnvTransactionsDrawer = () => {
       side="right"
       title={title || t('transactions')}
       controller={{ open: !!value, setOpen: open => !open && onClose() }}
-      contentClassName="flex flex-1 flex-col overflow-hidden p-0"
+      contentScrolls
     >
       <TransactionList
         initialQuery={initialQuery}

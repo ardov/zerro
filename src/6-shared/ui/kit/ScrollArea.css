@@ -1,0 +1,68 @@
+@layer components {
+  /* The thumb is there only while the area is pointed at or moving: a bar
+     that never goes away is most of what a person sees down the side of a
+     short list. Base UI sets both attributes on the scrollbar, and drops
+     `data-scrolling` half a second after the last scroll. */
+  .kit-scrollbar {
+    display: flex;
+    justify-content: center;
+    width: 10px;
+    margin: 4px 2px;
+    opacity: 0;
+    transition: opacity 300ms ease;
+
+    &[data-hovering],
+    &[data-scrolling] {
+      opacity: 1;
+      transition-duration: 100ms;
+    }
+  }
+
+  .kit-scrollbar-thumb {
+    width: 4px;
+    border-radius: 2px;
+    background: var(--color-ui-placeholder);
+    transition: width 100ms ease;
+
+    .kit-scrollbar:hover & {
+      width: 6px;
+      border-radius: 3px;
+    }
+  }
+
+  /* Fades the rows into the surface at an edge with more past it. A mask on
+     the viewport fades only what scrolls: the surface is the root behind it,
+     so its background and shadow stay whole. The fade grows with the
+     distance from the edge, up to its full height, so it settles in as the
+     list leaves its end rather than snapping on.
+
+     The scroll padding matches the fade: a row brought into view at an edge,
+     by arrow keys in a menu, stops clear of the fade instead of half in it. */
+  .kit-edge-fade {
+    --kit-fade-size: 24px;
+    --kit-fade-start: min(
+      var(--scroll-area-overflow-y-start, 0px),
+      var(--kit-fade-size)
+    );
+    --kit-fade-end: min(
+      var(--scroll-area-overflow-y-end, 0px),
+      var(--kit-fade-size)
+    );
+
+    scroll-padding-block: var(--kit-fade-size);
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--kit-fade-start),
+      #000 calc(100% - var(--kit-fade-end)),
+      transparent
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kit-scrollbar,
+    .kit-scrollbar-thumb {
+      transition: none;
+    }
+  }
+}
