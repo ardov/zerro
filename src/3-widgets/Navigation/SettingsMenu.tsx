@@ -29,7 +29,7 @@ import {
 import { Divider } from '@/6-shared/ui/kit/Divider'
 import { track } from '@/6-shared/analytics'
 import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
-import { AdaptivePopover } from '@/6-shared/ui/AdaptivePopover'
+import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { appVersion } from '@/6-shared/config'
 
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -49,25 +49,23 @@ import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useColorScheme } from '@/6-shared/ui/theme'
 import { useBottomBarShown } from './destinations'
 
-type SettingsMenuProps = { anchorEl?: Element | null }
-
-/** The settings menu, asked rather than mounted. Items act on the app
- * themselves, so it answers nothing. */
-export const SettingsMenu: FC<SettingsMenuProps> = props => {
-  const { anchorEl } = props
+/** The settings menu, asked rather than mounted, in a drawer on the left,
+ * the side the navigation that opens it is on.
+ * Items act on the app themselves, so it answers nothing. */
+export const SettingsMenu: FC = () => {
   const { t } = useTranslation('settings')
   const { open, answer } = useAsked<void>()
   return (
-    <AdaptivePopover
-      open={open}
-      onClose={() => answer()}
-      anchorEl={anchorEl}
-      aria-label={t('settings')}
+    <DrawerSurface
+      side="left"
+      title={t('settings')}
+      controller={{ open, setOpen: next => !next && answer() }}
+      contentClassName="px-2 pt-0 pb-2"
     >
       <ActionList aria-label={t('settings')}>
         <Settings onClose={() => answer()} />
       </ActionList>
-    </AdaptivePopover>
+    </DrawerSurface>
   )
 }
 

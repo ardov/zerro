@@ -28,6 +28,11 @@
       translate: var(--drawer-swipe-movement-x, 0px) 0;
     }
 
+    &[data-side='left'] {
+      --drawer-exit-translate: calc(-100% - var(--spacing-ui-drawer-inset)) 0;
+      translate: var(--drawer-swipe-movement-x, 0px) 0;
+    }
+
     &[data-starting-style],
     &[data-ending-style] {
       translate: var(--drawer-exit-translate);
@@ -35,6 +40,31 @@
 
     &[data-swiping] {
       transition: none;
+    }
+
+    /* Pulled the wrong way, against the edge it is attached to, a drawer
+       gives a little (Base UI damps the drag to its square root). Its
+       surface continues past the screen edge, so the pull shows more of the
+       sheet rather than the page behind its cut-off edge. */
+    &[data-attached]::after {
+      position: absolute;
+      content: '';
+      background: inherit;
+    }
+
+    &[data-attached][data-side='bottom']::after {
+      inset: 100% 0 auto;
+      height: 64px;
+    }
+
+    &[data-attached][data-side='right']::after {
+      inset: 0 auto 0 100%;
+      width: 64px;
+    }
+
+    &[data-attached][data-side='left']::after {
+      inset: 0 100% 0 auto;
+      width: 64px;
     }
 
     /* Also animate surfaces mounted with open=true. */

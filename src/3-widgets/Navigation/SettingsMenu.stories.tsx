@@ -57,8 +57,8 @@ export const Mobile: Story = {
   play: checkNestedConfirm,
 }
 
-/** Asked content mounts already open; the mobile sheet must nevertheless get
- * a closed starting frame and travel up from the bottom. */
+/** Asked content mounts already open; the drawer must nevertheless get a
+ * closed starting frame and slide in from the edge. */
 export const MobileEntrance: Story = {
   tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
@@ -71,7 +71,7 @@ export const MobileEntrance: Story = {
       name: 'Settings',
     })
     expect(popup).toHaveAttribute('data-starting-style')
-    expect(getComputedStyle(popup).transform).not.toBe('none')
+    expect(getComputedStyle(popup).translate).not.toBe('none')
     await waitFor(() =>
       expect(popup).not.toHaveAttribute('data-starting-style')
     )

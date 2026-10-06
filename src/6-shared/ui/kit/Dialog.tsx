@@ -14,6 +14,7 @@ import {
 import { useOwnedPopup } from './useOwnedPopup'
 import { useBottomSheetLayout } from './useBottomSheetLayout'
 import './Surface.css'
+import { modalBackdropClass } from './backdrop'
 
 type DialogOptions = SurfaceName & {
   'aria-describedby'?: string
@@ -103,7 +104,7 @@ function CenteredDialog(props: DialogSurfaceProps & { alert?: boolean }) {
       <Primitive.Portal>
         <Primitive.Backdrop
           forceRender
-          className="kit-surface-fade fixed inset-0 z-modal bg-ui-backdrop"
+          className={cn('kit-surface-fade', modalBackdropClass)}
         />
         <Primitive.Viewport
           className="pointer-events-none fixed inset-0 z-modal flex items-center justify-center p-4"

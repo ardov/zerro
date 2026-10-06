@@ -17,7 +17,7 @@ export const MenuButton: FC<MenuButtonProps> = props => {
       variant="ghost"
       size="sm"
       label={t('settings')}
-      onClick={e => ask(<SettingsMenu anchorEl={e.currentTarget} />)}
+      onClick={() => ask(<SettingsMenu />)}
       {...props}
     >
       <SettingsIcon />

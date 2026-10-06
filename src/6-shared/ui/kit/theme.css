@@ -6,6 +6,9 @@ emitted, not only those Tailwind finds used. */
   --opacity-ui-border:   0.1;
   --opacity-ui-disabled: 0.32;
 
+  /* 🌫 Blur */
+  --blur-ui-backdrop: 1.5px;
+
   /* 📚 Z-index */
   --z-index-drawer:  1200;
   --z-index-modal:   1300;
@@ -17,7 +20,10 @@ emitted, not only those Tailwind finds used. */
   --color-ui-base:        oklch(0.97 0.002 214);
   --color-ui-card:        oklch(1 0 0);
   --color-ui-popover:     oklch(1 0 0);
-  --color-ui-backdrop:    oklch(0 0 0 / 0.5);
+  /* Behind every modal: the page's own background over a slightly blurred
+     page, so a modal veils the page rather than dimming it. Follows the theme
+     through --color-ui-base. */
+  --color-ui-backdrop:    color-mix(in oklch, var(--color-ui-base) 60%, transparent);
   --color-ui-field-hatch: oklch(0 0 0 / 0.03);
   /* 🎨 State colors */
   --color-ui-focus:     oklch(0 0 0);
@@ -42,6 +48,7 @@ emitted, not only those Tailwind finds used. */
   --color-ui-on-button-primary:    oklch(1 0 0);
   --color-ui-tooltip:              oklch(0.22 0 0);
   --color-ui-on-tooltip:           oklch(1 0 0);
+  --color-ui-scrollbar:            oklch(0 0 0 / 0.12);
   /* 🎨 Control colors, checkbox and switch */
   --color-ui-control-active:   oklch(0 0 0);
   --color-ui-control-inactive: oklch(0.58 0 0);
@@ -96,7 +103,6 @@ emitted, not only those Tailwind finds used. */
   --color-ui-base: oklch(0.18 0.002 214);
   --color-ui-card: oklch(0.22 0.002 214);
   --color-ui-popover: oklch(0.26 0.002 214);
-  --color-ui-backdrop: oklch(0 0 0 / 0.6);
   --color-ui-field-hatch: oklch(1 0 0 / 0.04);
 
   --color-ui-focus: oklch(1 0 0);
@@ -118,6 +124,7 @@ emitted, not only those Tailwind finds used. */
   --color-ui-on-button-primary: oklch(0.18 0 0);
   --color-ui-tooltip: oklch(0.9 0 0);
   --color-ui-on-tooltip: oklch(0.18 0 0);
+  --color-ui-scrollbar: oklch(1 0 0 / 0.16);
   --color-ui-control-active: oklch(0.95 0 0);
   --color-ui-control-inactive: oklch(0.58 0 0);
   --color-ui-on-control: oklch(0.18 0 0);

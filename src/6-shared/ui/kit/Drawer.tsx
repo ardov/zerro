@@ -3,6 +3,7 @@ import { Drawer as Primitive } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
 import type { PopupController, SurfaceController } from '@/6-shared/overlays'
 import { MobileDrawerViewport } from '../MobileDrawerViewport'
+import { modalBackdropClass } from './backdrop'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import {
   SurfaceContent,
@@ -17,8 +18,9 @@ import './Drawer.css'
 export type DrawerProps = SurfaceName & {
   'aria-describedby'?: string
   /** Auto uses bottom below 500px and right on wider screens. Below 500px a
-   * right sheet fills the screen as a page. */
-  side?: 'auto' | 'bottom' | 'right'
+   * right sheet fills the screen as a page. A left sheet does the same, from
+   * the other edge. */
+  side?: 'auto' | 'bottom' | 'right' | 'left'
   className?: string
   contentClassName?: string
   /** The children bring their own scroller, such as a virtual list, and fill
@@ -97,28 +99,27 @@ function DrawerFrame(props: DrawerSurfaceProps) {
       : requestedSide
   // On a phone a side sheet is a page of its own: it fills the screen, and
   // from 500px it floats beside the page with an inset.
-  const page = side === 'right' && bottomSheet
+  const page = side !== 'bottom' && bottomSheet
   return (
     <Primitive.Root
       open={open}
       onOpenChange={onOpenChange}
       disablePointerDismissal={disablePointerDismissal}
-      swipeDirection={side === 'bottom' ? 'down' : 'right'}
+      swipeDirection={side === 'bottom' ? 'down' : side}
     >
       {trigger && <Primitive.Trigger disabled={disabled} render={trigger} />}
       <Primitive.Portal>
         <Primitive.Backdrop
           forceRender
-          className="kit-drawer-backdrop fixed inset-0 z-modal bg-ui-backdrop"
+          className={cn('kit-drawer-backdrop', modalBackdropClass)}
         />
         <MobileDrawerViewport
           className={cn(
             'flex',
-            side === 'bottom'
-              ? 'items-end'
-              : page
-                ? 'justify-end'
-                : 'justify-end p-ui-drawer-inset'
+            side === 'bottom' && 'items-end',
+            side === 'right' && 'justify-end',
+            side === 'left' && 'justify-start',
+            side !== 'bottom' && !page && 'p-ui-drawer-inset'
           )}
         >
           <Primitive.Popup
@@ -127,9 +128,15 @@ function DrawerFrame(props: DrawerSurfaceProps) {
             aria-labelledby={title != null ? titleId : undefined}
             initialFocus={initialFocus}
             data-side={side}
+            // Against the screen edge rather than floating beside the page.
+            data-attached={side === 'bottom' || page ? '' : undefined}
             finalFocus={finalFocus}
             className={cn(
-              'kit-drawer-popup pointer-events-auto relative flex flex-col overflow-hidden rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
+              'kit-drawer-popup pointer-events-auto relative flex flex-col rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
+              // A floating drawer clips its content to all four corners. An
+              // attached one has nothing at its rounded corners to clip, and
+              // must not clip the surface it extends past the screen edge.
+              side !== 'bottom' && !page && 'overflow-hidden',
               side === 'bottom'
                 ? 'max-h-[calc(100%-32px)] rounded-t-ui-popover'
                 : 'h-full w-90 max-w-full rounded-ui-popover',
@@ -158,7 +165,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
                 )}
                 contentScrolls={contentScrolls}
                 close={
-                  side === 'right' && title != null ? (
+                  side !== 'bottom' && title != null ? (
                     <Primitive.Close render={<SurfaceCloseButton />} />
                   ) : undefined
                 }
