@@ -24,8 +24,10 @@ import { core } from '@/zerro-core/redux'
 import { HistoryShortcuts } from '@/4-features/historyShortcuts'
 import { RegularSyncHandler } from '@/3-widgets/RegularSyncHandler'
 import { HistoryTopBar } from '@/3-widgets/History/HistoryTopBar'
-import Nav from '@/3-widgets/Navigation'
-import { MobileNavigation } from '@/3-widgets/Navigation'
+import { MobileNavigation, Rail } from '@/3-widgets/Navigation'
+import { Panel, scrollInsetClass } from '@/6-shared/ui/layout/Panel'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { useHomeBar } from '@/6-shared/hooks/useHomeBar'
 import ErrorBoundary from '@/3-widgets/ErrorBoundary'
 import Transactions from '@/2-pages/Transactions'
 import Auth from '@/2-pages/Auth'
@@ -47,34 +49,34 @@ export default function App() {
     setAnalyticsUser(userId || null)
   }, [userId])
 
-  const publicRoutes = [
-    <Route key="about" path="/about/*" element={<About />} />,
-    <Route key="donation" path="/donation" element={<Donation />} />,
+  const publicRoutes = (wrap: (page: React.ReactNode) => React.ReactNode) => [
+    <Route key="about" path="/about/*" element={wrap(<About />)} />,
+    <Route key="donation" path="/donation" element={wrap(<Donation />)} />,
   ]
 
   const notLoggedIn = [
-    ...publicRoutes,
+    ...publicRoutes(page => page),
     <Route key="*" path="*" element={<Auth />} />,
   ]
 
   const loggedInNoData = [
-    ...publicRoutes,
-    <Route key="token" path="/token" element={<Token />} />,
+    ...publicRoutes(inPanel),
+    <Route key="token" path="/token" element={inPanel(<Token />)} />,
     <Route key="*" path="*" element={<MainLoader />} />,
   ]
 
   const loggedInWithData = [
-    ...publicRoutes,
-    <Route key="token" path="/token" element={<Token />} />,
+    ...publicRoutes(inPanel),
+    <Route key="token" path="/token" element={inPanel(<Token />)} />,
     <Route
       key="transactions"
       path="/transactions"
       element={<Transactions />}
     />,
-    <Route key="review" path="/review" element={<Review />} />,
-    <Route key="accounts" path="/accounts" element={<Accounts />} />,
+    <Route key="review" path="/review" element={onCanvas(<Review />)} />,
+    <Route key="accounts" path="/accounts" element={inPanel(<Accounts />)} />,
     <Route key="budget" path="/budget" element={<Budgets />} />,
-    <Route key="stats" path="/stats" element={<Stats />} />,
+    <Route key="stats" path="/stats" element={onCanvas(<Stats />)} />,
     <Route key="*" path="*" element={<Navigate to="/budget" replace />} />,
   ]
 
@@ -120,33 +122,56 @@ const Layout: FC<{
   children: React.ReactNode
 }> = props => {
   const { isLoggedIn, hasData, children } = props
+  const isPhone = useBreakpointDown('sm')
+  const hasHomeBar = useHomeBar()
+  if (!isLoggedIn) return <div className="min-h-screen">{children}</div>
+
   return (
-    <div className="flex">
-      {isLoggedIn && <Navigation />}
-      <div className="min-h-screen min-w-0 grow">
-        {/* Inside the content column, not above the whole layout: the
-            navigation drawer is fixed, and a full-width bar would hand it
-            the controls on its left. */}
-        {isLoggedIn && hasData && <HistoryTopBar />}
-        {children}
+    // The canvas. `--canvas-gap` is its padding and the gap between panels:
+    // none on a phone, where panels run edge to edge. It matches
+    // `panelWidths.gap`, which the layout thresholds are summed from.
+    // `--bottom-inset` is how much of the window the bottom bar covers; each
+    // scroller adds it inside its scroll (see `scrollInsetClass`).
+    <div
+      className="flex h-dvh bg-background [--canvas-gap:0px] sm:[--canvas-gap:8px]"
+      style={
+        {
+          '--bottom-inset': isPhone ? (hasHomeBar ? '72px' : '56px') : '0px',
+        } as React.CSSProperties
+      }
+    >
+      {!isPhone && <Rail />}
+      <div className="flex min-w-0 grow flex-col">
+        {hasData && <HistoryTopBar />}
+        <main className="flex min-h-0 grow gap-(--canvas-gap) p-(--canvas-gap)">
+          {children}
+        </main>
       </div>
+      {isPhone && <MobileNavigation />}
     </div>
   )
 }
+
+/** A page not laid out in panels yet: one panel holds all of it. */
+const inPanel = (page: React.ReactNode) => (
+  <Panel className="min-w-0 grow">{page}</Panel>
+)
+
+/** A page made of its own cards, laid straight on the canvas. */
+const onCanvas = (page: React.ReactNode) => (
+  <div className={cn('min-h-0 min-w-0 grow overflow-auto', scrollInsetClass)}>
+    {page}
+  </div>
+)
 
 function FallbackLoader() {
   const { t } = useTranslation('loadingHints')
   return (
-    <div className="grid h-full place-content-center">
+    <div className="grid grow place-content-center">
       <RadialProgress size={40} aria-label={t('hint')} />
     </div>
   )
 }
-
-const Navigation = React.memo(() => {
-  const isMobile = useBreakpointDown('md')
-  return isMobile ? <MobileNavigation /> : <Nav />
-})
 
 function MainLoader() {
   const [hint, setHint] = useState('')
@@ -168,7 +193,7 @@ function MainLoader() {
     }
   }, [t])
   return (
-    <div className="flex h-full flex-col items-center justify-center">
+    <div className="flex grow flex-col items-center justify-center">
       <RadialProgress size={40} aria-label={t('hint')} />
       <div className="mt-8 w-[200px]">
         <p className="m-0 text-center text-body">{hint}</p>

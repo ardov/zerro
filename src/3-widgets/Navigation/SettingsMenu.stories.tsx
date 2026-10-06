@@ -43,7 +43,6 @@ const checkNestedConfirm: Story['play'] = async ({ canvasElement }) => {
 }
 
 export const Desktop: Story = {
-  args: { showLinks: true },
   render: args => (
     <div className="min-h-[360px]">
       <MenuButton {...args} />
@@ -54,7 +53,7 @@ export const Desktop: Story = {
 
 export const Mobile: Story = {
   globals: { viewport: { value: 'iphone13' } },
-  args: { showLinks: true },
+  args: { showAbout: true },
   render: args => <MenuButton {...args} />,
   play: checkNestedConfirm,
 }
@@ -64,7 +63,7 @@ export const Mobile: Story = {
 export const MobileEntrance: Story = {
   tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
-  args: { showLinks: true },
+  args: { showAbout: true },
   render: args => <MenuButton {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

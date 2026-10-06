@@ -461,6 +461,7 @@
   },
 
   "navigation": {
+    "main": "Основная навигация",
     "settings": "Настройки",
     "budget": "Бюджет",
     "transactions": "Операции",

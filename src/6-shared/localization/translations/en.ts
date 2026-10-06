@@ -484,6 +484,7 @@ export const en: typeof ru = {
   },
 
   navigation: {
+    main: 'Main navigation',
     settings: 'Settings',
     budget: 'Budget',
     transactions: 'Transactions',

@@ -91,6 +91,26 @@ export function Logo({ fill = '#000', visible = true, ...rest }) {
   )
 }
 
+/** The crossed zero on its own, without the wordmark or the entrance
+ * animation. */
+export function LogoMark({ fill = 'currentColor', ...rest }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 132 132"
+      {...rest}
+    >
+      <circle cx="66" cy="66" r="63" stroke={fill} strokeWidth="6" />
+      <path
+        fill={fill}
+        d="M66 32c7.28 0 12.76 2.92 16.43 8.76 3.74 5.77 5.61 14.17 5.61 25.2 0 11.01-1.87 19.44-5.6 25.28C78.75 97.08 73.27 100 66 100c-7.28 0-12.8-2.92-16.53-8.76-3.68-5.84-5.51-14.27-5.51-25.29s1.83-19.42 5.5-25.2C53.22 34.93 58.73 32 66 32zm0 7.18c-4.26 0-7.45 2.1-9.55 6.3-2.03 4.2-3.05 11.02-3.05 20.47s1.02 16.3 3.05 20.57c2.1 4.2 5.29 6.3 9.55 6.3 4.2 0 7.35-2.1 9.45-6.3 2.1-4.27 3.15-11.12 3.15-20.57 0-9.38-1.05-16.17-3.15-20.37-2.1-4.26-5.25-6.4-9.45-6.4z"
+      />
+      <path stroke={fill} strokeWidth="6" d="M43.5 101l45-70" />
+    </svg>
+  )
+}
+
 function makeLetterStyles(num: number) {
   return (visible: boolean) =>
     visible

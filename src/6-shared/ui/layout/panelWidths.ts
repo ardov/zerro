@@ -1,0 +1,34 @@
+import { useMediaQueryValue } from '@/6-shared/hooks/useMediaQueryValue'
+
+/** Minimum widths of the rail, the canvas gap and every panel, in pixels.
+ *
+ * The only place a page's layout thresholds come from: a page asks whether
+ * the window fits the rail and a set of panels side by side, and the answer
+ * moves whenever one of these numbers does. */
+export const panelWidths = {
+  rail: 56,
+  /** The canvas padding around panels and the gap between them. */
+  gap: 8,
+  accounts: 240,
+  transactionList: 400,
+  transactionDetail: 360,
+  envelopeList: 480,
+  budgetSide: 360,
+} as const
+
+/** The narrowest window that holds the rail and these panels side by side. */
+export function windowWidthFor(...panels: number[]) {
+  const { rail, gap } = panelWidths
+  return panels.reduce((sum, panel) => sum + panel + gap, rail + gap)
+}
+
+/** True while the window holds the rail and these panels side by side. */
+export function useWindowFits(...panels: number[]) {
+  return useMediaQueryValue(`(min-width: ${windowWidthFor(...panels)}px)`)
+}
+
+/** Whether the accounts panel fits beside the transaction list. Navigation
+ * offers Accounts as a destination exactly while it does not. */
+export function useAccountsPanelFits() {
+  return useWindowFits(panelWidths.accounts, panelWidths.transactionList)
+}

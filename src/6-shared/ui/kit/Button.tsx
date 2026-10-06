@@ -1,6 +1,6 @@
 import { Button as ButtonPrimitive } from '@base-ui/react/button'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { Tooltip } from './Tooltip'
+import { Tooltip, type TooltipProps } from './Tooltip'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import './Press.css'
 import './Button.css'
@@ -71,6 +71,7 @@ export type ButtonProps = Omit<ButtonPrimitive.Props, 'className'> &
 export type IconButtonProps = Omit<ButtonProps, 'aria-label'> & {
   label: string
   tooltip?: boolean
+  tooltipSide?: TooltipProps['side']
   /** Rounded rectangle by default; circle for standalone icon actions. */
   shape?: 'rounded' | 'circle'
 }
@@ -100,6 +101,7 @@ function Button({ className, variant, size = 'lg', ...props }: ButtonProps) {
 function IconButton({
   label,
   tooltip = true,
+  tooltipSide,
   shape = 'rounded',
   className,
   variant,
@@ -107,7 +109,7 @@ function IconButton({
   ...props
 }: IconButtonProps) {
   return (
-    <Tooltip content={label} disabled={!tooltip}>
+    <Tooltip content={label} disabled={!tooltip} side={tooltipSide}>
       <ButtonPrimitive
         data-slot="icon-button"
         className={cn(

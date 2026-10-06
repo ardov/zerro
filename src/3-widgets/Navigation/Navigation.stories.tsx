@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import NavigationDrawer from './NavDrawer'
+import { Rail } from './Rail'
 import { MobileNavigation } from './MobileNavigation'
 
 const meta = {
@@ -14,10 +14,10 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-export const DesktopDrawer: Story = {
+export const DesktopRail: Story = {
   render: () => (
-    <div className="flex min-h-[720px] bg-background">
-      <NavigationDrawer />
+    <div className="flex h-[720px] bg-background">
+      <Rail />
       <div className="grow" />
     </div>
   ),

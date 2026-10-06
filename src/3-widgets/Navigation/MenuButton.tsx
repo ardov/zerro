@@ -8,10 +8,10 @@ import { useAsk } from '@/6-shared/overlays'
 import { SettingsMenu } from './SettingsMenu'
 
 interface MenuButtonProps extends Omit<IconButtonProps, 'label'> {
-  showLinks?: boolean
+  showAbout?: boolean
 }
 
-export const MenuButton: FC<MenuButtonProps> = ({ showLinks, ...rest }) => {
+export const MenuButton: FC<MenuButtonProps> = ({ showAbout, ...rest }) => {
   const { t } = useTranslation('navigation')
   const ask = useAsk()
   return (
@@ -20,7 +20,7 @@ export const MenuButton: FC<MenuButtonProps> = ({ showLinks, ...rest }) => {
       size="sm"
       label={t('settings')}
       onClick={e =>
-        ask(<SettingsMenu showLinks={showLinks} anchorEl={e.currentTarget} />)
+        ask(<SettingsMenu showAbout={showAbout} anchorEl={e.currentTarget} />)
       }
       {...rest}
     >

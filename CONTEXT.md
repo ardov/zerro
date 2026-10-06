@@ -85,6 +85,33 @@ The history entry a Popup adds. It carries no address of its own and exists to
 absorb one Back press.
 _Avoid_: Blank entry, placeholder
 
+### Layout
+
+**Rail**:
+The narrow, icon-only strip of destinations along the left edge on a wide
+screen. It holds no lists of data.
+_Avoid_: Sidebar, navigation drawer
+
+**Canvas**:
+The background a page's panels sit on.
+_Avoid_: Page background, backdrop
+
+**Panel**:
+One rounded region of the canvas that scrolls on its own and has a minimum
+width. When the screen has no room for it, it opens as a drawer instead, or is
+not shown.
+_Avoid_: Card, work area, pane
+
+**Accounts panel**:
+The panel listing accounts and debtors, beside the transaction list.
+_Avoid_: Account sidebar, account drawer
+
+**Month overview**:
+The summary of the budget month: warnings, income, spending, transfers and
+money left to assign. An envelope's detail takes its place while the envelope
+is selected.
+_Avoid_: Side content, month info
+
 ### Stories
 
 **Bench**:

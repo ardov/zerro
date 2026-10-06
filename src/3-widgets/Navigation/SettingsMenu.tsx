@@ -14,7 +14,6 @@ import {
   SyncDisabledIcon,
   AutoAwesomeIcon,
   MoreHorizIcon,
-  AccountBalanceWalletIcon,
   GlobeIcon,
   HistoryIcon,
   CategoryIcon,
@@ -49,12 +48,12 @@ import { useAsk, useAsked } from '@/6-shared/overlays'
 import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useColorScheme } from '@/6-shared/ui/theme'
 
-type SettingsMenuProps = { showLinks?: boolean; anchorEl?: Element | null }
+type SettingsMenuProps = { showAbout?: boolean; anchorEl?: Element | null }
 
 /** The settings menu, asked rather than mounted. Items act on the app
  * themselves, so it answers nothing. */
 export const SettingsMenu: FC<SettingsMenuProps> = props => {
-  const { showLinks, anchorEl } = props
+  const { showAbout, anchorEl } = props
   const { t } = useTranslation('settings')
   const { open, answer } = useAsked<void>()
   return (
@@ -65,18 +64,18 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
       aria-label={t('settings')}
     >
       <ActionList aria-label={t('settings')}>
-        <Settings showLinks={showLinks} onClose={() => answer()} />
+        <Settings showAbout={showAbout} onClose={() => answer()} />
       </ActionList>
     </AdaptivePopover>
   )
 }
 
-const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
+const Settings = (props: { onClose: () => void; showAbout?: boolean }) => {
   const { t } = useTranslation('settings')
   const [isExpanded, setExpanded] = useState(false)
   return (
     <>
-      {props.showLinks && <NavItems onClose={props.onClose} />}
+      <NavItems onClose={props.onClose} showAbout={props.showAbout} />
       <ListRowSubheader>{t('settings')}</ListRowSubheader>
       <ThemeItem onClose={props.onClose} />
       <ReloadDataItem onClose={props.onClose} />
@@ -226,7 +225,9 @@ function LangItem(_props: ItemProps) {
   )
 }
 
-function NavItems(_props: ItemProps) {
+/** The destinations the rail and the bottom bar leave out. About is one of
+ * them only on a phone: the rail shows it. */
+function NavItems(props: ItemProps & { showAbout?: boolean }) {
   const { t } = useTranslation('navigation')
   const navigate = useNavigate()
   // Leaving the page takes the menu with it, so navigating is the whole of
@@ -240,16 +241,6 @@ function NavItems(_props: ItemProps) {
   return (
     <>
       <ActionListItem
-        onClick={handleNav('/accounts')}
-        render={<Link to="/accounts" />}
-        nativeButton={false}
-      >
-        <ListRowIcon>
-          <AccountBalanceWalletIcon />
-        </ListRowIcon>
-        <ListRowText>{t('accounts')}</ListRowText>
-      </ActionListItem>
-      <ActionListItem
         onClick={handleNav('/review')}
         render={<Link to="/review" />}
         nativeButton={false}
@@ -259,16 +250,18 @@ function NavItems(_props: ItemProps) {
         </ListRowIcon>
         <ListRowText>{t('yearWrapped')}</ListRowText>
       </ActionListItem>
-      <ActionListItem
-        onClick={handleNav('/about')}
-        render={<Link to="/about" />}
-        nativeButton={false}
-      >
-        <ListRowIcon>
-          <HelpOutlineIcon />
-        </ListRowIcon>
-        <ListRowText>{t('about')}</ListRowText>
-      </ActionListItem>
+      {props.showAbout && (
+        <ActionListItem
+          onClick={handleNav('/about')}
+          render={<Link to="/about" />}
+          nativeButton={false}
+        >
+          <ListRowIcon>
+            <HelpOutlineIcon />
+          </ListRowIcon>
+          <ListRowText>{t('about')}</ListRowText>
+        </ActionListItem>
+      )}
       <ActionListItem
         onClick={handleNav('/donation')}
         render={<Link to="/donation" />}
