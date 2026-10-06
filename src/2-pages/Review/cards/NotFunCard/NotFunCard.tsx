@@ -6,7 +6,7 @@ import { core } from '@/zerro-core/redux'
 import { CheckboxField } from '@/6-shared/ui/Checkbox'
 import { Link } from '@/6-shared/ui/kit/Link'
 import { Chip } from '@/6-shared/ui/Chip'
-import { Dialog } from '@/6-shared/ui/Dialog'
+import { Dialog } from '@/6-shared/ui/kit/Dialog'
 import pluralize from '@/6-shared/helpers/pluralize'
 import { round } from '@/6-shared/helpers/money'
 import { entries } from '@/6-shared/helpers/keys'
@@ -26,7 +26,6 @@ import { getTaxes } from './getTaxesByIncome'
 
 export function NotFunCard(props: TCardProps) {
   const { t: uiT } = useTranslation('common')
-  const [settings, toggleSettings] = useToggle(false)
   const [onlyRUB, toggleRUB] = useToggle(false)
   const { income, outcome } = useIncomeOutcome(onlyRUB, props.year)
   const [checkedIncome, setCheckedIncome] = useState(income.map(t => t.id))
@@ -148,47 +147,50 @@ export function NotFunCard(props: TCardProps) {
   return (
     <>
       <Card className="relative">
-        <IconButton
-          label={uiT('navigation:settings')}
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            track('external_link_opened', { destination: 'taxes_settings' })
-            toggleSettings()
-          }}
-          className="absolute right-2 top-2"
+        <Dialog
+          title={uiT('navigation:settings')}
+          trigger={
+            <IconButton
+              label={uiT('navigation:settings')}
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                track('external_link_opened', {
+                  destination: 'taxes_settings',
+                })
+              }
+              className="absolute right-2 top-2"
+            >
+              <SettingsIcon />
+            </IconButton>
+          }
         >
-          <SettingsIcon />
-        </IconButton>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col">
+              <CheckboxField
+                label="Только операции в рублях"
+                checked={onlyRUB}
+                onCheckedChange={() => toggleRUB()}
+              />
+            </div>
+            <TagSelect
+              label="Доходы"
+              options={income}
+              selected={checkedIncome}
+              onChange={setCheckedIncome}
+            />
+
+            <TagSelect
+              label="Расходы"
+              options={outcome}
+              selected={checkedOutcome}
+              onChange={setCheckedOutcome}
+            />
+          </div>
+        </Dialog>
 
         {totalIncome ? cardContent : emptyCardContent}
       </Card>
-
-      {/* Settings */}
-      <Dialog open={settings} onClose={() => toggleSettings()}>
-        <div className="flex flex-col gap-6 p-6">
-          <div className="flex flex-col">
-            <CheckboxField
-              label="Только операции в рублях"
-              checked={onlyRUB}
-              onCheckedChange={() => toggleRUB()}
-            />
-          </div>
-          <TagSelect
-            label="Доходы"
-            options={income}
-            selected={checkedIncome}
-            onChange={setCheckedIncome}
-          />
-
-          <TagSelect
-            label="Расходы"
-            options={outcome}
-            selected={checkedOutcome}
-            onChange={setCheckedOutcome}
-          />
-        </div>
-      </Dialog>
     </>
   )
 }

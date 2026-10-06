@@ -21,7 +21,7 @@ import {
 /** How long an answered surface is given before it is taken off the page.
  *
  * A ceiling rather than a duration: the exits themselves are timed in CSS
- * (`overlaySurface.css`, `Dialog.css` — the longest is 225ms), and this only
+ * (kit `Drawer.css` and `Surface.css` — the longest is 250ms), and this only
  * has to outlast them. The answer is handed over at once either way, so the
  * animation starts on the press rather than after the browser replies. */
 const EXIT_CEILING_MS = 400

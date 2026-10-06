@@ -92,7 +92,7 @@ const preview: Preview = {
               'DatePicker',
               'MonthSelect',
             ],
-            Overlays: ['Popover', 'AdaptivePopover', 'Dialog', 'Snackbar'],
+            Overlays: ['Snackbar'],
             Display: [
               'Amount',
               'Total',

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within, waitFor } from 'storybook/test'
 import { usePopup } from '@/6-shared/overlays'
-import { Dialog, DialogContent } from '@/6-shared/ui/Dialog'
+import { Dialog } from './Dialog'
 import { Select } from './Select'
 import { MultiSelect } from './MultiSelect'
 import { Button } from './Button'
@@ -17,7 +17,7 @@ function Demo(props: {
   external?: boolean
 }) {
   const { search, multiple, external } = props
-  const { open: dialogOpen, setOpen: setDialogOpen } = usePopup()
+  const dialog = usePopup()
   const popup = usePopup()
   const [value, setValue] = useState<string | null>('one')
   const [values, setValues] = useState(['one'])
@@ -53,36 +53,30 @@ function Demo(props: {
         onClick={() => {
           setMounted(true)
           setDisabled(false)
-          setDialogOpen(true)
+          dialog.setOpen(true)
         }}
       >
         Open editor
       </Button>
-      <Dialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        aria-label="Editor"
-      >
-        <DialogContent className="grid w-80 gap-4">
-          {external && (
-            <Button onClick={() => popup.setOpen(true)}>Open choice</Button>
-          )}
-          {mounted &&
-            (multiple ? (
-              <MultiSelect {...common} value={values} onChange={setValues} />
-            ) : (
-              <Select
-                {...common}
-                value={value}
-                onChange={setValue}
-                alignSelected={!search}
-              />
-            ))}
-          <output aria-label="Value">
-            {multiple ? values.join(',') : value}
-          </output>
-          <Button onClick={() => setDialogOpen(false)}>Close editor</Button>
-        </DialogContent>
+      <Dialog popup={dialog} label="Editor" contentClassName="grid w-80 gap-4">
+        {external && (
+          <Button onClick={() => popup.setOpen(true)}>Open choice</Button>
+        )}
+        {mounted &&
+          (multiple ? (
+            <MultiSelect {...common} value={values} onChange={setValues} />
+          ) : (
+            <Select
+              {...common}
+              value={value}
+              onChange={setValue}
+              alignSelected={!search}
+            />
+          ))}
+        <output aria-label="Value">
+          {multiple ? values.join(',') : value}
+        </output>
+        <Button onClick={() => dialog.setOpen(false)}>Close editor</Button>
       </Dialog>
     </>
   )

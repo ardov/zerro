@@ -1,14 +1,8 @@
 import { Button } from '@/6-shared/ui/kit/Button'
 import type { ChangeEvent } from 'react'
-import { useCallback, useRef } from 'react'
+import { useCallback, useId, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from '@/6-shared/ui/Dialog'
+import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
 import { ActionListItem } from '@/6-shared/ui/ActionList'
 import { ListRowIcon, ListRowText } from '@/6-shared/ui/ListRow'
 import { UploadIcon } from '@/6-shared/ui/Icons'
@@ -159,74 +153,74 @@ export function ImportBackupItem({ onClose = noop }: { onClose?: () => void }) {
 
 function BackupImportDialog({ pending }: { pending: TPending }) {
   const { t } = useTranslation('settings')
-  const { open, answer } = useAsked<boolean>()
+  const { controller, answer } = useAsked<boolean>()
+  const confirm = useRef<HTMLButtonElement>(null)
+  const descriptionId = useId()
   return (
-    <Dialog open={open} onClose={() => answer()}>
-      <DialogTitle>{t('importTitle')}</DialogTitle>
-      <DialogContent>
-        {pending.foreign && (
-          <div
-            role="alert"
-            className="mb-4 rounded-lg border border-error-border bg-error-surface p-3"
-          >
-            <p className="m-0 text-body-sm">{t('importForeignWarning')}</p>
-          </div>
-        )}
-        {!!pending.warnings.length && (
-          <div
-            role="alert"
-            className="mb-4 rounded-lg border border-warning-border bg-warning-surface p-3"
-          >
-            <p className="m-0 text-body-sm">
-              {t('importCompatibilityWarning')}
-            </p>
-            <ul className="mb-0 mt-2 pl-5 text-body-sm">
-              {pending.warnings.map(warning => (
-                <li key={`${warning.reason}:${warning.path}`}>
-                  {t('importCompatibilityWarningItem', {
-                    path: warning.path,
-                    count: warning.count,
-                  })}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <DialogContentText>{t('importWarning')}</DialogContentText>
-        <div className="mt-4 flex flex-col gap-1">
-          {entityLabelKeys.map(([key, labelKey]) => {
-            const counts = byLabelKey(pending.summary)[key]
-            if (!counts) return null
-            return (
-              <div key={key} className="flex justify-between gap-4">
-                <span className="text-body-sm">{t(labelKey)}</span>
-                <span className="text-body-sm text-muted-foreground">
-                  {[
-                    counts.created && t('importCreated', { n: counts.created }),
-                    counts.updated && t('importUpdated', { n: counts.updated }),
-                    counts.removed && t('importRemoved', { n: counts.removed }),
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </span>
-              </div>
-            )
-          })}
+    <DialogSurface
+      controller={controller}
+      title={t('importTitle')}
+      closeButton={false}
+      initialFocus={confirm}
+      aria-describedby={descriptionId}
+    >
+      {pending.foreign && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-error-border bg-error-surface p-3"
+        >
+          <p className="m-0 text-body-sm">{t('importForeignWarning')}</p>
         </div>
-      </DialogContent>
-      <DialogActions>
-        <Button variant="ghost" size="sm" onClick={() => answer()}>
+      )}
+      {!!pending.warnings.length && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-warning-border bg-warning-surface p-3"
+        >
+          <p className="m-0 text-body-sm">{t('importCompatibilityWarning')}</p>
+          <ul className="mb-0 mt-2 pl-5 text-body-sm">
+            {pending.warnings.map(warning => (
+              <li key={`${warning.reason}:${warning.path}`}>
+                {t('importCompatibilityWarningItem', {
+                  path: warning.path,
+                  count: warning.count,
+                })}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <p id={descriptionId} className="m-0 text-ui-secondary">
+        {t('importWarning')}
+      </p>
+      <div className="mt-4 flex flex-col gap-1">
+        {entityLabelKeys.map(([key, labelKey]) => {
+          const counts = byLabelKey(pending.summary)[key]
+          if (!counts) return null
+          return (
+            <div key={key} className="flex justify-between gap-4">
+              <span className="text-body-sm">{t(labelKey)}</span>
+              <span className="text-body-sm text-muted-foreground">
+                {[
+                  counts.created && t('importCreated', { n: counts.created }),
+                  counts.updated && t('importUpdated', { n: counts.updated }),
+                  counts.removed && t('importRemoved', { n: counts.removed }),
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+      <div className="mt-6 flex flex-wrap justify-end gap-2">
+        <Button variant="secondary" onClick={() => answer()}>
           {t('importCancel')}
         </Button>
-        <Button
-          size="sm"
-          onClick={() => answer(true)}
-          variant="primary"
-          autoFocus
-        >
+        <Button ref={confirm} variant="primary" onClick={() => answer(true)}>
           {t(pending.warnings.length ? 'importConfirmAnyway' : 'importConfirm')}
         </Button>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </DialogSurface>
   )
 }

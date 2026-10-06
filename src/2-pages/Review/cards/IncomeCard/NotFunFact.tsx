@@ -1,12 +1,11 @@
-import { IconButton } from '@/6-shared/ui/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
 import { core } from '@/zerro-core/redux'
 
 import { Link } from '@/6-shared/ui/kit/Link'
-import { Dialog } from '@/6-shared/ui/Dialog'
+import { Dialog } from '@/6-shared/ui/kit/Dialog'
 import pluralize from '@/6-shared/helpers/pluralize'
 import type { TFxAmount } from '@/6-shared/types'
 import { HelpOutlineIcon } from '@/6-shared/ui/Icons'
-import { useToggle } from '@/6-shared/hooks/useToggle'
 import { Amount } from '@/6-shared/ui/Amount'
 
 /** Median salary in Russia 2024. Source: https://sberindex.ru/ru/dashboards/median-wages */
@@ -14,7 +13,6 @@ const MEDIAN_WAGE_RUB = 62_632
 const MEDIAN_WAGE_SOURCE = 'https://sberindex.ru/ru/dashboards/median-wages'
 
 export function NotFunFact({ income }: { income: TFxAmount }) {
-  const [isOpenInfo, toggleInfo] = useToggle(false)
   const toDisplay = core.currency.useToDisplay('current')
   const rubIncome = income.RUB || 0
   const monthlyIncome = toDisplay(income) / 12
@@ -38,22 +36,24 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
           ])}.`}
           <br />
           Если сложить их зарплаты — получится ваша.{' '}
-          <IconButton size="small" onClick={toggleInfo}>
-            <HelpOutlineIcon />
-          </IconButton>
+          <Dialog
+            label="Медианная зарплата"
+            className="max-w-90"
+            trigger={
+              <IconButton label="Откуда цифра" variant="ghost" size="xs">
+                <HelpOutlineIcon />
+              </IconButton>
+            }
+          >
+            <p className="m-0 text-body text-balance">
+              Медианная зарплата в 2024 году в России{' '}
+              <Amount value={MEDIAN_WAGE_RUB} currency="RUB" decimals="ifAny" />{' '}
+              по данным <Link href={MEDIAN_WAGE_SOURCE}>Сбериндекса</Link>. Это
+              значит, что половина россиян получают меньше этой суммы.
+            </p>
+          </Dialog>
         </p>
       </div>
-
-      <Dialog open={isOpenInfo} onClose={toggleInfo}>
-        <div className="flex max-w-[360px] flex-col gap-6 p-6">
-          <p className="m-0 text-body text-balance">
-            Медианная зарплата в 2024 году в России{' '}
-            <Amount value={MEDIAN_WAGE_RUB} currency="RUB" decimals="ifAny" />{' '}
-            по данным <Link href={MEDIAN_WAGE_SOURCE}>Сбериндекса</Link>. Это
-            значит, что половина россиян получают меньше этой суммы.
-          </p>
-        </div>
-      </Dialog>
     </>
   )
 }

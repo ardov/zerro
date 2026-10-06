@@ -35,7 +35,11 @@ vi.mock('@/6-shared/ui/SnackbarProvider', () => ({
 }))
 vi.mock('@/6-shared/overlays', () => ({
   useAsk: () => askMock,
-  useAsked: () => ({ open: true, answer: answerMock }),
+  useAsked: () => ({
+    open: true,
+    answer: answerMock,
+    controller: { open: true, setOpen: () => {} },
+  }),
 }))
 vi.mock('@/6-shared/analytics', () => ({ track: vi.fn() }))
 vi.mock('@/4-features/localData', () => ({ clearLocalData: vi.fn() }))

@@ -144,10 +144,11 @@ a drawer instead, or is not shown.
 
 A scrolling surface follows four rules. Each one prevents a specific artifact:
 
-- **The scroller is the surface.** `overflow`, the corner radius and the
-  background sit on one element. Padding on a non-scrolling wrapper around a
-  scroller moves the scroll edge inside the visible surface. Content then
-  vanishes at an invisible line instead of passing under the edge.
+- **The scroller fills the surface.** The scroll edge is the surface's edge:
+  a `ScrollArea` root is the surface, with its background and radius, and its
+  viewport fills it. Padding on a non-scrolling wrapper around a scroller
+  moves the scroll edge inside the visible surface. Content then vanishes at
+  an invisible line instead of passing under the edge.
 - **Padding lives inside the scroll.** A scroller takes no horizontal padding.
   Its content or its rows carry it. A sticky element cannot leave its parent's
   content box, so padding on the scroller insets every sticky header.
@@ -156,13 +157,14 @@ A scrolling surface follows four rules. Each one prevents a specific artifact:
   `visible`. An `overflow: hidden` wrapper added for rounding becomes that
   ancestor, and it never scrolls. A sticky element's parent should also span
   the whole scrolled content, or the element leaves with it.
-- **Overlaps are insets inside the scroll.** The phone's bottom bar covers
-  `--bottom-inset` of the window. A scroller adds it as padding at the end of
-  its content and as `scroll-padding-bottom`, both through
-  `scrollInsetClass`. Content then scrolls on under the bar instead of
-  stopping above it. `Panel` applies this itself. A panel whose content brings
-  its own scroller, such as a virtual list, sets `contentScrolls` and hands
-  the class to that scroller.
+- **Overlaps are insets inside the scroll.** The bottom bar measures how much
+  of the window it covers, and the layout sets that as `--bottom-inset` on
+  the canvas, so every page scroller sees it and no overlay does. `Panel` is
+  a kit `ScrollArea` with `bottomInset`: the inset goes at the end of the
+  content, into `scroll-padding-bottom` and under the thumb's track. Content
+  then scrolls on under the bar instead of stopping above it. A panel whose
+  content brings its own scroller, such as a virtual list, sets
+  `contentScrolls` and gives that scroller `scrollInsetClass`.
 
 Every flex ancestor between `h-dvh` and a scroller needs `min-h-0` (or
 `min-w-0` across). Without it the item grows to its content, and the window
@@ -218,9 +220,8 @@ Important groups include:
   date controls own labels, adornments, focus, error and disabled states.
 - Feedback: `Checkbox`, `Switch`, `Chip`, kit `Tooltip`, `CircularProgress`,
   `SnackbarProvider`, and `SnackbarNotice` own their complete visual state.
-- Disclosure and overlays: `Collapse`, legacy `Dialog`, `Popover` and
-  `AdaptivePopover`, and kit `Dialog`, `Drawer`, `Popover`, `Menu` and
-  `Confirm` own focus, dismissal, transition and portal behavior.
+- Disclosure and overlays: `Collapse` and kit `Dialog`, `Drawer`, `Popover`,
+  `Menu` and `Confirm` own focus, dismissal, transition and portal behavior.
 
 Kit `Tooltip` opens on hover and focus only, and it does not name its trigger:
 the control owns its accessible name, so an icon-only button takes the same
@@ -235,16 +236,11 @@ Overlay components portal to the document body and share the stacking tokens
 `z-drawer`, `z-modal`, and `z-tooltip`. They come from `--z-index-*` in
 `src/tailwind.css`, so they do not depend on a mounted provider.
 
-The legacy `Popover` positions against an element or virtual anchor and uses the
-shared surface geometry in `overlaySurface`. `NavDrawer` is the separate docked
-navigation layout. `AdaptivePopover` selects the appropriate surface for the
-current viewport without changing the caller's open-state contract.
-
-Each legacy surface takes `open` and `onClose` and owns neither. Openness belongs
-to `6-shared/overlays`, which is the only place that touches browser history:
-`usePopup` for a surface with its own trigger, `useAsk` for one that is asked a
-question, `defineScreen` for one a person can come back to. A surface that
-holds its own `useState` for openness is a Back press that leaves the page.
+Openness belongs to `6-shared/overlays`, which is the only place that
+touches browser history: `usePopup` for a surface with its own trigger,
+`useAsk` for one that is asked a question, `defineScreen` for one a person can
+come back to. A surface that holds its own `useState` for openness is a Back
+press that leaves the page.
 
 ### Kit surfaces
 
@@ -364,10 +360,9 @@ decorative transforms.
 Surfaces scroll in the kit `ScrollArea` (`src/6-shared/ui/kit/ScrollArea.tsx`):
 the thumb shows only while the area is hovered or scrolled, the viewport is
 never a tab stop, and the area scrolls only vertically. Drawers and dialogs
-use the thumb. Menus and popovers — the kit `Menu` and `Popover`, the legacy
-`Popover` and `AdaptivePopover` — use `scrollbar="none"` with `fade` (a
-popover shown as a bottom sheet on a phone is a drawer and uses the thumb), a mask
-over the content at an edge with more past it. The mask covers everything
+use the thumb. The kit `Menu` and `Popover` use `scrollbar="none"` with
+`fade` (a popover shown as a bottom sheet on a phone is a drawer and uses the
+thumb), a mask over the content at an edge with more past it. The mask covers everything
 that scrolls, sticky headers included, so a surface with `fade` keeps its
 header above the area rather than inside it; its scroll padding keeps a row
 brought into view clear of the fade.
@@ -387,8 +382,8 @@ element is its own scroller and takes no outside ref.
 Use co-located CSS for behavior that utility classes cannot express clearly,
 including data-state transitions, notched field geometry, and keyframes. Class
 names describe the current component or motion (`collapse-panel`,
-`dialog-fade`, `drawer-slide`, `popup-grow`, `circular-progress`) rather than
-their implementation history.
+`kit-surface-fade`, `kit-drawer-popup`, `kit-edge-fade`) rather than their
+implementation history.
 
 State selectors should use component data attributes where possible. Keep
 transition timing in CSS and interactive state in React; hidden interactive
