@@ -25,7 +25,9 @@ export type DrawerProps = SurfaceName & {
   contentClassName?: string
   /** The children bring their own scroller, such as a virtual list, and fill
    * the drawer's body instead of scrolling in it. The body then has no
-   * padding of its own; `contentClassName` styles it. */
+   * padding of its own; `contentClassName` styles it. A bottom sheet then
+   * takes its full height rather than its content's, so the scroller has a
+   * definite height to fill. */
   contentScrolls?: boolean
   children: ReactNode
   onClose?: () => void
@@ -138,7 +140,12 @@ function DrawerFrame(props: DrawerSurfaceProps) {
               // must not clip the surface it extends past the screen edge.
               side !== 'bottom' && !page && 'overflow-hidden',
               side === 'bottom'
-                ? 'max-h-[calc(100%-32px)] rounded-t-ui-popover'
+                ? cn(
+                    'rounded-t-ui-popover',
+                    contentScrolls
+                      ? 'h-[calc(100%-32px)]'
+                      : 'max-h-[calc(100%-32px)]'
+                  )
                 : 'h-full w-90 max-w-full rounded-ui-popover',
               className,
               // Desktop popup widths must not shrink their mobile sheet.
@@ -157,6 +164,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
             )}
             <Primitive.Content className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[max(8px,env(safe-area-inset-bottom))]">
               <SurfaceContent
+                disableBodySwipe={side !== 'bottom'}
                 title={title}
                 titleId={titleId}
                 className={cn(

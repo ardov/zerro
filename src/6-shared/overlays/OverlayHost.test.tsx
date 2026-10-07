@@ -1,8 +1,16 @@
 import { StrictMode, useEffect, useState, type ReactNode } from 'react'
 import { useOwnedPopup } from '../ui/kit/useOwnedPopup'
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, useNavigate } from 'react-router-dom'
+import {
+  MemoryRouter,
+  NavigationType,
+  Router,
+  useNavigate,
+  type Location,
+  type Navigator,
+  type To,
+} from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { OverlayHost } from './OverlayHost'
 import { defineScreen } from './defineScreen'
@@ -326,6 +334,118 @@ describe('defineScreen', () => {
     expect(screen.getByText('open a')).toBeTruthy()
   })
 })
+
+describe('a screen closing through a slow history step', () => {
+  const sheet = defineScreen<string>('sheet')
+
+  function Sheet() {
+    const [id, setId] = sheet.use()
+    return (
+      <>
+        <button onClick={() => setId('a')}>open</button>
+        {id && <div>sheet {id}</div>}
+        {id && <button onClick={() => setId(null)}>close</button>}
+      </>
+    )
+  }
+
+  it('reads as closed before the step lands', async () => {
+    const user = userEvent.setup()
+    const history = renderWithSlowHistory(<Sheet />)
+
+    await user.click(screen.getByText('open'))
+    await user.click(screen.getByText('close'))
+    // A swiped drawer must not be told to come back while the browser works.
+    expect(screen.queryByText('sheet a')).toBeNull()
+
+    history.land()
+    expect(screen.queryByText('sheet a')).toBeNull()
+    expect(screen.getByText('open')).toBeTruthy()
+  })
+
+  it('shows it again when the step never lands', async () => {
+    const user = userEvent.setup()
+    renderWithSlowHistory(<Sheet />)
+    await user.click(screen.getByText('open'))
+
+    vi.useFakeTimers()
+    try {
+      fireEvent.click(screen.getByText('close'))
+      expect(screen.queryByText('sheet a')).toBeNull()
+      act(() => vi.advanceTimersByTime(1000))
+      expect(screen.getByText('sheet a')).toBeTruthy()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+})
+
+/** A history whose steps land only when the test says so, as a browser's do
+ * a few frames after they are asked for. Pushes and replaces land at once. */
+function renderWithSlowHistory(children: ReactNode) {
+  let keys = 0
+  // Steps asked for and not landed yet, each landing when called.
+  const steps: Array<() => void> = []
+  const toLocation = (to: To, state: unknown): Location => ({
+    pathname: '/budget',
+    search: '',
+    hash: '',
+    ...(typeof to === 'string' ? { pathname: to } : to),
+    state: state ?? null,
+    key: `entry-${++keys}`,
+  })
+  type Stack = { entries: Location[]; index: number; type: NavigationType }
+
+  function SlowRouter() {
+    const [stack, set] = useState<Stack>({
+      entries: [toLocation('/budget', null)],
+      index: 0,
+      type: NavigationType.Pop,
+    })
+    const navigator = useState<Navigator>(() => ({
+      createHref: to => (typeof to === 'string' ? to : (to.pathname ?? '')),
+      go: delta =>
+        steps.push(() =>
+          set(({ entries, index }) => ({
+            entries,
+            index: index + delta,
+            type: NavigationType.Pop,
+          }))
+        ),
+      push: (to, state) =>
+        set(({ entries, index }) => ({
+          entries: [...entries.slice(0, index + 1), toLocation(to, state)],
+          index: index + 1,
+          type: NavigationType.Push,
+        })),
+      replace: (to, state) =>
+        set(({ entries, index }) => ({
+          entries: entries.with(index, toLocation(to, state)),
+          index,
+          type: NavigationType.Replace,
+        })),
+    }))[0]
+    return (
+      <Router
+        location={stack.entries[stack.index]}
+        navigationType={stack.type}
+        navigator={navigator}
+      >
+        <OverlayHost>{children}</OverlayHost>
+      </Router>
+    )
+  }
+
+  render(<SlowRouter />)
+  return {
+    land: () =>
+      act(() => {
+        const step = steps.shift()
+        if (!step) throw new Error('No step is in flight')
+        step()
+      }),
+  }
+}
 
 describe('owner close notifications', () => {
   function Editor({ onClose }: { onClose: (value: string) => void }) {

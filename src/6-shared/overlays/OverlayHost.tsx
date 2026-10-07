@@ -55,6 +55,11 @@ export function OverlayHost({ children }: { children: ReactNode }) {
 
   const [live, setLive] = useState<readonly string[]>([])
   const [asks, setAsks] = useState<readonly AskLayer[]>([])
+  // Screens asked to close whose entry has not gone yet. Closing one steps
+  // back through history, which lands a good few frames later; until then
+  // the screen already reads as closed, so a surface that animates out on its
+  // own — a swiped drawer — is not told to come back meanwhile.
+  const [closing, setClosing] = useState<ReadonlySet<string>>(new Set())
 
   const liveRef = useRef(live)
   const asksRef = useRef(asks)
@@ -194,7 +199,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
    * mistaken call earns, and what each answer costs memory are all settled in
    * one place, for every action alike. */
   const perform = useCallback(
-    (action: OverlayAction) => {
+    (action: OverlayAction): boolean => {
       const decision = decide(
         entryRef.current,
         { popups: liveRef.current.length, stepping: !!stepRef.current },
@@ -203,14 +208,15 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       if (decision.complaint) {
         if (import.meta.env.DEV)
           console.error(`[overlays] ${decision.complaint}`)
-        return
+        return false
       }
       if (decision.defer) {
         pendingRef.current.push(action)
-        return
+        return true
       }
       dismiss(decision.dismiss)
       applyOp(decision.history)
+      return true
     },
     [applyOp, dismiss]
   )
@@ -261,13 +267,18 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   )
 
   const openScreen = useCallback(
-    (name: string, value: unknown, instead?: boolean) =>
-      perform({ kind: 'openScreen', name, value, instead }),
+    (name: string, value: unknown, instead?: boolean) => {
+      setClosing(names => without(names, name))
+      perform({ kind: 'openScreen', name, value, instead })
+    },
     [perform]
   )
 
   const closeScreen = useCallback(
-    (name: string) => perform({ kind: 'closeScreen', name }),
+    (name: string) => {
+      if (perform({ kind: 'closeScreen', name }))
+        setClosing(names => new Set(names).add(name))
+    },
     [perform]
   )
 
@@ -290,6 +301,11 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     // Reconcile only once the stack is ours again: an answer that stepped has
     // left history mid-move, and there is nothing to compare it against yet.
     if (!stepRef.current) perform({ kind: 'arrive' })
+    // Settled: nothing in flight, nothing held. From here the entry alone says
+    // what is open — including a close the browser refused, which shows the
+    // screen again rather than leaving it hidden over a live entry.
+    if (!stepRef.current && !pendingRef.current.length)
+      setClosing(names => (names.size ? new Set() : names))
   }, [location.key, navigationType, perform])
 
   // Nothing is left waiting on an answer that can no longer come.
@@ -314,10 +330,11 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     [openPopup, closePopup, ask, openScreen, closeScreen, subscribeClose]
   )
 
-  const state = useMemo<OverlayState>(
-    () => ({ live, screens: entry.screens ?? {} }),
-    [live, entry]
-  )
+  const state = useMemo<OverlayState>(() => {
+    const screens = { ...entry.screens }
+    closing.forEach(name => delete screens[name])
+    return { live, screens }
+  }, [live, entry, closing])
 
   return (
     <OverlayMethodsContext.Provider value={methods}>
@@ -393,6 +410,13 @@ function useEntranceOpen(open: boolean) {
     return () => cancelAnimationFrame(frame)
   }, [open])
   return open && entered
+}
+
+function without(names: ReadonlySet<string>, name: string) {
+  if (!names.has(name)) return names
+  const next = new Set(names)
+  next.delete(name)
+  return next
 }
 
 /** The overlay entry rides under its own key, so anything else a route puts in

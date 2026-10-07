@@ -54,11 +54,23 @@ export function SurfaceContent(props: {
   children: ReactNode
   className?: string
   contentScrolls?: boolean
+  /** Keep swipe dismissal off the body. A side drawer swipes across the way
+   * its body scrolls, so a scroll that drifts sideways would close it; it is
+   * dismissed from the header instead. */
+  disableBodySwipe?: boolean
   /** How the body says it goes on: a thumb, or faded edges for popovers. */
   scroll?: Pick<ScrollAreaProps, 'scrollbar' | 'fade'>
 }) {
-  const { title, titleId, close, children, className, contentScrolls, scroll } =
-    props
+  const {
+    title,
+    titleId,
+    close,
+    children,
+    className,
+    contentScrolls,
+    scroll,
+    disableBodySwipe,
+  } = props
   return (
     <>
       {(title != null || close) && (
@@ -80,11 +92,15 @@ export function SurfaceContent(props: {
         </div>
       )}
       {contentScrolls ? (
-        <div className={cn('flex min-h-0 flex-auto flex-col', className)}>
+        <div
+          data-base-ui-swipe-ignore={disableBodySwipe ? '' : undefined}
+          className={cn('flex min-h-0 flex-auto flex-col', className)}
+        >
           {children}
         </div>
       ) : (
         <ScrollArea
+          data-base-ui-swipe-ignore={disableBodySwipe ? '' : undefined}
           className="flex-auto"
           contentClassName={cn('p-4', className)}
           {...scroll}

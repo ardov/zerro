@@ -68,10 +68,7 @@ export const EnvTransactionsDrawer = () => {
   }, [envelopeConditions])
 
   return (
-    // A side sheet on every width: the virtualized list needs a definite
-    // height, which a bottom sheet sized by its content would not give it.
     <DrawerSurface
-      side="right"
       title={title || t('transactions')}
       controller={{ open: !!value, setOpen: open => !open && onClose() }}
       contentScrolls

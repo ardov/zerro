@@ -60,7 +60,6 @@ export function HistoryPanel() {
 
   return (
     <DrawerSurface
-      side="right"
       title={t('panelTitle')}
       controller={{ open, setOpen: next => !next && setOpened(null) }}
       className="w-95"

@@ -65,7 +65,6 @@ const MemoSideContent = memo<TSideContentProps>(props => {
   return (
     <DrawerSurface
       {...name}
-      side="right"
       controller={{ open, setOpen: next => !next && onClose() }}
       // The content is drawn on the card colour, as in the docked column.
       className="bg-card"
