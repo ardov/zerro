@@ -37,8 +37,7 @@ export function getTime(tr: TTransaction) {
 }
 
 export function getMainTag(tr: TTransaction) {
-  if (tr.tag) return tr.tag[0]
-  else return null
+  return tr.tag?.[0] ?? null
 }
 
 export function isViewed(tr: TTransaction) {
