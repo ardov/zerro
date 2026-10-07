@@ -34,7 +34,7 @@ type PanelProps = {
 export function Panel(props: PanelProps) {
   const { children, className, style, contentClassName, contentScrolls } = props
   const surface = cn(
-    'min-h-0 bg-card text-card-foreground sm:rounded-lg',
+    'min-h-0 bg-card text-card-foreground sm:rounded-ui-card rounded-smooth',
     className
   )
   if (contentScrolls)

@@ -6,8 +6,8 @@ import { useMediaQueryValue } from '@/6-shared/hooks/useMediaQueryValue'
  * the window fits the rail and a set of panels side by side, and the answer
  * moves whenever one of these numbers does. */
 export const panelWidths = {
-  rail: 56,
-  /** The canvas padding around panels and the gap between them. */
+  rail: 48,
+  /** The canvas padding above, below and after panels, and the gap between them. */
   gap: 8,
   accounts: 240,
   transactionList: 400,
@@ -19,7 +19,8 @@ export const panelWidths = {
 /** The narrowest window that holds the rail and these panels side by side. */
 function windowWidthFor(...panels: number[]) {
   const { rail, gap } = panelWidths
-  return panels.reduce((sum, panel) => sum + panel + gap, rail + gap)
+  // The first panel touches the rail; each panel has a gap on its right.
+  return panels.reduce((sum, panel) => sum + panel + gap, rail)
 }
 
 /** True while the window holds the rail and these panels side by side. */

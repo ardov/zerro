@@ -131,8 +131,9 @@ const Layout: FC<{
   if (!isLoggedIn) return <div className="min-h-screen">{children}</div>
 
   const canvas = {
-    // The canvas padding and the gap between panels: none under the bottom
-    // bar, where panels run edge to edge.
+    // The canvas padding above, below and after the panels, and the gap
+    // between them; the rail spaces the first panel from the left edge. None
+    // under the bottom bar, where panels run edge to edge.
     '--canvas-gap': `${bottomBar ? 0 : panelWidths.gap}px`,
     // How much of the window the bottom bar covers. Set here rather than on
     // the document so that it reaches every page scroller and no overlay;
@@ -145,7 +146,7 @@ const Layout: FC<{
       {!bottomBar && <Rail />}
       <div className="flex min-w-0 grow flex-col">
         {hasData && <HistoryTopBar />}
-        <main className="flex min-h-0 grow gap-(--canvas-gap) p-(--canvas-gap)">
+        <main className="flex min-h-0 grow gap-(--canvas-gap) py-(--canvas-gap) pr-(--canvas-gap)">
           {children}
         </main>
       </div>

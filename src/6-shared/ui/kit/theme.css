@@ -20,10 +20,7 @@ emitted, not only those Tailwind finds used. */
   --color-ui-base:        oklch(0.97 0.002 214);
   --color-ui-card:        oklch(1 0 0);
   --color-ui-popover:     oklch(1 0 0);
-  /* Behind every modal: the page's own background over a slightly blurred
-     page, so a modal veils the page rather than dimming it. Follows the theme
-     through --color-ui-base. */
-  --color-ui-backdrop:    color-mix(in oklch, var(--color-ui-base) 60%, transparent);
+  --color-ui-backdrop:    oklch(from var(--color-ui-base) l c h / 80%);
   --color-ui-field-hatch: oklch(0 0 0 / 0.03);
   /* 🎨 State colors */
   --color-ui-focus:     oklch(0 0 0);
