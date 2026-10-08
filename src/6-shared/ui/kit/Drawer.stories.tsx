@@ -252,7 +252,7 @@ export const Showcase: Story = {
 }
 
 function touch(
-  target: HTMLElement,
+  target: Element,
   type: 'touchstart' | 'touchmove' | 'touchend',
   x: number,
   y: number
@@ -271,7 +271,7 @@ function touch(
 
 /** Drags a finger across `target` in a few steps. Returns whether any move
  * was taken over by the drawer rather than left to the page to scroll. */
-function drag(target: HTMLElement, dx: number, dy: number) {
+function drag(target: Element, dx: number, dy: number) {
   const rect = target.getBoundingClientRect()
   const x = rect.left + Math.min(40, rect.width / 2)
   const y = rect.top + Math.min(40, rect.height / 2)
@@ -318,6 +318,35 @@ export const ScrollGesture: Story = {
     // dismissed from its header, not its body.
     expect(drag(content, 60, 12)).toBe(false)
     expect(drag(content, 20, 3)).toBe(false)
+    await waitFor(() => expect(sheet).not.toHaveAttribute('data-swiping'))
+    expect(sheet).toHaveAttribute('data-open')
+    await userEvent.keyboard('{Escape}')
+  },
+}
+
+/** SVG descendants must retain the surrounding body scroll instead of swiping. */
+export const BottomSvgScrollGesture: Story = {
+  globals: { viewport: { value: 'zerro499' } },
+  args: {
+    side: 'bottom',
+    children: (
+      <div aria-label="SVG scroller" className="h-64 overflow-y-auto">
+        <div className="h-32" />
+        <svg aria-label="Scroll target" width="80" height="80">
+          <rect width="80" height="80" fill="currentColor" />
+        </svg>
+        <div className="h-200" />
+      </div>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const sheet = await openSettled(canvasElement, 'Details')
+    const scroller = within(sheet).getByLabelText('SVG scroller')
+    scroller.scrollTop = 100
+    expect(scroller.scrollTop).toBe(100)
+    const svg = within(sheet).getByLabelText('Scroll target')
+    const rect = svg.querySelector('rect')!
+    expect(drag(rect, 0, 40)).toBe(false)
     await waitFor(() => expect(sheet).not.toHaveAttribute('data-swiping'))
     expect(sheet).toHaveAttribute('data-open')
     await userEvent.keyboard('{Escape}')

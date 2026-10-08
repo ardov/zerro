@@ -1,0 +1,64 @@
+diff --git a/utils/scrollable.js b/utils/scrollable.js
+index c03e693a05ad5294e5d42a37331f1b29ead9fbd4..8fe4eb8007a0d72980850a55df46070d706983df 100644
+--- a/utils/scrollable.js
++++ b/utils/scrollable.js
+@@ -37,9 +37,9 @@ function hasScrollableAncestor(target, root, axes) {
+   // `getParentNode` crosses shadow boundaries (and slots), so a target inside a shadow root
+   // still walks up to scrollable ancestors in the light DOM.
+   let node = target;
+-  while ((0, _dom.isHTMLElement)(node) && node !== root && !(0, _dom.isLastTraversableNode)(node)) {
++  while ((0, _dom.isElement)(node) && node !== root && !(0, _dom.isLastTraversableNode)(node)) {
+     for (const axis of axes) {
+-      if (isScrollable(node, axis)) {
++      if ((0, _dom.isHTMLElement)(node) && isScrollable(node, axis)) {
+         return true;
+       }
+     }
+@@ -50,9 +50,9 @@ function hasScrollableAncestor(target, root, axes) {
+ function findScrollableTouchTarget(target, root, axis = 'vertical', allowOverflowIntent = false) {
+   // `getParentNode` crosses shadow boundaries (and slots), so a target inside a shadow root
+   // still reaches a scrollable ancestor in the light DOM.
+-  let node = (0, _dom.isHTMLElement)(target) ? target : null;
+-  while ((0, _dom.isHTMLElement)(node) && node !== root && !(0, _dom.isLastTraversableNode)(node)) {
+-    if (isScrollable(node, axis, allowOverflowIntent)) {
++  let node = target;
++  while ((0, _dom.isElement)(node) && node !== root && !(0, _dom.isLastTraversableNode)(node)) {
++    if ((0, _dom.isHTMLElement)(node) && isScrollable(node, axis, allowOverflowIntent)) {
+       return node;
+     }
+     node = (0, _dom.getParentNode)(node);
+diff --git a/utils/scrollable.mjs b/utils/scrollable.mjs
+index 7b94b5f4352bf9c85662152a904f4cec5c17e719..3f7169067ce3b21554906a8c8e4d0d5e8357d2b2 100644
+--- a/utils/scrollable.mjs
++++ b/utils/scrollable.mjs
+@@ -1,4 +1,4 @@
+-import { getComputedStyle, getParentNode, isHTMLElement, isLastTraversableNode } from '@floating-ui/utils/dom';
++import { getComputedStyle, getParentNode, isElement, isHTMLElement, isLastTraversableNode } from '@floating-ui/utils/dom';
+ export function isScrollableY(element, allowOverflowIntent = false) {
+   const {
+     overflowY
+@@ -27,9 +27,9 @@ export function hasScrollableAncestor(target, root, axes) {
+   // `getParentNode` crosses shadow boundaries (and slots), so a target inside a shadow root
+   // still walks up to scrollable ancestors in the light DOM.
+   let node = target;
+-  while (isHTMLElement(node) && node !== root && !isLastTraversableNode(node)) {
++  while (isElement(node) && node !== root && !isLastTraversableNode(node)) {
+     for (const axis of axes) {
+-      if (isScrollable(node, axis)) {
++      if (isHTMLElement(node) && isScrollable(node, axis)) {
+         return true;
+       }
+     }
+@@ -40,9 +40,9 @@ export function hasScrollableAncestor(target, root, axes) {
+ export function findScrollableTouchTarget(target, root, axis = 'vertical', allowOverflowIntent = false) {
+   // `getParentNode` crosses shadow boundaries (and slots), so a target inside a shadow root
+   // still reaches a scrollable ancestor in the light DOM.
+-  let node = isHTMLElement(target) ? target : null;
+-  while (isHTMLElement(node) && node !== root && !isLastTraversableNode(node)) {
+-    if (isScrollable(node, axis, allowOverflowIntent)) {
++  let node = target;
++  while (isElement(node) && node !== root && !isLastTraversableNode(node)) {
++    if (isHTMLElement(node) && isScrollable(node, axis, allowOverflowIntent)) {
+       return node;
+     }
+     node = getParentNode(node);

@@ -3,3 +3,6 @@ allowBuilds:
   '@parcel/watcher': false
   esbuild: true
 minimumReleaseAge: 4320
+patchedDependencies:
+  # SVG scroll ancestor fix backported from https://github.com/mui/base-ui/pull/5844.
+  '@base-ui/react@1.8.0': patches/@base-ui__react@1.8.0.patch
