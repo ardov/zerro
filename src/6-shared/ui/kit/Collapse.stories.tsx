@@ -68,9 +68,9 @@ export const InFlexColumn: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => (
     <div className="flex w-[280px] flex-col gap-2" data-testid="column">
-      <div className="h-6 bg-accent">Above</div>
+      <div className="h-6 bg-ui-highlight">Above</div>
       <Collapse open>{content}</Collapse>
-      <div className="h-6 bg-accent">Below</div>
+      <div className="h-6 bg-ui-highlight">Below</div>
     </div>
   ),
   play: async ({ canvasElement }) => {

@@ -443,7 +443,7 @@ function VersionItem({ onClose }: ItemProps) {
     >
       <ListRowIcon />
       <ListRowText>
-        <span className="text-overline uppercase text-muted-foreground">
+        <span className="text-overline uppercase text-ui-secondary">
           {t('version', {
             version: appVersion,
             date: formatBuildDate(new Date(buildDate)),

@@ -142,7 +142,7 @@ const Layout: FC<{
   } as React.CSSProperties
 
   return (
-    <div className="flex h-dvh bg-background" style={canvas}>
+    <div className="flex h-dvh bg-ui-base" style={canvas}>
       {!bottomBar && <Rail />}
       <div className="flex min-w-0 grow flex-col">
         {hasData && <HistoryTopBar />}

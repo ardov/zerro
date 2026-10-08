@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { parseColor } from '@/6-shared/helpers/color'
-import { getThemeColor, getThemeColorShowcase, themeTokensCss } from './colors'
+import { getThemeColorShowcase, themeTokensCss } from './colors'
 
 /** What the theme emits and what Tailwind exposes have to stay in step, and
  * neither half notices on its own when they stop being.
@@ -49,16 +49,6 @@ const tokenValues = Object.fromEntries(
 const references = (css: string) =>
   new Set([...css.matchAll(/var\((--[\w-]+)\s*[,)]/g)].map(([, name]) => name))
 
-/** Tokens a stylesheet or a call site reads directly instead of through a
- * Tailwind counterpart. Each one is a decision, which is why they are listed
- * rather than pattern-matched: adding a token that only works as
- * `[var(--whatever)]` means editing this list, and that is the moment to ask
- * whether it wants an `@utility` instead.
- *
- * The switch track opacity is deliberately read as an arbitrary value because
- * it differs between color schemes and is not a color token. */
-const READ_DIRECTLY = ['--switch-track-opacity']
-
 describe('theme tokens and their Tailwind counterparts', () => {
   it('reads the whole of what the theme emits', () => {
     // Everything below is about the names inside these two blocks, so a block
@@ -74,12 +64,12 @@ describe('theme tokens and their Tailwind counterparts', () => {
     expect(themeTokensCss.replace(BLOCK, '').trim()).toBe('')
   })
 
-  it('gives every token a counterpart, or names it as read directly', () => {
+  it('gives every retained token a counterpart', () => {
     const exposed = references(tailwind)
     const uncovered = [...new Set([...light, ...dark])].filter(
       token => !exposed.has(token)
     )
-    expect(uncovered.sort()).toEqual([...READ_DIRECTLY].sort())
+    expect(uncovered).toEqual([])
   })
 
   it('exposes no token the theme has stopped emitting', () => {
@@ -110,22 +100,14 @@ describe('theme tokens and their Tailwind counterparts', () => {
   })
 
   it('emits finite, literal CSS colours', () => {
-    const nonColors = new Set(['--switch-track-opacity'])
-
     Object.values(tokenValues).forEach(tokens => {
-      Object.entries(tokens).forEach(([name, value]) => {
-        if (nonColors.has(name)) return
+      Object.values(tokens).forEach(value => {
         expect(value).toMatch(/^(?:#|rgba?\()/)
         const { l, c, h, alpha } = parseColor(value)
         expect([l, c, h].every(Number.isFinite)).toBe(true)
         expect(alpha === undefined || Number.isFinite(alpha)).toBe(true)
       })
     })
-  })
-
-  it('reads browser metadata from the generated surface token', () => {
-    expect(getThemeColor('light')).toBe(tokenValues[':root']['--card'])
-    expect(getThemeColor('dark')).toBe(tokenValues[':root.dark']['--card'])
   })
 })
 

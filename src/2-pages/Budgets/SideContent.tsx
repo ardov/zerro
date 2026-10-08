@@ -67,7 +67,7 @@ const MemoSideContent = memo<TSideContentProps>(props => {
       {...name}
       controller={{ open, setOpen: next => !next && onClose() }}
       // The content is drawn on the card colour, as in the docked column.
-      className="bg-card"
+      className="bg-ui-card"
       contentClassName="p-0"
     >
       {content}

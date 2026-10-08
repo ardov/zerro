@@ -57,7 +57,7 @@ export function EnvelopeInfo(props: {
         : t('availableTitlePast', { context: getMonthContext(month) })
 
   return (
-    <div className="w-full rounded-lg bg-background px-4 py-2">
+    <div className="w-full rounded-lg bg-ui-base px-4 py-2">
       <div className="flex flex-col gap-3 py-2">
         <Total
           title={blockTitle}
@@ -73,9 +73,9 @@ export function EnvelopeInfo(props: {
                 : undefined
           }
         />
-        <hr className="m-0 w-full border-0 border-t border-border opacity-60" />
+        <hr className="m-0 w-full border-0 border-t border-ui-border opacity-60" />
       </div>
-      <ListRows className="-mx-4 text-muted-foreground">
+      <ListRows className="-mx-4 text-ui-secondary">
         {/* Not a button: it reports a number and has no action. `text-inherit`
             keeps the list's muted color without adding an affordance. */}
         <div
@@ -102,7 +102,7 @@ export function EnvelopeInfo(props: {
           type="button"
           className={cn(
             listItemDenseClass,
-            'text-inherit transition-colors duration-200 hover:text-foreground'
+            'text-inherit transition-colors duration-200 hover:text-ui-primary'
           )}
           onClick={e => openBudgetPopover(id, e.currentTarget)}
         >
@@ -122,7 +122,7 @@ export function EnvelopeInfo(props: {
           type="button"
           className={cn(
             listItemDenseClass,
-            'text-inherit transition-colors duration-200 hover:text-foreground'
+            'text-inherit transition-colors duration-200 hover:text-ui-primary'
           )}
           onClick={() => {
             transactionDrawer({

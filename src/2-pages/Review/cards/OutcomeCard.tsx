@@ -46,12 +46,12 @@ export function OutcomeCard(props: TCardProps) {
         <h2 className="red-gradient m-0 text-center text-display">
           <DisplayAmount value={val} noShade decimals="ifAny" />
         </h2>
-        <p className="m-0 text-center text-body text-muted-foreground">
+        <p className="m-0 text-center text-body text-ui-secondary">
           {additionalInfo.join('  •  ')}
         </p>
         {comment && (
-          <div className="self-center rounded-lg bg-background px-4 py-1">
-            <p className="m-0 text-center text-body text-muted-foreground">
+          <div className="self-center rounded-lg bg-ui-base px-4 py-1">
+            <p className="m-0 text-center text-body text-ui-secondary">
               {comment}
             </p>
           </div>

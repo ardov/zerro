@@ -55,16 +55,16 @@ export const Transaction = React.memo(function Transaction(
   return (
     <div
       className={cn(
-        'relative flex cursor-pointer p-3 text-foreground select-none [-webkit-touch-callout:none]',
+        'relative flex cursor-pointer p-3 text-ui-primary select-none [-webkit-touch-callout:none]',
         // The tinted box behind the row, which is a pseudo-element so that it
         // can sit under content the row's own padding does not cover.
         "before:absolute before:inset-0 before:-z-10 before:rounded-lg before:transition-all before:duration-100 before:ease-in-out before:content-['']",
         // Arriving is animated, but reacting to the pointer is not.
-        'hover:before:transition-none active:before:bg-focus-surface',
+        'hover:before:transition-none active:before:bg-ui-pressed',
         isOpened
-          ? 'before:bg-focus-surface'
-          : 'before:bg-transparent hover:before:bg-muted',
-        deleted && 'line-through decoration-error'
+          ? 'before:bg-ui-selected'
+          : 'before:bg-transparent hover:before:bg-ui-highlight',
+        deleted && 'line-through decoration-ui-error'
       )}
       {...propsToPass}
     >
@@ -74,7 +74,7 @@ export const Transaction = React.memo(function Transaction(
           <Tags {...{ tr, trType }} />
           <Amounts {...{ tr, trType }} />
         </div>
-        <div className="transaction-line mt-1 flex text-body-sm text-muted-foreground">
+        <div className="transaction-line mt-1 flex text-body-sm text-ui-secondary">
           <Info {...{ tr, trType, onFilterByPayee }} />
           <Accounts {...{ tr, trType, onFilterByPayee }} />
         </div>

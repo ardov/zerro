@@ -116,10 +116,10 @@ export function getAvailableColor(
 export function getAvailableColorClass(color: string) {
   switch (color) {
     case 'success.main':
-      return 'text-success'
+      return 'text-ui-success'
     case 'error.main':
-      return 'text-error'
+      return 'text-ui-error'
     default:
-      return 'text-disabled-foreground'
+      return 'text-ui-tertiary'
   }
 }

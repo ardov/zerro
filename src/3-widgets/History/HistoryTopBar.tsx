@@ -82,7 +82,7 @@ export function HistoryTopBar() {
 
   return (
     <div
-      className={`border-b-2 bg-card px-2 py-1 sm:px-4 ${atHead ? 'border-border' : 'border-warning'}`}
+      className={`border-b-2 bg-ui-card px-2 py-1 sm:px-4 ${atHead ? 'border-ui-border' : 'border-ui-warning'}`}
     >
       <div className="flex flex-row items-center gap-1">
         {!compact && (

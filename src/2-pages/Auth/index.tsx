@@ -33,7 +33,7 @@ export default function Auth() {
         'flex min-h-screen flex-col items-center justify-center gap-16 p-6 transition-all duration-300 ease-in-out',
         // A backup can be dropped anywhere on this screen, and the whole of it
         // leans in to say so.
-        isDragging ? 'scale-110 bg-focus-surface' : 'scale-100'
+        isDragging ? 'scale-110 bg-ui-selected' : 'scale-100'
       )}
       onDragOver={e => {
         e.stopPropagation()
@@ -55,7 +55,7 @@ export default function Auth() {
         parseFiles(e?.dataTransfer?.files)
       }}
     >
-      <Logo width="200" fill="var(--primary)" visible={logoIn} />
+      <Logo width="200" fill="var(--color-ui-primary)" visible={logoIn} />
       <div className="flex flex-col items-center justify-center gap-6">
         <Button
           className="auth-reveal"
@@ -67,13 +67,13 @@ export default function Auth() {
         />
 
         <p
-          className="auth-reveal m-0 text-body text-muted-foreground"
+          className="auth-reveal m-0 text-body text-ui-secondary"
           style={reveal(2000)}
         >
           {t('haveTrouble')}{' '}
           <ButtonBase
             onClick={() => dispatch(logIn('app'))}
-            className="-m-2 inline p-2 align-baseline text-[length:inherit] leading-[inherit] font-[inherit] rounded-lg text-primary hover:text-interactive focus:text-interactive"
+            className="-m-2 inline p-2 align-baseline text-[length:inherit] leading-[inherit] font-[inherit] rounded-lg text-ui-link focusable"
           >
             {t('btnAlternativeSignIn')}
           </ButtonBase>

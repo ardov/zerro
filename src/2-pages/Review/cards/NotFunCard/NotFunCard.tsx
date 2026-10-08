@@ -82,7 +82,7 @@ export function NotFunCard(props: TCardProps) {
         нормально и правильно требовать от него выполнения обязательств.
       </p>
 
-      <hr className="m-0 w-full border-0 border-t border-border" />
+      <hr className="m-0 w-full border-0 border-t border-ui-border" />
 
       <div>
         <p className="m-0 text-center text-body">Россия получила от вас</p>
@@ -103,7 +103,7 @@ export function NotFunCard(props: TCardProps) {
           </span>
         ))}
       </div>
-      <hr className="m-0 w-full border-0 border-t border-border" />
+      <hr className="m-0 w-full border-0 border-t border-ui-border" />
       <p className="m-0 text-center text-body text-balance">
         Это приблизительные цифры, подробнее можно посчитать в{' '}
         <Link

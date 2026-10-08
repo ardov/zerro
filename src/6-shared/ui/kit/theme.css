@@ -30,11 +30,22 @@ emitted, not only those Tailwind finds used. */
   /* 🎨 Text */
   --color-ui-primary:     oklch(0 0 0 / 0.95);
   --color-ui-secondary:   oklch(0 0 0 / 0.6);
-  --color-ui-placeholder: oklch(0 0 0 / 0.35);
+  --color-ui-tertiary:    oklch(0 0 0 / 0.35);
+  --color-ui-placeholder: var(--color-ui-tertiary);
   --color-ui-link:        oklch(0.5 0.2 240);
   --color-ui-warning:     oklch(0.65 0.16 70);
   --color-ui-success:     oklch(0.6 0.2 150);
   --color-ui-error:       oklch(0.6 0.24 20);
+
+  /* Solid status surfaces are independent from status text and chart colors. */
+  --color-ui-success-solid: #008120;
+  --color-ui-on-success:    #ffffff;
+  --color-ui-warning-solid: #ed6c02;
+  --color-ui-on-warning:    #121212;
+  --color-ui-info-solid:    #2e83da;
+  --color-ui-on-info:       #121212;
+  --color-ui-error-solid:   #d32f2f;
+  --color-ui-on-error:      #ffffff;
 
   /* 🎨 Border */
   --color-ui-border: oklch(0 0 0 / var(--opacity-ui-border));
@@ -109,12 +120,21 @@ emitted, not only those Tailwind finds used. */
 
   --color-ui-primary: oklch(1 0 0 / 0.95);
   --color-ui-secondary: oklch(1 0 0 / 0.6);
-  --color-ui-placeholder: oklch(1 0 0 / 0.4);
+  --color-ui-tertiary: oklch(1 0 0 / 0.4);
   --color-ui-link: oklch(0.75 0.13 240);
   --color-ui-warning: oklch(0.8 0.15 70);
   --color-ui-success: oklch(0.75 0.18 150);
   --color-ui-error: oklch(0.72 0.18 20);
   --color-ui-border: oklch(1 0 0 / var(--opacity-ui-border));
+
+  --color-ui-success-solid: #00e842;
+  --color-ui-on-success: #121212;
+  --color-ui-warning-solid: #ffa726;
+  --color-ui-on-warning: #121212;
+  --color-ui-info-solid: #5eb0f4;
+  --color-ui-on-info: #121212;
+  --color-ui-error-solid: #f44437;
+  --color-ui-on-error: #121212;
 
   --color-ui-button-primary: oklch(0.95 0 0);
   --color-ui-button-primary-hover: oklch(1 0 0);

@@ -51,59 +51,37 @@ leaves it unset so `themeManager` remains the owner of preference.
 
 ## Color scales and tokens
 
-`src/6-shared/ui/theme/colors.ts` is the single authoring surface for theme
-colors. It contains:
+`src/6-shared/ui/kit/theme.css` authors the UI colors for both schemes.
+Use semantic utilities such as `bg-ui-base`, `bg-ui-card`, `text-ui-primary`,
+`text-ui-secondary` and `border-ui-border`. Tertiary text uses `ui-tertiary`;
+`ui-placeholder` currently shares its value but names the input-specific role.
+Disabled controls use `opacity-ui-disabled` on the whole control.
 
-- continuous `ColorScale` instances for the concrete hue families;
-- semantic scale names such as `primary`, `interactive` and `error`;
-- one table of visual lightness levels for each resolved color scheme;
-- one flat token factory evaluated once for `light` and once for `dark`;
-- serialization of the `:root` and `:root.dark` blocks and the browser
-  `theme-color` value.
+Interaction colors have distinct roles: `ui-highlight` is a subtle surface or
+hover layer, `ui-pressed` is a press layer, `ui-selected` is a persistent
+selection, and `ui-focus` is the keyboard focus outline. Selection and hover
+compose as separate layers. `focusable` supplies the standard focus outline.
 
-A token formula selects a semantic scale and a visual role. For example, the
-same `BORDER` level can be sampled from neutral, primary or error without
-copying numbered shades between separate palettes. Small optical corrections
-remain ordinary arithmetic beside the affected token. The factory may also use
-a literal when the scale abstraction would make a local decision less clear.
+Status text and icons use `ui-success`, `ui-warning`, `ui-error`, or `ui-link`
+for information. Solid status surfaces use `ui-{success,warning,info,error}-solid`
+paired with `ui-on-{success,warning,info,error}`. These pairs are independent
+from status text and chart colors. `UI Kit/Foundations` demonstrates the roles.
+The browser `theme-color` is converted from the kit's card color to sRGB by
+`kit/themeColor.ts`, without reading computed DOM styles during mounting.
 
-Opaque samples use `scale.at(level)`. Transparent light-scheme samples use
-`scale.opaqueAt(level)` and dark-scheme samples use
-`scale.opaqueInvAt(level)`. These use white and black as reference surfaces;
-the Theme Showcase is where scheme-specific corrections are judged.
+`src/6-shared/ui/theme/colors.ts` retains the generated palette consumed by
+charts, legacy warning surfaces and snackbars. Its values are evaluated once
+for both schemes and injected by `AppThemeProvider`; `src/tailwind.css` exposes
+only the retained aliases. Charts and SVGs can read those variables directly.
+`Foundations/Theme` shows the retained scales alongside the UI Kit roles.
+Feature code must not import scales or semantic levels.
 
-`src/tailwind.css` maps the generated properties onto semantic Tailwind colors
-via `@theme inline { --color-*: var(--*) }`. Typography recipes, elevation
-shadows, stacking levels and corner radii use native Tailwind theme namespaces
-(`--text-*`, `--shadow-*`, `--z-index-*` and `--radius-*`), so no custom
-`@utility` blocks are needed. The radius scale is declared in pixels and
-descends from an 8px `rounded-lg`; the namespace is cleared first, so the
-registered steps are exactly the ones the stylesheet lists.
-
-Use semantic utilities such as `bg-background`, `text-muted-foreground`,
-`border-border-strong`, `shadow-elevation-8` and `z-modal`. Typography
-recipes are `text-body`, `text-body-sm`, `text-caption`, `text-overline`,
-`text-title`, `text-title-lg` and `text-display`; `text-overline` sets size,
-line height and weight but not `text-transform`, so pair it with `uppercase`
-at the call site. Charts and SVGs read the same generated custom properties
-directly when a CSS utility cannot reach their API. Feature code must not
-import the scales or semantic levels. Avoid duplicating token values in
-arbitrary classes; add a role to the flat factory when multiple consumers need
-the same decision.
-
-Several `--color-*` aliases are intentionally retained even though current
-source scanning does not find a consumer. They are marked by a comment in
-`src/tailwind.css`; do not silently remove or expand that set.
-
-Two numeric tokens are not colors. The disabled-control opacity is declared in
-the `--opacity-*` namespace, so it reads as `opacity-disabled` and composes
-with variants such as `disabled:` and `aria-disabled:`. The switch track
-opacity differs between schemes, so the switch component consumes it directly
-as an arbitrary value.
-
-`Foundations/Theme` in Storybook is the visual calibration surface. It shows
-the concrete and semantic scales, the scheme's neutral levels, status roles,
-interaction states, representative controls and chart colors in both themes.
+Typography recipes, elevation shadows, stacking levels and corner radii remain
+in `src/tailwind.css`. Typography recipes are `text-body`, `text-body-sm`,
+`text-caption`, `text-overline`, `text-title`, `text-title-lg` and `text-display`;
+`text-overline` sets size, line height and weight but not text transform.
+Use `uppercase` at the call site when needed. Numeric spacing still uses the
+shared `--spacing` unit.
 
 ## Dynamic color input and foregrounds
 

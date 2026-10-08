@@ -18,7 +18,7 @@ export const BudgetCell: FC<BudgetCellProps> = props => {
     <div
       className={cn(
         'flex justify-end',
-        isSelf || !value ? 'text-disabled-foreground' : 'text-foreground'
+        isSelf || !value ? 'text-ui-tertiary' : 'text-ui-primary'
       )}
     >
       <Btn onClick={() => onBudgetClick(amountRef.current!)} disabled={isSelf}>

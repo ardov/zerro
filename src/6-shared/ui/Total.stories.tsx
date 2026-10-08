@@ -18,10 +18,10 @@ type Story = StoryObj<typeof meta>
 function AmountStates() {
   return (
     <div className="flex gap-8">
-      <span data-testid="ref-muted" className="text-muted-foreground" />
-      <span data-testid="ref-foreground" className="text-foreground" />
-      <span data-testid="ref-error" className="text-error" />
-      <span data-testid="ref-success" className="text-success" />
+      <span data-testid="ref-muted" className="text-ui-secondary" />
+      <span data-testid="ref-foreground" className="text-ui-primary" />
+      <span data-testid="ref-error" className="text-ui-error" />
+      <span data-testid="ref-success" className="text-ui-success" />
 
       <Total data-testid="zero" title="Zero" value={0} currency="RUB" />
       <Total data-testid="plain" title="Plain" value={1200} currency="RUB" />

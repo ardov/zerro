@@ -16,7 +16,7 @@ type Story = StoryObj
 
 export const DesktopRail: Story = {
   render: () => (
-    <div className="flex h-[720px] bg-background">
+    <div className="flex h-[720px] bg-ui-base">
       <Rail />
       <div className="grow" />
     </div>
@@ -26,7 +26,7 @@ export const DesktopRail: Story = {
 export const MobileBottomNavigation: Story = {
   globals: { viewport: { value: 'iphone13' } },
   render: () => (
-    <div className="flex min-h-[600px] flex-col bg-background">
+    <div className="flex min-h-[600px] flex-col bg-ui-base">
       <MobileNavigation onHeightChange={() => {}} />
     </div>
   ),

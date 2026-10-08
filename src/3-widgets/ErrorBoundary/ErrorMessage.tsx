@@ -32,7 +32,7 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
           </Button>
 
           {!!message && (
-            <p className="mt-12 mb-4 text-body text-muted-foreground">
+            <p className="mt-12 mb-4 text-body text-ui-secondary">
               {t('errorMsg', { message })}
             </p>
           )}

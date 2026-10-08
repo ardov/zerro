@@ -56,23 +56,23 @@ export function HistoryRestorePreview() {
   })
 
   return (
-    <div className="shrink-0 border-t border-border bg-accent px-4 py-3">
-      <p className="m-0 text-overline uppercase text-muted-foreground">
+    <div className="shrink-0 border-t border-ui-border bg-ui-highlight px-4 py-3">
+      <p className="m-0 text-overline uppercase text-ui-secondary">
         {tHistory('restoreWouldChange')}
       </p>
       {/* Its own scroll: with every entity type present the list would
           otherwise push the button it belongs to off the panel. */}
       <ScrollArea className="max-h-40">
         {missing ? (
-          <p className="m-0 text-body-sm text-muted-foreground">
+          <p className="m-0 text-body-sm text-ui-secondary">
             {tHistory('pointUnavailable')}
           </p>
         ) : !summary ? (
-          <p className="m-0 text-body-sm text-muted-foreground">
+          <p className="m-0 text-body-sm text-ui-secondary">
             {tHistory('restoreLoading')}
           </p>
         ) : rows.length === 0 ? (
-          <p className="m-0 text-body-sm text-muted-foreground">
+          <p className="m-0 text-body-sm text-ui-secondary">
             {tHistory('restoreNoChanges')}
           </p>
         ) : (
@@ -80,7 +80,7 @@ export function HistoryRestorePreview() {
             {rows.map(row => (
               <div key={row.key} className="flex justify-between gap-4">
                 <span className="truncate text-body-sm">{row.label}</span>
-                <span className="shrink-0 whitespace-nowrap text-body-sm text-muted-foreground">
+                <span className="shrink-0 whitespace-nowrap text-body-sm text-ui-secondary">
                   {row.parts}
                 </span>
               </div>

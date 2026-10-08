@@ -32,7 +32,7 @@ export default function Donation() {
             />
           </div>
 
-          <p className="mt-0 mb-4 text-center text-body text-muted-foreground">
+          <p className="mt-0 mb-4 text-center text-body text-ui-secondary">
             {t('afterword')}
           </p>
         </div>
@@ -55,12 +55,12 @@ const LinkCard: FC<LinkCardProps> = props => {
       target="_blank"
       rel="noopener noreferrer"
       underline="none"
-      className="flex rounded-lg bg-card p-6 shadow-elevation-2"
+      className="flex rounded-lg bg-ui-card p-6 shadow-elevation-2"
     >
       <div className="max-w-12">{icon}</div>
       <div className="ml-4">
         <h2 className="m-0 text-title">{primary}</h2>
-        <p className="m-0 text-body-sm text-muted-foreground">{secondary}</p>
+        <p className="m-0 text-body-sm text-ui-secondary">{secondary}</p>
       </div>
     </Link>
   )
@@ -99,18 +99,18 @@ function CardLogo() {
     >
       <path
         d="M6 19H42V33C42 35.2091 40.2091 37 38 37H10C7.79086 37 6 35.2091 6 33V19Z"
-        className="fill-primary"
+        className="fill-ui-primary"
       />
       <path
         d="M6 15C6 12.7909 7.79086 11 10 11H38C40.2091 11 42 12.7909 42 15V19H6V15Z"
-        className="fill-warning"
+        className="fill-ui-warning"
       />
-      <circle cx="35.5" cy="30.5" r="3.5" className="fill-warning" />
+      <circle cx="35.5" cy="30.5" r="3.5" className="fill-ui-warning" />
       <circle
         cx="29.5"
         cy="30.5"
         r="4"
-        className="fill-warning stroke-primary"
+        className="fill-ui-warning stroke-ui-primary"
       />
     </svg>
   )

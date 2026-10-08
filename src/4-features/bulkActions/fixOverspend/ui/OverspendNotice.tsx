@@ -32,8 +32,8 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   if (isZero(overspend)) return null
 
   return (
-    <div className="flex flex-row rounded-lg bg-background p-4">
-      <div className="shrink-0 pt-[2px] text-warning">
+    <div className="flex flex-row rounded-lg bg-ui-base p-4">
+      <div className="shrink-0 pt-[2px] text-ui-warning">
         <WarningIcon />
       </div>
       <div className="ml-3">

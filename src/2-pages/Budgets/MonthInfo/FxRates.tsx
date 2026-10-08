@@ -43,7 +43,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   const isCurrentRates = rateData.type === 'current'
 
   return (
-    <div className="rounded-lg bg-background p-4">
+    <div className="rounded-lg bg-ui-base p-4">
       <div className="flex flex-col gap-2">
         {currencies.map(c => (
           <FxRateInput
@@ -56,7 +56,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
             }
           />
         ))}
-        <p className="m-0 text-center text-caption text-muted-foreground">
+        <p className="m-0 text-center text-caption text-ui-secondary">
           {t(isCurrentRates ? 'title_current' : 'title', {
             date: formatDate(rateData.date, 'LLLL yyyy'),
           })}

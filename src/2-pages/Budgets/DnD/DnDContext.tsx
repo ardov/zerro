@@ -103,7 +103,7 @@ const Monies = () => {
     moniesRenderCount = (moniesRenderCount + 1) % 7
   }, [])
   return (
-    <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-background px-4 py-1">
+    <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-ui-base px-4 py-1">
       {t('moneyDnd', { context: String(moniesRenderCount) })}
     </div>
   )
@@ -128,7 +128,7 @@ const DragObj = () => {
     activeType === DragTypes.amount ? (
       <Monies />
     ) : activeType === DragTypes.envelope ? (
-      <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-background px-4 py-1">
+      <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-ui-base px-4 py-1">
         <p className="m-0 truncate text-body">
           {activeId ? envelopes[activeId].name : t('category')}
         </p>

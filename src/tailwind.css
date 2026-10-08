@@ -11,9 +11,6 @@
 @theme {
   --spacing: 0.25rem;
 
-  /* Opacity */
-  --opacity-disabled: 0.38;
-
   /* Stacking levels. A tooltip sits above every overlay, including the modal
      ones it can be opened from inside; the docked navigation panel is fixed
      and so has to sit above the page it reserves room in, but under every
@@ -111,63 +108,21 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-surface: var(--primary-surface);
-  --color-primary-focus: var(--primary-focus);
-  --color-primary-selected: var(--primary-selected);
-  --color-primary-selected-hover: var(--primary-selected-hover);
-  --color-primary-solid-hover: var(--primary-solid-hover);
-  --color-primary-border: var(--primary-border);
-  --color-interactive-hover: var(--interactive-hover);
-  --color-interactive-surface: var(--interactive-surface);
-  --color-interactive-border: var(--interactive-border);
-  --color-foreground-hover: var(--foreground-hover);
-  --color-error-hover: var(--error-hover);
   --color-error-border: var(--error-border);
   --color-error-surface: var(--error-surface);
-  --color-disabled-background: var(--disabled-background);
-  --color-selected: var(--selected);
-  --color-selected-foreground: var(--selected-foreground);
-  --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-icon-foreground: var(--icon-foreground);
-  --color-disabled-control-foreground: var(--disabled-control-foreground);
-  --color-focus-surface: var(--focus-surface);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-chip-hover: var(--chip-hover);
-  --color-chip-border: var(--chip-border);
-  --color-chip-primary-border: var(--chip-primary-border);
-  --color-link-underline: var(--link-underline);
-  --color-switch-thumb: var(--switch-thumb);
-  --color-switch-track: var(--switch-track);
-  --color-chip-delete: var(--chip-delete);
-  --color-chip-delete-hover: var(--chip-delete-hover);
   --color-tooltip: var(--tooltip);
   --color-tooltip-foreground: var(--tooltip-foreground);
   --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-  --color-ring: var(--ring);
   --color-interactive: var(--interactive);
-  --color-interactive-foreground: var(--interactive-foreground);
   --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-success-surface: var(--success-surface);
-  --color-success-border: var(--success-border);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-warning-surface: var(--warning-surface);
   --color-warning-border: var(--warning-border);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
-  --color-info-surface: var(--info-surface);
-  --color-info-border: var(--info-border);
   --color-error: var(--error);
   --color-error-foreground: var(--error-foreground);
   --color-disabled-foreground: var(--disabled-foreground);
@@ -177,24 +132,5 @@
   --color-data-error: var(--data-error);
   --color-data-error-alt: var(--data-error-alt);
 
-  /* Aliases no utility currently reaches. They remain declared so their status
-     is visible without making the token surface appear accidentally
-     incomplete, and the list is kept accurate so a genuinely dead token is
-     still distinguishable from one waiting for its first consumer.
-
-     No consumer at all. The status surface and border roles are authored as a
-     complete set — `Foundations/Theme` renders them from the tokens rather
-     than from these utilities, so the showcase does not count as one:
-     --color-primary-surface, --color-primary-focus,
-     --color-interactive-surface, --color-interactive-border,
-     --color-accent-foreground, --color-destructive,
-     --color-destructive-foreground, --color-interactive-foreground,
-     --color-success-foreground, --color-success-surface,
-     --color-success-border, --color-warning-surface, --color-warning-border,
-     --color-info-surface, --color-info-border
-
-     In use, but through the token rather than the utility: a chart hands its
-     colour to an SVG attribute, so it cannot go through a class:
-     --color-data-primary, --color-data-primary-alt, --color-data-success,
-     --color-data-error, --color-data-error-alt */
+  /* Legacy aliases are retained for charts, warning panels and snackbars. */
 }

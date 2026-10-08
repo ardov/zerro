@@ -76,9 +76,9 @@ const RefreshButton: FC<RefreshButtonProps> = props => {
     ) : (
       <RadialProgress size={20} />
     ),
-    stopped: <WarningIcon className="text-error" />,
+    stopped: <WarningIcon className="text-ui-error" />,
     success: <RadialProgress size={20} value={1} />,
-    fail: <WarningIcon className="text-error" />,
+    fail: <WarningIcon className="text-ui-error" />,
   }
   const label = hasDetails
     ? t('syncProgress:detailsTitle')
@@ -118,7 +118,7 @@ function SyncBadge({ count, children }: SyncBadgeProps) {
     <span className="relative inline-flex">
       {children}
       {count > 0 && (
-        <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full bg-info px-0.5 text-[0.625rem]/4 font-medium text-info-foreground">
+        <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full bg-ui-info-solid px-0.5 text-[0.625rem]/4 font-medium text-ui-on-info">
           {count > 99 ? '99+' : count}
         </span>
       )}

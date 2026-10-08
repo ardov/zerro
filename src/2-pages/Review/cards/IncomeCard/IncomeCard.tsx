@@ -57,7 +57,7 @@ export function IncomeCard(props: TCardProps) {
         <h2 className="green-gradient m-0 text-center text-display">
           <DisplayAmount value={totalIncomeFx} noShade decimals="ifOnly" />
         </h2>
-        <p className="m-0 text-center text-body-sm text-muted-foreground">
+        <p className="m-0 text-center text-body-sm text-ui-secondary">
           <DisplayAmount value={monthlyIncome} noShade decimals="ifOnly" />{' '}
           {t('perMonth')}
         </p>

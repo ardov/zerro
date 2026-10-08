@@ -147,9 +147,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     })
 
   return (
-    <div
-      className={cn('relative bg-card text-card-foreground pb-2', className)}
-    >
+    <div className={cn('relative bg-ui-card text-ui-primary pb-2', className)}>
       <Header
         month={month}
         isAllShown={showAll}

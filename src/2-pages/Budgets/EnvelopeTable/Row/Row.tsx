@@ -76,8 +76,7 @@ function useRevealItems(params: {
         key: Metric.assigned,
         label: t('assigned', { ns: 'common' }),
         value: assigned,
-        color:
-          isSelf || !assigned ? 'text-disabled-foreground' : 'text-foreground',
+        color: isSelf || !assigned ? 'text-ui-tertiary' : 'text-ui-primary',
         onClick: e => openBudgetPopover(id, e.currentTarget),
       },
     },
@@ -87,7 +86,7 @@ function useRevealItems(params: {
         key: Metric.outcome,
         label: t('activity', { ns: 'common' }),
         value: activity,
-        color: activity ? 'text-foreground' : 'text-disabled-foreground',
+        color: activity ? 'text-ui-primary' : 'text-ui-tertiary',
         onClick: () => openTransactionsPopover(id),
       },
     },
@@ -183,7 +182,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
       <SlideReveal enabled={isSmall} items={revealItems}>
         <TableRow
           className={cn(
-            'relative cursor-pointer transition-colors duration-100 hover:bg-accent active:bg-focus-surface',
+            'relative cursor-pointer transition-colors duration-100 hover:bg-ui-highlight active:bg-ui-pressed',
             'hover:[&_.addGoal]:opacity-100 hover:[&_.addGoal]:transition-opacity hover:[&_.addGoal]:duration-300',
             '[&:not(:hover)_.addGoal]:opacity-0',
             isChild ? '[&>*]:py-1' : '[&>*]:py-2'

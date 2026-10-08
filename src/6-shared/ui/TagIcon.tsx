@@ -47,7 +47,7 @@ export function TagIcon(props: TagIconProps) {
         // Without a tag colour the icon is the card it sits on: the contrast
         // calculation over `background.paper` lands on the card's own text
         // colour in either scheme, so it is a token rather than a computation.
-        !color && 'bg-muted text-card-foreground',
+        !color && 'bg-ui-highlight text-ui-primary',
         button
           ? 'cursor-pointer hover:scale-110 active:scale-100 active:duration-100'
           : 'cursor-auto',

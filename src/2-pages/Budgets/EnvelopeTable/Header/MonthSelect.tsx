@@ -63,7 +63,7 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
             size="xs"
             onClick={goPrevMonth}
             disabled={isFirst}
-            className="text-muted-foreground"
+            className="text-ui-secondary"
           >
             <ChevronLeftIcon />
           </IconButton>
@@ -73,7 +73,7 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
             size="xs"
             onClick={goNextMonth}
             disabled={isLast}
-            className="-ml-2 text-muted-foreground"
+            className="-ml-2 text-ui-secondary"
           >
             <ChevronRightIcon />
           </IconButton>

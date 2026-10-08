@@ -53,7 +53,7 @@
   }
 
   .article a {
-    border-bottom-color: var(--primary);
+    border-bottom-color: var(--color-ui-link);
     border-bottom-width: 0.4px;
     border-bottom-style: solid;
     position: relative;

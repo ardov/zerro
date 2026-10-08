@@ -32,7 +32,7 @@ export const Debtor: FC<
       <span
         className={cn(
           'ml-2 shrink-0',
-          balance < 0 ? 'text-error' : 'text-muted-foreground'
+          balance < 0 ? 'text-ui-error' : 'text-ui-secondary'
         )}
       >
         <Tooltip
@@ -71,7 +71,7 @@ export const Subheader: FC<
         <span
           className={cn(
             'ml-4',
-            toDisplay(amount) < 0 ? 'text-error' : 'text-muted-foreground'
+            toDisplay(amount) < 0 ? 'text-ui-error' : 'text-ui-secondary'
           )}
         >
           <b>

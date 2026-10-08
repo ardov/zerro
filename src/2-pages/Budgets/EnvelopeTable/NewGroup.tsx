@@ -26,7 +26,7 @@ export function NewGroup(props: { visible: boolean }) {
     <Collapse open={visible}>
       <div ref={setNodeRef} className="px-4 py-2">
         <div
-          className={`rounded-2xl border border-dashed border-border p-4 text-center ${isOver && canDrop ? 'bg-accent' : 'bg-card'}`}
+          className={`rounded-2xl border border-dashed border-ui-border p-4 text-center ${isOver && canDrop ? 'bg-ui-selected' : 'bg-ui-card'}`}
           onClick={() => setClicked(true)}
         >
           {text}

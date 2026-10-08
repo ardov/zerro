@@ -56,7 +56,7 @@ export const MobileNavigation: FC<{
       }}
     >
       <div
-        className="flex grow items-stretch overflow-hidden rounded-lg bg-card shadow-elevation-1"
+        className="flex grow items-stretch overflow-hidden rounded-lg bg-ui-card shadow-elevation-1"
         style={{ height: BAR.height }}
       >
         {destinations.map(destination => {
@@ -82,7 +82,7 @@ export const MobileNavigation: FC<{
           <SettingsIcon />
         </button>
       </div>
-      <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-card shadow-elevation-1">
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-ui-card shadow-elevation-1">
         <RefreshButton shape="circle" />
       </div>
     </nav>
@@ -91,6 +91,6 @@ export const MobileNavigation: FC<{
 
 const navigationActionClass = (selected: boolean) =>
   cn(
-    'relative flex min-w-8 flex-1 items-center justify-center border-0 bg-transparent font-sans text-icon-foreground no-underline transition-colors hover:bg-accent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring',
-    selected && 'text-primary'
+    'relative flex min-w-8 flex-1 items-center justify-center border-0 bg-transparent font-sans text-ui-secondary no-underline transition-colors hover:bg-ui-highlight focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ui-focus',
+    selected && 'text-ui-primary'
   )

@@ -18,11 +18,11 @@ import { cn } from './shadcn/utils'
  * because a menu keeps its disabled items focusable so they are still
  * announced. Only one of the two variants matches in either container. */
 const rowBase =
-  'relative flex w-full min-w-0 cursor-pointer items-center border-0 bg-transparent text-left font-sans whitespace-nowrap text-foreground focus-visible:outline-none disabled:pointer-events-none disabled:opacity-disabled aria-disabled:pointer-events-none aria-disabled:opacity-disabled'
+  'relative flex w-full min-w-0 cursor-pointer items-center border-0 bg-transparent text-left font-sans whitespace-nowrap text-ui-primary focusable disabled:pointer-events-none disabled:opacity-ui-disabled aria-disabled:pointer-events-none aria-disabled:opacity-ui-disabled'
 
 /** The rows the application's own lists are built from, which paint their own
  * background. */
-const paintedRow = `${rowBase} rounded-lg px-4 hover:bg-accent focus-visible:bg-focus-surface data-selected:bg-primary-selected data-selected:hover:bg-primary-selected-hover`
+const paintedRow = `${rowBase} isolate rounded-lg px-4 data-selected:bg-ui-selected after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] hover:after:bg-ui-highlight active:after:bg-ui-pressed`
 
 /** A row in a menu, a select list or an action bar.
  *
@@ -52,11 +52,11 @@ export function ListRowBacking({ selected }: { selected?: boolean }) {
           `data-selected` on it — needs to pass nothing. */}
       <PressBacking
         className={cn(
-          'group-data-selected:bg-selected',
-          selected && 'bg-selected'
+          'group-data-selected:bg-ui-selected',
+          selected && 'bg-ui-selected'
         )}
       />
-      <PressBacking className="group-hover:bg-foreground-hover group-focus-visible:bg-foreground-hover group-data-highlighted:bg-foreground-hover" />
+      <PressBacking className="group-hover:bg-ui-highlight group-focus-visible:bg-ui-highlight group-data-highlighted:bg-ui-highlight group-active:bg-ui-pressed" />
     </>
   )
 }
@@ -75,7 +75,7 @@ export function ListRowIcon({
     <span
       data-slot="list-row-icon"
       className={cn(
-        'inline-flex w-12 shrink-0 -ml-4 items-center justify-center text-icon-foreground',
+        'inline-flex w-12 shrink-0 -ml-4 items-center justify-center text-ui-secondary',
         className
       )}
       {...props}
@@ -105,7 +105,7 @@ export function ListRowText({
         // row truncates it too. It clips with an ellipsis under `whitespace-nowrap`
         // and wraps freely under a `whitespace-normal` row, where
         // nothing overflows for the ellipsis to land on.
-        <span className="block min-w-0 overflow-hidden text-ellipsis text-body-sm text-muted-foreground">
+        <span className="block min-w-0 overflow-hidden text-ellipsis text-body-sm text-ui-secondary">
           {secondary}
         </span>
       )}
@@ -140,7 +140,7 @@ export function ListRowSubheader({
     <div
       data-slot="list-row-subheader"
       className={cn(
-        'box-border block min-w-0 bg-card px-4 text-sm/[48px] font-medium text-muted-foreground',
+        'box-border block min-w-0 bg-ui-card px-4 text-sm/[48px] font-medium text-ui-secondary',
         sticky && 'sticky top-0 z-[1]',
         className
       )}

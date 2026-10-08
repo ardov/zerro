@@ -60,7 +60,7 @@ export const Account: FC<
       <span
         className={cn(
           'ml-2 shrink-0',
-          account.balance < 0 ? 'text-error' : 'text-muted-foreground'
+          account.balance < 0 ? 'text-ui-error' : 'text-ui-secondary'
         )}
       >
         <Tooltip
@@ -102,7 +102,7 @@ export const Subheader: FC<
         <span
           className={cn(
             'ml-4',
-            isNegative ? 'text-error' : 'text-muted-foreground'
+            isNegative ? 'text-ui-error' : 'text-ui-secondary'
           )}
         >
           <b>

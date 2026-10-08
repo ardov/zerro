@@ -15,7 +15,7 @@ export const ActivityCell: FC<ActivityCellProps> = props => {
     <div
       className={cn(
         'flex justify-end',
-        displayActivity ? 'text-foreground' : 'text-disabled-foreground'
+        displayActivity ? 'text-ui-primary' : 'text-ui-tertiary'
       )}
     >
       <Btn onClick={onClick}>

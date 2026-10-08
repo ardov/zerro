@@ -36,21 +36,18 @@ export function Total({
     'm-0 text-title-lg',
     alignmentClassName,
     amountColor === 'error'
-      ? 'text-error'
+      ? 'text-ui-error'
       : amountColor === 'success'
-        ? 'text-success'
+        ? 'text-ui-success'
         : value
-          ? 'text-foreground'
-          : 'text-muted-foreground'
+          ? 'text-ui-primary'
+          : 'text-ui-secondary'
   )
 
   return (
     <div {...rest}>
       <p
-        className={cn(
-          'm-0 text-body-sm text-muted-foreground',
-          alignmentClassName
-        )}
+        className={cn('m-0 text-body-sm text-ui-secondary', alignmentClassName)}
       >
         {title}
       </p>

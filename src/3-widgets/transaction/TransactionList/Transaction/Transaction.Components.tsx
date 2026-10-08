@@ -119,7 +119,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
               }
               side="top"
             >
-              <span className="text-body-sm text-muted-foreground">
+              <span className="text-body-sm text-ui-secondary">
                 <SmartAmount
                   value={tr.opOutcome}
                   instrument={tr.opOutcomeInstrument}
@@ -147,7 +147,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
               }
               side="top"
             >
-              <span className="text-body-sm text-muted-foreground">
+              <span className="text-body-sm text-ui-secondary">
                 <SmartAmount
                   value={tr.opIncome}
                   instrument={tr.opIncomeInstrument}
@@ -295,7 +295,7 @@ const SymbolWrapper: FC<HTMLDivProps> = props => (
 const NewIndicator: FC<{ viewed?: boolean }> = ({ viewed }) => (
   <div
     className={cn(
-      'absolute -top-px -left-0.5 h-3 w-3 scale-100 rounded-full border-2 border-solid border-card bg-error opacity-100 transition-all duration-200',
+      'absolute -top-px -left-0.5 h-3 w-3 scale-100 rounded-full border-2 border-solid border-ui-card bg-ui-error opacity-100 transition-all duration-200',
       viewed && 'scale-0 opacity-0'
     )}
   />
@@ -304,7 +304,7 @@ const NewIndicator: FC<{ viewed?: boolean }> = ({ viewed }) => (
 /* `text-[1rem]`, not `text-base`: the named size carries a line height with
    it, and this only ever set the size. */
 const Receipt: FC<{ children: ReactNode }> = ({ children }) => (
-  <div className="absolute -right-1.5 -bottom-[3px] text-[1rem] text-black [text-shadow:0_0_2px_var(--card)]">
+  <div className="absolute -right-1.5 -bottom-[3px] text-[1rem] text-black [text-shadow:0_0_2px_var(--color-ui-card)]">
     {children}
   </div>
 )
@@ -313,20 +313,20 @@ const TagsWrapper: FC<HTMLDivProps> = ({ className, ...props }) => (
   <div
     {...props}
     className={cn(
-      '[&>:not(:first-of-type)]:ml-2 [&>:not(:first-of-type)]:text-disabled-foreground',
+      '[&>:not(:first-of-type)]:ml-2 [&>:not(:first-of-type)]:text-ui-tertiary',
       className
     )}
   />
 )
 
 const NoCategory: FC<{ children: ReactNode }> = ({ children }) => (
-  <span className="text-error">{children}</span>
+  <span className="text-ui-error">{children}</span>
 )
 
 const amountColors = {
-  income: 'text-success',
-  transfer: 'text-muted-foreground',
-  outcome: 'text-foreground',
+  income: 'text-ui-success',
+  transfer: 'text-ui-secondary',
+  outcome: 'text-ui-primary',
 }
 
 /** The amounts and, on a transfer, the arrow between them. `data-type` is what
@@ -351,7 +351,7 @@ const InfoWrapper: FC<HTMLDivProps> = props => (
 const PayeeWrapper: FC<React.HTMLAttributes<HTMLSpanElement>> = props => (
   <span
     {...props}
-    className="relative hover:text-foreground after:absolute after:inset-x-0 after:bottom-0 after:z-[2] after:h-px after:bg-current after:opacity-20 after:transition-all after:duration-150 after:content-['']"
+    className="relative hover:text-ui-primary after:absolute after:inset-x-0 after:bottom-0 after:z-[2] after:h-px after:bg-current after:opacity-20 after:transition-all after:duration-150 after:content-['']"
   />
 )
 type ExchangeRateProps = React.DetailedHTMLProps<

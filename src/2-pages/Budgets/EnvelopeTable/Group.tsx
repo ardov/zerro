@@ -34,7 +34,7 @@ type TGroupProps = {
   children?: React.ReactNode[]
 }
 const Sum: FC<{ value: number }> = ({ value }) => (
-  <p className="m-0 self-baseline truncate text-right text-body text-disabled-foreground">
+  <p className="m-0 self-baseline truncate text-right text-body text-ui-tertiary">
     <Amount value={value} decimals="ifOnly" />
   </p>
 )
@@ -109,7 +109,7 @@ export const Group: FC<TGroupProps> = ({
   return (
     <>
       <TableRow
-        className="items-baseline border-b-[0.5px] border-border pt-4 last:border-0"
+        className="items-baseline border-b-[0.5px] border-ui-border pt-4 last:border-0"
         name={NameCell}
         assigned={<Sum value={assigned} />}
         outcome={<Sum value={activity} />}

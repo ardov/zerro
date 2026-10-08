@@ -40,7 +40,7 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
 
     return (
       <div
-        className="relative last:border-0 border-b-[0.5px] border-border bg-card"
+        className="relative last:border-0 border-b-[0.5px] border-ui-border bg-ui-card"
         ref={ref}
         {...rest}
       >

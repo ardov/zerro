@@ -13,14 +13,7 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-const statuses = [
-  'primary',
-  'interactive',
-  'success',
-  'warning',
-  'info',
-  'error',
-]
+const statuses = ['success', 'warning', 'info', 'error']
 
 const token = (name: string) => `var(--${name})`
 
@@ -41,8 +34,8 @@ function ScaleRows({ rows }: { rows: { name: string; colors: string[] }[] }) {
           key={row.name}
           className="grid items-center gap-2 sm:grid-cols-[8rem_1fr]"
         >
-          <span className="text-caption text-muted-foreground">{row.name}</span>
-          <div className="grid grid-cols-7 overflow-hidden rounded-lg border border-border">
+          <span className="text-caption text-ui-secondary">{row.name}</span>
+          <div className="grid grid-cols-7 overflow-hidden rounded-lg border border-ui-border">
             {row.colors.map((color, index) => (
               <div
                 key={`${color}-${index}`}
@@ -59,25 +52,30 @@ function ScaleRows({ rows }: { rows: { name: string; colors: string[] }[] }) {
 }
 
 function RoleCard({ name }: { name: string }) {
-  const foreground = token(`${name}-foreground`)
+  const foreground = token(`color-ui-on-${name}`)
   return (
-    <article className="grid gap-2 rounded-lg border border-border bg-card p-3">
+    <article className="grid gap-2 rounded-lg border border-ui-border bg-ui-card p-3">
       <div
         className="rounded-md p-3 text-body-sm"
-        style={{ backgroundColor: token(name), color: foreground }}
+        style={{
+          backgroundColor: token(`color-ui-${name}-solid`),
+          color: foreground,
+        }}
       >
         {name} solid
       </div>
-      <div
-        className="rounded-md border p-3 text-body-sm"
-        style={{
-          backgroundColor: token(`${name}-surface`),
-          borderColor: token(`${name}-border`),
-          color: token(name),
-        }}
-      >
-        transparent hover and border
-      </div>
+      {(name === 'warning' || name === 'error') && (
+        <div
+          className="rounded-md border p-3 text-body-sm"
+          style={{
+            backgroundColor: token(`${name}-surface`),
+            borderColor: token(`${name}-border`),
+            color: token(name),
+          }}
+        >
+          Legacy warning surface and border
+        </div>
+      )}
     </article>
   )
 }
@@ -87,15 +85,15 @@ function ThemeShowcase() {
   const showcase = getThemeColorShowcase(mode)
 
   return (
-    <main className="min-h-screen bg-background p-4 font-sans text-foreground sm:p-8">
+    <main className="min-h-screen bg-ui-base p-4 font-sans text-ui-primary sm:p-8">
       <div className="mx-auto grid max-w-6xl gap-10">
         <header className="grid gap-3">
-          <Logo fill="var(--primary)" width={220} />
+          <Logo fill="var(--color-ui-primary)" width={220} />
           <div>
             <h1 className="m-0 text-display">Theme Showcase</h1>
-            <p className="m-0 text-body text-muted-foreground">
-              {mode} scheme · long labels, money and controls share one semantic
-              colour pipeline
+            <p className="m-0 text-body text-ui-secondary">
+              {mode} scheme · UI Kit roles alongside the retained chart and
+              warning palette
             </p>
           </div>
         </header>
@@ -113,14 +111,12 @@ function ThemeShowcase() {
             {showcase.levels.map(({ name, level, color }) => (
               <div
                 key={name}
-                className="overflow-hidden rounded-lg border border-border bg-card"
+                className="overflow-hidden rounded-lg border border-ui-border bg-ui-card"
               >
                 <div className="h-12" style={{ backgroundColor: color }} />
                 <div className="p-2 text-caption">
                   <div>{name}</div>
-                  <div className="text-muted-foreground">
-                    {level.toFixed(3)}
-                  </div>
+                  <div className="text-ui-secondary">{level.toFixed(3)}</div>
                 </div>
               </div>
             ))}
@@ -136,16 +132,17 @@ function ThemeShowcase() {
         </Section>
 
         <Section title="Interaction states">
-          <div className="grid gap-3 rounded-lg border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 rounded-lg border border-ui-border bg-ui-card p-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ['hover', '--accent'],
-              ['focus', '--focus-surface'],
-              ['selected', '--selected'],
-              ['disabled', '--disabled-background'],
+              ['hover', '--color-ui-highlight'],
+              ['pressed', '--color-ui-pressed'],
+              ['selected', '--color-ui-selected'],
+              ['disabled', '--color-ui-highlight'],
             ].map(([label, background]) => (
               <button
                 key={label}
-                className="min-h-11 rounded-lg border border-border-strong px-4 text-body text-foreground"
+                disabled={label === 'disabled'}
+                className="focusable min-h-11 rounded-lg border border-ui-border px-4 text-body text-ui-primary disabled:opacity-ui-disabled"
                 style={{ backgroundColor: `var(${background})` }}
                 type="button"
               >
@@ -157,33 +154,31 @@ function ThemeShowcase() {
 
         <Section title="Representative UI">
           <div className="grid gap-4 lg:grid-cols-2">
-            <article className="rounded-lg bg-card text-card-foreground grid gap-4 border border-border p-5 shadow-elevation-1">
+            <article className="rounded-lg bg-ui-card text-ui-primary grid gap-4 border border-ui-border p-5 shadow-elevation-1">
               <div>
                 <h3 className="m-0 text-title">August budget</h3>
-                <p className="m-0 text-body-sm text-muted-foreground">
+                <p className="m-0 text-body-sm text-ui-secondary">
                   A deliberately long envelope label wraps without losing its
                   hierarchy or status colour.
                 </p>
               </div>
-              <div className="grid grid-cols-[1fr_auto] gap-3 border-t border-border pt-3">
+              <div className="grid grid-cols-[1fr_auto] gap-3 border-t border-ui-border pt-3">
                 <span className="text-body">
                   Rent and shared household costs
                 </span>
                 <strong className="text-body">24 850,00 Kč</strong>
-                <span className="text-body text-muted-foreground">
-                  Available
-                </span>
-                <span className="text-body text-success">3 240,00 Kč</span>
+                <span className="text-body text-ui-secondary">Available</span>
+                <span className="text-body text-ui-success">3 240,00 Kč</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
-                  className="rounded-lg border-0 bg-primary px-4 py-2 text-body-sm text-primary-foreground"
+                  className="rounded-lg border-0 bg-ui-button-primary px-4 py-2 text-body-sm text-ui-on-button-primary"
                   type="button"
                 >
                   Save changes
                 </button>
                 <button
-                  className="rounded-lg border border-primary-border bg-transparent px-4 py-2 text-body-sm text-primary"
+                  className="rounded-lg border border-ui-border bg-transparent px-4 py-2 text-body-sm text-ui-primary"
                   type="button"
                 >
                   Cancel
@@ -191,7 +186,7 @@ function ThemeShowcase() {
               </div>
             </article>
 
-            <article className="rounded-lg bg-card text-card-foreground grid gap-4 border border-border p-5 shadow-elevation-1">
+            <article className="rounded-lg bg-ui-card text-ui-primary grid gap-4 border border-ui-border p-5 shadow-elevation-1">
               <div className="rounded-lg border border-error-border bg-error-surface p-3 text-error">
                 <strong className="text-body-sm">Import needs attention</strong>
                 <p className="m-0 text-caption">
@@ -200,7 +195,7 @@ function ThemeShowcase() {
               </div>
               <div
                 aria-label="Representative chart palette"
-                className="flex h-28 items-end gap-2 border-b border-border"
+                className="flex h-28 items-end gap-2 border-b border-ui-border"
               >
                 {[
                   ['--data-primary', '45%'],
@@ -222,9 +217,8 @@ function ThemeShowcase() {
                   />
                 ))}
               </div>
-              <p className="m-0 text-caption text-disabled-foreground">
-                Disabled helper copy and chart axes remain quieter than muted
-                body text.
+              <p className="m-0 text-caption text-ui-tertiary">
+                Tertiary helper copy is quieter than secondary body text.
               </p>
             </article>
           </div>

@@ -22,7 +22,7 @@ export const Rail: FC = () => {
       <Link
         to="/budget"
         aria-label="Zerro"
-        className="focusable flex size-10 items-center justify-center rounded-ui-control-inner rounded-smooth text-foreground"
+        className="focusable flex size-10 items-center justify-center rounded-ui-control-inner rounded-smooth text-ui-primary"
       >
         <LogoMark width={28} height={28} />
       </Link>

@@ -33,8 +33,8 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
 
   const isSmall = useIsSmall()
 
-  const bg = `var(--${msgType})`
-  const color = `var(--${msgType}-foreground)`
+  const bg = `var(--color-ui-${msgType}-solid)`
+  const color = `var(--color-ui-on-${msgType})`
 
   return (
     <Tooltip content={<TooltipContent />}>

@@ -35,7 +35,7 @@ const buttonVariants = cva(
           'aria-expanded:text-ui-primary',
         ],
         destructive: [
-          'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
+          'bg-ui-error/10 text-ui-error hover:bg-ui-error/20 focus-visible:border-ui-error/40 focus-visible:ring-ui-error/20 dark:bg-ui-error/20 dark:hover:bg-ui-error/30 dark:focus-visible:ring-ui-error/40',
         ],
       },
     },

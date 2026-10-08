@@ -42,7 +42,7 @@ const QuickStart = () => {
 
 export default function Main() {
   return (
-    <main className="w-full bg-card">
+    <main className="w-full bg-ui-card">
       <ScrollToTop />
       <Header />
       <div className="flex flex-col items-center px-4 py-16">
@@ -62,8 +62,8 @@ const Header = () => {
   return (
     <header className="sticky inset-x-0 top-0 z-[100] flex flex-col items-center p-2">
       <Link to="/">
-        <div className="rounded-3xl bg-background px-6 py-2 leading-[0]">
-          <Logo fill="var(--primary)" width="100" />
+        <div className="rounded-3xl bg-ui-base px-6 py-2 leading-[0]">
+          <Logo fill="var(--color-ui-primary)" width="100" />
         </div>
       </Link>
     </header>

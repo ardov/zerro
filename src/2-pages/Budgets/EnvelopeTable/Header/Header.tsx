@@ -23,7 +23,7 @@ type HeaderProps = {
 const ColumnTitle: FC<{ name: string; onClick?: () => void }> = props => (
   <span
     onClick={props.onClick}
-    className="truncate text-right text-overline uppercase text-muted-foreground"
+    className="truncate text-right text-overline uppercase text-ui-secondary"
   >
     {props.name}
   </span>
@@ -45,7 +45,7 @@ export const Header: FC<HeaderProps> = props => {
 
   return (
     <>
-      <div className="sticky top-0 z-[99] border-b border-border bg-card">
+      <div className="sticky top-0 z-[99] border-b border-ui-border bg-ui-card">
         <div className="sticky top-0 z-[9] flex flex-wrap justify-between gap-4 p-2">
           <MonthSelect />
 
@@ -62,7 +62,7 @@ export const Header: FC<HeaderProps> = props => {
                 label={t('actions')}
                 trigger={
                   <Button variant="ghost" size="xs" className="-ml-2 px-2 py-0">
-                    <span className="truncate text-overline uppercase text-muted-foreground">
+                    <span className="truncate text-overline uppercase text-ui-secondary">
                       {t('categories', {
                         ns: 'budgets',
                         context: isAllShown ? 'all' : '',

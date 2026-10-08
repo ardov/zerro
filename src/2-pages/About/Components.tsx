@@ -23,7 +23,7 @@ export const ExampleBox: FC<ExampleBoxProps> = ({
 }) => {
   return (
     <div
-      className={cn('my-4 flex rounded-lg bg-background p-6', className)}
+      className={cn('my-4 flex rounded-lg bg-ui-base p-6', className)}
       {...rest}
     >
       {symbol && <span className="mr-2 min-w-6">{symbol}</span>}
@@ -37,17 +37,14 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
   const { children, title, className, ...rest } = props
   const [isOpen, toggle] = useToggle(false)
   return (
-    <div
-      className={cn('my-4 rounded-lg bg-background p-6', className)}
-      {...rest}
-    >
+    <div className={cn('my-4 rounded-lg bg-ui-base p-6', className)} {...rest}>
       <ButtonBase
         onClick={toggle}
         className="-m-4 w-full justify-start rounded-lg p-4 text-left text-[length:inherit] hover:underline"
       >
         <ChevronRightIcon
           className={cn(
-            'mr-2 text-interactive transition-transform duration-200 ease-in-out',
+            'mr-2 text-ui-link transition-transform duration-200 ease-in-out',
             isOpen && 'rotate-90'
           )}
         />
@@ -64,7 +61,7 @@ export const Muted: FC<HTMLAttributes<HTMLSpanElement>> = ({
   ...rest
 }) => {
   return (
-    <span className={cn('text-muted-foreground', className)} {...rest}>
+    <span className={cn('text-ui-secondary', className)} {...rest}>
       {children}
     </span>
   )

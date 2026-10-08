@@ -42,8 +42,8 @@
   }
 
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    background-color: var(--color-ui-base);
+    color: var(--color-ui-primary);
     /* The theme family inherited by application components. */
     font-family: 'IBM Plex Sans', sans-serif;
     font-size: 1rem;
@@ -104,7 +104,7 @@
   /* A top-layer element's backdrop is painted against the page rather than
      against the element it covers, so it needs the page's colour spelled out. */
   body::backdrop {
-    background-color: var(--background);
+    background-color: var(--color-ui-base);
   }
 
   @media print {
@@ -121,13 +121,13 @@
   }
 
   ::-webkit-scrollbar-corner {
-    background: var(--background);
+    background: var(--color-ui-base);
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: var(--border);
+    background-color: var(--color-ui-scrollbar);
     border-radius: 6px;
-    border: 2px solid var(--background);
+    border: 2px solid var(--color-ui-base);
   }
 
   @media (max-width: 880px) {

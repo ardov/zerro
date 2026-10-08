@@ -19,7 +19,7 @@ export const Light: Story = {
   args: { month: '2026-03' },
   render: args => (
     <div className="flex w-[312px] flex-col gap-4">
-      <div data-testid="background-reference" className="bg-background" />
+      <div data-testid="background-reference" className="bg-ui-base" />
       <ActivityStats {...args} />
     </div>
   ),

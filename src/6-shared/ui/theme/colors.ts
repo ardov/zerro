@@ -1,7 +1,7 @@
 import { ColorScale } from '@/6-shared/helpers/color'
 
 /** The resolved application colour scheme. The page-level theme manager owns
- * the preference; this module owns every colour the resolved scheme emits. */
+ * the preference; this module retains chart, warning and snackbar colours. */
 export type ColorScheme = 'light' | 'dark'
 
 type SemanticLevels = {
@@ -101,7 +101,6 @@ function createColorTokens(mode: ColorScheme) {
     SURFACE,
     SUBTLE,
     BORDER,
-    BORDER_STRONG,
     TEXT_DISABLED,
     TEXT_MUTED,
     TEXT,
@@ -124,9 +123,6 @@ function createColorTokens(mode: ColorScheme) {
   const infoSolidLevel = SOLID + (isLight ? 0.035 : 0)
   const errorSolidLevel = SOLID + (isLight ? 0 : -0.091)
 
-  const selectedLevel = isLight ? SUBTLE - 0.037 : SURFACE + 0.03
-  const selectedHoverLevel = isLight ? BORDER : BORDER_STRONG - 0.03
-
   /* The one surface a transparent rendering is wrong for: reading the page
      through a tooltip is the thing a tooltip exists to prevent. It is also
      the same dark chip in both schemes rather than a role sampled twice, so
@@ -137,87 +133,35 @@ function createColorTokens(mode: ColorScheme) {
   const error = semanticScales.error.at(errorSolidLevel)
   const foreground = semanticScales.neutral.at(TEXT)
   const surface = semanticScales.neutral.at(SURFACE)
-  const subtle = transparentAt(semanticScales.neutral, SUBTLE)
-  const selected = transparentAt(semanticScales.neutral, selectedLevel)
 
   return {
     '--background': semanticScales.neutral.at(BACKGROUND),
     '--foreground': foreground,
     '--card': surface,
     '--card-foreground': foreground,
-    '--popover': surface,
-    '--popover-foreground': foreground,
-
     '--tooltip': semanticScales.neutral.at(tooltipLevel),
     '--tooltip-foreground': semanticScales.neutral.at(1),
 
     '--primary': primary,
-    '--primary-foreground': onSolid(),
-    '--primary-hover': transparentAt(semanticScales.primary, SUBTLE),
-    '--primary-surface': transparentAt(semanticScales.primary, SUBTLE),
-    '--primary-focus': transparentAt(semanticScales.primary, BORDER),
-    '--primary-selected': transparentAt(semanticScales.primary, selectedLevel),
-    '--primary-selected-hover': transparentAt(
-      semanticScales.primary,
-      selectedHoverLevel
-    ),
-    '--primary-solid-hover': semanticScales.primary.at(
-      SOLID_HOVER + (isLight ? -0.233 : 0)
-    ),
-    '--primary-border': transparentAt(semanticScales.primary, BORDER),
-
     '--interactive': semanticScales.interactive.at(interactiveSolidLevel),
-    '--interactive-foreground': onSolid(),
-    '--interactive-hover': transparentAt(semanticScales.interactive, SUBTLE),
-    '--interactive-surface': transparentAt(semanticScales.interactive, SUBTLE),
-    '--interactive-border': transparentAt(semanticScales.interactive, BORDER),
-    '--foreground-hover': transparentAt(semanticScales.neutral, SUBTLE),
-
-    '--selected': selected,
-    '--selected-foreground': foreground,
-    '--muted': subtle,
     '--muted-foreground': transparentAt(semanticScales.neutral, TEXT_MUTED),
-    '--accent': subtle,
-    '--accent-foreground': foreground,
-    '--focus-surface': transparentAt(semanticScales.neutral, BORDER),
     '--border': transparentAt(semanticScales.neutral, BORDER),
-    '--border-strong': transparentAt(semanticScales.neutral, BORDER_STRONG),
-    '--icon-foreground': isLight
-      ? transparentAt(semanticScales.neutral, TEXT_MUTED + 0.05)
-      : semanticScales.neutral.at(TEXT),
-    '--disabled-control-foreground': transparentAt(
-      semanticScales.neutral,
-      TEXT_DISABLED + (isLight ? 0.115 : -0.07)
-    ),
-    '--disabled-background': transparentAt(semanticScales.neutral, BORDER),
     '--disabled-foreground': transparentAt(
       semanticScales.neutral,
       TEXT_DISABLED
     ),
 
     '--success': semanticScales.success.at(successSolidLevel),
-    '--success-foreground': onSolid(),
-    '--success-surface': transparentAt(semanticScales.success, SUBTLE),
-    '--success-border': transparentAt(semanticScales.success, BORDER),
     '--warning': semanticScales.warning.at(warningSolidLevel),
     '--warning-foreground': onSolid(),
     '--warning-surface': transparentAt(semanticScales.warning, SUBTLE),
     '--warning-border': transparentAt(semanticScales.warning, BORDER),
     '--info': semanticScales.info.at(infoSolidLevel),
     '--info-foreground': onSolid(),
-    '--info-surface': transparentAt(semanticScales.info, SUBTLE),
-    '--info-border': transparentAt(semanticScales.info, BORDER),
     '--error': error,
     '--error-foreground': semanticScales.neutral.at(1),
-    '--error-hover': transparentAt(semanticScales.error, SUBTLE),
     '--error-surface': transparentAt(semanticScales.error, SUBTLE),
     '--error-border': transparentAt(semanticScales.error, BORDER),
-    /* Kept for shadcn-compatible consumers without a second authored error. */
-    '--destructive': error,
-    '--destructive-foreground': semanticScales.neutral.at(1),
-
-    /* Data series stay independent from controls even where they currently
-       sample the same point, so later chart calibration remains local. */
     '--data-primary': semanticScales.primary.at(
       SOLID_HOVER + (isLight ? -0.233 : 0)
     ),
@@ -231,35 +175,6 @@ function createColorTokens(mode: ColorScheme) {
     '--data-error-alt': semanticScales.error.at(
       SOLID + (isLight ? -0.029 : -0.166)
     ),
-
-    /* Component-local roles whose relationships are not shared elsewhere. */
-    '--chip-hover': transparentAt(
-      semanticScales.neutral,
-      isLight ? BORDER : BORDER_STRONG - 0.03
-    ),
-    '--chip-primary-border': transparentAt(
-      semanticScales.primary,
-      SOLID + (isLight ? 0.04 : -0.03)
-    ),
-    '--chip-border': semanticScales.neutral.at(
-      TEXT_DISABLED + (isLight ? 0.115 : 0)
-    ),
-    '--chip-delete': transparentAt(
-      semanticScales.neutral,
-      TEXT_DISABLED + (isLight ? 0.115 : -0.1)
-    ),
-    '--chip-delete-hover': transparentAt(
-      semanticScales.neutral,
-      TEXT_DISABLED + (isLight ? -0.04 : 0.05)
-    ),
-    '--link-underline': transparentAt(
-      semanticScales.primary,
-      isLight ? BORDER_STRONG : TEXT_DISABLED
-    ),
-    '--switch-thumb': semanticScales.neutral.at(isLight ? SURFACE : BORDER),
-    '--switch-track': semanticScales.neutral.at(isLight ? 0 : TEXT),
-    '--switch-track-opacity': isLight ? '0.38' : '0.3',
-    '--ring': primary,
   }
 }
 
@@ -279,10 +194,6 @@ export const themeTokensCss = [
   `:root{${declarations(colorTokens.light)}}`,
   `:root.dark{${declarations(colorTokens.dark)}}`,
 ].join('')
-
-/** The browser theme colour is a DOM attribute, so it is read from the same
- * generated decision as `--card` rather than back out of computed styles. */
-export const getThemeColor = (mode: ColorScheme) => colorTokens[mode]['--card']
 
 const SHOWCASE_LEVELS = [0.1, 0.25, 0.4, 0.55, 0.7, 0.85, 1]
 

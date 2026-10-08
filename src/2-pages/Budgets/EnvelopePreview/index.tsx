@@ -78,7 +78,7 @@ const Header: FC<{
     [ask, color, dispatch, envelope.id]
   )
   return (
-    <header className="sticky top-0 z-[5] flex items-center bg-card px-6 py-2">
+    <header className="sticky top-0 z-[5] flex items-center bg-ui-card px-6 py-2">
       <div className="flex min-w-0 grow items-center">
         <TagIcon
           size="m"

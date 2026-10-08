@@ -24,7 +24,7 @@ export const Bench: Story = {}
  * control, and a row whose label wraps onto a second line. */
 function VariantShowcase() {
   return (
-    <div className="w-[320px] bg-card">
+    <div className="w-[320px] bg-ui-card">
       <ActionList aria-label="Actions">
         <ListRowSubheader>Section</ListRowSubheader>
         <ActionListItem>

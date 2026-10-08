@@ -30,14 +30,14 @@ export function BalanceWidget(props: { month: TISOMonth }) {
   const smartAssignedInFuture = toBeAssigned < 0 ? 0 : assignedInFuture
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg bg-background p-4">
+    <div className="flex flex-col gap-3 rounded-lg bg-ui-base p-4">
       <Total
         title={t('inBalance')}
         value={fundsEnd}
         currency={currency}
         onClick={cycleForward}
       />
-      <hr className="m-0 w-full border-0 border-t border-border" />
+      <hr className="m-0 w-full border-0 border-t border-ui-border" />
       <DataLine
         name={t('inEnvelopes')}
         tooltip={t('inEnvelopesTooltip')}
@@ -58,8 +58,8 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         amount={toBeAssigned}
         currency={currency}
       />
-      <hr className="m-0 w-full border-0 border-t border-border" />
-      <p className="m-0 text-center text-body-sm text-muted-foreground text-balance">
+      <hr className="m-0 w-full border-0 border-t border-ui-border" />
+      <p className="m-0 text-center text-body-sm text-ui-secondary text-balance">
         {getExplaining(fundsEnd, toBeAssigned, overspend)}
       </p>
     </div>

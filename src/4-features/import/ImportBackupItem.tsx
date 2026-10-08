@@ -200,7 +200,7 @@ function BackupImportDialog({ pending }: { pending: TPending }) {
           return (
             <div key={key} className="flex justify-between gap-4">
               <span className="text-body-sm">{t(labelKey)}</span>
-              <span className="text-body-sm text-muted-foreground">
+              <span className="text-body-sm text-ui-secondary">
                 {[
                   counts.created && t('importCreated', { n: counts.created }),
                   counts.updated && t('importUpdated', { n: counts.updated }),

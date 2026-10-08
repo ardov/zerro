@@ -83,7 +83,7 @@ export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
         <ActivityStats month={month} />
         <FxRates month={month} />
 
-        <div className="rounded-lg bg-background p-4">
+        <div className="rounded-lg bg-ui-base p-4">
           <div className="mb-2">
             <p className="m-0 text-center text-body">{t('actions')}</p>
           </div>

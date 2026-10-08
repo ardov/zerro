@@ -19,7 +19,7 @@ type TGoalsProgressProps = ButtonBaseProps & {
 }
 
 const baseStyles =
-  'flex min-h-10 items-center justify-center gap-2 rounded-lg bg-card px-4 py-2'
+  'flex min-h-10 items-center justify-center gap-2 rounded-lg bg-ui-card px-4 py-2'
 
 export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { t } = useTranslation('goals')

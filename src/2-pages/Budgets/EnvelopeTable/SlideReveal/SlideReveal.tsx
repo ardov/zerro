@@ -207,7 +207,7 @@ export const SlideReveal: FC<SlideRevealProps> = ({
 }
 
 const revealCellClassName =
-  'flex w-[88px] flex-col items-center justify-center border-l border-border bg-accent px-2'
+  'flex w-[88px] flex-col items-center justify-center border-l border-ui-border bg-ui-highlight px-2'
 
 type CellProps = {
   item: RevealItem
@@ -241,7 +241,7 @@ const DraggableRevealCell: FC<
       onClick={onClick}
       {...attributes}
       {...listeners}
-      className={`${revealCellClassName} ${drag.disabled ? 'cursor-pointer' : 'cursor-grab'} select-none touch-manipulation active:bg-focus-surface`}
+      className={`${revealCellClassName} ${drag.disabled ? 'cursor-pointer' : 'cursor-grab'} select-none touch-manipulation active:bg-ui-pressed`}
     >
       <RevealCellContent
         label={item.label}
@@ -258,7 +258,7 @@ const RevealCellContent: FC<{
   color: string
 }> = ({ label, value, color }) => (
   <>
-    <span className="truncate text-caption font-sans leading-[1.2] text-muted-foreground">
+    <span className="truncate text-caption font-sans leading-[1.2] text-ui-secondary">
       {label}
     </span>
     <p className={cn('m-0 truncate text-body-sm font-sans', color)}>

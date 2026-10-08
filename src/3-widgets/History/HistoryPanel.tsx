@@ -65,9 +65,9 @@ export function HistoryPanel() {
       className="w-95"
       contentScrolls
     >
-      <hr className="m-0 mt-3 border-0 border-t border-border" />
+      <hr className="m-0 mt-3 border-0 border-t border-ui-border" />
       <HistoryControls />
-      <hr className="m-0 border-0 border-t border-border" />
+      <hr className="m-0 border-0 border-t border-ui-border" />
       {rows.length === 0 ? (
         <EmptyHistory loading={pageStatus === 'loading'} />
       ) : (
@@ -103,7 +103,7 @@ export function HistoryPanel() {
 function EmptyHistory({ loading }: { loading: boolean }) {
   const { t } = useTranslation('history')
   return (
-    <div className="flex grow flex-col items-center justify-center gap-2 px-8 text-center text-muted-foreground">
+    <div className="flex grow flex-col items-center justify-center gap-2 px-8 text-center text-ui-secondary">
       <HistoryIcon className="size-10 opacity-40" />
       <p className="m-0 text-body-sm">
         {loading ? t('historyLoading') : t('noHistory')}

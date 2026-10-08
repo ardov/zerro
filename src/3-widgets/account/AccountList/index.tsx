@@ -95,7 +95,7 @@ const ArchivedList: FC<{ accs: core.accounts.TAccountPopulated[] }> = props => {
       </Collapse>
       <button
         type="button"
-        className={cn(listItemDenseClass, 'text-info')}
+        className={cn(listItemDenseClass, 'text-ui-link')}
         onClick={toggleVisibility}
       >
         {visible ? (

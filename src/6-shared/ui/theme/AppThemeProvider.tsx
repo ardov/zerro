@@ -1,7 +1,8 @@
 import type { FC, ReactNode } from 'react'
 import { useLayoutEffect } from 'react'
 import type { ColorScheme } from './colors'
-import { getThemeColor, themeTokensCss } from './colors'
+import { themeTokensCss } from './colors'
+import { getThemeColor } from '../kit/themeColor'
 import { ColorSchemeOverrideContext, useColorScheme } from './hooks'
 
 import './styles.css'
@@ -52,7 +53,7 @@ const ColorSchemeMetadata: FC<{ pinned: boolean }> = ({ pinned }) => {
 
   /* The last colour anything reads as a value: `content` is an attribute and
      not a CSS property, so no token can reach it.
-     It is read from the generated token decision and not back out of the
+     It is read from the UI Kit stylesheet and not back out of the
      cascade, even though the token is written to be readable. `getComputedStyle` forces a style
      recalculation, and that is not free to anyone else on the page: an element
      mounting into a transitioned state stops starting there and animates into

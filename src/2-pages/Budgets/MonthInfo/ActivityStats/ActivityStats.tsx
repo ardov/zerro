@@ -123,7 +123,7 @@ function StatWidget(props: {
     <>
       <ButtonBase
         onClick={toggleOpened}
-        className="flex flex-col items-stretch rounded-lg bg-background p-4"
+        className="flex flex-col items-stretch rounded-lg bg-ui-base p-4"
       >
         <DataLine name={name} amount={totalAmount} currency={currency} />
 

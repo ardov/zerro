@@ -87,7 +87,7 @@ export const NameCell: FC<{
       {!!comment && (
         <span
           title={comment}
-          className="shrink truncate text-body italic text-disabled-foreground"
+          className="shrink truncate text-body italic text-ui-tertiary"
         >
           {comment}
         </span>
