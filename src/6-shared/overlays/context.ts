@@ -5,6 +5,7 @@ import { createContext, useContext } from 'react'
 /** Everything that opens or closes an overlay. Stable for the life of the
  * host, so a caller can hold one in a `useCallback` without it going stale. */
 export type OverlayMethods = {
+  back: () => boolean
   subscribeClose: (id: string, listener: () => void) => () => void
   openPopup: (id: string) => void
   closePopup: (id: string, notify?: boolean) => void

@@ -255,7 +255,18 @@ owner's `controller`. They use its `open` and `setOpen`; they do not register
 history or subscribe to closing. For an asked editor, pass the `controller`
 returned by `useAsked(onClose?)`. A plain `{ open, setOpen }` is also accepted
 for rendering, but the caller must provide its own history and lifecycle.
-Do not register the same opening twice.
+`DrawerSurface` requires `OverlayHost` even with a plain controller, because
+system Back is dispatched through the host. This also applies to the drawer
+presentations of Dialog, Popover and Menu. Their owners must register in that
+same host so Back can identify the top layer. Do not register the same opening
+twice.
+
+Android system Back can reach a Drawer through Base UI's `CloseWatcher` even
+when a Select is above it. `DrawerFrame` routes that reason through
+`useOverlayBack`: the host dismisses the top popup or screen and ignores
+additional native requests while its history step is pending. The originating
+Drawer's own dismissal is canceled; its visibility still follows its owner.
+Escape, backdrop, swipe and explicit close retain their surface-specific behavior.
 
 A menu with its own button is a kit `Menu`. A context menu opened from an
 event, such as a right click on a list row, is asked: its component renders

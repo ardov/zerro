@@ -16,6 +16,7 @@ import { OverlayHost } from './OverlayHost'
 import { defineScreen } from './defineScreen'
 import { useAsk, useAsked } from './useAsk'
 import { usePopup } from './usePopup'
+import { useOverlayBack } from './useOverlayBack'
 
 function App({ children }: { children: ReactNode }) {
   return (
@@ -741,4 +742,56 @@ describe('asked close answers', () => {
       expect(notified).toHaveBeenCalledTimes(1)
     }
   )
+})
+
+describe('system Back', () => {
+  const parent = defineScreen<string>('system-back-parent')
+  function Stack({ onClose }: { onClose: () => void }) {
+    const [id, setId] = parent.use()
+    const popup = usePopup(onClose)
+    const back = useOverlayBack()
+    return (
+      <>
+        <button onClick={() => setId('parent')}>open parent</button>
+        {id && <div>parent body</div>}
+        <button onClick={() => popup.setOpen(true)}>open child</button>
+        {popup.open && <div>child body</div>}
+        <button onClick={back}>system back</button>
+      </>
+    )
+  }
+
+  it('closes only the top owner and ignores duplicate requests during a pending step', async () => {
+    const user = userEvent.setup()
+    const closed = vi.fn()
+    const history = renderWithSlowHistory(<Stack onClose={closed} />)
+    await user.click(screen.getByText('open parent'))
+    await user.click(screen.getByText('open child'))
+    await user.click(screen.getByText('system back'))
+    expect(screen.queryByText('child body')).toBeNull()
+    expect(screen.getByText('parent body')).toBeTruthy()
+    expect(closed).toHaveBeenCalledTimes(1)
+    await user.click(screen.getByText('system back'))
+    history.land()
+    expect(screen.getByText('parent body')).toBeTruthy()
+    expect(() => history.land()).toThrow('No step is in flight')
+    await user.click(screen.getByText('system back'))
+    history.land()
+    expect(screen.queryByText('parent body')).toBeNull()
+  })
+
+  it('leaves a page without overlays alone', async () => {
+    const handled = vi.fn()
+    function Page() {
+      const back = useOverlayBack()
+      return <button onClick={() => handled(back())}>system back</button>
+    }
+    render(
+      <App>
+        <Page />
+      </App>
+    )
+    await userEvent.click(screen.getByText('system back'))
+    expect(handled).toHaveBeenCalledExactlyOnceWith(false)
+  })
 })

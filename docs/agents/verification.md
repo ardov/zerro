@@ -42,6 +42,18 @@ pnpm test:storybook src/6-shared/ui/kit/InlineField.stories.tsx
 but neither command claims to select every policy-required regression or manual
 smoke. Do not repeat a successful broad gate while its inputs are unchanged.
 
+Android system Back has an additional targeted check using Chromium with an
+Android user agent and real `CloseWatcher` events, in both themes:
+
+```sh
+STORYBOOK_ANDROID=1 pnpm test:storybook src/6-shared/ui/kit/DrawerBack.stories.tsx
+```
+
+This exercises the Android-only library handler; it is not a physical-device
+or Android system-gesture test. The default `verify:ui`, `verify:all` and CI
+runs use a desktop user agent and do not exercise this handler; run the command
+above separately when changing system Back behavior.
+
 ## Handoff routing
 
 | Changed surface                          | Final verification                                                              |

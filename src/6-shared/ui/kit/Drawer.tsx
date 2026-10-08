@@ -1,7 +1,11 @@
 import { useId, type ReactElement, type ReactNode } from 'react'
 import { Drawer as Primitive } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
-import type { PopupController, SurfaceController } from '@/6-shared/overlays'
+import {
+  useOverlayBack,
+  type PopupController,
+  type SurfaceController,
+} from '@/6-shared/overlays'
 import { MobileDrawerViewport } from '../MobileDrawerViewport'
 import { modalBackdropClass } from './backdrop'
 import { cn } from '@/6-shared/ui/shadcn/utils'
@@ -90,6 +94,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
     contentScrolls,
   } = props
   const { open, setOpen: onOpenChange } = controller
+  const back = useOverlayBack()
   const { t } = useTranslation()
   const titleId = useId()
   const bottomSheet = useBottomSheetLayout()
@@ -105,7 +110,15 @@ function DrawerFrame(props: DrawerSurfaceProps) {
   return (
     <Primitive.Root
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(next, details) => {
+        if (!next && details.reason === 'close-watcher' && back()) {
+          // Android Back belongs to the whole stack. Prevent Base UI from
+          // closing this drawer when the host dismissed a child instead.
+          details.cancel()
+          return
+        }
+        onOpenChange(next)
+      }}
       disablePointerDismissal={disablePointerDismissal}
       swipeDirection={side === 'bottom' ? 'down' : side}
     >

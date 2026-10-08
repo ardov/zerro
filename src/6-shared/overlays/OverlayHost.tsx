@@ -282,6 +282,24 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     [perform]
   )
 
+  // A native close request can be delivered to a drawer underneath a select
+  // or an asked popup. The host owns the actual order of all these layers.
+  const back = useCallback(() => {
+    // Multiple platform callbacks must not unwind the same pending step twice.
+    if (stepRef.current) return true
+    const popup = liveRef.current.at(-1)
+    if (popup !== undefined) {
+      closePopup(popup)
+      return true
+    }
+    const screen = Object.keys(entryRef.current.screens ?? {}).at(-1)
+    if (screen !== undefined) {
+      closeScreen(screen)
+      return true
+    }
+    return false
+  }, [closePopup, closeScreen])
+
   // Landing on an entry — mounted, navigated, went back, reloaded — is the one
   // moment history and memory can disagree, so it is the one moment they are
   // brought back together.
@@ -320,6 +338,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
 
   const methods = useMemo<OverlayMethods>(
     () => ({
+      back,
       openPopup,
       closePopup,
       ask,
@@ -327,7 +346,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       closeScreen,
       subscribeClose,
     }),
-    [openPopup, closePopup, ask, openScreen, closeScreen, subscribeClose]
+    [back, openPopup, closePopup, ask, openScreen, closeScreen, subscribeClose]
   )
 
   const state = useMemo<OverlayState>(() => {

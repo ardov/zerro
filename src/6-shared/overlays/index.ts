@@ -7,3 +7,4 @@ export type {
   OverlayController,
   PopupController,
 } from './controller'
+export { useOverlayBack } from './useOverlayBack'
