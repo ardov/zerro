@@ -541,7 +541,8 @@
     "convertBudgetsFromZm": "Конвертировать бюджеты из Дзен-мани",
     "budgetsConverted": "✅ Бюджеты сконвертированы ({{budgets}})",
     "logOut": "Выйти",
-    "version": "Версия: {{version}}"
+    "version": "{{version}}-{{date}}",
+    "build": "Сборка {{build}}"
   },
 
   "history": {

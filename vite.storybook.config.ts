@@ -2,6 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
+import { buildDefines } from './buildDefines'
 
 const root = path.dirname(fileURLToPath(import.meta.url))
 
@@ -46,7 +47,5 @@ export default defineConfig({
       stories: path.resolve(root, 'stories'),
     },
   },
-  define: {
-    APP_VERSION: JSON.stringify(process.env.npm_package_version),
-  },
+  define: buildDefines(),
 })

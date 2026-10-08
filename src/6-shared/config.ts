@@ -12,6 +12,9 @@ export const gaid = import.meta.env.REACT_APP_GAID as string
 
 // Info about the app
 export const appVersion = APP_VERSION
+export const buildDate = APP_BUILD_DATE
+/** One deploy among those sharing a version, as Sentry tells releases apart. */
+export const appRelease = `${APP_VERSION}+${APP_BUILD_COMMIT}`
 export const isProduction = import.meta.env.PROD
 
 // Database parameters

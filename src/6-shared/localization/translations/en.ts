@@ -574,7 +574,8 @@ export const en: typeof ru = {
     convertBudgetsFromZm: 'Convert budgets from Zenmoney',
     budgetsConverted: '✅ Budgets converted ({{budgets}})',
     logOut: 'Log out',
-    version: 'Version: {{version}}',
+    version: '{{version}}-{{date}}',
+    build: 'Build {{build}}',
   },
 
   history: {

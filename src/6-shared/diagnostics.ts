@@ -1,10 +1,10 @@
 import * as Sentry from '@sentry/browser'
 import type { ErrorInfo } from 'react'
-import { appVersion, isProduction, sentryDSN } from '@/6-shared/config'
+import { appRelease, isProduction, sentryDSN } from '@/6-shared/config'
 
 export function initSentry() {
   if (isProduction && sentryDSN) {
-    Sentry.init({ release: appVersion, dsn: sentryDSN })
+    Sentry.init({ release: appRelease, dsn: sentryDSN })
   }
 }
 

@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -30,7 +30,9 @@ import { Divider } from '@/6-shared/ui/kit/Divider'
 import { track } from '@/6-shared/analytics'
 import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
-import { appVersion } from '@/6-shared/config'
+import { appRelease, appVersion, buildDate } from '@/6-shared/config'
+import { formatDate } from '@/6-shared/helpers/date'
+import { isThisYear } from 'date-fns'
 
 import { useAppDispatch, useAppSelector } from '@/store'
 
@@ -419,11 +421,22 @@ function LogOutItem({ onClose }: ItemProps) {
   )
 }
 
+/** Shows the version and build date; a press reloads the app. Holding it
+ * shows the full build, commit included, for a bug report. */
 function VersionItem({ onClose }: ItemProps) {
   const { t } = useTranslation('settings')
+  const snackbar = useSnackbar()
+  const hold = useLongPress(() => {
+    snackbar({ message: t('build', { build: appRelease }) })
+    // Best effort: a touch hold may not count as a gesture that allows it.
+    navigator.clipboard?.writeText(appRelease).catch(() => {})
+  })
   return (
     <ActionListItem
+      {...hold.handlers}
+      className="select-none [-webkit-touch-callout:none]"
       onClick={() => {
+        if (hold.consumeClick()) return
         onClose()
         window.location.reload()
       }}
@@ -431,9 +444,50 @@ function VersionItem({ onClose }: ItemProps) {
       <ListRowIcon />
       <ListRowText>
         <span className="text-overline uppercase text-muted-foreground">
-          {t('version', { version: appVersion })}
+          {t('version', {
+            version: appVersion,
+            date: formatBuildDate(new Date(buildDate)),
+          })}
         </span>
       </ListRowText>
     </ActionListItem>
   )
+}
+
+/** 07.10, with the year only when it is not this one: 07.10.2025. */
+function formatBuildDate(date: Date) {
+  return formatDate(date, isThisYear(date) ? 'dd.MM' : 'dd.MM.yyyy')
+}
+
+const LONG_PRESS_MS = 600
+
+/** Calls `onLongPress` once a pointer has been held down for a while. The
+ * click that ends the hold is still delivered, so the caller asks
+ * `consumeClick` whether to skip its own action for it. */
+function useLongPress(onLongPress: () => void) {
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const fired = useRef(false)
+  const cancel = () => clearTimeout(timer.current)
+  return {
+    handlers: {
+      onPointerDown: () => {
+        cancel()
+        fired.current = false
+        timer.current = setTimeout(() => {
+          fired.current = true
+          onLongPress()
+        }, LONG_PRESS_MS)
+      },
+      onPointerUp: cancel,
+      onPointerLeave: cancel,
+      onPointerCancel: cancel,
+      // A touch hold opens the context menu otherwise.
+      onContextMenu: (event: React.MouseEvent) => event.preventDefault(),
+    },
+    consumeClick: () => {
+      const skip = fired.current
+      fired.current = false
+      return skip
+    },
+  }
 }
