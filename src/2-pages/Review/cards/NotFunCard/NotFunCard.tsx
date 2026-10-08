@@ -3,9 +3,9 @@ import { IconButton } from '@/6-shared/ui/kit/Button'
 import { useMemo, useState } from 'react'
 import { core } from '@/zerro-core/redux'
 
-import { CheckboxField } from '@/6-shared/ui/Checkbox'
+import { CheckboxField } from '@/6-shared/ui/kit/Checkbox'
 import { Link } from '@/6-shared/ui/kit/Link'
-import { Chip } from '@/6-shared/ui/Chip'
+import { Chip } from '@/6-shared/ui/kit/Chip'
 import { Dialog } from '@/6-shared/ui/kit/Dialog'
 import pluralize from '@/6-shared/helpers/pluralize'
 import { round } from '@/6-shared/helpers/money'
@@ -95,20 +95,10 @@ export function NotFunCard(props: TCardProps) {
         {taxes.map(info => (
           <span key={info.name} className="m-1 inline-block">
             <Tooltip content={info.comment}>
-              <Chip
-                variant={'outlined'}
-                label={
-                  <>
-                    {info.name} (
-                    <DisplayAmount
-                      value={info.value}
-                      noShade
-                      decimals="ifOnly"
-                    />
-                    )
-                  </>
-                }
-              />
+              <Chip variant="outline">
+                {info.name} (
+                <DisplayAmount value={info.value} noShade decimals="ifOnly" />)
+              </Chip>
             </Tooltip>
           </span>
         ))}

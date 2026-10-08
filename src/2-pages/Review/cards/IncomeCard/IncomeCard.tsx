@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { core } from '@/zerro-core/redux'
 
-import { Chip } from '@/6-shared/ui/Chip'
+import { Chip } from '@/6-shared/ui/kit/Chip'
 import { entries } from '@/6-shared/helpers/keys'
 import { addFxAmount } from '@/6-shared/helpers/money'
 import { useAppSelector } from '@/store'
@@ -67,23 +67,20 @@ export function IncomeCard(props: TCardProps) {
         {incomeTags.map(tagInfo => (
           <span key={tagInfo.id} className="m-1 inline-block">
             <Chip
-              variant={checked.includes(tagInfo.id) ? 'filled' : 'outlined'}
+              checked={checked.includes(tagInfo.id)}
               onClick={() => toggle(tagInfo.id)}
               onDoubleClick={() =>
                 props.onShowTransactions(tagInfo.transactions)
               }
-              label={
-                <>
-                  {tagInfo.name} (
-                  <DisplayAmount
-                    value={tagInfo.incomeFx}
-                    noShade
-                    decimals="ifOnly"
-                  />
-                  )
-                </>
-              }
-            />
+            >
+              {tagInfo.name} (
+              <DisplayAmount
+                value={tagInfo.incomeFx}
+                noShade
+                decimals="ifOnly"
+              />
+              )
+            </Chip>
           </span>
         ))}
       </div>

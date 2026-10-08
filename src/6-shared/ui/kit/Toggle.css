@@ -59,12 +59,14 @@
     width: 20px;
     height: 20px;
     border-radius: 6px;
+    color: inherit;
     background: transparent;
 
     &::before {
       position: absolute;
       inset: 0;
-      border: var(--stroke-ui-control) solid var(--color-ui-control-inactive);
+      border: var(--stroke-ui-control) solid
+        var(--checkbox-color, var(--color-ui-control-inactive));
       border-radius: inherit;
       pointer-events: none;
       content: '';
@@ -72,9 +74,17 @@
       transition: border-color 150ms ease;
     }
 
+    &:is([data-checked], [data-indeterminate]) {
+      background: transparent;
+    }
+
     &:is([data-checked], [data-indeterminate])::before {
       border-color: transparent;
     }
+  }
+
+  .kit-checkbox-fill {
+    fill: var(--checkbox-color, var(--color-ui-control-active));
   }
 
   .kit-checkbox-indicator {
@@ -155,6 +165,8 @@
       --color-ui-control-inactive: CanvasText;
       --color-ui-on-control: Canvas;
       --color-ui-focus: CanvasText;
+      /* System colors override even an inline chart color. */
+      --checkbox-color: CanvasText !important;
     }
   }
 }

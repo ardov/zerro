@@ -13,12 +13,16 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 
 const chipVariants = cva(
   [
-    'relative isolate inline-flex h-8 max-w-full shrink-0 items-center rounded-2xl rounded-smooth text-ui-16 font-normal text-ui-primary align-middle',
+    'relative isolate inline-flex max-w-full shrink-0 items-center rounded-2xl rounded-smooth font-normal text-ui-primary align-middle',
     '[--chip-hover:var(--color-ui-highlight)] [--chip-pressed:var(--color-ui-pressed)]',
     'before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-[inherit]',
   ],
   {
     variants: {
+      size: {
+        sm: 'h-6 text-ui-14',
+        md: 'h-8 text-ui-16',
+      },
       variant: {
         filled: 'bg-ui-selected',
         outline: 'bg-transparent before:border before:border-ui-border',
@@ -30,7 +34,7 @@ const chipVariants = cva(
       },
       disabled: { true: 'opacity-ui-disabled' },
     },
-    defaultVariants: { variant: 'filled' },
+    defaultVariants: { variant: 'filled', size: 'md' },
   }
 )
 
@@ -43,6 +47,10 @@ export type ChipProps = Omit<
   /** Opaque HEX, RGB or OKLCH fill. Only used by the filled variant. */
   color?: string
   variant?: NonNullable<VariantProps<typeof chipVariants>['variant']>
+  /** sm is 24px; md is 32px (default). */
+  size?: 'sm' | 'md'
+  /** Controlled toggle state. With onClick, exposes aria-pressed and owns the fill. */
+  checked?: boolean
   /** Decorative leading icon. */
   start?: ReactNode
   onClick?: MouseEventHandler<HTMLButtonElement>
@@ -55,6 +63,8 @@ export function Chip(props: ChipProps) {
     children,
     color,
     variant = 'filled',
+    size = 'md',
+    checked,
     start,
     onClick,
     onRemove,
@@ -72,8 +82,11 @@ export function Chip(props: ChipProps) {
   const hasSeparateRemove = Boolean(onClick && onRemove)
   const interactive = Boolean(primaryAction)
   const Label = interactive ? 'button' : 'span'
+  const appearance =
+    checked === undefined ? variant : checked ? 'filled' : 'outline'
+  const compact = size === 'sm'
   const foreground =
-    color && variant === 'filled' ? getContrastText(color) : undefined
+    color && appearance === 'filled' ? getContrastText(color) : undefined
   const palette = foreground
     ? ({
         backgroundColor: color,
@@ -98,7 +111,8 @@ export function Chip(props: ChipProps) {
       }}
       className={cn(
         chipVariants({
-          variant,
+          variant: appearance,
+          size,
           interactive: interactive && !disabled,
           disabled,
         }),
@@ -119,6 +133,9 @@ export function Chip(props: ChipProps) {
         onKeyDown={onKeyDown}
         type={interactive ? 'button' : undefined}
         disabled={interactive ? disabled : undefined}
+        aria-pressed={
+          onClick && checked !== undefined ? checked : restProps['aria-pressed']
+        }
         onClick={
           interactive
             ? event => {
@@ -137,15 +154,18 @@ export function Chip(props: ChipProps) {
         }
         className={cn(
           'inline-flex h-full min-w-0 items-center rounded-[inherit] outline-none',
-          start != null ? 'pl-1' : 'pl-4',
-          onRemove ? 'pr-1' : 'pr-4',
+          start != null ? 'pl-1' : compact ? 'pl-2' : 'pl-4',
+          onRemove ? 'pr-1' : compact ? 'pr-2' : 'pr-4',
           interactive && 'cursor-pointer disabled:cursor-default'
         )}
       >
         {start != null && (
           <span
             aria-hidden
-            className="flex size-8 shrink-0 items-center justify-center [&_svg]:size-5"
+            className={cn(
+              'flex shrink-0 items-center justify-center',
+              compact ? 'size-5 [&_svg]:size-4' : 'size-8 [&_svg]:size-5'
+            )}
           >
             {start}
           </span>
@@ -157,7 +177,8 @@ export function Chip(props: ChipProps) {
           <span
             aria-hidden
             className={cn(
-              'ml-1 flex size-6 shrink-0 items-center justify-center rounded-full',
+              'ml-1 flex shrink-0 items-center justify-center rounded-full',
+              compact ? 'size-4' : 'size-6',
               !disabled && 'hover:bg-(--chip-hover) active:bg-(--chip-pressed)'
             )}
           >
@@ -175,7 +196,10 @@ export function Chip(props: ChipProps) {
             event.stopPropagation()
             onRemove?.()
           }}
-          className="mr-1 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full outline-none disabled:cursor-default enabled:hover:bg-(--chip-hover) enabled:active:bg-(--chip-pressed)"
+          className={cn(
+            'mr-1 flex shrink-0 cursor-pointer items-center justify-center rounded-full outline-none disabled:cursor-default enabled:hover:bg-(--chip-hover) enabled:active:bg-(--chip-pressed)',
+            compact ? 'size-4' : 'size-6'
+          )}
         >
           <CloseIcon className="size-4" />
         </button>

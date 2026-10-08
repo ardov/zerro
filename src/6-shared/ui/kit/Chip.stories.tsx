@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, userEvent, within } from 'storybook/test'
 import { CalendarIcon } from '@/6-shared/ui/Icons'
@@ -13,7 +14,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Compact category labels and filters. Use children for the label and start for a decorative icon. color accepts an opaque HEX, RGB or OKLCH fill; outline variants ignore it. onClick opens or edits, onRemove removes. Interactive chips have one Tab stop; Delete/Backspace removes. className/style decorate the surface; native attributes and ref target the primary button (the label span when static). The caller restores focus after removing a chip. Example: <Chip onRemove={remove}>Groceries</Chip>.',
+          'Compact category labels and filters. Use children for the label and start for a decorative icon. color accepts an opaque HEX, RGB or OKLCH fill; outline variants ignore it. size="sm" is 24px; the default size="md" is 32px. checked + onClick makes a controlled toggle: checked owns filled/outline styling and aria-pressed. Without checked, onClick opens or edits; onRemove removes. Interactive chips have one Tab stop; Delete/Backspace removes. className/style decorate the surface; native attributes and ref target the primary button (the label span when static). The caller restores focus after removing a chip. Example: <Chip onRemove={remove}>Groceries</Chip>.',
       },
     },
   },
@@ -105,4 +106,74 @@ export const Interaction: Story = {
     await expect(args.onRemove).toHaveBeenCalledTimes(2)
     await expect(args.onClick).toHaveBeenCalledTimes(1)
   },
+}
+
+function ToggleChips() {
+  const [checked, setChecked] = useState(false)
+  return (
+    <div className="flex items-center gap-3">
+      <Chip
+        size="sm"
+        checked={checked}
+        onClick={() => setChecked(value => !value)}
+      >
+        Income
+      </Chip>
+      <Chip checked={!checked} onClick={() => setChecked(value => !value)}>
+        Expenses
+      </Chip>
+      <Chip size="sm" checked disabled onClick={() => setChecked(false)}>
+        Disabled
+      </Chip>
+    </div>
+  )
+}
+
+export const Toggle: Story = {
+  render: () => <ToggleChips />,
+  play: async ({ canvas }) => {
+    const income = canvas.getByRole('button', {
+      name: 'Income',
+      pressed: false,
+    })
+    await expect(
+      income.closest('[data-slot="chip"]')!.getBoundingClientRect().height
+    ).toBe(24)
+    await expect(
+      canvas
+        .getByRole('button', { name: 'Expenses' })
+        .closest('[data-slot="chip"]')!
+        .getBoundingClientRect().height
+    ).toBe(32)
+    await userEvent.click(income)
+    await expect(income).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.keyboard('[Space]')
+    await expect(income).toHaveAttribute('aria-pressed', 'false')
+    await userEvent.keyboard('{Enter}')
+    await expect(income).toHaveAttribute('aria-pressed', 'true')
+    const disabled = canvas.getByRole('button', { name: 'Disabled' })
+    await expect(disabled).toBeDisabled()
+    await userEvent.click(disabled)
+    await expect(income).toHaveAttribute('aria-pressed', 'true')
+  },
+}
+
+export const Compact: Story = {
+  render: () => (
+    <div className="flex items-center gap-3">
+      <Chip size="sm">USD</Chip>
+      <Chip size="sm" variant="outline">
+        Current
+      </Chip>
+      <Chip size="sm" start={<CalendarIcon />} onClick={fn()}>
+        Date
+      </Chip>
+      <Chip size="sm" onRemove={fn()}>
+        Category
+      </Chip>
+      <Chip size="sm" start={<CalendarIcon />} onClick={fn()} onRemove={fn()}>
+        Filter
+      </Chip>
+    </div>
+  ),
 }

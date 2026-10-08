@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@/6-shared/ui/Button'
+import { Button, IconButton } from '@/6-shared/ui/kit/Button'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
@@ -88,22 +88,24 @@ export function HistoryTopBar() {
         {!compact && (
           <>
             <IconButton
-              size="small"
+              size="xs"
+              variant="ghost"
               disabled={!step.back}
               onClick={() =>
                 step.back && void dispatch(selectHistoryPoint(step.back))
               }
-              aria-label={t('stepBack')}
+              label={t('stepBack')}
             >
               <ChevronLeftIcon />
             </IconButton>
             <IconButton
-              size="small"
+              size="xs"
+              variant="ghost"
               disabled={!step.forward}
               onClick={() =>
                 step.forward && void dispatch(selectHistoryPoint(step.forward))
               }
-              aria-label={t('stepForward')}
+              label={t('stepForward')}
             >
               <ChevronRightIcon />
             </IconButton>
@@ -120,16 +122,18 @@ export function HistoryTopBar() {
         {!compact && (
           <>
             <IconButton
-              size="small"
+              size="xs"
+              variant="ghost"
               onClick={() => setPanelOpen(true)}
-              aria-label={t('openPanel')}
+              label={t('openPanel')}
             >
               <HistoryIcon />
             </IconButton>
             {/* The date is the only thing allowed to shrink: a label that wraps
                 would make the bar two rows tall mid-step and shift the page. */}
             <Button
-              size="small"
+              size="xs"
+              variant="ghost"
               className="shrink-0 whitespace-nowrap"
               disabled={!canRestore}
               onClick={restore}
@@ -139,7 +143,8 @@ export function HistoryTopBar() {
           </>
         )}
         <Button
-          size="small"
+          size="xs"
+          variant="ghost"
           className="shrink-0 whitespace-nowrap"
           disabled={atHead}
           onClick={() => dispatch(returnToCurrent())}
@@ -147,9 +152,10 @@ export function HistoryTopBar() {
           {t('goToCurrent')}
         </Button>
         <IconButton
-          size="small"
+          size="xs"
+          variant="ghost"
           onClick={() => dispatch(exitHistoryBrowsing())}
-          aria-label={t('exitHistory')}
+          label={t('exitHistory')}
         >
           <CloseIcon />
         </IconButton>

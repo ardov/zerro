@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
-import { CheckboxField } from '@/6-shared/ui/Checkbox'
+import { CheckboxField } from '@/6-shared/ui/kit/Checkbox'
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -97,10 +97,8 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
   const makeCheck = (key: TDataKey) => (
     <CheckboxField
       label={names[key]}
-      // The series' own colour, checked or not, which is what tells the two
-      // lines apart in the chart above.
-      style={{ color: colors[key] }}
-      className="[&_[data-slot=checkbox]]:text-current [&_[data-slot=checkbox]]:data-checked:text-current"
+      color={colors[key]}
+      className="inline-flex mr-4"
       checked={isVisible(key)}
       onCheckedChange={() => toggle(key)}
     />

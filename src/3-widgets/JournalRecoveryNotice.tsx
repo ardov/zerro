@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import { useCallback } from 'react'
 import { SnackbarNotice } from '@/6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
@@ -42,7 +42,12 @@ export const JournalRecoveryNotice = () => {
       severity="error"
       title={t('journalRecoveryTitle')}
       action={
-        <Button color="inherit" size="small" onClick={confirmReload}>
+        <Button
+          className="text-inherit hover:text-inherit"
+          size="xs"
+          variant="ghost"
+          onClick={confirmReload}
+        >
           {t('journalRecoveryConfirm')}
         </Button>
       }

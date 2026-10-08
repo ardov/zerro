@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent } from 'storybook/test'
+import { expect, userEvent, waitFor } from 'storybook/test'
 import { Checkbox, CheckboxField } from './Checkbox'
 import { Switch, SwitchField } from './Switch'
 
@@ -20,6 +20,8 @@ const meta = {
 Use CheckboxField or SwitchField for a clickable label. Plain controls need a label or aria-label. Keep links and other actions outside the clickable label. Never put these interactive controls inside a button or menu item.
 
 Checkbox indeterminate is a separate, derived flag. A select-all owner computes checked and indeterminate from its children and selects all when partly selected; the component does not cycle through three states. Use explicit controlled children for groups.
+
+Checkbox color sets the fill and outline; omit it for theme defaults or use currentColor to inherit the surrounding text color. Check and mixed marks are transparent cutouts.
 
 Minimal examples: <Checkbox defaultChecked aria-label="Include account" /> and <SwitchField label="Notifications" checked={enabled} onCheckedChange={setEnabled} />.`,
       },
@@ -326,5 +328,89 @@ export const FormSubmission: Story = {
     await expect(canvas.getByLabelText('Submitted values')).toHaveTextContent(
       '{}'
     )
+  },
+}
+
+export const ColorsAndInheritance: Story = {
+  render: () => (
+    <>
+      <section className="flex flex-wrap gap-x-6" aria-label="Chart legend">
+        <CheckboxField
+          label="Income"
+          color="var(--data-success)"
+          defaultChecked
+        />
+        <CheckboxField label="Expenses" color="var(--data-error)" />
+        <CheckboxField label="Savings" color="#7656c9" indeterminate />
+        <CheckboxField
+          label="Unavailable series"
+          color="#7656c9"
+          defaultChecked
+          disabled
+        />
+      </section>
+      <section className="flex gap-6">
+        {['#243e90', '#ffe18a'].map(background => (
+          <div
+            key={background}
+            style={{
+              background,
+              color: background === '#243e90' ? '#fff' : '#000',
+            }}
+            className="flex gap-6 rounded-xl p-6"
+          >
+            <Checkbox
+              color="currentColor"
+              defaultChecked
+              aria-label={`Selected on ${background}`}
+            />
+            <Checkbox
+              color="currentColor"
+              aria-label={`Empty on ${background}`}
+            />
+            <Checkbox
+              color="currentColor"
+              indeterminate
+              aria-label={`Mixed on ${background}`}
+            />
+          </div>
+        ))}
+      </section>
+    </>
+  ),
+  play: async ({ canvas }) => {
+    const income = canvas.getByRole('checkbox', { name: 'Income' })
+    const fill = getComputedStyle(
+      income.querySelector('.kit-checkbox-fill')!
+    ).fill
+    await userEvent.click(income)
+    await expect(income).not.toBeChecked()
+    await waitFor(() =>
+      expect(getComputedStyle(income, '::before').borderTopColor).toBe(fill)
+    )
+    await userEvent.keyboard('[Space]')
+    await expect(income).toBeChecked()
+    for (const background of ['#243e90', '#ffe18a']) {
+      const checkbox = canvas.getByRole('checkbox', {
+        name: `Selected on ${background}`,
+      })
+      await expect(checkbox).toBeChecked()
+      await expect(getComputedStyle(checkbox).backgroundColor).toBe(
+        'rgba(0, 0, 0, 0)'
+      )
+      const expectedColor =
+        background === '#243e90' ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'
+      await expect(
+        getComputedStyle(checkbox.querySelector('.kit-checkbox-fill')!).fill
+      ).toBe(expectedColor)
+      const mask = checkbox.querySelector('mask')!
+      await expect(
+        checkbox.querySelector('rect[mask]')?.getAttribute('mask')
+      ).toBe(`url(#${mask.id})`)
+      await userEvent.click(checkbox)
+      await expect(checkbox).not.toBeChecked()
+      await userEvent.keyboard('[Space]')
+      await expect(checkbox).toBeChecked()
+    }
   },
 }

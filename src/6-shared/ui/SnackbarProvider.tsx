@@ -1,5 +1,5 @@
 import { Toast } from '@base-ui/react/toast'
-import { IconButton } from './Button'
+import { IconButton } from './kit/Button'
 import type { FC } from 'react'
 import React, { useCallback, useContext } from 'react'
 import { CloseIcon } from './Icons'
@@ -49,9 +49,10 @@ function SnackbarContents({ children }: { children: React.ReactNode }) {
                 <Toast.Description className="m-0 text-body-sm" />
               </Toast.Content>
               <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
+                size="xs"
+                variant="ghost"
+                label="close"
+                className="text-inherit hover:text-inherit"
                 onClick={() => close(toast.id)}
               >
                 <CloseIcon />

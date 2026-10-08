@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Button } from './Button'
+import { Button } from './kit/Button'
 import { useSnackbar } from './SnackbarProvider'
 
 type SnackbarTriggerProps = { message: string }

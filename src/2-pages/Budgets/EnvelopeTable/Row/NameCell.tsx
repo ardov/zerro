@@ -4,7 +4,7 @@ import { memo, useRef } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import { useDraggable } from '@dnd-kit/core'
-import { Chip } from '@/6-shared/ui/Chip'
+import { Chip } from '@/6-shared/ui/kit/Chip'
 import { useTranslation } from 'react-i18next'
 
 import { TagIcon } from '@/6-shared/ui/TagIcon'
@@ -126,7 +126,7 @@ const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
   if (!currency) return null
   return (
     <Tooltip content={t('envelopeCurrencyTooltip', { currency })}>
-      <Chip label={getCurrencySymbol(currency)} size="small" />
+      <Chip size="sm">{getCurrencySymbol(currency)}</Chip>
     </Tooltip>
   )
 }

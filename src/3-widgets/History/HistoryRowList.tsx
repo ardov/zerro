@@ -1,7 +1,7 @@
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
-import { Chip } from '@/6-shared/ui/Chip'
+import { Chip } from '@/6-shared/ui/kit/Chip'
 import {
   ListRowSubheader,
   ListRowText,
@@ -199,13 +199,9 @@ function RowText({
           >
             {primary}
           </span>
-          <Chip
-            size="small"
-            color="primary"
-            variant="outlined"
-            label={nowLabel}
-            className="h-[18px] shrink-0 [&_[data-slot=chip-label]]:px-1.5"
-          />
+          <Chip size="sm" variant="outline">
+            {nowLabel}
+          </Chip>
         </span>
       ) : (
         primary

@@ -1,4 +1,4 @@
-import { Button } from '@/6-shared/ui/Button'
+import { Button } from '@/6-shared/ui/kit/Button'
 import { useCallback } from 'react'
 import { SnackbarNotice } from '@/6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
@@ -39,7 +39,12 @@ export function OutboxRecoveryNotice() {
       severity="error"
       title={t('outboxRecoveryTitle')}
       action={
-        <Button color="inherit" size="small" onClick={confirmDiscard}>
+        <Button
+          className="text-inherit hover:text-inherit"
+          size="xs"
+          variant="ghost"
+          onClick={confirmDiscard}
+        >
           {t('outboxRecoveryConfirm')}
         </Button>
       }

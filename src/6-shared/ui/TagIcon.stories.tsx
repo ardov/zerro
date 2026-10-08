@@ -25,3 +25,24 @@ export const Showcase: Story = {
     </div>
   ),
 }
+
+export const Selection: Story = {
+  render: () => (
+    <div className="flex gap-6">
+      {['#243e90', '#ffe18a', null].map(color => (
+        <TagIcon
+          key={color ?? 'default'}
+          symbol="🍎"
+          color={color}
+          size="m"
+          showCheckBox
+          onCheckedChange={() => {}}
+          checkboxProps={{
+            defaultChecked: true,
+            'aria-label': `Select ${color ?? 'default'}`,
+          }}
+        />
+      ))}
+    </div>
+  ),
+}

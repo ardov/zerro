@@ -2,7 +2,7 @@ import { CategorySymbol } from './CategoryIcon'
 import type { ComponentPropsWithoutRef } from 'react'
 import { cn } from './shadcn/utils'
 import { getContrastText } from '@/6-shared/helpers/color'
-import { Checkbox, type CheckboxProps } from './Checkbox'
+import { Checkbox, type CheckboxProps } from './kit/Checkbox'
 
 export type TagIconProps = Omit<
   ComponentPropsWithoutRef<'div'>,
@@ -76,8 +76,9 @@ export function TagIcon(props: TagIconProps) {
       />
       {onCheckedChange && (
         <Checkbox
+          color="currentColor"
           className={cn(
-            'absolute transition-opacity duration-200',
+            'absolute transition-opacity duration-200 focus-visible:opacity-100',
             showCheckBox || checked ? 'opacity-100' : 'opacity-0',
             isInteractive ? 'group-hover:opacity-100' : 'group-hover:opacity-0',
             checkboxClassName
