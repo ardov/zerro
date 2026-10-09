@@ -52,7 +52,7 @@ const meta = {
 - The whole field opens the modal popup. Its transparent backdrop consumes the first outside click; Escape closes it.
 - **required** prevents clearing. **readOnly** keeps the field focusable; **name** includes its value in form submission.
 - **alignSelected** opts into Base UI text alignment for short lists. Touch and constrained space can fall back to ordinary positioning; native overlap closes on window resize.
-- Popup width follows its content, with a minimum of the trigger width plus side insets. **popupMinWidth** sets an additional minimum (pixels or a CSS length); available screen space caps both.
+- Popup width follows its content. Ordinary fields use the trigger width plus side insets as their minimum; custom triggers use an independent 13rem minimum so changing chip labels cannot resize the panel. **popupMinWidth** overrides the custom-trigger minimum or adds a minimum for ordinary fields (pixels or a CSS length); available screen space caps both.
 - **trigger** accepts a custom button; **renderValue** formats the closed value, and **showValueIcon={false}** hides only its image.
 `,
       },
@@ -437,12 +437,14 @@ export const PopupWidth: Story = {
         ).getBoundingClientRect()
         const anchor = trigger.getBoundingClientRect()
         const viewport = canvasElement.ownerDocument.documentElement.clientWidth
-        expect(rect.width).toBeGreaterThanOrEqual(
-          Math.min(anchor.width + 8, viewport - 32) - 1
-        )
+        if (label === 'Field')
+          expect(rect.width).toBeGreaterThanOrEqual(
+            Math.min(anchor.width + 8, viewport - 32) - 1
+          )
         expect(rect.left).toBeGreaterThanOrEqual(15)
         expect(rect.right).toBeLessThanOrEqual(viewport - 15)
-        if (label === 'Compact') expect(rect.width).toBeLessThan(200)
+        if (label === 'Compact' || label === 'Wide trigger')
+          expect(rect.width).toBeCloseTo(Math.min(208, viewport - 32), 0)
         if (label === 'Minimum')
           expect(rect.width).toBeGreaterThanOrEqual(
             Math.min(360, viewport - 32) - 1

@@ -10,7 +10,10 @@ import {
 import { core } from '@/zerro-core/redux'
 import type { TDraftMerchant, TNamedMerchant } from './draft'
 import { Favicon } from '@/6-shared/ui/kit/Favicon'
-import { initialMerchantSearch, merchantMatchPriority } from './merchantSearch'
+import {
+  initialMerchantSearch,
+  merchantMatchPriority,
+} from '../../merchant/merchantSearch'
 
 export type MerchantFieldProps = Pick<
   SelectProps,

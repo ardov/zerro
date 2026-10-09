@@ -31,6 +31,37 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Playground: Story = {}
+export const FadeLabels: Story = {
+  render: () => (
+    <div className="flex w-48 flex-col gap-3">
+      <Chip overflow="fade" onClick={fn()} onRemove={fn()}>
+        Short label
+      </Chip>
+      <Chip
+        overflow="fade"
+        start={<CalendarIcon />}
+        onClick={fn()}
+        onRemove={fn()}
+      >
+        A long label that fades before the removal action
+      </Chip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const short = canvas.getByRole('button', { name: 'Short label' })
+    const long = canvas.getByRole('button', {
+      name: 'A long label that fades before the removal action',
+    })
+    await expect(short.querySelector('[data-overflow]')).toBeNull()
+    await expect(long.querySelector('[data-overflow]')).not.toBeNull()
+    await expect(
+      canvas.getByRole('button', {
+        name: 'Remove A long label that fades before the removal action',
+      })
+    ).toBeVisible()
+  },
+}
 export const Showcase: Story = {
   render: () => (
     <div className="flex max-w-xl flex-col gap-6 p-8">

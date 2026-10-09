@@ -105,6 +105,14 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
         ? props.renderValue(selected)
         : (selected?.label ?? props.value)
 
+  const requestedWidth =
+    typeof props.popupMinWidth === 'number'
+      ? `${props.popupMinWidth}px`
+      : props.popupMinWidth
+  const minimumWidth = props.trigger
+    ? (requestedWidth ?? '13rem')
+    : `max(calc(var(--anchor-width) + ${2 * selectPanelOutset}px), ${requestedWidth ?? '0px'})`
+
   return {
     size,
     options,
@@ -142,7 +150,10 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
       ) : undefined,
     popupStyle: {
       width: 'max-content',
-      minWidth: `min(var(--available-width, calc(100dvw - var(--list-panel-margin, 16px) * 2)), max(calc(var(--anchor-width) + ${2 * selectPanelOutset}px), ${typeof props.popupMinWidth === 'number' ? `${props.popupMinWidth}px` : (props.popupMinWidth ?? '0px')}))`,
+      // Compact custom triggers (for example filter chips) change width as
+      // selection changes. Their panel sizes to its options, not that summary.
+      // Ordinary field surfaces still establish the panel's minimum width.
+      minWidth: `min(var(--available-width, calc(100dvw - var(--list-panel-margin, 16px) * 2)), ${minimumWidth})`,
     } satisfies CSSProperties,
   }
 }

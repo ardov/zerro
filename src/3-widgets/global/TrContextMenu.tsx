@@ -18,11 +18,20 @@ export type TransactionMenuProps = {
   /** List actions. Each item is shown only when its handler is passed. */
   onSelectSimilar?: (changed: TTransaction['changed']) => void
   onMarkOlderViewed?: () => void
+  onFilterMerchant?: (id: string) => void
+  onSearchPayee?: (name: string) => void
 }
 
 /** The transaction's context menu, asked from a context gesture. */
 export const TransactionMenu: FC<TransactionMenuProps> = props => {
-  const { id, anchor, onSelectSimilar, onMarkOlderViewed } = props
+  const {
+    id,
+    anchor,
+    onSelectSimilar,
+    onMarkOlderViewed,
+    onFilterMerchant,
+    onSearchPayee,
+  } = props
   const { t } = useTranslation('transactionContextMenu')
   const { controller } = useAsked<void>()
   const dispatch = useAppDispatch()
@@ -30,8 +39,24 @@ export const TransactionMenu: FC<TransactionMenuProps> = props => {
     state => core.transactions.selectAll(state)[id]
   )
 
+  const merchants = core.merchants.useAll()
   const items: MenuItem[] = []
   if (transaction) {
+    const merchant = transaction.merchant && merchants[transaction.merchant]
+    if (merchant && onFilterMerchant) {
+      items.push({
+        id: 'filterMerchant',
+        label: t('filterMerchant', { name: merchant.title }),
+        onSelect: () => onFilterMerchant(merchant.id),
+      })
+    } else if (!transaction.merchant && transaction.payee && onSearchPayee) {
+      const name = transaction.payee
+      items.push({
+        id: 'searchPayee',
+        label: t('searchPayee', { name }),
+        onSelect: () => onSearchPayee(name),
+      })
+    }
     const viewed = core.transactions.isViewed(transaction)
     if (transaction.deleted) {
       items.push({

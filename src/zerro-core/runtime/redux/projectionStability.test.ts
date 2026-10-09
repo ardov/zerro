@@ -4,6 +4,7 @@ import { makeDemoStore } from '../../support/demo'
 import { makeTestRootState } from '@/store/testing'
 import * as selectors from '../../support/testing/reduxSelectors'
 import * as activity from './activity'
+import * as transactions from './transactions'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 
@@ -29,6 +30,7 @@ const nodes: Record<string, (state: RootState) => unknown> = {
   monthList: selectors.selectMonthList,
   currentFunds: selectors.selectCurrentFunds,
   routingContext: activity.selectTransactionRoutingContext,
+  transactionQueryContext: transactions.selectQueryContext,
   rawActivity: selectors.selectRawActivity,
   activity: selectors.selectActivity,
   envMetrics: selectors.selectEnvMetrics,

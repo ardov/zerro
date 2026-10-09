@@ -24,13 +24,9 @@ export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
     () =>
       node(data)
   const queryTransactions = (query: TTransactionQuery) =>
-    g.sortedTransactions(data).filter(
-      compileTransactionQuery(query, {
-        routing: g.routingContext(data),
-        envelopes: g.envelopes(data),
-        keepingEnvelopeIds: new Set(g.keepingEnvelopeIds(data)),
-      })
-    )
+    g
+      .sortedTransactions(data)
+      .filter(compileTransactionQuery(query, g.transactionQueryContext(data)))
 
   return {
     data,

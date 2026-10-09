@@ -30,6 +30,7 @@ export const selectAll = (state: RootState) => selectData(state).transaction
 export const selectIds = fromGraph(graph.transactionIds)
 export const selectHistory = fromGraph(graph.transactionsHistory)
 export const selectHistoryStart = fromGraph(graph.historyStart)
+export const selectQueryContext = fromGraph(graph.transactionQueryContext)
 export const useType = () => {
   const debtAccountId = useAppSelector(accounts.selectDebtAccountId)
   return useCallback(
@@ -46,6 +47,7 @@ export {
 } from '../../internal/domain/zenmoney/entities/transactions'
 export {
   compileTransactionQuery as compileQuery,
+  normalizeDateFilter,
   TrFilterMode,
   TrFilterType,
   type TTransactionFilterClause,

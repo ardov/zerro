@@ -17,6 +17,7 @@ import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
 
 import { GroupedList, LIST_MAX_WIDTH } from './GroupedList'
 import Filter from './TopBar/Filter'
+import { upsertFilter } from './TopBar/filterModel'
 import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
 import { TransactionMenu } from '@/3-widgets/global/TrContextMenu'
@@ -84,9 +85,11 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     }),
     [debouncedSearch, query]
   )
-  const onFilterByPayee = useCallback(
-    (payee?: string) => onSearchChange(payee || ''),
-    [onSearchChange]
+  const onFilterByMerchant = useCallback(
+    (merchant: string) => {
+      onQueryChange(upsertFilter(query, { kind: 'merchant', ids: [merchant] }))
+    },
+    [onQueryChange, query]
   )
 
   const trList = useFilteredTransactions(transactionIds, appliedQuery)
@@ -153,11 +156,20 @@ export const TransactionList: FC<TTransactionListProps> = props => {
         <TransactionMenu
           id={id}
           anchor={getEventAnchor(e)}
+          onFilterMerchant={hideFilter ? undefined : onFilterByMerchant}
+          onSearchPayee={hideFilter ? undefined : onSearchChange}
           onSelectSimilar={onSelectSimilar}
           onMarkOlderViewed={() => onMarkOlderViewed(id)}
         />
       ),
-    [ask, onSelectSimilar, onMarkOlderViewed]
+    [
+      ask,
+      onSelectSimilar,
+      onMarkOlderViewed,
+      hideFilter,
+      onFilterByMerchant,
+      onSearchChange,
+    ]
   )
 
   const checkedSet = useMemo(() => new Set(checked), [checked])
@@ -173,7 +185,6 @@ export const TransactionList: FC<TTransactionListProps> = props => {
         isInSelectionMode={isInSelectionMode}
         onOpen={onTrOpen}
         onToggle={toggleTransaction}
-        onPayeeClick={onFilterByPayee}
         onContextMenu={onContextMenu}
       />
     ),
@@ -183,7 +194,6 @@ export const TransactionList: FC<TTransactionListProps> = props => {
       isInSelectionMode,
       onTrOpen,
       toggleTransaction,
-      onFilterByPayee,
       onContextMenu,
     ]
   )
@@ -238,13 +248,7 @@ function useFilteredTransactions(
 ) {
   const transactionsById = useAppSelector(core.transactions.selectAll)
   const allTransactionIds = useAppSelector(core.transactions.selectIds)
-  const routing = useAppSelector(core.activity.selectTransactionRoutingContext)
-  const envelopes = useAppSelector(core.envelopes.selectDomain)
-  const keepingEnvelopeIds = useAppSelector(core.envelopes.selectKeepingIds)
-  const context = useMemo<core.transactions.TTransactionQueryContext>(
-    () => ({ routing, envelopes, keepingEnvelopeIds }),
-    [envelopes, keepingEnvelopeIds, routing]
-  )
+  const context = useAppSelector(core.transactions.selectQueryContext)
   const groups = useMemo(() => {
     const checker = core.transactions.compileQuery(query, context)
     const list = trIds || allTransactionIds

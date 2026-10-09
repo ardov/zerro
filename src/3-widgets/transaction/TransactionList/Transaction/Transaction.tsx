@@ -18,7 +18,6 @@ export type TTransactionProps = {
   // Actions
   onOpen?: (id: TTransactionId) => void
   onToggle?: (id: TTransactionId) => void
-  onPayeeClick?: (payee: string) => void
   onContextMenu?: (
     event: React.MouseEvent | React.TouchEvent,
     id: TTransactionId
@@ -35,7 +34,6 @@ export const Transaction = React.memo(function Transaction(
     isInSelectionMode,
     onOpen,
     onToggle,
-    onPayeeClick: onFilterByPayee,
     onContextMenu,
   } = props
 
@@ -75,8 +73,8 @@ export const Transaction = React.memo(function Transaction(
           <Amounts {...{ tr, trType }} />
         </div>
         <div className="transaction-line mt-1 flex text-body-sm text-ui-secondary">
-          <Info {...{ tr, trType, onFilterByPayee }} />
-          <Accounts {...{ tr, trType, onFilterByPayee }} />
+          <Info {...{ tr, trType }} />
+          <Accounts {...{ tr, trType }} />
         </div>
       </div>
     </div>

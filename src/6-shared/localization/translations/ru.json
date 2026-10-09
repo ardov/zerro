@@ -169,6 +169,8 @@
   },
 
   "transactionContextMenu": {
+    "filterMerchant": "Фильтровать по «{{name}}»",
+    "searchPayee": "Искать «{{name}}»",
     "selectSimilar": "Выбрать другие из этой синхронизации",
     "markViewed": "Пометить просмотренной",
     "markViewedOlder": "Пометить все ниже просмотренными",
@@ -706,6 +708,10 @@
   },
 
   "filterDrawer": {
+    "search": "Поиск операций",
+    "merchant": "Мерчант",
+    "noMerchant": "Без мерчанта",
+    "findMerchant": "Найти мерчанта",
     "filter": "Фильтр",
     "addFilter": "Добавить фильтр",
     "account": "Счёт",

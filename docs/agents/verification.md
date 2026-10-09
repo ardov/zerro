@@ -54,6 +54,14 @@ or Android system-gesture test. The default `verify:ui`, `verify:all` and CI
 runs use a desktop user agent and do not exercise this handler; run the command
 above separately when changing system Back behavior.
 
+Motion-sensitive stories can also run with the browser's reduced-motion preference:
+
+```sh
+STORYBOOK_REDUCED_MOTION=1 pnpm test:storybook src/3-widgets/transaction/TransactionList/TopBar/Filter.stories.tsx
+```
+
+This uses real `prefers-reduced-motion` media queries in both themes.
+
 ## Handoff routing
 
 | Changed surface                          | Final verification                                                              |

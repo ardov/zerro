@@ -12,6 +12,10 @@ import type { TTransaction } from '../../zenmoney/entities/transactions/types'
 import type { TEnvelopeId } from '../envelope-id'
 import type { TEnvelope } from '../envelopes'
 import {
+  compileTransactionSearch,
+  type TTransactionSearchContext,
+} from './search'
+import {
   routeTransactionToActivity,
   type TTransactionActivityRoutingContext,
 } from '../activity/transactionRouting'
@@ -37,6 +41,7 @@ export type TrFilterType = (typeof TrFilterType)[keyof typeof TrFilterType]
 export type TTransactionFilterClause =
   | { kind: 'search'; value: string }
   | { kind: 'account'; ids: TAccountId[] }
+  | { kind: 'merchant'; ids: Array<string | null> }
   | { kind: 'tag'; ids: Array<TTagId | 'null'> }
   | { kind: 'type'; values: TrFilterType[] }
   | { kind: 'amount'; gte?: number; lte?: number }
@@ -56,6 +61,7 @@ export type TTransactionQuery = {
 }
 
 export type TTransactionQueryContext = {
+  search?: TTransactionSearchContext
   routing: TTransactionActivityRoutingContext
   envelopes: ById<Pick<TEnvelope, 'id' | 'children'>>
   keepingEnvelopeIds: ReadonlySet<TEnvelopeId>
@@ -82,13 +88,15 @@ function compileClause(
 ): TTransactionPredicate {
   switch (clause.kind) {
     case 'search': {
-      const search = clause.value.trim().toUpperCase()
-      return transaction =>
-        !search ||
-        Boolean(
-          transaction.comment?.toUpperCase().includes(search) ||
-          transaction.payee?.toUpperCase().includes(search)
-        )
+      return compileTransactionSearch(
+        clause.value,
+        context?.search,
+        context?.routing.debtAccountId
+      )
+    }
+    case 'merchant': {
+      const ids = new Set(clause.ids)
+      return transaction => !ids.size || ids.has(transaction.merchant)
     }
     case 'account': {
       // Nullable because a soft-deleted row can carry a leg that an account
@@ -145,12 +153,14 @@ function compileClause(
           return true
         })
       }
-    case 'date':
+    case 'date': {
+      const { from, to } = normalizeDateFilter(clause)
       return transaction => {
-        if (clause.from && transaction.date < clause.from) return false
-        if (clause.to && transaction.date > clause.to) return false
+        if (from && transaction.date < from) return false
+        if (to && transaction.date > to) return false
         return true
       }
+    }
     case 'viewed':
       return transaction => isTransactionViewed(transaction) === clause.value
     case 'deleted':
@@ -160,6 +170,14 @@ function compileClause(
     case 'activity':
       return compileActivityClause(clause, context)
   }
+}
+
+export function normalizeDateFilter(
+  clause: Extract<TTransactionFilterClause, { kind: 'date' }>
+): Extract<TTransactionFilterClause, { kind: 'date' }> {
+  return clause.from && clause.to && clause.from > clause.to
+    ? { ...clause, from: clause.to, to: clause.from }
+    : clause
 }
 
 function compileActivityClause(

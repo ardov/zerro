@@ -344,6 +344,19 @@ Transitions must have a reduced-motion variant. Reduced motion may keep an
 opacity change when it conveys visibility, but must remove spatial movement and
 decorative transforms.
 
+`AnimatedItem` wraps keyed items inside Motion's `AnimatePresence` with
+`mode="popLayout"`. It animates entrance, exit and neighbouring positions;
+exiting items become inert immediately. Keep item keys stable during editing.
+`TextFade` clips one line with a trailing mask only when its text overflows.
+Place icons and actions outside it. `Chip overflow="fade"` applies that rule
+to its label while retaining the complete accessible name; the default remains
+ellipsis clipping.
+
+Select panels opened from compact custom triggers size to their options, with
+`popupMinWidth` setting their minimum (13rem by default). Editing a chip's
+summary therefore does not resize its open list. Ordinary Select field surfaces
+still establish the panel's minimum width.
+
 ### Scrolling
 
 Surfaces scroll in the kit `ScrollArea` (`src/6-shared/ui/kit/ScrollArea.tsx`):

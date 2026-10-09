@@ -1,6 +1,7 @@
 import { toISODate, toISOMonth } from '../domain/foundation/date'
 import type { TDataStore } from '../domain/zenmoney'
 import type { TCoreContext } from '../../types'
+import type { TTransactionQueryContext } from '../domain/zerro/transactions'
 import {
   buildBalances,
   buildBalancesByDate,
@@ -218,6 +219,29 @@ export function createProjectionGraph(ctx: TCoreContext) {
     }),
     buildActivityRoutingContext
   )
+  const transactionQueryContext = node(
+    d => [
+      routingContext(d),
+      envelopes(d),
+      keepingEnvelopeIds(d),
+      d.account,
+      d.tag,
+      d.merchant,
+    ],
+    (
+      routing,
+      envelopes,
+      keepingEnvelopeIds,
+      accounts,
+      tags,
+      merchants
+    ): TTransactionQueryContext => ({
+      routing,
+      envelopes,
+      keepingEnvelopeIds,
+      search: { accounts, tags, merchants },
+    })
+  )
   const rawActivity = nodeObj(
     d => ({
       transactions: transactionsHistory(d),
@@ -328,6 +352,7 @@ export function createProjectionGraph(ctx: TCoreContext) {
     monthList,
     currentFunds,
     routingContext,
+    transactionQueryContext,
     rawActivity,
     activity,
     envMetrics,

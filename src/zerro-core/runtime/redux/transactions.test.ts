@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { makeDemoStore } from '../../support/demo'
 import { makeTestRootState } from '@/store/testing'
-import { makeTransaction } from '../../support/testing/zenmoneyTestData'
+import {
+  makeTransaction,
+  makeMerchant,
+  makeTag,
+} from '../../support/testing/zenmoneyTestData'
+import { compileQuery, selectQueryContext } from './transactions'
 import {
   selectDebtors,
   selectBalancesByDate,
@@ -20,6 +25,69 @@ const NOW = Date.parse('2026-05-15T12:00:00Z')
 const makeRootState = makeTestRootState
 
 describe('Core transaction adapter reads', () => {
+  it.each(['account', 'tag', 'merchant'] as const)(
+    'refreshes search after a %s rename, but retains context for unrelated writes',
+    kind => {
+      const data = makeDemoStore({ now: NOW })
+      data.account = {
+        ...data.account,
+        'Cash USD': { ...data.account['Cash USD'], title: 'Accountneedle' },
+      }
+      data.tag = {
+        ...data.tag,
+        food: makeTag({ id: 'food', title: 'Tagneedle' }),
+      }
+      data.merchant = {
+        ...data.merchant,
+        shop: makeMerchant({ id: 'shop', title: 'Merchantneedle' }),
+      }
+      const transaction = makeTransaction({
+        outcome: 12,
+        outcomeAccount: 'Cash USD',
+        tag: ['food'],
+        merchant: 'shop',
+      })
+      const first = selectQueryContext(makeRootState(data))
+      const value = `${kind}needle`
+      const query = { clauses: [{ kind: 'search' as const, value }] }
+      expect(compileQuery(query, first)(transaction)).toBe(true)
+      expect(
+        selectQueryContext(
+          makeRootState({ ...data, reminderMarker: { ...data.reminderMarker } })
+        )
+      ).toBe(first)
+      const changed = {
+        ...data,
+        account:
+          kind === 'account'
+            ? {
+                ...data.account,
+                'Cash USD': { ...data.account['Cash USD'], title: 'Renamed' },
+              }
+            : data.account,
+        tag:
+          kind === 'tag'
+            ? { ...data.tag, food: { ...data.tag.food, title: 'Renamed' } }
+            : data.tag,
+        merchant:
+          kind === 'merchant'
+            ? {
+                ...data.merchant,
+                shop: { ...data.merchant.shop, title: 'Renamed' },
+              }
+            : data.merchant,
+      }
+      const next = selectQueryContext(makeRootState(changed))
+      expect(next).not.toBe(first)
+      expect(compileQuery(query, next)(transaction)).toBe(false)
+      expect(
+        compileQuery(
+          { clauses: [{ kind: 'search', value: 'Renamed' }] },
+          next
+        )(transaction)
+      ).toBe(true)
+    }
+  )
   it('exposes reference data through explicit Core contracts', () => {
     const state = makeRootState(makeDemoStore({ now: NOW }))
     const instruments = Object.values(state.data.current.instrument)

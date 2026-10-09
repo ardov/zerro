@@ -51,6 +51,7 @@ import {
   RotateCcw,
   RotateCcwClock,
   Rewind,
+  Search,
   Send,
   Settings,
   Sparkles,
@@ -88,6 +89,7 @@ export const VisibilityIcon = createIcon(Eye, 'VisibilityIcon')
 
 // Editing
 export const CloseIcon = createIcon(X, 'CloseIcon')
+export const SearchIcon = createIcon(Search, 'SearchIcon')
 export const AddIcon = createIcon(Plus, 'AddIcon')
 export const EditIcon = createIcon(Pencil, 'EditIcon')
 export const DeleteIcon = createIcon(Trash2, 'DeleteIcon')

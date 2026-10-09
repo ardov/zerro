@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { initialMerchantSearch, merchantMatchPriority } from './merchantSearch'
+import {
+  initialMerchantSearch,
+  merchantMatchPriority,
+} from '../../merchant/merchantSearch'
 
 const usage = {
   searchTerms: {

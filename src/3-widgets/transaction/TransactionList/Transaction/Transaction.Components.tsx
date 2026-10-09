@@ -181,29 +181,20 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
   }
 }
 
-type InfoProps = TrElementProps & { onFilterByPayee?: (payee: string) => void }
+type InfoProps = TrElementProps
 
-export const Info: FC<InfoProps> = ({ tr, trType, onFilterByPayee }) => {
+export const Info: FC<InfoProps> = ({ tr, trType }) => {
   return (
     <InfoWrapper>
       {trType !== 'incomeDebt' && trType !== 'outcomeDebt' && (
-        <Payee
-          payee={tr.payee}
-          merchant={tr.merchant}
-          onClick={onFilterByPayee}
-        />
+        <Payee payee={tr.payee} merchant={tr.merchant} />
       )}
       {!!tr.comment && <span title={tr.comment}>{tr.comment}</span>}
     </InfoWrapper>
   )
 }
 
-export const Accounts: FC<InfoProps> = ({
-  tr,
-  trType,
-  onFilterByPayee,
-  ...rest
-}) => {
+export const Accounts: FC<InfoProps> = ({ tr, trType, ...rest }) => {
   switch (trType) {
     case 'income':
       return (
@@ -228,21 +219,13 @@ export const Accounts: FC<InfoProps> = ({
       return (
         <AmountsWrapper type="transfer" {...rest}>
           <Account id={tr.outcomeAccount} />
-          <Payee
-            payee={tr.payee}
-            merchant={tr.merchant}
-            onClick={onFilterByPayee}
-          />
+          <Payee payee={tr.payee} merchant={tr.merchant} />
         </AmountsWrapper>
       )
     case 'incomeDebt':
       return (
         <AmountsWrapper type="transfer" {...rest}>
-          <Payee
-            payee={tr.payee}
-            merchant={tr.merchant}
-            onClick={onFilterByPayee}
-          />
+          <Payee payee={tr.payee} merchant={tr.merchant} />
           <Account id={tr.incomeAccount} />
         </AmountsWrapper>
       )
@@ -263,25 +246,11 @@ const Account: FC<{ id: string | null }> = ({ id, ...rest }) => {
 const Payee: FC<{
   payee: string | null
   merchant: string | null
-  onClick?: (payee: string) => void
-}> = ({ payee, merchant, onClick, ...rest }) => {
+}> = ({ payee, merchant, ...rest }) => {
   const merchants = core.merchants.useAll()
   if (!payee && !merchant) return null
-  const name = merchant ? merchants[merchant]?.title : payee
-  return (
-    <PayeeWrapper
-      onClick={e => {
-        if (onClick) {
-          e.preventDefault()
-          e.stopPropagation()
-          onClick(payee || '')
-        }
-      }}
-      {...rest}
-    >
-      {name}
-    </PayeeWrapper>
-  )
+  const name = (merchant && merchants[merchant]?.title) || payee
+  return <PayeeWrapper {...rest}>{name}</PayeeWrapper>
 }
 
 /** Styles */

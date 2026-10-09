@@ -2,10 +2,50 @@ import { describe, expect, it } from 'vitest'
 
 import type { TDataStore } from '@/6-shared/types'
 import { EnvType, envId } from '../../internal/domain/zerro/envelope-id'
-import { makeTransaction } from '../../support/testing/zenmoneyTestData'
+import {
+  makeTransaction,
+  makeAccount,
+  makeTag,
+  makeMerchant,
+} from '../../support/testing/zenmoneyTestData'
 import { createZerroSession } from './createZerroSession'
 
 describe('createZerroSession', () => {
+  it('searches the names from its own immutable snapshot', () => {
+    const data = makeEmptyData()
+    data.account.card = makeAccount({ id: 'card', title: 'Travel card' })
+    data.tag.food = makeTag({ id: 'food', title: 'Groceries' })
+    data.merchant.shop = makeMerchant({ id: 'shop', title: 'Lidl' })
+    data.transaction.expense = makeTransaction({
+      id: 'expense',
+      outcome: 15,
+      outcomeAccount: 'card',
+      tag: ['food'],
+      merchant: 'shop',
+    })
+    const query = {
+      clauses: [{ kind: 'search' as const, value: 'lidl grocer travel 15' }],
+    }
+    const ctx = {
+      now: () => Date.parse('2026-01-15T12:00:00Z'),
+      uuid: () => 'test-id',
+    }
+    const session = createZerroSession(data, ctx)
+    expect(session.transactions.query(query).map(item => item.id)).toEqual([
+      'expense',
+    ])
+    const renamed = createZerroSession(
+      {
+        ...data,
+        merchant: { shop: { ...data.merchant.shop, title: 'Other' } },
+      },
+      ctx
+    )
+    expect(renamed.transactions.query(query)).toEqual([])
+    expect(session.transactions.query(query).map(item => item.id)).toEqual([
+      'expense',
+    ])
+  })
   it('memoizes reads for the session lifetime', () => {
     let now = Date.parse('2026-01-15T12:00:00.000Z')
     const session = createZerroSession(makeEmptyData(), {

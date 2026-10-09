@@ -33,6 +33,31 @@ function makeContext(
 }
 
 describe('compileTransactionQuery', () => {
+  it('requires every search word across the operation and its named entities', () => {
+    const context = makeContext({
+      search: {
+        accounts: { card: { title: 'Travel card' } },
+        tags: { food: { title: 'Groceries' } },
+        merchants: { shop: { title: 'Lidl' } },
+      },
+    })
+    const transaction = makeTransaction({
+      outcome: 15,
+      outcomeAccount: 'card',
+      tag: ['food'],
+      merchant: 'shop',
+      comment: 'Lunch',
+      payee: 'STORE 42',
+      originalPayee: 'LIDL CYPRUS',
+    })
+    const search = (value: string) =>
+      compileTransactionQuery({ clauses: [{ kind: 'search', value }] }, context)
+    expect(search(' LIDL grocer travel LUNCH ')(transaction)).toBe(true)
+    expect(search('cyprus 42')(transaction)).toBe(true)
+    expect(search('lidl rent')(transaction)).toBe(false)
+    expect(search('lidll')(transaction)).toBe(false)
+  })
+
   it('combines intrinsic clauses and hides deleted transactions by default', () => {
     const query: TTransactionQuery = {
       clauses: [
@@ -52,6 +77,71 @@ describe('compileTransactionQuery', () => {
     expect(matches(transaction)).toBe(true)
     expect(matches({ ...transaction, deleted: true })).toBe(false)
     expect(matches({ ...transaction, comment: 'Tea shop' })).toBe(false)
+  })
+
+  it('searches exact amounts on active legs and in original currencies', () => {
+    const search = (value: string) =>
+      compileTransactionQuery({ clauses: [{ kind: 'search', value }] })
+    const expense = makeTransaction({
+      outcome: 12,
+      income: 0,
+      comment: null,
+      payee: null,
+    })
+    expect(search('12,00')(expense)).toBe(true)
+    expect(search('12.00')(expense)).toBe(true)
+    expect(search('12')({ ...expense, outcome: 120 })).toBe(false)
+    expect(search('12')({ ...expense, outcome: 12.5 })).toBe(false)
+    expect(search('0')(expense)).toBe(false)
+    expect(
+      search('12')({
+        ...expense,
+        outcome: 20,
+        opOutcome: 12,
+        opOutcomeInstrument: 1,
+      })
+    ).toBe(true)
+    expect(
+      search('12')({
+        ...expense,
+        income: 12,
+        outcome: 20,
+        incomeAccount: 'cash',
+        outcomeAccount: 'card',
+      })
+    ).toBe(true)
+    expect(
+      search('12')({ ...expense, outcome: 20, comment: 'Receipt 1234' })
+    ).toBe(true)
+  })
+
+  it('intersects merchant selection, search, and inclusive normalized dates', () => {
+    const query: TTransactionQuery = {
+      clauses: [
+        { kind: 'merchant', ids: ['lidl', 'other'] },
+        { kind: 'search', value: 'lunch' },
+        { kind: 'date', from: '2026-10-20', to: '2026-10-05' },
+      ],
+    }
+    const matches = compileTransactionQuery(query)
+    const transaction = makeTransaction({
+      outcome: 12,
+      merchant: 'lidl',
+      comment: 'Lunch',
+      date: '2026-10-05',
+    })
+    expect(matches(transaction)).toBe(true)
+    expect(
+      matches({ ...transaction, date: '2026-10-20', merchant: 'other' })
+    ).toBe(true)
+    expect(matches({ ...transaction, date: '2026-10-21' })).toBe(false)
+    expect(matches({ ...transaction, merchant: null })).toBe(false)
+    expect(matches({ ...transaction, comment: 'Dinner' })).toBe(false)
+    expect(
+      compileTransactionQuery({ clauses: [{ kind: 'merchant', ids: [null] }] })(
+        { ...transaction, merchant: null, payee: 'Legacy name' }
+      )
+    ).toBe(true)
   })
 
   it('can include or select only deleted transactions', () => {

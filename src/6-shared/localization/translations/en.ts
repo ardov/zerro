@@ -176,6 +176,8 @@ export const en: typeof ru = {
   },
 
   transactionContextMenu: {
+    filterMerchant: 'Filter by “{{name}}”',
+    searchPayee: 'Search for “{{name}}”',
     selectSimilar: 'Select others from this sync',
     markViewed: 'Mark as viewed',
     markViewedOlder: 'Mark all below as viewed',
@@ -743,6 +745,10 @@ export const en: typeof ru = {
   },
 
   filterDrawer: {
+    search: 'Search transactions',
+    merchant: 'Merchant',
+    noMerchant: 'No merchant',
+    findMerchant: 'Find merchant',
     filter: 'Filter',
     addFilter: 'Add filter',
     account: 'Account',

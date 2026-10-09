@@ -2,8 +2,13 @@ import { configureStore } from '@reduxjs/toolkit'
 import { makeCoreNextDemoRootState } from '@/zerro-core/support/testing/demoState'
 import { createEmptyDataStore } from '@/zerro-core/replica'
 import { rootReducer } from '@/store/rootReducer'
+import {
+  makeMerchant,
+  makeTransaction,
+} from '@/zerro-core/support/testing/zenmoneyTestData'
 
 export type StoryScenario =
+  | 'transaction-filters'
   | 'receipt-and-map'
   | 'demo'
   | 'off-budget-transfers'
@@ -16,6 +21,51 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
 
   const preloadedState = (() => {
     switch (scenario) {
+      case 'transaction-filters': {
+        const current = demoState.data.current
+        const expense = {
+          date: '2026-10-09' as const,
+          outcome: 12,
+          incomeAccount: 'Cash USD',
+          outcomeAccount: 'Cash USD',
+          tag: ['Food'],
+          incomeInstrument: 1,
+          outcomeInstrument: 1,
+        }
+        return makeCoreNextDemoRootState({
+          ...current,
+          merchant: {
+            lidl: makeMerchant({ id: 'lidl', title: 'Lidl' }),
+            other: makeMerchant({ id: 'other', title: 'Other shop' }),
+          },
+          transaction: {
+            lunch: makeTransaction({
+              ...expense,
+              id: 'lunch',
+              merchant: 'lidl',
+              comment: 'Lunch groceries',
+            }),
+            dinner: makeTransaction({
+              ...expense,
+              id: 'dinner',
+              merchant: 'lidl',
+              comment: 'Dinner groceries',
+            }),
+            other: makeTransaction({
+              ...expense,
+              id: 'other',
+              merchant: 'other',
+              comment: 'Lunch elsewhere',
+            }),
+            legacy: makeTransaction({
+              ...expense,
+              id: 'legacy',
+              payee: 'Legacy café',
+              comment: 'Coffee',
+            }),
+          },
+        })
+      }
       case 'receipt-and-map': {
         const current = demoState.data.current
         const transaction = Object.values(current.transaction).find(
