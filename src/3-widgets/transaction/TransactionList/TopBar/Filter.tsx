@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { AnimatePresence, LayoutGroup } from 'motion/react'
 import { useTranslation } from 'react-i18next'
+import { useLocalDay } from '@/6-shared/hooks/useLocalDay'
 import { usePopup } from '@/6-shared/overlays'
 import { Chip } from '@/6-shared/ui/kit/Chip'
 import { IconButton } from '@/6-shared/ui/kit/Button'
@@ -11,6 +12,7 @@ import { core } from '@/zerro-core/redux'
 import { useAppSelector } from '@/store'
 import { TransactionCreateButton } from '../../TransactionCreateButton'
 import { SearchChip } from './SearchChip'
+import { FilterIcon } from './FilterIcon'
 import { FilterChip } from './FilterChip'
 import {
   filterKinds,
@@ -43,7 +45,9 @@ export default function Filter({
   const envelopes = useAppSelector(core.envelopes.selectAll)
   const tags = useAppSelector(core.tags.selectPopulated)
   const merchants = core.merchants.useAll()
+  const today = useLocalDay()
   const labels = {
+    today,
     accounts,
     envelopes,
     tags,
@@ -117,6 +121,7 @@ export default function Filter({
         items={available.map(kind => ({
           id: kind,
           label: getKindLabel(kind, t),
+          start: <FilterIcon kind={kind} />,
           onSelect: () => {
             setNewKind(kind)
             onQueryChange(upsertFilter(query, makeDefaultClause(kind)))

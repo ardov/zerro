@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next'
 import { usePopup } from '@/6-shared/overlays'
 import { Chip } from '@/6-shared/ui/kit/Chip'
 import { Popover } from '@/6-shared/ui/kit/Popover'
+import { Menu } from '@/6-shared/ui/kit/Menu'
+import { FilterIcon } from './FilterIcon'
 import { MultiSelect } from '@/6-shared/ui/kit/MultiSelect'
-import { CalendarIcon, PlaceIcon } from '@/6-shared/ui/Icons'
+import { CheckIcon } from '@/6-shared/ui/Icons'
 import { AccountMultiSelect } from '../../../account/AccountMultiSelect'
 import { CategoryMultiSelect } from '../../../category/CategoryMultiSelect'
 import { MerchantMultiSelect } from '../../../merchant/MerchantMultiSelect'
@@ -12,6 +14,7 @@ import { core } from '@/zerro-core/redux'
 import { AmountFilterEditor, DateFilterEditor } from './RangeFilterEditors'
 import {
   getTypeLabel,
+  getChangedPeriodLabel,
   isEmptyClause,
   type Clause,
   type DateClause,
@@ -39,11 +42,15 @@ export function FilterChip({
       ? core.transactions.normalizeDateFilter(clause)
       : { kind: 'date' }
   )
-  const popup = usePopup(() => {
-    if (isEmptyClause(clause)) onRemove()
-    if (clause.kind === 'date')
-      setDates(core.transactions.normalizeDateFilter(clause))
-  })
+  const popup = usePopup()
+  const wasOpen = useRef(false)
+  useLayoutEffect(() => {
+    const closed = wasOpen.current && !popup.open
+    wasOpen.current = popup.open
+    // Menu actions close before updating the clause. Inspect the committed
+    // render so choosing a preset never looks like dismissing an empty draft.
+    if (closed && isEmptyClause(clause)) onRemove()
+  }, [popup.open, clause, onRemove])
   const started = useRef(false)
   useLayoutEffect(() => {
     if (autoOpen && !started.current) {
@@ -58,10 +65,10 @@ export function FilterChip({
       overflow="fade"
       variant={isEmptyClause(clause) ? 'outline-draft' : 'filled'}
       start={
-        clause.kind === 'date' ? (
-          <CalendarIcon />
-        ) : clause.kind === 'merchant' ? (
-          <PlaceIcon />
+        clause.kind === 'date' ||
+        clause.kind === 'merchant' ||
+        clause.kind === 'changed' ? (
+          <FilterIcon kind={clause.kind} />
         ) : undefined
       }
       onClick={() => {
@@ -112,6 +119,25 @@ export function FilterChip({
           items={Object.values(core.transactions.TrFilterType).map(value => ({
             value,
             label: getTypeLabel(value, t),
+          }))}
+        />
+      )
+    case 'changed':
+      return (
+        <Menu
+          label={t('lastChanged')}
+          popup={popup}
+          trigger={chip}
+          items={core.transactions.changedPeriods.map(({ value: period }) => ({
+            id: period,
+            label: getChangedPeriodLabel(period, t),
+            start:
+              period === clause.period ? (
+                <CheckIcon />
+              ) : (
+                <span className="size-5" />
+              ),
+            onSelect: () => onChange({ ...clause, period }),
           }))}
         />
       )

@@ -48,6 +48,8 @@ export {
 export {
   compileTransactionQuery as compileQuery,
   normalizeDateFilter,
+  changedPeriods,
+  type TChangedPeriod,
   TrFilterMode,
   TrFilterType,
   type TTransactionFilterClause,

@@ -5,4 +5,5 @@ allowBuilds:
 minimumReleaseAge: 4320
 patchedDependencies:
   # SVG scroll ancestor fix backported from https://github.com/mui/base-ui/pull/5844.
+  # Also re-arm Android CloseWatcher when a controlled Drawer cancels dismissal.
   '@base-ui/react@1.8.0': patches/@base-ui__react@1.8.0.patch

@@ -287,3 +287,56 @@ describe('compileTransactionQuery', () => {
     ).toBe(true)
   })
 })
+
+describe('last-modified transaction filter', () => {
+  // March includes a DST boundary in many user timezones.
+  const now = new Date(2026, 2, 30, 12).getTime()
+  const midnight = (day: number) => new Date(2026, 2, day).getTime()
+  it.each([
+    ['today', 30, 31],
+    ['yesterday', 29, 30],
+    ['7d', 24, 31],
+    ['14d', 17, 31],
+    ['30d', 1, 31],
+  ] as const)(
+    '%s matches local calendar boundaries using changed, not operation date',
+    (period, from, before) => {
+      const matches = compileTransactionQuery(
+        { clauses: [{ kind: 'changed', period }] },
+        undefined,
+        now
+      )
+      const transaction = makeTransaction({ date: '2020-01-01', outcome: 1 })
+      expect(matches({ ...transaction, changed: midnight(from) - 1 })).toBe(
+        false
+      )
+      expect(matches({ ...transaction, changed: midnight(from) })).toBe(true)
+      expect(matches({ ...transaction, changed: midnight(before) - 1 })).toBe(
+        true
+      )
+      expect(matches({ ...transaction, changed: midnight(before) })).toBe(false)
+    }
+  )
+  it('combines changed with date and search, and leaves an empty draft neutral', () => {
+    const transaction = makeTransaction({
+      changed: midnight(30),
+      outcome: 1,
+      date: '2026-01-01',
+      comment: 'Lunch',
+    })
+    const query: TTransactionQuery = {
+      clauses: [
+        { kind: 'changed', period: 'today' },
+        { kind: 'date', from: '2026-01-01', to: '2026-01-01' },
+        { kind: 'search', value: 'Lunch' },
+      ],
+    }
+    const matches = compileTransactionQuery(query, undefined, now)
+    expect(matches(transaction)).toBe(true)
+    expect(matches({ ...transaction, comment: 'Dinner' })).toBe(false)
+    expect(matches({ ...transaction, date: '2026-01-02' })).toBe(false)
+    expect(
+      compileTransactionQuery({ clauses: [{ kind: 'changed' }] })(transaction)
+    ).toBe(true)
+  })
+})

@@ -1,6 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
+import {
+  expect,
+  fireEvent,
+  fn,
+  userEvent,
+  waitFor,
+  within,
+} from 'storybook/test'
+import { formatDate } from '@/6-shared/helpers/date'
 import { core } from '@/zerro-core/redux'
 import Filter from './Filter'
 
@@ -21,6 +29,7 @@ function FilterHarness(props: {
   initialQuery?: core.transactions.TTransactionQuery
   initialSearch?: string
   width?: number
+  onQueryChange?: (query: core.transactions.TTransactionQuery) => void
 }) {
   const [query, setQuery] = useState<core.transactions.TTransactionQuery>(
     props.initialQuery || { clauses: [] }
@@ -30,7 +39,10 @@ function FilterHarness(props: {
     <div style={{ width: props.width ?? 560 }} className="max-w-[95vw]">
       <Filter
         query={query}
-        onQueryChange={setQuery}
+        onQueryChange={next => {
+          props.onQueryChange?.(next)
+          setQuery(next)
+        }}
         search={search}
         onSearchChange={setSearch}
       />
@@ -397,12 +409,16 @@ export const DateRange: Story = {
     await expect(from).toHaveValue('2026-10-20')
     await expect(to).toHaveValue('2026-10-05')
     await expect(
-      canvas.getByText('Date: 2026-10-05–2026-10-20')
+      canvas.getByText(
+        `5–20 Oct${new Date().getFullYear() === 2026 ? '' : ' 2026'}`
+      )
     ).toBeInTheDocument()
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
     await userEvent.click(
-      canvas.getByRole('button', { name: 'Date: 2026-10-05–2026-10-20' })
+      canvas.getByRole('button', {
+        name: `5–20 Oct${new Date().getFullYear() === 2026 ? '' : ' 2026'}`,
+      })
     )
     await expect(await body.findByLabelText('Date From')).toHaveValue(
       '2026-10-05'
@@ -422,6 +438,45 @@ export const DateRange: Story = {
 
 export const MobileDateRange: Story = {
   ...DateRange,
+  globals: { viewport: { value: 'zerro499' } },
+}
+
+export const DateCalendar: Story = {
+  render: () => (
+    <FilterHarness
+      initialQuery={{ clauses: [{ kind: 'date', from: '2026-10-20' }] }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: `From 20 Oct${new Date().getFullYear() === 2026 ? '' : ' 2026'}`,
+      })
+    )
+    const field = await body.findByLabelText('Date From')
+    await expect(field).toHaveValue('2026-10-20')
+    const trigger = body.getByRole('button', { name: 'Select date: Date From' })
+    await userEvent.click(trigger)
+    const calendar = await body.findByRole('dialog', {
+      name: 'Select date: Date From',
+    })
+    await userEvent.click(
+      within(calendar).getByRole('button', {
+        name: formatDate('2026-10-05', 'PPPP'),
+      })
+    )
+    await waitFor(() => expect(calendar).not.toBeInTheDocument())
+    await expect(field).toHaveValue('2026-10-05')
+    await expect(trigger).toHaveFocus()
+    await expect(body.getByLabelText('Date To')).toHaveValue('')
+    await userEvent.keyboard('{Escape}')
+  },
+}
+
+export const MobileDateCalendar: Story = {
+  ...DateCalendar,
   globals: { viewport: { value: 'zerro499' } },
 }
 
@@ -604,4 +659,52 @@ export const SearchClearAndBlur: Story = {
     ).toBeInTheDocument()
     await expect(canvas.getByLabelText('Search query')).toHaveTextContent(/^$/)
   },
+}
+
+const changedQuery = fn()
+
+export const LastModified: Story = {
+  render: () => (
+    <FilterHarness initialSearch="Lunch" onQueryChange={changedQuery} />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
+    await userEvent.click(
+      await body.findByText('Last modified', { exact: true })
+    )
+    const choice = await body.findByText('Last 7 days', { exact: true })
+    changedQuery.mockClear()
+    choice.closest<HTMLElement>('[role="menuitem"], button')!.focus()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(choice).not.toBeInTheDocument())
+    await expect(changedQuery).toHaveBeenCalledTimes(1)
+    await expect(changedQuery).toHaveBeenCalledWith({
+      clauses: [{ kind: 'changed', period: '7d' }],
+    })
+    await expect(
+      canvas.getByRole('button', { name: 'Modified in the last 7 days' })
+    ).toHaveFocus()
+    await expect(readQuery(canvasElement).clauses).toEqual([
+      { kind: 'changed', period: '7d' },
+    ])
+    await expect(canvas.getByLabelText('Search query')).toHaveTextContent(
+      'Lunch'
+    )
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Modified in the last 7 days' })
+    )
+    const yesterday = await body.findByText('Yesterday', { exact: true })
+    await userEvent.click(yesterday)
+    await waitFor(() => expect(yesterday).not.toBeInTheDocument())
+    await expect(readQuery(canvasElement).clauses).toEqual([
+      { kind: 'changed', period: 'yesterday' },
+    ])
+  },
+}
+
+export const MobileLastModified: Story = {
+  ...LastModified,
+  globals: { viewport: { value: 'zerro499' } },
 }

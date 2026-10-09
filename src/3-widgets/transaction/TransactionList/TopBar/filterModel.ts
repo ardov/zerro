@@ -1,10 +1,11 @@
 import type { useTranslation } from 'react-i18next'
+import { getDateFilterLabel } from './dateFilterLabel'
 import { core } from '@/zerro-core/redux'
 
 export type Clause = core.transactions.TTransactionFilterClause
 export type AddableFilterKind = Exclude<Clause['kind'], 'search' | 'activity'>
 export type SelectKind = 'tag' | 'account' | 'type' | 'merchant'
-export type EditableFilterKind = SelectKind | 'amount' | 'date'
+export type EditableFilterKind = SelectKind | 'amount' | 'date' | 'changed'
 export type AmountClause = Extract<Clause, { kind: 'amount' }>
 export type DateClause = Extract<Clause, { kind: 'date' }>
 
@@ -15,6 +16,7 @@ export const filterKinds: AddableFilterKind[] = [
   'type',
   'amount',
   'date',
+  'changed',
   'viewed',
   'deleted',
 ]
@@ -43,6 +45,7 @@ export function makeDefaultClause(kind: AddableFilterKind): Clause {
       return { kind, values: [] }
     case 'amount':
     case 'date':
+    case 'changed':
       return { kind }
     case 'viewed':
       return { kind, value: false }
@@ -63,7 +66,12 @@ export function isSelectKind(kind: Clause['kind']): kind is SelectKind {
 export function isEditableKind(
   kind: Clause['kind']
 ): kind is EditableFilterKind {
-  return isSelectKind(kind) || kind === 'amount' || kind === 'date'
+  return (
+    isSelectKind(kind) ||
+    kind === 'amount' ||
+    kind === 'date' ||
+    kind === 'changed'
+  )
 }
 
 export function isEmptyClause(clause: Clause): boolean {
@@ -77,6 +85,7 @@ export function isEmptyClause(clause: Clause): boolean {
   if (clause.kind === 'amount') {
     return clause.gte === undefined && clause.lte === undefined
   }
+  if (clause.kind === 'changed') return !clause.period
   if (clause.kind === 'date') return !clause.from && !clause.to
   return false
 }
@@ -90,9 +99,10 @@ export function getClauseLabel(
     tags: ReturnType<typeof core.tags.selectPopulated>
     t: ReturnType<typeof useTranslation>['t']
     language: string
+    today: number
   }
 ): string {
-  const { accounts, envelopes, tags, merchants, t, language } = context
+  const { accounts, envelopes, tags, merchants, t, language, today } = context
   switch (clause.kind) {
     case 'account':
       return clause.ids.length
@@ -119,13 +129,12 @@ export function getClauseLabel(
         : t('transactionType')
     case 'amount':
       return getAmountLabel(clause, t, language)
+    case 'changed':
+      return clause.period
+        ? getChangedPeriodLabel(clause.period, t, true)
+        : t('lastChanged')
     case 'date':
-      if (clause.from && clause.to) {
-        return `${t('date')}: ${clause.from}–${clause.to}`
-      }
-      if (clause.from) return `${t('dateFrom')} ${clause.from}`
-      if (clause.to) return `${t('dateTo')} ${clause.to}`
-      return t('date')
+      return getDateFilterLabel(clause, t, language, new Date(today))
     case 'viewed':
       return clause.value ? t('viewed') : t('onlyNew')
     case 'deleted':
@@ -159,6 +168,8 @@ export function getKindLabel(
   t: ReturnType<typeof useTranslation>['t']
 ) {
   switch (kind) {
+    case 'changed':
+      return t('lastChanged')
     case 'date':
       return t('date')
     case 'merchant':
@@ -201,4 +212,20 @@ export function joinLabels<T>(
   const labels = values.map(getLabel)
   if (labels.length <= 2) return labels.join(', ')
   return `${labels.slice(0, 2).join(', ')} +${labels.length - 2}`
+}
+
+export function getChangedPeriodLabel(
+  period: core.transactions.TChangedPeriod,
+  t: ReturnType<typeof useTranslation>['t'],
+  modified = false
+) {
+  if (period === 'today') return t(modified ? 'modifiedToday' : 'common:today')
+  if (period === 'yesterday')
+    return t(modified ? 'modifiedYesterday' : 'common:yesterday')
+  const preset = core.transactions.changedPeriods.find(
+    item => item.value === period
+  )!
+  return t(modified ? 'modifiedLastDays' : 'lastDays', {
+    count: preset.before - preset.from,
+  })
 }

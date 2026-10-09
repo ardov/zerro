@@ -1,16 +1,11 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TISODate } from '@/6-shared/types'
-import { Popover } from '@/6-shared/ui/kit/Popover'
-import { Calendar } from '@/6-shared/ui/kit/Calendar'
-import { IconButton } from '@/6-shared/ui/kit/Button'
-import { CalendarIcon } from '@/6-shared/ui/Icons'
+import { FieldSurface, fieldControlClass } from '@/6-shared/ui/kit/Field'
 import {
-  FieldSurface,
-  FieldAddon,
-  fieldControlClass,
-} from '@/6-shared/ui/kit/Field'
-import { usePopup } from '@/6-shared/overlays'
+  DateCalendarAction,
+  nativeDateTimeControlClass,
+} from '@/6-shared/ui/kit/DateFieldParts'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 
 export type DateTimeFieldProps = {
@@ -22,12 +17,10 @@ export type DateTimeFieldProps = {
   className?: string
 }
 
-// Native segmented editing without the browser's picker chrome.
 const nativeControlClass = cn(
   fieldControlClass,
-  'appearance-none py-3',
-  '[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-inner-spin-button]:appearance-none',
-  '[&::-webkit-datetime-edit]:p-0'
+  nativeDateTimeControlClass,
+  'py-3'
 )
 
 /** Native date and time share one surface. Incomplete dates revert on blur;
@@ -35,11 +28,7 @@ const nativeControlClass = cn(
 export function DateTimeField(props: DateTimeFieldProps) {
   const { date, onDateChange, time, onTimeChange, className } = props
   const { t } = useTranslation('transaction')
-  // The calendar's own label belongs to the date picker's vocabulary, which
-  // is shared and lives in `common`.
-  const { t: tCommon } = useTranslation()
   const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
-  const popup = usePopup()
   const dateRef = useRef<HTMLInputElement>(null)
   // A native date input reads as empty while a segment is incomplete.
   const [blankedDate, setBlankedDate] = useState<TISODate | null>(null)
@@ -50,34 +39,11 @@ export function DateTimeField(props: DateTimeFieldProps) {
       controlRef={dateRef}
       className={className}
       start={
-        <FieldAddon kind="action">
-          <Popover
-            popup={popup}
-            anchor={anchor}
-            label={tCommon('selectDate')}
-            className="w-fit"
-            contentClassName="flex justify-center p-1"
-            trigger={
-              <IconButton
-                label={tCommon('selectDate')}
-                variant="ghost"
-                size="sm"
-                tooltip={false}
-              >
-                <CalendarIcon />
-              </IconButton>
-            }
-          >
-            <Calendar
-              autoFocus
-              value={date}
-              onChange={next => {
-                popup.setOpen(false)
-                onDateChange(next)
-              }}
-            />
-          </Popover>
-        </FieldAddon>
+        <DateCalendarAction
+          value={date}
+          onChange={onDateChange}
+          anchor={anchor}
+        />
       }
     >
       <input

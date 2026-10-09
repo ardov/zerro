@@ -241,9 +241,17 @@ twice.
 
 Android system Back can reach a Drawer through Base UI's `CloseWatcher` even
 when a Select is above it. `DrawerFrame` routes that reason through
-`useOverlayBack`: the host dismisses the top popup or screen and ignores
-additional native requests while its history step is pending. The originating
+`useOverlayBack`: the host dismisses the top popup or screen and deduplicates
+native callbacks within one event-loop task. A later Back request closes the
+next owner even while the previous history step is pending; the existing
+history queue serializes those steps. The originating
 Drawer's own dismissal is canceled; its visibility still follows its owner.
+Native close watchers are consumed even when that dismissal is canceled. The
+Base UI 1.8.0 patch renews the watcher's effect after cancellation so the next
+Android Back can dismiss the remaining drawer. Keep this patch until upstream
+handles that lifecycle. Android stories must require a live native watcher on
+every Back request, without falling back to router history, and check that the
+underlying page is hit-testable after the final close.
 Escape, backdrop, swipe and explicit close retain their surface-specific behavior.
 
 A menu with its own button is a kit `Menu`. A context menu opened from an

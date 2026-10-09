@@ -756,12 +756,19 @@ describe('system Back', () => {
         {id && <div>parent body</div>}
         <button onClick={() => popup.setOpen(true)}>open child</button>
         {popup.open && <div>child body</div>}
-        <button onClick={back}>system back</button>
+        <button
+          onClick={() => {
+            back()
+            back()
+          }}
+        >
+          system back
+        </button>
       </>
     )
   }
 
-  it('closes only the top owner and ignores duplicate requests during a pending step', async () => {
+  it('deduplicates one native dispatch but queues the next Back during a pending history step', async () => {
     const user = userEvent.setup()
     const closed = vi.fn()
     const history = renderWithSlowHistory(<Stack onClose={closed} />)
@@ -772,12 +779,11 @@ describe('system Back', () => {
     expect(screen.getByText('parent body')).toBeTruthy()
     expect(closed).toHaveBeenCalledTimes(1)
     await user.click(screen.getByText('system back'))
+    expect(screen.queryByText('parent body')).toBeNull()
     history.land()
-    expect(screen.getByText('parent body')).toBeTruthy()
-    expect(() => history.land()).toThrow('No step is in flight')
-    await user.click(screen.getByText('system back'))
     history.land()
     expect(screen.queryByText('parent body')).toBeNull()
+    expect(() => history.land()).toThrow('No step is in flight')
   })
 
   it('leaves a page without overlays alone', async () => {

@@ -1,3 +1,75 @@
+diff --git a/drawer/root/DrawerRoot.js b/drawer/root/DrawerRoot.js
+index 1809cc4808c09f73ce221825ffb5b70d89f1073a..0ded997f9aeacbfe9862352c211e19ede226e545 100644
+--- a/drawer/root/DrawerRoot.js
++++ b/drawer/root/DrawerRoot.js
+@@ -201,6 +201,7 @@ function DrawerProviderReporter() {
+   const nestedOpenDialogCount = store.useState('nestedOpenDialogCount');
+   const popupElement = store.useState('popupElement');
+   const isTopmost = nestedOpenDialogCount === 0;
++  const [closeWatcherVersion, renewCloseWatcher] = React.useReducer(version => version + 1, 0);
+   (0, _useIsoLayoutEffect.useIsoLayoutEffect)(() => {
+     if (!removeDrawer) {
+       return undefined;
+@@ -227,7 +228,13 @@ function DrawerProviderReporter() {
+       if (!store.select('open')) {
+         return;
+       }
+-      store.setOpen(false, (0, _createBaseUIEventDetails.createChangeEventDetails)(_reasons.REASONS.closeWatcher, event));
++      const details = (0, _createBaseUIEventDetails.createChangeEventDetails)(_reasons.REASONS.closeWatcher, event);
++      store.setOpen(false, details);
++      // A close event consumes the native watcher even when the controlled
++      // owner cancels closing (for example, it dismissed a child overlay).
++      if (details.isCanceled) {
++        renewCloseWatcher();
++      }
+     }
+     const closeWatcher = new CloseWatcherCtor();
+     const unsubscribe = (0, _addEventListener.addEventListener)(closeWatcher, 'close', handleCloseWatcher);
+@@ -235,6 +242,6 @@ function DrawerProviderReporter() {
+       unsubscribe();
+       closeWatcher.destroy();
+     };
+-  }, [store, isTopmost, open, popupElement]);
++  }, [store, isTopmost, open, popupElement, closeWatcherVersion]);
+   return null;
+ }
+\ No newline at end of file
+diff --git a/drawer/root/DrawerRoot.mjs b/drawer/root/DrawerRoot.mjs
+index 4ffbea97c607d334e5e1cb71251f94abb30f1b4c..623d186d50897740739b100ebdd377456a03564a 100644
+--- a/drawer/root/DrawerRoot.mjs
++++ b/drawer/root/DrawerRoot.mjs
+@@ -195,6 +195,7 @@ function DrawerProviderReporter() {
+   const nestedOpenDialogCount = store.useState('nestedOpenDialogCount');
+   const popupElement = store.useState('popupElement');
+   const isTopmost = nestedOpenDialogCount === 0;
++  const [closeWatcherVersion, renewCloseWatcher] = React.useReducer(version => version + 1, 0);
+   useIsoLayoutEffect(() => {
+     if (!removeDrawer) {
+       return undefined;
+@@ -221,7 +222,13 @@ function DrawerProviderReporter() {
+       if (!store.select('open')) {
+         return;
+       }
+-      store.setOpen(false, createChangeEventDetails(REASONS.closeWatcher, event));
++      const details = createChangeEventDetails(REASONS.closeWatcher, event);
++      store.setOpen(false, details);
++      // A close event consumes the native watcher even when the controlled
++      // owner cancels closing (for example, it dismissed a child overlay).
++      if (details.isCanceled) {
++        renewCloseWatcher();
++      }
+     }
+     const closeWatcher = new CloseWatcherCtor();
+     const unsubscribe = addEventListener(closeWatcher, 'close', handleCloseWatcher);
+@@ -229,6 +236,6 @@ function DrawerProviderReporter() {
+       unsubscribe();
+       closeWatcher.destroy();
+     };
+-  }, [store, isTopmost, open, popupElement]);
++  }, [store, isTopmost, open, popupElement, closeWatcherVersion]);
+   return null;
+ }
+\ No newline at end of file
 diff --git a/utils/scrollable.js b/utils/scrollable.js
 index c03e693a05ad5294e5d42a37331f1b29ead9fbd4..8fe4eb8007a0d72980850a55df46070d706983df 100644
 --- a/utils/scrollable.js

@@ -11,6 +11,7 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { track } from '@/6-shared/analytics'
+import { useLocalDay } from '@/6-shared/hooks/useLocalDay'
 import { useDebounce } from '@/6-shared/hooks/useDebounce'
 
 import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
@@ -249,14 +250,15 @@ function useFilteredTransactions(
   const transactionsById = useAppSelector(core.transactions.selectAll)
   const allTransactionIds = useAppSelector(core.transactions.selectIds)
   const context = useAppSelector(core.transactions.selectQueryContext)
+  const today = useLocalDay()
   const groups = useMemo(() => {
-    const checker = core.transactions.compileQuery(query, context)
+    const checker = core.transactions.compileQuery(query, context, today)
     const list = trIds || allTransactionIds
     return list
       .map(id => transactionsById[id])
       .filter(checker)
       .sort(core.transactions.compareTransactionDates)
-  }, [trIds, allTransactionIds, context, query, transactionsById])
+  }, [trIds, allTransactionIds, context, query, transactionsById, today])
   return groups
 }
 

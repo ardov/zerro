@@ -90,6 +90,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   // rather than a flag: a stuck step that wakes up to find a later one in
   // flight must recognise that the pending step is no longer its own.
   const stepRef = useRef<object | null>(null)
+  const backDispatchRef = useRef(false)
 
   // Actions asked for while that step was in flight. They are held rather than
   // answered, and asked again on the landing — see `decide`.
@@ -285,20 +286,31 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   // A native close request can be delivered to a drawer underneath a select
   // or an asked popup. The host owns the actual order of all these layers.
   const back = useCallback(() => {
-    // Multiple platform callbacks must not unwind the same pending step twice.
-    if (stepRef.current) return true
+    // One native close signal can notify multiple watchers in the same task.
+    // Deduplicate that dispatch, not the entire asynchronous history step:
+    // a later gesture must still close the next owner via the existing queue.
+    if (backDispatchRef.current) return true
     const popup = liveRef.current.at(-1)
+    const screen = Object.keys(entryRef.current.screens ?? {})
+      .filter(name => !closing.has(name))
+      .at(-1)
+    if (popup === undefined && screen === undefined) return false
+    backDispatchRef.current = true
+    const timer = setTimeout(() => {
+      timersRef.current.delete(timer)
+      backDispatchRef.current = false
+    }, 0)
+    timersRef.current.add(timer)
     if (popup !== undefined) {
       closePopup(popup)
       return true
     }
-    const screen = Object.keys(entryRef.current.screens ?? {}).at(-1)
     if (screen !== undefined) {
       closeScreen(screen)
       return true
     }
     return false
-  }, [closePopup, closeScreen])
+  }, [closePopup, closeScreen, closing])
 
   // Landing on an entry — mounted, navigated, went back, reloaded — is the one
   // moment history and memory can disagree, so it is the one moment they are

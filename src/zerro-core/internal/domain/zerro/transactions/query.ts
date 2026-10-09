@@ -38,6 +38,17 @@ export const TrFilterType = {
 
 export type TrFilterType = (typeof TrFilterType)[keyof typeof TrFilterType]
 
+/** Inclusive start and exclusive end, in local calendar days from today. */
+export const changedPeriods = [
+  { value: 'today', from: 0, before: 1 },
+  { value: 'yesterday', from: -1, before: 0 },
+  { value: '7d', from: -6, before: 1 },
+  { value: '14d', from: -13, before: 1 },
+  { value: '30d', from: -29, before: 1 },
+] as const
+
+export type TChangedPeriod = (typeof changedPeriods)[number]['value']
+
 export type TTransactionFilterClause =
   | { kind: 'search'; value: string }
   | { kind: 'account'; ids: TAccountId[] }
@@ -46,6 +57,7 @@ export type TTransactionFilterClause =
   | { kind: 'type'; values: TrFilterType[] }
   | { kind: 'amount'; gte?: number; lte?: number }
   | { kind: 'date'; from?: TISODate; to?: TISODate }
+  | { kind: 'changed'; period?: TChangedPeriod }
   | { kind: 'viewed'; value: boolean }
   | { kind: 'deleted'; mode: 'hide' | 'include' | 'only' }
   | {
@@ -71,10 +83,13 @@ type TTransactionPredicate = (transaction: TTransaction) => boolean
 
 export function compileTransactionQuery(
   query: TTransactionQuery,
-  context?: TTransactionQueryContext
+  context?: TTransactionQueryContext,
+  referenceTime = Date.now()
 ): TTransactionPredicate {
   const deletedClause = query.clauses.find(clause => clause.kind === 'deleted')
-  const predicates = query.clauses.map(clause => compileClause(clause, context))
+  const predicates = query.clauses.map(clause =>
+    compileClause(clause, context, referenceTime)
+  )
 
   return transaction => {
     if (!deletedClause && isDeletedTransaction(transaction)) return false
@@ -84,7 +99,8 @@ export function compileTransactionQuery(
 
 function compileClause(
   clause: TTransactionFilterClause,
-  context?: TTransactionQueryContext
+  context: TTransactionQueryContext | undefined,
+  referenceTime: number
 ): TTransactionPredicate {
   switch (clause.kind) {
     case 'search': {
@@ -160,6 +176,22 @@ function compileClause(
         if (to && transaction.date > to) return false
         return true
       }
+    }
+    case 'changed': {
+      if (!clause.period) return () => true
+      const now = new Date(referenceTime)
+      // Calendar boundaries in the user's timezone, including DST changes.
+      const midnight = (offset: number) =>
+        new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() + offset
+        ).getTime()
+      const period = changedPeriods.find(item => item.value === clause.period)!
+      const from = midnight(period.from)
+      const before = midnight(period.before)
+      return transaction =>
+        transaction.changed >= from && transaction.changed < before
     }
     case 'viewed':
       return transaction => isTransactionViewed(transaction) === clause.value

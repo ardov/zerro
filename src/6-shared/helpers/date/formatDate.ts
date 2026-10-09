@@ -53,8 +53,10 @@ export function formatTransactionTimestamp(date: TDateDraft): string {
 /** The `date-fns` locale the interface is currently in. Read at call time
  * rather than held, so a language change is one re-render away — the calendar
  * reads it the same way this file's own formatting does. */
-export function getDateLocale() {
-  return (i18n.resolvedLanguage || i18n.language) === 'ru' ? ru : en
+export function getDateLocale(
+  language = i18n.resolvedLanguage || i18n.language
+) {
+  return language === 'ru' ? ru : en
 }
 
 export function formatDate(date: TDateDraft, template?: string): string {
