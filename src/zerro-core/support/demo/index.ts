@@ -2,6 +2,7 @@ import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
 import type { ById } from '../../internal/domain/foundation/types'
+import { toISODate } from '../../internal/domain/foundation/date'
 import { round } from '../../internal/domain/foundation/numbers'
 import { generateTransactions } from './generateTransactions'
 import type { TTagIconId } from '../../runtime/presentation/tag-icons'
@@ -46,7 +47,12 @@ function updateBalances(diff: TNormalizedPatch) {
 }
 
 export function getDemoData(options: TDemoDataOptions = {}): TNormalizedPatch {
-  return makeDemoDiff(options)
+  const now = resolveDemoNow(options.now ?? Date.now())
+  return makeDemoDiff({
+    ...options,
+    now,
+    until: options.until ?? toISODate(now),
+  })
 }
 
 export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {

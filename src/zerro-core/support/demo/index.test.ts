@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { hashJson } from '../testing/stableJson'
 import { getDemoData, makeDemoDiff, makeDemoStore } from './index'
@@ -10,14 +10,31 @@ const demoOptions = {
 }
 
 describe('demo data', () => {
+  afterEach(() => vi.useRealTimers())
   it('is deterministic for pinned options', () => {
     expect(hashJson(makeDemoDiff(demoOptions))).toBe(
       hashJson(makeDemoDiff(demoOptions))
     )
   })
 
-  it('uses deterministic defaults for the app-facing wrapper', () => {
-    expect(hashJson(getDemoData())).toBe(hashJson(getDemoData()))
+  it('generates app-facing data through the current local day on every call', () => {
+    vi.useFakeTimers()
+    for (const day of [9, 10]) {
+      const now = new Date(2026, 9, day, 0, 30)
+      vi.setSystemTime(now)
+      const diff = getDemoData()
+      const dates = diff.transaction!.map(transaction => transaction.date)
+      expect(dates.sort().at(-1)).toBe(
+        `2026-10-${String(day).padStart(2, '0')}`
+      )
+      expect(diff.user?.[0].changed).toBe(now.getTime())
+    }
+  })
+
+  it('honours explicitly pinned app-facing options', () => {
+    expect(hashJson(getDemoData(demoOptions))).toBe(
+      hashJson(makeDemoDiff(demoOptions))
+    )
   })
 
   it('can build a normalized store for zerro-core tests', () => {
