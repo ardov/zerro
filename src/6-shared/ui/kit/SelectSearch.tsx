@@ -12,11 +12,13 @@ import {
 import { FieldAddon, FieldSurface, fieldControlClass } from './Field'
 import { ListPanel } from './ListPanel'
 import { ListRow, ListRowHeader, ListRowSeparator } from './ListRow'
+import { useBottomSheetLayout } from './useBottomSheetLayout'
 import { useListPanelPositioning } from './useListPanelPositioning'
 
 export type SelectSearchOptions<T extends string> = {
   label?: string
   placeholder?: string
+  /** Defaults to the search input on desktop and the panel on narrow screens. */
   autoFocus?: boolean
   /** Query restored on each opening; changes while open do not replace typing. */
   initialQuery?: string
@@ -91,6 +93,8 @@ export function SelectSearch<T extends string>(
     emptyNotice,
     popupStyle,
   } = useSelectField(props)
+  const narrow = useBottomSheetLayout()
+  const autoFocus = search.autoFocus ?? !narrow
   const input = useRef<HTMLInputElement>(null)
   const popup = useRef<HTMLDivElement>(null)
   const [session, setSession] = useState({
@@ -183,14 +187,11 @@ export function SelectSearch<T extends string>(
             <Combobox.Popup
               ref={popup}
               aria-label={label}
-              initialFocus={search.autoFocus === false ? popup : input}
+              initialFocus={autoFocus ? input : popup}
               onFocus={event => {
                 // Base UI redirects popup focus into its input on non-touch opens.
                 // Keep the explicit no-autofocus mode on the dialog; Tab enters search.
-                if (
-                  search.autoFocus === false &&
-                  event.target === event.currentTarget
-                )
+                if (!autoFocus && event.target === event.currentTarget)
                   event.preventBaseUIHandler()
               }}
               render={

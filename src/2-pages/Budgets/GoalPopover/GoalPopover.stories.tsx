@@ -22,6 +22,12 @@ const meta = {
 export default meta
 type Story = StoryObj
 
+async function expectInitialAmountFocus(input: HTMLElement) {
+  const target =
+    window.innerWidth < 500 ? input.closest('[tabindex="-1"]') : input
+  await waitFor(() => expect(target).toHaveFocus())
+}
+
 function MonthConfirmationHarness() {
   const openSide = useSideContent()
   return (
@@ -156,6 +162,7 @@ export const GoalAmountRegression: Story = {
       canvas.getByRole('button', { name: 'Open amount editor' })
     )
     const input = await body.findByPlaceholderText('0')
+    await expectInitialAmountFocus(input)
     await userEvent.click(input)
     await userEvent.clear(input)
     await userEvent.type(input, '25,5+4.5{Enter}')
@@ -164,6 +171,11 @@ export const GoalAmountRegression: Story = {
       commands + 1
     )
   },
+}
+
+export const MobileGoalAmount: Story = {
+  ...GoalAmountRegression,
+  globals: { viewport: { value: 'zerro499' } },
 }
 
 function GoalDraftHarness({ inDrawer = false }: { inDrawer?: boolean }) {
@@ -209,7 +221,7 @@ export const GoalDraftAndNestedMonth: Story = {
     const initial = saved.textContent
     await userEvent.click(trigger)
     const amount = await body.findByPlaceholderText('0')
-    await waitFor(() => expect(amount).toHaveFocus())
+    await expectInitialAmountFocus(amount)
     // A nested list is anchored to the field inside the animated surface.
     // Wait for that surface to settle before measuring/opening its child.
     await waitFor(() =>
@@ -317,7 +329,7 @@ export const GoalInsideDrawer: Story = {
     await userEvent.click(trigger)
     const goal = await body.findByRole('dialog', { name: 'Goal' })
     await waitFor(() => expect(getComputedStyle(goal).opacity).toBe('1'))
-    await expect(within(goal).getByPlaceholderText('0')).toHaveFocus()
+    await expectInitialAmountFocus(within(goal).getByPlaceholderText('0'))
     await userEvent.click(
       within(goal).getByRole('combobox', { name: /^Type of goal/ })
     )

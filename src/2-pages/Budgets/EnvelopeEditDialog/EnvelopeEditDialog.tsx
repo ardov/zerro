@@ -5,6 +5,7 @@ import { shallowEqual } from 'react-redux'
 import { useFormik } from 'formik'
 import { Select } from '@/6-shared/ui/kit/Select'
 import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
+import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
 import { Input } from '@/6-shared/ui/kit/Input'
 import { ColorPicker } from '@/3-widgets/ColorPicker'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -45,6 +46,8 @@ const EnvelopeEditDialogForm: FC<{
   envelope: core.envelopes.TPresentedEnvelope
   onClose: () => void
 }> = ({ envelope, onClose }) => {
+  const narrow = useBottomSheetLayout()
+  const formRef = useRef<HTMLFormElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
   const dispatch = useAppDispatch()
   const { t } = useTranslation('envelopeEditDialog')
@@ -90,7 +93,7 @@ const EnvelopeEditDialogForm: FC<{
       title={t('titleEdit')}
       mobile="drawer"
       closeButton={false}
-      initialFocus={nameRef}
+      initialFocus={narrow ? formRef : nameRef}
       className="max-w-100"
       controller={{
         open: true,
@@ -100,13 +103,17 @@ const EnvelopeEditDialogForm: FC<{
         },
       }}
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form
+        ref={formRef}
+        tabIndex={-1}
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 outline-none"
+      >
         <Input
           label={t('nameLabel')}
           placeholder={t('nameLabel')}
           error={errors.originalName}
           ref={nameRef}
-          autoFocus
           name="originalName"
           value={values.originalName}
           onChange={handleChange}

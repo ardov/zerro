@@ -29,6 +29,7 @@ import {
 import { Divider } from '@/6-shared/ui/kit/Divider'
 import { track } from '@/6-shared/analytics'
 import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { appRelease, appVersion, buildDate } from '@/6-shared/config'
 import { formatDate } from '@/6-shared/helpers/date'
@@ -51,15 +52,15 @@ import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useColorScheme } from '@/6-shared/ui/theme'
 import { useBottomBarShown } from './destinations'
 
-/** The settings menu, asked rather than mounted, in a drawer on the left,
- * the side the navigation that opens it is on.
+/** The settings menu opens from the bottom on phones and beside the rail on desktop.
  * Items act on the app themselves, so it answers nothing. */
 export const SettingsMenu: FC = () => {
   const { t } = useTranslation('settings')
+  const bottomSheet = useBottomSheetLayout()
   const { open, answer } = useAsked<void>()
   return (
     <DrawerSurface
-      side="left"
+      side={bottomSheet ? 'bottom' : 'left'}
       title={t('settings')}
       controller={{ open, setOpen: next => !next && answer() }}
       contentClassName="px-2 pt-0 pb-2"

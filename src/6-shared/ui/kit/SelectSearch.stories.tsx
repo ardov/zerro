@@ -52,7 +52,7 @@ const meta = {
 - Search matches labels and optional **keywords** across the full source. Selection closes the popup; closing resets the query and expansion.
 - **search.filter(items, query, { expanded })** returns **{ items, hasMore }**. The selector owns expansion and resets it on close. Show more is a separate button in the scrollport, reached with Tab; Shift-Tab returns to search.
 - Custom filtering returns the final filtered/ranked items, without a second filter. Keep the full source in **items** so the closed value and icon remain available.
-- **search.autoFocus=false** focuses the popup without opening a software keyboard; Tab reaches search.
+- Search focuses automatically on desktop. Below 500px the panel receives focus, keeping the software keyboard closed; Tab or tapping reaches search. **search.autoFocus** explicitly overrides either default.
 - Localize **search.label**, **search.placeholder**, **search.showMoreLabel**, **emptyText**, and **clearLabel**.
 - **search.actions** holds consumer-owned buttons after the list. Pass **popup={usePopup()}** to close after an action.
 - Search uses ordinary positioning; **alignSelected** applies only without search. Mobile keyboard behavior needs testing on a real device.
@@ -217,12 +217,36 @@ export const WithoutAutofocus: Story = {
       canvas.getByRole('combobox', { name: /Account Everyday account/ })
     )
     const search = await body.findByRole('combobox', { name: 'Search Account' })
+    await waitFor(() =>
+      expect(body.getByRole('dialog', { name: 'Account' })).toHaveFocus()
+    )
     await expect(search).not.toHaveFocus()
     await userEvent.tab()
-    await expect(search).toHaveFocus()
+    await waitFor(() => expect(search).toHaveFocus())
     await userEvent.keyboard('{Escape}')
   },
 }
+export const MobileWithoutAutofocus: Story = {
+  ...WithoutAutofocus,
+  render: () => <Demo required />,
+  globals: { viewport: { value: 'zerro499' } },
+}
+
+export const MobileExplicitAutofocus: Story = {
+  render: () => <Demo autoFocus />,
+  globals: { viewport: { value: 'zerro499' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('combobox', { name: /Account Everyday account/ })
+    )
+    const input = await body.findByRole('combobox', { name: 'Search Account' })
+    await waitFor(() => expect(input).toHaveFocus())
+    await userEvent.keyboard('{Escape}')
+  },
+}
+
 function CategoryDemo() {
   const [selected, setSelected] = useState<string[]>([])
   return (

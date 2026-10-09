@@ -58,6 +58,7 @@ export const SaveAndReopen: Story = {
     await userEvent.click(trigger)
     const dialog = await findCreateSurface(body)
     const amount = dialog.getByRole('textbox', { name: /^(Amount|Сумма)$/ })
+    if (window.innerWidth < 500) await expect(amount).not.toHaveFocus()
     await userEvent.click(
       dialog.getByRole('button', {
         name: /Create transaction|Создать операцию/,

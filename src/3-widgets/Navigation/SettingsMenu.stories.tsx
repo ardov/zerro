@@ -23,6 +23,10 @@ const checkNestedConfirm: Story['play'] = async ({ canvasElement }) => {
   // The rows are toolbar buttons, not `menuitem`s: the list is not a popup
   // that something opened, so it does not promise menu semantics.
   const list = await body.findByRole('toolbar', { name: 'Settings' })
+  await expect(list.closest('[role="dialog"]')).toHaveAttribute(
+    'data-side',
+    window.innerWidth < 500 ? 'bottom' : 'left'
+  )
   const reload = await within(list).findByRole('button', {
     name: 'Reload data',
   })

@@ -1,10 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { useMemo } from 'react'
+import {
+  expect,
+  fireEvent,
+  fn,
+  userEvent,
+  waitFor,
+  within,
+} from 'storybook/test'
+import { useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import type { TTransaction } from '@/6-shared/types'
 import { TransactionPreview, TrEmptyState } from '.'
+import {
+  TransactionPreviewDrawer,
+  useTransactionPreview,
+} from '@/3-widgets/global/TransactionPreviewDrawer'
 import { AccountField } from './AccountField'
 
 const meta = {
@@ -297,5 +308,139 @@ export const ReceiptAndMap: Story = {
     )
     await userEvent.click(canvas.getByRole('button', { name: 'Show more' }))
     await expect(canvas.getByText('9287440301110113')).toBeVisible()
+  },
+}
+
+function ModalSaveHarness() {
+  const outcome = useByType().outcome
+  const open = useTransactionPreview()
+  const transactions = useAppSelector(core.transactions.selectAll)
+  const saved = Object.values(transactions).find(
+    tr => tr.comment === 'Saved from modal' && !tr.deleted
+  )
+  return (
+    <>
+      <button onClick={() => open(outcome!.id)}>Edit transaction</button>
+      <output aria-label="Saved comment">{saved?.comment}</output>
+      <output aria-label="Saved time">
+        {saved
+          ? new Date(saved.created).getHours() +
+            ':' +
+            new Date(saved.created).getMinutes()
+          : ''}
+      </output>
+      <TransactionPreviewDrawer />
+    </>
+  )
+}
+
+function checkModalSave(changeTime: boolean): Story['play'] {
+  return async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('button', { name: 'Edit transaction' })
+    await userEvent.click(trigger)
+    const dialog = await body.findByRole('dialog', { name: 'Transaction' })
+    const editor = within(dialog)
+    const comment = editor.getByRole('textbox', { name: 'Comment' })
+    await userEvent.clear(comment)
+    await userEvent.type(comment, 'Saved from modal')
+    if (changeTime) {
+      fireEvent.change(editor.getByLabelText('Time'), {
+        target: { value: '13:37' },
+      })
+    }
+    await userEvent.click(editor.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(dialog).not.toBeInTheDocument())
+    await expect(canvas.getByLabelText('Saved comment')).toHaveTextContent(
+      'Saved from modal'
+    )
+    if (changeTime)
+      await expect(canvas.getByLabelText('Saved time')).toHaveTextContent(
+        '13:37'
+      )
+    await waitFor(() => expect(trigger).toHaveFocus())
+  }
+}
+
+export const ModalSave: Story = {
+  ...Bench,
+  render: () => <ModalSaveHarness />,
+  play: checkModalSave(false),
+}
+export const ModalSaveWithChangedTime: Story = {
+  ...ModalSave,
+  play: checkModalSave(true),
+}
+export const MobileModalSave: Story = {
+  ...ModalSave,
+  globals: { viewport: { value: 'zerro499' } },
+}
+export const InlineSaveStaysOpen: Story = {
+  ...Bench,
+  args: { id: '', onClose: fn(), onOpenOther: fn() },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    const comment = canvas.getByRole('textbox', { name: 'Comment' })
+    await userEvent.clear(comment)
+    await userEvent.type(comment, 'Saved inline')
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(
+        canvas.queryByRole('button', { name: 'Save' })
+      ).not.toBeInTheDocument()
+    )
+    await expect(comment).toBeVisible()
+    await expect(comment).toHaveValue('Saved inline')
+    await expect(args.onClose).not.toHaveBeenCalled()
+  },
+}
+
+function InlineRecreateHarness() {
+  const outcome = useByType().outcome!
+  const [id, setId] = useState(outcome.id)
+  const [initialId] = useState(id)
+  return (
+    <>
+      <output aria-label="Operation replaced">
+        {String(id !== initialId)}
+      </output>
+      {id && (
+        <Frame>
+          <TransactionPreview
+            id={id}
+            onClose={() => setId('')}
+            onOpenOther={setId}
+          />
+        </Frame>
+      )}
+    </>
+  )
+}
+
+export const InlineSaveWithChangedTime: Story = {
+  ...Bench,
+  render: () => <InlineRecreateHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const comment = canvas.getByRole('textbox', { name: 'Comment' })
+    await userEvent.clear(comment)
+    await userEvent.type(comment, 'Recreated inline')
+    fireEvent.change(canvas.getByLabelText('Time'), {
+      target: { value: '13:37' },
+    })
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Operation replaced')).toHaveTextContent(
+        'true'
+      )
+    )
+    await expect(canvas.getByRole('textbox', { name: 'Comment' })).toHaveValue(
+      'Recreated inline'
+    )
+    await expect(canvas.getByLabelText('Time')).toHaveValue('13:37')
+    await expect(
+      canvas.queryByRole('button', { name: 'Save' })
+    ).not.toBeInTheDocument()
   },
 }

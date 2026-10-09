@@ -86,7 +86,12 @@ export const ReturnsFocusAfterRemount: Story = {
       await userEvent.click(trigger)
       const dialog = await body.findByRole('dialog')
       const name = within(dialog).getByRole('textbox', { name: 'Name' })
-      await waitFor(() => expect(name).toHaveFocus())
+      if (window.innerWidth < 500) {
+        await waitFor(() => expect(name.closest('form')).toHaveFocus())
+        await expect(name).not.toHaveFocus()
+      } else {
+        await waitFor(() => expect(name).toHaveFocus())
+      }
       await expect(name).toHaveValue('Food')
       await userEvent.clear(name)
       await userEvent.type(name, 'Discard this draft')

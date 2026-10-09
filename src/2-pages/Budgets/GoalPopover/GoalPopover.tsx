@@ -1,7 +1,8 @@
 import { Button, IconButton } from '@/6-shared/ui/kit/Button'
 import type { FC } from 'react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { PopoverSurface } from '@/6-shared/ui/kit/Popover'
+import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
 import { Select } from '@/6-shared/ui/kit/Select'
 import { useTranslation } from 'react-i18next'
 import { AmountInput } from '@/6-shared/ui/kit/AmountInput'
@@ -25,6 +26,8 @@ export type TGoalPopoverProps = {
 
 export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, open, anchorEl } = props
+  const narrow = useBottomSheetLayout()
+  const contentRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation('goals')
   const dispatch = useAppDispatch()
   const envelope = useAppSelector(core.envelopes.selectAll)[id]
@@ -88,6 +91,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   return (
     <PopoverSurface
       label={t('goal', { ns: 'budgets' })}
+      initialFocus={narrow ? contentRef : undefined}
       controller={{
         open,
         setOpen: next => {
@@ -96,7 +100,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
       }}
       anchor={anchorEl}
     >
-      <div className="grid gap-4">
+      <div ref={contentRef} tabIndex={-1} className="grid gap-4 outline-none">
         <Select
           label={t('goalType')}
           labelMode="floating"
@@ -121,7 +125,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
         />
 
         <AmountInput
-          autoFocus
+          autoFocus={!narrow}
           selectOnFocus
           value={rawValue}
           label={amountLabels[type]}

@@ -102,6 +102,7 @@ export const TransactionPreviewDrawer = () => {
             id={id}
             key={id}
             onClose={onClose}
+            closeOnSave
             onOpenOther={openOther}
           />
         )}

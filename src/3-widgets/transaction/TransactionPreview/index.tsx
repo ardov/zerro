@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { TAccountId, TTransaction, TTransactionId } from '@/6-shared/types'
 import { Button, IconButton } from '@/6-shared/ui/kit/Button'
 import { AmountInlineField } from '@/6-shared/ui/kit/AmountInput'
+import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useShake } from '@/6-shared/ui/useShake'
@@ -85,6 +86,8 @@ export type TransactionPreviewProps = {
   onClose: () => void
   onOpenOther: (id: TTransactionId) => void
   onSelectSimilar?: (date: number) => void
+  /** The surface owner decides whether a successful save dismisses the editor. */
+  closeOnSave?: boolean
 }
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
@@ -121,6 +124,7 @@ const TransactionEditor = ({
   onClose,
   onOpenOther,
   onSelectSimilar,
+  closeOnSave = false,
   createQuery,
   createPopup,
   onCreated,
@@ -129,10 +133,12 @@ const TransactionEditor = ({
   onClose: () => void
   onOpenOther: (id: TTransactionId) => void
   onSelectSimilar?: (date: number) => void
+  closeOnSave?: boolean
   createQuery?: core.transactions.TTransactionQuery
   createPopup?: SurfaceController
   onCreated?: () => void
 }) => {
+  const narrow = useBottomSheetLayout()
   const id = tr?.id ?? ''
   const { t } = useTranslation('transaction')
   const createPosting = useAppCommand(core.transactions.createPosting)
@@ -279,11 +285,13 @@ const TransactionEditor = ({
         newMerchant ?? undefined
       )
       track('transaction_recreated', { source: 'preview' })
-      onOpenOther(newId)
+      if (closeOnSave) onClose()
+      else onOpenOther(newId)
       return
     }
     update({ id, ...changes }, newMerchant ?? undefined)
     track('transaction_edited', { source: 'preview' })
+    if (closeOnSave) onClose()
   }
 
   /** What an account counts in, spelled the short way an amount is labelled
@@ -433,7 +441,7 @@ const TransactionEditor = ({
                 >
                   <AmountInlineField
                     label={t('amount')}
-                    autoFocus={!tr}
+                    autoFocus={!tr && !narrow}
                     value={draft.amount}
                     onChange={amount => edit({ amount })}
                     onEnter={onSave}
