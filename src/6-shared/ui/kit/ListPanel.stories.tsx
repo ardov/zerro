@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Popover } from '@base-ui/react/popover'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
@@ -24,6 +24,7 @@ const meta = {
         component: `A list surface with a fixed header, edge fades and one scrollbar-free scrollport. Actions follow the list inside the same scrollport.
 
 - Compose with a Base UI Popup through **render**; focus and list semantics belong to the owner.
+- **surface="embedded"** fills a host surface without its own background, shadow or outer padding. Its scrollport consumes **--kit-scroll-bottom-inset** for both content spacing and keyboard scrolling.
 - Set **preserveHeight** while filtering to freeze the previous height, including for an empty result. Clear it for natural sizing or explicit expansion. Unmount between openings to reset.
 - Put an empty result in **empty**, not in the children: a listbox scrollport holds options, so a message inside it would be orphan text.
 - **useListPanelPositioning** supplies visible-viewport bounds to Base UI. It does not position anything itself. Override width for field-aligned or custom triggers.
@@ -270,5 +271,49 @@ export const Filtering: Story = {
         canvas.getByRole('button', { name: 'Browse accounts' })
       ).toHaveFocus()
     )
+  },
+}
+
+export const EmbeddedSurface: Story = {
+  render: () => (
+    <div
+      className="w-80 bg-ui-card"
+      style={{ '--kit-scroll-bottom-inset': '34px' } as CSSProperties}
+    >
+      <ListPanel
+        surface="embedded"
+        className="max-h-60"
+        aria-label="Embedded list"
+      >
+        {accounts.slice(0, 20).map(name => (
+          <ListRow key={name} render={<button type="button" />}>
+            {name}
+          </ListRow>
+        ))}
+      </ListPanel>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const panel = canvas.getByLabelText('Embedded list')
+    await expect(getComputedStyle(panel).backgroundColor).toBe(
+      'rgba(0, 0, 0, 0)'
+    )
+    await expect(getComputedStyle(panel).boxShadow).toBe('none')
+    const first = canvas.getByRole('button', { name: 'Account 001' })
+    const last = canvas.getByRole('button', { name: 'Account 020' })
+    let scrollport: HTMLElement | null = first
+    while (scrollport && getComputedStyle(scrollport).overflowY !== 'auto')
+      scrollport = scrollport.parentElement
+    await expect(scrollport).not.toBeNull()
+    await expect(getComputedStyle(scrollport!).scrollPaddingBottom).toBe('58px')
+    await userEvent.click(first)
+    for (let i = 0; i < 19; i++) await userEvent.tab()
+    await waitFor(() => {
+      expect(last).toHaveFocus()
+      expect(last.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+        scrollport!.getBoundingClientRect().bottom - 34
+      )
+    })
   },
 }

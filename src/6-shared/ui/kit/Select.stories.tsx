@@ -664,3 +664,118 @@ export const NestedModalDismissal: Story = {
     }
   },
 }
+
+export const MobileLongList: Story = {
+  render: () => (
+    <Select
+      label="Long list"
+      items={Array.from({ length: 100 }, (_, i) => ({
+        value: String(i),
+        label: `Account ${i + 1}`,
+      }))}
+      value="0"
+      onChange={() => {}}
+    />
+  ),
+  globals: { viewport: { value: 'zerro499' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('combobox', { name: /Long list/ })
+    await userEvent.click(trigger)
+    const sheet = await body.findByRole('dialog', { name: 'Long list' })
+    const list = body.getByRole('listbox')
+    await waitFor(() => {
+      expect(sheet.getBoundingClientRect().top).toBeGreaterThanOrEqual(31)
+      expect(
+        Math.abs(sheet.getBoundingClientRect().bottom - window.innerHeight)
+      ).toBeLessThan(2)
+    })
+    await expect(
+      sheet.contains(canvasElement.ownerDocument.activeElement)
+    ).toBe(true)
+    let scrollport: HTMLElement | null = list
+    while (scrollport && getComputedStyle(scrollport).overflowY !== 'auto')
+      scrollport = scrollport.parentElement
+    await expect(scrollport).not.toBeNull()
+    await waitFor(() => {
+      const bounds = scrollport!.getBoundingClientRect()
+      expect(Math.abs(bounds.bottom - window.innerHeight)).toBeLessThan(2)
+      expect(bounds.left).toBe(8)
+      expect(bounds.right).toBe(window.innerWidth - 8)
+    })
+    await userEvent.keyboard('{End}')
+    const last = body.getByRole('option', { name: 'Account 100' })
+    await waitFor(() =>
+      expect(last.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+        sheet.getBoundingClientRect().bottom
+      )
+    )
+    await expect(list.scrollHeight).toBeGreaterThan(sheet.clientHeight)
+    await userEvent.click(last)
+    await waitFor(() =>
+      expect(body.queryByRole('dialog')).not.toBeInTheDocument()
+    )
+    await expect(trigger).toHaveFocus()
+  },
+}
+
+function MobileFieldContractDemo() {
+  const [value, setValue] = useState<string | null>(null)
+  const [submitted, setSubmitted] = useState('none')
+  return (
+    <form
+      onSubmit={event => {
+        event.preventDefault()
+        setSubmitted(String(new FormData(event.currentTarget).get('account')))
+      }}
+    >
+      <Select
+        label="Account"
+        name="account"
+        value={value}
+        onChange={setValue}
+        required
+        items={[
+          { value: 'cash', label: 'Cash' },
+          { value: 'savings', label: 'Savings' },
+        ]}
+      />
+      <Button type="submit">Submit</Button>
+      <output aria-label="Submitted">{submitted}</output>
+    </form>
+  )
+}
+
+export const MobileFieldContract: Story = {
+  render: () => <MobileFieldContractDemo />,
+  globals: { viewport: { value: 'zerro499' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('combobox', { name: 'Account' })
+    await userEvent.click(canvas.getByRole('button', { name: 'Submit' }))
+    await expect(canvas.getByLabelText('Submitted')).toHaveTextContent('none')
+    await waitFor(() => expect(trigger).toHaveFocus())
+    await userEvent.keyboard('{ArrowDown}')
+    const sheet = await body.findByRole('dialog', { name: 'Account' })
+    await expect(trigger).toHaveAttribute('aria-controls', sheet.id)
+    await userEvent.click(body.getByRole('option', { name: 'Cash' }))
+    await waitFor(() =>
+      expect(body.queryByRole('dialog')).not.toBeInTheDocument()
+    )
+    await expect(trigger).toHaveFocus()
+    await userEvent.keyboard('s')
+    await waitFor(() => expect(trigger).toHaveTextContent('Savings'))
+    for (const key of ['{ArrowUp}', '{Enter}', ' ']) {
+      await userEvent.keyboard(key)
+      await body.findByRole('dialog', { name: 'Account' })
+      await userEvent.keyboard('{Escape}')
+      await waitFor(() => expect(trigger).toHaveFocus())
+    }
+    await userEvent.click(canvas.getByRole('button', { name: 'Submit' }))
+    await expect(canvas.getByLabelText('Submitted')).toHaveTextContent(
+      'savings'
+    )
+  },
+}

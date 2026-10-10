@@ -342,3 +342,48 @@ export const Showcase: Story = {
     await expect(body.queryByRole('listbox')).not.toBeInTheDocument()
   },
 }
+
+export const MobileSelection: Story = {
+  render: () => <Demo custom />,
+  globals: { viewport: { value: 'zerro499' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('combobox', { name: 'Choose accounts' })
+    await userEvent.click(trigger)
+    const sheet = await body.findByRole('dialog', { name: 'Accounts' })
+    await expect(sheet).toHaveAttribute('data-side', 'bottom')
+    await userEvent.click(
+      body.getByRole('option', { name: 'Savings account EUR' })
+    )
+    await expect(sheet).toBeVisible()
+    await expect(canvas.getByLabelText('Selection')).toHaveTextContent(
+      'daily,savings'
+    )
+    await userEvent.click(
+      body.getByRole('option', { name: 'Everyday account CZK' })
+    )
+    await expect(canvas.getByLabelText('Selection')).toHaveTextContent(
+      /^savings$/
+    )
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(body.queryByRole('dialog')).not.toBeInTheDocument()
+    )
+    await expect(trigger).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'Submit' }))
+    await expect(canvas.getByLabelText('Submitted')).toHaveTextContent(
+      'savings'
+    )
+    await userEvent.click(trigger)
+    await expect(
+      await body.findByRole('option', { name: 'Savings account EUR' })
+    ).toHaveAttribute('aria-selected', 'true')
+    await userEvent.keyboard('{Escape}')
+  },
+}
+
+export const MobileSearch: Story = {
+  ...SearchInteraction,
+  globals: { viewport: { value: 'zerro499' } },
+}

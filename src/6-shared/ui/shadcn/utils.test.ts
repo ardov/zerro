@@ -14,3 +14,12 @@ it('lets callers override kit radii while retaining corner smoothing', () => {
     'rounded-ui-control rounded-t-sm'
   )
 })
+
+it('lets callers remove kit shadows without discarding shadow colors', () => {
+  expect(cn('shadow-ui-popover', 'shadow-none')).toBe('shadow-none')
+  expect(cn('shadow-ui-card', 'shadow-ui-popover')).toBe('shadow-ui-popover')
+  expect(cn('shadow-none', 'shadow-ui-popover')).toBe('shadow-ui-popover')
+  expect(cn('shadow-ui-popover shadow-black/10', 'shadow-none')).toBe(
+    'shadow-black/10 shadow-none'
+  )
+})

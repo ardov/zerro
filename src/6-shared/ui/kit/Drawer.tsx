@@ -55,6 +55,10 @@ export function Drawer(props: DrawerProps) {
 
 type DrawerSurfaceProps = Omit<DrawerProps, 'popup' | 'onClose'> & {
   controller: SurfaceController
+  /** Content ownership puts safe area in --kit-scroll-bottom-inset for the
+   * child scrollport, so it scrolls with the last row instead of clipping it. */
+  bottomInsetOwner?: 'drawer' | 'content'
+  id?: string
   finalFocus?: Primitive.Popup.Props['finalFocus']
   initialFocus?: Primitive.Popup.Props['initialFocus']
 }
@@ -79,6 +83,7 @@ export function BottomSheetSurface(props: Omit<DrawerSurfaceProps, 'side'>) {
 function DrawerFrame(props: DrawerSurfaceProps) {
   const {
     label,
+    id,
     'aria-describedby': descriptionId,
     title,
     initialFocus,
@@ -92,6 +97,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
     className,
     contentClassName,
     contentScrolls,
+    bottomInsetOwner = 'drawer',
   } = props
   const { open, setOpen: onOpenChange } = controller
   const back = useOverlayBack()
@@ -138,6 +144,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
           )}
         >
           <Primitive.Popup
+            id={id}
             aria-label={label}
             aria-describedby={descriptionId}
             aria-labelledby={title != null ? titleId : undefined}
@@ -175,7 +182,14 @@ function DrawerFrame(props: DrawerSurfaceProps) {
                 <span className="h-1 w-8 rounded-full bg-ui-border" />
               </div>
             )}
-            <Primitive.Content className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[max(8px,env(safe-area-inset-bottom))]">
+            <Primitive.Content
+              className={cn(
+                'flex min-h-0 flex-1 flex-col overflow-hidden',
+                bottomInsetOwner === 'drawer'
+                  ? 'pb-[max(8px,env(safe-area-inset-bottom))] [--kit-scroll-bottom-inset:0px]'
+                  : '[--kit-scroll-bottom-inset:env(safe-area-inset-bottom)]'
+              )}
+            >
               <SurfaceContent
                 disableBodySwipe={side !== 'bottom'}
                 title={title}

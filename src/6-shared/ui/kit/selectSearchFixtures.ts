@@ -1,5 +1,5 @@
 import type { SelectItem, SelectOption } from './Select'
-import type { SelectSearchOptions } from './SelectSearch'
+import type { SelectSearchOptions } from './SelectCombobox'
 
 /** Story fixture: prefer active bank accounts; search includes every account. */
 export const accountSearch: SelectSearchOptions<string> = {

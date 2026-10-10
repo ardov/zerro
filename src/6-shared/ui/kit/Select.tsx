@@ -1,9 +1,10 @@
 import { useState, type ReactElement, type ReactNode } from 'react'
 import type { PopupController } from '@/6-shared/overlays'
 import type { MultiSelectProps } from './MultiSelect'
-import { SelectSearch, type SelectSearchOptions } from './SelectSearch'
+import { SelectCombobox, type SelectSearchOptions } from './SelectCombobox'
 import { Field } from '@base-ui/react/field'
 import { Select as Primitive } from '@base-ui/react/select'
+import { useBottomSheetLayout } from './useBottomSheetLayout'
 import { ListPanel } from './ListPanel'
 import { ListRowHeader, ListRowSeparator } from './ListRow'
 import type { SelectTriggerProps } from './SelectTrigger'
@@ -105,8 +106,12 @@ export function Select<T extends string>(props: SelectProps<T>) {
 /** Internal dispatcher used by the single and multiple public controls. */
 export function SelectControl<T extends string>(props: SelectControlProps<T>) {
   const { search, ...restProps } = props
-  return search ? (
-    <SelectSearch {...restProps} search={search === true ? {} : search} />
+  const narrow = useBottomSheetLayout()
+  return search || narrow ? (
+    <SelectCombobox
+      {...restProps}
+      search={search === true ? {} : search || false}
+    />
   ) : (
     <PlainSelect {...restProps} />
   )

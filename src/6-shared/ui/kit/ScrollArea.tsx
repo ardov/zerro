@@ -2,6 +2,7 @@ import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area'
 import type { CSSProperties, ReactNode } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import './ScrollArea.css'
+import './edgeFade.css'
 
 export type ScrollAreaProps = Omit<
   ScrollAreaPrimitive.Root.Props,

@@ -5,7 +5,7 @@ import { core } from '@/zerro-core/redux'
 import type { TTagId } from '@/6-shared/types'
 import { CategoryIcon } from '@/6-shared/ui/CategoryIcon'
 import type { SelectOption } from '@/6-shared/ui/kit/Select'
-import type { SelectSearchOptions } from '@/6-shared/ui/kit/SelectSearch'
+import type { SelectSearchOptions } from '@/6-shared/ui/kit/SelectCombobox'
 import { categoryChoices, type CategoryChoicesOptions } from './model'
 
 /** Select props for categories. The option source is built once per category

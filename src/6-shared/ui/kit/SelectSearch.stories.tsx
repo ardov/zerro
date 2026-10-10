@@ -55,7 +55,7 @@ const meta = {
 - Search focuses automatically on desktop. Below 500px the panel receives focus, keeping the software keyboard closed; Tab or tapping reaches search. **search.autoFocus** explicitly overrides either default.
 - Localize **search.label**, **search.placeholder**, **search.showMoreLabel**, **emptyText**, and **clearLabel**.
 - **search.actions** holds consumer-owned buttons after the list. Pass **popup={usePopup()}** to close after an action.
-- Search uses ordinary positioning; **alignSelected** applies only without search. Mobile keyboard behavior needs testing on a real device.
+- Below 500px all selectors open in a bottom sheet; wider screens use a popup. **alignSelected** applies only to plain desktop selects. Mobile keyboard behavior needs testing on a real device.
 `,
       },
     },
@@ -218,7 +218,11 @@ export const WithoutAutofocus: Story = {
     )
     const search = await body.findByRole('combobox', { name: 'Search Account' })
     await waitFor(() =>
-      expect(body.getByRole('dialog', { name: 'Account' })).toHaveFocus()
+      expect(
+        body
+          .getByRole('dialog', { name: 'Account' })
+          .contains(canvasElement.ownerDocument.activeElement)
+      ).toBe(true)
     )
     await expect(search).not.toHaveFocus()
     await userEvent.tab()
@@ -230,6 +234,33 @@ export const MobileWithoutAutofocus: Story = {
   ...WithoutAutofocus,
   render: () => <Demo required />,
   globals: { viewport: { value: 'zerro499' } },
+  play: async context => {
+    await WithoutAutofocus.play!(context)
+    const canvas = within(context.canvasElement)
+    const body = within(context.canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('combobox', {
+      name: /Account Everyday account/,
+    })
+    await userEvent.click(trigger)
+    const sheet = await body.findByRole('dialog', { name: 'Account' })
+    await expect(sheet).toHaveAttribute('data-side', 'bottom')
+    await waitFor(() =>
+      expect(
+        Math.abs(sheet.getBoundingClientRect().bottom - window.innerHeight)
+      ).toBeLessThan(2)
+    )
+    const input = body.getByRole('combobox', { name: 'Search Account' })
+    await expect(input).not.toHaveFocus()
+    await userEvent.type(input, 'Savings')
+    await userEvent.click(
+      body.getByRole('option', { name: 'Savings account EUR' })
+    )
+    await waitFor(() =>
+      expect(body.queryByRole('dialog')).not.toBeInTheDocument()
+    )
+    await expect(trigger).toHaveTextContent('Savings account')
+    await expect(trigger).toHaveFocus()
+  },
 }
 
 export const MobileExplicitAutofocus: Story = {

@@ -4,7 +4,7 @@ import { core } from '@/zerro-core/redux'
 import { AccountIcon } from './AccountIcon'
 import { accountChoices, type AccountChoicesOptions } from './model'
 import type { SelectItem, SelectOption } from '@/6-shared/ui/kit/Select'
-import type { SelectSearchOptions } from '@/6-shared/ui/kit/SelectSearch'
+import type { SelectSearchOptions } from '@/6-shared/ui/kit/SelectCombobox'
 
 /** Select props for accounts. The option source is built once per account
  * set; search and archive grouping come from `accountChoices`. */

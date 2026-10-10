@@ -1,8 +1,11 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { useRender } from '@base-ui/react/use-render'
 import { cn } from '@/6-shared/ui/shadcn/utils'
+import './edgeFade.css'
 
 export type ListPanelProps = useRender.ComponentProps<'div'> & {
+  /** Embedded panels share their host surface and consume its scroll inset. */
+  surface?: 'popover' | 'embedded'
   header?: ReactNode
   /** Register the actual scrollport with the owning list primitive. */
   scrollRender?: useRender.ComponentProps<'div'>['render']
@@ -19,6 +22,7 @@ export type ListPanelProps = useRender.ComponentProps<'div'> & {
 export function ListPanel(props: ListPanelProps) {
   const {
     header,
+    surface = 'popover',
     scrollRender,
     actions,
     empty,
@@ -43,7 +47,15 @@ export function ListPanel(props: ListPanelProps) {
     let frame = 0
     let previousHeight = scroller.clientHeight
     const edges = () => {
-      scroller.parentElement!.dataset.fade = scrollFadeEdges(scroller)
+      // Feed the same overflow distances that Base UI supplies for ScrollArea.
+      scroller.style.setProperty(
+        '--scroll-area-overflow-y-start',
+        `${Math.max(0, scroller.scrollTop)}px`
+      )
+      scroller.style.setProperty(
+        '--scroll-area-overflow-y-end',
+        `${Math.max(0, scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop)}px`
+      )
     }
     const measure = () => {
       // Freeze the pre-filter height, including intermediate queries that match
@@ -109,9 +121,17 @@ export function ListPanel(props: ListPanelProps) {
     ref: scroll,
     props: {
       className:
-        'min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-p-1 [scrollbar-width:none]',
+        'kit-edge-fade min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none]',
       children: (
-        <div ref={content} className="flow-root p-1">
+        <div
+          ref={content}
+          className={cn(
+            'flow-root',
+            surface === 'popover'
+              ? 'p-1'
+              : 'pb-[var(--kit-scroll-bottom-inset,0px)]'
+          )}
+        >
           {children}
           {actions}
         </div>
@@ -127,10 +147,13 @@ export function ListPanel(props: ListPanelProps) {
       ...restProps,
       className: cn(
         // The surface clips at its own corners; no padding around the scrollport.
-        'flex w-80 max-w-[var(--available-width,calc(100dvw-var(--list-panel-margin,16px)*2))] flex-col overflow-hidden rounded-ui-popover rounded-smooth bg-ui-popover text-ui-primary shadow-ui-popover outline-none',
+        'flex min-h-0 flex-col overflow-hidden text-ui-primary outline-none',
+        surface === 'popover'
+          ? 'w-80 max-w-[var(--available-width,calc(100dvw-var(--list-panel-margin,16px)*2))] rounded-ui-popover rounded-smooth bg-ui-popover shadow-ui-popover max-h-[min(var(--available-height,100dvh),calc(100dvh-var(--list-panel-margin,16px)*2))]'
+          : 'w-full max-h-full',
         // The margin matches the positioner's collision padding, which sets
         // `--list-panel-margin`; standalone panels fall back to the same 16px.
-        'h-[var(--list-panel-height,auto)] max-h-[min(var(--available-height,100dvh),calc(100dvh-var(--list-panel-margin,16px)*2))]',
+        'h-[var(--list-panel-height,auto)]',
         className
       ),
       children: (
@@ -144,29 +167,9 @@ export function ListPanel(props: ListPanelProps) {
           <div ref={notice} className="shrink-0">
             {empty}
           </div>
-          <div className="group/panel-scroll relative flex min-h-0 flex-1 flex-col">
-            {scrollport}
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6 bg-linear-to-b from-ui-popover to-transparent opacity-0 group-data-[fade=top]/panel-scroll:opacity-100 group-data-[fade=both]/panel-scroll:opacity-100"
-            />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-6 bg-linear-to-t from-ui-popover to-transparent opacity-0 group-data-[fade=bottom]/panel-scroll:opacity-100 group-data-[fade=both]/panel-scroll:opacity-100"
-            />
-          </div>
+          {scrollport}
         </>
       ),
     },
   })
-}
-
-/** Which edges of a scrollport have more content past them. */
-function scrollFadeEdges(element: HTMLElement) {
-  // A pixel of slack: fractional scroll positions are ordinary at fractional
-  // zoom, and an edge a hair from the end still counts as the end.
-  const above = element.scrollTop > 1
-  const below =
-    element.scrollTop + element.clientHeight < element.scrollHeight - 1
-  return above && below ? 'both' : above ? 'top' : below ? 'bottom' : ''
 }

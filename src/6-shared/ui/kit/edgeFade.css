@@ -1,0 +1,31 @@
+@layer components {
+  /* Fades the rows into the surface at an edge with more past it. A mask on
+     the viewport fades only what scrolls: the surface is the root behind it,
+     so its background and shadow stay whole. The fade grows with the
+     distance from the edge, up to its full height, so it settles in as the
+     list leaves its end rather than snapping on.
+
+     The scroll padding matches the fade: a row brought into view at an edge,
+     by arrow keys in a menu, stops clear of the fade instead of half in it. */
+  .kit-edge-fade {
+    --kit-fade-size: 24px;
+    --kit-fade-start: min(
+      var(--scroll-area-overflow-y-start, 0px),
+      var(--kit-fade-size)
+    );
+    --kit-fade-end: min(
+      var(--scroll-area-overflow-y-end, 0px),
+      var(--kit-fade-size)
+    );
+
+    scroll-padding-block: var(--kit-fade-size)
+      calc(var(--kit-fade-size) + var(--kit-scroll-bottom-inset, 0px));
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--kit-fade-start),
+      #000 calc(100% - var(--kit-fade-end)),
+      transparent
+    );
+  }
+}
