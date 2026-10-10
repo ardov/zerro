@@ -6,6 +6,7 @@ import './edgeFade.css'
 export type ListPanelProps = useRender.ComponentProps<'div'> & {
   /** Embedded panels share their host surface and consume its scroll inset. */
   surface?: 'popover' | 'embedded'
+  /** Fixed header aligned with the rows; a 4px gap scrolls with the list. */
   header?: ReactNode
   /** Register the actual scrollport with the owning list primitive. */
   scrollRender?: useRender.ComponentProps<'div'>['render']
@@ -33,6 +34,7 @@ export function ListPanel(props: ListPanelProps) {
     ref,
     ...restProps
   } = props
+  const hasHeader = header != null && typeof header !== 'boolean'
   const [panel, setPanel] = useState<HTMLElement | null>(null)
   const head = useRef<HTMLDivElement>(null)
   const notice = useRef<HTMLDivElement>(null)
@@ -129,7 +131,10 @@ export function ListPanel(props: ListPanelProps) {
             'flow-root',
             surface === 'popover'
               ? 'p-1'
-              : 'pb-[var(--kit-scroll-bottom-inset,0px)]'
+              : cn(
+                  'pb-[var(--kit-scroll-bottom-inset,0px)]',
+                  hasHeader && 'pt-1'
+                )
           )}
         >
           {children}
@@ -160,7 +165,11 @@ export function ListPanel(props: ListPanelProps) {
         <>
           <div
             ref={head}
-            className={cn('shrink-0', header != null && 'px-1 pt-1')}
+            className={cn(
+              'shrink-0',
+              hasHeader && 'pt-1',
+              hasHeader && surface === 'popover' && 'px-1'
+            )}
           >
             {header}
           </div>

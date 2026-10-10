@@ -25,6 +25,7 @@ const meta = {
 
 - Compose with a Base UI Popup through **render**; focus and list semantics belong to the owner.
 - **surface="embedded"** fills a host surface without its own background, shadow or outer padding. Its scrollport consumes **--kit-scroll-bottom-inset** for both content spacing and keyboard scrolling.
+- The header and rows share horizontal edges in both surfaces. A **4px** gap before the first row belongs to the scrolling content; embedded lists without a header have no top gap.
 - Set **preserveHeight** while filtering to freeze the previous height, including for an empty result. Clear it for natural sizing or explicit expansion. Unmount between openings to reset.
 - Put an empty result in **empty**, not in the children: a listbox scrollport holds options, so a message inside it would be orphan text.
 - **useListPanelPositioning** supplies visible-viewport bounds to Base UI. It does not position anything itself. Override width for field-aligned or custom triggers.
@@ -35,6 +36,59 @@ const meta = {
 } satisfies Meta<typeof ListPanel>
 export default meta
 type Story = StoryObj<typeof meta>
+
+export const HeaderGeometry: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-8">
+      {(['popover', 'embedded'] as const).map(surface => (
+        <ListPanel
+          key={surface}
+          surface={surface}
+          className="w-80 max-h-60"
+          data-testid={surface}
+          header={
+            <div data-testid="search-field">
+              <Input label={`${surface} search`} readOnly />
+            </div>
+          }
+        >
+          {accounts.slice(0, 20).map((name, index) => (
+            <ListRow key={name} selected={index === 0}>
+              {name}
+            </ListRow>
+          ))}
+        </ListPanel>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    for (const surface of ['popover', 'embedded']) {
+      const panel = within(canvas.getByTestId(surface))
+      const field = panel.getByTestId('search-field')
+      const first = panel.getByText('Account 001')
+      const row = first.closest('[data-selected]')!
+      await waitFor(() => {
+        const fieldBounds = field.getBoundingClientRect()
+        const rowBounds = row.getBoundingClientRect()
+        expect(rowBounds.left).toBeCloseTo(fieldBounds.left, 1)
+        expect(rowBounds.right).toBeCloseTo(fieldBounds.right, 1)
+        expect(rowBounds.top - fieldBounds.bottom).toBeCloseTo(4, 1)
+      })
+      // The gap belongs to the scrolling content, not to the fixed header.
+      let scrollport = row.parentElement!
+      while (getComputedStyle(scrollport).overflowY !== 'auto')
+        scrollport = scrollport.parentElement!
+      scrollport.scrollTop = 4
+      await waitFor(() =>
+        expect(row.getBoundingClientRect().top).toBeCloseTo(
+          field.getBoundingClientRect().bottom,
+          1
+        )
+      )
+    }
+  },
+}
 
 export const Showcase: Story = {
   render: () => (
@@ -284,6 +338,7 @@ export const EmbeddedSurface: Story = {
         surface="embedded"
         className="max-h-60"
         aria-label="Embedded list"
+        header={false}
       >
         {accounts.slice(0, 20).map(name => (
           <ListRow key={name} render={<button type="button" />}>
@@ -302,6 +357,10 @@ export const EmbeddedSurface: Story = {
     await expect(getComputedStyle(panel).boxShadow).toBe('none')
     const first = canvas.getByRole('button', { name: 'Account 001' })
     const last = canvas.getByRole('button', { name: 'Account 020' })
+    await expect(first.getBoundingClientRect().top).toBeCloseTo(
+      panel.getBoundingClientRect().top,
+      1
+    )
     let scrollport: HTMLElement | null = first
     while (scrollport && getComputedStyle(scrollport).overflowY !== 'auto')
       scrollport = scrollport.parentElement
