@@ -15,6 +15,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       filename: 'service-worker.js',
       workbox: {
+        importScripts: ['favicon-cache-sw.js'],
         // Account marks are separate assets but must work with offline accounts.
         globPatterns: ['**/*.{js,wasm,css,html}', 'assets/ic_bank_*.svg'],
         // Increase the default 2,097,152 (2MiB) limit

@@ -27,6 +27,7 @@ import {
   ListRowText,
 } from '@/6-shared/ui/ListRow'
 import { Divider } from '@/6-shared/ui/kit/Divider'
+import { clearFaviconCache } from '@/6-shared/favicon-cache'
 import { track } from '@/6-shared/analytics'
 import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
 import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
@@ -85,6 +86,7 @@ const Settings = (props: { onClose: () => void }) => {
       {isExpanded ? (
         <>
           <IconModeItem />
+          <ClearIconCacheItem />
           <BudgetSettingsItem />
         </>
       ) : (
@@ -347,6 +349,31 @@ function IconModeItem() {
         <CategoryIcon />
       </ListRowIcon>
       <ListRowText>{t(emojiIcons ? 'useIcons' : 'useEmojis')}</ListRowText>
+    </ActionListItem>
+  )
+}
+
+function ClearIconCacheItem() {
+  const { t } = useTranslation('settings')
+  const snackbar = useSnackbar()
+  const [clearing, setClearing] = useState(false)
+  const clear = async () => {
+    setClearing(true)
+    try {
+      await clearFaviconCache()
+      snackbar({ message: t('iconCacheCleared') })
+    } catch {
+      snackbar({ message: t('iconCacheClearFailed') })
+    } finally {
+      setClearing(false)
+    }
+  }
+  return (
+    <ActionListItem onClick={clear} disabled={clearing}>
+      <ListRowIcon>
+        <SyncIcon />
+      </ListRowIcon>
+      <ListRowText>{t('clearIconCache')}</ListRowText>
     </ActionListItem>
   )
 }

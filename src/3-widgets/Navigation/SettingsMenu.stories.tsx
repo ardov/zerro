@@ -81,3 +81,43 @@ export const MobileEntrance: Story = {
     )
   },
 }
+
+const checkClearIconCache: Story['play'] = async ({ canvasElement }) => {
+  const cacheName = 'zerro-favicons-v1'
+  const unrelatedName = 'settings-story-unrelated'
+  const cache = await caches.open(cacheName)
+  await cache.put('/cached-icon', new Response('icon'))
+  const unrelated = await caches.open(unrelatedName)
+  await unrelated.put('/unrelated', new Response('keep'))
+  try {
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      within(canvasElement).getByRole('button', { name: 'Settings' })
+    )
+    const list = await body.findByRole('toolbar', { name: 'Settings' })
+    await userEvent.click(
+      within(list).getByRole('button', { name: 'Advanced settings...' })
+    )
+    await userEvent.click(
+      within(list).getByRole('button', { name: 'Clear icon cache' })
+    )
+    await body.findByText('Icon cache cleared')
+    await expect(await caches.has(cacheName)).toBe(false)
+    await expect(await (await unrelated.match('/unrelated'))?.text()).toBe(
+      'keep'
+    )
+  } finally {
+    await caches.delete(cacheName)
+    await caches.delete(unrelatedName)
+  }
+}
+
+export const ClearIconCache: Story = {
+  tags: ['!dev', '!autodocs'],
+  play: checkClearIconCache,
+}
+export const ClearIconCacheMobile: Story = {
+  tags: ['!dev', '!autodocs'],
+  globals: { viewport: { value: 'iphone13' } },
+  play: checkClearIconCache,
+}

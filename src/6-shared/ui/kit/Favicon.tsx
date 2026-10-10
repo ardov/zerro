@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { faviconUrl, reportFaviconLoad } from '@/6-shared/favicon-cache'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 
 export type FaviconProps = {
@@ -12,6 +13,9 @@ export function Favicon({ domain, fallback }: FaviconProps) {
 }
 
 function FaviconImage({ domain, fallback }: FaviconProps) {
+  const [requestId] = useState(() =>
+    navigator.serviceWorker?.controller ? crypto.randomUUID() : undefined
+  )
   const [size, setSize] = useState<48 | 32 | null>(48)
   const [loaded, setLoaded] = useState(false)
 
@@ -34,12 +38,16 @@ function FaviconImage({ domain, fallback }: FaviconProps) {
         >
           <img
             key={size}
-            src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=${size}`}
+            src={faviconUrl(domain, size, requestId)}
             alt=""
             referrerPolicy="no-referrer"
             className="size-4 rounded-[2px] object-contain"
-            onLoad={() => setLoaded(true)}
-            onError={() => {
+            onLoad={event => {
+              reportFaviconLoad(event.currentTarget.src, true)
+              setLoaded(true)
+            }}
+            onError={event => {
+              reportFaviconLoad(event.currentTarget.src, false)
               setLoaded(false)
               setSize(size === 48 ? 32 : null)
             }}
