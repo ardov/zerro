@@ -38,7 +38,11 @@ const buttonVariants = cva(
           'bg-ui-error/10 text-ui-error hover:bg-ui-error/20 focus-visible:border-ui-error/40 focus-visible:ring-ui-error/20 dark:bg-ui-error/20 dark:hover:bg-ui-error/30 dark:focus-visible:ring-ui-error/40',
         ],
       },
+      muted: { true: null, false: null },
     },
+    compoundVariants: [
+      { variant: 'ghost', muted: true, class: 'text-ui-secondary' },
+    ],
     defaultVariants: {
       variant: 'primary',
     },
@@ -66,6 +70,8 @@ type ButtonVariants = {
 export type ButtonProps = Omit<ButtonPrimitive.Props, 'className'> &
   Partial<ButtonVariants> & {
     className?: string
+    /** Secondary foreground for ghost buttons; hover and expanded stay primary. */
+    muted?: boolean
   }
 
 export type IconButtonProps = Omit<ButtonProps, 'aria-label'> & {
@@ -84,12 +90,18 @@ const buttonOptions: {
   size: ['lg', 'sm', 'xs'],
 }
 
-function Button({ className, variant, size = 'lg', ...props }: ButtonProps) {
+function Button({
+  className,
+  variant,
+  muted,
+  size = 'lg',
+  ...props
+}: ButtonProps) {
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(
-        buttonVariants({ variant }),
+        buttonVariants({ variant, muted }),
         geometry.regular[size],
         className
       )}
@@ -105,6 +117,7 @@ function IconButton({
   shape = 'rounded',
   className,
   variant,
+  muted,
   size = 'lg',
   ...props
 }: IconButtonProps) {
@@ -113,7 +126,7 @@ function IconButton({
       <ButtonPrimitive
         data-slot="icon-button"
         className={cn(
-          buttonVariants({ variant }),
+          buttonVariants({ variant, muted }),
           geometry.icon[size],
           'kit-button-icon',
           shape === 'circle' && 'rounded-full [corner-shape:round]',

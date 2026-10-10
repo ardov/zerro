@@ -14,6 +14,9 @@ import { useDestinations } from './destinations'
  * gap under it — wider over a home indicator. */
 const BAR = { top: 4, height: 48, bottom: 4, bottomOverHomeBar: 20 }
 
+const barSurfaceClass =
+  'bg-white/90 shadow-elevation-1 inset-ring-1 inset-ring-ui-border backdrop-blur-[1.5px] dark:bg-black/90'
+
 /** The bottom bar of a narrow window: destinations and settings as icons, and
  * Sync beside them as a separate round button — it is an action, not a
  * place. About moves into the settings menu.
@@ -56,7 +59,10 @@ export const MobileNavigation: FC<{
       }}
     >
       <div
-        className="flex grow items-stretch overflow-hidden rounded-lg bg-ui-card shadow-elevation-1"
+        className={cn(
+          'flex grow items-stretch overflow-hidden rounded-lg',
+          barSurfaceClass
+        )}
         style={{ height: BAR.height }}
       >
         {destinations.map(destination => {
@@ -82,8 +88,13 @@ export const MobileNavigation: FC<{
           <SettingsIcon />
         </button>
       </div>
-      <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-ui-card shadow-elevation-1">
-        <RefreshButton shape="circle" />
+      <div
+        className={cn(
+          'flex size-12 shrink-0 items-center justify-center rounded-full',
+          barSurfaceClass
+        )}
+      >
+        <RefreshButton shape="circle" muted />
       </div>
     </nav>
   )

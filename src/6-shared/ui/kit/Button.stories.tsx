@@ -14,7 +14,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Use buttons for actions. Choose primary for the main action, secondary or ghost for supporting actions, and destructive for removal. IconButton needs an accessible label. Sizes are lg (48px), sm (40px) and xs (32px). IconButton shape defaults to rounded; choose circle for standalone actions. Explore sizes, icons and disabled states below.',
+          'Use buttons for actions. Choose primary for the main action, secondary or ghost for supporting actions, and destructive for removal. Set muted on ghost Button or IconButton for a secondary foreground at rest; hover and expanded states remain primary. Other variants keep their own foreground. IconButton needs an accessible label. Sizes are lg (48px), sm (40px) and xs (32px). IconButton shape defaults to rounded; choose circle for standalone actions. Explore sizes, icons and disabled states below.',
       },
     },
     controls: { disable: true },
@@ -25,10 +25,12 @@ const meta = {
     variant: 'primary',
     size: 'lg',
     disabled: false,
+    muted: false,
   },
   argTypes: {
     variant: { control: 'select', options: variants },
     size: { control: 'select', options: buttonOptions.size },
+    muted: { control: 'boolean' },
   },
   decorators: [
     Story => (
@@ -44,6 +46,39 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Playground: Story = {}
+
+export const Muted: Story = {
+  render: () => (
+    <div className="flex items-center gap-3">
+      <span hidden data-testid="primary" className="text-ui-primary" />
+      <span hidden data-testid="secondary" className="text-ui-secondary" />
+      <Button variant="ghost">Normal action</Button>
+      <Button variant="ghost" muted>
+        Muted action
+      </Button>
+      <IconButton variant="ghost" muted label="Muted icon">
+        <AddIcon />
+      </IconButton>
+      <Button variant="ghost" muted aria-expanded>
+        Expanded action
+      </Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const primary = getComputedStyle(canvas.getByTestId('primary')).color
+    const secondary = getComputedStyle(canvas.getByTestId('secondary')).color
+    for (const name of ['Normal action', 'Expanded action'])
+      expect(getComputedStyle(canvas.getByRole('button', { name })).color).toBe(
+        primary
+      )
+    for (const name of ['Muted action', 'Muted icon']) {
+      const button = canvas.getByRole('button', { name })
+      expect(getComputedStyle(button).color).toBe(secondary)
+      expect(button).not.toHaveAttribute('muted')
+    }
+  },
+}
 
 export const Showcase: Story = {
   render: () => (

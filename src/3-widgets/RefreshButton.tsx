@@ -19,7 +19,7 @@ import { useRegularSync } from '@/3-widgets/RegularSyncHandler'
 type ButtonState = 'idle' | 'pending' | 'stopped' | 'success' | 'fail'
 type RefreshButtonProps = Pick<
   IconButtonProps,
-  'className' | 'shape' | 'tooltipSide'
+  'className' | 'shape' | 'tooltipSide' | 'muted'
 >
 
 const RefreshButton: FC<RefreshButtonProps> = props => {
