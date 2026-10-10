@@ -15,9 +15,9 @@ version. It is intentionally separate from application-owned artwork.
 Category assets are rendered as CSS masks, so their original fill colours are
 ignored and the visible colour is inherited from `currentColor`. Bank assets
 retain their original colours and are rendered by the shared account
-`AccountIcon` in account lists and selectors. Their 20px image has a white
-backing for artwork with dark details; it does not recolour the logo. Missing
-bank IDs and failed images fall back to the theme-aware account glyph.
+`AccountIcon` in account lists and selectors. Their 20px image is rendered
+without an added background or corner clipping. Missing bank IDs and failed
+images fall back to the theme-aware account glyph.
 Bank SVGs are emitted as separate files rather than inlined into application
 JavaScript and included in the service worker's precache for offline use.
 Lookup needs no network request to the company directory and no name matching.

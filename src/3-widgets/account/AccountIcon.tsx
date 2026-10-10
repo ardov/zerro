@@ -21,7 +21,7 @@ export function AccountIcon({
         aria-hidden
         width={20}
         height={20}
-        className="size-5 shrink-0 rounded-sm bg-white object-contain"
+        className="size-5 shrink-0 object-contain"
         onError={() => setFailedUrl(url)}
       />
     )
