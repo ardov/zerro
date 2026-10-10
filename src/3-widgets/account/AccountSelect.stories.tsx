@@ -13,6 +13,7 @@ import { ZERRO_DATA_ACCOUNT_NAME } from '@/zerro-core/constants'
 import { Button } from '@/6-shared/ui/kit/Button'
 import { AccountSelect } from './AccountSelect'
 import { AccountMultiSelect } from './AccountMultiSelect'
+import { bankIconById } from '@/6-shared/zenmoney-assets/bankIcons'
 const meta = {
   title: 'App/Accounts/Selectors',
   parameters: { app: { scenario: 'demo' }, layout: 'centered' },
@@ -27,13 +28,25 @@ function Fixtures({ children }: { children: ReactNode }) {
         makeStore({
           account: {
             cash: makeAccount({ id: 'cash', title: 'Cash', archive: false }),
-            bank: makeAccount({ id: 'bank', title: 'Bank', archive: false }),
+            bank: makeAccount({
+              id: 'bank',
+              title: 'Bank',
+              archive: false,
+              company: 12574,
+              type: 'ccard',
+            }),
             service: makeAccount({
               id: 'service',
               title: ZERRO_DATA_ACCOUNT_NAME,
               archive: true,
             }),
-            old: makeAccount({ id: 'old', title: 'Old bank', archive: true }),
+            old: makeAccount({
+              id: 'old',
+              title: 'Old bank',
+              archive: true,
+              company: 4417,
+              type: 'checking',
+            }),
           },
         })
       ),
@@ -133,6 +146,10 @@ export const Multiple: Story = {
     await expect(
       await body.findByRole('option', { name: /^Old bank/ })
     ).toHaveAttribute('aria-selected', 'true')
+    const image = body
+      .getByRole('option', { name: /^Old bank/ })
+      .querySelector('img')!
+    await waitFor(() => expect(image.naturalWidth).toBeGreaterThan(0))
     await userEvent.click(body.getByRole('option', { name: /^Cash/ }))
     await expect(canvas.getByLabelText('Selection')).toHaveTextContent(
       'old,cash'
@@ -141,6 +158,44 @@ export const Multiple: Story = {
     await expect(canvas.getByLabelText('Selection')).toHaveTextContent(/^cash$/)
     await expect(body.getByRole('listbox')).toBeVisible()
   },
+}
+
+function BankMarksDemo() {
+  const [value, setValue] = useState('bank')
+  return (
+    <Fixtures>
+      <AccountSelect label="Account" value={value} onChange={setValue} />
+    </Fixtures>
+  )
+}
+
+export const BankMarks: Story = {
+  render: () => <BankMarksDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const trigger = canvas.getByRole('combobox', { name: 'Account Bank' })
+    const selectedImage = canvasElement.querySelector('img')!
+    await waitFor(() => expect(selectedImage.naturalWidth).toBeGreaterThan(0))
+    await userEvent.click(trigger)
+    const bank = await body.findByRole('option', { name: /^Bank/ })
+    const image = bank.querySelector('img')!
+    expect(image).toHaveAttribute('src', bankIconById[12574])
+    expect(image).toHaveAttribute('alt', '')
+    await waitFor(() => expect(image.naturalWidth).toBeGreaterThan(0))
+    expect(image.getBoundingClientRect().width).toBe(20)
+    expect(image.getBoundingClientRect().height).toBe(20)
+    const cash = body.getByRole('option', { name: /^Cash/ })
+    expect(cash.querySelector('img')).toBeNull()
+    await userEvent.click(cash)
+    await waitFor(() => expect(trigger).toHaveTextContent('Cash'))
+    expect(canvasElement.querySelector('img')).toBeNull()
+  },
+}
+
+export const MobileBankMarks: Story = {
+  ...BankMarks,
+  globals: { viewport: { value: 'zerro499' } },
 }
 
 export const SelectedServiceAccount: Story = {

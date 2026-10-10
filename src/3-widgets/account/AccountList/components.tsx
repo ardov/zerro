@@ -16,6 +16,7 @@ import { AccountMenu } from '@/3-widgets/global/AccountContextMenu'
 import { useAsk } from '@/6-shared/overlays'
 import { useContextMenu } from '@/6-shared/hooks/useContextMenu'
 import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
+import { AccountIcon } from '../AccountIcon'
 
 export const Account: FC<
   { account: core.accounts.TAccountPopulated } & Omit<
@@ -47,6 +48,9 @@ export const Account: FC<
       {...rest}
       {...propsToPass}
     >
+      <span className="mr-2 flex shrink-0 items-center">
+        <AccountIcon account={account} />
+      </span>
       <div
         className={cn(
           'relative min-w-0 grow overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_left,transparent,black_40px)]',
