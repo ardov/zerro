@@ -131,3 +131,23 @@ export const CrossFieldSearch: Story = {
     await userEvent.keyboard('{Enter}')
   },
 }
+
+export const HiddenActionsPassThrough: Story = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText('Lunch groceries')
+    const bar = canvasElement.querySelector<HTMLElement>('.actions-transition')!
+    const wrapper = bar.parentElement!
+    const rect = wrapper.getBoundingClientRect()
+    const hit = canvasElement.ownerDocument.elementFromPoint(
+      rect.x + rect.width / 2,
+      rect.y + rect.height / 2
+    )
+    await expect(hit).not.toBe(wrapper)
+    await expect(wrapper.contains(hit)).toBe(false)
+  },
+}
+
+export const HiddenActionsPassThroughMobile: Story = {
+  ...HiddenActionsPassThrough,
+  globals: { viewport: { value: 'zerro499' } },
+}

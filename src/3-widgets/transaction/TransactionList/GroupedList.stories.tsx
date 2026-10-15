@@ -66,3 +66,27 @@ export const Mobile: Story = {
   globals: { viewport: { value: 'zerro499' } },
   play: check,
 }
+
+export const WideListAlignment: Story = {
+  render: () => (
+    <div style={{ width: 850, height: 300 }}>
+      <GroupedList
+        groups={[{ date: '2026-09-20', ids: ['row'] }]}
+        renderTransaction={id => (
+          <div key={id} data-testid="wide-row" style={{ height: 72 }}>
+            {id}
+          </div>
+        )}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const row = await within(canvasElement).findByTestId('wide-row')
+    const scroller = canvasElement.querySelector('[role="list"]')!
+    const rowRect = row.getBoundingClientRect()
+    const listRect = scroller.getBoundingClientRect()
+    await expect(
+      Math.abs(rowRect.x + rowRect.width / 2 - listRect.x - listRect.width / 2)
+    ).toBeLessThan(1)
+  },
+}

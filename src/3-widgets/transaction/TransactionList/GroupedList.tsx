@@ -220,14 +220,14 @@ const Day = (props: RowComponentProps<DayData>): React.ReactElement => {
   const { index, style, groups, onDateClick, renderTransaction } = props
   const group = groups[index]
   return (
-    <div style={{ ...groupStyle, ...style }}>
-      {/* Sticky is handled by the overlay header in GroupedList, because
-          react-window's row transform breaks native `position: sticky`. */}
-      <ListRowSubheader onClick={() => onDateClick(group.date)}>
-        {formatDate(group.date)}
-      </ListRowSubheader>
+    <div style={style}>
+      <div style={groupStyle}>
+        <ListRowSubheader onClick={() => onDateClick(group.date)}>
+          {formatDate(group.date)}
+        </ListRowSubheader>
 
-      {group.ids.map(renderTransaction)}
+        {group.ids.map(renderTransaction)}
+      </div>
     </div>
   )
 }
