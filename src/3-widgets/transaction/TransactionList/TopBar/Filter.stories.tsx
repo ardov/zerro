@@ -86,16 +86,14 @@ export const Flags: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    for (const name of ['Only New', 'Show Deleted']) {
+    for (const name of ['New', 'Including deleted']) {
       const chip = canvas.getByRole('button', { name })
       await userEvent.click(chip)
       await expect(chip).toBeInTheDocument()
       await userEvent.keyboard('{Enter}{Space}')
       expect(readQuery(canvasElement).clauses).toHaveLength(2)
     }
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'Remove Only New' })
-    )
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove New' }))
     expect(readQuery(canvasElement).clauses).toEqual([
       { kind: 'deleted', mode: 'include' },
     ])
@@ -289,9 +287,7 @@ export const DirectTypeSelection: Story = {
     const canvas = within(canvasElement),
       body = within(canvasElement.ownerDocument.body)
     await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await userEvent.click(
-      await body.findByRole('menuitem', { name: 'Type of Transaction' })
-    )
+    await userEvent.click(await body.findByRole('menuitem', { name: 'Type' }))
     await userEvent.click(await body.findByRole('option', { name: 'Income' }))
     await userEvent.click(body.getByRole('option', { name: 'Expense' }))
     expect(readQuery(canvasElement).clauses[0].values).toHaveLength(2)
@@ -323,7 +319,7 @@ export const AmountRange: Story = {
     expect(readQuery(canvasElement).clauses).toEqual([
       { kind: 'amount', gte: 100, lte: 500 },
     ])
-    const chip = canvas.getByRole('button', { name: 'Amount: 100–500' })
+    const chip = canvas.getByRole('button', { name: '100–500' })
     await waitFor(() => expect(chip).toHaveFocus())
     await userEvent.click(chip)
     await userEvent.clear(
@@ -545,7 +541,7 @@ export const NarrowWrapping: Story = {
       expect(search.querySelector('[data-overflow]')).not.toBeNull()
     )
     const add = canvas.getByRole('button', { name: 'Add filter' })
-    const last = canvas.getByRole('button', { name: 'Amount from 12' })
+    const last = canvas.getByRole('button', { name: 'From 12' })
     await waitFor(() =>
       expect(
         Math.abs(
@@ -646,13 +642,9 @@ export const SearchClearAndBlur: Story = {
       canvas.getByRole('button', { name: 'Search transactions' })
     )
     await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await userEvent.click(
-      await body.findByRole('menuitem', { name: 'Only New' })
-    )
+    await userEvent.click(await body.findByRole('menuitem', { name: 'New' }))
     await waitFor(() =>
-      expect(
-        canvas.getByRole('button', { name: 'Only New' })
-      ).toBeInTheDocument()
+      expect(canvas.getByRole('button', { name: 'New' })).toBeInTheDocument()
     )
     await expect(
       canvas.getByRole('button', { name: 'Search transactions' })
@@ -684,7 +676,7 @@ export const LastModified: Story = {
       clauses: [{ kind: 'changed', period: '7d' }],
     })
     await expect(
-      canvas.getByRole('button', { name: 'Modified in the last 7 days' })
+      canvas.getByRole('button', { name: 'Modified in 7d' })
     ).toHaveFocus()
     await expect(readQuery(canvasElement).clauses).toEqual([
       { kind: 'changed', period: '7d' },
@@ -693,7 +685,7 @@ export const LastModified: Story = {
       'Lunch'
     )
     await userEvent.click(
-      canvas.getByRole('button', { name: 'Modified in the last 7 days' })
+      canvas.getByRole('button', { name: 'Modified in 7d' })
     )
     const yesterday = await body.findByText('Yesterday', { exact: true })
     await userEvent.click(yesterday)

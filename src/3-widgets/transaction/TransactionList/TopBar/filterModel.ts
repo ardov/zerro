@@ -153,13 +153,13 @@ export function getAmountLabel(
     new Intl.NumberFormat(language).format(value)
 
   if (clause.gte !== undefined && clause.lte !== undefined) {
-    if (clause.gte === clause.lte)
-      return `${t('amount')}: ${format(clause.gte)}`
-    return `${t('amount')}: ${format(clause.gte)}–${format(clause.lte)}`
+    if (clause.gte === clause.lte) return format(clause.gte)
+    return `${format(clause.gte)}–${format(clause.lte)}`
   }
   if (clause.gte !== undefined)
-    return `${t('amountFrom')} ${format(clause.gte)}`
-  if (clause.lte !== undefined) return `${t('amountTo')} ${format(clause.lte)}`
+    return `${t('amountFromShort')} ${format(clause.gte)}`
+  if (clause.lte !== undefined)
+    return `${t('amountToShort')} ${format(clause.lte)}`
   return t('amount')
 }
 
@@ -211,7 +211,7 @@ export function joinLabels<T>(
 ): string {
   const labels = values.map(getLabel)
   if (labels.length <= 2) return labels.join(', ')
-  return `${labels.slice(0, 2).join(', ')} +${labels.length - 2}`
+  return `${labels[0]} +${labels.length - 1}`
 }
 
 export function getChangedPeriodLabel(
