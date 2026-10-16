@@ -21,6 +21,8 @@ export function useContextMenu(props: {
   onClick?: (event: React.MouseEvent) => void
   threshold?: number
 }) {
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(timer.current), [])
   const threshold = props.threshold || waitBeforeContextMenu
   const contextMenuCb = useRef(props.onContextMenu)
   const onClickCb = useRef(props.onClick)
@@ -43,14 +45,13 @@ export function useContextMenu(props: {
       }
     }
 
-    let timer: NodeJS.Timeout | undefined
     let clientX = 0
     let clientY = 0
     let lastCalledContext = 0
 
     const clear = () => {
-      clearTimeout(timer)
-      timer = undefined
+      clearTimeout(timer.current)
+      timer.current = undefined
     }
 
     // Handle touch start
@@ -58,7 +59,7 @@ export function useContextMenu(props: {
       clientX = event.touches[0].clientX
       clientY = event.touches[0].clientY
       clear()
-      timer = setTimeout(() => {
+      timer.current = setTimeout(() => {
         lastCalledContext = Date.now()
         contextMenuCb.current?.(event)
       }, threshold)
@@ -95,6 +96,7 @@ export function useContextMenu(props: {
       onTouchStart,
       onTouchMove,
       onTouchEnd,
+      onTouchCancel: onTouchEnd,
       onContextMenu,
       onClick,
       style,

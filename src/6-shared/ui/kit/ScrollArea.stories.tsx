@@ -94,10 +94,9 @@ export const Showcase: Story = {
   ),
 }
 
-/** The viewport is the root's first presentational descendant; the content
- * is inside it. */
+/** Target the actual viewport, not Base UI's presentational wrappers. */
 const viewportOf = (root: HTMLElement) =>
-  root.querySelector<HTMLElement>('[role="presentation"]')!
+  root.querySelector<HTMLElement>('.kit-scroll-viewport')!
 
 /** The viewport stays out of the tab order: Tab goes from the button before
  * the area straight to the first control inside it. */
@@ -228,7 +227,7 @@ export const BottomInset: Story = {
   render: () => (
     <ScrollArea
       className={`h-60 w-72 ${surface}`}
-      bottomInset="40px"
+      insetBottom="40px"
       data-testid="outer"
     >
       {rows(10)}
@@ -244,5 +243,34 @@ export const BottomInset: Story = {
     await expect(getComputedStyle(outer).paddingBottom).toBe('40px')
     await expect(getComputedStyle(outer).scrollPaddingBottom).toBe('40px')
     await expect(getComputedStyle(inner).paddingBottom).toBe('0px')
+  },
+}
+
+export const TopOverlayInset: Story = {
+  tags: ['!dev', '!autodocs'],
+  render: () => (
+    <ScrollArea className="h-60 w-72" insetTop="48px" data-testid="outer">
+      <div style={{ paddingTop: 48 }}>
+        {rows(10)}
+        <ScrollArea className="h-20" data-testid="inner">
+          {rows(5)}
+        </ScrollArea>
+      </div>
+    </ScrollArea>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const outer = canvas.getByTestId('outer')
+    await expect(getComputedStyle(viewportOf(outer)).scrollPaddingTop).toBe(
+      '48px'
+    )
+    await expect(getComputedStyle(viewportOf(outer)).paddingTop).toBe('0px')
+    await expect(
+      getComputedStyle(viewportOf(canvas.getByTestId('inner'))).scrollPaddingTop
+    ).toBe('0px')
+    await expect(
+      getComputedStyle(outer.querySelector(':scope > .kit-scrollbar')!)
+        .marginTop
+    ).toBe('52px')
   },
 }

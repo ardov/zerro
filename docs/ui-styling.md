@@ -138,11 +138,13 @@ A scrolling surface follows four rules. Each one prevents a specific artifact:
 - **Overlaps are insets inside the scroll.** The bottom bar measures how much
   of the window it covers, and the layout sets that as `--bottom-inset` on
   the canvas, so every page scroller sees it and no overlay does. `Panel` is
-  a kit `ScrollArea` with `bottomInset`: the inset goes at the end of the
+  a kit `ScrollArea` with `insetBottom`: the inset goes at the end of the
   content, into `scroll-padding-bottom` and under the thumb's track. Content
   then scrolls on under the bar instead of stopping above it. A panel whose
   content brings its own scroller, such as a virtual list, sets
-  `contentScrolls` and gives that scroller `scrollInsetClass`.
+  `contentScrolls` and passes `insetBottom={bottomBarInset}` to its nested
+  `ScrollArea`. For a top overlay, `insetTop` reserves native scroll padding
+  and shortens the track; the content supplies its own leading space.
 
 Every flex ancestor between `h-dvh` and a scroller needs `min-h-0` (or
 `min-w-0` across). Without it the item grows to its content, and the window
@@ -381,11 +383,27 @@ The content has its natural height, so percentages inside it have nothing
 to resolve against. To pin a footer to the bottom of short content, the
 content takes `flex min-h-full flex-col` and the footer `mt-auto`.
 
-Two scrollers stay native, with the scrollbar hidden. `ListPanel` scrolls the
-list primitive's own element, which owns scroll-to-selected and keyboard
-navigation; a ScrollArea viewport rendered as that element would replace its
-listbox role. The transaction list is virtualized by react-window, whose list
-element is its own scroller and takes no outside ref.
+`ListPanel` keeps its native scroller with the scrollbar hidden. The list
+primitive owns scroll-to-selected and keyboard navigation; a ScrollArea
+viewport rendered as that element would replace its listbox role.
+
+The transaction list uses TanStack Virtual with the kit ScrollArea viewport
+passed through `viewportRef`. Dates and individual operations are virtual rows
+with stable keys and fixed heights of 48px and 72px. Filters precede the list in DOM order. Their unscaled border-box height
+supplies the virtualizer's top padding and scroll alignment, and ScrollArea's
+`insetTop` keeps native focus scrolling and the thumb clear of the overlay. The bottom 48px of the filter surface blend from the card background to
+60% opacity with a 2px backdrop blur. Below it, a separate date chip floats
+over the list without a full-width background. Its local `PinnedDateChip` uses ButtonBase with a 24px height,
+compensates its horizontal padding to align with ordinary date text,
+and shares the date typography and tabular numerals. The local component owns its background, outline and date typography.
+Pinning fades only the shell, keeping the date text continuously visible. It changes its label with a 4px directional crossfade (opacity only
+with reduced motion). The chip switches dates 8px before the next header reaches the filter edge,
+without pushing against it. The active source heading is hidden while its
+chip is pinned, preserving its row height. A focused source date hands focus
+to the chip without scrolling; returning to the top hands it back. Label motion and reduced-motion
+variants live in the co-located CSS. Restoration and calendar navigation
+retain the date-based contract, including when empty search results become
+nonempty again.
 
 ## Component CSS
 

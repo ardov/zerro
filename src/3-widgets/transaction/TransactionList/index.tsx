@@ -16,7 +16,7 @@ import { useDebounce } from '@/6-shared/hooks/useDebounce'
 
 import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
 
-import { GroupedList, LIST_MAX_WIDTH } from './GroupedList'
+import { GroupedList } from './GroupedList'
 import Filter from './TopBar/Filter'
 import { upsertFilter } from './TopBar/filterModel'
 import Actions from './TopBar/Actions'
@@ -140,7 +140,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   // Groups carry only ids and depend on the list alone, so opening or checking
   // a transaction never rebuilds them. The heavy `<Transaction>` elements are
-  // created lazily by `renderTransaction`, only for the groups react-window
+  // created lazily by `renderTransaction`, only for the rows the virtualizer
   // actually mounts.
   const groups = useMemo(() => {
     const byDate: ByDate<{ date: TISODate; ids: TTransactionId[] }> = {}
@@ -199,47 +199,37 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     ]
   )
 
+  const header = !hideFilter ? (
+    <div className="transaction-list-width w-full px-2 pt-2">
+      <Filter
+        query={query}
+        onQueryChange={onQueryChange}
+        search={search}
+        onSearchChange={onSearchChange}
+      />
+    </div>
+  ) : undefined
+
   return (
-    <>
-      <div className={cn('relative flex flex-col pt-2', className)}>
-        {!hideFilter && (
-          <div
-            className="relative z-10 mx-auto w-full px-2"
-            style={{ maxWidth: LIST_MAX_WIDTH }}
-          >
-            <Filter
-              query={query}
-              onQueryChange={onQueryChange}
-              search={search}
-              onSearchChange={onSearchChange}
-            />
-          </div>
-        )}
-
-        <Actions
-          visible={Boolean(checked?.length)}
-          checkedIds={checked}
-          onUncheckAll={uncheckAll}
-          onCheckAll={checkAll}
+    <div className={cn('relative flex min-h-0 flex-col', className)}>
+      <Actions
+        visible={Boolean(checked.length)}
+        checkedIds={checked}
+        onUncheckAll={uncheckAll}
+        onCheckAll={checkAll}
+      />
+      <div className="min-h-0 flex-1">
+        <GroupedList
+          groups={groups}
+          renderTransaction={renderTransaction}
+          initialDate={initialDate}
+          restoredTopDate={view?.restoredTopDate}
+          onTopDateChange={view?.onTopDateChange}
+          header={header}
+          emptyState={<EmptyState />}
         />
-
-        <div className="grow">
-          {groups.length ? (
-            <GroupedList
-              {...{
-                groups,
-                renderTransaction,
-                initialDate,
-                restoredTopDate: view?.restoredTopDate,
-                onTopDateChange: view?.onTopDateChange,
-              }}
-            />
-          ) : (
-            <EmptyState />
-          )}
-        </div>
       </div>
-    </>
+    </div>
   )
 }
 

@@ -9,7 +9,8 @@
     display: flex;
     justify-content: flex-end;
     width: 10px;
-    margin: 4px 4px calc(4px + var(--kit-scroll-bottom-inset, 0px));
+    margin: calc(4px + var(--kit-scroll-top-inset, 0px)) 4px
+      calc(4px + var(--kit-scroll-bottom-inset, 0px));
     opacity: 0;
     transition: opacity 300ms ease;
 
@@ -36,11 +37,13 @@
      cover and the last row can still be scrolled clear of it. The content
      resets it: an area nested inside does not reach the cover. */
   .kit-scroll-viewport {
+    scroll-padding-top: var(--kit-scroll-top-inset, 0px);
     padding-bottom: var(--kit-scroll-bottom-inset, 0px);
     scroll-padding-bottom: var(--kit-scroll-bottom-inset, 0px);
 
     & > * {
       --kit-scroll-bottom-inset: 0px;
+      --kit-scroll-top-inset: 0px;
     }
   }
 

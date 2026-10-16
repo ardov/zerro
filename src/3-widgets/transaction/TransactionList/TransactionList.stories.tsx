@@ -3,6 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import type { core } from '@/zerro-core/redux'
 import { TransactionList } from './index'
+import {
+  TransactionListDrawer,
+  useTransactionDrawer,
+} from '@/3-widgets/global/TransactionListDrawer'
 
 function Example() {
   const [query, setQuery] = useState<core.transactions.TTransactionQuery>({
@@ -133,6 +137,7 @@ export const CrossFieldSearch: Story = {
 }
 
 export const HiddenActionsPassThrough: Story = {
+  tags: ['!dev', '!autodocs'],
   play: async ({ canvasElement }) => {
     await within(canvasElement).findByText('Lunch groceries')
     const bar = canvasElement.querySelector<HTMLElement>('.actions-transition')!
@@ -148,6 +153,57 @@ export const HiddenActionsPassThrough: Story = {
 }
 
 export const HiddenActionsPassThroughMobile: Story = {
+  tags: ['!dev', '!autodocs'],
   ...HiddenActionsPassThrough,
+  globals: { viewport: { value: 'zerro499' } },
+}
+
+function DrawerExample() {
+  const open = useTransactionDrawer()
+  return (
+    <>
+      <button onClick={() => open({ title: 'Transaction history' })}>
+        Open history
+      </button>
+      <TransactionListDrawer />
+    </>
+  )
+}
+
+export const DrawerScroll: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { app: { scenario: 'demo', route: '/transactions' } },
+  render: () => <DrawerExample />,
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      within(canvasElement).getByRole('button', { name: 'Open history' })
+    )
+    const dialog = await body.findByRole('dialog', {
+      name: 'Transaction history',
+    })
+    const viewport = dialog.querySelector<HTMLElement>('.kit-scroll-viewport')!
+    await waitFor(() => expect(viewport.clientHeight).toBeGreaterThan(100))
+    await waitFor(() =>
+      expect(dialog.querySelectorAll('[data-row-key]').length).toBeGreaterThan(
+        0
+      )
+    )
+    await expect(viewport.scrollHeight).toBeGreaterThan(viewport.clientHeight)
+    viewport.scrollTop = 300
+    await waitFor(() =>
+      expect(dialog.querySelector('.transaction-date-chip')).toHaveAttribute(
+        'data-pinned'
+      )
+    )
+    await expect(dialog.querySelectorAll('.kit-scroll-viewport').length).toBe(1)
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(dialog).not.toBeVisible())
+  },
+}
+
+export const MobileDrawerScroll: Story = {
+  tags: ['!dev', '!autodocs'],
+  ...DrawerScroll,
   globals: { viewport: { value: 'zerro499' } },
 }

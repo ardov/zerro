@@ -162,7 +162,7 @@ const inPanel = (page: React.ReactNode) => (
 
 /** A page made of its own cards, laid straight on the canvas. */
 const onCanvas = (page: React.ReactNode) => (
-  <ScrollArea className="min-w-0 grow" bottomInset={bottomBarInset}>
+  <ScrollArea className="min-w-0 grow" insetBottom={bottomBarInset}>
     {page}
   </ScrollArea>
 )

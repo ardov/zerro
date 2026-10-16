@@ -1,5 +1,5 @@
 import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, ReactNode, Ref } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import './ScrollArea.css'
 import './edgeFade.css'
@@ -8,6 +8,8 @@ export type ScrollAreaProps = Omit<
   ScrollAreaPrimitive.Root.Props,
   'className' | 'children' | 'render' | 'style'
 > & {
+  /** Access to the native scroll element, for virtualized content. */
+  viewportRef?: Ref<HTMLDivElement>
   children?: ReactNode
   style?: CSSProperties
   /** The surface itself: its size, background and radius. The viewport fills
@@ -29,7 +31,11 @@ export type ScrollAreaProps = Omit<
    * into the scroll padding, and lifts the thumb's track, so the last row and
    * the thumb stop above the cover while content still passes under it.
    * Areas nested in the content do not inherit it. */
-  bottomInset?: string
+  insetBottom?: string
+  /** Height covered by an overlay above the viewport. Reserves native focus
+   * scroll padding and shortens the track; content supplies its own leading
+   * space (for example a virtualizer's paddingStart). */
+  insetTop?: string
 }
 
 /** A vertically scrolling surface.
@@ -43,11 +49,13 @@ export type ScrollAreaProps = Omit<
 export function ScrollArea(props: ScrollAreaProps) {
   const {
     children,
+    viewportRef,
     className,
     contentClassName,
     scrollbar = 'overlay',
     fade = false,
-    bottomInset,
+    insetBottom,
+    insetTop,
     style,
     ...restProps
   } = props
@@ -58,16 +66,16 @@ export function ScrollArea(props: ScrollAreaProps) {
         className
       )}
       style={
-        bottomInset
-          ? ({
-              '--kit-scroll-bottom-inset': bottomInset,
-              ...style,
-            } as CSSProperties)
-          : style
+        {
+          '--kit-scroll-bottom-inset': insetBottom,
+          '--kit-scroll-top-inset': insetTop,
+          ...style,
+        } as CSSProperties
       }
       {...restProps}
     >
       <ScrollAreaPrimitive.Viewport
+        ref={viewportRef}
         tabIndex={-1}
         // After Base UI's own `overflow: scroll`, which this narrows to the
         // vertical axis.

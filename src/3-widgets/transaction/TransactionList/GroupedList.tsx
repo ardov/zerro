@@ -1,264 +1,322 @@
-import type { FC } from 'react'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { ListImperativeAPI, RowComponentProps } from 'react-window'
-import { List } from 'react-window'
-import { AutoSizer } from 'react-virtualized-auto-sizer'
+import type { FC, ReactNode, Ref } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { ListRowSubheader } from '@/6-shared/ui/ListRow'
-import { scrollInsetClass } from '@/6-shared/ui/layout/Panel'
-import { cn } from '@/6-shared/ui/shadcn/utils'
-import { formatDate } from '@/6-shared/helpers/date'
+import { ScrollArea } from '@/6-shared/ui/kit/ScrollArea'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
+import { bottomBarInset } from '@/6-shared/ui/layout/Panel'
+import { formatDate, toISODate } from '@/6-shared/helpers/date'
 import type { TDateDraft, TISODate, TTransactionId } from '@/6-shared/types'
-import { toISODate } from '@/6-shared/helpers/date'
 import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
 import { useAsk, useAsked } from '@/6-shared/overlays'
 import { Calendar } from '@/6-shared/ui/kit/Calendar'
 import { useTranslation } from 'react-i18next'
+import './GroupedList.css'
 
-type GroupNode = {
-  date: TISODate
-  ids: TTransactionId[]
-}
-
-const HEADER_HEIGHT = 48
+type GroupNode = { date: TISODate; ids: TTransactionId[] }
+type Row = { date: TISODate; key: string } & (
+  { kind: 'date' } | { kind: 'transaction'; id: TTransactionId }
+)
+const DATE_ROW_HEIGHT = 48
 const TRANSACTION_HEIGHT = 72
-
-const groupHeight = (group: GroupNode) =>
-  HEADER_HEIGHT + TRANSACTION_HEIGHT * group.ids.length
-
-/** Index of the first group at or before `date` (groups are newest-first). */
-const findDateIndex = (groups: GroupNode[], date: TISODate) => {
-  for (let i = 0; i < groups.length; i++) {
-    if (groups[i].date <= date) return i
-  }
-  return groups.length - 1
-}
-
-/** Index of the last group whose top offset is at or above `scrollTop`. */
-const findTopIndex = (offsets: number[], scrollTop: number) => {
-  let lo = 0
-  let hi = offsets.length - 1
-  while (lo < hi) {
-    const mid = (lo + hi + 1) >> 1
-    if (offsets[mid] <= scrollTop) lo = mid
-    else hi = mid - 1
-  }
-  return lo
-}
+// Switch 8px before the incoming date reaches the filter edge.
+const DATE_SWITCH_OFFSET = 8
 
 type GroupedListProps = {
   groups: GroupNode[]
-  renderTransaction: (id: TTransactionId) => React.ReactNode
+  renderTransaction: (id: TTransactionId) => ReactNode
   initialDate?: TDateDraft
   restoredTopDate?: TISODate | null
   onTopDateChange?: (date: TISODate) => void
+  header?: ReactNode
+  emptyState?: ReactNode
 }
 
-export const GroupedList: FC<GroupedListProps> = props => {
-  const {
-    groups,
-    renderTransaction,
-    initialDate,
-    restoredTopDate,
-    onTopDateChange,
-  } = props
-  const listRef = useRef<ListImperativeAPI>(null)
+export const GroupedList: FC<GroupedListProps> = ({
+  groups,
+  renderTransaction,
+  initialDate,
+  restoredTopDate,
+  onTopDateChange,
+  header,
+  emptyState,
+}) => {
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const headerRef = useRef<HTMLDivElement>(null)
+  const [measuredFilterHeight, setFilterHeight] = useState<number | null>(null)
+  const headerHeight = measuredFilterHeight ?? 0
+  const chipButtonRef = useRef<HTMLButtonElement>(null)
+  const { t } = useTranslation()
   const ask = useAsk()
-
-  // react-window v2 offsets rows with `transform: translateY(...)`, which
-  // breaks `position: sticky` on the in-row headers. So we render the pinned
-  // header as an overlay driven by the scroll position instead, including the
-  // classic "push" where the next day's header nudges the current one up.
-  // The page controller receives the *top visible date* rather than a pixel
-  // offset: the list can have a different height after data changes, so a raw
-  // scrollTop could land in the wrong place — or past the content. A date is
-  // stable and maps back through `scrollToDate`.
-  const [scrollTop, setScrollTop] = useState(() => {
-    if (!restoredTopDate || !groups.length) return 0
-    // Offset of the saved group, so the overlay header is correct on the first
-    // paint (it matches where `scrollToDate` will land below).
-    const idx = findDateIndex(groups, restoredTopDate)
-    let sum = 0
-    for (let i = 0; i < idx; i++) sum += groupHeight(groups[i])
-    return sum
-  })
-
-  // Prefix sum of group tops: offsets[i] is the y where group i starts.
-  const offsets = useMemo(() => {
-    const acc: number[] = []
-    let sum = 0
+  const { rows, dateIndexes } = useMemo(() => {
+    const rows: Row[] = []
+    const dateIndexes: number[] = []
     for (const group of groups) {
-      acc.push(sum)
-      sum += groupHeight(group)
+      dateIndexes.push(rows.length)
+      rows.push({ kind: 'date', date: group.date, key: `date:${group.date}` })
+      for (const id of group.ids)
+        rows.push({
+          kind: 'transaction',
+          date: group.date,
+          id,
+          key: `transaction:${id}`,
+        })
     }
-    return acc
+    return { rows, dateIndexes }
   }, [groups])
 
+  useLayoutEffect(() => {
+    const filterSurface = headerRef.current
+    if (!filterSurface) return
+    const observer = new ResizeObserver(([entry]) =>
+      setFilterHeight(
+        entry.borderBoxSize[0]?.blockSize ?? filterSurface.offsetHeight
+      )
+    )
+    setFilterHeight(filterSurface.offsetHeight)
+    observer.observe(filterSurface)
+    return () => observer.disconnect()
+  }, [])
+
+  // eslint-disable-next-line react-hooks/incompatible-library -- Reads the mutable virtualizer on every render; React Compiler is not enabled.
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => viewportRef.current,
+    getItemKey: useCallback((index: number) => rows[index].key, [rows]),
+    estimateSize: index =>
+      rows[index].kind === 'date' ? DATE_ROW_HEIGHT : TRANSACTION_HEIGHT,
+    paddingStart: headerHeight,
+    scrollPaddingStart: headerHeight,
+    overscan: 6,
+  })
   const scrollToDate = useCallback(
     (date: TDateDraft) => {
       if (!groups.length) return
-      const idx = findDateIndex(groups, toISODate(date))
-      listRef.current?.scrollToRow({ index: idx, align: 'start' })
-    },
-    [groups]
-  )
-
-  const onDateClick = useCallback(
-    async (date: TISODate) => {
-      const picked = await ask<TISODate>(
-        <DateDialog
-          value={date}
-          minDate={groups[groups.length - 1]?.date}
-          maxDate={groups[0]?.date}
-        />
+      const iso = toISODate(date)
+      const found = groups.findIndex(group => group.date <= iso)
+      virtualizer.scrollToIndex(
+        dateIndexes[found < 0 ? groups.length - 1 : found],
+        { align: 'start' }
       )
-      if (picked) scrollToDate(picked)
     },
-    [ask, groups, scrollToDate]
+    [groups, dateIndexes, virtualizer]
   )
 
-  // Position the list once, after react-window has actually mounted and
-  // measured its rows (that's when `element` and `scrollToRow` become usable).
-  // `onRowsRendered` fires on every render, so guard it to run a single time.
-  // `initialDate` ("jump to this date") wins over a restored scroll position.
-  const positionedRef = useRef(false)
-  const applyInitialPosition = useCallback(() => {
-    if (positionedRef.current) return
-    positionedRef.current = true
-    // Defer to the next frame: `onRowsRendered` fires before react-window has
-    // attached its imperative handle (so `element` is still null here), and
-    // react-window also syncs its own scroll offset to 0 right after mount.
-    // By the next frame the element exists and its offset is settled.
-    requestAnimationFrame(() => {
-      if (!listRef.current?.element) return
-      if (initialDate) {
-        scrollToDate(initialDate)
-      } else if (restoredTopDate) {
-        scrollToDate(restoredTopDate)
+  const positioned = useRef(false)
+  const previousInitialDate = useRef(initialDate)
+  const items = virtualizer.getVirtualItems()
+  const offset = virtualizer.scrollOffset ?? 0
+  const boundary = offset + headerHeight + DATE_SWITCH_OFFSET
+  const topItem = items.find(
+    item => item.start <= boundary && item.end > boundary
+  )
+  const topDate = topItem
+    ? rows[topItem.index].date
+    : boundary >= virtualizer.getTotalSize()
+      ? rows.at(-1)?.date
+      : rows[0]?.date
+  const pinned = offset > 0 && Boolean(topDate)
+  const reportedDate = useRef<TISODate | null>(null)
+  useLayoutEffect(() => {
+    // Empty results collapse the native scroll offset. When rows return,
+    // restore from the current props, not a target captured before filtering.
+    if (!rows.length) {
+      positioned.current = false
+      return
+    }
+    if (measuredFilterHeight === null) return
+    if (!positioned.current || initialDate !== previousInitialDate.current) {
+      const target = positioned.current
+        ? initialDate
+        : (initialDate ?? restoredTopDate)
+      positioned.current = true
+      previousInitialDate.current = initialDate
+      if (target) {
+        scrollToDate(target)
+        // Do not publish the pre-restoration date and overwrite the saved one.
+        // The virtualizer reports the actual date on the following scroll render.
+        if (viewportRef.current?.scrollTop !== offset) return
       }
-    })
-  }, [initialDate, restoredTopDate, scrollToDate])
+    }
+    if (topDate && topDate !== reportedDate.current) {
+      reportedDate.current = topDate
+      onTopDateChange?.(topDate)
+    }
+  }, [
+    rows.length,
+    measuredFilterHeight,
+    initialDate,
+    restoredTopDate,
+    scrollToDate,
+    offset,
+    topDate,
+    onTopDateChange,
+  ])
 
-  // Re-jump when `initialDate` changes while already mounted — e.g. clicking
-  // another point on the analytics chart reuses this list and only updates the
-  // prop. The initial mount is handled by `applyInitialPosition` above.
-  const prevInitialDate = useRef(initialDate)
-  useEffect(() => {
-    if (prevInitialDate.current === initialDate) return
-    prevInitialDate.current = initialDate
-    if (positionedRef.current && initialDate) scrollToDate(initialDate)
-  }, [initialDate, scrollToDate])
+  useLayoutEffect(() => {
+    const active = document.activeElement
+    if (pinned && active?.closest('.transaction-date-heading[data-pinned]')) {
+      if (viewportRef.current?.contains(active))
+        chipButtonRef.current?.focus({ preventScroll: true })
+    } else if (!pinned && active === chipButtonRef.current) {
+      viewportRef.current
+        ?.querySelector<HTMLButtonElement>('.transaction-date-heading button')
+        ?.focus({ preventScroll: true })
+    }
+  }, [pinned, topDate])
 
-  const topIndex = findTopIndex(offsets, scrollTop)
-  const topDate = groups[topIndex]?.date
-  const reportedTopDate = useRef<TISODate | null>(null)
-  // Distance from the list top to the next day's header. Once it enters the
-  // header band, push the pinned header up so the two swap seamlessly.
-  const nextHeaderTop = (offsets[topIndex + 1] ?? Infinity) - scrollTop
-  const pushY = Math.min(0, nextHeaderTop - HEADER_HEIGHT)
+  const onDateClick = async (date: TISODate) => {
+    const picked = await ask<TISODate>(
+      <DateDialog
+        value={date}
+        minDate={groups.at(-1)?.date}
+        maxDate={groups[0]?.date}
+      />
+    )
+    if (picked) scrollToDate(picked)
+  }
 
   return (
-    <>
-      <div style={{ position: 'relative', height: '100%' }}>
-        <AutoSizer
-          renderProp={({ height }) => {
-            if (!height) return null
+    <div className="relative h-full min-h-0">
+      <div
+        ref={headerRef}
+        className="transaction-filter-surface absolute inset-x-0 top-0 z-20"
+      >
+        {header}
+      </div>
+      <div
+        className="transaction-date-surface pointer-events-none absolute inset-x-0 z-10"
+        style={{ top: headerHeight, height: DATE_ROW_HEIGHT }}
+      >
+        <div className="transaction-list-width flex h-full items-center px-6">
+          {topDate && (
+            <PinnedDateChip
+              date={topDate}
+              pinned={pinned}
+              ref={chipButtonRef}
+              onClick={() => onDateClick(topDate)}
+            />
+          )}
+        </div>
+      </div>
+      <ScrollArea
+        className="h-full"
+        viewportRef={viewportRef}
+        insetBottom={bottomBarInset}
+        insetTop={`${headerHeight}px`}
+      >
+        <div
+          role="list"
+          aria-label={t('transactions')}
+          style={{ height: virtualizer.getTotalSize(), position: 'relative' }}
+        >
+          {items.map(item => {
+            const row = rows[item.index]
+            const hiddenDate =
+              row.kind === 'date' && pinned && row.date === topDate
             return (
-              <List
-                className={cn('hidden-scroll', scrollInsetClass)}
-                style={{ height }}
-                listRef={listRef}
-                rowCount={groups.length}
-                rowProps={{ groups, onDateClick, renderTransaction }}
-                rowHeight={i => groupHeight(groups[i])}
-                rowComponent={Day}
-                onRowsRendered={applyInitialPosition}
-                onScroll={e => {
-                  const top = e.currentTarget.scrollTop
-                  setScrollTop(top)
-                  const date = groups[findTopIndex(offsets, top)]?.date
-                  if (date && date !== reportedTopDate.current) {
-                    reportedTopDate.current = date
-                    onTopDateChange?.(date)
-                  }
+              <div
+                key={item.key}
+                role="listitem"
+                data-row-key={row.key}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: item.size,
+                  transform: `translateY(${item.start}px)`,
                 }}
-              />
-            )
-          }}
-        />
-
-        {topDate && (
-          <div style={stickyOverlayStyle}>
-            <div style={{ ...groupStyle, transform: `translateY(${pushY}px)` }}>
-              <ListRowSubheader
-                sticky
-                style={{ pointerEvents: 'auto' }}
-                onClick={() => onDateClick(topDate)}
               >
-                {formatDate(topDate)}
-              </ListRowSubheader>
-            </div>
-          </div>
-        )}
-      </div>
-    </>
-  )
-}
-
-//
-//
-//
-//
-//
-//
-
-type DayData = {
-  groups: GroupNode[]
-  onDateClick: (date: TISODate) => void
-  renderTransaction: (id: TTransactionId) => React.ReactNode
-}
-const Day = (props: RowComponentProps<DayData>): React.ReactElement => {
-  const { index, style, groups, onDateClick, renderTransaction } = props
-  const group = groups[index]
-  return (
-    <div style={style}>
-      <div style={groupStyle}>
-        <ListRowSubheader onClick={() => onDateClick(group.date)}>
-          {formatDate(group.date)}
-        </ListRowSubheader>
-
-        {group.ids.map(renderTransaction)}
-      </div>
+                <div className="transaction-list-width px-2">
+                  {row.kind === 'date' ? (
+                    <ListRowSubheader
+                      className="transaction-date-heading tabular-nums"
+                      data-pinned={hiddenDate || undefined}
+                      aria-hidden={hiddenDate || undefined}
+                    >
+                      <ButtonBase
+                        className="align-baseline"
+                        tabIndex={hiddenDate ? -1 : 0}
+                        onClick={() => onDateClick(row.date)}
+                      >
+                        {formatDate(row.date)}
+                      </ButtonBase>
+                    </ListRowSubheader>
+                  ) : (
+                    renderTransaction(row.id)
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        {!rows.length && <div>{emptyState}</div>}
+      </ScrollArea>
     </div>
   )
 }
 
-/** The widest the list's rows and its filter grow, side padding included. */
-export const LIST_MAX_WIDTH = 576
-
-/** The side padding is the row's own, not the list's: padding around the
- * scroller would cut content off short of the panel edge. */
-const groupStyle: React.CSSProperties = {
-  position: 'relative',
-  maxWidth: LIST_MAX_WIDTH,
-  paddingInline: 8,
-  marginLeft: 'auto',
-  marginRight: 'auto',
+function PinnedDateChip({
+  date,
+  pinned,
+  ref,
+  onClick,
+}: {
+  date: TISODate
+  pinned: boolean
+  ref: Ref<HTMLButtonElement>
+  onClick: () => void
+}) {
+  return (
+    <ButtonBase
+      ref={ref}
+      className="transaction-date-chip pointer-events-auto -ml-2 h-6 rounded-2xl rounded-smooth px-2 text-ui-14 font-medium tracking-normal text-ui-secondary tabular-nums"
+      data-pinned={pinned || undefined}
+      aria-hidden={!pinned}
+      tabIndex={pinned ? 0 : -1}
+      onClick={onClick}
+      aria-label={formatDate(date)}
+    >
+      <DateLabel date={date} />
+    </ButtonBase>
+  )
 }
 
-const stickyOverlayStyle: React.CSSProperties = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  pointerEvents: 'none',
+/** Two bounded layers: rapid scrolling replaces the outgoing label rather than
+ * accumulating an animation queue. The button's accessible name is always current. */
+function DateLabel({ date }: { date: TISODate }) {
+  const [labels, setLabels] = useState<{
+    date: TISODate
+    outgoing: TISODate | null
+  }>({ date, outgoing: null })
+  if (labels.date !== date) {
+    setLabels({
+      date,
+      outgoing: labels.date,
+    })
+  }
+  return (
+    <span
+      key={labels.date}
+      className="transaction-date-label relative block overflow-hidden"
+      data-direction={
+        labels.outgoing && labels.date > labels.outgoing
+          ? 'backward'
+          : 'forward'
+      }
+      data-changing={labels.outgoing ? '' : undefined}
+      aria-hidden="true"
+    >
+      <span className="transaction-date-outgoing absolute inset-0 opacity-0">
+        {labels.outgoing && formatDate(labels.outgoing)}
+      </span>
+      <span className="transaction-date-current block">
+        {formatDate(labels.date)}
+      </span>
+    </span>
+  )
 }
-
-//
-//
-//
-//
-//
-//
 
 type TDateDialogProps = {
   value: TISODate

@@ -130,7 +130,7 @@ export default function Filter({
       />
     ) : null
   return (
-    <div className="flex items-start gap-2 rounded-ui-card rounded-smooth bg-ui-card p-2 text-ui-primary shadow-ui-card">
+    <div className="flex items-start gap-2 p-2 text-ui-primary">
       <LayoutGroup>
         <div
           className="relative flex min-w-0 flex-1 flex-wrap items-center gap-1.5"

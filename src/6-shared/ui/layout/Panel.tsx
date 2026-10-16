@@ -8,11 +8,6 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
  * not cover. */
 export const bottomBarInset = 'var(--bottom-inset, 0px)'
 
-/** The same room for a page scroller that is not a ScrollArea, such as a
- * virtual list: inside the scroll, so content passes under the bar instead
- * of stopping above it. */
-export const scrollInsetClass = 'pb-(--bottom-inset) scroll-pb-(--bottom-inset)'
-
 type PanelProps = {
   children?: ReactNode
   /** The panel's size in the canvas: its width, whether it grows. */
@@ -21,8 +16,8 @@ type PanelProps = {
   /** Padding and layout of the content, inside the scroll. */
   contentClassName?: string
   /** The content brings its own scroller (a virtual list, say). The panel
-   * then only clips it to the rounded corners, and that scroller takes
-   * `scrollInsetClass`. */
+   * then only clips it to the rounded corners. A nested ScrollArea takes
+   * `insetBottom={bottomBarInset}`. */
   contentScrolls?: boolean
 }
 
@@ -48,7 +43,7 @@ export function Panel(props: PanelProps) {
       className={surface}
       style={style}
       contentClassName={contentClassName}
-      bottomInset={bottomBarInset}
+      insetBottom={bottomBarInset}
     >
       {children}
     </ScrollArea>
