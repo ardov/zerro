@@ -12,6 +12,7 @@ import { useAsk, useAsked } from '@/6-shared/overlays'
 import { Calendar } from '@/6-shared/ui/kit/Calendar'
 import { useTranslation } from 'react-i18next'
 import './GroupedList.css'
+import '@/6-shared/ui/kit/HeaderSurface.css'
 
 type GroupNode = { date: TISODate; ids: TTransactionId[] }
 type Row = { date: TISODate; key: string } & (
@@ -180,7 +181,7 @@ export const GroupedList: FC<GroupedListProps> = ({
     <div className="relative h-full min-h-0">
       <div
         ref={headerRef}
-        className="transaction-filter-surface absolute inset-x-0 top-0 z-20"
+        className="transaction-filter-surface kit-header-surface absolute inset-x-0 top-0 z-20"
       >
         {header}
       </div>

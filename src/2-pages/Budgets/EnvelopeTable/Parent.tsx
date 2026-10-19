@@ -51,7 +51,7 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
             variant="ghost"
             label={t(isExpanded ? 'collapseCategory' : 'expandCategory')}
             aria-expanded={isExpanded}
-            className="absolute -left-[7px] top-[9px] z-[1]"
+            className="absolute -left-[7px] top-[9px] z-[1] [&:not(:hover)]:before:opacity-0"
             onClick={handleExpand}
           >
             <ChevronRightIcon

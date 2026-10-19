@@ -1,3 +1,4 @@
+import '@/6-shared/ui/kit/HeaderSurface.css'
 import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { Button } from '@/6-shared/ui/kit/Button'
 import type { FC } from 'react'
@@ -46,7 +47,7 @@ export const Header: FC<HeaderProps> = props => {
 
   return (
     <>
-      <div className="sticky top-0 z-[99] border-b border-ui-border bg-ui-card">
+      <div className="kit-header-surface sticky top-0 z-[99]">
         <div className="sticky top-0 z-[9] flex flex-wrap justify-between gap-4 p-2">
           <MonthSelect />
 

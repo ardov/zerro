@@ -52,6 +52,10 @@ export const Toggle: Story = {
     expect(args.onExpandToggle).toHaveBeenCalledWith('tag#category')
     expect(button).toHaveAttribute('aria-expanded', 'true')
     await expect(canvas.getByText('Child category')).toBeVisible()
+    await user.unhover(button)
+    await waitFor(() =>
+      expect(getComputedStyle(button, '::before').opacity).toBe('0')
+    )
     await user.keyboard('{Alt>}')
     await user.click(button)
     await user.keyboard('{/Alt}')

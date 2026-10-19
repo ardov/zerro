@@ -1,13 +1,4 @@
 @layer components {
-  .transaction-filter-surface {
-    background: linear-gradient(
-      to top,
-      color-mix(in srgb, var(--color-ui-card) 60%, transparent),
-      var(--color-ui-card) 48px
-    );
-    backdrop-filter: blur(2px);
-  }
-
   .transaction-date-chip {
     isolation: isolate;
     visibility: hidden;
