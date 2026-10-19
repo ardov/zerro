@@ -3,8 +3,6 @@ import { useCallback } from 'react'
 import { SnackbarNotice } from '@/6-shared/ui/SnackbarNotice'
 import { useTranslation } from 'react-i18next'
 import { reloadData } from '@/4-features/sync'
-import { useAsk } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   getJournalRecoveryReason,
@@ -22,18 +20,6 @@ export const JournalRecoveryNotice = () => {
   const handleReload = useCallback(() => {
     void dispatch(reloadData())
   }, [dispatch])
-  const ask = useAsk()
-  const confirmReload = async () => {
-    const confirmed = await ask(
-      <Confirm
-        title={t('journalRecoveryTitle')}
-        description={t('journalRecoveryDescription')}
-        okText={t('journalRecoveryConfirm')}
-      />
-    )
-    if (!confirmed) return
-    handleReload()
-  }
 
   if (!recoveryRequired || outboxRecoveryReason !== null) return null
 
@@ -46,7 +32,7 @@ export const JournalRecoveryNotice = () => {
           className="text-inherit hover:text-inherit"
           size="xs"
           variant="ghost"
-          onClick={confirmReload}
+          onClick={handleReload}
         >
           {t('journalRecoveryConfirm')}
         </Button>

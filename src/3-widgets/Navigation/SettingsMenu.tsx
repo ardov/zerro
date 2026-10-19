@@ -294,20 +294,8 @@ function ReloadDataItem(_props: ItemProps) {
     track('local_data_reload_requested', {})
     void dispatch(reloadData())
   }, [dispatch])
-  const ask = useAsk()
-  const reload = async () => {
-    const confirmed = await ask(
-      <Confirm
-        title={t('reloadData')}
-        description={t('reloadDataDescription')}
-        okText={t('reloadData')}
-      />
-    )
-    if (!confirmed) return
-    requestReload()
-  }
   return (
-    <ActionListItem onClick={reload}>
+    <ActionListItem onClick={requestReload}>
       <ListRowIcon>
         <SyncIcon />
       </ListRowIcon>

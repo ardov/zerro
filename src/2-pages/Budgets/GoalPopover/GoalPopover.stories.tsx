@@ -65,11 +65,11 @@ export const ConfirmFromDrawer: Story = {
       await userEvent.click(opener)
       const parent = await body.findByRole('dialog')
       const trigger = within(parent).getByRole('button', {
-        name: 'Copy from last month',
+        name: 'Reset all leftovers',
       })
       await userEvent.click(trigger)
       const child = await body.findByRole('dialog', {
-        name: 'Copy all budgets?',
+        name: 'Want to start all over again?',
       })
       const expectChildFocus = () =>
         expect(child).toContainElement(
@@ -78,7 +78,7 @@ export const ConfirmFromDrawer: Story = {
       await waitFor(expectChildFocus)
       await waitFor(() =>
         expect(
-          within(child).getByRole('button', { name: 'Copy' })
+          within(child).getByRole('button', { name: 'Reset leftovers' })
         ).toHaveFocus()
       )
       await userEvent.tab({ shift: true })
@@ -98,7 +98,7 @@ export const ConfirmFromDrawer: Story = {
 
       await userEvent.keyboard('{Enter}')
       const reopened = await body.findByRole('dialog', {
-        name: 'Copy all budgets?',
+        name: 'Want to start all over again?',
       })
       await userEvent.click(
         within(reopened).getByRole('button', { name: 'Cancel' })

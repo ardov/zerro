@@ -14,7 +14,7 @@ const meta = {
     controls: { disable: true },
     docs: {
       description: {
-        component: `Mount <Toaster /> once, then import toast and call toast.add({ title: 'Imported', type: 'success' }) from any event handler. The renderer must be mounted before calls. toast.add returns an ID; toast.update(id, options) updates it; toast.close(id) dismisses it, and toast.close() dismisses all. Reusing an ID replaces that notification and refreshes its timer. Default lifetime is six seconds; timeout: 0 and loading do not auto-dismiss. Updating loading to success resumes the timer. Action handlers own closing: actionProps follows Base UI button props. Dismissing never cancels an operation. Use a separate manager for each Storybook canvas or independent root. Notifications are transient events, not persistent application warnings. Hover or press F6 to expand the stack; touch devices can tap the stack. Swipe right/down to dismiss. Timers pause during interaction and window blur. At most three notifications are visible; overflow follows Base UI's limited-toast behavior, not a guaranteed delivery queue.`,
+        component: `Mount <Toaster /> once, then import toast and call toast.add({ title: 'Imported', type: 'success' }) from any event handler. The renderer must be mounted before calls. toast.add returns an ID; toast.update(id, options) updates it; toast.close(id) dismisses it, and toast.close() dismisses all. Reusing an ID replaces that notification and refreshes its timer. Default lifetime is six seconds; timeout: 0 and loading do not auto-dismiss. Updating loading to success resumes the timer. Action handlers own closing: actionProps follows Base UI button props. Dismissing never cancels an operation. Use a separate manager for each Storybook canvas or independent root. Notifications are transient events, not persistent application warnings. Hover or press F6 to expand the stack; touch devices can tap the stack. Swipe down to dismiss. Timers pause during interaction and window blur. At most three notifications are visible; overflow follows Base UI's limited-toast behavior, not a guaranteed delivery queue.`,
       },
     },
   },
@@ -167,14 +167,28 @@ export const Stack: Story = {
     for (const name of ['neutral', 'success', 'warning', 'error'])
       await userEvent.click(canvas.getByRole('button', { name }))
     await expect(
-      body.getByText('neutral notification').closest('[role=dialog]')
+      body.getByText('neutral notification').closest('[role=status]')
     ).toHaveAttribute('inert')
+    const front = body
+      .getByText('error notification')
+      .closest('[role=status]') as HTMLElement
+    await waitFor(() => expect(getComputedStyle(front).opacity).toBe('1'))
+    await Promise.all(
+      front.getAnimations().map(animation => animation.finished)
+    )
+    const bounds = front.getBoundingClientRect()
+    expect(bounds.width).toBeLessThanOrEqual(360)
+    expect(bounds.right).toBeGreaterThan(window.innerWidth - 25)
+    expect(bounds.bottom).toBeGreaterThan(window.innerHeight - 25)
+    expect(getComputedStyle(front).borderRadius).toBe('16px')
     await userEvent.keyboard('{F6}')
     const region = body
       .getByText('error notification')
       .closest('[role=region]') as HTMLElement
     await expect(region).toHaveFocus()
-    await expect(await body.findByText('success notification')).toBeVisible()
+    await waitFor(() =>
+      expect(body.getByText('success notification')).toBeVisible()
+    )
     await userEvent.tab()
     await userEvent.keyboard('{Escape}')
     await waitFor(() =>

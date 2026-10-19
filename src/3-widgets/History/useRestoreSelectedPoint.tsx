@@ -1,6 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import { useAsk } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { restoreOutboxPosition } from '@/store/data'
@@ -16,8 +14,8 @@ import { core } from '@/zerro-core/redux'
  *
  * The panel and the top bar both need this and must not drift: a local point
  * is undone rather than diffed (nothing was ever sent, so there is nothing to
- * overwrite), a server point goes through confirmation and an ordinary restore
- * command. Two copies of that rule would be two chances to get it wrong.
+ * overwrite), a server point adds an ordinary undoable restore command. Two copies
+ * of that rule would be two chances to get it wrong.
  */
 export function useRestoreSelectedPoint() {
   const { t } = useTranslation('history')
@@ -32,18 +30,6 @@ export function useRestoreSelectedPoint() {
     dispatch(exitHistoryBrowsing())
     snackbar({ message: applied ? t('restoreApplied') : t('restoreNoChanges') })
   }
-  const ask = useAsk()
-  const confirmRestoreServer = async () => {
-    const confirmed = await ask(
-      <Confirm
-        title={t('restorePoint')}
-        description={t('restoreServerDescription')}
-        okText={t('restorePoint')}
-      />
-    )
-    if (!confirmed) return
-    restoreServer()
-  }
 
   return {
     /** `data` is the single readiness signal: a local point out of range and a
@@ -51,7 +37,7 @@ export function useRestoreSelectedPoint() {
     canRestore: point !== null && data !== undefined,
     restore: () => {
       if (point === null) return
-      if (point.kind !== 'local') return confirmRestoreServer()
+      if (point.kind !== 'local') return restoreServer()
       dispatch(restoreOutboxPosition(point.index))
       dispatch(exitHistoryBrowsing())
     },

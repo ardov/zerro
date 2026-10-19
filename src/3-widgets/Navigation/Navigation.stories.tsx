@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { useState } from 'react'
+import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
 import { Rail } from './Rail'
 import { MobileNavigation } from './MobileNavigation'
 
@@ -59,5 +61,61 @@ export const MobileBottomNavigation: Story = {
       expect(next).toHaveAttribute('aria-current', 'page')
       checkColors()
     })
+  },
+}
+
+function ToastAboveNavigationHarness() {
+  const show = useSnackbar()
+  const [visible, setVisible] = useState(true)
+  const [, setHeight] = useState(0)
+  return (
+    <>
+      <button
+        onClick={() =>
+          show({ message: 'Saved above navigation', autoHideDuration: 0 })
+        }
+      >
+        Show toast
+      </button>
+      <button onClick={() => setVisible(false)}>Hide navigation</button>
+      {visible && <MobileNavigation onHeightChange={setHeight} />}
+    </>
+  )
+}
+
+export const ToastAboveNavigation: Story = {
+  tags: ['!dev', '!autodocs'],
+  globals: { viewport: { value: 'iphone13' } },
+  render: () => <ToastAboveNavigationHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Show toast' }))
+    const toast = await body.findByRole('status', {
+      name: 'Saved above navigation',
+    })
+    await waitFor(() => expect(getComputedStyle(toast).opacity).toBe('1'))
+    await Promise.all(
+      toast.getAnimations().map(animation => animation.finished)
+    )
+    const nav = canvas.getByRole('navigation')
+    expect(
+      nav.getBoundingClientRect().top - toast.getBoundingClientRect().bottom
+    ).toBeCloseTo(16, 0)
+    // A resized bar must move the portalled stack too, without hardcoded height.
+    nav.style.paddingTop = '24px'
+    await waitFor(() =>
+      expect(
+        nav.getBoundingClientRect().top - toast.getBoundingClientRect().bottom
+      ).toBeCloseTo(16, 0)
+    )
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Hide navigation' })
+    )
+    await waitFor(() =>
+      expect(
+        window.innerHeight - toast.getBoundingClientRect().bottom
+      ).toBeCloseTo(16, 0)
+    )
   },
 }

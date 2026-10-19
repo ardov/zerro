@@ -31,12 +31,20 @@ export const MobileNavigation: FC<{
   useLayoutEffect(() => {
     const element = nav.current
     if (!element) return
-    const report = () => onHeightChange(element.offsetHeight)
+    // Toasts are portalled outside the page canvas. Publish their reserved
+    // space separately from the canvas-only scrolling inset.
+    const root = element.ownerDocument.documentElement
+    const report = () => {
+      const height = element.offsetHeight
+      onHeightChange(height)
+      root.style.setProperty('--toast-bottom-inset', `${height}px`)
+    }
     report()
     const observer = new ResizeObserver(report)
-    observer.observe(element)
+    observer.observe(element, { box: 'border-box' })
     return () => {
       observer.disconnect()
+      root.style.removeProperty('--toast-bottom-inset')
       onHeightChange(0)
     }
   }, [onHeightChange])

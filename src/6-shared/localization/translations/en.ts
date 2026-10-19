@@ -362,12 +362,8 @@ export const en: typeof ru = {
       actions: 'Actions',
       close: 'Close',
       copyAllBudgets: {
+        done: 'Budgets copied',
         trigger: 'Copy from last month',
-        title: 'Copy all budgets?',
-        description:
-          'Budgets will be exactly the same as in the previous month.',
-        okText: 'Copy',
-        cancelText: 'Cancel',
       },
       fixOverspends: {
         trigger: 'Cover Overspending',
@@ -385,11 +381,6 @@ export const en: typeof ru = {
       },
       completeAllGoals: {
         trigger: 'Complete all goals',
-        title: 'Complete all goals?',
-        description:
-          'Budgets will be set so that goals for this month are achieved.',
-        okText: 'Complete goals',
-        cancelText: 'Cancel',
       },
     },
   },
@@ -447,11 +438,7 @@ export const en: typeof ru = {
     save: 'Save goal',
     goalsProgress: 'Goals {{percent}}%',
     completeAll: {
-      title: 'Complete all goals?',
-      description:
-        'Budgets will be set so that goals for this month are achieved.',
-      okText: 'Complete goals',
-      cancelText: 'Cancel',
+      done: 'Budgets set to meet goals',
     },
     toWords: {
       monthly: 'Saving {{sum}} each month',
@@ -569,8 +556,6 @@ export const en: typeof ru = {
     darkMode: 'Dark Mode',
     lightMode: 'Light Mode',
     reloadData: 'Reload data',
-    reloadDataDescription:
-      'Downloads a complete server state and adds a full sync point to the history. Unsynchronized changes stay queued.',
     regularSync: 'Auto-sync',
     useIcons: 'Use icons',
     useEmojis: 'Use emojis',
@@ -641,8 +626,6 @@ export const en: typeof ru = {
     exitHistory: 'Leave history',
     restorePoint: 'Restore this point',
     restoreShort: 'Restore',
-    restoreServerDescription:
-      'The selected state will be added as one local undoable change on top of the current one. Unsynchronized changes remain queued and may be overwritten.',
     restoreWouldChange: 'Restoring would change',
     restoreApplied: 'The historical state was added to the local queue',
     restoreNoChanges: 'The current state already matches this point',
@@ -724,12 +707,10 @@ export const en: typeof ru = {
     selected_few: 'Selected {{count}} transactions',
     selected_many: 'Selected {{count}} transactions',
     selected_other: 'Selected {{count}} transactions',
-    delete_one: 'Delete {{count}} transaction?',
-    delete_few: 'Delete {{count}} transactions?',
-    delete_many: 'Delete {{count}} transactions?',
-    delete_other: 'Delete {{count}} transactions?',
-    deleteBtn: 'Delete',
-    cancelDeletion: 'Keep',
+    deleted_one: '{{count}} transaction deleted',
+    deleted_few: '{{count}} transactions deleted',
+    deleted_many: '{{count}} transactions deleted',
+    deleted_other: '{{count}} transactions deleted',
     deleteSelected: 'Delete Selected',
     setCategory: 'Set Category',
     actions: 'Actions',

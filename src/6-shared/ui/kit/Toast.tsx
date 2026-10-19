@@ -88,13 +88,14 @@ function ToastViewport() {
               <Primitive.Root
                 key={item.id}
                 toast={item}
-                swipeDirection={['right', 'down']}
+                swipeDirection="down"
+                role="status"
                 className="kit-toast rounded-smooth focusable"
               >
                 <Primitive.Content className="kit-toast-content">
                   {Icon && <Icon aria-hidden className="kit-toast-icon" />}
                   <div className="min-w-0 flex-1">
-                    <Primitive.Title className="text-ui-16 font-medium" />
+                    <Primitive.Title className="kit-toast-title text-ui-16 font-medium" />
                     <Primitive.Description className="kit-toast-description text-ui-14 text-ui-secondary" />
                     {item.actionProps && (
                       <Primitive.Action

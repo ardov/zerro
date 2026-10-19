@@ -10,8 +10,7 @@ import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@/store'
 
 import { fillGoals } from '../model/fillGoals'
-import { useAsk } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/kit/Confirm'
+import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
 import { useTranslation } from 'react-i18next'
 
 type TGoalsProgressProps = ButtonBaseProps & {
@@ -24,24 +23,16 @@ const baseStyles =
 export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { t } = useTranslation('goals')
   const { month, ...btnProps } = props
-  const dispatch = useAppDispatch()
   const [currency] = core.currency.useDisplayCurrency()
   const toDisplay = core.currency.useToDisplay(month)
   const totalProgress = useAppSelector(core.goals.selectTotals)[month]
   const formatSum = (sum: number) => formatMoney(sum, currency)
 
-  const ask = useAsk()
-  const completeAll = async () => {
-    const confirmed = await ask(
-      <Confirm
-        title={t('completeAll.title')}
-        description={t('completeAll.description')}
-        okText={t('completeAll.okText')}
-        cancelText={t('completeAll.cancelText')}
-      />
-    )
-    if (!confirmed) return
+  const dispatch = useAppDispatch()
+  const snackbar = useSnackbar()
+  const completeAll = () => {
     dispatch(fillGoals(month))
+    snackbar({ message: t('completeAll.done') })
   }
 
   // No goals

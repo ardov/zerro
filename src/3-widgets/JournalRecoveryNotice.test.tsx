@@ -58,8 +58,9 @@ describe('JournalRecoveryNotice', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
-  it('offers a confirmed full reload when recovery is required', async () => {
+  it('immediately requests a full reload when recovery is required', async () => {
     const store = createStore(true)
+    const dispatch = vi.spyOn(store, 'dispatch')
 
     render(
       <Provider store={store}>
@@ -72,7 +73,8 @@ describe('JournalRecoveryNotice', () => {
     await userEvent.click(
       screen.getByRole('button', { name: 'journalRecoveryConfirm' })
     )
-    expect(askMock).toHaveBeenCalledOnce()
+    expect(dispatch).toHaveBeenCalledWith({ type: 'journal/reload' })
+    expect(askMock).not.toHaveBeenCalled()
   })
 
   it('waits for corrupt outbox recovery before offering a full reload', () => {

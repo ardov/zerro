@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useAppSelector } from '@/store'
 import { MenuButton } from './MenuButton'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 
@@ -15,7 +16,7 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-const checkNestedConfirm: Story['play'] = async ({ canvasElement }) => {
+const checkSettings: Story['play'] = async ({ canvasElement }) => {
   const canvas = within(canvasElement)
   const body = within(canvasElement.ownerDocument.body)
   const trigger = canvas.getByRole('button', { name: 'Settings' })
@@ -30,17 +31,7 @@ const checkNestedConfirm: Story['play'] = async ({ canvasElement }) => {
   const reload = await within(list).findByRole('button', {
     name: 'Reload data',
   })
-  await userEvent.click(reload)
-  const cancel = await body.findByRole('button', { name: 'Cancel' })
-  await waitFor(() =>
-    expect(cancel.closest('[role="dialog"]')).toContainElement(
-      document.activeElement as HTMLElement
-    )
-  )
-  await userEvent.click(cancel)
-  await waitFor(() => expect(cancel).not.toBeVisible())
-  await waitFor(() => expect(reload).toHaveFocus())
-  await expect(reload.matches(':focus-visible')).toBe(false)
+  await expect(reload).toBeVisible()
   await userEvent.keyboard('{Escape}')
   await waitFor(() => expect(trigger).toHaveFocus())
   await expect(trigger.matches(':focus-visible')).toBe(true)
@@ -52,13 +43,13 @@ export const Desktop: Story = {
       <MenuButton {...args} />
     </div>
   ),
-  play: checkNestedConfirm,
+  play: checkSettings,
 }
 
 export const Mobile: Story = {
   globals: { viewport: { value: 'iphone13' } },
   render: args => <MenuButton {...args} />,
-  play: checkNestedConfirm,
+  play: checkSettings,
 }
 
 /** Asked content mounts already open; the drawer must nevertheless get a
@@ -120,4 +111,37 @@ export const ClearIconCacheMobile: Story = {
   tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'iphone13' } },
   play: checkClearIconCache,
+}
+
+function ReloadHarness() {
+  const result = useAppSelector(state => state.sync.lastResult)
+  return (
+    <>
+      <MenuButton />
+      <output aria-label="Reload attempted">{String(result !== null)}</output>
+    </>
+  )
+}
+
+export const ReloadImmediately: Story = {
+  tags: ['!dev', '!autodocs'],
+  render: () => <ReloadHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Settings' }))
+    const list = await body.findByRole('toolbar', { name: 'Settings' })
+    await userEvent.click(
+      within(list).getByRole('button', { name: 'Reload data' })
+    )
+    // The fixture has no token: reload returns a sync result without a network
+    // request. Reaching that result proves no confirmation blocks the action.
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Reload attempted')).toHaveTextContent(
+        'true'
+      )
+    )
+    expect(body.queryByRole('dialog', { name: 'Reload data' })).toBeNull()
+    expect(body.queryByRole('alertdialog')).toBeNull()
+  },
 }

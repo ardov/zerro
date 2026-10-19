@@ -1,3 +1,4 @@
+import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
 import { Button } from '@/6-shared/ui/kit/Button'
 import type { FC, HTMLAttributes } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -36,17 +37,10 @@ export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
 
   const ask = useAsk()
 
-  const copyAllBudgets = async () => {
-    const confirmed = await ask(
-      <Confirm
-        title={t('copyAllBudgets.title')}
-        description={t('copyAllBudgets.description')}
-        okText={t('copyAllBudgets.okText')}
-        cancelText={t('copyAllBudgets.cancelText')}
-      />
-    )
-    if (!confirmed) return
+  const snackbar = useSnackbar()
+  const copyAllBudgets = () => {
     dispatch(copyPreviousBudget(month))
+    snackbar({ message: t('copyAllBudgets.done') })
   }
 
   const fixOverspends = async () => {
@@ -131,25 +125,17 @@ function GoalAction(props: { month: TISOMonth }) {
   const { t } = useTranslation('budgets', {
     keyPrefix: 'actions.completeAllGoals',
   })
-  const dispatch = useAppDispatch()
   const { month } = props
   const { progress, goalsCount } = useAppSelector(core.goals.selectTotals)[
     month
   ]
   const canComplete = progress < 1 && goalsCount > 0
 
-  const ask = useAsk()
-  const completeAll = async () => {
-    const confirmed = await ask(
-      <Confirm
-        title={t('title')}
-        description={t('description')}
-        okText={t('okText')}
-        cancelText={t('cancelText')}
-      />
-    )
-    if (!confirmed) return
+  const dispatch = useAppDispatch()
+  const snackbar = useSnackbar()
+  const completeAll = () => {
     dispatch(fillGoals(month))
+    snackbar({ message: t('goals:completeAll.done', { keyPrefix: '' }) })
   }
 
   if (!canComplete) return null

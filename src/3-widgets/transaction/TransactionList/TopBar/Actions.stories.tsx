@@ -19,6 +19,7 @@ export default meta
 type Story = StoryObj
 
 function Harness() {
+  const pending = useAppSelector(state => state.data.outbox.length)
   const transactions = useAppSelector(core.transactions.selectAll)
   const candidates = Object.values(transactions)
     .filter(tr => !tr.deleted && core.transactions.getType(tr) === 'outcome')
@@ -49,6 +50,7 @@ function Harness() {
         onUncheckAll={() => setIds([])}
         onCheckAll={() => setIds(candidates.map(tr => tr.id))}
       />
+      <output aria-label="Pending actions">{pending}</output>
       <output className="sr-only" aria-label="Selected transactions">
         {ids.length}
       </output>
@@ -74,21 +76,29 @@ export const EditDialog: Story = {
   },
 }
 
-export const DeleteConfirmation: Story = {
+export const DeleteImmediately: Story = {
   ...Toolbar,
+  tags: ['!dev', '!autodocs'],
   play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
+    const before = Number(canvas.getByLabelText('Pending actions').textContent)
     await userEvent.click(
-      within(canvasElement).getByRole('button', { name: 'Delete Selected' })
+      canvas.getByRole('button', { name: 'Delete Selected' })
+    )
+    await expect(body.queryByRole('alertdialog')).toBeNull()
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Selected transactions')).toHaveTextContent(
+        '0'
+      )
     )
     await waitFor(() =>
-      expect(
-        body.getByRole('alertdialog', { name: 'Delete 2 transactions?' })
-      ).toBeVisible()
+      expect(Number(canvas.getByLabelText('Pending actions').textContent)).toBe(
+        before + 1
+      )
     )
-    await waitFor(() =>
-      expect(body.getByRole('button', { name: 'Keep' })).toHaveFocus()
-    )
+    await body.findByText('2 transactions deleted')
+    expect(body.queryByRole('button', { name: 'Undo' })).toBeNull()
   },
 }
 
@@ -171,21 +181,7 @@ export const MobileSaveAndCancel: Story = {
   globals: { viewport: { value: 'zerro499' } },
 }
 
-export const KeepTransactions: Story = {
-  ...Toolbar,
-  tags: ['!dev', '!autodocs'],
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement),
-      body = within(canvasElement.ownerDocument.body)
-    const trigger = canvas.getByRole('button', { name: 'Delete Selected' })
-    await userEvent.click(trigger)
-    await userEvent.click(await body.findByRole('button', { name: 'Keep' }))
-    await waitFor(() =>
-      expect(body.queryByRole('alertdialog')).not.toBeInTheDocument()
-    )
-    await waitFor(() => expect(trigger).toHaveFocus())
-    expect(canvas.getByLabelText('Selected transactions')).toHaveTextContent(
-      '2'
-    )
-  },
+export const MobileDeleteImmediately: Story = {
+  ...DeleteImmediately,
+  globals: { viewport: { value: 'zerro499' } },
 }

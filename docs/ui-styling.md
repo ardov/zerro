@@ -70,14 +70,15 @@ The browser `theme-color` is converted from the kit's card color to sRGB by
 `kit/themeColor.ts`, without reading computed DOM styles during mounting.
 
 `src/6-shared/ui/theme/colors.ts` retains the generated palette consumed by
-charts, legacy warning surfaces and snackbars. Its values are evaluated once
+charts and legacy warning surfaces. Its values are evaluated once
 for both schemes and injected by `AppThemeProvider`; `src/tailwind.css` exposes
 only the retained aliases. Charts and SVGs can read those variables directly.
 `Foundations/Theme` shows the retained scales alongside the UI Kit roles.
 Feature code must not import scales or semantic levels.
 
-Typography recipes, elevation shadows, stacking levels and corner radii remain
-in `src/tailwind.css`. Typography recipes are `text-body`, `text-body-sm`,
+Kit typography, shadows, stacking levels, radii and easing live in
+`src/6-shared/ui/kit/theme.css`. Legacy application recipes remain in
+`src/tailwind.css`. Typography recipes are `text-body`, `text-body-sm`,
 `text-caption`, `text-overline`, `text-title`, `text-title-lg` and `text-display`;
 `text-overline` sets size, line height and weight but not text transform.
 Use `uppercase` at the call site when needed. Numeric spacing still uses the
@@ -337,7 +338,15 @@ Other application editors may still use legacy surfaces.
 `Confirm` is passed to `useAsk<boolean>()`. Explicit confirmation answers `true`;
 all dismissals answer `undefined`. `intent="danger"` uses AlertDialog semantics,
 a destructive action and initial focus on Cancel. Ordinary confirmation initially
-focuses the confirming action. All application confirmations use the kit Confirm.
+focuses the confirming action.
+
+Copying budgets, filling goals, deleting selected transactions and restoring a
+server history point apply immediately and show a message-only snackbar.
+`SnackbarProvider` adapts existing callers to the kit `Toaster`, which owns
+notification presentation and stacking.
+Undo remains available through history controls and keyboard shortcuts.
+Data reload starts directly; the journal recovery notice explains its effect
+before the reload button.
 
 When an overlay opens another overlay, preserve the opener's history and focus
 contract: closing the child returns focus to the child trigger; closing the

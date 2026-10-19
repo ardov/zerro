@@ -18,8 +18,8 @@ import {
 } from '@/6-shared/ui/Icons'
 import { addFxAmount, createFxAmount } from '@/6-shared/helpers/money'
 import { track } from '@/6-shared/analytics'
-import { useAsk, usePopup } from '@/6-shared/overlays'
-import { Confirm } from '@/6-shared/ui/kit/Confirm'
+import { usePopup } from '@/6-shared/overlays'
+import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
 import { useAppDispatch, useAppSelector } from '@/store'
 
 import { CategorySelect } from '../../../category/CategorySelect'
@@ -77,18 +77,10 @@ const Actions: FC<ActionsProps> = ({
     onUncheckAll()
   }
 
-  const ask = useAsk()
-  const handleDelete = async () => {
-    const confirmed = await ask(
-      <Confirm
-        intent="danger"
-        title={t('delete', { count: ids.length })}
-        okText={t('deleteBtn')}
-        cancelText={t('cancelDeletion')}
-      />
-    )
-    if (!confirmed) return
+  const snackbar = useSnackbar()
+  const handleDelete = () => {
     dispatch(core.transactions.remove(checkedIds))
+    snackbar({ message: t('deleted', { count: checkedIds.length }) })
     track('transaction_deleted', { mode: 'bulk', source: 'bulk_toolbar' })
     closeMenu()
     onUncheckAll()
