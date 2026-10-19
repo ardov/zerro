@@ -1,10 +1,27 @@
 import { useState } from 'react'
-import { AccountIcon as AccountGlyph } from '@/6-shared/ui/Icons'
-import type { TAccount } from '@/6-shared/types'
+import {
+  AccountIcon as AccountGlyph,
+  CashAccountIcon,
+  CardAccountIcon,
+  LoanAccountIcon,
+  DepositAccountIcon,
+  EmoneyAccountIcon,
+  DebtAccountIcon,
+} from '@/6-shared/ui/Icons'
+import { AccountType, type TAccount } from '@/6-shared/types'
 import { bankIconById } from '@/6-shared/zenmoney-assets/bankIcons'
 
-/** Local bank artwork keyed by account.company; unknown or failed assets use
- * the theme-aware account glyph. Selection belongs to the surrounding control. */
+const iconByType = {
+  [AccountType.Cash]: CashAccountIcon,
+  [AccountType.Ccard]: CardAccountIcon,
+  [AccountType.Checking]: AccountGlyph,
+  [AccountType.Loan]: LoanAccountIcon,
+  [AccountType.Deposit]: DepositAccountIcon,
+  [AccountType.Emoney]: EmoneyAccountIcon,
+  [AccountType.Debt]: DebtAccountIcon,
+} satisfies Record<AccountType, typeof AccountGlyph>
+
+/** Bank artwork takes priority; missing or failed assets fall back to the account type. */
 export function AccountIcon({
   account,
 }: {
@@ -25,5 +42,9 @@ export function AccountIcon({
         onError={() => setFailedUrl(url)}
       />
     )
-  return <AccountGlyph aria-hidden data-account-type={account?.type} />
+  const Glyph =
+    account && Object.hasOwn(iconByType, account.type)
+      ? iconByType[account.type as AccountType]
+      : AccountGlyph
+  return <Glyph aria-hidden data-account-type={account?.type} />
 }

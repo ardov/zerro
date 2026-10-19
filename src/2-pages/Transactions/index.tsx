@@ -51,7 +51,7 @@ export default function TransactionsView() {
         <Panel
           className="shrink-0"
           style={{ width: panelWidths.accounts }}
-          contentClassName="p-2"
+          contentClassName="px-1 py-2"
         >
           <AccountList />
           <DebtorList />

@@ -30,6 +30,11 @@ import {
   CornerUpLeft,
   CornerUpRight,
   CreditCard,
+  Banknote,
+  HandCoins,
+  PiggyBank,
+  Wallet,
+  UsersRound,
   Download,
   Ellipsis,
   EllipsisVertical,
@@ -124,6 +129,12 @@ export const AccountBalanceWalletIcon = createIcon(
 )
 /** One account, in a form that is editing it. */
 export const AccountIcon = createIcon(Landmark, 'AccountIcon')
+export const CashAccountIcon = createIcon(Banknote, 'CashAccountIcon')
+export const CardAccountIcon = createIcon(CreditCard, 'CardAccountIcon')
+export const LoanAccountIcon = createIcon(HandCoins, 'LoanAccountIcon')
+export const DepositAccountIcon = createIcon(PiggyBank, 'DepositAccountIcon')
+export const EmoneyAccountIcon = createIcon(Wallet, 'EmoneyAccountIcon')
+export const DebtAccountIcon = createIcon(UsersRound, 'DebtAccountIcon')
 /** A transfer between two accounts. */
 export const SyncAltIcon = createIcon(ArrowLeftRight, 'SyncAltIcon')
 /** The leg money leaves an account by, and the leg it arrives on. They share
