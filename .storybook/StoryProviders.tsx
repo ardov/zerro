@@ -5,7 +5,6 @@ import { GlobalWidgets } from '@/1-app/GlobalWidgets'
 import { Providers } from '@/1-app/Providers'
 import { OverlayHost } from '@/6-shared/overlays'
 import { i18n } from '@/6-shared/localization'
-import { SnackbarProvider } from '@/6-shared/ui/SnackbarProvider'
 import { AppThemeProvider } from '@/6-shared/ui/theme'
 import { TooltipProvider } from '@/6-shared/ui/kit/Tooltip'
 import { makeStoryStore, type StoryScenario } from 'stories/fixtures/storyStore'
@@ -61,11 +60,9 @@ export function LibraryStoryProviders(props: {
 }) {
   return (
     <AppThemeProvider defaultMode={getTheme(props.context)}>
-      <SnackbarProvider>
-        <TooltipProvider>
-          <StoryRouter context={props.context}>{props.children}</StoryRouter>
-        </TooltipProvider>
-      </SnackbarProvider>
+      <TooltipProvider>
+        <StoryRouter context={props.context}>{props.children}</StoryRouter>
+      </TooltipProvider>
     </AppThemeProvider>
   )
 }

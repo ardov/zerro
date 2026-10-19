@@ -7,13 +7,11 @@ import { describe, expect, it, vi } from 'vitest'
 import { undoClientCommand } from '@/store/data'
 import { rootReducer } from '@/store/rootReducer'
 import { makeCoreNextDemoRootState } from '@/zerro-core/support/testing/demoState'
-import type { TSnackBarProps } from '@/6-shared/ui/SnackbarProvider'
 import { useRestoreSelectedPoint } from './useRestoreSelectedPoint'
 
 const { show } = vi.hoisted(() => ({ show: vi.fn() }))
-vi.mock('@/6-shared/ui/SnackbarProvider', async importOriginal => ({
-  ...(await importOriginal<typeof import('@/6-shared/ui/SnackbarProvider')>()),
-  useSnackbar: () => show,
+vi.mock('@/6-shared/ui/kit/Toast', () => ({
+  toast: { add: show },
 }))
 vi.mock('react-i18next', async importOriginal => ({
   ...(await importOriginal<typeof import('react-i18next')>()),
@@ -69,9 +67,10 @@ describe('restoring a server history point', () => {
     expect(
       Object.values(store.getState().data.current.transaction)[0].comment
     ).toBe('Previous comment')
-    const notification = show.mock.calls[0][0] as TSnackBarProps
-    expect(notification.message).toBe('restoreApplied')
-    expect(notification).toEqual({ message: 'restoreApplied' })
+    expect(show).toHaveBeenCalledExactlyOnceWith({
+      title: 'restoreApplied',
+      type: 'success',
+    })
     act(() => {
       store.dispatch(undoClientCommand())
     })
@@ -84,7 +83,8 @@ describe('restoring a server history point', () => {
     expect(store.getState().data.outbox).toHaveLength(0)
     expect(store.getState().history.browsing).toBe(false)
     expect(show).toHaveBeenCalledExactlyOnceWith({
-      message: 'restoreNoChanges',
+      title: 'restoreNoChanges',
+      type: 'info',
     })
   })
 })

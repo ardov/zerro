@@ -10,7 +10,7 @@ import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@/store'
 
 import { fillGoals } from '../model/fillGoals'
-import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { toast } from '@/6-shared/ui/kit/Toast'
 import { useTranslation } from 'react-i18next'
 
 type TGoalsProgressProps = ButtonBaseProps & {
@@ -29,10 +29,9 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const formatSum = (sum: number) => formatMoney(sum, currency)
 
   const dispatch = useAppDispatch()
-  const snackbar = useSnackbar()
   const completeAll = () => {
     dispatch(fillGoals(month))
-    snackbar({ message: t('completeAll.done') })
+    toast.add({ type: 'success', title: t('completeAll.done') })
   }
 
   // No goals

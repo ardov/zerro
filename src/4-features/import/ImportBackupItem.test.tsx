@@ -17,7 +17,7 @@ import { ActionList } from '@/6-shared/ui/ActionList'
 
 import { ImportBackupItem } from './ImportBackupItem'
 
-const { askMock, answerMock, askedOverlay, dispatchMock, snackbarMock } =
+const { askMock, answerMock, askedOverlay, dispatchMock, toastMock } =
   vi.hoisted(() => ({
     askMock: vi.fn(),
     answerMock: vi.fn(),
@@ -26,12 +26,12 @@ const { askMock, answerMock, askedOverlay, dispatchMock, snackbarMock } =
       resolve: undefined as ((value?: boolean) => void) | undefined,
     },
     dispatchMock: vi.fn(),
-    snackbarMock: vi.fn(),
+    toastMock: vi.fn(),
   }))
 
 vi.mock('@/store', () => ({ useAppDispatch: () => dispatchMock }))
-vi.mock('@/6-shared/ui/SnackbarProvider', () => ({
-  useSnackbar: () => snackbarMock,
+vi.mock('@/6-shared/ui/kit/Toast', () => ({
+  toast: { add: toastMock },
 }))
 vi.mock('@/6-shared/overlays', () => ({
   useAsk: () => askMock,
@@ -100,7 +100,7 @@ describe('ImportBackupItem', () => {
         ? action(dispatchMock, () => state, undefined)
         : action
     )
-    snackbarMock.mockReset()
+    toastMock.mockReset()
     askMock.mockReset()
     answerMock.mockReset()
     askedOverlay.element = null
@@ -115,6 +115,29 @@ describe('ImportBackupItem', () => {
     answerMock.mockImplementation((value?: boolean) =>
       askedOverlay.resolve?.(value)
     )
+  })
+
+  it('reports an unreadable backup as an error without opening confirmation', async () => {
+    const view = render(
+      <ActionList>
+        <ImportBackupItem />
+      </ActionList>
+    )
+    const input = view.container.querySelector('input[type="file"]')!
+    const file = new File([], 'backup.json')
+    Object.defineProperty(file, 'text', {
+      value: vi.fn().mockRejectedValue(new Error('Read failed')),
+    })
+
+    fireEvent.change(input, { target: { files: [file] } })
+
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledExactlyOnceWith({
+        title: 'importError_unreadable',
+        type: 'error',
+      })
+    )
+    expect(askMock).not.toHaveBeenCalled()
   })
 
   it('offers an explicit restore-anyway action for a valid warned backup', async () => {
@@ -152,7 +175,10 @@ describe('ImportBackupItem', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'importConfirmAnyway' }))
     await waitFor(() =>
-      expect(snackbarMock).toHaveBeenCalledWith({ message: 'importNoChanges' })
+      expect(toastMock).toHaveBeenCalledWith({
+        title: 'importNoChanges',
+        type: 'info',
+      })
     )
   })
 })

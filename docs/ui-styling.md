@@ -200,7 +200,7 @@ Important groups include:
 - Fields: kit `Input`, `Textarea`, `InlineField`, `Select`/`MultiSelect`, and
   date controls own labels, adornments, focus, error and disabled states.
 - Feedback: `Checkbox`, `Switch`, `Chip`, kit `Tooltip`, `CircularProgress`,
-  `SnackbarProvider`, and `SnackbarNotice` own their complete visual state.
+  kit `Toaster`, and `SnackbarNotice` own their complete visual state.
 - Disclosure and overlays: `Collapse` and kit `Dialog`, `Drawer`, `Popover`,
   `Menu` and `Confirm` own focus, dismissal, transition and portal behavior.
 
@@ -341,9 +341,15 @@ a destructive action and initial focus on Cancel. Ordinary confirmation initiall
 focuses the confirming action.
 
 Copying budgets, filling goals, deleting selected transactions and restoring a
-server history point apply immediately and show a message-only snackbar.
-`SnackbarProvider` adapts existing callers to the kit `Toaster`, which owns
-notification presentation and stacking.
+server history point apply immediately and call the kit's `toast.add` API.
+The application mounts one `Toaster` for the shared `toast` manager, which owns
+notification presentation and stacking. Successful operations use `success`,
+failures use `error`, and no-change results and build information use `info`.
+Storybook examples mount their own `Toaster` with an isolated manager, except
+for the explicit global-manager example. Toast stories cover smooth dismissal
+and downward swipe dismissal.
+Persistent data and recovery warnings remain declarative `SnackbarNotice`
+components rather than transient notifications.
 Undo remains available through history controls and keyboard shortcuts.
 Data reload starts directly; the journal recovery notice explains its effect
 before the reload button.

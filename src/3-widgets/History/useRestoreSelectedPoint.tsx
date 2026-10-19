@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { toast } from '@/6-shared/ui/kit/Toast'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { restoreOutboxPosition } from '@/store/data'
 import {
@@ -20,7 +20,6 @@ import { core } from '@/zerro-core/redux'
 export function useRestoreSelectedPoint() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()
-  const snackbar = useSnackbar()
   const point = useAppSelector(selectSelectedHistoryPoint)
   const data = useAppSelector(selectHistoryPointData)
 
@@ -28,7 +27,10 @@ export function useRestoreSelectedPoint() {
     if (!data) return
     const applied = dispatch(core.restore.apply(data))
     dispatch(exitHistoryBrowsing())
-    snackbar({ message: applied ? t('restoreApplied') : t('restoreNoChanges') })
+    toast.add({
+      type: applied ? 'success' : 'info',
+      title: applied ? t('restoreApplied') : t('restoreNoChanges'),
+    })
   }
 
   return {

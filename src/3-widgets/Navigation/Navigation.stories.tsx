@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { useState } from 'react'
-import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { toast } from '@/6-shared/ui/kit/Toast'
 import { Rail } from './Rail'
 import { MobileNavigation } from './MobileNavigation'
 
@@ -65,14 +65,17 @@ export const MobileBottomNavigation: Story = {
 }
 
 function ToastAboveNavigationHarness() {
-  const show = useSnackbar()
   const [visible, setVisible] = useState(true)
   const [, setHeight] = useState(0)
   return (
     <>
       <button
         onClick={() =>
-          show({ message: 'Saved above navigation', autoHideDuration: 0 })
+          toast.add({
+            title: 'Saved above navigation',
+            type: 'success',
+            timeout: 0,
+          })
         }
       >
         Show toast

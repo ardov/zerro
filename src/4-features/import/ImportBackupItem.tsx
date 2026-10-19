@@ -10,7 +10,7 @@ import {
   byLabelKey,
   entityLabelKeys,
 } from '@/6-shared/localization/entityLabels'
-import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { toast } from '@/6-shared/ui/kit/Toast'
 import { track } from '@/6-shared/analytics'
 import { parseFullBackup } from '@/6-shared/api/zm-adapter'
 import type { TFullBackupWarning } from '@/6-shared/api/zm-adapter'
@@ -45,7 +45,6 @@ const noop = () => {}
 export function ImportBackupItem({ onClose = noop }: { onClose?: () => void }) {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const snackbar = useSnackbar()
   const inputRef = useRef<HTMLInputElement>(null)
 
   const reloadData = useCallback(async () => {
@@ -78,13 +77,13 @@ export function ImportBackupItem({ onClose = noop }: { onClose?: () => void }) {
       try {
         text = await file.text()
       } catch {
-        snackbar({ message: t('importError_unreadable') })
+        toast.add({ type: 'error', title: t('importError_unreadable') })
         return
       }
 
       const parsed = parseFullBackup(text)
       if (!parsed.ok) {
-        snackbar({ message: t(`importError_${parsed.reason}`) })
+        toast.add({ type: 'error', title: t(`importError_${parsed.reason}`) })
         return
       }
 
@@ -94,13 +93,16 @@ export function ImportBackupItem({ onClose = noop }: { onClose?: () => void }) {
           confirmReload()
           return
         }
-        snackbar({ message: t(`importError_${compatibility.reason}`) })
+        toast.add({
+          type: 'error',
+          title: t(`importError_${compatibility.reason}`),
+        })
         return
       }
 
       const summary = dispatch(previewBackup(parsed.store))
       if (!Object.keys(summary).length && !parsed.warnings.length) {
-        snackbar({ message: t('importNoChanges') })
+        toast.add({ type: 'info', title: t('importNoChanges') })
         return
       }
       const pending: TPending = {
@@ -121,14 +123,15 @@ export function ImportBackupItem({ onClose = noop }: { onClose?: () => void }) {
           confirmReload()
           return
         }
-        snackbar({ message: t(`importError_${result.reason}`) })
+        toast.add({ type: 'error', title: t(`importError_${result.reason}`) })
       } else {
-        snackbar({
-          message: t(result.applied ? 'importDone' : 'importNoChanges'),
+        toast.add({
+          type: result.applied ? 'success' : 'info',
+          title: t(result.applied ? 'importDone' : 'importNoChanges'),
         })
       }
     },
-    [ask, confirmReload, dispatch, onClose, snackbar, t]
+    [ask, confirmReload, dispatch, onClose, t]
   )
 
   return (

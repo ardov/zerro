@@ -29,7 +29,7 @@ import {
 import { Divider } from '@/6-shared/ui/kit/Divider'
 import { clearFaviconCache } from '@/6-shared/favicon-cache'
 import { track } from '@/6-shared/analytics'
-import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { toast } from '@/6-shared/ui/kit/Toast'
 import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { appRelease, appVersion, buildDate } from '@/6-shared/config'
@@ -343,15 +343,14 @@ function IconModeItem() {
 
 function ClearIconCacheItem() {
   const { t } = useTranslation('settings')
-  const snackbar = useSnackbar()
   const [clearing, setClearing] = useState(false)
   const clear = async () => {
     setClearing(true)
     try {
       await clearFaviconCache()
-      snackbar({ message: t('iconCacheCleared') })
+      toast.add({ type: 'success', title: t('iconCacheCleared') })
     } catch {
-      snackbar({ message: t('iconCacheClearFailed') })
+      toast.add({ type: 'error', title: t('iconCacheClearFailed') })
     } finally {
       setClearing(false)
     }
@@ -369,7 +368,6 @@ function ClearIconCacheItem() {
 function BudgetSettingsItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const setSnackbar = useSnackbar()
   const { preferZmBudgets } = core.settings.use()
   const toggleSetting = () => {
     dispatch(core.settings.setPreferZmBudgets(!preferZmBudgets))
@@ -381,8 +379,9 @@ function BudgetSettingsItem() {
   const convertBudgets = () => {
     const updated = dispatch(convertZmBudgetsToZerro())
     track('legacy_budgets_converted', {})
-    setSnackbar({
-      message: t('budgetsConverted', {
+    toast.add({
+      type: 'success',
+      title: t('budgetsConverted', {
         budgets: updated.length,
       }),
     })
@@ -441,9 +440,8 @@ function LogOutItem({ onClose }: ItemProps) {
  * shows the full build, commit included, for a bug report. */
 function VersionItem({ onClose }: ItemProps) {
   const { t } = useTranslation('settings')
-  const snackbar = useSnackbar()
   const hold = useLongPress(() => {
-    snackbar({ message: t('build', { build: appRelease }) })
+    toast.add({ type: 'info', title: t('build', { build: appRelease }) })
     // Best effort: a touch hold may not count as a gesture that allows it.
     navigator.clipboard?.writeText(appRelease).catch(() => {})
   })

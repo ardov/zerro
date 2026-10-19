@@ -19,7 +19,7 @@ import {
 import { addFxAmount, createFxAmount } from '@/6-shared/helpers/money'
 import { track } from '@/6-shared/analytics'
 import { usePopup } from '@/6-shared/overlays'
-import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { toast } from '@/6-shared/ui/kit/Toast'
 import { useAppDispatch, useAppSelector } from '@/store'
 
 import { CategorySelect } from '../../../category/CategorySelect'
@@ -77,10 +77,12 @@ const Actions: FC<ActionsProps> = ({
     onUncheckAll()
   }
 
-  const snackbar = useSnackbar()
   const handleDelete = () => {
     dispatch(core.transactions.remove(checkedIds))
-    snackbar({ message: t('deleted', { count: checkedIds.length }) })
+    toast.add({
+      type: 'success',
+      title: t('deleted', { count: checkedIds.length }),
+    })
     track('transaction_deleted', { mode: 'bulk', source: 'bulk_toolbar' })
     closeMenu()
     onUncheckAll()

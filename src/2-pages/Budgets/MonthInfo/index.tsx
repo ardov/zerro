@@ -1,4 +1,4 @@
-import { useSnackbar } from '@/6-shared/ui/SnackbarProvider'
+import { toast } from '@/6-shared/ui/kit/Toast'
 import { Button } from '@/6-shared/ui/kit/Button'
 import type { FC, HTMLAttributes } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -37,10 +37,9 @@ export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
 
   const ask = useAsk()
 
-  const snackbar = useSnackbar()
   const copyAllBudgets = () => {
     dispatch(copyPreviousBudget(month))
-    snackbar({ message: t('copyAllBudgets.done') })
+    toast.add({ type: 'success', title: t('copyAllBudgets.done') })
   }
 
   const fixOverspends = async () => {
@@ -132,10 +131,12 @@ function GoalAction(props: { month: TISOMonth }) {
   const canComplete = progress < 1 && goalsCount > 0
 
   const dispatch = useAppDispatch()
-  const snackbar = useSnackbar()
   const completeAll = () => {
     dispatch(fillGoals(month))
-    snackbar({ message: t('goals:completeAll.done', { keyPrefix: '' }) })
+    toast.add({
+      type: 'success',
+      title: t('goals:completeAll.done', { keyPrefix: '' }),
+    })
   }
 
   if (!canComplete) return null
