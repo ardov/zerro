@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC, ReactNode } from 'react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -258,11 +259,14 @@ const RevealCellContent: FC<{
   color: string
 }> = ({ label, value, color }) => (
   <>
-    <span className="truncate text-caption font-sans leading-[1.2] text-ui-secondary">
+    <TextFade className="text-caption font-sans leading-[1.2] text-ui-secondary">
       {label}
-    </span>
-    <p className={cn('m-0 truncate text-body-sm font-sans', color)}>
+    </TextFade>
+    <TextFade
+      render={<p />}
+      className={cn('m-0 text-body-sm font-sans', color)}
+    >
       <Amount value={value} decimals="ifOnly" />
-    </p>
+    </TextFade>
   </>
 )

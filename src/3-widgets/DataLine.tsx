@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import React from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
@@ -47,7 +48,7 @@ export const DataLine: FC<DataLineProps> = ({
       <div className="mr-2 flex min-w-0 grow items-center">
         {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
         <Tooltip content={tooltip}>
-          <span className={cn('truncate', typographyClassName)}>{name}</span>
+          <TextFade className={typographyClassName}>{name}</TextFade>
         </Tooltip>
       </div>
       {amount !== undefined && (
@@ -87,9 +88,7 @@ export const OneLiner: FC<{
 }> = ({ left, right }) => {
   return (
     <div className="flex w-full text-base">
-      <div className="relative min-w-0 grow overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_left,transparent,black_40px)]">
-        {left}
-      </div>
+      <TextFade className="grow">{left}</TextFade>
 
       <span className="ml-2 shrink-0">{right}</span>
     </div>

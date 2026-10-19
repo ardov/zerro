@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import type { ButtonBaseProps } from '@/6-shared/ui/kit/ButtonBase'
 import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC } from 'react'
@@ -43,7 +44,10 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
         style={{ background: bg, color }}
         {...props}
       >
-        <p className="m-0 truncate text-center text-body font-sans">
+        <TextFade
+          render={<p />}
+          className="m-0 text-center text-body font-sans"
+        >
           {!isSmall &&
             (toBeAssigned ? t('notAllocated') : t('allAllocated')) + ' '}
           {toBeAssigned ? (
@@ -58,7 +62,7 @@ export const ToBeAssigned: FC<ToBeAssignedProps> = props => {
           ) : (
             '👌'
           )}
-        </p>
+        </TextFade>
         <ArrowForwardIcon />
       </ButtonBase>
     </Tooltip>

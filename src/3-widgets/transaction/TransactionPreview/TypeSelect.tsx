@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/6-shared/ui/kit/Button'
 import { Select } from '@/6-shared/ui/kit/Select'
@@ -40,7 +41,7 @@ export function TypeSelect(props: {
           size="sm"
           className="-ml-3 max-w-full text-ui-20"
         >
-          <span className="truncate">{t(`type_${value}`)}</span>
+          <TextFade>{t(`type_${value}`)}</TextFade>
           <ChevronDownIcon />
         </Button>
       }

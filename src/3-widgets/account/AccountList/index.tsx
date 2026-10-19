@@ -1,3 +1,4 @@
+import { BalanceSubheader } from '@/3-widgets/BalanceSubheader'
 import type { FC } from 'react'
 import { core } from '@/zerro-core/redux'
 
@@ -12,7 +13,7 @@ import { addFxAmount } from '@/6-shared/helpers/money'
 import { toISOMonth } from '@/6-shared/helpers/date'
 
 import { DisplayAmount } from '@/3-widgets/DisplayAmount'
-import { Account, Subheader } from './components'
+import { Account } from './components'
 
 export default function AccountList({ className = '' }) {
   const { t } = useTranslation('accounts')
@@ -41,7 +42,7 @@ export default function AccountList({ className = '' }) {
   return (
     <div className={className}>
       <ListRows>
-        <Subheader
+        <BalanceSubheader
           name={
             <Tooltip content={t('inBalanceDescription')}>
               <span>{t('inBalance')}</span>
@@ -56,7 +57,7 @@ export default function AccountList({ className = '' }) {
       </ListRows>
 
       <ListRows>
-        <Subheader
+        <BalanceSubheader
           name={
             <Tooltip content={t('otherDescription')}>
               <span>{t('other')}</span>

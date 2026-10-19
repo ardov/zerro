@@ -34,15 +34,10 @@ export const Playground: Story = {}
 export const FadeLabels: Story = {
   render: () => (
     <div className="flex w-48 flex-col gap-3">
-      <Chip overflow="fade" onClick={fn()} onRemove={fn()}>
+      <Chip onClick={fn()} onRemove={fn()}>
         Short label
       </Chip>
-      <Chip
-        overflow="fade"
-        start={<CalendarIcon />}
-        onClick={fn()}
-        onRemove={fn()}
-      >
+      <Chip start={<CalendarIcon />} onClick={fn()} onRemove={fn()}>
         A long label that fades before the removal action
       </Chip>
     </div>

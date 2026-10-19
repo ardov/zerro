@@ -23,3 +23,27 @@ it('lets callers remove kit shadows without discarding shadow colors', () => {
     'shadow-black/10 shadow-none'
   )
 })
+
+it.each([
+  'body',
+  'body-sm',
+  'caption',
+  'overline',
+  'title',
+  'title-lg',
+  'display',
+  'ui-14',
+])('keeps the %s font size independent of text color', size => {
+  expect(cn(`text-${size}`, 'text-ui-secondary')).toBe(
+    `text-${size} text-ui-secondary`
+  )
+  expect(cn('text-ui-secondary', `text-${size}`)).toBe(
+    `text-ui-secondary text-${size}`
+  )
+  expect(cn(`text-${size} text-ui-secondary`, 'text-lg text-ui-error')).toBe(
+    'text-lg text-ui-error'
+  )
+  expect(cn('text-lg text-ui-error', `text-${size}`)).toBe(
+    `text-ui-error text-${size}`
+  )
+})

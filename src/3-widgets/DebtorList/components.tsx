@@ -1,13 +1,10 @@
-import type { FC, ReactNode } from 'react'
-import { core } from '@/zerro-core/redux'
+import type { FC } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 
 import type { ComponentPropsWithoutRef } from 'react'
-import { ListRowSubheader, listItemDenseClass } from '@/6-shared/ui/ListRow'
-import type { TFxAmount, TFxCode } from '@/6-shared/types'
+import { listItemDenseClass } from '@/6-shared/ui/ListRow'
+import type { TFxCode } from '@/6-shared/types'
 import { Amount } from '@/6-shared/ui/Amount'
-import { DisplayAmount } from '@/3-widgets/DisplayAmount'
-import { toISOMonth } from '@/6-shared/helpers/date'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 
 export const Debtor: FC<
@@ -50,40 +47,5 @@ export const Debtor: FC<
         </Tooltip>
       </span>
     </button>
-  )
-}
-
-export const Subheader: FC<
-  {
-    name: ReactNode
-    amount: TFxAmount
-  } & ComponentPropsWithoutRef<'div'>
-> = ({ name, amount, className, ...rest }) => {
-  const month = toISOMonth(new Date())
-  const toDisplay = core.currency.useToDisplay(month)
-  return (
-    <ListRowSubheader sticky className={cn('rounded-lg', className)} {...rest}>
-      <span className="flex w-full">
-        <span className="grow truncate text-body leading-[inherit]">
-          <b>{name}</b>
-        </span>
-
-        <span
-          className={cn(
-            'ml-4',
-            toDisplay(amount) < 0 ? 'text-ui-error' : 'text-ui-secondary'
-          )}
-        >
-          <b>
-            <DisplayAmount
-              value={amount}
-              month={month}
-              decimals="ifOnly"
-              noShade
-            />
-          </b>
-        </span>
-      </span>
-    </ListRowSubheader>
   )
 }

@@ -1,3 +1,4 @@
+import { TextFade } from './TextFade'
 import type {
   ComponentPropsWithRef,
   CSSProperties,
@@ -248,7 +249,7 @@ export function FieldContent(props: {
     props: {
       className: cn(
         'pointer-events-none',
-        !floating ? 'sr-only' : 'absolute left-0 max-w-full truncate',
+        !floating ? 'sr-only' : 'absolute left-0 max-w-full',
         floating &&
           (raised
             ? 'top-2 text-ui-14 text-ui-secondary'
@@ -267,7 +268,11 @@ export function FieldContent(props: {
       )}
     >
       {children}
-      {renderedLabel}
+      {floating ? (
+        <TextFade render={renderedLabel}>{label}</TextFade>
+      ) : (
+        renderedLabel
+      )}
     </Content>
   )
 }

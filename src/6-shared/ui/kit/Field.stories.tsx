@@ -524,3 +524,28 @@ export const FloatingLabelFocus: Story = {
     ).toBeDisabled()
   },
 }
+
+export const LongFloatingLabel: Story = {
+  args: { label: 'A long floating label that cannot fit in a narrow field' },
+  render: args => (
+    <div className="w-48">
+      <Input {...args} />
+    </div>
+  ),
+  play: async ({ canvas, args }) => {
+    const input = canvas.getByRole('textbox', { name: String(args.label) })
+    const label = canvas.getByText(String(args.label), { selector: 'label' })
+    await waitFor(() =>
+      expect(getComputedStyle(label).maskImage).not.toBe('none')
+    )
+    await userEvent.click(input)
+    await userEvent.type(input, 'Value')
+    await waitFor(() =>
+      expect(getComputedStyle(label).maskImage).not.toBe('none')
+    )
+    await expect(label.getBoundingClientRect().right).toBeLessThanOrEqual(
+      input.getBoundingClientRect().right + 1
+    )
+    await expect(input).toHaveAccessibleName(String(args.label))
+  },
+}

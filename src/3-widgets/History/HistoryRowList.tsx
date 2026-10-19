@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
@@ -87,8 +88,11 @@ function HistoryRowItem({
   if (row.type === 'redo') {
     return (
       <div className="px-4 py-1 opacity-50 text-body-sm">
-        <ListRowText className="my-1 truncate" secondary={t('undoneHint')}>
-          {commandTitle(row.command, t)}
+        <ListRowText
+          className="my-1 block whitespace-nowrap"
+          secondary={t('undoneHint')}
+        >
+          <TextFade>{commandTitle(row.command, t)}</TextFade>
         </ListRowText>
       </div>
     )
@@ -187,24 +191,16 @@ function RowText({
   nowLabel: string
 }) {
   return (
-    <ListRowText className="my-1 truncate" secondary={secondary}>
+    <ListRowText className="my-1 block whitespace-nowrap" secondary={secondary}>
       {isHead ? (
         <span className="flex min-w-0 flex-row items-center gap-2">
-          <span
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {primary}
-          </span>
+          <TextFade>{primary}</TextFade>
           <Chip size="sm" variant="outline">
             {nowLabel}
           </Chip>
         </span>
       ) : (
-        primary
+        <TextFade>{primary}</TextFade>
       )}
     </ListRowText>
   )

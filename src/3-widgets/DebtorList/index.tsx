@@ -1,6 +1,7 @@
+import { BalanceSubheader } from '@/3-widgets/BalanceSubheader'
 import { useTranslation } from 'react-i18next'
 import { ListRows } from '@/6-shared/ui/ListRow'
-import { Debtor, Subheader } from './components'
+import { Debtor } from './components'
 import { addFxAmount, isZero } from '@/6-shared/helpers/money'
 import { keys } from '@/6-shared/helpers/keys'
 import type { TFxCode } from '@/6-shared/types'
@@ -48,7 +49,7 @@ export function DebtorList({ className = '' }) {
     <div className={className}>
       {!!iOweList.length && (
         <ListRows>
-          <Subheader name={t('iOwe')} amount={totalOwe} />
+          <BalanceSubheader name={t('iOwe')} amount={totalOwe} />
           {iOweList.map(d => (
             <Debtor
               key={d.name + d.currency}
@@ -62,7 +63,7 @@ export function DebtorList({ className = '' }) {
 
       {!!iLentList.length && (
         <ListRows>
-          <Subheader name={t('iAmOwed')} amount={totalLent} />
+          <BalanceSubheader name={t('iAmOwed')} amount={totalLent} />
           {iLentList.map(d => (
             <Debtor
               key={d.name + d.currency}

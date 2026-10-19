@@ -1,17 +1,17 @@
+import { BalanceSubheader } from '@/3-widgets/BalanceSubheader'
 import type { FC } from 'react'
-import React, { useState, useMemo, useCallback, memo } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import { Collapse } from '@/6-shared/ui/kit/Collapse'
-import { ListRows, ListRowSubheader } from '@/6-shared/ui/ListRow'
+import { ListRows } from '@/6-shared/ui/ListRow'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
 import { formatDate, toISOMonth } from '@/6-shared/helpers/date'
 import type { TAccountId, TISODate, TFxAmount } from '@/6-shared/types'
 import { Amount } from '@/6-shared/ui/Amount'
 import { useToggle } from '@/6-shared/hooks/useToggle'
 import { addFxAmount } from '@/6-shared/helpers/money'
-import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import type { Period } from '../shared/period'
 import { useAccountHistory } from './model'
 import { useTransactionDrawer } from '@/3-widgets/global/TransactionListDrawer'
@@ -70,7 +70,11 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
     return (
       <div>
         <ListRows>
-          <Subheader name={t('inBalance')} amount={totalInBudget} />
+          <BalanceSubheader
+            className="mb-2 cursor-default"
+            name={t('inBalance')}
+            amount={totalInBudget}
+          />
           {inBudgetActive.map(acc => (
             <AccountHistoryWidget
               key={acc.id}
@@ -82,7 +86,11 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
         </ListRows>
 
         <ListRows>
-          <Subheader name={t('other')} amount={totalSavings} />
+          <BalanceSubheader
+            className="mb-2 cursor-default"
+            name={t('other')}
+            amount={totalSavings}
+          />
           {savingsActive.map(acc => (
             <AccountHistoryWidget
               key={acc.id}
@@ -94,7 +102,8 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
         </ListRows>
 
         <ListRows>
-          <Subheader
+          <BalanceSubheader
+            className="mb-2 cursor-pointer"
             name={t('archived')}
             amount={totalArchived}
             onClick={toggleVisibility}
@@ -116,45 +125,6 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
     )
   }
 )
-
-type SubheaderProps = {
-  name: React.ReactNode
-  amount: TFxAmount
-  onClick?: () => void
-}
-
-const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
-  const month = toISOMonth(new Date())
-  const toDisplay = core.currency.useToDisplay(month)
-  const isNegative = toDisplay(amount) < 0
-
-  return (
-    <ListRowSubheader
-      sticky
-      className={`mb-2 rounded-lg ${onClick ? 'cursor-pointer' : 'cursor-default'}`}
-      onClick={onClick}
-    >
-      <span className="flex w-full">
-        <span className="grow truncate text-body leading-[inherit]">
-          <b>{name}</b>
-        </span>
-
-        <span
-          className={`${isNegative ? 'text-error' : 'text-muted-foreground'} ml-4`}
-        >
-          <b>
-            <DisplayAmount
-              month={month}
-              value={amount}
-              decimals="ifOnly"
-              noShade
-            />
-          </b>
-        </span>
-      </span>
-    </ListRowSubheader>
-  )
-})
 
 type AccTrendProps = {
   period: Period

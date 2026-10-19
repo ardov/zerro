@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import type { FC, MouseEvent } from 'react'
 import { useCallback } from 'react'
@@ -88,7 +89,9 @@ const Header: FC<{
           onClick={openColorPicker}
           button
         />
-        <h2 className="m-0 truncate text-title">{name}</h2>
+        <TextFade render={<h2 />} className="m-0 text-title">
+          {name}
+        </TextFade>
       </div>
       <IconButton
         variant="ghost"

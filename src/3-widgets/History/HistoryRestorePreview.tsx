@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { ScrollArea } from '@/6-shared/ui/kit/ScrollArea'
 import { Button } from '@/6-shared/ui/kit/Button'
 import { useMemo } from 'react'
@@ -79,7 +80,7 @@ export function HistoryRestorePreview() {
           <div className="mt-1 flex flex-col gap-[2px]">
             {rows.map(row => (
               <div key={row.key} className="flex justify-between gap-4">
-                <span className="truncate text-body-sm">{row.label}</span>
+                <TextFade className="text-body-sm">{row.label}</TextFade>
                 <span className="shrink-0 whitespace-nowrap text-body-sm text-ui-secondary">
                   {row.parts}
                 </span>

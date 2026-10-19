@@ -373,9 +373,10 @@ decorative transforms.
 `mode="popLayout"`. It animates entrance, exit and neighbouring positions;
 exiting items become inert immediately. Keep item keys stable during editing.
 `TextFade` clips one line with a trailing mask only when its text overflows.
-Place icons and actions outside it. `Chip overflow="fade"` applies that rule
-to its label while retaining the complete accessible name; the default remains
-ellipsis clipping.
+Use it for constrained text throughout the interface. `render={<h2 />}` preserves
+semantic elements, and `ref` points to the rendered element.
+Place icons and actions outside it. `Chip` always applies that rule
+to its label while retaining the complete accessible name.
 
 Select panels opened from compact custom triggers size to their options, with
 `popupMinWidth` setting their minimum (13rem by default). Editing a chip's

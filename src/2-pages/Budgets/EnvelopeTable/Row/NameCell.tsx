@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import type { FC, ReactNode } from 'react'
 import { memo, useRef } from 'react'
@@ -68,8 +69,8 @@ export const NameCell: FC<{
           color={isSelf ? null : colorHex}
           className="mr-3"
         />
-        <span
-          className="truncate text-body"
+        <TextFade
+          className="text-body"
           title={name}
           ref={ref}
           onClick={e => {
@@ -81,16 +82,16 @@ export const NameCell: FC<{
           }}
         >
           {isSelf ? `${name} ${t('isSelf')}` : name}
-        </span>
+        </TextFade>
       </div>
       {displCurrency !== currency && <CurrencyTag currency={currency} />}
       {!!comment && (
-        <span
+        <TextFade
           title={comment}
-          className="shrink truncate text-body italic text-ui-tertiary"
+          className="shrink text-body italic text-ui-tertiary"
         >
           {comment}
-        </span>
+        </TextFade>
       )}
     </div>
   )

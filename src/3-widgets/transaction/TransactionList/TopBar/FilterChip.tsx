@@ -62,7 +62,6 @@ export function FilterChip({
     <Chip
       className="min-w-0 shrink"
       ref={ref}
-      overflow="fade"
       variant={isEmptyClause(clause) ? 'outline-draft' : 'filled'}
       start={
         clause.kind === 'date' ||

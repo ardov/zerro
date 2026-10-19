@@ -1,3 +1,4 @@
+import { TextFade } from './kit/TextFade'
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { PressBacking } from './PressBacking'
 import { cn } from './shadcn/utils'
@@ -101,13 +102,13 @@ export function ListRowText({
     >
       {children}
       {secondary && (
-        // No wrapping rule of its own: it inherits the row's, so a truncating
-        // row truncates it too. It clips with an ellipsis under `whitespace-nowrap`
-        // and wraps freely under a `whitespace-normal` row, where
-        // nothing overflows for the ellipsis to land on.
-        <span className="block min-w-0 overflow-hidden text-ellipsis text-body-sm text-ui-secondary">
+        // Preserve wrapping rows; only a horizontally overflowing line fades.
+        <TextFade
+          className="text-body-sm text-ui-secondary"
+          style={{ whiteSpace: 'inherit' }}
+        >
           {secondary}
-        </span>
+        </TextFade>
       )}
     </span>
   )

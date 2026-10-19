@@ -120,7 +120,6 @@ export function SearchChip({
           ) : value ? (
             <Chip
               ref={setButton}
-              overflow="fade"
               start={<SearchIcon />}
               onClick={open}
               onRemove={() => {

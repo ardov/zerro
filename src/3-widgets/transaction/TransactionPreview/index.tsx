@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import type { FC, ReactNode } from 'react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -310,9 +311,9 @@ const TransactionEditor = ({
       <header className="flex items-center gap-1 px-6 py-3">
         <div className="min-w-0 grow">
           {tr?.deleted && (
-            <span className="block truncate text-ui-14 text-ui-error">
+            <TextFade className="block text-ui-14 text-ui-error">
               {t('transactionDeleted')}
-            </span>
+            </TextFade>
           )}
           <TypeSelect
             value={draft.type}

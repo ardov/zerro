@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { Button, IconButton } from '@/6-shared/ui/kit/Button'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -114,11 +115,11 @@ export function HistoryTopBar() {
         {/* Left-aligned while the panel is open: the panel overlays the right
             of the page, and controls pushed under it are controls that are
             gone. */}
-        <span
-          className={`${compact ? 'grow-0' : 'grow'} min-w-0 truncate text-caption`}
+        <TextFade
+          className={`${compact ? 'grow-0' : 'grow'} min-w-0 text-caption`}
         >
           {atHead ? label : t('viewingPast', { time: label })}
-        </span>
+        </TextFade>
         {!compact && (
           <>
             <IconButton

@@ -1,16 +1,13 @@
-import type { FC, ReactNode } from 'react'
+import type { FC } from 'react'
 import { useCallback } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
-import { core } from '@/zerro-core/redux'
+import type { core } from '@/zerro-core/redux'
 
 import type { ComponentPropsWithoutRef } from 'react'
-import { ListRowSubheader, listItemDenseClass } from '@/6-shared/ui/ListRow'
-import { toISOMonth } from '@/6-shared/helpers/date'
+import { listItemDenseClass } from '@/6-shared/ui/ListRow'
 import { Amount } from '@/6-shared/ui/Amount'
-import type { TFxAmount } from '@/6-shared/types'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 
-import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import { useTransactionDrawer } from '@/3-widgets/global/TransactionListDrawer'
 import { AccountMenu } from '@/3-widgets/global/AccountContextMenu'
 import { useAsk } from '@/6-shared/overlays'
@@ -84,41 +81,5 @@ export const Account: FC<
         </Tooltip>
       </span>
     </button>
-  )
-}
-
-export const Subheader: FC<
-  {
-    name: ReactNode
-    amount: TFxAmount
-  } & ComponentPropsWithoutRef<'div'>
-> = ({ name, amount, className, ...rest }) => {
-  const month = toISOMonth(new Date())
-  const toDisplay = core.currency.useToDisplay(month)
-  const isNegative = toDisplay(amount) < 0
-  return (
-    <ListRowSubheader sticky className={cn('rounded-lg', className)} {...rest}>
-      <span className="flex w-full">
-        <span className="grow truncate text-body leading-[inherit]">
-          <b>{name}</b>
-        </span>
-
-        <span
-          className={cn(
-            'ml-4',
-            isNegative ? 'text-ui-error' : 'text-ui-secondary'
-          )}
-        >
-          <b>
-            <DisplayAmount
-              month={month}
-              value={amount}
-              decimals="ifOnly"
-              noShade
-            />
-          </b>
-        </span>
-      </span>
-    </ListRowSubheader>
   )
 }

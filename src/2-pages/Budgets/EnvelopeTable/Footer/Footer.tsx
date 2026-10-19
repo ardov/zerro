@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import type { FC } from 'react'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
@@ -15,9 +16,9 @@ type FooterProps = {
 }
 
 const Sum: FC<{ value: TFxAmount; month: TISOMonth }> = ({ value, month }) => (
-  <span className="truncate text-right text-overline uppercase text-ui-secondary">
+  <TextFade className="text-right text-overline uppercase text-ui-secondary">
     <DisplayAmount value={value} decimals="ifOnly" month={month} noCurrency />
-  </span>
+  </TextFade>
 )
 
 export const Footer: FC<FooterProps> = props => {
@@ -29,9 +30,9 @@ export const Footer: FC<FooterProps> = props => {
     <TableRow
       name={
         <div>
-          <span className="truncate text-overline uppercase text-ui-secondary">
+          <TextFade className="text-overline uppercase text-ui-secondary">
             {t('total')}
-          </span>
+          </TextFade>
         </div>
       }
       assigned={<Sum value={totals.assigned} month={month} />}

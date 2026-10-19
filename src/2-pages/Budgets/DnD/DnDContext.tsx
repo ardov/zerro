@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { createPortal } from 'react-dom'
 import type { FC, ReactNode } from 'react'
 import { useEffect, useState } from 'react'
@@ -129,9 +130,9 @@ const DragObj = () => {
       <Monies />
     ) : activeType === DragTypes.envelope ? (
       <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-ui-base px-4 py-1">
-        <p className="m-0 truncate text-body">
+        <TextFade render={<p />} className="m-0 text-body">
           {activeId ? envelopes[activeId].name : t('category')}
-        </p>
+        </TextFade>
       </div>
     ) : null
 

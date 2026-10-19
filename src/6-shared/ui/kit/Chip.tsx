@@ -50,8 +50,6 @@ export type ChipProps = Omit<
   variant?: NonNullable<VariantProps<typeof chipVariants>['variant']>
   /** sm is 24px; md is 32px (default). */
   size?: 'sm' | 'md'
-  /** Fade overflowing labels without masking icons or removal controls. */
-  overflow?: 'ellipsis' | 'fade'
   /** Controlled toggle state. With onClick, exposes aria-pressed and owns the fill. */
   checked?: boolean
   /** Decorative leading icon. */
@@ -67,7 +65,6 @@ export function Chip(props: ChipProps) {
     color,
     variant = 'filled',
     size = 'md',
-    overflow = 'ellipsis',
     checked,
     start,
     onClick,
@@ -174,13 +171,7 @@ export function Chip(props: ChipProps) {
             {start}
           </span>
         )}
-        {overflow === 'fade' ? (
-          <TextFade id={labelId}>{children}</TextFade>
-        ) : (
-          <span id={labelId} className="truncate">
-            {children}
-          </span>
-        )}
+        <TextFade id={labelId}>{children}</TextFade>
         {onRemove && !hasSeparateRemove && (
           <span
             aria-hidden

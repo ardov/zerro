@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { useState, type ButtonHTMLAttributes } from 'react'
 import { eachMonthOfInterval } from 'date-fns'
 import {
@@ -110,7 +111,6 @@ export function Calendar(props: CalendarProps) {
 const classNames: Partial<ClassNames> = {
   month: 'grid w-full grid-cols-[auto_1fr_auto] items-center gap-y-2',
   month_caption: calendarCaptionClass,
-  caption_label: 'truncate text-ui-16 font-medium first-letter:uppercase',
   month_grid: 'col-span-3 w-full table-fixed border-collapse',
   weekday:
     'h-8 text-center text-ui-14 font-normal text-ui-secondary select-none',
@@ -184,7 +184,7 @@ function CalendarMonthCaption(props: MonthCaptionProps) {
             aria-label={`${t('selectMonth')}: ${caption}`}
             className="max-w-full rounded-smooth px-2"
           >
-            <span className="truncate first-letter:uppercase">{caption}</span>
+            <TextFade className="first-letter:uppercase">{caption}</TextFade>
           </Button>
         }
       />

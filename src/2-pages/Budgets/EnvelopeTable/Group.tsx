@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC } from 'react'
@@ -34,9 +35,12 @@ type TGroupProps = {
   children?: React.ReactNode[]
 }
 const Sum: FC<{ value: number }> = ({ value }) => (
-  <p className="m-0 self-baseline truncate text-right text-body text-ui-tertiary">
+  <TextFade
+    render={<p />}
+    className="m-0 self-baseline text-right text-body text-ui-tertiary"
+  >
     <Amount value={value} decimals="ifOnly" />
-  </p>
+  </TextFade>
 )
 
 export const Group: FC<TGroupProps> = ({
@@ -97,9 +101,13 @@ export const Group: FC<TGroupProps> = ({
   const NameCell = (
     <div className="flex min-w-0 items-center justify-start">
       <ButtonBase className="-ml-2 min-w-0 shrink p-2" onClick={rename}>
-        <h6 ref={ref} className="m-0 truncate text-title font-sans font-black">
+        <TextFade
+          render={<h6 />}
+          ref={ref}
+          className="m-0 text-title font-sans font-black"
+        >
           {name}
-        </h6>
+        </TextFade>
       </ButtonBase>
 
       {isReordering && Actions}

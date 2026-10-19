@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { useTranslation } from 'react-i18next'
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
@@ -51,9 +52,9 @@ export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
     <>
       <div ref={paperRef} className="flex" {...props}>
         <ButtonBase className="rounded-lg py-2 pl-2" onClick={openPopover}>
-          <p className="m-0 truncate text-body font-sans">
+          <TextFade render={<p />} className="m-0 text-body font-sans">
             <b>{getMonthName(month)}</b> {getYear(month)}
-          </p>
+          </TextFade>
         </ButtonBase>
 
         <div className="flex">

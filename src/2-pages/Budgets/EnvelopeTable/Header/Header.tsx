@@ -1,3 +1,4 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { Button } from '@/6-shared/ui/kit/Button'
 import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,12 +22,12 @@ type HeaderProps = {
 }
 
 const ColumnTitle: FC<{ name: string; onClick?: () => void }> = props => (
-  <span
+  <TextFade
     onClick={props.onClick}
-    className="truncate text-right text-overline uppercase text-ui-secondary"
+    className="text-right text-overline uppercase text-ui-secondary"
   >
     {props.name}
-  </span>
+  </TextFade>
 )
 
 export const Header: FC<HeaderProps> = props => {
@@ -62,12 +63,12 @@ export const Header: FC<HeaderProps> = props => {
                 label={t('actions')}
                 trigger={
                   <Button variant="ghost" size="xs" className="-ml-2 px-2 py-0">
-                    <span className="truncate text-overline uppercase text-ui-secondary">
+                    <TextFade className="text-overline uppercase text-ui-secondary">
                       {t('categories', {
                         ns: 'budgets',
                         context: isAllShown ? 'all' : '',
                       })}
-                    </span>
+                    </TextFade>
                     <ChevronDownIcon />
                   </Button>
                 }

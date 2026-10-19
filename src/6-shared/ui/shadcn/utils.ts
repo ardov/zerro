@@ -4,8 +4,17 @@ import { extendTailwindMerge } from 'tailwind-merge'
 const twMerge = extendTailwindMerge({
   extend: {
     theme: {
-      // Parse 'ui-14' as a text size
-      text: [(value: string) => /^ui-\d+$/.test(value)],
+      // Custom font sizes must not be merged as text colors.
+      text: [
+        'body',
+        'body-sm',
+        'caption',
+        'overline',
+        'title',
+        'title-lg',
+        'display',
+        (value: string) => /^ui-\d+$/.test(value),
+      ],
       radius: ['ui-card', 'ui-control', 'ui-control-inner', 'ui-popover'],
       shadow: ['ui-card', 'ui-popover'],
     },
