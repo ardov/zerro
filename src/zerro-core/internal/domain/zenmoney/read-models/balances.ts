@@ -1,3 +1,4 @@
+import { getDebtorId } from './debtors'
 import { GroupBy, makeDateArray, toISODate } from '../../foundation/date'
 import { entries } from '../../foundation/keys'
 import { isZero, subFxAmount } from '../model/money'
@@ -6,7 +7,7 @@ import type { TAccount, TAccountId } from '../entities/accounts'
 import type { TISODate, TDateDraft } from '../primitives'
 import type { TFxAmount } from '../model/money'
 import type { TFxCode, TInstrumentId } from '../entities/instruments'
-import { normalizePayee, type TMerchant } from '../entities/merchants'
+import type { TMerchant } from '../entities/merchants'
 import type {
   TTransaction,
   TTransactionId,
@@ -234,10 +235,4 @@ function getCurrentBalanceState(
   })
 
   return result
-}
-
-function getDebtorId(transaction: TTransaction, merchants: ById<TMerchant>) {
-  const merchantTitle =
-    transaction.merchant && merchants[transaction.merchant]?.title
-  return normalizePayee(merchantTitle || transaction.payee || '')
 }

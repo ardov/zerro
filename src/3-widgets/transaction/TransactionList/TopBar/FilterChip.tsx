@@ -9,6 +9,7 @@ import { MultiSelect } from '@/6-shared/ui/kit/MultiSelect'
 import { CheckIcon } from '@/6-shared/ui/Icons'
 import { AccountMultiSelect } from '../../../account/AccountMultiSelect'
 import { CategoryMultiSelect } from '../../../category/CategoryMultiSelect'
+import { DebtorMultiSelect } from '../../../DebtorList/DebtorMultiSelect'
 import { MerchantMultiSelect } from '../../../merchant/MerchantMultiSelect'
 import { core } from '@/zerro-core/redux'
 import { AmountFilterEditor, DateFilterEditor } from './RangeFilterEditors'
@@ -66,6 +67,7 @@ export function FilterChip({
       start={
         clause.kind === 'date' ||
         clause.kind === 'merchant' ||
+        clause.kind === 'debtor' ||
         clause.kind === 'changed' ? (
           <FilterIcon kind={clause.kind} />
         ) : undefined
@@ -92,6 +94,15 @@ export function FilterChip({
     case 'tag':
       return (
         <CategoryMultiSelect
+          value={clause.ids}
+          onChange={ids => onChange({ ...clause, ids })}
+          popup={popup}
+          trigger={chip}
+        />
+      )
+    case 'debtor':
+      return (
+        <DebtorMultiSelect
           value={clause.ids}
           onChange={ids => onChange({ ...clause, ids })}
           popup={popup}

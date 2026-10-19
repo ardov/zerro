@@ -226,6 +226,22 @@ Presentation decorates domain values afterward: localized names, group labels,
 icons, colors, and asset URLs never enter domain calculations. Command-time
 reads use the same graph; commands resolve domain identities before compilation.
 
+### Transaction filters
+
+Transaction queries combine clauses with AND; selected values within a clause
+use OR. The debtor clause matches debt operations by the same normalized merchant
+title or legacy payee identity used by debtor balances, independently of budget
+participation. Debtor choices include settled and soft-deleted history; deleted
+operations still remain hidden unless the query includes them explicitly.
+
+The amount clause accepts optional inclusive bounds and currency codes. Currency
+alone is an applied filter. Both bounds and currency must match the same money
+leg: income for receipts (including incoming debt operations), outcome for
+payments (including outgoing debt operations), either real leg for transfers. The technical debt-account leg and original
+purchase amounts (`opIncome`/`opOutcome`) do not participate. The debtor balance
+and query share this money-leg selection. Opening a debtor row supplies a query
+for that debtor and the row's currency, so matching operations update with data.
+
 ## Persistence and history
 
 [`replicaStorage.ts`](../../../6-shared/api/replicaStorage.ts) owns IndexedDB:

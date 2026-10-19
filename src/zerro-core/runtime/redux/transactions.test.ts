@@ -155,3 +155,27 @@ describe('Core transaction adapter reads', () => {
     expect(selectBalancesByDate(changed)).not.toBe(balancesByDate)
   })
 })
+
+it('refreshes currency matching when instrument metadata changes', () => {
+  const data = makeDemoStore({ now: NOW })
+  const transaction = makeTransaction({
+    income: 0,
+    outcome: 10,
+    outcomeInstrument: 1,
+    outcomeAccount: 'Cash USD',
+  })
+  const query = { clauses: [{ kind: 'amount' as const, currencies: ['USD'] }] }
+  const first = selectQueryContext(makeRootState(data))
+  expect(compileQuery(query, first)(transaction)).toBe(true)
+  const next = selectQueryContext(
+    makeRootState({
+      ...data,
+      instrument: {
+        ...data.instrument,
+        1: { ...data.instrument[1], shortTitle: 'EUR' },
+      },
+    })
+  )
+  expect(next).not.toBe(first)
+  expect(compileQuery(query, next)(transaction)).toBe(false)
+})

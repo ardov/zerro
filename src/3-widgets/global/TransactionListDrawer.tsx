@@ -30,7 +30,7 @@ export const useTransactionDrawer = () => transactionListScreen.useOpen()
 export const TransactionListDrawer = () => {
   const { t } = useTranslation('common')
   const [value, setValue] = transactionListScreen.use()
-  const showTransaction = useTransactionPreview()
+  const showTransaction = useTransactionPreview({ modal: true })
   const onClose = useCallback(() => setValue(null), [setValue])
   // The screen value is gone while the drawer slides out. Keep showing what
   // it showed, so the closing list keeps its title and its filter.

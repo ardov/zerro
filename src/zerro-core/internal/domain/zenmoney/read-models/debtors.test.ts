@@ -4,7 +4,7 @@ import {
   makeTransaction,
   usdInstruments,
 } from '../../../../support/testing/zenmoneyTestData'
-import { buildDebtors } from './debtors'
+import { buildDebtors, buildDebtorNames } from './debtors'
 
 describe('buildDebtors', () => {
   it('collects payee debt transactions and balances', () => {
@@ -84,4 +84,87 @@ describe('buildDebtors', () => {
 
     expect(result).toEqual({})
   })
+})
+
+it('uses real account currencies when debt legs differ', () => {
+  const result = buildDebtors({
+    transactions: [
+      makeTransaction({
+        income: 90,
+        incomeInstrument: 2,
+        incomeAccount: 'debt',
+        outcome: 100,
+        outcomeInstrument: 1,
+        outcomeAccount: 'card',
+        merchant: 'alex',
+      }),
+      makeTransaction({
+        income: 20,
+        incomeInstrument: 1,
+        incomeAccount: 'card',
+        outcome: 18,
+        outcomeInstrument: 2,
+        outcomeAccount: 'debt',
+        payee: 'Alex!',
+      }),
+    ],
+    merchants: { alex: makeMerchant({ id: 'alex', title: 'Alex' }) },
+    instruments: {
+      ...usdInstruments,
+      2: { ...usdInstruments[1], id: 2, shortTitle: 'EUR' },
+    },
+    debtAccountId: 'debt',
+  })
+  expect(result.alex.balance).toEqual({ USD: 80 })
+  expect(result.alex.transactions).toHaveLength(2)
+})
+
+it('uses the same stable merchant name for balances and filter options in either history order', () => {
+  const merchant = makeTransaction({
+    id: 'merchant',
+    income: 10,
+    outcome: 10,
+    incomeAccount: 'debt',
+    outcomeAccount: 'card',
+    merchant: 'alex',
+  })
+  const payee = { ...merchant, id: 'payee', merchant: null, payee: 'Alex!' }
+  for (const transactions of [
+    [merchant, payee],
+    [payee, merchant],
+  ]) {
+    const input = {
+      transactions,
+      merchants: { alex: makeMerchant({ id: 'alex', title: 'Alex' }) },
+      instruments: usdInstruments,
+      debtAccountId: 'debt',
+    }
+    expect(buildDebtorNames(input)).toEqual({ alex: 'Alex' })
+    expect(buildDebtors(input).alex.name).toBe('Alex')
+  }
+})
+
+it('keeps the payee-only label stable when history order changes', () => {
+  const first = makeTransaction({
+    income: 10,
+    outcome: 10,
+    incomeAccount: 'debt',
+    outcomeAccount: 'card',
+    payee: 'Alex!',
+  })
+  const second = { ...first, id: 'second', payee: 'Alex' }
+  const input = {
+    merchants: {},
+    instruments: usdInstruments,
+    debtAccountId: 'debt',
+  }
+  for (const transactions of [
+    [first, second],
+    [second, first],
+  ]) {
+    expect(buildDebtorNames({ ...input, transactions })).toEqual({
+      alex: 'Alex',
+    })
+    expect(buildDebtors({ ...input, transactions }).alex.name).toBe('Alex')
+  }
 })

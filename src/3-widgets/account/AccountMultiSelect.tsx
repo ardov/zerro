@@ -1,3 +1,4 @@
+import { core } from '@/zerro-core/redux'
 import type { ReactElement } from 'react'
 import type { TAccountId } from '@/6-shared/types'
 import type { PopupController } from '@/6-shared/overlays'
@@ -18,7 +19,14 @@ export function AccountMultiSelect({
   popup,
 }: AccountMultiSelectProps) {
   const { t } = useTranslation('filterDrawer')
-  const options = useAccountOptions({ selectedIds: value }, t('account'))
+  const accounts = core.accounts.useAll()
+  const excludeIds = Object.values(accounts)
+    .filter(account => account.type === 'debt')
+    .map(account => account.id)
+  const options = useAccountOptions(
+    { selectedIds: value, excludeIds },
+    t('account')
+  )
   return (
     <MultiSelect
       {...options}

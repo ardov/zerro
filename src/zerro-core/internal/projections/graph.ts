@@ -6,6 +6,7 @@ import {
   buildBalances,
   buildBalancesByDate,
   buildDebtors,
+  buildDebtorNames,
   buildMerchantUsage,
   getDebtAccountId,
   getHistoryStart,
@@ -154,6 +155,15 @@ export function createProjectionGraph(ctx: TCoreContext) {
     buildDebtors
   )
 
+  const debtorNames = nodeObj(
+    d => ({
+      transactions: sortedTransactions(d),
+      merchants: d.merchant,
+      debtAccountId: debtAccountId(d),
+    }),
+    buildDebtorNames
+  )
+
   // --- merchants -----------------------------------------------------------
   const merchantUsage = nodeObj(
     d => ({
@@ -227,6 +237,7 @@ export function createProjectionGraph(ctx: TCoreContext) {
       d.account,
       d.tag,
       d.merchant,
+      instrumentCodeById(d),
     ],
     (
       routing,
@@ -234,11 +245,13 @@ export function createProjectionGraph(ctx: TCoreContext) {
       keepingEnvelopeIds,
       accounts,
       tags,
-      merchants
+      merchants,
+      instrumentCodeById
     ): TTransactionQueryContext => ({
       routing,
       envelopes,
       keepingEnvelopeIds,
+      instrumentCodeById,
       search: { accounts, tags, merchants },
     })
   )
@@ -344,6 +357,7 @@ export function createProjectionGraph(ctx: TCoreContext) {
     fxRatesGetter,
     convertFx,
     debtors,
+    debtorNames,
     merchantUsage,
     envelopes,
     envelopeStructure,

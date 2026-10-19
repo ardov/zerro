@@ -15,6 +15,7 @@ const meta = {
       description: {
         component: `Row layout for lists and pickers, with optional images and secondary text.
 
+- Use **ListRowButton** for a native action row with hover and keyboard focus.
 - Compose with a semantic element or Base UI item through **render**; the owner handles keyboard interaction, disabled behavior and accessible selection.
 - Keep **reserveStart** on every row of a mixed-image list, even while filtering. Start images are decorative.
 - Selection is a background; the owner supplies one pointer/keyboard highlight. Pressing moves only the background, respecting reduced motion.

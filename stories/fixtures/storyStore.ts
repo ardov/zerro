@@ -4,10 +4,12 @@ import { createEmptyDataStore } from '@/zerro-core/replica'
 import { rootReducer } from '@/store/rootReducer'
 import {
   makeMerchant,
+  makeInstrument,
   makeTransaction,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
 
 export type StoryScenario =
+  | 'debtor-navigation'
   | 'transaction-filters'
   | 'receipt-and-map'
   | 'demo'
@@ -21,6 +23,59 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
 
   const preloadedState = (() => {
     switch (scenario) {
+      case 'debtor-navigation': {
+        const current = demoState.data.current
+        const loan = {
+          date: '2026-03-20' as const,
+          incomeAccount: 'Debts',
+          outcomeAccount: 'Cash USD',
+          income: 100,
+          outcome: 100,
+          incomeInstrument: 1,
+          outcomeInstrument: 1,
+        }
+        return makeCoreNextDemoRootState({
+          ...current,
+          instrument: {
+            ...current.instrument,
+            999: makeInstrument({ id: 999, shortTitle: 'EUR', symbol: '€' }),
+          },
+          merchant: { alex: makeMerchant({ id: 'alex', title: 'Alex' }) },
+          transaction: {
+            loan: makeTransaction({
+              ...loan,
+              id: 'loan',
+              merchant: 'alex',
+              comment: 'Alex dollar loan',
+            }),
+            repayment: makeTransaction({
+              ...loan,
+              id: 'repayment',
+              payee: 'Alex',
+              incomeAccount: 'Cash USD',
+              outcomeAccount: 'Debts',
+              income: 20,
+              outcome: 18,
+              outcomeInstrument: 999,
+              comment: 'Alex dollar repayment',
+            }),
+            euro: makeTransaction({
+              ...loan,
+              id: 'euro',
+              payee: 'Alex',
+              incomeInstrument: 999,
+              outcomeInstrument: 999,
+              comment: 'Alex euro loan',
+            }),
+            other: makeTransaction({
+              ...loan,
+              id: 'other',
+              payee: 'Bob',
+              comment: 'Bob loan',
+            }),
+          },
+        })
+      }
       case 'transaction-filters': {
         const current = demoState.data.current
         const expense = {

@@ -17,6 +17,10 @@ import { TransactionPreview } from '../transaction/TransactionPreview'
  * press away from the page. */
 export const transactionScreen = defineScreen<TTransactionId>('transaction')
 
+/** A preview opened from a modal list keeps its own history entry and never
+ * takes over the page's selected transaction. */
+const modalTransactionScreen = defineScreen<TTransactionId>('modalTransaction')
+
 /** How long the screen waits before closing over a transaction that is no
  * longer in the replica.
  *
@@ -34,7 +38,9 @@ export const transactionScreen = defineScreen<TTransactionId>('transaction')
  * and a sync taking a transaction away underneath it. */
 const HANDOVER_MS = 250
 
-export const useTransactionPreview = () => transactionScreen.useOpen()
+export function useTransactionPreview({ modal = false } = {}) {
+  return (modal ? modalTransactionScreen : transactionScreen).useOpen()
+}
 
 /** True once the address names a transaction the replica no longer holds. */
 function useTransactionGone(id: string | undefined) {
@@ -60,11 +66,26 @@ export function useTransactionScreenDocked() {
 }
 
 export const TransactionPreviewDrawer = () => {
-  const { t } = useTranslation('common')
-  const [id, setId] = transactionScreen.use()
-  const openOther = transactionScreen.useOpen()
-  const onClose = useCallback(() => setId(null), [setId])
   const docked = useTransactionScreenDocked()
+  return (
+    <>
+      <TransactionScreenDrawer screen={transactionScreen} docked={docked} />
+      <TransactionScreenDrawer screen={modalTransactionScreen} />
+    </>
+  )
+}
+
+function TransactionScreenDrawer({
+  screen,
+  docked = false,
+}: {
+  screen: typeof transactionScreen
+  docked?: boolean
+}) {
+  const { t } = useTranslation('common')
+  const [id, setId] = screen.use()
+  const openOther = screen.useOpen()
+  const onClose = useCallback(() => setId(null), [setId])
   const gone = useTransactionGone(id)
 
   // Deleting the transaction from inside this screen, or a sync taking it

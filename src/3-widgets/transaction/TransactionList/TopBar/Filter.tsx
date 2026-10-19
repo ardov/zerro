@@ -44,6 +44,7 @@ export default function Filter({
   const accounts = core.accounts.usePopulated()
   const envelopes = useAppSelector(core.envelopes.selectAll)
   const tags = useAppSelector(core.tags.selectPopulated)
+  const debtors = useAppSelector(core.debtors.selectOptions)
   const merchants = core.merchants.useAll()
   const today = useLocalDay()
   const labels = {
@@ -52,6 +53,7 @@ export default function Filter({
     envelopes,
     tags,
     merchants,
+    debtors,
     t,
     language: i18n.language,
   }

@@ -68,6 +68,12 @@ describe('activity projection performance', () => {
           debtAccountId: getDebtAccountId(store.account),
           debtors: session.debtors.getAll(),
         },
+        instrumentCodeById: Object.fromEntries(
+          Object.values(store.instrument).map(instrument => [
+            instrument.id,
+            instrument.shortTitle,
+          ])
+        ),
         envelopes: session.envelopes.getAll(),
         keepingEnvelopeIds: new Set(session.envelopes.getKeepingIds()),
       }

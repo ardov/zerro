@@ -4,7 +4,8 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import type { core } from '@/zerro-core/redux'
 
 import type { ComponentPropsWithoutRef } from 'react'
-import { listItemDenseClass } from '@/6-shared/ui/ListRow'
+import { ListRowButton } from '@/6-shared/ui/kit/ListRow'
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { Amount } from '@/6-shared/ui/Amount'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 
@@ -39,47 +40,38 @@ export const Account: FC<
     onClick: showTransactions,
   })
   return (
-    <button
-      type="button"
-      className={cn(listItemDenseClass, className)}
+    <ListRowButton
+      size="sm"
+      className={className}
       {...rest}
       {...propsToPass}
-    >
-      <span className="mr-2 flex shrink-0 items-center">
-        <AccountIcon account={account} />
-      </span>
-      <div
-        className={cn(
-          'relative min-w-0 grow overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_left,transparent,black_40px)]',
-          account.archive && 'line-through'
-        )}
-        title={account.title}
-      >
-        {account.title}
-      </div>
-
-      <span
-        className={cn(
-          'ml-2 shrink-0',
-          account.balance < 0 ? 'text-ui-error' : 'text-ui-secondary'
-        )}
-      >
+      start={<AccountIcon account={account} />}
+      end={
         <Tooltip
           content={
             <Amount value={account.balance} currency={account.fxCode} noShade />
           }
           side="right"
         >
-          <div>
-            <Amount
-              value={account.balance}
-              currency={account.fxCode}
-              decimals="ifOnly"
-              noShade
-            />
-          </div>
+          <Amount
+            className={cn(
+              'block whitespace-nowrap',
+              account.balance < 0 ? 'text-ui-error' : 'text-ui-secondary'
+            )}
+            value={account.balance}
+            currency={account.fxCode}
+            decimals="ifOnly"
+            noShade
+          />
         </Tooltip>
-      </span>
-    </button>
+      }
+    >
+      <TextFade
+        className={cn(account.archive && 'line-through')}
+        title={account.title}
+      >
+        {account.title}
+      </TextFade>
+    </ListRowButton>
   )
 }

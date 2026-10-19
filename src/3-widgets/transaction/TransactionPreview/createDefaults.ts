@@ -39,7 +39,11 @@ export function createDefaultsFromQuery(
         : undefined,
     type: exactType ?? activityType,
     amount:
-      amount?.gte !== undefined && amount.gte === amount.lte
+      // The draft account owns its currency; do not copy a foreign amount
+      // before an account in that currency has been selected.
+      !amount?.currencies?.length &&
+      amount?.gte !== undefined &&
+      amount.gte === amount.lte
         ? amount.gte
         : undefined,
     date:

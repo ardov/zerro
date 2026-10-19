@@ -1,3 +1,5 @@
+import { core } from '@/zerro-core/redux'
+import { CurrencyCodeSelect } from '@/3-widgets/currency/CurrencyCodeSelect'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TISODate } from '@/6-shared/types'
@@ -14,14 +16,28 @@ export function AmountFilterEditor(props: {
 }) {
   const { clause, onChange } = props
   const { t } = useTranslation('filterDrawer')
+  const accounts = core.accounts.usePopulated()
+  const currencies = [
+    ...new Set(
+      Object.values(accounts)
+        .filter(
+          account =>
+            account.type !== 'debt' &&
+            !core.accounts.isZerroDataAccount(account)
+        )
+        .map(account => account.fxCode)
+        .filter(Boolean)
+    ),
+  ].sort()
 
   return (
-    <div className="flex flex-row gap-2">
+    <div className="flex flex-col gap-2">
       <Input
-        labelMode="floating"
         className="min-w-0 flex-1"
         autoFocus
         type="number"
+        prefix={t('amountFromShort')}
+        step="any"
         label={t('amountFrom')}
         value={clause.gte ?? ''}
         onChange={event =>
@@ -32,9 +48,10 @@ export function AmountFilterEditor(props: {
         }
       />
       <Input
-        labelMode="floating"
         className="min-w-0 flex-1"
         type="number"
+        prefix={t('amountToShort')}
+        step="any"
         label={t('amountTo')}
         value={clause.lte ?? ''}
         onChange={event =>
@@ -43,6 +60,21 @@ export function AmountFilterEditor(props: {
             lte: event.target.value ? Number(event.target.value) : undefined,
           })
         }
+      />
+      <CurrencyCodeSelect
+        label={t('common:currency')}
+        placeholder={t('common:currency')}
+        clearLabel={t('common:removeValue', { label: t('common:currency') })}
+        value={clause.currencies?.[0] ?? null}
+        onChange={currency =>
+          onChange({ ...clause, currencies: currency ? [currency] : undefined })
+        }
+        currencies={currencies}
+        search={{
+          label: t('findCurrency'),
+          placeholder: t('findCurrency'),
+          showMoreLabel: t('common:showMore'),
+        }}
       />
     </div>
   )

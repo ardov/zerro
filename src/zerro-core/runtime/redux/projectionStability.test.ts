@@ -5,6 +5,7 @@ import { makeTestRootState } from '@/store/testing'
 import * as selectors from '../../support/testing/reduxSelectors'
 import * as activity from './activity'
 import * as transactions from './transactions'
+import { selectOptions as selectDebtorOptions } from './debtors'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 
@@ -23,6 +24,7 @@ const nodes: Record<string, (state: RootState) => unknown> = {
   historyStart: selectors.selectHistoryStart,
   instCodeMap: selectors.selectInstCodeMap,
   debtors: selectors.selectDebtors,
+  debtorOptions: selectDebtorOptions,
   domainEnvelopes: selectors.selectDomainEnvelopes,
   envelopes: selectors.selectEnvelopes,
   keepingEnvelopeIds: selectors.selectKeepingEnvelopeIds,

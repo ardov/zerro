@@ -255,6 +255,10 @@ export const EmptyAccountCleanup: Story = {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
     await userEvent.click(canvas.getByRole('combobox', { name: 'Cash USD' }))
+    await body.findByRole('option', { name: /^Cash USD/ })
+    expect(
+      body.queryByRole('option', { name: /^Debts/ })
+    ).not.toBeInTheDocument()
     await step('Clear the account selection', async () => {
       await userEvent.click(
         await body.findByRole('option', { name: /^Cash USD/ })
@@ -699,4 +703,83 @@ export const LastModified: Story = {
 export const MobileLastModified: Story = {
   ...LastModified,
   globals: { viewport: { value: 'zerro499' } },
+}
+
+export const AmountCurrency: Story = {
+  render: () => <FilterHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement),
+      body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
+    await userEvent.click(await body.findByText('Amount', { exact: true }))
+    const from = await body.findByRole('spinbutton', { name: 'Amount from' })
+    await expect(from).toHaveAccessibleDescription('From')
+    await expect(
+      body.getByRole('spinbutton', { name: 'Amount up to' })
+    ).toHaveAccessibleDescription('Up to')
+    await userEvent.click(body.getByRole('combobox', { name: 'Currency' }))
+    await body.findByRole('option', { name: /^USD(?: |$)/ })
+    expect(
+      body.getAllByRole('option').map(option => option.textContent?.slice(0, 3))
+    ).toEqual(['EUR', 'RUB', 'USD'])
+    await userEvent.click(body.getByRole('option', { name: /^USD(?: |$)/ }))
+    await waitFor(() =>
+      expect(body.queryByRole('listbox')).not.toBeInTheDocument()
+    )
+    await expect(from).toBeVisible()
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(body.queryByRole('dialog')).not.toBeInTheDocument()
+    )
+    expect(readQuery(canvasElement).clauses).toEqual([
+      { kind: 'amount', currencies: ['USD'] },
+    ])
+    await userEvent.click(canvas.getByRole('button', { name: /^USD(?: |$)/ }))
+    await userEvent.type(
+      await body.findByRole('spinbutton', { name: 'Amount from' }),
+      '0'
+    )
+    await userEvent.type(
+      body.getByRole('spinbutton', { name: 'Amount up to' }),
+      '10.5'
+    )
+    await userEvent.click(body.getByRole('button', { name: 'Remove Currency' }))
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(body.queryByRole('dialog')).not.toBeInTheDocument()
+    )
+    expect(readQuery(canvasElement).clauses).toEqual([
+      { kind: 'amount', gte: 0, lte: 10.5 },
+    ])
+    await expect(canvas.getByRole('button', { name: '0–10.5' })).toBeVisible()
+  },
+}
+
+export const MobileAmountCurrency: Story = {
+  ...AmountCurrency,
+  globals: { viewport: { value: 'zerro499' } },
+}
+
+export const Debtor: Story = {
+  parameters: {
+    app: { scenario: 'debtor-navigation', route: '/transactions' },
+  },
+  render: () => <FilterHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement),
+      body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
+    await userEvent.click(await body.findByRole('menuitem', { name: 'Debtor' }))
+    const input = await body.findByRole('combobox', { name: 'Find debtor' })
+    await userEvent.type(input, 'Alex')
+    await userEvent.click(await body.findByRole('option', { name: 'Alex' }))
+    expect(readQuery(canvasElement).clauses).toEqual([
+      { kind: 'debtor', ids: ['alex'] },
+    ])
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(body.queryByRole('listbox')).not.toBeInTheDocument()
+    )
+    await expect(canvas.getByRole('combobox', { name: 'Alex' })).toHaveFocus()
+  },
 }

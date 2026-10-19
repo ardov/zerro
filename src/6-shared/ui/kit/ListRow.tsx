@@ -143,3 +143,38 @@ export function ListRowSeparator(props: ComponentPropsWithRef<'div'>) {
     </div>
   )
 }
+
+/** Native action row for ordinary lists; composite widgets own their highlight. */
+export function ListRowButton({
+  className,
+  children,
+  start,
+  end,
+  description,
+  size,
+  selected,
+  indent,
+  ...props
+}: ComponentPropsWithRef<'button'> &
+  Pick<
+    ListRowProps,
+    'start' | 'end' | 'description' | 'size' | 'selected' | 'indent'
+  >) {
+  return (
+    <ListRow
+      render={<button type="button" {...props} />}
+      size={size}
+      start={start}
+      end={end}
+      description={description}
+      selected={selected}
+      indent={indent}
+      className={cn(
+        'cursor-pointer focusable hover:after:opacity-100 focus-visible:after:opacity-100 disabled:pointer-events-none',
+        className
+      )}
+    >
+      {children}
+    </ListRow>
+  )
+}

@@ -118,3 +118,22 @@ export function getTransactionType(
   if (transaction.outcome) return TrType.Outcome
   return TrType.Income
 }
+
+/** Money on real accounts; a debt account's technical leg is excluded. */
+export function getTransactionMoney(
+  transaction: TTransaction,
+  debtAccountId?: TAccountId
+) {
+  const income = {
+    amount: transaction.income,
+    instrument: transaction.incomeInstrument,
+  }
+  const outcome = {
+    amount: transaction.outcome,
+    instrument: transaction.outcomeInstrument,
+  }
+  const type = getTransactionType(transaction, debtAccountId)
+  if (type === TrType.Income || type === TrType.IncomeDebt) return [income]
+  if (type === TrType.Outcome || type === TrType.OutcomeDebt) return [outcome]
+  return [income, outcome]
+}

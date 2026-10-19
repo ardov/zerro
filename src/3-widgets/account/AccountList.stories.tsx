@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import AccountList from './AccountList'
 import { DebtorList } from '@/3-widgets/DebtorList'
-import { expect, waitFor, within } from 'storybook/test'
+import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { Account } from './AccountList/components'
 import { makeAccount } from '@/zerro-core/support/testing/zenmoneyTestData'
 
@@ -25,6 +25,13 @@ export const BankMarks: Story = {
         { id: 'known', title: 'Bank account', company: 12574 },
         { id: 'missing', title: 'Unknown bank', company: -1 },
         { id: 'cash', title: 'Cash', company: null },
+        {
+          id: 'archived',
+          title: 'Archived account with a very long name that should fade',
+          company: null,
+          archive: true,
+          balance: -1234.56,
+        },
       ].map(account => (
         <Account
           key={account.id}
@@ -45,6 +52,14 @@ export const BankMarks: Story = {
     await waitFor(() => expect(image.naturalWidth).toBeGreaterThan(0))
     expect(image.getBoundingClientRect().width).toBe(20)
     expect(image.getBoundingClientRect().height).toBe(20)
+    const archived = canvas.getByRole('button', { name: /Archived account/ })
+    expect(archived.scrollWidth).toBeLessThanOrEqual(archived.clientWidth)
+    const label = within(archived).getByTitle(
+      'Archived account with a very long name that should fade'
+    )
+    await waitFor(() => expect(label).toHaveAttribute('data-overflow'))
+    expect(getComputedStyle(label).textDecorationLine).toBe('line-through')
+    expect(archived.getBoundingClientRect().height).toBe(40)
     for (const name of [/Unknown bank/, /Cash/]) {
       const row = canvas.getByRole('button', { name })
       expect(row.querySelector('img')).toBeNull()
@@ -72,4 +87,62 @@ export const NarrowViewport: Story = {
       <AccountList />
     </div>
   ),
+}
+
+export const DebtorTransactions: Story = {
+  parameters: { app: { scenario: 'debtor-navigation' } },
+  render: () => (
+    <div className="w-80">
+      <DebtorList />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const dollars = canvas.getByRole('button', { name: /Alex.*\$/ })
+    dollars.focus()
+    await userEvent.keyboard('{Enter}')
+    const dialog = await body.findByRole('dialog', { name: 'Alex · USD' })
+    await within(dialog).findByText('Alex dollar loan')
+    await within(dialog).findByText('Alex dollar repayment')
+    expect(within(dialog).queryByText('Alex euro loan')).toBeNull()
+    expect(within(dialog).queryByText('Bob loan')).toBeNull()
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(dialog).not.toBeInTheDocument())
+    await waitFor(() => expect(dollars).toHaveFocus())
+    await userEvent.click(canvas.getByRole('button', { name: /Alex.*€/ }))
+    const euros = await body.findByRole('dialog', { name: 'Alex · EUR' })
+    await within(euros).findByText('Alex euro loan')
+    expect(within(euros).queryByText('Alex dollar loan')).toBeNull()
+    expect(within(euros).queryByText('Alex dollar repayment')).toBeNull()
+  },
+}
+
+export const DebtorTransactionsMobile: Story = {
+  ...DebtorTransactions,
+  globals: { viewport: { value: 'iphone13' } },
+}
+
+export const AccountInteractions: Story = {
+  render: () => (
+    <div className="w-80">
+      <AccountList />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const row = canvas.getByRole('button', { name: /Cash USD/ })
+    row.focus()
+    await userEvent.keyboard('{Enter}')
+    const dialog = await body.findByRole('dialog', { name: 'Cash USD' })
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(dialog).not.toBeInTheDocument())
+    await waitFor(() => expect(row).toHaveFocus())
+    fireEvent.contextMenu(row, { clientX: 150, clientY: 100 })
+    const menu = await body.findByRole('menu')
+    expect(within(menu).getAllByRole('menuitem')).toHaveLength(1)
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(menu).not.toBeInTheDocument())
+  },
 }

@@ -69,3 +69,11 @@ describe('createDefaultsFromQuery', () => {
     })
   })
 })
+
+it('does not prefill a currency-qualified amount into an unspecified account currency', () => {
+  expect(
+    createDefaultsFromQuery({
+      clauses: [{ kind: 'amount', currencies: ['USD'], gte: 100, lte: 100 }],
+    }).amount
+  ).toBeUndefined()
+})

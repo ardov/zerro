@@ -4,7 +4,7 @@ import { core } from '@/zerro-core/redux'
 
 export type Clause = core.transactions.TTransactionFilterClause
 export type AddableFilterKind = Exclude<Clause['kind'], 'search' | 'activity'>
-export type SelectKind = 'tag' | 'account' | 'type' | 'merchant'
+export type SelectKind = 'tag' | 'account' | 'type' | 'merchant' | 'debtor'
 export type EditableFilterKind = SelectKind | 'amount' | 'date' | 'changed'
 export type AmountClause = Extract<Clause, { kind: 'amount' }>
 export type DateClause = Extract<Clause, { kind: 'date' }>
@@ -13,6 +13,7 @@ export const filterKinds: AddableFilterKind[] = [
   'account',
   'tag',
   'merchant',
+  'debtor',
   'type',
   'amount',
   'date',
@@ -39,6 +40,7 @@ export function makeDefaultClause(kind: AddableFilterKind): Clause {
     case 'account':
       return { kind, ids: [] }
     case 'tag':
+    case 'debtor':
     case 'merchant':
       return { kind, ids: [] }
     case 'type':
@@ -59,6 +61,7 @@ export function isSelectKind(kind: Clause['kind']): kind is SelectKind {
     kind === 'tag' ||
     kind === 'account' ||
     kind === 'type' ||
+    kind === 'debtor' ||
     kind === 'merchant'
   )
 }
@@ -78,12 +81,17 @@ export function isEmptyClause(clause: Clause): boolean {
   if (
     clause.kind === 'account' ||
     clause.kind === 'tag' ||
+    clause.kind === 'debtor' ||
     clause.kind === 'merchant'
   )
     return !clause.ids.length
   if (clause.kind === 'type') return !clause.values.length
   if (clause.kind === 'amount') {
-    return clause.gte === undefined && clause.lte === undefined
+    return (
+      clause.gte === undefined &&
+      clause.lte === undefined &&
+      !clause.currencies?.length
+    )
   }
   if (clause.kind === 'changed') return !clause.period
   if (clause.kind === 'date') return !clause.from && !clause.to
@@ -93,6 +101,7 @@ export function isEmptyClause(clause: Clause): boolean {
 export function getClauseLabel(
   clause: Clause,
   context: {
+    debtors: Record<string, string>
     accounts: ReturnType<typeof core.accounts.usePopulated>
     envelopes: ReturnType<typeof core.envelopes.selectAll>
     merchants: ReturnType<typeof core.merchants.useAll>
@@ -102,12 +111,17 @@ export function getClauseLabel(
     today: number
   }
 ): string {
-  const { accounts, envelopes, tags, merchants, t, language, today } = context
+  const { accounts, envelopes, tags, merchants, debtors, t, language, today } =
+    context
   switch (clause.kind) {
     case 'account':
       return clause.ids.length
         ? joinLabels(clause.ids, id => accounts[id]?.title || id)
         : t('account')
+    case 'debtor':
+      return clause.ids.length
+        ? joinLabels(clause.ids, id => debtors[id] || id)
+        : t('debtor')
     case 'merchant':
       return clause.ids.length
         ? joinLabels(clause.ids, id =>
@@ -149,6 +163,20 @@ export function getAmountLabel(
   t: ReturnType<typeof useTranslation>['t'],
   language: string
 ): string {
+  const currency = clause.currencies?.join(', ')
+  const amount = getAmountBoundsLabel(clause, t, language)
+  return currency
+    ? amount
+      ? `${amount} ${currency}`
+      : currency
+    : amount || t('amount')
+}
+
+function getAmountBoundsLabel(
+  clause: AmountClause,
+  t: ReturnType<typeof useTranslation>['t'],
+  language: string
+): string {
   const format = (value: number) =>
     new Intl.NumberFormat(language).format(value)
 
@@ -160,7 +188,7 @@ export function getAmountLabel(
     return `${t('amountFromShort')} ${format(clause.gte)}`
   if (clause.lte !== undefined)
     return `${t('amountToShort')} ${format(clause.lte)}`
-  return t('amount')
+  return ''
 }
 
 export function getKindLabel(
@@ -172,6 +200,8 @@ export function getKindLabel(
       return t('lastChanged')
     case 'date':
       return t('date')
+    case 'debtor':
+      return t('debtor')
     case 'merchant':
       return t('merchant')
     case 'account':

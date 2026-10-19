@@ -35,7 +35,7 @@ export const useEnvTransactionsDrawer = () =>
 export const EnvTransactionsDrawer = () => {
   const { t } = useTranslation('common')
   const [value, setValue] = envelopeTransactionsScreen.use()
-  const showTransaction = useTransactionPreview()
+  const showTransaction = useTransactionPreview({ modal: true })
   const onClose = useCallback(() => setValue(null), [setValue])
   // The screen value is gone while the drawer slides out. Keep showing what
   // it showed, so the closing list keeps its title and its filter.

@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { core } from '@/zerro-core/redux'
 import type { TFxAmount } from '@/6-shared/types'
 import { toISOMonth } from '@/6-shared/helpers/date'
-import { ListRowSubheader } from '@/6-shared/ui/ListRow'
+import { ListRowHeader } from '@/6-shared/ui/kit/ListRow'
 import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { DisplayAmount } from './DisplayAmount'
@@ -21,27 +21,24 @@ export function BalanceSubheader({
   const toDisplay = core.currency.useToDisplay(month)
   const isNegative = toDisplay(amount) < 0
   return (
-    <ListRowSubheader sticky className={cn('rounded-lg', className)} {...props}>
-      <span className="flex w-full">
-        <TextFade className="grow text-body leading-[inherit]">
-          <b>{name}</b>
-        </TextFade>
-        <span
-          className={cn(
-            'ml-4',
-            isNegative ? 'text-ui-error' : 'text-ui-secondary'
-          )}
-        >
-          <b>
-            <DisplayAmount
-              month={month}
-              value={amount}
-              decimals="ifOnly"
-              noShade
-            />
-          </b>
-        </span>
-      </span>
-    </ListRowSubheader>
+    <ListRowHeader
+      size="sm"
+      className={cn('sticky top-0 z-[1] flex bg-ui-card', className)}
+      {...props}
+    >
+      <TextFade className="grow text-body font-bold leading-[inherit]">
+        {name}
+      </TextFade>
+      <DisplayAmount
+        className={cn(
+          'ml-4 shrink-0 whitespace-nowrap font-bold',
+          isNegative ? 'text-ui-error' : 'text-ui-secondary'
+        )}
+        month={month}
+        value={amount}
+        decimals="ifOnly"
+        noShade
+      />
+    </ListRowHeader>
   )
 }

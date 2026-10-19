@@ -1,8 +1,10 @@
+import { getDebtorId } from '../../zenmoney/read-models/debtors'
 import type { ById } from '../../foundation/types'
 import type { TAccountId } from '../../zenmoney/entities/accounts'
 import type { TISODate, TISOMonth } from '../../zenmoney/primitives'
 import type { TTagId } from '../../zenmoney/entities/tags'
 import {
+  getTransactionMoney,
   getTransactionType,
   isDeletedTransaction,
   isTransactionViewed,
@@ -52,10 +54,11 @@ export type TChangedPeriod = (typeof changedPeriods)[number]['value']
 export type TTransactionFilterClause =
   | { kind: 'search'; value: string }
   | { kind: 'account'; ids: TAccountId[] }
+  | { kind: 'debtor'; ids: string[] }
   | { kind: 'merchant'; ids: Array<string | null> }
   | { kind: 'tag'; ids: Array<TTagId | 'null'> }
   | { kind: 'type'; values: TrFilterType[] }
-  | { kind: 'amount'; gte?: number; lte?: number }
+  | { kind: 'amount'; gte?: number; lte?: number; currencies?: string[] }
   | { kind: 'date'; from?: TISODate; to?: TISODate }
   | { kind: 'changed'; period?: TChangedPeriod }
   | { kind: 'viewed'; value: boolean }
@@ -73,6 +76,7 @@ export type TTransactionQuery = {
 }
 
 export type TTransactionQueryContext = {
+  instrumentCodeById: Record<number, string>
   search?: TTransactionSearchContext
   routing: TTransactionActivityRoutingContext
   envelopes: ById<Pick<TEnvelope, 'id' | 'children'>>
@@ -109,6 +113,23 @@ function compileClause(
         context?.search,
         context?.routing.debtAccountId
       )
+    }
+    case 'debtor': {
+      const ids = new Set(clause.ids)
+      if (!ids.size) return () => true
+      if (!context?.search)
+        throw new Error('Debtor transaction filters require query context')
+      const merchants = context.search.merchants
+      return transaction => {
+        const type = getTransactionType(
+          transaction,
+          context.routing.debtAccountId
+        )
+        return (
+          (type === TrType.IncomeDebt || type === TrType.OutcomeDebt) &&
+          ids.has(getDebtorId(transaction, merchants))
+        )
+      }
     }
     case 'merchant': {
       const ids = new Set(clause.ids)
@@ -151,24 +172,19 @@ function compileClause(
         return values.has(type)
       }
     }
-    case 'amount':
-      return transaction => {
-        const type = getTransactionType(
-          transaction,
-          context?.routing.debtAccountId
+    case 'amount': {
+      const currencies = new Set(clause.currencies)
+      if (currencies.size && !context)
+        throw new Error('Currency transaction filters require query context')
+      return transaction =>
+        getTransactionMoney(transaction, context?.routing.debtAccountId).some(
+          ({ amount, instrument }) =>
+            (!currencies.size ||
+              currencies.has(context!.instrumentCodeById[instrument])) &&
+            (clause.gte === undefined || amount >= clause.gte) &&
+            (clause.lte === undefined || amount <= clause.lte)
         )
-        const values =
-          type === TrType.Income || type === TrType.IncomeDebt
-            ? [transaction.income]
-            : type === TrType.Outcome || type === TrType.OutcomeDebt
-              ? [transaction.outcome]
-              : [transaction.income, transaction.outcome]
-        return values.some(value => {
-          if (clause.gte !== undefined && value < clause.gte) return false
-          if (clause.lte !== undefined && value > clause.lte) return false
-          return true
-        })
-      }
+    }
     case 'date': {
       const { from, to } = normalizeDateFilter(clause)
       return transaction => {

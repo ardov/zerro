@@ -28,6 +28,7 @@ function makeContext(
       [parentId]: makeEnvelope({ id: parentId, children: [foodId] }),
     },
     keepingEnvelopeIds: new Set(),
+    instrumentCodeById: { 1: 'USD', 2: 'EUR' },
     ...patch,
   }
 }
@@ -338,5 +339,89 @@ describe('last-modified transaction filter', () => {
     expect(
       compileTransactionQuery({ clauses: [{ kind: 'changed' }] })(transaction)
     ).toBe(true)
+  })
+})
+
+describe('debtor and currency filters', () => {
+  const context = makeContext({
+    search: { accounts: {}, tags: {}, merchants: { alex: { title: 'Alex!' } } },
+    routing: {
+      inBudgetAccountIds: new Set(),
+      debtAccountId: 'debt',
+      debtors: {},
+    },
+  })
+  const loan = makeTransaction({
+    income: 90,
+    incomeInstrument: 2,
+    incomeAccount: 'debt',
+    outcome: 100,
+    outcomeInstrument: 1,
+    outcomeAccount: 'outside-budget',
+    merchant: 'alex',
+  })
+  const repayment = makeTransaction({
+    income: 20,
+    incomeInstrument: 1,
+    incomeAccount: 'outside-budget',
+    outcome: 18,
+    outcomeInstrument: 2,
+    outcomeAccount: 'debt',
+    payee: ' ALEX. ',
+  })
+  const clauses: TTransactionQuery['clauses'] = [
+    { kind: 'debtor', ids: ['alex'] },
+    { kind: 'amount', currencies: ['USD'] },
+  ]
+
+  it('joins merchant and legacy payee history without requiring a budget account or outstanding balance', () => {
+    const matches = compileTransactionQuery({ clauses }, context)
+    expect(matches(loan)).toBe(true)
+    expect(matches(repayment)).toBe(true)
+    expect(matches({ ...loan, merchant: null, payee: 'Bob' })).toBe(false)
+    expect(matches({ ...loan, incomeAccount: 'other-real-account' })).toBe(
+      false
+    )
+    expect(matches({ ...loan, deleted: true })).toBe(false)
+    expect(
+      compileTransactionQuery(
+        { clauses: [...clauses, { kind: 'deleted', mode: 'include' }] },
+        context
+      )({ ...loan, deleted: true })
+    ).toBe(true)
+  })
+
+  it('ignores the technical debt leg and original purchase currency', () => {
+    const matches = compileTransactionQuery(
+      { clauses: [{ kind: 'amount', currencies: ['EUR'] }] },
+      context
+    )
+    expect(matches(loan)).toBe(false)
+    expect(matches(repayment)).toBe(false)
+    expect(matches({ ...loan, opOutcome: 90, opOutcomeInstrument: 2 })).toBe(
+      false
+    )
+  })
+
+  it('matches both bounds and currency on one transfer leg, with inclusive zero and decimal bounds', () => {
+    const transfer = { ...loan, incomeAccount: 'other-real-account' }
+    const matches = (currencies: string[], gte?: number, lte?: number) =>
+      compileTransactionQuery(
+        { clauses: [{ kind: 'amount', currencies, gte, lte }] },
+        context
+      )(transfer)
+    expect(matches(['USD'], 100, 100)).toBe(true)
+    expect(matches(['EUR'], 90, 90)).toBe(true)
+    expect(matches(['USD'], 90, 90)).toBe(false)
+    expect(matches(['EUR'], 100, 100)).toBe(false)
+    expect(matches(['EUR', 'USD'], 100, 100)).toBe(true)
+    expect(matches([], 90, 90)).toBe(true)
+    const small = compileTransactionQuery(
+      { clauses: [{ kind: 'amount', currencies: ['USD'], gte: 0, lte: 0.5 }] },
+      context
+    )
+    expect(small({ ...loan, outcome: 0 })).toBe(true)
+    expect(small({ ...loan, outcome: 0.5 })).toBe(true)
+    expect(small({ ...loan, outcome: 0.51 })).toBe(false)
   })
 })

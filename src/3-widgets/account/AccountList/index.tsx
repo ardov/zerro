@@ -4,8 +4,7 @@ import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import { Collapse } from '@/6-shared/ui/kit/Collapse'
-import { ListRows, listItemDenseClass } from '@/6-shared/ui/ListRow'
-import { cn } from '@/6-shared/ui/shadcn/utils'
+import { ListRowButton } from '@/6-shared/ui/kit/ListRow'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useToggle } from '@/6-shared/hooks/useToggle'
 import type { TFxAmount } from '@/6-shared/types'
@@ -41,7 +40,7 @@ export default function AccountList({ className = '' }) {
 
   return (
     <div className={className}>
-      <ListRows>
+      <div className="relative flex flex-col py-2">
         <BalanceSubheader
           name={
             <Tooltip content={t('inBalanceDescription')}>
@@ -54,9 +53,9 @@ export default function AccountList({ className = '' }) {
           <Account key={acc.id} account={acc} />
         ))}
         <ArchivedList accs={inBudgetArchived} />
-      </ListRows>
+      </div>
 
-      <ListRows>
+      <div className="relative flex flex-col py-2">
         <BalanceSubheader
           name={
             <Tooltip content={t('otherDescription')}>
@@ -69,7 +68,7 @@ export default function AccountList({ className = '' }) {
           <Account key={acc.id} account={acc} />
         ))}
         <ArchivedList accs={savingsArchived} />
-      </ListRows>
+      </div>
     </div>
   )
 }
@@ -88,21 +87,22 @@ const ArchivedList: FC<{ accs: core.accounts.TAccountPopulated[] }> = props => {
   return (
     <>
       <Collapse open={visible}>
-        <ListRows>
+        <div className="relative flex flex-col py-2">
           {accs.map(acc => (
             <Account key={acc.id} account={acc} />
           ))}
-        </ListRows>
+        </div>
       </Collapse>
-      <button
-        type="button"
-        className={cn(listItemDenseClass, 'text-ui-link')}
+      <ListRowButton
+        size="sm"
+        className="text-ui-link"
+        aria-expanded={visible}
         onClick={toggleVisibility}
       >
         {visible ? (
-          <span>{t('hideArchived')}</span>
+          t('hideArchived')
         ) : (
-          <span>
+          <>
             {t('archivedAccounts', { count: accs.length })}{' '}
             {hasArchivedMoney && (
               <DisplayAmount
@@ -112,9 +112,9 @@ const ArchivedList: FC<{ accs: core.accounts.TAccountPopulated[] }> = props => {
                 noShade
               />
             )}
-          </span>
+          </>
         )}
-      </button>
+      </ListRowButton>
     </>
   )
 }
