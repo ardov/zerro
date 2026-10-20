@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+import './coloredSurface.css'
 import { getContrastText } from '@/6-shared/helpers/color'
 import { cn } from './shadcn/utils'
 
@@ -6,13 +8,22 @@ type CategoryIconProps = { symbol: string; color?: string | null }
 /** A decorative category mark; selection and interaction belong to its owner. */
 export function CategoryIcon(props: CategoryIconProps) {
   const { symbol, color } = props
+  const foreground = color ? getContrastText(color) : undefined
   return (
     <span
       aria-hidden
-      className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ui-selected text-ui-primary"
+      className={cn(
+        'flex size-8 shrink-0 items-center justify-center rounded-full bg-ui-selected text-ui-primary',
+        color && 'colored-surface'
+      )}
       style={
         color
-          ? { backgroundColor: color, color: getContrastText(color) }
+          ? ({
+              backgroundColor: color,
+              color: foreground,
+              '--surface-color': color,
+              '--surface-direction': foreground === '#ffffff' ? -1 : 1,
+            } as CSSProperties)
           : undefined
       }
     >

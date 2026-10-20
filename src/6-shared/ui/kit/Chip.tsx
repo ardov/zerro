@@ -11,6 +11,7 @@ import { CloseIcon } from '@/6-shared/ui/Icons'
 import { getContrastText } from '@/6-shared/helpers/color'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { TextFade } from './TextFade'
+import '../coloredSurface.css'
 
 const chipVariants = cva(
   [
@@ -91,6 +92,8 @@ export function Chip(props: ChipProps) {
   const palette = foreground
     ? ({
         backgroundColor: color,
+        '--surface-color': color,
+        '--surface-direction': foreground === '#ffffff' ? -1 : 1,
         color: foreground,
         '--chip-hover': `color-mix(in srgb, ${foreground} 8%, transparent)`,
         '--chip-pressed': `color-mix(in srgb, ${foreground} 12%, transparent)`,
@@ -100,6 +103,9 @@ export function Chip(props: ChipProps) {
   return (
     <span
       data-slot="chip"
+      data-surface-interactive={
+        interactive && !disabled && foreground ? true : undefined
+      }
       data-disabled={disabled || undefined}
       style={{ ...palette, ...style }}
       onKeyDown={event => {
@@ -114,9 +120,11 @@ export function Chip(props: ChipProps) {
         chipVariants({
           variant: appearance,
           size,
-          interactive: interactive && !disabled,
+          interactive: interactive && !disabled && !foreground,
           disabled,
         }),
+        foreground && 'colored-surface',
+        foreground && interactive && !disabled && 'focusable',
         className
       )}
     >

@@ -1,0 +1,60 @@
+@property --surface-shift {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+@layer components {
+  /* Keep the chosen foreground stable as lightness moves away from it. */
+  .colored-surface {
+    background-image: linear-gradient(
+      to right bottom in oklch,
+      lch(
+        from var(--surface-color)
+          calc(l + var(--surface-direction) * (var(--surface-shift)) + 20) c h
+      ),
+      lch(
+        from var(--surface-color)
+          calc(l + var(--surface-direction) * (var(--surface-shift))) c h
+      )
+    );
+    /* stylelint-disable-next-line custom-property-no-missing-var-function -- The transition names the animated property; it does not read its value. */
+    --surface-transition: --surface-shift 150ms ease-out;
+
+    transition: var(--surface-transition);
+  }
+
+  .tag-icon {
+    --tag-scale-duration: 200ms;
+
+    transition: scale var(--tag-scale-duration) ease-in-out;
+  }
+
+  .tag-icon.colored-surface {
+    transition:
+      var(--surface-transition),
+      scale var(--tag-scale-duration) ease-in-out;
+  }
+
+  .tag-icon:active {
+    --tag-scale-duration: 100ms;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .colored-surface[data-surface-interactive]:hover {
+      --surface-shift: 10;
+    }
+  }
+
+  .colored-surface[data-surface-interactive]:active {
+    --surface-shift: 20;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .colored-surface,
+    .tag-icon,
+    .tag-icon.colored-surface {
+      transition: none;
+    }
+  }
+}

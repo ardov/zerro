@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, userEvent, within } from 'storybook/test'
 import { CalendarIcon } from '@/6-shared/ui/Icons'
 import { Chip } from './Chip'
+import { TagIcon } from '../TagIcon'
+import { CategoryIcon } from '../CategoryIcon'
 
 const meta = {
   tags: ['autodocs'],
@@ -202,4 +204,64 @@ export const Compact: Story = {
       </Chip>
     </div>
   ),
+}
+
+export const ColoredSurfaces: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4 p-8">
+      {['#f5dd72', '#172554', '#777777', 'oklch(0.6 0.15 150)'].map(color => (
+        <div key={color} className="flex items-center gap-3">
+          <Chip color={color} onClick={fn()} onRemove={fn()}>
+            Interactive
+          </Chip>
+          <Chip color={color}>Static</Chip>
+          <Chip color={color} disabled onClick={fn()}>
+            Disabled
+          </Chip>
+          <TagIcon color={color} symbol="🍎" button />
+          <CategoryIcon color={color} symbol="🍎" />
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const surfaces =
+      canvasElement.querySelectorAll<HTMLElement>('.colored-surface')
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    for (const surface of surfaces) {
+      const resting = getComputedStyle(surface).backgroundImage
+      await expect(resting).toContain('linear-gradient')
+      await expect(resting).toContain('oklch')
+      // Drive the same registered value as hover, then sample the midpoint.
+      // This catches an unregistered property snapping between gradient stops.
+      surface.style.setProperty('--surface-shift', '10')
+      getComputedStyle(surface).getPropertyValue('--surface-shift')
+      const transition = surface
+        .getAnimations()
+        .find(
+          animation =>
+            animation instanceof CSSTransition &&
+            animation.transitionProperty === '--surface-shift'
+        )
+      if (reduced) {
+        await expect(transition).toBeUndefined()
+      } else {
+        await expect(transition).toBeDefined()
+        await expect(transition!.effect!.getTiming().duration).toBe(150)
+        transition!.pause()
+        const duration = Number(transition!.effect!.getTiming().duration)
+        transition!.currentTime = duration / 2
+        const midway = Number(
+          getComputedStyle(surface).getPropertyValue('--surface-shift')
+        )
+        await expect(midway).toBeGreaterThan(0)
+        await expect(midway).toBeLessThan(10)
+        await expect(getComputedStyle(surface).backgroundImage).not.toBe(
+          resting
+        )
+        transition!.finish()
+      }
+      surface.style.removeProperty('--surface-shift')
+    }
+  },
 }

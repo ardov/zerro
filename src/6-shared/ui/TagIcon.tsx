@@ -1,5 +1,6 @@
+import './coloredSurface.css'
 import { CategorySymbol } from './CategoryIcon'
-import type { ComponentPropsWithoutRef } from 'react'
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react'
 import { cn } from './shadcn/utils'
 import { getContrastText } from '@/6-shared/helpers/color'
 import { Checkbox, type CheckboxProps } from './kit/Checkbox'
@@ -37,33 +38,38 @@ export function TagIcon(props: TagIconProps) {
   const { className: checkboxClassName, ...restCheckboxProps } =
     checkboxProps ?? {}
 
+  const foreground = color ? getContrastText(color) : undefined
+
   return (
     <div
       {...rest}
+      data-surface-interactive={
+        color && (button || (isInteractive && !checkboxProps?.disabled))
+          ? true
+          : undefined
+      }
       className={cn(
-        'group relative flex shrink-0 items-center justify-center rounded-full transition-transform duration-200 ease-in-out',
+        'tag-icon group relative flex shrink-0 items-center justify-center rounded-full',
         size === 's' ? 'size-8' : 'size-10',
-        color ? 'border' : 'border-0',
-        // Without a tag colour the icon is the card it sits on: the contrast
-        // calculation over `background.paper` lands on the card's own text
-        // colour in either scheme, so it is a token rather than a computation.
+        color ? 'colored-surface' : '',
+        // Icons without a custom colour use the theme surface and foreground.
         !color && 'bg-ui-highlight text-ui-primary',
         button
-          ? 'cursor-pointer hover:scale-110 active:scale-100 active:duration-100'
+          ? 'cursor-pointer hover:scale-110 active:scale-100'
           : 'cursor-auto',
         className
       )}
-      style={{
-        // A tag's colour is the user's, so this one has to be computed.
-        ...(color && {
-          color: getContrastText(color),
-          borderColor: color,
-          backgroundColor: color,
-          backgroundImage:
-            'linear-gradient(-30deg, rgba(255,255,255,0.2), transparent)',
-        }),
-        ...style,
-      }}
+      style={
+        {
+          // A tag's colour is the user's, so this one has to be computed.
+          ...(color && {
+            color: foreground,
+            '--surface-color': color,
+            '--surface-direction': foreground === '#ffffff' ? -1 : 1,
+          }),
+          ...style,
+        } as CSSProperties
+      }
     >
       <CategorySymbol
         symbol={symbol}
