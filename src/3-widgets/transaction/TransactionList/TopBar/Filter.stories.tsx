@@ -670,17 +670,18 @@ export const LastModified: Story = {
     await userEvent.click(
       await body.findByText('Last modified', { exact: true })
     )
-    const choice = await body.findByText('Last 7 days', { exact: true })
+    const choice = await body.findByRole('option', { name: 'Last 7 days' })
     changedQuery.mockClear()
-    choice.closest<HTMLElement>('[role="menuitem"], button')!.focus()
-    await userEvent.keyboard('{Enter}')
-    await waitFor(() => expect(choice).not.toBeInTheDocument())
+    await userEvent.click(choice)
+    await waitFor(() =>
+      expect(body.queryByRole('listbox')).not.toBeInTheDocument()
+    )
     await expect(changedQuery).toHaveBeenCalledTimes(1)
     await expect(changedQuery).toHaveBeenCalledWith({
       clauses: [{ kind: 'changed', period: '7d' }],
     })
     await expect(
-      canvas.getByRole('button', { name: 'Modified in 7d' })
+      canvas.getByRole('combobox', { name: 'Modified in 7d' })
     ).toHaveFocus()
     await expect(readQuery(canvasElement).clauses).toEqual([
       { kind: 'changed', period: '7d' },
@@ -689,11 +690,13 @@ export const LastModified: Story = {
       'Lunch'
     )
     await userEvent.click(
-      canvas.getByRole('button', { name: 'Modified in 7d' })
+      canvas.getByRole('combobox', { name: 'Modified in 7d' })
     )
-    const yesterday = await body.findByText('Yesterday', { exact: true })
+    const yesterday = await body.findByRole('option', { name: 'Yesterday' })
     await userEvent.click(yesterday)
-    await waitFor(() => expect(yesterday).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(body.queryByRole('listbox')).not.toBeInTheDocument()
+    )
     await expect(readQuery(canvasElement).clauses).toEqual([
       { kind: 'changed', period: 'yesterday' },
     ])

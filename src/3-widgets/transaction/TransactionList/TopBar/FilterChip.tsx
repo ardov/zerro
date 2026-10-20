@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { usePopup } from '@/6-shared/overlays'
 import { Chip } from '@/6-shared/ui/kit/Chip'
 import { Popover } from '@/6-shared/ui/kit/Popover'
-import { Menu } from '@/6-shared/ui/kit/Menu'
+import { Select } from '@/6-shared/ui/kit/Select'
 import { FilterIcon } from './FilterIcon'
 import { MultiSelect } from '@/6-shared/ui/kit/MultiSelect'
-import { CheckIcon } from '@/6-shared/ui/Icons'
 import { AccountMultiSelect } from '../../../account/AccountMultiSelect'
 import { CategoryMultiSelect } from '../../../category/CategoryMultiSelect'
 import { DebtorMultiSelect } from '../../../DebtorList/DebtorMultiSelect'
@@ -48,8 +47,8 @@ export function FilterChip({
   useLayoutEffect(() => {
     const closed = wasOpen.current && !popup.open
     wasOpen.current = popup.open
-    // Menu actions close before updating the clause. Inspect the committed
-    // render so choosing a preset never looks like dismissing an empty draft.
+    // Inspect the committed render so choosing a value never looks like
+    // dismissing an empty draft.
     if (closed && isEmptyClause(clause)) onRemove()
   }, [popup.open, clause, onRemove])
   const started = useRef(false)
@@ -134,20 +133,19 @@ export function FilterChip({
       )
     case 'changed':
       return (
-        <Menu
+        <Select
           label={t('lastChanged')}
+          value={clause.period ?? null}
+          clearable={false}
+          onChange={period => {
+            onChange({ ...clause, period })
+            popup.setOpen(false)
+          }}
           popup={popup}
           trigger={chip}
           items={core.transactions.changedPeriods.map(({ value: period }) => ({
-            id: period,
+            value: period,
             label: getChangedPeriodLabel(period, t),
-            start:
-              period === clause.period ? (
-                <CheckIcon />
-              ) : (
-                <span className="size-5" />
-              ),
-            onSelect: () => onChange({ ...clause, period }),
           }))}
         />
       )
