@@ -17,7 +17,7 @@ import {
 
 export type MerchantFieldProps = Pick<
   SelectProps,
-  'invalid' | 'error' | 'disabled' | 'readOnly'
+  'invalid' | 'error' | 'disabled' | 'readOnly' | 'required'
 > & {
   merchant: TDraftMerchant
   /** Legacy text is preserved until the user explicitly chooses or clears. */
@@ -42,6 +42,7 @@ export function MerchantField(props: MerchantFieldProps) {
     originalPayee,
     debt,
     onChange,
+    required,
     placeholder,
     ...restProps
   } = props
@@ -99,9 +100,23 @@ export function MerchantField(props: MerchantFieldProps) {
           },
         ]
 
+  const select = (next: string | null) => {
+    if (next === null) onChange(null)
+    else if (next.startsWith('create:'))
+      onChange({ title: next.slice('create:'.length) })
+    else if (next.startsWith('merchant:')) {
+      const selected = merchants[next.slice('merchant:'.length)]
+      if (selected) onChange({ id: selected.id, title: selected.title })
+    }
+  }
+  const selection = required
+    ? { required: true as const, onChange: select }
+    : { required: false as const, onChange: select }
+
   return (
     <Select
       {...restProps}
+      {...selection}
       label={placeholder}
       placeholder={placeholder}
       clearLabel={t('clearMerchant')}
@@ -113,15 +128,7 @@ export function MerchantField(props: MerchantFieldProps) {
           <span className={unlinked ? 'italic' : undefined}>{shown}</span>
         ) : null
       }
-      onChange={next => {
-        if (next === null) onChange(null)
-        else if (next.startsWith('create:'))
-          onChange({ title: next.slice('create:'.length) })
-        else if (next.startsWith('merchant:')) {
-          const selected = merchants[next.slice('merchant:'.length)]
-          if (selected) onChange({ id: selected.id, title: selected.title })
-        }
-      }}
+
       emptyText={t('noMerchants')}
       search={{
         label: t('findMerchant'),

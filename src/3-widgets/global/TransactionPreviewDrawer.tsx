@@ -8,6 +8,7 @@ import { panelWidths, useWindowFits } from '@/6-shared/ui/layout/panelWidths'
 import { defineScreen } from '@/6-shared/overlays'
 import type { TTransactionId } from '@/6-shared/types'
 import { TransactionPreview } from '../transaction/TransactionPreview'
+import { usePendingEdit } from '../transaction/TransactionPreview/usePendingEdit'
 
 /** A screen: one transaction, described by its id alone, so Back, Forward and
  * a reload all bring it back.
@@ -83,7 +84,8 @@ function TransactionScreenDrawer({
   docked?: boolean
 }) {
   const { t } = useTranslation('common')
-  const [id, setId] = screen.use()
+  const pending = usePendingEdit(!docked)
+  const [id, setId] = screen.use(docked ? undefined : pending.finish)
   const openOther = screen.useOpen()
   const onClose = useCallback(() => setId(null), [setId])
   const gone = useTransactionGone(id)
@@ -123,7 +125,7 @@ function TransactionScreenDrawer({
             id={id}
             key={id}
             onClose={onClose}
-            closeOnSave
+            onPendingEdit={pending.register}
             onOpenOther={openOther}
           />
         )}

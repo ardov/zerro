@@ -45,6 +45,24 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     )
   }
 
+  it('commits only on Enter or leaving the complete field, not between its controls', async () => {
+    const user = userEvent.setup()
+    const onCommit = vi.fn()
+    render(<Editor onCommit={onCommit} operators />)
+    const input = screen.getByRole('textbox', { name: 'Amount' })
+    await user.clear(input)
+    await user.type(input, '25+5')
+    expect(onCommit).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('button', { name: '+' }))
+    expect(onCommit).not.toHaveBeenCalled()
+    await user.click(input)
+    await user.keyboard('{End}10{Enter}')
+    expect(onCommit).toHaveBeenLastCalledWith(40)
+    onCommit.mockClear()
+    await user.click(screen.getByRole('button', { name: 'Reset amount' }))
+    expect(onCommit).toHaveBeenCalledExactlyOnceWith(40)
+  })
+
   it('formats arithmetic live and settles it on Enter without requiring a submit handler', async () => {
     const user = userEvent.setup()
     render(<Editor />)

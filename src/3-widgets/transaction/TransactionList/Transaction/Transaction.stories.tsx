@@ -103,7 +103,7 @@ export const AmountEditorRegression: Story = {
     await userEvent.click(input)
     await userEvent.clear(input)
     await userEvent.type(input, '25,5+4.5')
-    await userEvent.click(await body.findByRole('button', { name: 'Save' }))
+    await userEvent.tab()
     await waitFor(() =>
       expect(canvas.getByTestId('expense')).toHaveTextContent(/^30$/)
     )
@@ -123,7 +123,6 @@ export const TypeSwitchRegression: Story = {
       await body.findByRole('combobox', { name: 'Transaction type' })
     )
     await userEvent.click(await body.findByRole('option', { name: 'Transfer' }))
-    await userEvent.click(await body.findByRole('button', { name: 'Save' }))
     await waitFor(() =>
       expect(canvas.getByTestId('type')).toHaveTextContent(/^transfer$/)
     )

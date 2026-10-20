@@ -1,3 +1,4 @@
+import { usePendingEdit } from '@/3-widgets/transaction/TransactionPreview/usePendingEdit'
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
 import { TransactionList } from '@/3-widgets/transaction/TransactionList'
@@ -86,7 +87,8 @@ export default function TransactionsView() {
 const DockedPreview: FC<{ onSelectSimilar: (date: Date) => void }> = ({
   onSelectSimilar,
 }) => {
-  const [id, setId] = transactionScreen.use()
+  const pending = usePendingEdit()
+  const [id, setId] = transactionScreen.use(pending.finish)
   const openAnother = transactionScreen.useOpen()
   if (!id) return <TrEmptyState />
   return (
@@ -95,6 +97,7 @@ const DockedPreview: FC<{ onSelectSimilar: (date: Date) => void }> = ({
       key={id}
       onClose={() => setId(null)}
       onOpenOther={openAnother}
+      onPendingEdit={pending.register}
       onSelectSimilar={changed => onSelectSimilar(new Date(changed))}
     />
   )

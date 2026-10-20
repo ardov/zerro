@@ -14,6 +14,8 @@ type AmountEditingProps = {
   onChange: (value: number) => void
   /** Finishes the expression before handing its amount to the form. */
   onEnter?: (value: number) => void
+  /** A finished expression, on Enter or when focus leaves the whole field. */
+  onCommit?: (value: number) => void
   selectOnFocus?: boolean
   /** Shows buttons for arithmetic on keyboards without operator keys. */
   operators?: boolean
@@ -71,6 +73,7 @@ function AmountEditor(
     children,
     onChange,
     onEnter,
+    onCommit,
     selectOnFocus = false,
     operators: showOperators,
     presentation,
@@ -97,6 +100,7 @@ function AmountEditor(
     value,
     onChange,
     onEnter,
+    onCommit,
     selectOnFocus,
     format: amount => formatMoney(amount, null, 'ifAny'),
     onFocus,

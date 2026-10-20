@@ -19,6 +19,7 @@ export type UseAmountExpressionOptions = {
   onChange: (value: number) => void
   /** Enter, with whatever the field is worth by then. */
   onEnter?: (value: number) => void
+  onCommit?: (value: number) => void
   /** How the amount reads while nobody is typing into it. */
   format: (value: number) => string
   /** Select the whole amount when the field is entered, so the first
@@ -49,6 +50,7 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
     value,
     onChange,
     onEnter,
+    onCommit,
     format,
     selectOnFocus = true,
     onFocus,
@@ -138,6 +140,7 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
         lastSelection.current ?? undefined
       )
     )
+    onCommit?.(amount)
     return amount
   }
 

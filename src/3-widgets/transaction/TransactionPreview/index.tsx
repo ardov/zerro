@@ -1,6 +1,9 @@
 import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import type { FC, ReactNode } from 'react'
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useState } from 'react'
+import { useStore } from 'react-redux'
+import type { RootState } from '@/store'
+import type { TPendingEdit } from './usePendingEdit'
 import { useTranslation } from 'react-i18next'
 import type { TAccountId, TTransaction, TTransactionId } from '@/6-shared/types'
 import { Button, IconButton } from '@/6-shared/ui/kit/Button'
@@ -87,8 +90,7 @@ export type TransactionPreviewProps = {
   onClose: () => void
   onOpenOther: (id: TTransactionId) => void
   onSelectSimilar?: (date: number) => void
-  /** The surface owner decides whether a successful save dismisses the editor. */
-  closeOnSave?: boolean
+  onPendingEdit?: TPendingEdit
 }
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
@@ -125,7 +127,7 @@ const TransactionEditor = ({
   onClose,
   onOpenOther,
   onSelectSimilar,
-  closeOnSave = false,
+  onPendingEdit,
   createQuery,
   createPopup,
   onCreated,
@@ -134,11 +136,12 @@ const TransactionEditor = ({
   onClose: () => void
   onOpenOther: (id: TTransactionId) => void
   onSelectSimilar?: (date: number) => void
-  closeOnSave?: boolean
+  onPendingEdit?: TPendingEdit
   createQuery?: core.transactions.TTransactionQuery
   createPopup?: SurfaceController
   onCreated?: () => void
 }) => {
+  const store = useStore<RootState>()
   const narrow = useBottomSheetLayout()
   const id = tr?.id ?? ''
   const { t } = useTranslation('transaction')
@@ -228,17 +231,7 @@ const TransactionEditor = ({
 
   const transfer = draft.type === 'transfer'
   const categorized = draft.type === 'income' || draft.type === 'outcome'
-  const patch = toPatch(draft, ctx)
-  // The rates a moved leg invalidates are part of the same save.
-  const claimed = patch ? { ...patch, ...(tr && staleRates(patch, tr)) } : null
-  const changes = claimed && tr ? changedFields(tr, claimed) : {}
-  const recreated = !!tr && timeChanged(draft, tr)
   const issues = draftIssues(draft)
-  // A merchant that has yet to be created is a change all by itself: the
-  // patch cannot name it, so nothing in `changes` would show it.
-  const newMerchant = newMerchantTitle(draft)
-  const dirty =
-    !tr || recreated || !!newMerchant || Object.keys(changes).length > 0
   const stillWrong = marked.filter(field => issues[field])
   if (stillWrong.length !== marked.length) setMarked(stillWrong)
   const marks: TDraftIssues = Object.fromEntries(
@@ -259,41 +252,96 @@ const TransactionEditor = ({
   const edit = (next: Partial<TTransactionDraft>) =>
     setDraft({ ...draft, ...next })
 
-  const onSave = () => {
-    if (!dirty) return
+  const onCreate = () => {
     if (hasIssues(issues)) {
       setMarked(Object.keys(issues) as TDraftField[])
       if (issues.amount) shakeHeadline()
       return
     }
-    if (!claimed) return
-    if (!tr) {
-      const command = toCreateInput(draft, ctx, startedAt)
-      if (!command) return
-      if (command.type === 'transfer') createTransfer(command.input)
-      else createPosting(command.input)
-      saveLastTransactionAccount(
-        command.type === 'transfer'
-          ? command.input.fromAccountId
-          : command.input.accountId
-      )
-      onCreated?.()
+    const command = toCreateInput(draft, ctx, startedAt)
+    if (!command) return
+    if (command.type === 'transfer') createTransfer(command.input)
+    else createPosting(command.input)
+    saveLastTransactionAccount(
+      command.type === 'transfer'
+        ? command.input.fromAccountId
+        : command.input.accountId
+    )
+    onCreated?.()
+  }
+
+  // A completed choice or input applies the current valid draft. A switch to
+  // debt can wait here for a counterparty, without opening another surface.
+  // Closing the editor discards that unfinished draft.
+  const save = (next: TTransactionDraft, leaving = false) => {
+    if (!tr) return
+    // A blur may already have applied this draft, or sync/Undo may have
+    // replaced its source before the owner's close notification arrives.
+    if (core.transactions.selectAll(store.getState())[id] !== tr) return
+    const nextIssues = draftIssues(next)
+    if (hasIssues(nextIssues)) {
+      if (!leaving) setMarked(Object.keys(nextIssues) as TDraftField[])
       return
     }
-    if (recreated) {
+    const patch = toPatch(next, ctx)
+    if (!patch) return
+    const claimed = { ...patch, ...staleRates(patch, tr) }
+    const changes = changedFields(tr, claimed)
+    const newMerchant = newMerchantTitle(next)
+    if (timeChanged(next, tr)) {
       const newId = recreate(
-        { id, ...claimed, created: draftCreated(draft, tr.created) },
+        { id, ...claimed, created: draftCreated(next, tr.created) },
         newMerchant ?? undefined
       )
       track('transaction_recreated', { source: 'preview' })
-      if (closeOnSave) onClose()
-      else onOpenOther(newId)
+      if (!leaving) onOpenOther(newId)
+    } else if (Object.keys(changes).length || newMerchant) {
+      update({ id, ...changes }, newMerchant ?? undefined)
+      track('transaction_edited', { source: 'preview' })
+    }
+  }
+
+  const commit = (next: TTransactionDraft) => {
+    setDraft(next)
+    save(next)
+  }
+
+  const finishAmount = (
+    field: 'amount' | 'fromAmount' | 'toAmount',
+    amount: number
+  ) => {
+    if (!tr) return
+    const saved = setDraftType(toDraft(tr, ctx), draft.type, ctx)
+    if (amount <= 0) {
+      if (field === 'amount') shakeHeadline()
+      // Restore both mirrored legs together, but keep unrelated draft work.
+      setDraft(
+        field === 'amount'
+          ? { ...draft, amount: saved.amount }
+          : { ...draft, fromAmount: saved.fromAmount, toAmount: saved.toAmount }
+      )
       return
     }
-    update({ id, ...changes }, newMerchant ?? undefined)
-    track('transaction_edited', { source: 'preview' })
-    if (closeOnSave) onClose()
+    save(
+      field === 'amount'
+        ? { ...draft, amount }
+        : setTransferAmount(
+            draft,
+            field === 'fromAmount' ? 'from' : 'to',
+            amount,
+            ctx
+          )
+    )
   }
+
+  // Registration belongs to the stable screen owner. There is deliberately
+  // no cleanup save: a technical remount must not apply unfinished input.
+  useLayoutEffect(() => {
+    onPendingEdit?.(
+      id,
+      tr && !hasIssues(issues) ? () => save(draft, true) : undefined
+    )
+  })
 
   /** What an account counts in, spelled the short way an amount is labelled
    * with — `CZK` rather than the instrument it comes from. */
@@ -318,7 +366,7 @@ const TransactionEditor = ({
           <TypeSelect
             value={draft.type}
             unavailable={unavailable}
-            onChange={type => setDraft(setDraftType(draft, type, ctx))}
+            onChange={type => commit(setDraftType(draft, type, ctx))}
           />
         </div>
         {tr && (
@@ -375,7 +423,7 @@ const TransactionEditor = ({
                 value={draft.fromAccount}
                 excludeIds={[...excludedAccounts, draft.toAccount]}
                 onChange={account =>
-                  setDraft(setTransferAccount(draft, 'from', account))
+                  commit(setTransferAccount(draft, 'from', account))
                 }
               />
               <AmountField
@@ -385,6 +433,9 @@ const TransactionEditor = ({
                 icon={<MoneyOutIcon />}
                 value={draft.fromAmount}
                 currency={currencyOf(draft.fromAccount)}
+                onCommit={
+                  tr ? amount => finishAmount('fromAmount', amount) : undefined
+                }
                 onChange={amount =>
                   setDraft(setTransferAmount(draft, 'from', amount, ctx))
                 }
@@ -401,7 +452,7 @@ const TransactionEditor = ({
                 value={draft.toAccount}
                 excludeIds={[...excludedAccounts, draft.fromAccount]}
                 onChange={account =>
-                  setDraft(setTransferAccount(draft, 'to', account))
+                  commit(setTransferAccount(draft, 'to', account))
                 }
               />
               <AmountField
@@ -411,6 +462,9 @@ const TransactionEditor = ({
                 icon={<MoneyInIcon />}
                 value={draft.toAmount}
                 currency={currencyOf(draft.toAccount)}
+                onCommit={
+                  tr ? amount => finishAmount('toAmount', amount) : undefined
+                }
                 onChange={amount =>
                   setDraft(setTransferAmount(draft, 'to', amount, ctx))
                 }
@@ -424,7 +478,7 @@ const TransactionEditor = ({
                 variant="secondary"
                 size="sm"
                 label={t('btnSwap')}
-                onClick={() => setDraft(swapTransferSides(draft))}
+                onClick={() => commit(swapTransferSides(draft))}
                 className="rounded-full"
               >
                 <ArrowDownwardIcon />
@@ -445,7 +499,10 @@ const TransactionEditor = ({
                     autoFocus={!tr && !narrow}
                     value={draft.amount}
                     onChange={amount => edit({ amount })}
-                    onEnter={onSave}
+                    onEnter={tr ? undefined : onCreate}
+                    onCommit={
+                      tr ? amount => finishAmount('amount', amount) : undefined
+                    }
                     start={
                       <span aria-hidden>
                         {isIncoming(draft.type) ? '+' : '−'}
@@ -471,7 +528,10 @@ const TransactionEditor = ({
                   align="center"
                   preferredType={draft.type === 'income' ? 'income' : 'outcome'}
                   onAction={action =>
-                    edit({ tag: applyCategoryAction(draft.tag ?? [], action) })
+                    commit({
+                      ...draft,
+                      tag: applyCategoryAction(draft.tag ?? [], action),
+                    })
                   }
                 />
               )}
@@ -481,7 +541,7 @@ const TransactionEditor = ({
               value={draft.account}
               excludeIds={excludedAccounts}
               invalid={!!marks.account}
-              onChange={account => edit({ account })}
+              onChange={account => commit({ ...draft, account })}
             />
           </>
         )}
@@ -489,12 +549,15 @@ const TransactionEditor = ({
         <DateTimeField
           date={draft.date}
           onDateChange={date => edit({ date })}
+          onDateCommit={tr ? date => save({ ...draft, date }) : undefined}
           time={draft.time}
           onTimeChange={time => edit({ time })}
+          onTimeCommit={tr ? time => save({ ...draft, time }) : undefined}
         />
 
         {!transfer && (
           <MerchantField
+            required={!!tr && isDebt(draft.type)}
             invalid={!!marks.payee}
             error={marks.payee && t(`issue_${marks.payee}`)}
             payee={draft.payee}
@@ -502,7 +565,7 @@ const TransactionEditor = ({
             merchant={draft.merchant}
             debt={isDebt(draft.type)}
             placeholder={isDebt(draft.type) ? t('debtor') : t('payee')}
-            onChange={named => setDraft(setDraftMerchant(draft, named))}
+            onChange={named => commit(setDraftMerchant(draft, named))}
           />
         )}
 
@@ -517,6 +580,11 @@ const TransactionEditor = ({
           maxRows={6}
           value={draft.comment ?? ''}
           onValueChange={comment => edit({ comment })}
+          onBlur={
+            tr
+              ? event => save({ ...draft, comment: event.currentTarget.value })
+              : undefined
+          }
         />
 
         {tr && (
@@ -543,12 +611,10 @@ const TransactionEditor = ({
         )}
       </div>
 
-      {/* No button at all until there is something to save: a permanently
-          disabled control is a question a person keeps re-reading. */}
-      {dirty && (
+      {!tr && (
         <div className="sticky bottom-0 mt-auto bg-ui-card px-6 pt-2 pb-6">
-          <Button variant="primary" onClick={onSave} className="w-full">
-            {t(tr ? 'btnSave' : 'btnCreate')}
+          <Button variant="primary" onClick={onCreate} className="w-full">
+            {t('btnCreate')}
           </Button>
         </div>
       )}

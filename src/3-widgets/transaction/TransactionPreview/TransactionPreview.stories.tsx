@@ -7,8 +7,9 @@ import {
   waitFor,
   within,
 } from 'storybook/test'
-import { useMemo, useState } from 'react'
-import { useAppSelector } from '@/store'
+import { useState } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { undoClientCommand, redoClientCommand } from '@/store/data'
 import { core } from '@/zerro-core/redux'
 import type { TTransaction } from '@/6-shared/types'
 import { TransactionPreview, TrEmptyState } from '.'
@@ -17,6 +18,7 @@ import {
   useTransactionPreview,
 } from '@/3-widgets/global/TransactionPreviewDrawer'
 import { AccountField } from './AccountField'
+import TransactionsView from '@/2-pages/Transactions'
 
 const meta = {
   title: 'App/Transactions/TransactionPreview',
@@ -38,14 +40,17 @@ type Story = StoryObj<typeof meta>
 function useByType() {
   const transactions = useAppSelector(core.transactions.selectAll)
   const debtAccountId = useAppSelector(core.accounts.selectDebtAccountId)
-  return useMemo(() => {
-    const found: Partial<Record<string, TTransaction>> = {}
+  const [ids] = useState(() => {
+    const found: Record<string, string> = {}
     Object.values(transactions).forEach(tr => {
       const type = core.transactions.getType(tr, debtAccountId)
-      if (!found[type] && !tr.deleted) found[type] = tr
+      if (!found[type] && !tr.deleted) found[type] = tr.id
     })
     return found
-  }, [transactions, debtAccountId])
+  })
+  return Object.fromEntries(
+    Object.entries(ids).map(([type, id]) => [type, transactions[id]])
+  ) as Partial<Record<string, TTransaction>>
 }
 
 const Frame = ({ children }: { children: React.ReactNode }) => (
@@ -58,10 +63,18 @@ export const Bench: Story = {
   args: { id: '', onClose: () => {}, onOpenOther: () => {} },
   render: args => {
     const outcome = useByType().outcome
+    const [id, setId] = useState(() => outcome?.id)
     return (
       <Frame>
-        {outcome ? (
-          <TransactionPreview {...args} id={outcome.id} />
+        {id ? (
+          <TransactionPreview
+            {...args}
+            id={id}
+            onOpenOther={next => {
+              setId(next)
+              args.onOpenOther(next)
+            }}
+          />
         ) : (
           <TrEmptyState />
         )}
@@ -311,7 +324,7 @@ export const ReceiptAndMap: Story = {
   },
 }
 
-function ModalSaveHarness() {
+function ModalSaveHarness({ docked = false }: { docked?: boolean }) {
   const outcome = useByType().outcome
   const open = useTransactionPreview()
   const transactions = useAppSelector(core.transactions.selectAll)
@@ -320,7 +333,9 @@ function ModalSaveHarness() {
   )
   return (
     <>
-      <button onClick={() => open(outcome!.id)}>Edit transaction</button>
+      <button onClick={() => open(saved?.id ?? outcome!.id)}>
+        Edit transaction
+      </button>
       <output aria-label="Saved comment">{saved?.comment}</output>
       <output aria-label="Saved time">
         {saved
@@ -329,6 +344,11 @@ function ModalSaveHarness() {
             new Date(saved.created).getMinutes()
           : ''}
       </output>
+      {docked && (
+        <div className="flex h-[700px] gap-2">
+          <TransactionsView />
+        </div>
+      )}
       <TransactionPreviewDrawer />
     </>
   )
@@ -345,13 +365,15 @@ function checkModalSave(changeTime: boolean): Story['play'] {
     const comment = editor.getByRole('textbox', { name: 'Comment' })
     await userEvent.clear(comment)
     await userEvent.type(comment, 'Saved from modal')
+    await userEvent.click(editor.getByLabelText('Time'))
     if (changeTime) {
       fireEvent.change(editor.getByLabelText('Time'), {
         target: { value: '13:37' },
       })
     }
-    await userEvent.click(editor.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(dialog).not.toBeInTheDocument())
+    await userEvent.tab()
+    await expect(dialog).toBeInTheDocument()
+    await expect(editor.queryByRole('button', { name: 'Save' })).toBeNull()
     await expect(canvas.getByLabelText('Saved comment')).toHaveTextContent(
       'Saved from modal'
     )
@@ -359,6 +381,10 @@ function checkModalSave(changeTime: boolean): Story['play'] {
       await expect(canvas.getByLabelText('Saved time')).toHaveTextContent(
         '13:37'
       )
+    await userEvent.click(
+      within(dialog).getAllByRole('button', { name: 'Close' })[0]
+    )
+    await waitFor(() => expect(dialog).not.toBeInTheDocument())
     await waitFor(() => expect(trigger).toHaveFocus())
   }
 }
@@ -384,7 +410,7 @@ export const InlineSaveStaysOpen: Story = {
     const comment = canvas.getByRole('textbox', { name: 'Comment' })
     await userEvent.clear(comment)
     await userEvent.type(comment, 'Saved inline')
-    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+    await userEvent.tab()
     await waitFor(() =>
       expect(
         canvas.queryByRole('button', { name: 'Save' })
@@ -398,7 +424,7 @@ export const InlineSaveStaysOpen: Story = {
 
 function InlineRecreateHarness() {
   const outcome = useByType().outcome!
-  const [id, setId] = useState(outcome.id)
+  const [id, setId] = useState(() => outcome.id)
   const [initialId] = useState(id)
   return (
     <>
@@ -426,10 +452,11 @@ export const InlineSaveWithChangedTime: Story = {
     const comment = canvas.getByRole('textbox', { name: 'Comment' })
     await userEvent.clear(comment)
     await userEvent.type(comment, 'Recreated inline')
+    await userEvent.click(canvas.getByLabelText('Time'))
     fireEvent.change(canvas.getByLabelText('Time'), {
       target: { value: '13:37' },
     })
-    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+    await userEvent.tab()
     await waitFor(() =>
       expect(canvas.getByLabelText('Operation replaced')).toHaveTextContent(
         'true'
@@ -442,5 +469,390 @@ export const InlineSaveWithChangedTime: Story = {
     await expect(
       canvas.queryByRole('button', { name: 'Save' })
     ).not.toBeInTheDocument()
+  },
+}
+
+/** Watches the same entity and the real undo stack across autosaves. */
+function AutosaveHarness({
+  type = 'outcome',
+}: {
+  type?: 'outcome' | 'transfer'
+}) {
+  const transactions = useAppSelector(core.transactions.selectAll)
+  const getType = core.transactions.useType()
+  const [id, setId] = useState(
+    () =>
+      Object.values(transactions).find(
+        tr => !tr.deleted && getType(tr) === type && !tr.payee
+      )?.id ??
+      Object.values(transactions).find(
+        tr => !tr.deleted && getType(tr) === type
+      )!.id
+  )
+  const transaction = transactions[id]
+  const count = useAppSelector(state => state.data.outbox.length)
+  const dispatch = useAppDispatch()
+  const [open, setOpen] = useState(true)
+  return (
+    <>
+      <button onClick={() => setOpen(true)}>Reopen</button>
+      <button onClick={() => dispatch(undoClientCommand())}>Undo edit</button>
+      <button onClick={() => dispatch(redoClientCommand())}>Redo edit</button>
+      <output aria-label="Command count">{count}</output>
+      <output aria-label="Stored transaction">
+        {JSON.stringify(transaction)}
+      </output>
+      <output aria-label="Stored type">{getType(transaction)}</output>
+      {open && (
+        <Frame>
+          <TransactionPreview
+            id={id}
+            onClose={() => setOpen(false)}
+            onOpenOther={setId}
+          />
+        </Frame>
+      )}
+    </>
+  )
+}
+
+function stored(canvas: ReturnType<typeof within>): TTransaction {
+  return JSON.parse(canvas.getByLabelText('Stored transaction').textContent!)
+}
+
+export const FinishedFieldsAndUndo: Story = {
+  ...Bench,
+  tags: ['check'],
+  render: () => <AutosaveHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const original = stored(canvas)
+    const count = Number(canvas.getByLabelText('Command count').textContent)
+    const comment = canvas.getByRole('textbox', { name: 'Comment' })
+    await userEvent.clear(comment)
+    await userEvent.type(comment, 'One finished edit')
+    expect(stored(canvas).comment).toBe(original.comment)
+    expect(canvas.getByLabelText('Command count')).toHaveTextContent(
+      String(count)
+    )
+    const amount = canvas.getByRole('textbox', { name: 'Amount' })
+    await userEvent.click(amount)
+    await waitFor(() =>
+      expect(stored(canvas).comment).toBe('One finished edit')
+    )
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count + 1
+    )
+    await userEvent.clear(amount)
+    await userEvent.type(amount, '25+5')
+    expect(stored(canvas).outcome).toBe(original.outcome)
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(stored(canvas).outcome).toBe(30))
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count + 2
+    )
+    await userEvent.click(canvas.getByRole('button', { name: 'Undo edit' }))
+    await waitFor(() => expect(stored(canvas).outcome).toBe(original.outcome))
+    expect(stored(canvas).comment).toBe('One finished edit')
+    await userEvent.click(canvas.getByRole('button', { name: 'Redo edit' }))
+    await waitFor(() => expect(stored(canvas).outcome).toBe(30))
+    await userEvent.click(amount)
+    await userEvent.clear(amount)
+    await userEvent.tab()
+    await waitFor(() => expect(amount).toHaveValue('30'))
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count + 2
+    )
+    await userEvent.click(amount)
+    await userEvent.clear(amount)
+    await userEvent.type(amount, '10-20{Enter}')
+    await waitFor(() => expect(amount).toHaveValue('30'))
+    expect(stored(canvas).outcome).toBe(30)
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count + 2
+    )
+    expect(canvas.queryByRole('button', { name: 'Save' })).toBeNull()
+  },
+}
+
+export const DebtWaitsForCounterparty: Story = {
+  ...Bench,
+  tags: ['check'],
+  render: () => <AutosaveHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    // Ensure a nameless expense even when the demo starts with a merchant.
+    if (stored(canvas).payee) {
+      await userEvent.click(canvas.getByRole('combobox', { name: /^Place/ }))
+      await userEvent.click(await body.findByRole('option', { name: 'Clear' }))
+    }
+    const count = Number(canvas.getByLabelText('Command count').textContent)
+    const chooseDebt = async () => {
+      await userEvent.click(
+        canvas.getByRole('combobox', { name: 'Transaction type' })
+      )
+      await userEvent.click(await body.findByRole('option', { name: 'Lent' }))
+      await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
+    }
+    await chooseDebt()
+    expect(canvas.getByLabelText('Stored type')).toHaveTextContent('outcome')
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count
+    )
+    expect(
+      canvas.getByRole('combobox', { name: /^Who owes/ })
+    ).not.toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'Close' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Reopen' }))
+    expect(
+      canvas.getByRole('combobox', { name: 'Transaction type' })
+    ).toHaveTextContent('Expense')
+    await chooseDebt()
+    await userEvent.click(canvas.getByRole('combobox', { name: /^Who owes/ }))
+    const search = await body.findByRole('combobox', { name: 'Find or create' })
+    await userEvent.clear(search)
+    await userEvent.type(search, 'Autosave debtor')
+    await userEvent.click(
+      await body.findByRole('option', { name: /Create.*Autosave debtor/ })
+    )
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Stored type')).toHaveTextContent(
+        'outcomeDebt'
+      )
+    )
+    expect(stored(canvas).payee).toBe('Autosave debtor')
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count + 1
+    )
+    await userEvent.click(canvas.getByRole('button', { name: 'Undo edit' }))
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Stored type')).toHaveTextContent('outcome')
+    )
+    expect(stored(canvas).payee).toBeFalsy()
+  },
+}
+
+export const DismissActiveComment: Story = {
+  ...ModalSave,
+  tags: ['check'],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Edit transaction' })
+    )
+    const dialog = await body.findByRole('dialog', { name: 'Transaction' })
+    const comment = within(dialog).getByRole('textbox', { name: 'Comment' })
+    await userEvent.clear(comment)
+    await userEvent.type(comment, 'Saved from modal')
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(dialog).not.toBeInTheDocument())
+    expect(canvas.getByLabelText('Saved comment')).toHaveTextContent(
+      'Saved from modal'
+    )
+  },
+}
+
+export const BackFinishesActiveComment: Story = {
+  ...DismissActiveComment,
+  parameters: { historyShortcuts: true },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Edit transaction' })
+    )
+    const dialog = await body.findByRole('dialog', { name: 'Transaction' })
+    const comment = within(dialog).getByRole('textbox', { name: 'Comment' })
+    await userEvent.clear(comment)
+    await userEvent.type(comment, 'Saved from modal')
+    await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
+    await waitFor(() => expect(dialog).not.toBeInTheDocument())
+    expect(canvas.getByLabelText('Saved comment')).toHaveTextContent(
+      'Saved from modal'
+    )
+  },
+}
+
+export const DateAndTimeFinishOnce: Story = {
+  ...Bench,
+  tags: ['check'],
+  render: () => <AutosaveHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const count = Number(canvas.getByLabelText('Command count').textContent)
+    const original = stored(canvas)
+    const date = canvas.getByLabelText('Date')
+    const time = canvas.getByLabelText('Time')
+    await userEvent.click(date)
+    fireEvent.change(date, { target: { value: '2026-09-15' } })
+    fireEvent.change(date, { target: { value: '2026-09-16' } })
+    expect(stored(canvas).date).toBe(original.date)
+    await userEvent.click(time)
+    await waitFor(() => expect(stored(canvas).date).toBe('2026-09-16'))
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count + 1
+    )
+    fireEvent.change(time, { target: { value: '' } })
+    await userEvent.click(date)
+    expect(stored(canvas).created).toBe(original.created)
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count + 1
+    )
+    await userEvent.click(time)
+    fireEvent.change(time, { target: { value: '13:30' } })
+    fireEvent.change(time, { target: { value: '13:37' } })
+    expect(stored(canvas).created).toBe(original.created)
+    await userEvent.tab()
+    await waitFor(() => expect(stored(canvas).id).not.toBe(original.id))
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count + 2
+    )
+  },
+}
+
+export const TransferAmountsAutosave: Story = {
+  ...Bench,
+  tags: ['check'],
+  render: () => <AutosaveHarness type="transfer" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const original = stored(canvas)
+    const count = Number(canvas.getByLabelText('Command count').textContent)
+    const from = canvas.getByRole('textbox', { name: 'Amount taken' })
+    const to = canvas.getByRole('textbox', { name: 'Amount received' })
+    await userEvent.clear(from)
+    await userEvent.click(to)
+    expect(stored(canvas).outcome).toBe(original.outcome)
+    expect(stored(canvas).income).toBe(original.income)
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count
+    )
+    await userEvent.clear(to)
+    await userEvent.type(to, '150{Enter}')
+    await waitFor(() => expect(stored(canvas).income).toBe(150))
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count + 1
+    )
+    await userEvent.clear(from)
+    await userEvent.type(from, '300{Enter}')
+    await waitFor(() => expect(stored(canvas).outcome).toBe(300))
+    expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
+      count + 2
+    )
+    await userEvent.click(canvas.getByRole('button', { name: 'Undo edit' }))
+    expect(stored(canvas).outcome).toBe(original.outcome)
+    expect(stored(canvas).income).toBe(150)
+  },
+}
+
+export const DockedBackFinishesInput: Story = {
+  ...Bench,
+  tags: ['check'],
+  parameters: {
+    layout: 'fullscreen',
+    app: { scenario: 'demo', route: '/transactions' },
+    historyShortcuts: true,
+    viewport: {
+      options: {
+        wide: {
+          name: 'Wide desktop',
+          styles: { width: '1440px', height: '900px' },
+          type: 'desktop',
+        },
+      },
+    },
+  },
+  globals: { viewport: { value: 'wide' } },
+  render: () => <ModalSaveHarness docked />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Edit transaction' })
+    )
+    const comment = await canvas.findByRole('textbox', { name: 'Comment' })
+    await userEvent.clear(comment)
+    await userEvent.type(comment, 'Saved from modal')
+    expect(canvas.getByLabelText('Saved comment')).toHaveTextContent('')
+    await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
+    await waitFor(() => expect(comment).not.toBeInTheDocument())
+    expect(canvas.getByLabelText('Saved comment')).toHaveTextContent(
+      'Saved from modal'
+    )
+  },
+}
+
+/** An inactive drawer must forget the editor that its adaptive branch removed. */
+export const AdaptiveRemountDiscardsPendingEdit: Story = {
+  ...DockedBackFinishesInput,
+  tags: ['check', '!dev', '!autodocs'],
+  play: async ({ canvasElement }) => {
+    // Resizing the real browser exercises both owners and their media queries.
+    // The interactive Storybook canvas has no test-browser viewport controller.
+    if (!('__vitest_browser_runner__' in window)) return
+    const { page } = await import('vitest/browser')
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const originalWidth = window.innerWidth
+    const originalHeight = window.innerHeight
+    try {
+      for (const closeWhileDocked of [false, true]) {
+        await page.viewport(900, 900)
+        await userEvent.click(
+          canvas.getByRole('button', { name: 'Edit transaction' })
+        )
+        const dialog = await body.findByRole('dialog', { name: 'Transaction' })
+        const comment = within(dialog).getByRole<HTMLTextAreaElement>(
+          'textbox',
+          { name: 'Comment' }
+        )
+        const originalComment = comment.value
+        await userEvent.clear(comment)
+        await userEvent.type(comment, 'Saved from modal')
+        expect(canvas.getByLabelText('Saved comment')).toBeEmptyDOMElement()
+
+        await page.viewport(1440, 900)
+        await waitFor(() =>
+          expect(body.queryByRole('dialog', { name: 'Transaction' })).toBeNull()
+        )
+        expect(canvas.getByRole('textbox', { name: 'Comment' })).toHaveValue(
+          originalComment
+        )
+        await userEvent.click(canvas.getByText('Delivery', { exact: true }))
+        if (closeWhileDocked) {
+          await userEvent.click(canvas.getByRole('button', { name: 'Close' }))
+          await userEvent.click(canvas.getByText('Delivery', { exact: true }))
+        }
+
+        await page.viewport(900, 900)
+        const nextDialog = await body.findByRole('dialog', {
+          name: 'Transaction',
+        })
+        expect(
+          within(nextDialog).getByRole('textbox', { name: 'Comment' })
+        ).toHaveValue('Food delivery')
+        expect(canvas.getByLabelText('Saved comment')).toBeEmptyDOMElement()
+        await userEvent.keyboard('{Escape}')
+        await waitFor(() =>
+          expect(body.queryByRole('dialog', { name: 'Transaction' })).toBeNull()
+        )
+        await userEvent.click(
+          canvas.getByRole('button', { name: 'Edit transaction' })
+        )
+        const reopened = await body.findByRole('dialog', {
+          name: 'Transaction',
+        })
+        expect(
+          within(reopened).getByRole('textbox', { name: 'Comment' })
+        ).toHaveValue(originalComment)
+        await userEvent.keyboard('{Escape}')
+        await waitFor(() =>
+          expect(body.queryByRole('dialog', { name: 'Transaction' })).toBeNull()
+        )
+      }
+    } finally {
+      await page.viewport(originalWidth, originalHeight)
+    }
   },
 }

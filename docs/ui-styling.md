@@ -333,6 +333,13 @@ separately. The transaction editor uses kit fields, selection controls, menus
 and an adaptive `DrawerSurface`; its existing popup or screen owns history.
 The editor opens as a full-width bottom sheet below 500px and a right drawer
 on wider screens. Its date and time inputs retain native segmented editing.
+Existing transactions apply completed field edits automatically, one command
+per finished action. Amounts finish on Enter or field exit; comments finish on
+field exit. Date/time typing stays in the draft until field exit, while calendar
+choices apply immediately. Nonpositive amounts shake and revert without a
+command. A debt without a counterparty stays a draft until one is selected;
+closing discards that invalid draft. Stable screen owners finish valid active
+input on close or selection change. New transactions retain explicit creation.
 Other application editors may still use legacy surfaces.
 
 `Confirm` is passed to `useAsk<boolean>()`. Explicit confirmation answers `true`;

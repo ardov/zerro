@@ -47,12 +47,19 @@ export const Editing: Story = {
     await expect(value).toHaveTextContent('2026-09-12 18:56')
     await userEvent.click(outside)
     await expect(date).toHaveValue('2026-09-12')
+    await userEvent.click(date)
     fireEvent.change(date, { target: { value: '2026-09-15' } })
     await userEvent.click(outside)
     await expect(value).toHaveTextContent('2026-09-15 18:56')
     await expect(time).toHaveAttribute('type', 'time')
+    await userEvent.click(time)
     fireEvent.change(time, { target: { value: '09:30' } })
+    await userEvent.click(outside)
     await expect(value).toHaveTextContent('2026-09-15 09:30')
+    await userEvent.click(time)
+    fireEvent.change(time, { target: { value: '' } })
+    await userEvent.click(outside)
+    await expect(time).toHaveValue('09:30')
   },
 }
 
