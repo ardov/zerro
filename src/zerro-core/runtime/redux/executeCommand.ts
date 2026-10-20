@@ -1,4 +1,6 @@
 import { v1 as uuidv1 } from 'uuid'
+import { t } from 'i18next'
+import { toast } from '@/6-shared/ui/kit/Toast'
 import type { AppDispatch, AppThunk, RootState } from '@/store'
 import { appendClientCommand, getReplicaWriteBlocked } from '@/store/data'
 import { selectIsHistoryPointVisible } from '@/store/history'
@@ -17,7 +19,7 @@ export type TReduxCommandCompiler<TReceipt = unknown> = (
 ) => TCompiled<TReceipt>
 
 export type TCommandExecution<TReceipt> = {
-  applied: boolean
+  status: 'applied' | 'noop' | 'blocked'
   receipt: TReceipt | undefined
 }
 
@@ -62,7 +64,11 @@ export function executeReduxCommandWithStatus<TReceipt = unknown>(
       getReplicaWriteBlocked(state) ||
       (selectIsHistoryPointVisible(state) && !options.allowHistory)
     ) {
-      return { applied: false, receipt: undefined }
+      toast.add({
+        type: 'error',
+        title: t('commandWriteBlocked', { ns: 'common' }),
+      })
+      return { status: 'blocked', receipt: undefined }
     }
     const result = compile(state, coreContext)
     const applied =
@@ -70,7 +76,7 @@ export function executeReduxCommandWithStatus<TReceipt = unknown>(
       appendCommand(dispatch, state, result, options)
 
     return {
-      applied,
+      status: applied ? 'applied' : 'noop',
       receipt: result.receipt,
     }
   }

@@ -20,7 +20,6 @@ import { track } from '@/6-shared/analytics'
 import { PopoverSurface } from '@/6-shared/ui/kit/Popover'
 
 import { useAppDispatch, useAppSelector } from '@/store'
-import { setTotalBudget } from '@/4-features/budget/setTotalBudget'
 import { useQuickActions } from './useQuickActions'
 import { useAmountAlignment } from './useAmountAlignment'
 
@@ -97,11 +96,11 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   }
 
   const onChange = (value: number) =>
-    dispatch(setTotalBudget({ month, id, value }))
+    dispatch(core.budgets.setTotalAssigned({ month, id, amount: value }))
 
   const changeAndClose = (value: number) => {
-    onClose?.()
     if (value !== assigned.env) onChange(value)
+    onClose()
   }
 
   const helperText =
@@ -167,16 +166,21 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
           aria-label={t('quickAmounts')}
           className="mt-2"
         >
-          {quickActions.map(({ text, amount }, index) => (
+          {quickActions.map(({ kind, text, amount }, index) => (
             <ActionListItem
               selected={inputValue === amount}
               end={format.env(amount)}
-              key={text}
+              key={kind}
               onClick={() => {
-                changeAndClose(amount)
-                track('budget_quick_amount_selected', {
-                  preset_position: index + 1,
-                })
+                const result = dispatch(
+                  core.budgets.applyPreset({ month, id, kind })
+                )
+                onClose()
+                if (result.status === 'applied') {
+                  track('budget_quick_amount_selected', {
+                    preset_position: index + 1,
+                  })
+                }
               }}
             >
               {text}

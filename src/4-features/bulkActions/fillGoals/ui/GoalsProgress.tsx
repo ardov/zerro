@@ -9,7 +9,7 @@ import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@/store'
 
-import { fillGoals } from '../model/fillGoals'
+import { track } from '@/6-shared/analytics'
 import { toast } from '@/6-shared/ui/kit/Toast'
 import { useTranslation } from 'react-i18next'
 
@@ -30,7 +30,8 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
 
   const dispatch = useAppDispatch()
   const completeAll = () => {
-    dispatch(fillGoals(month))
+    if (dispatch(core.budgets.fundGoals(month)).status !== 'applied') return
+    track('budget_automation_applied', { automation: 'fill_goals' })
     toast.add({ type: 'success', title: t('completeAll.done') })
   }
 

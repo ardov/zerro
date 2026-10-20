@@ -62,6 +62,11 @@ describe('hidden data read codecs', () => {
           month: 'not-month',
           payload: { envelope: 200 },
         }),
+        outOfRangeMonth: makeReminder('outOfRangeMonth', {
+          type: HiddenDataType.Budgets,
+          month: '2026-13',
+          payload: { envelope: 300 },
+        }),
         otherType: makeReminder('otherType', {
           type: HiddenDataType.Goals,
           month: '2026-01',

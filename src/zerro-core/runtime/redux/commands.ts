@@ -568,17 +568,19 @@ export function restoreDataStore(desired: TDataStore): AppThunk<boolean> {
       )
       if (!compatibility.ok) return false
 
-      return executeReduxCommandWithStatus(
-        (state, ctx) => ({
-          operations: entityOperations(
-            selectData(state, 'live'),
-            buildRestorePlan(selectData(state, 'live'), desired, {
-              allocateId: (_key, _desiredId) => ctx.uuid(),
-            }).patch
-          ),
-        }),
-        { allowHistory: true, label: { verb: 'data-restored' } }
-      )(dispatch, getState, extra).applied
+      return (
+        executeReduxCommandWithStatus(
+          (state, ctx) => ({
+            operations: entityOperations(
+              selectData(state, 'live'),
+              buildRestorePlan(selectData(state, 'live'), desired, {
+                allocateId: (_key, _desiredId) => ctx.uuid(),
+              }).patch
+            ),
+          }),
+          { allowHistory: true, label: { verb: 'data-restored' } }
+        )(dispatch, getState, extra).status === 'applied'
+      )
     })()
 }
 

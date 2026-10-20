@@ -8,7 +8,7 @@ vi.mock('@/zerro-core/redux', () => ({
   core: {
     budgets: {
       selectRaw: vi.fn(),
-      set: vi.fn(),
+      setOwnAssigned: vi.fn(),
     },
     envelopes: {
       EnvType: { Tag: 'tag' },
@@ -31,12 +31,12 @@ describe('convertZmBudgetsToZerro', () => {
         outcome: 20_000,
       },
     } as never)
-    vi.mocked(core.budgets.set).mockReturnValue(action as never)
+    vi.mocked(core.budgets.setOwnAssigned).mockReturnValue(action as never)
 
     const updates = convertZmBudgetsToZerro()(dispatch, () => state, undefined)
 
     expect(core.budgets.selectRaw).toHaveBeenCalledWith(state)
-    expect(core.budgets.set).toHaveBeenCalledWith([
+    expect(core.budgets.setOwnAssigned).toHaveBeenCalledWith([
       { id: 'tag#food', month: '2026-07', value: 12_000 },
     ])
     expect(dispatch).toHaveBeenCalledWith(action)

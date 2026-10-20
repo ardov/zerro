@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import type { TISOMonth } from '@/6-shared/types'
 import { useAppDispatch, useAppSelector } from '@/store'
 
-import { moveMoney } from './moveMoney'
+import { track } from '@/6-shared/analytics'
 
 export type MoveMoneyModalProps = {
   open: boolean
@@ -58,7 +58,15 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
 
   const handleSubmit = (value = amount) => {
     if (value) {
-      dispatch(moveMoney(value, currency, source, destination, month))
+      const result = dispatch(
+        core.budgets.moveFunds({
+          month,
+          from: source,
+          to: destination,
+          money: { amount: value, currency },
+        })
+      )
+      if (result.status === 'applied') track('budget_funds_moved', {})
     }
     onClose()
   }

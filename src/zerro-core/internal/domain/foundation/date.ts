@@ -53,6 +53,11 @@ export function nextMonth(d: TDateDraft) {
   return new Date(date.getFullYear(), date.getMonth() + 1, 1)
 }
 
+export function previousMonth(d: TDateDraft) {
+  const date = parseDate(d)
+  return new Date(date.getFullYear(), date.getMonth() - 1, 1)
+}
+
 function nextYear(d: TDateDraft) {
   const date = parseDate(d)
   return new Date(date.getFullYear() + 1, 0, 1)
@@ -60,10 +65,7 @@ function nextYear(d: TDateDraft) {
 
 /** Checks if string is valid ISO month */
 export function isISOMonth(date?: unknown): date is TISOMonth {
-  if (!date) return false
-  if (typeof date !== 'string') return false
-  const regex = /\d{4}-\d{2}/g // 0000-00
-  return regex.test(date) && date.length === 7
+  return typeof date === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(date)
 }
 
 /** Checks if string is valid ISO date */

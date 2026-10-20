@@ -2,6 +2,7 @@ import type ru from './ru.json'
 
 export const en: typeof ru = {
   common: {
+    commandWriteBlocked: 'Editing is currently unavailable.',
     btnLogin: 'Sign in with Zenmoney',
     btnAbout: 'What is Zerro?',
     haveTrouble: 'Not loading?',
@@ -589,6 +590,17 @@ export const en: typeof ru = {
     serverSync: 'Update',
     unnamedChange: 'Change',
     verb_budgetSet: 'Budget changed',
+    verb_budgetGoalsFunded: 'Goals funded',
+    verb_budgetOverspendingCovered: 'Overspending covered',
+    verb_budgetRestarted: 'Budget leftovers reset',
+    verb_budgetCopied: 'Budget assignments copied',
+    verb_budgetGoalAssigned: 'Assigned to match the goal',
+    verb_budgetPreviousAssignmentSet: 'Assigned to match last month',
+    verb_budgetFundsMoved: 'Budget funds moved',
+    verb_budgetSurplusReleased: 'Budget surplus released',
+    verb_budgetAverageSpendingAssigned: 'Average spending assigned',
+    verb_budgetPreviousSpendingAssigned: 'Previous spending assigned',
+    verb_budgetChildrenAssigned: 'Assigned to match child budgets',
     verb_goalSet: 'Goal changed',
     verb_fxRatesSet: 'Exchange rates changed',
     verb_fxRatesReset: 'Exchange rates reset',

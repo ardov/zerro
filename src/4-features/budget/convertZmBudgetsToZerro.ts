@@ -11,7 +11,7 @@ export function convertZmBudgetsToZerro(): AppThunk<
   return (dispatch, getState) => {
     const tagBudgets = core.budgets.selectRaw(getState())
     const updates = convertTagBudgetsToUpdates(tagBudgets)
-    dispatch(core.budgets.set(updates))
+    dispatch(core.budgets.setOwnAssigned(updates))
     return updates
   }
 }

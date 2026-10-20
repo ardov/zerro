@@ -10,7 +10,7 @@ import { useAsk } from '@/6-shared/overlays'
 import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { DisplayAmount } from '@/3-widgets/DisplayAmount'
-import { fixOverspends as fixAllOverspends } from '../model/fixOverspends'
+import { track } from '@/6-shared/analytics'
 
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const { t } = useTranslation('overspendNotice')
@@ -26,7 +26,9 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
       />
     )
     if (!confirmed) return
-    dispatch(fixAllOverspends(month))
+    if (dispatch(core.budgets.coverOverspending(month)).status === 'applied') {
+      track('budget_automation_applied', { automation: 'fix_overspends' })
+    }
   }
 
   if (isZero(overspend)) return null

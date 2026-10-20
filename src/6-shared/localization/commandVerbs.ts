@@ -9,6 +9,17 @@ import type { TCommandVerb } from '@/zerro-core/replica'
  */
 export const commandVerbLabelKeys = {
   'budget-set': 'verb_budgetSet',
+  'budget-goals-funded': 'verb_budgetGoalsFunded',
+  'budget-overspending-covered': 'verb_budgetOverspendingCovered',
+  'budget-restarted': 'verb_budgetRestarted',
+  'budget-copied': 'verb_budgetCopied',
+  'budget-goal-assigned': 'verb_budgetGoalAssigned',
+  'budget-previous-assignment-set': 'verb_budgetPreviousAssignmentSet',
+  'budget-funds-moved': 'verb_budgetFundsMoved',
+  'budget-surplus-released': 'verb_budgetSurplusReleased',
+  'budget-average-spending-assigned': 'verb_budgetAverageSpendingAssigned',
+  'budget-previous-spending-assigned': 'verb_budgetPreviousSpendingAssigned',
+  'budget-children-assigned': 'verb_budgetChildrenAssigned',
   'goal-set': 'verb_goalSet',
   'fx-rates-set': 'verb_fxRatesSet',
   'fx-rates-reset': 'verb_fxRatesReset',

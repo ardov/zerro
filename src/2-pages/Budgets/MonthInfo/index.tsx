@@ -1,24 +1,20 @@
+import { track } from '@/6-shared/analytics'
+import { prevMonth, toISOMonth } from '@/6-shared/helpers/date'
 import { toast } from '@/6-shared/ui/kit/Toast'
 import { Button } from '@/6-shared/ui/kit/Button'
 import type { FC, HTMLAttributes } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isZero } from '@/6-shared/helpers/money'
-import { startFresh } from '@/4-features/bulkActions/startFresh'
 import type { TISOMonth } from '@/6-shared/types'
 
 import { DisplayAmount } from '@/3-widgets/DisplayAmount'
-import {
-  fixOverspends as fixAllOverspends,
-  OverspendNotice,
-} from '@/4-features/bulkActions/fixOverspend'
-import { copyPreviousBudget } from '@/4-features/bulkActions/copyPrevMonth'
+import { OverspendNotice } from '@/4-features/bulkActions/fixOverspend'
 import { useMonth } from '../MonthProvider'
 import { BalanceWidget } from '../BalanceWidget'
 import { FxRates } from './FxRates'
 import { ActivityStats } from './ActivityStats'
 import { core } from '@/zerro-core/redux'
 
-import { fillGoals } from '@/4-features/bulkActions/fillGoals'
 import { useAsk } from '@/6-shared/overlays'
 import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useTranslation } from 'react-i18next'
@@ -38,7 +34,14 @@ export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
   const ask = useAsk()
 
   const copyAllBudgets = () => {
-    dispatch(copyPreviousBudget(month))
+    const result = dispatch(
+      core.budgets.copyAssignments({
+        from: toISOMonth(prevMonth(month)),
+        to: month,
+      })
+    )
+    if (result.status !== 'applied') return
+    track('budget_automation_applied', { automation: 'copy_previous' })
     toast.add({ type: 'success', title: t('copyAllBudgets.done') })
   }
 
@@ -51,7 +54,9 @@ export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
       />
     )
     if (!confirmed) return
-    dispatch(fixAllOverspends(month))
+    if (dispatch(core.budgets.coverOverspending(month)).status === 'applied') {
+      track('budget_automation_applied', { automation: 'fix_overspends' })
+    }
   }
 
   const startAgain = async () => {
@@ -64,7 +69,9 @@ export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
       />
     )
     if (!confirmed) return
-    dispatch(startFresh(month))
+    if (dispatch(core.budgets.restart(month)).status === 'applied') {
+      track('budget_automation_applied', { automation: 'start_fresh' })
+    }
   }
 
   return (
@@ -132,7 +139,8 @@ function GoalAction(props: { month: TISOMonth }) {
 
   const dispatch = useAppDispatch()
   const completeAll = () => {
-    dispatch(fillGoals(month))
+    if (dispatch(core.budgets.fundGoals(month)).status !== 'applied') return
+    track('budget_automation_applied', { automation: 'fill_goals' })
     toast.add({
       type: 'success',
       title: t('goals:completeAll.done', { keyPrefix: '' }),

@@ -93,6 +93,35 @@ write restrictions, prepares the command, materializes it, and omits empty
 changes before dispatching `appendClientCommand`. Domain builders do not read
 Redux.
 
+### Budget actions
+
+`core.budgets` exposes `fundGoals`, `coverOverspending`, `restart`,
+`copyAssignments`, `moveFunds`, `applyPreset`, and `setTotalAssigned`. Each
+action calculates concrete assignments from the current data and appends at most
+one command with an action label. These methods return a status: `applied`,
+`noop`, or `blocked`. No-op actions preserve redo; a failed calculation
+publishes no changes.
+
+Commands reuse the runtime projection graph and its cached reads. Dependent
+calculations use a private working assignment table; changed drafts recompute
+metrics and goals without rebuilding transaction activity. Goal funding only
+tops up assignments, processes children before parents, and treats a parent goal
+as a minimum including its children. Endless balance goals are excluded from
+bulk funding. Funding may leave the unassigned balance negative. Overspending
+coverage first funds children with nonzero own assignments, then parents;
+children without own assignments continue spending from the parent pool.
+
+Restart resets the preceding and selected months' leftovers, then clears future
+assignments of existing envelopes, preserving transactions and goals. Copy
+replaces own assignments, including zero. ZenMoney's global budget and
+assignments of absent envelopes are preserved by restart. `setOwnAssigned`
+writes own values directly; `setTotalAssigned` subtracts the current child
+assignments from the requested total. All amounts are expressed in the
+envelope's currency. Presets are calculated in Core both for display and again
+when clicked. The single-envelope goal preset sets the exact target assignment
+and may reduce it; bulk funding only tops up. Saved commands contain fixed
+assignments, so replay does not repeat calculations or currency conversions.
+
 ### Zerro storage materialization
 
 [`materializeZerro.ts`](../../internal/operations/materialization/materializeZerro.ts)

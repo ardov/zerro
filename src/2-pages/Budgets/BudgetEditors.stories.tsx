@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { usePopup } from '@/6-shared/overlays'
 import { Button } from '@/6-shared/ui/kit/Button'
 import { MoveMoneyModal } from '@/4-features/moveMoney'
 import { core } from '@/zerro-core/redux'
-import { useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { hydrateCorruptOutbox } from '@/store/data'
 import { MonthProvider, useMonth } from './MonthProvider'
 import { useBudgetPopover } from './BudgetPopover'
 import { BudgetCell } from './EnvelopeTable/Row/BudgetCell'
@@ -27,7 +29,10 @@ type Story = StoryObj
 
 /** Real editors and demo store. No play function: changes stay on screen so
  * this is also a manual review surface, independent of the regression tests. */
-function Editors() {
+function Editors({ blockedCheck = false }: { blockedCheck?: boolean }) {
+  const dispatch = useAppDispatch()
+  const current = useAppSelector(state => state.data.current)
+  const pending = useAppSelector(state => state.data.outbox.length)
   const [month] = useMonth()
   const budget = useBudgetPopover()
   const goal = useGoalPopover()
@@ -41,6 +46,27 @@ function Editors() {
   return (
     <main className="mx-auto grid max-w-160 gap-6 p-4 text-ui-16 text-ui-primary">
       <h1 className="text-ui-20 font-medium">Budget editors</h1>
+      {blockedCheck && (
+        <>
+          <Button
+            onClick={() =>
+              dispatch(
+                hydrateCorruptOutbox({
+                  rootUserId: 1,
+                  base: current,
+                  reason: 'test recovery',
+                })
+              )
+            }
+          >
+            Block writes
+          </Button>
+          <output aria-label="Pending actions">{pending}</output>
+          <output aria-label="Current data" hidden>
+            {JSON.stringify(current)}
+          </output>
+        </>
+      )}
       <div className="flex items-center justify-between rounded-ui-card bg-ui-card p-4">
         <span>Food · Assigned ({currency})</span>
         <BudgetCell
@@ -101,4 +127,76 @@ export const Desktop: Story = {
 export const Mobile: Story = {
   ...Desktop,
   globals: { viewport: { value: 'iphone13' } },
+}
+
+export const BlockedAssignment: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { historyShortcuts: true },
+  render: () => (
+    <MonthProvider>
+      <Editors blockedCheck />
+    </MonthProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Block writes' }))
+    const before = canvas.getByLabelText('Current data').textContent
+    for (const action of ['enter', 'apply', 'escape', 'outside', 'preset']) {
+      await userEvent.click(
+        canvas.getByRole('button', { name: '1. Assign budget' })
+      )
+      const input = await body.findByRole('textbox', { name: 'Assigned' })
+      await userEvent.clear(input)
+      await userEvent.type(input, '123.45')
+      if (action === 'enter') await userEvent.keyboard('{Enter}')
+      if (action === 'apply')
+        await userEvent.click(body.getByRole('button', { name: 'Apply' }))
+      if (action === 'escape') await userEvent.keyboard('{Escape}')
+      if (action === 'outside')
+        await userEvent.click(
+          canvasElement.ownerDocument.elementFromPoint(5, 5)!
+        )
+      if (action === 'preset') {
+        const presets = within(
+          body.getByRole('toolbar', { name: 'Quick amounts' })
+        )
+        await userEvent.click(presets.getAllByRole('button')[0])
+      }
+      await waitFor(() => expect(input).not.toBeVisible())
+      await body.findAllByText('Editing is currently unavailable.')
+      expect(canvas.getByLabelText('Current data').textContent).toBe(before)
+      expect(canvas.getByLabelText('Pending actions').textContent).toBe('0')
+      // Dismiss each notification to check that the next attempt produces one.
+      await userEvent.hover(body.getByRole('region', { name: 'Notifications' }))
+      await userEvent.click(
+        await body.findByRole('button', { name: 'Dismiss notification' })
+      )
+      await waitFor(() =>
+        expect(
+          body.queryByText('Editing is currently unavailable.')
+        ).not.toBeInTheDocument()
+      )
+    }
+  },
+}
+
+export const BlockedMove: Story = {
+  ...BlockedAssignment,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Block writes' }))
+    const before = canvas.getByLabelText('Current data').textContent
+    await userEvent.click(
+      canvas.getByRole('button', { name: '2. Move money to Food' })
+    )
+    const input = await body.findByRole('textbox', { name: 'Amount' })
+    await userEvent.clear(input)
+    await userEvent.type(input, '123.45{Enter}')
+    await body.findAllByText('Editing is currently unavailable.')
+    await waitFor(() => expect(input).not.toBeVisible())
+    expect(canvas.getByLabelText('Current data').textContent).toBe(before)
+    expect(canvas.getByLabelText('Pending actions').textContent).toBe('0')
+  },
 }

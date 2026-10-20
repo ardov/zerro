@@ -17,7 +17,13 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-function Harness({ drawer = false }: { drawer?: boolean }) {
+function Harness({
+  drawer = false,
+  overspent = false,
+}: {
+  drawer?: boolean
+  overspent?: boolean
+}) {
   const openSide = useSideContent()
   const dispatch = useAppDispatch()
   const [month, setMonth] = useMonth()
@@ -32,9 +38,10 @@ function Harness({ drawer = false }: { drawer?: boolean }) {
             item => item.name === 'Food'
           )!.id
           dispatch(
-            core.budgets.set([
+            core.budgets.setOwnAssigned([
               { id, month: '2026-02', value: 321 },
-              { id, month: '2026-03', value: 0 },
+              { id, month: '2026-03', value: overspent ? -10000 : 0 },
+              { id, month: '2026-04', value: 500 },
             ])
           )
           dispatch(
@@ -111,6 +118,50 @@ export const DirectActionsAndUndo: Story = {
         expect(canvas.getByLabelText('Current data').textContent).toBe(before)
       )
       expect(canvas.getByLabelText('Pending actions')).toHaveTextContent(
+        String(pending)
+      )
+    }
+  },
+}
+
+export const ConfirmedActionsAndUndo: Story = {
+  render: () => (
+    <MonthProvider>
+      <Harness overspent />
+    </MonthProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Prepare budgets' })
+    )
+    for (const [trigger, confirmation] of [
+      [/^Cover Overspending/, 'Cover Overspending'],
+      [/^Reset all leftovers$/, 'Reset leftovers'],
+    ] as const) {
+      const before = canvas.getByLabelText('Current data').textContent
+      const pending = Number(
+        canvas.getByLabelText('Pending actions').textContent
+      )
+      await userEvent.click(canvas.getByRole('button', { name: trigger }))
+      const dialog = await body.findByRole('dialog')
+      expect(canvas.getByLabelText('Current data').textContent).toBe(before)
+      await userEvent.click(
+        within(dialog).getByRole('button', { name: confirmation })
+      )
+      await waitFor(() =>
+        expect(canvas.getByLabelText('Pending actions').textContent).toBe(
+          String(pending + 1)
+        )
+      )
+      expect(canvas.getByLabelText('Current data').textContent).not.toBe(before)
+      await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+      await userEvent.click(canvas.getByRole('button', { name: 'Undo' }))
+      await waitFor(() =>
+        expect(canvas.getByLabelText('Current data').textContent).toBe(before)
+      )
+      expect(canvas.getByLabelText('Pending actions').textContent).toBe(
         String(pending)
       )
     }

@@ -4,9 +4,39 @@ import {
   parseISO,
 } from 'date-fns'
 import type { TISODate } from './primitives'
-import { differenceInCalendarMonths, parseDate, toISODate } from './date'
+import {
+  differenceInCalendarMonths,
+  parseDate,
+  toISODate,
+  toISOMonth,
+  previousMonth,
+  isISOMonth,
+} from './date'
 
 const isoDates = (...dates: string[]) => dates as TISODate[]
+
+describe('month validation and arithmetic', () => {
+  it.each(['2026-01', '2026-12', '2000-02'])('accepts %s', month => {
+    expect(isISOMonth(month)).toBe(true)
+  })
+  it.each([
+    '2026-00',
+    '2026-13',
+    '2026-1',
+    'x2026-01',
+    '2026-01-01',
+    '',
+    null,
+    undefined,
+    202601,
+  ])('rejects %s', month => {
+    expect(isISOMonth(month)).toBe(false)
+  })
+  it('crosses year and DST boundaries using local month starts', () => {
+    expect(toISOMonth(previousMonth('2026-01'))).toBe('2025-12')
+    expect(toISODate(previousMonth('2026-03-31'))).toBe('2026-02-01')
+  })
+})
 
 // The internal date helpers replaced date-fns. These tests pin the behaviors
 // that are easy to get wrong without it.

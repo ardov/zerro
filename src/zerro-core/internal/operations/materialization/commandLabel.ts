@@ -18,6 +18,17 @@
  */
 export const commandVerbs = [
   'budget-set',
+  'budget-goals-funded',
+  'budget-overspending-covered',
+  'budget-restarted',
+  'budget-copied',
+  'budget-goal-assigned',
+  'budget-previous-assignment-set',
+  'budget-funds-moved',
+  'budget-surplus-released',
+  'budget-average-spending-assigned',
+  'budget-previous-spending-assigned',
+  'budget-children-assigned',
   'goal-set',
   'fx-rates-set',
   'fx-rates-reset',
