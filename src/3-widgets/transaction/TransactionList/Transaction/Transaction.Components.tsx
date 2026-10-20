@@ -3,6 +3,11 @@ import type { FC, ReactNode } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/6-shared/ui/shadcn/utils'
+import {
+  IncomeDebtIcon,
+  OutcomeDebtIcon,
+  TransferIcon,
+} from '@/6-shared/ui/Icons'
 import { TagIcon } from '@/6-shared/ui/TagIcon'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useAppSelector } from '@/store'
@@ -60,11 +65,11 @@ export const Symbol: FC<SymbolProps> = ({
       case core.transactions.TrType.Outcome:
         return { symbol: tag.symbol, color: tag.colorHEX }
       case core.transactions.TrType.Transfer:
-        return { symbol: '↔️' }
+        return { symbol: <TransferIcon size={24} /> }
       case core.transactions.TrType.OutcomeDebt:
-        return { symbol: '⬅️' }
+        return { symbol: <OutcomeDebtIcon size={24} /> }
       case core.transactions.TrType.IncomeDebt:
-        return { symbol: '➡️' }
+        return { symbol: <IncomeDebtIcon size={24} /> }
       default:
         return { symbol: '' }
     }

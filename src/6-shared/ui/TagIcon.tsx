@@ -1,6 +1,10 @@
 import './coloredSurface.css'
 import { CategorySymbol } from './CategoryIcon'
-import type { ComponentPropsWithoutRef, CSSProperties } from 'react'
+import type {
+  ComponentPropsWithoutRef,
+  CSSProperties,
+  ReactElement,
+} from 'react'
 import { cn } from './shadcn/utils'
 import { getContrastText } from '@/6-shared/helpers/color'
 import { Checkbox, type CheckboxProps } from './kit/Checkbox'
@@ -9,7 +13,7 @@ export type TagIconProps = Omit<
   ComponentPropsWithoutRef<'div'>,
   'children' | 'color' | 'onChange'
 > & {
-  symbol: string
+  symbol: string | ReactElement
   color?: string | null
   size?: 's' | 'm'
   onCheckedChange?: CheckboxProps['onCheckedChange']
@@ -71,15 +75,20 @@ export function TagIcon(props: TagIconProps) {
         } as CSSProperties
       }
     >
-      <CategorySymbol
-        symbol={symbol}
-        size={size}
+      <span
+        aria-hidden
         className={cn(
-          'transition-opacity duration-200',
+          'flex items-center justify-center transition-opacity duration-200',
           contentIsHidden ? 'opacity-0' : 'opacity-100',
           isInteractive ? 'group-hover:opacity-0' : 'group-hover:opacity-100'
         )}
-      />
+      >
+        {typeof symbol === 'string' ? (
+          <CategorySymbol symbol={symbol} size={size} />
+        ) : (
+          symbol
+        )}
+      </span>
       {onCheckedChange && (
         <Checkbox
           color="currentColor"

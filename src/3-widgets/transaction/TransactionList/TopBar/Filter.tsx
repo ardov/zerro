@@ -7,7 +7,7 @@ import { Chip } from '@/6-shared/ui/kit/Chip'
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import { Menu } from '@/6-shared/ui/kit/Menu'
 import { AnimatedItem } from '@/6-shared/ui/kit/AnimatedItem'
-import { AddIcon, FilterListIcon } from '@/6-shared/ui/Icons'
+import { AddFilterIcon } from '@/6-shared/ui/Icons'
 import { core } from '@/zerro-core/redux'
 import { useAppSelector } from '@/store'
 import { TransactionCreateButton } from '../../TransactionCreateButton'
@@ -105,7 +105,7 @@ export default function Filter({
               variant="ghost"
               label={t('addFilter')}
             >
-              <AddIcon />
+              <AddFilterIcon />
             </IconButton>
           ) : (
             <Chip
@@ -113,7 +113,7 @@ export default function Filter({
                 addRef.current = node
               }}
               variant="outline-draft"
-              start={<FilterListIcon />}
+              start={<AddFilterIcon />}
               onClick={() => {}}
             >
               {t('addFilter')}

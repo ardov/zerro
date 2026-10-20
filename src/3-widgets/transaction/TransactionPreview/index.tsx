@@ -20,7 +20,7 @@ import {
   NotesIcon,
   MoneyInIcon,
   MoneyOutIcon,
-  ArrowDownwardIcon,
+  TransferDirectionIcon,
 } from '@/6-shared/ui/Icons'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { formatTransactionTimestamp } from '@/6-shared/helpers/date'
@@ -481,7 +481,7 @@ const TransactionEditor = ({
                 onClick={() => commit(swapTransferSides(draft))}
                 className="rounded-full"
               >
-                <ArrowDownwardIcon />
+                <TransferDirectionIcon />
               </IconButton>
             </div>
           </div>

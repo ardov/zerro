@@ -14,6 +14,10 @@
  */
 import {
   ArrowDown,
+  ArrowBigDown,
+  ArrowRightToLine,
+  ArrowLeftFromLine,
+  ArrowRightLeft,
   ArrowLeft,
   ArrowLeftRight,
   ArrowRight,
@@ -41,6 +45,7 @@ import {
   Eye,
   Flag,
   Funnel,
+  ListFilter,
   Globe,
   GripVertical,
   Heart,
@@ -107,6 +112,7 @@ export const RestoreFromTrashIcon = createIcon(
 )
 export const MergeTypeIcon = createIcon(Merge, 'MergeTypeIcon')
 export const FilterListIcon = createIcon(Funnel, 'FilterListIcon')
+export const AddFilterIcon = createIcon(ListFilter, 'AddFilterIcon')
 export const DragIndicatorIcon = createIcon(GripVertical, 'DragIndicatorIcon')
 /** Opens the rest of what can be done to something. */
 export const MoreVertIcon = createIcon(EllipsisVertical, 'MoreVertIcon')
@@ -120,6 +126,14 @@ export const ArrowBackIcon = createIcon(ArrowLeft, 'ArrowBackIcon')
 export const ArrowForwardIcon = createIcon(ArrowRight, 'ArrowForwardIcon')
 export const ArrowUpwardIcon = createIcon(ArrowUp, 'ArrowUpwardIcon')
 export const ArrowDownwardIcon = createIcon(ArrowDown, 'ArrowDownwardIcon')
+
+export const TransferDirectionIcon = createIcon(
+  ArrowBigDown,
+  'TransferDirectionIcon'
+)
+export const TransferIcon = createIcon(ArrowRightLeft, 'TransferIcon')
+export const IncomeDebtIcon = createIcon(ArrowRightToLine, 'IncomeDebtIcon')
+export const OutcomeDebtIcon = createIcon(ArrowLeftFromLine, 'OutcomeDebtIcon')
 
 // Money and its parts
 export const AccountBalanceIcon = createIcon(House, 'AccountBalanceIcon')
