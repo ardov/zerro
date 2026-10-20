@@ -183,7 +183,7 @@ export const VirtualRowsAndSurface: Story = {
       getComputedStyle(
         canvasElement.querySelector('.transaction-filter-surface')!
       ).backdropFilter
-    ).toBe('blur(2px)')
+    ).toBe('blur(2px) saturate(1.2)')
     await expect(getComputedStyle(viewport).paddingBottom).toBe('40px')
     await expect(chip).not.toBeVisible()
     viewport.scrollTop = 150
