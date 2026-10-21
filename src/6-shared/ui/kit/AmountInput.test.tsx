@@ -70,7 +70,7 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     await user.clear(input)
     await user.type(input, '12000+3000÷2')
     expect(input).toHaveValue('12\u00a0000+3\u00a0000/2')
-    expect(screen.getByTestId('amount')).toHaveTextContent(/^13500$/)
+    expect(screen.getByTestId('amount').textContent).toBe('13500')
     await user.keyboard('{Enter}')
     expect(input).toHaveValue('13\u00a0500')
     expect(input).toHaveFocus()
@@ -89,7 +89,7 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     await user.clear(input)
     await user.type(input, '12,50{Enter}')
     expect(input).toHaveValue('12,50')
-    expect(screen.getByTestId('amount')).toHaveTextContent(/^12.5$/)
+    expect(screen.getByTestId('amount').textContent).toBe('12.5')
   })
 
   it('reverts invalid arithmetic to the last valid result on Enter or blur', async () => {
@@ -99,7 +99,7 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     const input = screen.getByRole('textbox', { name: 'Amount' })
     await user.clear(input)
     await user.type(input, '12/0')
-    expect(screen.getByTestId('amount')).toHaveTextContent(/^12$/)
+    expect(screen.getByTestId('amount').textContent).toBe('12')
     await user.keyboard('{Enter}')
     expect(onEnter).toHaveBeenLastCalledWith(12)
     expect(input).toHaveValue('12')
@@ -140,7 +140,7 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     expect(input).toHaveFocus()
     expect(input).toHaveValue('12\u00a0000*3\u00a0000')
     expect(input.selectionStart).toBe(7)
-    expect(screen.getByTestId('amount')).toHaveTextContent(/^36000000$/)
+    expect(screen.getByTestId('amount').textContent).toBe('36000000')
   })
 
   it('retains the selection when reaching operator buttons by keyboard', async () => {
@@ -234,7 +234,7 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     await user.type(input, '12345')
     await user.keyboard('{Control>}z{/Control}')
     expect(input).toHaveValue('1\u00a0234')
-    expect(screen.getByTestId('amount')).toHaveTextContent(/^1234$/)
+    expect(screen.getByTestId('amount').textContent).toBe('1234')
     await user.keyboard('{Control>}{Shift>}z{/Shift}{/Control}')
     expect(input).toHaveValue('12\u00a0345')
     input.setSelectionRange(2, 2)
@@ -242,7 +242,7 @@ describe.each([AmountInput, AmountInlineField])('%s', Control => {
     expect(input).toHaveValue('12+345')
     await user.keyboard('{Meta>}z{/Meta}')
     expect(input).toHaveValue('12\u00a0345')
-    expect(screen.getByTestId('amount')).toHaveTextContent(/^12345$/)
+    expect(screen.getByTestId('amount').textContent).toBe('12345')
   })
 
   it.each(['disabled', 'readOnly'] as const)(
