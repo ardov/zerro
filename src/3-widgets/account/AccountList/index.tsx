@@ -4,7 +4,7 @@ import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import { Collapse } from '@/6-shared/ui/kit/Collapse'
-import { ListRowButton } from '@/6-shared/ui/kit/ListRow'
+import { ListRowButton, type ListRowSize } from '@/6-shared/ui/kit/ListRow'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useToggle } from '@/6-shared/hooks/useToggle'
 import type { TFxAmount } from '@/6-shared/types'
@@ -14,7 +14,13 @@ import { toISOMonth } from '@/6-shared/helpers/date'
 import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import { Account } from './components'
 
-export default function AccountList({ className = '' }) {
+export default function AccountList({
+  className = '',
+  size = 'sm',
+}: {
+  className?: string
+  size?: ListRowSize
+}) {
   const { t } = useTranslation('accounts')
   const toDisplay = core.currency.useToDisplay(toISOMonth(new Date()))
   const inBudget = core.accounts
@@ -42,6 +48,7 @@ export default function AccountList({ className = '' }) {
     <div className={className}>
       <div className="relative flex flex-col py-2">
         <BalanceSubheader
+          size={size}
           name={
             <Tooltip content={t('inBalanceDescription')}>
               <span>{t('inBalance')}</span>
@@ -50,13 +57,14 @@ export default function AccountList({ className = '' }) {
           amount={getTotal(inBudget)}
         />
         {inBudgetActive.map(acc => (
-          <Account key={acc.id} account={acc} />
+          <Account key={acc.id} account={acc} size={size} />
         ))}
-        <ArchivedList accs={inBudgetArchived} />
+        <ArchivedList accs={inBudgetArchived} size={size} />
       </div>
 
       <div className="relative flex flex-col py-2">
         <BalanceSubheader
+          size={size}
           name={
             <Tooltip content={t('otherDescription')}>
               <span>{t('other')}</span>
@@ -65,17 +73,20 @@ export default function AccountList({ className = '' }) {
           amount={getTotal(savings)}
         />
         {savingsActive.map(acc => (
-          <Account key={acc.id} account={acc} />
+          <Account key={acc.id} account={acc} size={size} />
         ))}
-        <ArchivedList accs={savingsArchived} />
+        <ArchivedList accs={savingsArchived} size={size} />
       </div>
     </div>
   )
 }
 
-const ArchivedList: FC<{ accs: core.accounts.TAccountPopulated[] }> = props => {
+const ArchivedList: FC<{
+  accs: core.accounts.TAccountPopulated[]
+  size: ListRowSize
+}> = props => {
   const { t } = useTranslation('accounts')
-  const { accs } = props
+  const { accs, size } = props
   const month = toISOMonth(new Date())
   const toDisplay = core.currency.useToDisplay(month)
   const [visible, toggleVisibility] = useToggle()
@@ -89,12 +100,12 @@ const ArchivedList: FC<{ accs: core.accounts.TAccountPopulated[] }> = props => {
       <Collapse open={visible}>
         <div className="relative flex flex-col py-2">
           {accs.map(acc => (
-            <Account key={acc.id} account={acc} />
+            <Account key={acc.id} account={acc} size={size} />
           ))}
         </div>
       </Collapse>
       <ListRowButton
-        size="sm"
+        size={size}
         className="text-ui-link"
         aria-expanded={visible}
         onClick={toggleVisibility}

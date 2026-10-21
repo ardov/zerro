@@ -18,8 +18,7 @@ import {
   panelWidths,
   useAccountsPanelFits,
 } from '@/6-shared/ui/layout/panelWidths'
-import AccountList from '@/3-widgets/account/AccountList'
-import { DebtorList } from '@/3-widgets/DebtorList'
+import { AccountsPanel } from '@/3-widgets/account/AccountsPanel'
 
 import { useTransactionsPageView } from './useTransactionsPageView'
 
@@ -48,16 +47,7 @@ export default function TransactionsView() {
       <title>{`${t('pageTitle')} | Zerro`}</title>
       <meta name="description" content={t('pageDescription')} />
       <link rel="canonical" href="https://zerro.app/transactions" />
-      {accountsPanelFits && (
-        <Panel
-          className="shrink-0"
-          style={{ width: panelWidths.accounts }}
-          contentClassName="px-1 py-2"
-        >
-          <AccountList />
-          <DebtorList />
-        </Panel>
-      )}
+      {accountsPanelFits && <AccountsPanel />}
 
       <Panel contentScrolls className="flex min-w-0 flex-1">
         <TransactionList

@@ -4,7 +4,7 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import type { core } from '@/zerro-core/redux'
 
 import type { ComponentPropsWithoutRef } from 'react'
-import { ListRowButton } from '@/6-shared/ui/kit/ListRow'
+import { ListRowButton, type ListRowSize } from '@/6-shared/ui/kit/ListRow'
 import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { Amount } from '@/6-shared/ui/Amount'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
@@ -17,11 +17,11 @@ import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
 import { AccountIcon } from '../AccountIcon'
 
 export const Account: FC<
-  { account: core.accounts.TAccountPopulated } & Omit<
+  { account: core.accounts.TAccountPopulated; size?: ListRowSize } & Omit<
     ComponentPropsWithoutRef<'button'>,
     'children'
   >
-> = ({ account, className, ...rest }) => {
+> = ({ account, className, size = 'sm', ...rest }) => {
   const transactionDrawer = useTransactionDrawer()
   const ask = useAsk()
   const showTransactions = useCallback(
@@ -41,7 +41,7 @@ export const Account: FC<
   })
   return (
     <ListRowButton
-      size="sm"
+      size={size}
       className={className}
       {...rest}
       {...propsToPass}

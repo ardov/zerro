@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { core } from '@/zerro-core/redux'
 import type { TFxAmount } from '@/6-shared/types'
 import { toISOMonth } from '@/6-shared/helpers/date'
-import { ListRowHeader } from '@/6-shared/ui/kit/ListRow'
+import { ListRowHeader, type ListRowSize } from '@/6-shared/ui/kit/ListRow'
 import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { DisplayAmount } from './DisplayAmount'
@@ -12,17 +12,19 @@ export function BalanceSubheader({
   name,
   amount,
   className,
+  size = 'sm',
   ...props
 }: ComponentPropsWithoutRef<'div'> & {
   name: ReactNode
   amount: TFxAmount
+  size?: ListRowSize
 }) {
   const month = toISOMonth(new Date())
   const toDisplay = core.currency.useToDisplay(month)
   const isNegative = toDisplay(amount) < 0
   return (
     <ListRowHeader
-      size="sm"
+      size={size}
       className={cn('sticky top-0 z-[1] flex bg-ui-card', className)}
       {...props}
     >

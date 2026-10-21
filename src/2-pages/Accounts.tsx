@@ -9,9 +9,9 @@ export default function Accounts() {
       <title>{`${t('pageTitle')} | Zerro`}</title>
       <meta name="description" content={t('pageDescription')} />
       <link rel="canonical" href="https://zerro.app/accounts" />
-      <div className="mx-auto max-w-[320px] p-4">
-        <AccountList />
-        <DebtorList />
+      <div className="mx-auto w-full max-w-[500px] p-4">
+        <AccountList size="lg" />
+        <DebtorList size="lg" />
       </div>
     </>
   )

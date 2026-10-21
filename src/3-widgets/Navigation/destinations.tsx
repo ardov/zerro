@@ -30,7 +30,6 @@ export function useDestinations() {
   const destinations: TDestination[] = [
     { path: '/budget', label: t('budget'), icon: <AccountBalanceIcon /> },
     { path: '/transactions', label: t('transactions'), icon: <SyncAltIcon /> },
-    { path: '/stats', label: t('stats'), icon: <BarChartIcon /> },
   ]
   if (!accountsPanelFits)
     destinations.push({
@@ -38,6 +37,11 @@ export function useDestinations() {
       label: t('accounts'),
       icon: <AccountBalanceWalletIcon />,
     })
+  destinations.push({
+    path: '/stats',
+    label: t('stats'),
+    icon: <BarChartIcon />,
+  })
   if (!bottomBar)
     destinations.push({
       path: '/about',

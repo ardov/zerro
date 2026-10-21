@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import AccountList from './AccountList'
+import Accounts from '@/2-pages/Accounts'
 import { DebtorList } from '@/3-widgets/DebtorList'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { Account } from './AccountList/components'
@@ -145,4 +146,35 @@ export const AccountInteractions: Story = {
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(menu).not.toBeInTheDocument())
   },
+}
+
+export const AccountsPage: Story = {
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <div data-testid="accounts-page">
+      <Accounts />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const host = canvas.getByTestId('accounts-page')
+    const content = host.firstElementChild!
+    expect(content.getBoundingClientRect().width).toBe(
+      Math.min(500, host.clientWidth)
+    )
+    expect(host.scrollWidth).toBeLessThanOrEqual(host.clientWidth)
+    for (const row of within(content as HTMLElement).getAllByRole('button')) {
+      expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(48)
+      expect(row.scrollWidth).toBeLessThanOrEqual(row.clientWidth)
+    }
+    expect(
+      canvas.getByRole('button', { name: /Cash USD/ }).getBoundingClientRect()
+        .height
+    ).toBe(48)
+  },
+}
+
+export const AccountsPageMobile: Story = {
+  ...AccountsPage,
+  globals: { viewport: { value: 'iphone13' } },
 }

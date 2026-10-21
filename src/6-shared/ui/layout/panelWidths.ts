@@ -2,17 +2,19 @@ import { useMediaQueryValue } from '@/6-shared/hooks/useMediaQueryValue'
 
 /** Minimum widths of the rail, the canvas gap and every panel, in pixels.
  *
- * The only place a page's layout thresholds come from: a page asks whether
+ * The shared home for page layout thresholds: a page asks whether
  * the window fits the rail and a set of panels side by side, and the answer
  * moves whenever one of these numbers does. */
 export const panelWidths = {
   rail: 48,
   /** The canvas padding above, below and after panels, and the gap between them. */
   gap: 8,
-  accounts: 240,
+  accounts: 280,
   transactionList: 400,
   transactionDetail: 360,
   envelopeList: 480,
+  /** An 800px table with 24px of room on either side before adding accounts. */
+  envelopeListComfortable: 848,
   monthOverview: 360,
 } as const
 
@@ -31,4 +33,13 @@ export function useWindowFits(...panels: number[]) {
 /** Whether the accounts panel fits beside the transaction list. */
 export function useAccountsPanelFits() {
   return useWindowFits(panelWidths.accounts, panelWidths.transactionList)
+}
+
+/** Budgets keep extra room for the envelope table before adding accounts. */
+export function useBudgetAccountsPanelFits() {
+  return useWindowFits(
+    panelWidths.accounts,
+    panelWidths.envelopeListComfortable,
+    panelWidths.monthOverview
+  )
 }

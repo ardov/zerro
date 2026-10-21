@@ -2,21 +2,23 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import type { FC } from 'react'
 
 import type { ComponentPropsWithoutRef } from 'react'
-import { ListRowButton } from '@/6-shared/ui/kit/ListRow'
+import { ListRowButton, type ListRowSize } from '@/6-shared/ui/kit/ListRow'
 import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import type { TFxCode } from '@/6-shared/types'
 import { Amount } from '@/6-shared/ui/Amount'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 
 export const Debtor: FC<
-  { name: string; currency: TFxCode; balance: number } & Omit<
-    ComponentPropsWithoutRef<'button'>,
-    'children'
-  >
-> = ({ name, currency, balance, className, ...rest }) => {
+  {
+    name: string
+    currency: TFxCode
+    balance: number
+    size?: ListRowSize
+  } & Omit<ComponentPropsWithoutRef<'button'>, 'children'>
+> = ({ name, currency, balance, className, size = 'sm', ...rest }) => {
   return (
     <ListRowButton
-      size="sm"
+      size={size}
       className={className}
       {...rest}
       end={

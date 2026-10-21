@@ -39,6 +39,11 @@ export const MobileBottomNavigation: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const nav = canvas.getByRole('navigation')
+    expect(
+      within(nav)
+        .getAllByRole('link')
+        .map(link => link.getAttribute('href'))
+    ).toEqual(['/budget', '/transactions', '/accounts', '/stats'])
     const primary = getComputedStyle(canvas.getByTestId('primary')).color
     const secondary = getComputedStyle(canvas.getByTestId('secondary')).color
     const checkColors = () => {

@@ -1,5 +1,6 @@
 import { BalanceSubheader } from '@/3-widgets/BalanceSubheader'
 import { useTranslation } from 'react-i18next'
+import type { ListRowSize } from '@/6-shared/ui/kit/ListRow'
 import { Debtor } from './components'
 import { addFxAmount, isZero } from '@/6-shared/helpers/money'
 import { keys } from '@/6-shared/helpers/keys'
@@ -16,7 +17,13 @@ type TDebtorInfo = {
   currency: TFxCode
 }
 
-export function DebtorList({ className = '' }) {
+export function DebtorList({
+  className = '',
+  size = 'sm',
+}: {
+  className?: string
+  size?: ListRowSize
+}) {
   const { t } = useTranslation('common')
   const debtors = useAppSelector(core.debtors.selectAll)
   const openTransactions = useTransactionDrawer()
@@ -64,9 +71,10 @@ export function DebtorList({ className = '' }) {
     <div className={className}>
       {!!iOweList.length && (
         <div className="relative flex flex-col py-2">
-          <BalanceSubheader name={t('iOwe')} amount={totalOwe} />
+          <BalanceSubheader size={size} name={t('iOwe')} amount={totalOwe} />
           {iOweList.map(d => (
             <Debtor
+              size={size}
               key={d.id + d.currency}
               name={d.name}
               currency={d.currency}
@@ -79,9 +87,14 @@ export function DebtorList({ className = '' }) {
 
       {!!iLentList.length && (
         <div className="relative flex flex-col py-2">
-          <BalanceSubheader name={t('iAmOwed')} amount={totalLent} />
+          <BalanceSubheader
+            size={size}
+            name={t('iAmOwed')}
+            amount={totalLent}
+          />
           {iLentList.map(d => (
             <Debtor
+              size={size}
               key={d.id + d.currency}
               name={d.name}
               currency={d.currency}

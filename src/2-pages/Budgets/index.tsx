@@ -4,7 +4,12 @@ import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 
 import { Panel } from '@/6-shared/ui/layout/Panel'
-import { panelWidths, useWindowFits } from '@/6-shared/ui/layout/panelWidths'
+import {
+  panelWidths,
+  useBudgetAccountsPanelFits,
+  useWindowFits,
+} from '@/6-shared/ui/layout/panelWidths'
+import { AccountsPanel } from '@/3-widgets/account/AccountsPanel'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '@/6-shared/helpers/date'
@@ -79,6 +84,7 @@ const BudgetLayout: FC<{
   mainContent: ReactElement
 }> = props => {
   const { mainContent } = props
+  const accountsPanelFits = useBudgetAccountsPanelFits()
   const monthOverviewFits = useWindowFits(
     panelWidths.envelopeList,
     panelWidths.monthOverview
@@ -86,6 +92,7 @@ const BudgetLayout: FC<{
 
   return (
     <>
+      {accountsPanelFits && <AccountsPanel />}
       <Panel className="min-w-0 grow" contentClassName="flex justify-center">
         {mainContent}
       </Panel>
