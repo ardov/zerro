@@ -89,8 +89,9 @@ const RefreshButton: FC<RefreshButtonProps> = props => {
       <IconButton
         onClick={handleClick}
         label={label}
-        variant="ghost"
+        variant={changedNum > 0 ? 'primary' : 'ghost'}
         size="sm"
+        shape="circle"
         {...props}
       >
         {components[state]}

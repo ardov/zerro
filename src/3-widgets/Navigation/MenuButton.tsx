@@ -16,6 +16,7 @@ export const MenuButton: FC<MenuButtonProps> = props => {
     <IconButton
       variant="ghost"
       size="sm"
+      shape="circle"
       label={t('settings')}
       onClick={() => ask(<SettingsMenu />)}
       {...props}

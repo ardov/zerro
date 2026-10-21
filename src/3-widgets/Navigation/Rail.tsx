@@ -16,7 +16,7 @@ export const Rail: FC = () => {
   return (
     <nav
       aria-label={t('main')}
-      className="flex h-full shrink-0 flex-col items-center gap-2 py-2"
+      className="flex h-full shrink-0 flex-col items-center gap-2 py-3"
       style={{ width: panelWidths.rail }}
     >
       <Link
@@ -33,9 +33,9 @@ export const Rail: FC = () => {
         ))}
       </ul>
 
-      <div className="flex flex-col items-center gap-1">
-        <RefreshButton tooltipSide="right" />
+      <div className="flex flex-col items-center gap-2">
         <MenuButton tooltipSide="right" />
+        <RefreshButton tooltipSide="right" />
       </div>
     </nav>
   )
