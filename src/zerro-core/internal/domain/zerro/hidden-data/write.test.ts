@@ -55,6 +55,7 @@ describe('hidden data write codecs', () => {
         title: '🤖 [Zerro Data]',
         user: 1,
         instrument: 2,
+        balanceCorrectionType: 'disabled',
       }),
     ])
     expect(patch.reminder).toEqual([

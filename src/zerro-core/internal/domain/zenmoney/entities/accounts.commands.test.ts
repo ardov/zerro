@@ -76,9 +76,38 @@ describe('zenmoney account commands', () => {
         user: 1,
         instrument: 2,
         title: 'Cash',
+        balanceCorrectionType: 'disabled',
       })
     )
   })
+
+  it.each([
+    { enableCorrection: false, expected: 'disabled' },
+    { enableCorrection: true, expected: 'request' },
+  ])(
+    'creates a valid correction mode with correction enabled=$enableCorrection',
+    ({ enableCorrection, expected }) => {
+      const data = makeStore({ user: { 1: { id: 1, parent: null } } as any })
+      const patch = compileCreateAccount(
+        data.user,
+        { title: 'Cash', instrument: 2, enableCorrection },
+        { now: () => 100, uuid: () => 'new' }
+      )
+      const next = applyPatch(data, patch)
+      expect(next.account.new.balanceCorrectionType).toBe(expected)
+    }
+  )
+
+  it.each([null, 'createCorrection', 'future-mode'])(
+    'preserves an explicit correction mode %s',
+    balanceCorrectionType => {
+      const account = makeCoreAccount(
+        { user: 1, instrument: 2, title: 'Cash', balanceCorrectionType },
+        { now: () => 100, uuid: () => 'new' }
+      )
+      expect(account.balanceCorrectionType).toBe(balanceCorrectionType)
+    }
+  )
 
   it('compiles sparse patches for existing accounts', () => {
     const data = makeStore({

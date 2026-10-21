@@ -22,12 +22,13 @@ export const logOut = (): AppThunk<Promise<void>> => async dispatch => {
 export const logIn =
   (endpoint: EndpointPreference): AppThunk =>
   async dispatch => {
-    // Clear all data before logging in
-    await dispatch(logOut())
-
-    // Get token
+    // Open the popup in the click handler, before any asynchronous storage work.
     const token = await zenmoney.authorize(endpoint)
     if (!token) return
+
+    // Reset the previous replica only after authorization succeeds, and finish
+    // persistence cleanup before installing the new session.
+    await dispatch(logOut())
 
     // Save token and endpoint preference
     zmPreferenceStorage.set(endpoint)

@@ -39,7 +39,11 @@ export async function authorize(preference: EndpointPreference) {
     `?client_id=${clientId}` +
     `&redirect_uri=${redirectUri}` +
     `&response_type=code`
-  openPopupWindow(authUrl, '_blank', 480, 640)
+  const popup = openPopupWindow(authUrl, '_blank', 480, 640)
+  if (!popup) {
+    window.alert('Please allow pop-ups for this site and try signing in again.')
+    return null
+  }
 
   /*
     - User logs in to Zenmoney
@@ -48,7 +52,7 @@ export async function authorize(preference: EndpointPreference) {
   */
 
   /* Listen to the authorization code from localStorage and return it */
-  const authCode = await waitForAuthCode()
+  const authCode = await waitForAuthCode(popup)
   if (!authCode) return null
 
   /* Request access token with the received code */
@@ -68,10 +72,6 @@ export async function authorize(preference: EndpointPreference) {
   const token = accessTokenData?.access_token
   if (!token) return null
 
-  /* Store the token and success preference */
-  // tokenStorage.set(token)
-  // zmEndpoints.set(preference)
-
   return token
 }
 
@@ -85,14 +85,21 @@ function setAuthCode(code: string) {
 }
 
 /** Listens to the authorization code from localStorage */
-function waitForAuthCode() {
+function waitForAuthCode(popup: Window) {
   return new Promise((resolve: (s?: string) => void) => {
+    function finish(code?: string) {
+      window.removeEventListener('storage', storageEventHandler)
+      window.clearInterval(closedTimer)
+      resolve(code)
+    }
+    const closedTimer = window.setInterval(() => {
+      if (popup.closed) finish()
+    }, 500)
     function storageEventHandler(e: StorageEvent) {
       if (e.key !== AUTH_CODE_KEY) return
       if (!e.newValue) return
-      window.removeEventListener('storage', storageEventHandler)
       window.localStorage.removeItem(AUTH_CODE_KEY)
-      resolve(e.newValue)
+      finish(e.newValue)
     }
     window.addEventListener('storage', storageEventHandler)
   })

@@ -48,8 +48,10 @@ describe('zerro account commands', () => {
         title: '🤖 [Zerro Data]',
         user: 1,
         instrument: 2,
+        balanceCorrectionType: 'disabled',
       }),
     ])
+    expect(next.account['data-account'].balanceCorrectionType).toBe('disabled')
     expect(next.account['data-account'].title).toBe('🤖 [Zerro Data]')
   })
 

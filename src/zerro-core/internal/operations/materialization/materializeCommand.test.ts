@@ -1005,6 +1005,7 @@ describe('materializeCommand', () => {
     })
     const account = makeAccount({
       id: 'new-account',
+      balanceCorrectionType: 'disabled',
       changed: 100,
       user: 1,
       instrument: 2,

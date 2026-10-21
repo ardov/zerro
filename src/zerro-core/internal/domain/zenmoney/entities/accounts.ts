@@ -202,7 +202,14 @@ export function makeAccount(
     inBalance: draft.inBalance ?? false,
     savings: draft.savings === undefined ? false : draft.savings,
     enableCorrection: draft.enableCorrection ?? false,
-    balanceCorrectionType: draft.balanceCorrectionType ?? null,
+    // New accounts need a mode accepted by ZenMoney. Preserve explicit legacy
+    // values when replaying or restoring a complete account.
+    balanceCorrectionType:
+      draft.balanceCorrectionType === undefined
+        ? draft.enableCorrection
+          ? 'request'
+          : 'disabled'
+        : draft.balanceCorrectionType,
     enableSMS: draft.enableSMS ?? false,
     archive: draft.archive ?? false,
     private: draft.private ?? false,

@@ -212,6 +212,12 @@ with null. These defaults describe those fixtures, not general client defaults.
 | `reminder`       | `id`, `changed`, `user`, `outcomeInstrument`, `outcomeAccount`, `tag`, `merchant`, `payee`, `comment`, `interval`, `step`, `points`, `startDate`, `endDate`                                                                                                                                      | `incomeInstrument: 2`, absent `incomeAccount` copies `outcomeAccount`, `notify: false`                                                                                                |
 | `reminderMarker` | `id`, `changed`, `user`, `outcomeInstrument`, `outcomeAccount`, `outcome`, `tag`, `merchant`, `payee`, `comment`, `date`, `reminder`, `state`                                                                                                                                                    | `incomeInstrument: 2`, absent `incomeAccount` copies `outcomeAccount`, `income: 0`, `notify: false`                                                                                   |
 
+Account writes reject `balanceCorrectionType: null`; omitting the field is
+not equivalent to sending null. The observed server default on omission is
+`request`. For locally created accounts, Zerro supplies `disabled` when
+correction is off and `request` when it is on. Explicit values in existing
+snapshots remain unchanged.
+
 Reminder income/outcome were not omitted because the zero-amount shape had
 returned HTTP 500. Their omission behavior is unknown.
 

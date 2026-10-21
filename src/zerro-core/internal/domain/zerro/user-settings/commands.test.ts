@@ -99,6 +99,7 @@ describe('user settings commands', () => {
     expect(patch.account).toEqual([
       makeAccount({
         id: 'data-account',
+        balanceCorrectionType: 'disabled',
         changed: 100,
         title: '🤖 [Zerro Data]',
         user: 1,
