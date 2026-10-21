@@ -60,7 +60,11 @@ Disabled controls use `opacity-ui-disabled` on the whole control.
 Interaction colors have distinct roles: `ui-highlight` is a subtle surface or
 hover layer, `ui-pressed` is a press layer, `ui-selected` is a persistent
 selection, and `ui-focus` is the keyboard focus outline. Selection and hover
-compose as separate layers. `focusable` supplies the standard focus outline.
+compose as separate layers in list controls such as Select. Budget and transaction
+rows use a single layer: selected rows keep `ui-selected` during hover and press;
+unselected rows use `ui-highlight` on hover, with no pressed fill or background
+transition. Nested buttons keep their own interaction states.
+`focusable` supplies the standard focus outline.
 
 Status text and icons use `ui-success`, `ui-warning`, `ui-error`, or `ui-link`
 for information. Solid status surfaces use `ui-{success,warning,info,error}-solid`

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { core } from '@/zerro-core/redux'
 import { useAppSelector } from '@/store'
 import { Transaction } from './Transaction'
+import { Accounts, Amounts } from './Transaction.Components'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { useTransactionPreview } from '@/3-widgets/global/TransactionPreviewDrawer'
 
@@ -48,6 +49,39 @@ export const Showcase: Story = {
         ))}
       </div>
     )
+  },
+  play: async ({ canvasElement }) => {
+    if (!('__vitest_browser_runner__' in window)) return
+    const { page } = await import('vitest/browser')
+    const rows = Array.from(
+      canvasElement.querySelectorAll<HTMLElement>('.transaction-line')
+    )
+      .filter((_, index) => index % 2 === 0)
+      .map(line => line.parentElement!.parentElement!)
+    const background = (row: HTMLElement) =>
+      getComputedStyle(row, '::before').backgroundColor
+    const selected = background(rows[1])
+    for (const row of rows.slice(0, 2)) {
+      const target = page.elementLocator(row)
+      await target.hover()
+      const hovered = background(row)
+      if (row === rows[1]) expect(hovered).toBe(selected)
+      let pressed = ''
+      row.addEventListener(
+        'mousedown',
+        () => {
+          pressed = background(row)
+        },
+        { once: true }
+      )
+      await target.click()
+      expect(pressed).toBe(hovered)
+      expect(background(row)).toBe(hovered)
+      expect(getComputedStyle(row, '::before').transitionDuration).toBe('0s')
+      expect(getComputedStyle(row, '::before').animationName).toBe('none')
+    }
+    await page.elementLocator(rows[0]).hover()
+    expect(background(rows[1])).toBe(selected)
   },
 }
 
@@ -127,5 +161,75 @@ export const TypeSwitchRegression: Story = {
       expect(canvas.getByTestId('type')).toHaveTextContent(/^transfer$/)
     )
     await expect(canvas.getByTestId('tags')).toHaveTextContent('')
+  },
+}
+
+export const DirectionSeparators: Story = {
+  render: function Render() {
+    const transactions = useAppSelector(core.transactions.selectAll)
+    const accounts = core.accounts.usePopulated()
+    const ids = Object.keys(accounts)
+    const tr = {
+      ...Object.values(transactions)[0],
+      outcomeAccount: ids[0],
+      incomeAccount: ids[1],
+      merchant: null,
+      payee: 'Counterparty',
+    }
+    return (
+      <div>
+        {[
+          core.transactions.TrType.Transfer,
+          core.transactions.TrType.IncomeDebt,
+          core.transactions.TrType.OutcomeDebt,
+        ].map(trType => (
+          <div key={trType} data-testid={trType}>
+            <Accounts tr={tr} trType={trType} onPayeeClick={() => {}} />
+          </div>
+        ))}
+        <div data-testid="equal-amounts">
+          <Amounts
+            tr={{
+              ...tr,
+              income: 10,
+              outcome: 10,
+              incomeInstrument: tr.outcomeInstrument,
+            }}
+            trType={core.transactions.TrType.Transfer}
+          />
+        </div>
+        <div data-testid="missing-account">
+          <Accounts
+            tr={{ ...tr, outcomeAccount: null }}
+            trType={core.transactions.TrType.OutcomeDebt}
+            onPayeeClick={() => {}}
+          />
+        </div>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    for (const type of ['transfer', 'incomeDebt', 'outcomeDebt']) {
+      const row = canvas.getByTestId(type)
+      const arrow = row.querySelector<SVGSVGElement>('svg')!
+      expect(arrow).toBeVisible()
+      expect(arrow.getBoundingClientRect().width).toBe(16)
+      expect(arrow.getBoundingClientRect().height).toBe(16)
+      // Lucide preserves the standard 1.5px stroke at 16px.
+      expect(arrow).toHaveAttribute('stroke-width', '2.25')
+      const before = arrow.previousElementSibling!.getBoundingClientRect()
+      const after = arrow.nextElementSibling!.getBoundingClientRect()
+      expect(arrow.getBoundingClientRect().left - before.right).toBeCloseTo(4)
+      expect(after.left - arrow.getBoundingClientRect().right).toBeCloseTo(4)
+      if (type !== 'transfer')
+        expect(
+          within(row).getByRole('button', { name: 'Counterparty' })
+        ).toBeVisible()
+    }
+    expect(canvas.getByTestId('equal-amounts').querySelector('svg')).toBeNull()
+    expect(
+      canvas.getByTestId('missing-account').querySelector('svg')
+    ).not.toBeVisible()
   },
 }

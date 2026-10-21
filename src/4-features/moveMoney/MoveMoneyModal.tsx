@@ -85,9 +85,9 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
       closeButton={false}
     >
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className="flex min-w-0 items-center justify-center gap-2">
           <EnvelopeChip envelope={sourceEnvelope} name={sourceName} />
-          <span className="mx-2 flex items-center">
+          <span className="mx-2 flex shrink-0 items-center">
             <ArrowForwardIcon />
           </span>
           <EnvelopeChip envelope={destinationEnvelope} name={destinationName} />
@@ -136,10 +136,22 @@ function EnvelopeChip({
   envelope?: core.envelopes.TPresentedEnvelope
   name: string
 }) {
+  const tags = useAppSelector(core.tags.selectPopulated)
+  const tag =
+    envelope?.type === core.envelopes.EnvType.Tag
+      ? tags[envelope.entityId]
+      : undefined
+  const hasSymbol =
+    envelope &&
+    (envelope.type !== core.envelopes.EnvType.Tag ||
+      (tag && (tag.icon || tag.name !== tag.title)))
   return (
     <Chip
+      className="min-w-10 shrink"
       color={envelope?.colorHex ?? undefined}
-      start={envelope ? <CategorySymbol symbol={envelope.symbol} /> : undefined}
+      start={
+        hasSymbol ? <CategorySymbol symbol={envelope.symbol} /> : undefined
+      }
     >
       {name}
     </Chip>

@@ -15,6 +15,8 @@ export type TTransactionProps = {
   isChecked: boolean
   isOpened: boolean
   isInSelectionMode: boolean
+  onFilterMerchant?: (id: string) => void
+  onSearchPayee?: (payee: string) => void
   // Actions
   onOpen?: (id: TTransactionId) => void
   onToggle?: (id: TTransactionId) => void
@@ -35,6 +37,8 @@ export const Transaction = React.memo(function Transaction(
     onOpen,
     onToggle,
     onContextMenu,
+    onFilterMerchant,
+    onSearchPayee,
   } = props
 
   const propsToPass = useContextMenu({
@@ -49,6 +53,12 @@ export const Transaction = React.memo(function Transaction(
   }
   const trType = getTrType(tr)
   const { deleted } = tr
+  const onPayeeClick =
+    tr.merchant && onFilterMerchant
+      ? () => onFilterMerchant(tr.merchant!)
+      : !tr.merchant && tr.payee && onSearchPayee
+        ? () => onSearchPayee(tr.payee!)
+        : undefined
 
   return (
     <div
@@ -56,9 +66,7 @@ export const Transaction = React.memo(function Transaction(
         'relative flex cursor-pointer p-3 text-ui-primary select-none [-webkit-touch-callout:none]',
         // The tinted box behind the row, which is a pseudo-element so that it
         // can sit under content the row's own padding does not cover.
-        "before:absolute before:inset-0 before:-z-10 before:rounded-lg before:transition-all before:duration-100 before:ease-in-out before:content-['']",
-        // Arriving is animated, but reacting to the pointer is not.
-        'hover:before:transition-none active:before:bg-ui-pressed',
+        "before:absolute before:inset-0 before:-z-10 before:rounded-lg before:content-['']",
         isOpened
           ? 'before:bg-ui-selected'
           : 'before:bg-transparent hover:before:bg-ui-highlight',
@@ -73,8 +81,8 @@ export const Transaction = React.memo(function Transaction(
           <Amounts {...{ tr, trType }} />
         </div>
         <div className="transaction-line mt-1 flex text-body-sm text-ui-secondary">
-          <Info {...{ tr, trType }} />
-          <Accounts {...{ tr, trType }} />
+          <Info {...{ tr, trType, onPayeeClick }} />
+          <Accounts {...{ tr, trType, onPayeeClick }} />
         </div>
       </div>
     </div>

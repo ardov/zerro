@@ -34,6 +34,7 @@ type EnvelopeRowProps = {
   id: core.envelopes.TEnvelopeId
   month: TISOMonth
   isSelf?: boolean
+  isSelected?: boolean
   isDefaultVisible: boolean
   isLastVisibleChild?: boolean
   isExpanded?: boolean
@@ -114,6 +115,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
     id,
     month,
     isSelf,
+    isSelected,
     isDefaultVisible,
     isLastVisibleChild,
     isExpanded,
@@ -181,8 +183,14 @@ export const Row: FC<EnvelopeRowProps> = props => {
     >
       <SlideReveal enabled={isSmall} items={revealItems}>
         <TableRow
+          data-envelope-id={id}
+          data-selected={isSelected || undefined}
           className={cn(
-            'relative cursor-pointer transition-colors duration-100 hover:bg-ui-highlight active:bg-ui-pressed',
+            'relative isolate cursor-pointer',
+            'before:pointer-events-none before:absolute before:inset-0 before:-z-10',
+            isSelected
+              ? 'before:bg-ui-selected'
+              : 'before:bg-transparent hover:before:bg-ui-highlight',
             'hover:[&_.addGoal]:opacity-100 hover:[&_.addGoal]:transition-opacity hover:[&_.addGoal]:duration-300',
             '[&:not(:hover)_.addGoal]:opacity-0',
             isChild ? '[&>*]:py-1' : '[&>*]:py-2'

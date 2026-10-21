@@ -1,9 +1,10 @@
 import type { TTransaction } from '@/6-shared/types'
 import type { FC, ReactNode } from 'react'
-import React from 'react'
+import React, { Children, Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import {
+  ArrowForwardIcon,
   IncomeDebtIcon,
   OutcomeDebtIcon,
   TransferIcon,
@@ -186,20 +187,25 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
   }
 }
 
-type InfoProps = TrElementProps
+type InfoProps = TrElementProps & { onPayeeClick?: () => void }
 
-export const Info: FC<InfoProps> = ({ tr, trType }) => {
+export const Info: FC<InfoProps> = ({ tr, trType, onPayeeClick }) => {
   return (
     <InfoWrapper>
       {trType !== 'incomeDebt' && trType !== 'outcomeDebt' && (
-        <Payee payee={tr.payee} merchant={tr.merchant} />
+        <Payee payee={tr.payee} merchant={tr.merchant} onClick={onPayeeClick} />
       )}
       {!!tr.comment && <span title={tr.comment}>{tr.comment}</span>}
     </InfoWrapper>
   )
 }
 
-export const Accounts: FC<InfoProps> = ({ tr, trType, ...rest }) => {
+export const Accounts: FC<InfoProps> = ({
+  tr,
+  trType,
+  onPayeeClick,
+  ...rest
+}) => {
   switch (trType) {
     case 'income':
       return (
@@ -224,13 +230,21 @@ export const Accounts: FC<InfoProps> = ({ tr, trType, ...rest }) => {
       return (
         <AmountsWrapper type="transfer" {...rest}>
           <Account id={tr.outcomeAccount} />
-          <Payee payee={tr.payee} merchant={tr.merchant} />
+          <Payee
+            payee={tr.payee}
+            merchant={tr.merchant}
+            onClick={onPayeeClick}
+          />
         </AmountsWrapper>
       )
     case 'incomeDebt':
       return (
         <AmountsWrapper type="transfer" {...rest}>
-          <Payee payee={tr.payee} merchant={tr.merchant} />
+          <Payee
+            payee={tr.payee}
+            merchant={tr.merchant}
+            onClick={onPayeeClick}
+          />
           <Account id={tr.incomeAccount} />
         </AmountsWrapper>
       )
@@ -251,11 +265,24 @@ const Account: FC<{ id: string | null }> = ({ id, ...rest }) => {
 const Payee: FC<{
   payee: string | null
   merchant: string | null
-}> = ({ payee, merchant, ...rest }) => {
+  onClick?: () => void
+}> = ({ payee, merchant, onClick }) => {
   const merchants = core.merchants.useAll()
   if (!payee && !merchant) return null
   const name = (merchant && merchants[merchant]?.title) || payee
-  return <PayeeWrapper {...rest}>{name}</PayeeWrapper>
+  if (!onClick) return <span>{name}</span>
+  return (
+    <button
+      type="button"
+      className="relative cursor-pointer border-0 bg-transparent p-0 text-inherit hover:text-ui-primary focusable after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-current after:opacity-20"
+      onClick={event => {
+        event.stopPropagation()
+        onClick()
+      }}
+    >
+      {name}
+    </button>
+  )
 }
 
 /** Styles */
@@ -303,31 +330,33 @@ const amountColors = {
   outcome: 'text-ui-primary',
 }
 
-/** The amounts and, on a transfer, the arrow between them. `data-type` is what
- * `Transaction.css` puts that arrow in; it was a `type` attribute, which is
- * not one a `div` has. */
+/** Keep separators independent of whether a neighbour is text or a button. */
 const AmountsWrapper: FC<
   HTMLDivProps & { type: 'income' | 'outcome' | 'transfer' }
-> = ({ type, className, ...props }) => (
+> = ({ type, className, children, ...props }) => (
   <div
     {...props}
-    data-type={type}
-    className={cn('transaction-amounts', amountColors[type], className)}
-  />
+    className={cn(
+      'transaction-amounts inline-flex items-center gap-2',
+      amountColors[type],
+      className
+    )}
+  >
+    {Children.toArray(children).map((child, index) => (
+      <Fragment key={React.isValidElement(child) ? child.key : index}>
+        {type === 'transfer' && index > 0 && (
+          <ArrowForwardIcon size={16} className="transaction-direction -mx-1" />
+        )}
+        {child}
+      </Fragment>
+    ))}
+  </div>
 )
 
 const InfoWrapper: FC<HTMLDivProps> = props => (
-  <div {...props} className="[&>:not(:first-of-type)]:ml-2" />
+  <div {...props} className="[&>:not(:first-child)]:ml-2" />
 )
 
-/** A payee, underlined by a rule of its own rather than by
- * `text-decoration`, so that it can be fainter than the text above it. */
-const PayeeWrapper: FC<React.HTMLAttributes<HTMLSpanElement>> = props => (
-  <span
-    {...props}
-    className="relative hover:text-ui-primary after:absolute after:inset-x-0 after:bottom-0 after:z-[2] after:h-px after:bg-current after:opacity-20 after:transition-all after:duration-150 after:content-['']"
-  />
-)
 type ExchangeRateProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
   HTMLDivElement

@@ -62,7 +62,7 @@ export const NameCell: FC<{
         </EnvDraggable>
       )}
       <div
-        className={`flex min-w-0 shrink items-center justify-center ${isDefaultVisible ? 'opacity-100' : 'opacity-50'}`}
+        className={`flex min-w-0 shrink items-center justify-center ${comment ? 'max-w-[80%]' : ''} ${isDefaultVisible ? 'opacity-100' : 'opacity-50'}`}
       >
         <TagIcon
           symbol={isSelf ? '–' : symbol}
@@ -88,7 +88,7 @@ export const NameCell: FC<{
       {!!comment && (
         <TextFade
           title={comment}
-          className="shrink text-body italic text-ui-tertiary"
+          className="flex-1 text-body italic text-ui-tertiary"
         >
           {comment}
         </TextFade>

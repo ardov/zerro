@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { core } from '@/zerro-core/redux'
 import { MonthProvider, useMonth } from '@/2-pages/Budgets/MonthProvider'
-import { useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { MoveMoneyModal } from './MoveMoneyModal'
 
 const meta = {
@@ -19,12 +19,24 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-function AmountHarness() {
+function AmountHarness({ longNames = false }: { longNames?: boolean }) {
+  const dispatch = useAppDispatch()
+  const envelopes = useAppSelector(core.envelopes.selectAll)
+  const [id] = useState(
+    () =>
+      Object.values(envelopes).find(envelope => envelope.name === 'Food')!.id
+  )
+  const [otherId] = useState(
+    () =>
+      Object.values(envelopes).find(
+        envelope =>
+          envelope.id.startsWith('tag#') &&
+          envelope.id !== 'tag#null' &&
+          envelope.id !== id
+      )!.id
+  )
   const [month] = useMonth()
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
-  const id = Object.values(useAppSelector(core.envelopes.selectAll)).find(
-    envelope => envelope.name === 'Food'
-  )!.id
   const metrics = useAppSelector(core.activity.selectEnvelopeMetrics)[month][id]
   const [currency] = core.currency.useDisplayCurrency()
   const convert = useAppSelector(core.currency.selectConvertFx)
@@ -32,7 +44,26 @@ function AmountHarness() {
   const commands = useAppSelector(state => state.data.outbox.length)
   return (
     <>
-      <button type="button" onClick={event => setAnchor(event.currentTarget)}>
+      <button
+        type="button"
+        onClick={event => {
+          if (longNames) {
+            dispatch(
+              core.envelopes.rename(
+                id,
+                'Very long destination category for everyday expenses'
+              )
+            )
+            dispatch(
+              core.envelopes.rename(
+                otherId,
+                'Very long source category for savings'
+              )
+            )
+          }
+          setAnchor(event.currentTarget)
+        }}
+      >
         Open amount editor
       </button>
       <output data-testid="commands">{commands}</output>
@@ -40,7 +71,7 @@ function AmountHarness() {
       <MoveMoneyModal
         key={String(!!anchor)}
         month={month}
-        source="toBeAssigned"
+        source={longNames ? otherId : 'toBeAssigned'}
         destination={id}
         open={!!anchor}
         onClose={() => setAnchor(null)}
@@ -93,5 +124,42 @@ export const MoveMoneyAmountRegression: Story = {
 
 export const MobileMoveMoneyAmountRegression: Story = {
   ...MoveMoneyAmountRegression,
+  globals: { viewport: { value: 'iphone13' } },
+}
+
+export const LongCategoryNames: Story = {
+  render: () => (
+    <MonthProvider>
+      <AmountHarness longNames />
+    </MonthProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Open amount editor' })
+    )
+    const dialog = await body.findByRole('dialog')
+    const chips = Array.from(
+      dialog.querySelectorAll<HTMLElement>('[data-slot="chip"]')
+    )
+    expect(chips).toHaveLength(2)
+    await waitFor(() => {
+      const [source, destination] = chips.map(chip =>
+        chip.getBoundingClientRect()
+      )
+      expect(source.top).toBe(destination.top)
+      expect(source.width).toBeGreaterThanOrEqual(40)
+      expect(destination.width).toBeGreaterThanOrEqual(40)
+      expect(destination.right).toBeLessThanOrEqual(
+        dialog.getBoundingClientRect().right
+      )
+      for (const chip of chips)
+        expect(chip.querySelector('[data-overflow]')).not.toBeNull()
+    })
+  },
+}
+export const MobileLongCategoryNames: Story = {
+  ...LongCategoryNames,
   globals: { viewport: { value: 'iphone13' } },
 }

@@ -81,14 +81,14 @@ export const SearchAndMerchant: Story = {
       canvas.getByRole('combobox', { name: 'Lidl' })
     ).toBeInTheDocument()
     await expect(canvas.queryByRole('textbox')).toBeNull()
-    // Counterparty text is ordinary row content now: its tap opens the operation.
+    // Narrow screens keep the payee as ordinary row content.
     await userEvent.click(
       canvas
         .getAllByText('Lidl')
         .find(element => !element.closest('[data-slot="chip"]'))!
     )
     await expect(canvas.getByLabelText('Opened operation')).toHaveTextContent(
-      'lunch'
+      window.innerWidth < 900 ? 'lunch' : ''
     )
     await userEvent.click(canvas.getByRole('button', { name: 'Remove lunch' }))
     await waitFor(() =>
@@ -104,7 +104,7 @@ export const SearchAndMerchant: Story = {
       expect(canvas.queryByText('Lunch groceries')).toBeNull()
     )
     await expect(
-      canvas.getByRole('button', { name: 'Legacy café' })
+      canvas.getAllByRole('button', { name: 'Legacy café' })[0]
     ).toBeInTheDocument()
     await expect(canvas.queryByRole('textbox')).toBeNull()
   },
@@ -206,4 +206,36 @@ export const MobileDrawerScroll: Story = {
   tags: ['!dev', '!autodocs'],
   ...DrawerScroll,
   globals: { viewport: { value: 'zerro499' } },
+}
+
+export const DesktopMerchantClick: Story = {
+  globals: { viewport: { value: 'zerro900' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const comment = canvas.getByText('Lunch groceries')
+    expect(comment.previousElementSibling?.tagName).toBe('BUTTON')
+    expect(getComputedStyle(comment).marginLeft).toBe('8px')
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Lidl' })[0])
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Applied query')).toHaveTextContent(
+        'merchant'
+      )
+    )
+    expect(canvas.getByRole('combobox', { name: 'Lidl' })).toBeInTheDocument()
+    expect(canvas.getByLabelText('Opened operation')).toBeEmptyDOMElement()
+    expect(canvas.queryByText('Lunch elsewhere')).toBeNull()
+  },
+}
+
+export const MobileMerchantText: Story = {
+  globals: { viewport: { value: 'zerro899' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.queryByRole('button', { name: 'Lidl' })).toBeNull()
+    await userEvent.click(canvas.getAllByText('Lidl')[0])
+    expect(canvas.getByLabelText('Opened operation')).not.toBeEmptyDOMElement()
+    expect(canvas.getByLabelText('Applied query')).not.toHaveTextContent(
+      'merchant'
+    )
+  },
 }

@@ -11,6 +11,7 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { track } from '@/6-shared/analytics'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { useLocalDay } from '@/6-shared/hooks/useLocalDay'
 import { useDebounce } from '@/6-shared/hooks/useDebounce'
 
@@ -59,6 +60,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     className,
   } = props
 
+  const isMobile = useBreakpointDown('md')
   const dispatch = useAppDispatch()
   const [localQuery, setLocalQuery] =
     useState<core.transactions.TTransactionQuery>(() => ({
@@ -187,6 +189,10 @@ export const TransactionList: FC<TTransactionListProps> = props => {
         onOpen={onTrOpen}
         onToggle={toggleTransaction}
         onContextMenu={onContextMenu}
+        onFilterMerchant={
+          hideFilter || isMobile ? undefined : onFilterByMerchant
+        }
+        onSearchPayee={hideFilter || isMobile ? undefined : onSearchChange}
       />
     ),
     [
@@ -196,6 +202,10 @@ export const TransactionList: FC<TTransactionListProps> = props => {
       onTrOpen,
       toggleTransaction,
       onContextMenu,
+      hideFilter,
+      isMobile,
+      onFilterByMerchant,
+      onSearchChange,
     ]
   )
 

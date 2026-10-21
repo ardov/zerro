@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import Budgets from './index'
 import { panelWidths } from '@/6-shared/ui/layout/panelWidths'
 
@@ -81,5 +81,75 @@ export const WithAccountsPanel: Story = {
     expect(columns[1].getBoundingClientRect().width).toBe(848)
     expect(columns[2].getBoundingClientRect().width).toBe(360)
     expect(panels.scrollWidth).toBeLessThanOrEqual(panels.clientWidth)
+  },
+}
+
+export const SelectedCategory: Story = {
+  globals: { viewport: { value: 'belowAccounts' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const rows = Array.from(
+      canvasElement.querySelectorAll<HTMLElement>('[data-envelope-id]')
+    )
+    const first = rows[0]
+    const second = rows.find(
+      row => row.dataset.envelopeId !== first.dataset.envelopeId
+    )!
+    const name = (row: HTMLElement) =>
+      row.querySelector<HTMLElement>('[title]')!
+    const background = (row: HTMLElement) =>
+      getComputedStyle(row, '::before').backgroundColor
+
+    if ('__vitest_browser_runner__' in window) {
+      const { page } = await import('vitest/browser')
+      const target = page.elementLocator(name(first))
+      await target.hover()
+      const hover = background(first)
+      let pressed = ''
+      first.addEventListener(
+        'mousedown',
+        () => {
+          pressed = background(first)
+        },
+        { once: true }
+      )
+      await target.click()
+      expect(pressed).toBe(hover)
+    } else {
+      await userEvent.click(name(first))
+    }
+    await waitFor(() => expect(first).toHaveAttribute('data-selected'))
+    const selected = background(first)
+    expect(getComputedStyle(first, '::before').transitionDuration).toBe('0s')
+    expect(getComputedStyle(first, '::before').animationName).toBe('none')
+    expect(getComputedStyle(first, '::after').content).toBe('none')
+
+    if ('__vitest_browser_runner__' in window) {
+      const { page } = await import('vitest/browser')
+      await page
+        .elementLocator(canvas.getByRole('button', { name: 'Close' }))
+        .hover()
+      expect(background(first)).toBe(selected)
+      const target = page.elementLocator(name(first))
+      await target.hover()
+      expect(background(first)).toBe(selected)
+      let pressed = ''
+      first.addEventListener(
+        'mousedown',
+        () => {
+          pressed = background(first)
+        },
+        { once: true }
+      )
+      await target.click()
+      expect(pressed).toBe(selected)
+      expect(background(first)).toBe(selected)
+    }
+
+    await userEvent.click(name(second))
+    expect(first).not.toHaveAttribute('data-selected')
+    expect(second).toHaveAttribute('data-selected')
+    await userEvent.click(canvas.getByRole('button', { name: 'Close' }))
+    expect(second).not.toHaveAttribute('data-selected')
   },
 }

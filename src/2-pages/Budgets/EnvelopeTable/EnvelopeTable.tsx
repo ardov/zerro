@@ -18,6 +18,7 @@ import { useEnvRenderInfo } from './models/envRenderInfo'
 import { Footer } from './Footer'
 import { Group } from './Group'
 import { NewGroup } from './NewGroup'
+import { useSelectedEnvelope } from '../SideContent'
 
 type TagTableProps = {
   month: TISOMonth
@@ -39,6 +40,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     onShowTransactions,
   } = props
 
+  const selectedEnvelope = useSelectedEnvelope()
   const structure = useAppSelector(core.envelopes.selectStructure, deepEqual)
   const renderInfo = useEnvRenderInfo(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
@@ -69,6 +71,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
               <Row
                 key={'child' + child.id}
                 id={child.id}
+                isSelected={selectedEnvelope === child.id}
                 month={month}
                 isDefaultVisible={renderInfo[child.id].isDefaultVisible}
                 isLastVisibleChild={idx === arr.length - 1}
@@ -108,6 +111,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
               parent={
                 <Row
                   id={parent.id}
+                  isSelected={selectedEnvelope === parent.id}
                   month={month}
                   isDefaultVisible={isDefaultVisible}
                   isExpanded={isExpanded}

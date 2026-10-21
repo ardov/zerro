@@ -9,7 +9,7 @@
     flex-shrink: 0;
   }
 
-  .transaction-line > *:first-of-type {
+  .transaction-line > *:first-child {
     position: relative;
     overflow: hidden;
     min-width: 0;
@@ -24,15 +24,9 @@
     margin-left: 0;
   }
 
-  /* The amounts, which are separated by 8px — and on a transfer, by an arrow
-     in the middle of it. The empty pseudo-element carries that spacing in
-     both cases, so the two differ only in what it says. */
-  .transaction-amounts > :not(:first-of-type)::before {
-    content: '';
-    margin: 0 4px;
-  }
-
-  .transaction-amounts[data-type='transfer'] > :not(:first-of-type)::before {
-    content: '→';
+  /* Deleted accounts and absent counterparties can render no DOM node. */
+  .transaction-direction:first-child,
+  .transaction-direction:last-child {
+    display: none;
   }
 }

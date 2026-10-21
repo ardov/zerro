@@ -19,6 +19,11 @@ const envelopeScreen = defineScreen<TDrawerId>('envelope')
 
 export const useSideContent = () => envelopeScreen.useOpen()
 
+export function useSelectedEnvelope() {
+  const id = envelopeScreen.useValue()
+  return id && id !== 'overview' ? id : undefined
+}
+
 export const SideContent: FC<{ docked?: boolean }> = props => {
   const [id, setId] = envelopeScreen.use()
   const onClose = useCallback(() => setId(null), [setId])
