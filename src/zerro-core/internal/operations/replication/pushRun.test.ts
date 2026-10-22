@@ -16,10 +16,64 @@ import {
 import { globalBudgetTagId } from '../../domain/zenmoney'
 import { type TCommand } from '../materialization'
 import { beginPush, acceptPushChunk, shrinkPushChunk } from './pushRun'
+import {
+  parseCommandOutbox,
+  replayOutbox,
+  undoOutbox,
+  redoOutbox,
+} from './outbox'
 
 const now = Date.parse('2026-08-31T12:00:00.000Z')
 
 describe('bounded outbox push', () => {
+  it('acknowledges cancelling edits after reload and rebase, preserving later commands', () => {
+    const base = makeBase()
+    const first = prepareCommand(
+      base,
+      {
+        account: [{ ...base.account.cash, title: 'Temporary' }],
+      },
+      now
+    )
+    const second = prepareCommand(
+      replayOutbox(base, [first]),
+      {
+        account: [base.account.cash],
+      },
+      now + 1
+    )
+    const outbox = parseCommandOutbox(
+      JSON.parse(JSON.stringify([first, second]))
+    )
+    const undone = undoOutbox(outbox, [])
+    expect(replayOutbox(base, undone.outbox).account.cash.title).toBe(
+      'Temporary'
+    )
+    const redone = redoOutbox(undone.outbox, undone.redo)
+    const rebased = { ...base, serverTimestamp: base.serverTimestamp + 1000 }
+    const replica = { base: rebased, outbox: redone.outbox }
+    const prepared = beginPush(replica, now + 2)
+    expect(prepared).toBeDefined()
+    if (!prepared) throw new Error('Expected a prepared push')
+    expect(prepared.request).toEqual({ serverTimestamp: base.serverTimestamp })
+    expect(prepared.requestItemCount).toBe(0)
+    const later = prepareCommand(
+      replayOutbox(rebased, outbox),
+      {
+        account: [{ ...base.account.cash, title: 'Later' }],
+      },
+      now + 3
+    )
+    const accepted = acceptPushChunk(
+      { ...replica, outbox: [...outbox, later] },
+      prepared,
+      { serverTimestamp: now + 4 }
+    )
+    expect(accepted.outbox).toEqual([later])
+    expect(accepted.current.account.cash.title).toBe('Later')
+    expect(accepted.next).toBeUndefined()
+  })
+
   it('keeps a small combined upsert and cleanup in one request', () => {
     const base = makeBase()
     const command = prepareCommand(

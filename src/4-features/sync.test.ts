@@ -16,8 +16,10 @@ vi.mock('@/6-shared/analytics', () => ({ track: vi.fn() }))
 
 import {
   makeAccount,
+  makeReminder,
   makeUser,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
+import { core } from '@/zerro-core/runtime/redux'
 
 import {
   appendClientCommand,
@@ -59,6 +61,37 @@ describe('syncData', () => {
     syncMock.mockClear()
   })
 
+  it('acknowledges enabling and disabling ZenMoney budgets back to the stored value', async () => {
+    const store = makeSyncedStore()
+    store.dispatch(
+      applyServerPatch({
+        user: [makeUser({ id: 1, parent: null, currency: 2 })],
+        account: [makeAccount({ id: 'data', title: '🤖 [Zerro Data]' })],
+        reminder: [
+          makeReminder({
+            id: 'settings',
+            incomeAccount: 'data',
+            outcomeAccount: 'data',
+            comment: JSON.stringify({
+              type: 'UserSettings',
+              payload: { preferZmBudgets: false },
+            }),
+          }),
+        ],
+      }) as any
+    )
+    store.dispatch(core.settings.setPreferZmBudgets(true) as any)
+    store.dispatch(core.settings.setPreferZmBudgets(false) as any)
+    expect(store.getState().data.outbox).toHaveLength(2)
+    syncMock.mockResolvedValueOnce({ data: { serverTimestamp: 200_000 } })
+
+    await store.dispatch(syncData() as any)
+
+    expect(store.getState().data.outbox).toEqual([])
+    expect(syncMock).toHaveBeenCalledOnce()
+    expect(store.getState().sync.lastResult?.isSuccessful).toBe(true)
+  })
+
   it('records a successful result after applying the canonical response', async () => {
     syncMock.mockResolvedValueOnce({
       data: { serverTimestamp: 200 },
@@ -77,6 +110,38 @@ describe('syncData', () => {
     // zero cursor into an incremental one.
     expect(syncMock).toHaveBeenCalledWith('', 'ru', { serverTimestamp: 0 })
     expect(store.getState().data.current.serverTimestamp).toBe(200)
+  })
+
+  it('keeps a failed cursor-only push retryable without opening chunk details', async () => {
+    const store = makeSyncedStore()
+    store.dispatch(appendClientCommand(renameCashTo('Temporary', 10)))
+    store.dispatch(appendClientCommand(renameCashTo('Cash', 20)))
+    const outbox = store.getState().data.outbox
+    syncMock.mockResolvedValue({ error: 'offline' })
+    // The cursor fits, but the unchanged account in the raw transport does not.
+    const runtime = { maxBytes: 100, sleep: async () => undefined }
+
+    await store.dispatch(syncData(runtime) as any)
+
+    expect(syncMock).toHaveBeenCalledTimes(4)
+    expect(syncMock).toHaveBeenCalledWith('', 'ru', { serverTimestamp: 99_000 })
+    expect(store.getState().sync).toMatchObject({
+      status: { kind: 'idle' },
+      detailsOpen: false,
+      lastResult: { isSuccessful: false, errorMessage: 'offline' },
+    })
+    expect(store.getState().data.outbox).toEqual(outbox)
+    store.dispatch(undoClientCommand())
+    expect(store.getState().data.current.account.cash.title).toBe('Temporary')
+    store.dispatch(redoClientCommand())
+    expect(store.getState().data.current.account.cash.title).toBe('Cash')
+
+    syncMock.mockResolvedValueOnce({ data: { serverTimestamp: 200_000 } })
+    await store.dispatch(syncData(runtime) as any)
+
+    expect(store.getState().data.outbox).toEqual([])
+    expect(store.getState().sync.lastResult?.isSuccessful).toBe(true)
+    expect(store.getState().sync.detailsOpen).toBe(false)
   })
 
   it('does not contact the server while the persisted outbox is quarantined', async () => {

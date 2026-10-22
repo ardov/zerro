@@ -106,7 +106,7 @@ export function beginPush(
   requirePositiveByteLimit(maxBytes)
   const measure = options.measure ?? measureNormalizedBytes
   const fullRequest = withCursor(replica.base, transport)
-  const itemCount = allItems(transport, replica.base).length
+  const itemCount = commandItemCount(command)
   const run: TPushRun = {
     capturedOutboxCount: replica.outbox.length,
     command,
@@ -118,9 +118,11 @@ export function beginPush(
     totals: countCommandItems(command),
   }
   if (!itemCount) {
+    // Normalization can remove edits that returned to the canonical value.
+    // Still acknowledge the captured prefix through a successful exchange.
     return {
-      run,
-      request: fullRequest,
+      run: { ...run, multiChunk: false },
+      request: withCursor(replica.base, {}),
       progress: [],
       requestItemCount: 0,
       receipt: { items: [] },
