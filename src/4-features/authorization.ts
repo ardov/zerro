@@ -9,7 +9,6 @@ import { refreshData } from '@/4-features/sync'
 import { convertDiff } from '@/6-shared/api/zm-adapter'
 import { clearLocalData } from './localData'
 import { zmPreferenceStorage } from '@/6-shared/api/zmPreferenceStorage'
-import { getDemoData } from '@/zerro-core/demo'
 
 export const logOut = (): AppThunk<Promise<void>> => async dispatch => {
   dispatch(resetData())
@@ -58,6 +57,9 @@ export const loadBackup =
 
 export const loadDemoData = (): AppThunk<void> => async dispatch => {
   try {
+    // Demo data is a few hundred kilobytes, so it loads when the demo opens
+    // rather than with the app.
+    const { getDemoData } = await import('@/zerro-core/demo')
     const diff = getDemoData()
     console.log(diff)
     // TODO: maybe later make more elegant solution for local data

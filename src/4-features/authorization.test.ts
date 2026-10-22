@@ -1,21 +1,28 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import data from '@/store/data'
 import token from '@/store/token'
 import view, { patchTransactionsPage } from '@/store/view'
 
-const { clearLocalDataMock, authorizeMock, refreshMock } = vi.hoisted(() => ({
-  clearLocalDataMock: vi.fn().mockResolvedValue(undefined),
-  authorizeMock: vi.fn(),
-  refreshMock: vi.fn(),
-}))
+const { clearLocalDataMock, authorizeMock, refreshMock, demoLoads } =
+  vi.hoisted(() => ({
+    clearLocalDataMock: vi.fn().mockResolvedValue(undefined),
+    authorizeMock: vi.fn(),
+    refreshMock: vi.fn(),
+    demoLoads: { count: 0 },
+  }))
 
 vi.mock('./localData', () => ({
   clearLocalData: () => async () => clearLocalDataMock(),
 }))
 
 vi.mock('@/6-shared/api/zenmoney', () => ({
-  zenmoney: { authorize: authorizeMock },
+  zenmoney: { authorize: authorizeMock, fakeToken: 'fake_token' },
 }))
+vi.mock('@/zerro-core/demo', async importOriginal => {
+  demoLoads.count++
+  return importOriginal()
+})
 vi.mock('@/4-features/sync', () => ({
   refreshData: () => refreshMock,
 }))
@@ -24,7 +31,7 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
-import { logIn, logOut } from './authorization'
+import { loadDemoData, logIn, logOut } from './authorization'
 
 describe('logOut', () => {
   it('clears transient views', async () => {
@@ -81,5 +88,20 @@ describe('logIn', () => {
     await (store.dispatch as any)(logIn('ru'))
     expect(clearLocalDataMock).not.toHaveBeenCalled()
     expect(refreshMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('loadDemoData', () => {
+  it('loads the demo module only when the demo is opened', async () => {
+    expect(demoLoads.count).toBe(0)
+    const store = configureStore({ reducer: { token, data } })
+
+    await (store.dispatch as any)(loadDemoData())
+
+    expect(demoLoads.count).toBe(1)
+    expect(store.getState().token).toBe('fake_token')
+    expect(
+      Object.keys(store.getState().data.current.account).length
+    ).toBeGreaterThan(0)
   })
 })

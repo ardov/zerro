@@ -1,7 +1,9 @@
 const categoryModules = import.meta.glob<string>('./categories/a*.svg', {
   eager: true,
   import: 'default',
-  query: '?url',
+  // Emitted as files, like the bank icons, so the startup chunk does not carry
+  // every category icon as a data URL.
+  query: '?url&no-inline',
 })
 
 const noCategoryModules = import.meta.glob<string>(
