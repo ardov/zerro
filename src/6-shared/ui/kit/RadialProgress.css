@@ -4,8 +4,15 @@
   .radial-progress-activity {
     transform-box: view-box;
     transform-origin: center;
-    animation: radial-progress-activity 3s linear infinite;
     transition: 0.5s ease-out 0.1s;
+    animation: radial-progress-activity 3s linear infinite paused;
+  }
+
+  /* Only a moving indicator spins. A stopped ring stays paused at its angle,
+     so the dashes close up in place, and a paused animation does not repaint;
+     a static ring's outer circle is solid, so the angle is invisible there. */
+  .radial-progress-activity[data-moving] {
+    animation-play-state: running;
   }
 
   .radial-progress-activity ~ circle {
@@ -32,7 +39,8 @@
     .radial-progress-activity {
       transition: none;
     }
-    .radial-progress-activity {
+    .radial-progress-activity,
+    .radial-progress-activity[data-moving] {
       animation: none;
     }
   }

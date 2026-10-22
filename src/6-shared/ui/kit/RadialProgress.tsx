@@ -44,6 +44,7 @@ export function RadialProgress(props: RadialProgressProps) {
     >
       <circle
         className={'radial-progress-activity'}
+        data-moving={moving || undefined}
         r="30"
         cx="32"
         cy="32"
