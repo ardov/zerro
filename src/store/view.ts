@@ -11,11 +11,14 @@ export type TTransactionsPageView = {
 }
 
 export type TViewState = {
+  /** Bumped by every reset, so a save scheduled before it can be told apart. */
+  generation: number
   transactionsPage: TTransactionsPageView
 }
 
-function createInitialState(): TViewState {
+function createInitialState(generation = 0): TViewState {
   return {
+    generation,
     transactionsPage: {
       query: { clauses: [] },
       search: '',
@@ -34,13 +37,22 @@ const { reducer, actions } = createSlice({
     ) => {
       Object.assign(state.transactionsPage, action.payload)
     },
-    resetViews: () => createInitialState(),
+    saveTransactionsTopDate: (
+      state,
+      action: PayloadAction<{ topDate: TISODate; generation: number }>
+    ) => {
+      if (action.payload.generation !== state.generation) return
+      state.transactionsPage.topDate = action.payload.topDate
+    },
+    resetViews: state => createInitialState(state.generation + 1),
   },
 })
 
 export default reducer
 
-export const { patchTransactionsPage, resetViews } = actions
+export const { patchTransactionsPage, saveTransactionsTopDate, resetViews } =
+  actions
 
 export const selectTransactionsPageView = (state: RootState) =>
   state.view.transactionsPage
+export const selectViewGeneration = (state: RootState) => state.view.generation

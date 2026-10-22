@@ -5,6 +5,8 @@ import { useMemo, useRef } from 'react'
 
 export interface DebouncedFunction<Fn extends (...args: any[]) => any> {
   (this: ThisParameterType<Fn>, ...args: Parameters<Fn>): void
+  /** Runs a pending call now, if there is one. */
+  flush(): void
 }
 
 /**
@@ -80,6 +82,7 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
       Object.defineProperties(wrapped, {
         length: { value: callback.length },
         name: { value: `${callback.name || 'anonymous'}__debounced__${delay}` },
+        flush: { value: execute },
       })
 
       return wrapped

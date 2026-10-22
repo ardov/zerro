@@ -2,8 +2,8 @@ import { configureStore } from '@reduxjs/toolkit'
 import { act, renderHook } from '@testing-library/react'
 import type { FC, PropsWithChildren } from 'react'
 import { Provider } from 'react-redux'
-import { describe, expect, it } from 'vitest'
-import view from '@/store/view'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import view, { resetViews } from '@/store/view'
 
 import { useTransactionsPageView } from './useTransactionsPageView'
 
@@ -14,6 +14,10 @@ function makeWrapper() {
   )
   return { store, Wrapper }
 }
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 describe('useTransactionsPageView', () => {
   it('restores the page view when its consumer remounts', () => {
@@ -37,6 +41,43 @@ describe('useTransactionsPageView', () => {
       search: 'coffee',
       restoredTopDate: '2026-07-23',
     })
+  })
+
+  it('saves the top date once scrolling settles, not on every day', () => {
+    vi.useFakeTimers()
+    const { store, Wrapper } = makeWrapper()
+    const { result } = renderHook(() => useTransactionsPageView(), {
+      wrapper: Wrapper,
+    })
+    const view = result.current
+
+    act(() => {
+      view.onTopDateChange('2026-07-23')
+      view.onTopDateChange('2026-07-22')
+      view.onTopDateChange('2026-07-21')
+    })
+    expect(store.getState().view.transactionsPage.topDate).toBeNull()
+    expect(result.current).toBe(view)
+
+    act(() => vi.advanceTimersByTime(1000))
+    expect(store.getState().view.transactionsPage.topDate).toBe('2026-07-21')
+  })
+
+  it('drops a pending top date when the views are reset before unmount', () => {
+    vi.useFakeTimers()
+    const { store, Wrapper } = makeWrapper()
+    const { result, unmount } = renderHook(() => useTransactionsPageView(), {
+      wrapper: Wrapper,
+    })
+
+    act(() => result.current.onTopDateChange('2026-07-21'))
+    act(() => {
+      store.dispatch(resetViews())
+    })
+    unmount()
+    act(() => vi.advanceTimersByTime(1000))
+
+    expect(store.getState().view.transactionsPage.topDate).toBeNull()
   })
 
   it('starts from defaults in a new store', () => {
