@@ -466,6 +466,8 @@ function parseLoadedOutbox(
 ): TLoadedReplica['outbox'] {
   const parsed = parsePersistedOutbox(value)
   if (parsed.status === 'corrupt') return parsed
+  // Replaying nothing returns the base, which the caller has just validated.
+  if (!parsed.commands.length) return parsed
   try {
     assertValid(replayOutbox(base, parsed.commands))
     return parsed
