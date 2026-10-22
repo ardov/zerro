@@ -1,5 +1,5 @@
 import { toISODate, toISOMonth } from '../domain/foundation/date'
-import type { TDataStore } from '../domain/zenmoney'
+import type { TDataStore, TFxCode } from '../domain/zenmoney'
 import type { TCoreContext } from '../../types'
 import type { TTransactionQueryContext } from '../domain/zerro/transactions'
 import {
@@ -99,8 +99,10 @@ export function createProjectionGraph(ctx: TCoreContext) {
   // --- pass-through and primitive nodes: no memo ---------------------------
   const debtAccountId: TNode<ReturnType<typeof getDebtAccountId>> = d =>
     getDebtAccountId(d.account)
-  const userCurrency: TNode<ReturnType<typeof getUserCurrency>> = d =>
-    getUserCurrency({ users: d.user, instruments: d.instrument })
+  // Runs inside the dependency check of every envelope read, so it reads the
+  // memoized code map rather than building one.
+  const userCurrency: TNode<TFxCode> = d =>
+    getUserCurrency({ users: d.user, instrumentCodes: instrumentCodeById(d) })
   const historyStart: TNode<ReturnType<typeof getHistoryStart>> = d =>
     getHistoryStart(transactionsHistory(d), currentDate())
 

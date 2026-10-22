@@ -1,8 +1,7 @@
 import type { TCountryId } from './countries'
-import { getInstCodeMap, type TFxCode, type TInstrumentId } from './instruments'
+import type { TFxCode, TInstrumentCodeMap, TInstrumentId } from './instruments'
 import type { TMsTime, TUnixTime } from '../../foundation/primitives'
 import type { ById, EntityPatch } from '../../foundation/types'
-import type { TInstrument } from './instruments'
 
 export type TUserId = number
 export type TUser = {
@@ -45,12 +44,11 @@ export function getRootUserId(users: ById<TUser>): TUserId | null {
 export function getUserInstrumentId(users: ById<TUser>): TInstrumentId | null {
   return getRootUser(users)?.currency || null
 }
+/** The root user's currency code, or USD when it cannot be resolved. */
 export function getUserCurrency(data: {
   users: ById<TUser>
-  instruments: ById<TInstrument>
+  instrumentCodes: TInstrumentCodeMap
 }): TFxCode {
   const id = getUserInstrumentId(data.users)
-  return typeof id === 'number'
-    ? getInstCodeMap(data.instruments)[id] || 'USD'
-    : 'USD'
+  return typeof id === 'number' ? data.instrumentCodes[id] || 'USD' : 'USD'
 }
