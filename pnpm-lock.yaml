@@ -202,6 +202,9 @@ importers:
       idb:
         specifier: ^8.0.4
         version: 8.0.4
+      immer:
+        specifier: ^11.1.21
+        version: 11.1.21
       json2mq:
         specifier: ^0.2.0
         version: 0.2.0

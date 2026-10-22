@@ -5,8 +5,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { tokenStorage } from '@/6-shared/api/tokenStorage'
 
 import { replicaPersistenceMiddleware } from './data/replicaPersistence'
+import { configureImmer } from './immer'
 import { rootReducer } from './rootReducer'
 import type { RootState } from './rootReducer'
+
+configureImmer(import.meta.env.PROD)
 
 export const store = configureStore({
   reducer: rootReducer,
