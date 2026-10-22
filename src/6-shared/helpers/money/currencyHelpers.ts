@@ -13,6 +13,23 @@ import { keys } from '@/6-shared/helpers/keys'
  */
 export function round(amount: number): number {
   if (!Number.isFinite(amount)) return amount
+  if (amount === 0) return 0
+  // Fast path for everyday amounts. Away from a half cent, multiplying lands
+  // on the same whole number of cents as the printed form below: the product
+  // and the printed value differ by a few units in the last place, far less
+  // than the margin checked here. A whole number of cents divided by 100 is
+  // then the same double that "123e-2" parses to. Near a tie, and for values
+  // JavaScript prints with an exponent, the printed form decides.
+  const cents = amount * 100
+  const whole = Math.round(cents)
+  const margin = Math.max(1e-9, Math.abs(cents) * 8 * Number.EPSILON)
+  if (
+    Math.abs(amount) >= 1e-6 &&
+    Math.abs(cents) < 2 ** 52 &&
+    Math.abs(Math.abs(cents - whole) - 0.5) > margin
+  ) {
+    return whole / 100 + 0
+  }
   // The decimal point is moved through the number's own printed form rather
   // than by multiplying. 1.005 is stored as 1.00499999999999989, so
   // `1.005 * 100` is 100.49999999999999 and rounds down to a cent nobody
