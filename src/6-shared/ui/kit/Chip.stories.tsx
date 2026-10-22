@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, fn, userEvent, within } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { CalendarIcon } from '@/6-shared/ui/Icons'
 import { Chip } from './Chip'
 import { TagIcon } from '../TagIcon'
@@ -50,8 +50,11 @@ export const FadeLabels: Story = {
     const long = canvas.getByRole('button', {
       name: 'A long label that fades before the removal action',
     })
+    // Overflow is measured when the first frame lays out.
+    await waitFor(() =>
+      expect(long.querySelector('[data-overflow]')).not.toBeNull()
+    )
     await expect(short.querySelector('[data-overflow]')).toBeNull()
-    await expect(long.querySelector('[data-overflow]')).not.toBeNull()
     await expect(
       canvas.getByRole('button', {
         name: 'Remove A long label that fades before the removal action',

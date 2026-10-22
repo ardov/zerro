@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { useAppSelector } from '@/store'
 import type { THistoryPointRef, THistoryRow } from '@/store/history'
 import { HistoryRowList } from './HistoryRowList'
@@ -72,7 +72,9 @@ export const CompactRows: Story = {
     const canvas = within(canvasElement)
     const local = canvas.getByRole('button', { name: /Transaction edited/ })
     expect(local).toHaveAttribute('data-selected')
-    expect(local.querySelector('[data-overflow]')).not.toBeNull()
+    await waitFor(() =>
+      expect(local.querySelector('[data-overflow]')).not.toBeNull()
+    )
     expect(local.scrollWidth).toBeLessThanOrEqual(local.clientWidth)
     const run = canvas.getByRole('button', { name: /2 updates/ })
     run.focus()
