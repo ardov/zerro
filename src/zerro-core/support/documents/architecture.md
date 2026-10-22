@@ -286,9 +286,10 @@ metadata and only the selected historical snapshot.
 Full sync, recovery, and retention write checkpoints. Ordinary pulls append
 transitions only when canonical data changes; empty pulls update the cursor.
 Sequences are never renumbered. Retention folds bounded oldest prefixes under
-90 days of server time and 100 MiB of logical JSON bytes. The minimal current
-checkpoint and Outbox may exceed the budget. There is no periodic checkpoint
-or special retention exemption for restore. See
+90 days of server time and 100 MiB of logical JSON bytes. Transitions record
+their exact JSON size; checkpoints estimate theirs from sample rows of each
+entity map. The minimal current checkpoint and Outbox may exceed the budget.
+There is no periodic checkpoint or special retention exemption for restore. See
 [ADR 0001](../../../../docs/adr/0001-linear-indexeddb-replica.md).
 
 Browser writes use one Promise queue per tab. A primary persistence failure

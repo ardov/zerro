@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { makeStore } from '../../../support/testing/zenmoneyTestData'
+import { makeDemoStore } from '../../../support/demo'
+import {
+  makeStore,
+  makeTransaction,
+} from '../../../support/testing/zenmoneyTestData'
 import {
   compactJournalEntries,
   createCheckpointEntry,
@@ -111,6 +115,63 @@ describe('linear canonical journal', () => {
     })
     expect(compacted.snapshot).toEqual(current)
     expect(compacted.byteSize).toBeGreaterThan(0)
+  })
+})
+
+describe('journal entry sizes', () => {
+  const jsonBytes = (value: unknown) =>
+    new TextEncoder().encode(JSON.stringify(value)).byteLength
+  const relativeError = (entry: { byteSize: number }) => {
+    const { byteSize, ...unsized } = entry
+    const exact = jsonBytes(unsized)
+    return Math.abs(byteSize - exact) / exact
+  }
+
+  it('estimates the demo account checkpoint within 2% of its JSON size', () => {
+    const snapshot = makeDemoStore({ now: Date.parse('2026-05-15T12:00:00Z') })
+
+    const entry = createCheckpointEntry(7, 1, 'full-sync', snapshot)
+
+    expect(relativeError(entry)).toBeLessThan(0.02)
+  })
+
+  it('counts long ids and uneven rows in the estimate', () => {
+    const id = (i: number) =>
+      `${String(i).padStart(8, '0')}-4a1c-8b2d-9e3f-${String(i * 7919).padStart(12, '0')}`
+    const transaction = Object.fromEntries(
+      Array.from({ length: 3000 }, (_, i) => [
+        id(i),
+        makeTransaction({
+          id: id(i),
+          comment: i % 3 ? 'Кофе и булочка '.repeat(i % 7) : null,
+          payee: i % 5 ? `Shop ${i}` : null,
+        }),
+      ])
+    )
+    const snapshot = makeStore({
+      serverTimestamp: 10,
+      account: { cash: row({ id: 'cash', title: 'Cash' }) },
+      transaction,
+    })
+
+    const entry = createCheckpointEntry(7, 1, 'full-sync', snapshot)
+
+    expect(relativeError(entry)).toBeLessThan(0.02)
+  })
+
+  it('measures a transition exactly', () => {
+    const before = makeStore({
+      serverTimestamp: 10,
+      account: { cash: row({ id: 'cash', title: 'Cash' }) },
+    })
+    const after = makeStore({
+      serverTimestamp: 20,
+      account: { cash: row({ id: 'cash', title: 'Wallet' }) },
+    })
+
+    const entry = createTransitionEntry(7, 2, before, after, false)!
+
+    expect(relativeError(entry)).toBe(0)
   })
 })
 
