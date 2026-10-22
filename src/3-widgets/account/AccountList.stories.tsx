@@ -133,10 +133,10 @@ export const AccountInteractions: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
-    const row = canvas.getByRole('button', { name: /Cash USD/ })
+    const row = canvas.getByRole('button', { name: /HSBC USD/ })
     row.focus()
     await userEvent.keyboard('{Enter}')
-    const dialog = await body.findByRole('dialog', { name: 'Cash USD' })
+    const dialog = await body.findByRole('dialog', { name: 'HSBC USD' })
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(dialog).not.toBeInTheDocument())
     await waitFor(() => expect(row).toHaveFocus())
@@ -168,7 +168,7 @@ export const AccountsPage: Story = {
       expect(row.scrollWidth).toBeLessThanOrEqual(row.clientWidth)
     }
     expect(
-      canvas.getByRole('button', { name: /Cash USD/ }).getBoundingClientRect()
+      canvas.getByRole('button', { name: /HSBC USD/ }).getBoundingClientRect()
         .height
     ).toBe(48)
   },

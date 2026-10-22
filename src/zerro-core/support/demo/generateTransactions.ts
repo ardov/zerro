@@ -29,6 +29,7 @@ export function generateTransactions(opts: {
   // Optional
   merchant?: TPatternValue<TTransaction['merchant']>
   payee?: TPatternValue<TTransaction['payee']>
+  originalPayee?: TPatternValue<TTransaction['originalPayee']>
   comment?: TPatternValue<TTransaction['comment']>
   opIncome?: TPatternValue<TTransaction['opIncome']>
   opIncomeInstrument?: TPatternValue<TTransaction['opIncomeInstrument']>
@@ -106,7 +107,7 @@ export function generateTransactions(opts: {
       mcc: null,
       comment: resolve(opts.comment) || null,
       payee: resolve(opts.payee) || null,
-      originalPayee: null,
+      originalPayee: resolve(opts.originalPayee) || null,
       merchant: resolve(opts.merchant) || null,
       latitude: null,
       longitude: null,

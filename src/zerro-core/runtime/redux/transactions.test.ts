@@ -31,7 +31,7 @@ describe('Core transaction adapter reads', () => {
       const data = makeDemoStore({ now: NOW })
       data.account = {
         ...data.account,
-        'Cash USD': { ...data.account['Cash USD'], title: 'Accountneedle' },
+        'HSBC USD': { ...data.account['HSBC USD'], title: 'Accountneedle' },
       }
       data.tag = {
         ...data.tag,
@@ -43,7 +43,7 @@ describe('Core transaction adapter reads', () => {
       }
       const transaction = makeTransaction({
         outcome: 12,
-        outcomeAccount: 'Cash USD',
+        outcomeAccount: 'HSBC USD',
         tag: ['food'],
         merchant: 'shop',
       })
@@ -62,7 +62,7 @@ describe('Core transaction adapter reads', () => {
           kind === 'account'
             ? {
                 ...data.account,
-                'Cash USD': { ...data.account['Cash USD'], title: 'Renamed' },
+                'HSBC USD': { ...data.account['HSBC USD'], title: 'Renamed' },
               }
             : data.account,
         tag:
@@ -162,7 +162,7 @@ it('refreshes currency matching when instrument metadata changes', () => {
     income: 0,
     outcome: 10,
     outcomeInstrument: 1,
-    outcomeAccount: 'Cash USD',
+    outcomeAccount: 'HSBC USD',
   })
   const query = { clauses: [{ kind: 'amount' as const, currencies: ['USD'] }] }
   const first = selectQueryContext(makeRootState(data))

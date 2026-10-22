@@ -18,7 +18,7 @@ it('keeps historical debtor options and refreshes matching live transactions', (
     incomeInstrument: 1,
     outcomeInstrument: 1,
     incomeAccount: 'Debts',
-    outcomeAccount: 'Cash USD',
+    outcomeAccount: 'HSBC USD',
     merchant: 'alex',
   })
   const repayment = {
@@ -26,7 +26,7 @@ it('keeps historical debtor options and refreshes matching live transactions', (
     id: 'repayment',
     merchant: null,
     payee: 'Alex!',
-    incomeAccount: 'Cash USD',
+    incomeAccount: 'HSBC USD',
     outcomeAccount: 'Debts',
   }
   data.transaction = {

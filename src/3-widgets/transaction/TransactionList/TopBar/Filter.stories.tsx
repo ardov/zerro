@@ -63,7 +63,10 @@ export const SearchAndFilters: Story = {
     <FilterHarness
       initialQuery={{
         clauses: [
-          { kind: 'account', ids: ['Cash USD', 'Cash RUB', 'Cash EUR'] },
+          {
+            kind: 'account',
+            ids: ['HSBC USD', 'N26 EUR', 'HSBC EUR'],
+          },
           { kind: 'tag', ids: ['Food', 'Transportation'] },
           { kind: 'type', values: [core.transactions.TrFilterType.Outcome] },
           { kind: 'amount', gte: 100, lte: 5000 },
@@ -105,7 +108,7 @@ export const ChipRemoval: Story = {
     <FilterHarness
       initialQuery={{
         clauses: [
-          { kind: 'account', ids: ['Cash USD'] },
+          { kind: 'account', ids: ['HSBC USD'] },
           { kind: 'tag', ids: ['Food'] },
         ],
       }}
@@ -113,7 +116,7 @@ export const ChipRemoval: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const first = canvas.getByRole('combobox', { name: 'Cash USD' })
+    const first = canvas.getByRole('combobox', { name: 'HSBC USD' })
     const second = canvas.getByRole('combobox', { name: 'Food' })
     first.focus()
     await userEvent.keyboard('{Delete}')
@@ -248,20 +251,20 @@ export const EmptyCategoryCleanup: Story = {
 export const EmptyAccountCleanup: Story = {
   render: () => (
     <FilterHarness
-      initialQuery={{ clauses: [{ kind: 'account', ids: ['Cash USD'] }] }}
+      initialQuery={{ clauses: [{ kind: 'account', ids: ['HSBC USD'] }] }}
     />
   ),
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(canvas.getByRole('combobox', { name: 'Cash USD' }))
-    await body.findByRole('option', { name: /^Cash USD/ })
+    await userEvent.click(canvas.getByRole('combobox', { name: 'HSBC USD' }))
+    await body.findByRole('option', { name: /^HSBC USD/ })
     expect(
       body.queryByRole('option', { name: /^Debts/ })
     ).not.toBeInTheDocument()
     await step('Clear the account selection', async () => {
       await userEvent.click(
-        await body.findByRole('option', { name: /^Cash USD/ })
+        await body.findByRole('option', { name: /^HSBC USD/ })
       )
       expect(readQuery(canvasElement).clauses).toEqual([
         { kind: 'account', ids: [] },
@@ -484,7 +487,7 @@ export const MerchantSelection: Story = {
   render: () => (
     <FilterHarness
       initialSearch="lunch"
-      initialQuery={{ clauses: [{ kind: 'account', ids: ['Cash USD'] }] }}
+      initialQuery={{ clauses: [{ kind: 'account', ids: ['HSBC USD'] }] }}
     />
   ),
   play: async ({ canvasElement }) => {
@@ -532,7 +535,10 @@ export const NarrowWrapping: Story = {
       initialSearch="A very long search across comments categories merchants and accounts"
       initialQuery={{
         clauses: [
-          { kind: 'account', ids: ['Cash USD', 'Cash RUB', 'Cash EUR'] },
+          {
+            kind: 'account',
+            ids: ['HSBC USD', 'N26 EUR', 'HSBC EUR'],
+          },
           { kind: 'amount', gte: 12 },
         ],
       }}
@@ -724,7 +730,7 @@ export const AmountCurrency: Story = {
     await body.findByRole('option', { name: /^USD(?: |$)/ })
     expect(
       body.getAllByRole('option').map(option => option.textContent?.slice(0, 3))
-    ).toEqual(['EUR', 'RUB', 'USD'])
+    ).toEqual(['EUR', 'USD'])
     await userEvent.click(body.getByRole('option', { name: /^USD(?: |$)/ }))
     await waitFor(() =>
       expect(body.queryByRole('listbox')).not.toBeInTheDocument()

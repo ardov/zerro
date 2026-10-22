@@ -45,8 +45,8 @@ describe('demo data', () => {
       diff.transaction?.length || 0
     )
     expect(store.user[23880]?.login).toBe('demoAccount')
-    expect(store.account['Cash RUB']?.balance).toEqual(
-      diff.account?.find(account => account.id === 'Cash RUB')?.balance
+    expect(store.account['N26 EUR']?.balance).toEqual(
+      diff.account?.find(account => account.id === 'N26 EUR')?.balance
     )
   })
 })

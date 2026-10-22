@@ -79,6 +79,7 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
     now: () => NOW,
     uuid: () => 'demo-id',
   }
+  const merchantDomains: Record<string, string> = {}
   const demoTransactions = (
     idPrefix: string,
     opts: Omit<Parameters<typeof generateTransactions>[0], 'idPrefix' | 'until'>
@@ -87,6 +88,10 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       ...opts,
       idPrefix,
       until,
+      originalPayee:
+        typeof opts.merchant === 'string'
+          ? (merchantDomains[opts.merchant] ?? null)
+          : null,
       pattern: {
         ...opts.pattern,
         every: scaleEvery(opts.pattern.every, scale),
@@ -95,20 +100,19 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
 
   // Instruments
   const USD = 1
-  const RUB = 2
   const EUR = 3
 
   // Countries
-  const RU = 1
+  const DE = 3
 
   // User
   const mainUser: TUser = {
     id: 23880,
     changed: NOW,
-    currency: RUB,
+    currency: EUR,
     parent: null,
-    country: RU,
-    countryCode: 'RU',
+    country: DE,
+    countryCode: 'DE',
     email: null,
     login: 'demoAccount',
     monthStartDay: 1,
@@ -126,38 +130,40 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
   // Merchants
 
   function makeMerchants(user: TUser) {
-    const makeMerchant = (title: string) =>
-      makeCoreMerchant({ id: title, title, user: user.id }, demoCtx)
+    const makeMerchant = (title: string, domain?: string) => {
+      if (domain) merchantDomains[title] = domain
+      return makeCoreMerchant({ id: title, title, user: user.id }, demoCtx)
+    }
 
     const merchants = {
       // Grocery stores
-      supermarket: makeMerchant('City Supermarket'),
-      localStore: makeMerchant('Local Corner Store'),
+      supermarket: makeMerchant('Lidl', 'lidl.com'),
+      localStore: makeMerchant('Carrefour', 'carrefour.com'),
 
       // Restaurants & Food
-      pizzaPlace: makeMerchant("Mario's Pizza"),
-      cafe: makeMerchant('Coffee Bean Cafe'),
-      fastFood: makeMerchant('Quick Burger'),
+      pizzaPlace: makeMerchant('Pizza Hut', 'pizzahut.com'),
+      cafe: makeMerchant('Starbucks', 'starbucks.com'),
+      fastFood: makeMerchant('McDonald’s', 'mcdonalds.com'),
 
       // Delivery services
-      deliveryApp: makeMerchant('FoodDelivery App'),
-      pizzaDelivery: makeMerchant('Express Pizza Delivery'),
+      deliveryApp: makeMerchant('Wolt', 'wolt.com'),
+      pizzaDelivery: makeMerchant('Domino’s', 'dominos.com'),
 
       // Transportation
-      taxiService: makeMerchant('City Taxi'),
-      gasStation: makeMerchant('Shell Gas Station'),
+      taxiService: makeMerchant('Uber', 'uber.com'),
+      gasStation: makeMerchant('Shell', 'shell.com'),
 
       // Shopping
-      electronics: makeMerchant('TechWorld Electronics'),
-      clothing: makeMerchant('Fashion Outlet'),
+      electronics: makeMerchant('Apple', 'apple.com'),
+      clothing: makeMerchant('Zara', 'zara.com'),
 
       // Bills & Services
-      electricCompany: makeMerchant('City Electric Company'),
-      internetProvider: makeMerchant('FastNet Internet'),
+      electricCompany: makeMerchant('E.ON', 'eon.com'),
+      internetProvider: makeMerchant('Vodafone', 'vodafone.com'),
 
       // Healthcare
-      pharmacy: makeMerchant('HealthPlus Pharmacy'),
-      clinic: makeMerchant('City Medical Clinic'),
+      pharmacy: makeMerchant('Boots', 'boots.com'),
+      clinic: makeMerchant('Bupa', 'bupa.com'),
 
       // People
       friend: makeMerchant('Alex'),
@@ -175,7 +181,8 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
     instrument: TInstrumentId
     type: AccountType
     inBalance?: boolean
-    startBalance?: number
+    balance?: number
+    company?: number
   }) =>
     makeCoreAccount(
       {
@@ -187,31 +194,68 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       demoCtx
     )
 
-  const { Debt, Cash, Ccard } = AccountType
+  const { Checking, Cash, Debt } = AccountType
 
   const accounts = {
+    // ZenMoney requires a separate debt ledger; it is hidden from bank accounts.
     debt: makeAccount({
       title: 'Debts',
       instrument: mainUser.currency,
       type: Debt,
     }),
-    cashUSD: makeAccount({ title: 'Cash USD', instrument: USD, type: Cash }),
-    cashRUB: makeAccount({ title: 'Cash RUB', instrument: RUB, type: Cash }),
-    cashEUR: makeAccount({
+    travel: makeAccount({
+      title: 'HSBC USD',
+      instrument: USD,
+      type: Checking,
+      company: 15571,
+      balance: 2400,
+    }),
+    daily: makeAccount({
+      title: 'N26 EUR',
+      instrument: EUR,
+      type: Checking,
+      company: 15542,
+      balance: 800,
+    }),
+    euro: makeAccount({
+      title: 'HSBC EUR',
+      instrument: EUR,
+      type: Checking,
+      company: 15571,
+      balance: 8200,
+    }),
+    dollar: makeAccount({
+      title: 'Cash USD',
+      instrument: USD,
+      type: Cash,
+      balance: 200,
+    }),
+    main: makeAccount({
+      title: 'Revolut EUR',
+      instrument: EUR,
+      type: Checking,
+      company: 15693,
+      balance: 1500,
+    }),
+    shopping: makeAccount({
+      title: 'Revolut Shopping',
+      instrument: EUR,
+      type: Checking,
+      company: 15693,
+      balance: 8000,
+    }),
+    bills: makeAccount({
+      title: 'HSBC Bills',
+      instrument: EUR,
+      type: Checking,
+      company: 15571,
+      balance: 30000,
+    }),
+    cash: makeAccount({
       title: 'Cash EUR',
       instrument: EUR,
       type: Cash,
-      startBalance: 1000,
-    }),
-    ccardUSD: makeAccount({
-      title: 'Credit Card USD',
-      instrument: USD,
-      type: Ccard,
-    }),
-    ccardRUB: makeAccount({
-      title: 'Credit Card RUB',
-      instrument: RUB,
-      type: Ccard,
+      balance: 300,
     }),
   }
 
@@ -315,21 +359,21 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       parent: tags.transportation.id,
       showOutcome: true,
       icon: '3010_bus',
-      color: hex2int('#5C6BC0'),
+      color: hex2int('#009688'),
     }),
     gas: makeTag({
       title: 'Gas',
       parent: tags.transportation.id,
       showOutcome: true,
       icon: '3501_gas_station',
-      color: hex2int('#3949AB'),
+      color: hex2int('#D4A017'),
     }),
     taxi: makeTag({
       title: 'Taxi',
       parent: tags.transportation.id,
       showOutcome: true,
       icon: '3004_taxi',
-      color: hex2int('#7986CB'),
+      color: hex2int('#D81B60'),
     }),
 
     groceries: makeTag({
@@ -337,21 +381,21 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       parent: tags.food.id,
       showOutcome: true,
       icon: '1001_bunch_ingredients',
-      color: hex2int('#FFA726'),
+      color: hex2int('#7CB342'),
     }),
     restaurant: makeTag({
       title: 'Restaurant',
       parent: tags.food.id,
       showOutcome: true,
       icon: '1016_coffee_cup',
-      color: hex2int('#FB8C00'),
+      color: hex2int('#FF7043'),
     }),
     delivery: makeTag({
       title: 'Delivery',
       parent: tags.food.id,
       showOutcome: true,
       icon: '2013_scooter',
-      color: hex2int('#FFB74D'),
+      color: hex2int('#AB47BC'),
     }),
 
     rent: makeTag({
@@ -359,21 +403,21 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       parent: tags.bills.id,
       showOutcome: true,
       icon: '9011_mortgage',
-      color: hex2int('#8D6E63'),
+      color: hex2int('#5C6BC0'),
     }),
     electricity: makeTag({
       title: 'Electricity',
       parent: tags.bills.id,
       showOutcome: true,
       icon: '5503_electrical',
-      color: hex2int('#6D4C41'),
+      color: hex2int('#C0CA33'),
     }),
     internet: makeTag({
       title: 'Internet',
       parent: tags.bills.id,
       showOutcome: true,
       icon: '8002_globe',
-      color: hex2int('#A1887F'),
+      color: hex2int('#039BE5'),
     }),
   }
 
@@ -394,8 +438,8 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'monthly', every: 1, offset: 5 },
       user: mainUser.id,
       tag: [[tags.salary.id]],
-      income: 200_000,
-      incomeAccount: accounts.ccardRUB,
+      income: 2000,
+      incomeAccount: accounts.main,
       comment: 'Regular salary',
     }),
 
@@ -404,8 +448,8 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'monthly', every: 3, offset: 15 },
       user: mainUser.id,
       tag: [[tags.freelance.id]],
-      income: 50_000,
-      incomeAccount: accounts.cashRUB,
+      income: 500,
+      incomeAccount: accounts.daily,
     }),
 
     // Birthday Gifts
@@ -414,7 +458,7 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       user: mainUser.id,
       tag: [[tags.gifts.id]],
       income: [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650],
-      incomeAccount: accounts.cashUSD,
+      incomeAccount: accounts.travel,
       merchant: merchants.wife.id,
       comment: 'Birthday gift',
     }),
@@ -424,8 +468,8 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'daily', every: 1, offset: 1 },
       user: mainUser.id,
       tag: [[tagsChildren.publicTransport.id]],
-      outcome: [45, 50, 55],
-      outcomeAccount: accounts.cashRUB,
+      outcome: [0.45, 0.5, 0.55],
+      outcomeAccount: accounts.cash,
       comment: 'Metro/Bus fare',
     }),
 
@@ -434,17 +478,17 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'daily', every: 4, offset: 1 },
       user: mainUser.id,
       tag: [[tagsChildren.groceries.id]],
-      outcome: [1000, 5160, 2715, 11345, 816, 3190, 800, 5000, 5500],
+      outcome: [10, 51.6, 27.15, 113.45, 8.16, 31.9, 8, 50, 55],
       merchant: merchants.supermarket.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.main,
     }),
     ...demoTransactions('groceries-local-store', {
       pattern: { since, repeat: 'daily', every: 2, offset: 2 },
       user: mainUser.id,
       tag: [[tagsChildren.groceries.id]],
-      outcome: [420.5, 100.32, 816, 800, 5000, 550],
+      outcome: [4.21, 1, 8.16, 8, 50, 5.5],
       merchant: merchants.localStore.id,
-      outcomeAccount: accounts.cashRUB,
+      outcomeAccount: accounts.daily,
     }),
 
     // Delivery transactions
@@ -452,18 +496,18 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'daily', every: 8, offset: 1 },
       user: mainUser.id,
       tag: [[tagsChildren.delivery.id]],
-      outcome: [1630, 3560, 2581, 3000, 1729, 1000],
+      outcome: [16.3, 35.6, 25.81, 30, 17.29, 10],
       merchant: merchants.deliveryApp.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.main,
       comment: 'Food delivery',
     }),
     ...demoTransactions('pizza-delivery', {
       pattern: { since, repeat: 'daily', every: 12, offset: 3 },
       user: mainUser.id,
       tag: [[tagsChildren.delivery.id]],
-      outcome: [1200, 1800, 2400],
+      outcome: [12, 18, 24],
       merchant: merchants.pizzaDelivery.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.main,
       comment: 'Pizza delivery',
     }),
 
@@ -472,27 +516,27 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'daily', every: 7, offset: 2 },
       user: mainUser.id,
       tag: [[tagsChildren.restaurant.id]],
-      outcome: [2500, 3200, 4100, 1800, 5500],
+      outcome: [25, 32, 41, 18, 55],
       merchant: merchants.pizzaPlace.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.main,
       comment: 'Dinner out',
     }),
     ...demoTransactions('restaurant-cafe', {
       pattern: { since, repeat: 'daily', every: 5, offset: 4 },
       user: mainUser.id,
       tag: [[tagsChildren.restaurant.id]],
-      outcome: [450, 620, 380, 720],
+      outcome: [4.5, 6.2, 3.8, 7.2],
       merchant: merchants.cafe.id,
-      outcomeAccount: accounts.cashRUB,
+      outcomeAccount: accounts.cash,
       comment: 'Coffee & snacks',
     }),
     ...demoTransactions('restaurant-fast-food', {
       pattern: { since, repeat: 'daily', every: 14, offset: 6 },
       user: mainUser.id,
       tag: [[tagsChildren.restaurant.id]],
-      outcome: [850, 1200, 950],
+      outcome: [8.5, 12, 9.5],
       merchant: merchants.fastFood.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.main,
       comment: 'Quick lunch',
     }),
 
@@ -501,18 +545,18 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'daily', every: 10, offset: 3 },
       user: mainUser.id,
       tag: [[tagsChildren.taxi.id]],
-      outcome: [300, 450, 600, 750, 900],
+      outcome: [3, 4.5, 6, 7.5, 9],
       merchant: merchants.taxiService.id,
-      outcomeAccount: accounts.cashRUB,
+      outcomeAccount: accounts.daily,
       comment: 'Taxi ride',
     }),
     ...demoTransactions('gas', {
       pattern: { since, repeat: 'daily', every: 7, offset: 5 },
       user: mainUser.id,
       tag: [[tagsChildren.gas.id]],
-      outcome: [2000, 2500, 3000, 3500],
+      outcome: [20, 25, 30, 35],
       merchant: merchants.gasStation.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.main,
       comment: 'Gas refill',
     }),
 
@@ -521,18 +565,18 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'monthly', every: 2, offset: 20 },
       user: mainUser.id,
       tag: [[tags.shopping.id]],
-      outcome: [15000, 25000, 8000, 45000, 12000],
+      outcome: [150, 250, 80, 450, 120],
       merchant: merchants.electronics.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.shopping,
       comment: 'Electronics purchase',
     }),
     ...demoTransactions('clothing', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 25 },
       user: mainUser.id,
       tag: [[tags.shopping.id]],
-      outcome: [3500, 5200, 7800, 2100, 4600],
+      outcome: [35, 52, 78, 21, 46],
       merchant: merchants.clothing.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.shopping,
       comment: 'Clothing',
     }),
 
@@ -541,26 +585,26 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'monthly', every: 1, offset: 10 },
       user: mainUser.id,
       tag: [[tagsChildren.electricity.id]],
-      outcome: [2500, 3200, 2800, 3500, 4100],
+      outcome: [25, 32, 28, 35, 41],
       merchant: merchants.electricCompany.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.bills,
       comment: 'Electricity bill',
     }),
     ...demoTransactions('internet', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 15 },
       user: mainUser.id,
       tag: [[tagsChildren.internet.id]],
-      outcome: [1200],
+      outcome: [12],
       merchant: merchants.internetProvider.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.bills,
       comment: 'Internet subscription',
     }),
     ...demoTransactions('rent', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 3 },
       user: mainUser.id,
       tag: [[tagsChildren.rent.id]],
-      outcome: [35000],
-      outcomeAccount: accounts.ccardRUB,
+      outcome: [350],
+      outcomeAccount: accounts.bills,
       comment: 'Monthly rent',
     }),
 
@@ -569,18 +613,18 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'monthly', every: 3, offset: 18 },
       user: mainUser.id,
       tag: [[tags.health.id]],
-      outcome: [850, 1200, 650, 2100],
+      outcome: [8.5, 12, 6.5, 21],
       merchant: merchants.pharmacy.id,
-      outcomeAccount: accounts.cashRUB,
+      outcomeAccount: accounts.cash,
       comment: 'Medicine',
     }),
     ...demoTransactions('clinic', {
       pattern: { since, repeat: 'monthly', every: 6, offset: 25 },
       user: mainUser.id,
       tag: [[tags.health.id]],
-      outcome: [3500, 5000, 7500],
+      outcome: [35, 50, 75],
       merchant: merchants.clinic.id,
-      outcomeAccount: accounts.ccardRUB,
+      outcomeAccount: accounts.main,
       comment: 'Medical checkup',
     }),
 
@@ -589,8 +633,8 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'daily', every: 15, offset: 8 },
       user: mainUser.id,
       tag: [[tags.entertainment.id]],
-      outcome: [1500, 2200, 3000, 1800],
-      outcomeAccount: accounts.ccardRUB,
+      outcome: [15, 22, 30, 18],
+      outcomeAccount: accounts.main,
       comment: 'Movies/Entertainment',
     }),
 
@@ -599,29 +643,39 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       pattern: { since, repeat: 'monthly', every: 3, offset: 12 },
       user: mainUser.id,
       tag: [[tags.other.id]],
-      outcome: [5000, 8000, 3000],
+      outcome: [50, 80, 30],
       merchant: merchants.friend.id,
-      outcomeAccount: accounts.cashRUB,
+      outcomeAccount: accounts.daily,
       comment: 'Loan to friend',
     }),
     ...demoTransactions('mother-gift', {
       pattern: { since, repeat: 'monthly', every: 4, offset: 8 },
       user: mainUser.id,
       tag: [[tags.gifts.id]],
-      outcome: [2500, 4000, 6000],
+      outcome: [25, 40, 60],
       merchant: merchants.mother.id,
-      outcomeAccount: accounts.cashRUB,
+      outcomeAccount: accounts.daily,
       comment: 'Gift for mother',
     }),
-    // Transfer to Cash RUB
-    ...demoTransactions('cash-rub-transfer', {
+    // Regular cash withdrawals
+    ...demoTransactions('cash-withdrawal', {
+      pattern: { since, repeat: 'monthly', every: 1, offset: 2 },
+      user: mainUser.id,
+      outcome: 100,
+      income: 100,
+      outcomeAccount: accounts.daily,
+      incomeAccount: accounts.cash,
+      comment: 'ATM withdrawal',
+    }),
+    // Transfer to daily account
+    ...demoTransactions('daily-account-transfer', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 10 },
       user: mainUser.id,
-      outcome: [50000, 4000, 6000, 20000],
-      income: [50000, 4000, 6000, 20000],
-      outcomeAccount: accounts.ccardRUB,
-      incomeAccount: accounts.cashRUB,
-      comment: 'Transfer to Cash RUB',
+      outcome: [500, 40, 60, 200],
+      income: [500, 40, 60, 200],
+      outcomeAccount: accounts.main,
+      incomeAccount: accounts.daily,
+      comment: 'Transfer to N26',
     }),
   ]
 

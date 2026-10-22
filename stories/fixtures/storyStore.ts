@@ -28,7 +28,7 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
         const loan = {
           date: '2026-03-20' as const,
           incomeAccount: 'Debts',
-          outcomeAccount: 'Cash USD',
+          outcomeAccount: 'HSBC USD',
           income: 100,
           outcome: 100,
           incomeInstrument: 1,
@@ -52,7 +52,7 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
               ...loan,
               id: 'repayment',
               payee: 'Alex',
-              incomeAccount: 'Cash USD',
+              incomeAccount: 'HSBC USD',
               outcomeAccount: 'Debts',
               income: 20,
               outcome: 18,
@@ -81,8 +81,8 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
         const expense = {
           date: '2026-10-09' as const,
           outcome: 12,
-          incomeAccount: 'Cash USD',
-          outcomeAccount: 'Cash USD',
+          incomeAccount: 'HSBC USD',
+          outcomeAccount: 'HSBC USD',
           tag: ['Food'],
           incomeInstrument: 1,
           outcomeInstrument: 1,
@@ -148,7 +148,7 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
           ...current,
           account: {
             ...current.account,
-            'Cash RUB': { ...current.account['Cash RUB'], inBalance: false },
+            'N26 EUR': { ...current.account['N26 EUR'], inBalance: false },
           },
         })
       }

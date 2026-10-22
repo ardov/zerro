@@ -48,7 +48,7 @@ export const BeforeAccountsPanel: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     expect(window.innerWidth).toBe(1559)
-    expect(canvas.queryByRole('button', { name: /Cash USD/ })).toBeNull()
+    expect(canvas.queryByRole('button', { name: /HSBC USD/ })).toBeNull()
     const panels = canvas.getByTestId('budget-panels')
     // DnD also renders visually hidden announcement nodes beside the panels.
     const columns = Array.from(panels.children).filter(
@@ -67,7 +67,7 @@ export const WithAccountsPanel: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     expect(window.innerWidth).toBe(1560)
-    const account = canvas.getByRole('button', { name: /Cash USD/ })
+    const account = canvas.getByRole('button', { name: /HSBC USD/ })
     expect(account.getBoundingClientRect().height).toBe(40)
     const panels = canvas.getByTestId('budget-panels')
     // DnD also renders visually hidden announcement nodes beside the panels.
