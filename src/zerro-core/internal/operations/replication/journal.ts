@@ -1,5 +1,4 @@
 import {
-  applyPatch,
   dataEntityKeys,
   type TDataEntityKey,
   type TDataStore,
@@ -96,40 +95,49 @@ export function compactCanonicalTransition(
   return Object.keys(transition).length ? transition : undefined
 }
 
-export function applyCompactTransition(
+/**
+ * Applies canonical transitions in order. Each entity map the run touches is
+ * cloned once for the whole run; maps it never touches keep their reference
+ * from `base`, and `base` itself is not mutated.
+ */
+export function applyCompactTransitions(
   base: TDataStore,
-  transition: TCompactCanonicalTransition
+  transitions: readonly TCompactCanonicalTransition[]
 ): TDataStore {
-  const next = applyPatch(base, {
-    serverTimestamp: transition.serverTimestamp,
-  })
+  if (!transitions.length) return base
+  const next: TDataStore = { ...base }
   const mutableNext = next as unknown as Record<TDataEntityKey, TEntityMap>
-  const touched = new Set<TDataEntityKey>()
+  const cloned = new Set<TDataEntityKey>()
+  const ownMap = (object: TDataEntityKey): TEntityMap => {
+    if (!cloned.has(object)) {
+      mutableNext[object] = { ...getEntityMap(next, object) }
+      cloned.add(object)
+    }
+    return getEntityMap(next, object)
+  }
 
-  transition.deletion?.forEach(item => touched.add(item.object))
-  Object.keys(transition.upsert ?? {}).forEach(object =>
-    touched.add(object as TDataEntityKey)
-  )
-  touched.forEach(object => {
-    mutableNext[object] = { ...getEntityMap(next, object) }
-  })
+  transitions.forEach(transition => {
+    if (transition.serverTimestamp) {
+      next.serverTimestamp = transition.serverTimestamp
+    }
 
-  transition.deletion?.forEach(({ object, id }) => {
-    delete getEntityMap(next, object)[id]
-  })
+    transition.deletion?.forEach(({ object, id }) => {
+      delete ownMap(object)[id]
+    })
 
-  Object.entries(transition.upsert ?? {}).forEach(([object, changes]) => {
-    if (!changes) return
-    const entityMap = getEntityMap(next, object as TDataEntityKey)
+    Object.entries(transition.upsert ?? {}).forEach(([object, changes]) => {
+      if (!changes) return
+      const entityMap = ownMap(object as TDataEntityKey)
 
-    changes.forEach(change => {
-      const previous = entityMap[change.id]
-      const entity: TEntityRecord = previous
-        ? { ...previous }
-        : { id: change.id }
-      change.remove?.forEach(field => delete entity[field])
-      Object.assign(entity, change.fields)
-      entityMap[change.id] = entity
+      changes.forEach(change => {
+        const previous = entityMap[change.id]
+        const entity: TEntityRecord = previous
+          ? { ...previous }
+          : { id: change.id }
+        change.remove?.forEach(field => delete entity[field])
+        Object.assign(entity, change.fields)
+        entityMap[change.id] = entity
+      })
     })
   })
 

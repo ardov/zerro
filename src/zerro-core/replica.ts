@@ -53,7 +53,7 @@ export {
 } from './internal/operations/replication/canonical'
 
 export {
-  applyCompactTransition,
+  applyCompactTransitions,
   compactCanonicalTransition,
   type TCompactCanonicalTransition,
   type TCompactDeletion,

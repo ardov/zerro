@@ -33,6 +33,34 @@ describe('linear canonical journal', () => {
     expect(replayJournalEntries(entries)).toEqual(current)
   })
 
+  it('restarts the replay at a later checkpoint', () => {
+    const first = makeStore({
+      serverTimestamp: 10,
+      account: { cash: row({ id: 'cash', title: 'Cash' }) },
+    })
+    const second = makeStore({
+      serverTimestamp: 20,
+      account: { cash: row({ id: 'cash', title: 'Wallet' }) },
+    })
+    const restored = makeStore({
+      serverTimestamp: 30,
+      account: { card: row({ id: 'card', title: 'Card' }) },
+    })
+    const current = makeStore({
+      serverTimestamp: 40,
+      account: { card: row({ id: 'card', title: 'Main card' }) },
+    })
+
+    const entries = [
+      createCheckpointEntry(7, 1, 'full-sync', first),
+      createTransitionEntry(7, 2, first, second, false)!,
+      createCheckpointEntry(7, 3, 'recovery', restored),
+      createTransitionEntry(7, 4, restored, current, false)!,
+    ]
+
+    expect(replayJournalEntries(entries)).toEqual(current)
+  })
+
   it('keeps a cursor-only pull out of the journal', () => {
     const before = makeStore({ serverTimestamp: 10 })
     const after = makeStore({ serverTimestamp: 20 })

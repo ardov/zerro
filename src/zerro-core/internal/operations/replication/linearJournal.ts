@@ -1,6 +1,6 @@
 import type { TDataStore } from '../../domain/zenmoney'
 import {
-  applyCompactTransition,
+  applyCompactTransitions,
   compactCanonicalTransition,
   type TCompactCanonicalTransition,
 } from './journal'
@@ -73,15 +73,21 @@ export function replayJournalEntries(
   entries: readonly TJournalEntry[]
 ): TDataStore {
   let snapshot: TDataStore | undefined
+  let suffix: TCompactCanonicalTransition[] = []
 
+  // A checkpoint is a full state: it replaces the snapshot and starts a new
+  // suffix. The final suffix is applied as one run.
   entries.forEach(entry => {
-    snapshot =
-      entry.kind === 'checkpoint'
-        ? entry.snapshot
-        : applyCompactTransition(requireCheckpoint(snapshot), entry.transition)
+    if (entry.kind === 'checkpoint') {
+      snapshot = entry.snapshot
+      suffix = []
+    } else {
+      requireCheckpoint(snapshot)
+      suffix.push(entry.transition)
+    }
   })
 
-  return requireCheckpoint(snapshot)
+  return applyCompactTransitions(requireCheckpoint(snapshot), suffix)
 }
 
 export function compactJournalEntries(
