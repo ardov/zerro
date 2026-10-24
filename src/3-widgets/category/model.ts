@@ -1,4 +1,5 @@
 import type { TTagId } from '@/6-shared/types'
+import { searchQueries } from '@/6-shared/helpers/searchQueries'
 
 export type CategoryRowAction =
   | { type: 'replace'; index: number; id: TTagId }
@@ -87,13 +88,16 @@ export function categoryChoices<T extends Category>(
   const byId = new Map(available.map(category => [category.id, category]))
   const visible = new Set<TTagId>()
   const eligible = new Set<TTagId>()
-  const search = query.trim().toLocaleLowerCase()
+  const search = query.trim()
+  const queries = searchQueries(query)
   for (const category of available) {
     const excluded = excludeIds.includes(category.id) && category.id !== value
     const matches = search
-      ? `${category.name} ${category.title}`
-          .toLocaleLowerCase()
-          .includes(search)
+      ? queries.some(text =>
+          `${category.name} ${category.title}`
+            .toLocaleLowerCase()
+            .includes(text)
+        )
       : (includeUncategorized && category.id === UNCATEGORIZED_ID) ||
         showAll ||
         !preferredType ||

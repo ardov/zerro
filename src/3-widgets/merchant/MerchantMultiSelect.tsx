@@ -5,7 +5,7 @@ import { MultiSelect } from '@/6-shared/ui/kit/MultiSelect'
 import { Favicon } from '@/6-shared/ui/kit/Favicon'
 import { PersonIcon, PlaceIcon } from '@/6-shared/ui/Icons'
 import { core } from '@/zerro-core/redux'
-import { merchantMatchPriority } from './merchantSearch'
+import { merchantMatchPriority, merchantSearchQueries } from './merchantSearch'
 
 const merchantKey = (id: string | null) =>
   id === null ? 'none' : `merchant:${id}`
@@ -60,8 +60,8 @@ export function MerchantMultiSelect({
         label: t('findMerchant'),
         placeholder: t('findMerchant'),
         filter: (_options, text) => {
-          const query = core.merchants.normalizePayee(text)
-          if (!query) return { items: items }
+          const queries = merchantSearchQueries(text)
+          if (!queries.length) return { items: items }
           return {
             items: items
               .map(option => ({
@@ -69,7 +69,7 @@ export function MerchantMultiSelect({
                 priority: merchantMatchPriority(
                   core.merchants.normalizePayee(option.label),
                   usage[option.value.slice('merchant:'.length)],
-                  query
+                  queries
                 ),
               }))
               .filter(match => Number.isFinite(match.priority))

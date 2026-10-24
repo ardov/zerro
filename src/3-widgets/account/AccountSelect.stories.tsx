@@ -126,7 +126,8 @@ export const Single: Story = {
     })
     await step('Search archives and retain a selected archive', async () => {
       const input = body.getByRole('combobox', { name: 'From account' })
-      await userEvent.type(input, 'Old')
+      await userEvent.type(input, 'Щдв')
+      await expect(input).toHaveValue('Щдв')
       await expect(body.getByRole('group', { name: 'Archived' })).toBeVisible()
       await userEvent.click(body.getByRole('option', { name: /^Old bank/ }))
       await expect(canvas.getByLabelText('Selection')).toHaveTextContent('old')

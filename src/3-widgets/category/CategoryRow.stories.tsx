@@ -173,7 +173,8 @@ export const Editing: Story = {
     const search = await body.findByRole('combobox', {
       name: 'Select category',
     })
-    await userEvent.type(search, 'gift')
+    await userEvent.type(search, 'пшае')
+    await expect(search).toHaveValue('пшае')
     await expect(body.getByRole('option', { name: 'Income' })).toBeVisible()
     await userEvent.click(body.getByRole('option', { name: 'Gift' }))
     await waitFor(() =>

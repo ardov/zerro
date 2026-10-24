@@ -2,6 +2,7 @@ import { useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Combobox } from '@base-ui/react/combobox'
 import { Field } from '@base-ui/react/field'
 import { ChevronDown, Search } from 'lucide-react'
+import { searchQueries } from '@/6-shared/helpers/searchQueries'
 import type { SelectItem, SelectOption, SelectControlProps } from './Select'
 import {
   useSelectField,
@@ -119,12 +120,16 @@ export function SelectCombobox<T extends string>(
     [options]
   )
   const { contains } = Combobox.useFilter()
+  const queries = searchQueries(query)
   const filtered = search.filter?.(items, query, { expanded })
   const matches = (item: SelectOption<T>) =>
     Boolean(search.filter) ||
     !query ||
-    contains(item.label, query) ||
-    (item.keywords?.some(term => contains(term, query)) ?? false)
+    queries.some(
+      text =>
+        contains(item.label, text) ||
+        item.keywords?.some(term => contains(term, text))
+    )
   const visible = visibleItems(filtered?.items ?? items, matches)
   const shownOptions = flatten(visible)
   const hasMore = !expanded && Boolean(filtered?.hasMore)

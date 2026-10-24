@@ -13,6 +13,7 @@ import { Favicon } from '@/6-shared/ui/kit/Favicon'
 import {
   initialMerchantSearch,
   merchantMatchPriority,
+  merchantSearchQueries,
 } from '../../merchant/merchantSearch'
 
 export type MerchantFieldProps = Pick<
@@ -138,14 +139,15 @@ export function MerchantField(props: MerchantFieldProps) {
         showMoreLabel: t('showAllMerchants'),
         filter: (_items, search, { expanded }) => {
           const query = normalizePayee(search)
-          if (query) {
+          const queries = merchantSearchQueries(search)
+          if (queries.length) {
             const matches = all
               .map(option => ({
                 option,
                 priority: merchantMatchPriority(
                   normalizePayee(option.title),
                   usage[option.id],
-                  query
+                  queries
                 ),
               }))
               .filter(match => Number.isFinite(match.priority))
@@ -155,7 +157,10 @@ export function MerchantField(props: MerchantFieldProps) {
                   a.option.title.localeCompare(b.option.title)
               )
               .map(match => toOption(match.option))
-            if (!all.some(option => normalizePayee(option.title) === query)) {
+            if (
+              query &&
+              !all.some(option => normalizePayee(option.title) === query)
+            ) {
               matches.push({
                 value: createKey(search.trim()),
                 label: t('createMerchant', { title: search.trim() }),

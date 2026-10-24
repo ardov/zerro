@@ -141,6 +141,33 @@ export const SearchAndCreate: Story = {
   },
 }
 
+export const KeyboardLayoutSearch: Story = {
+  args: { ...BarePayee.args, payee: null, onChange: fn() },
+  parameters: { app: { scenario: 'transaction-filters', route: '/budget' } },
+  play: async ({ canvasElement, args }) => {
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      within(canvasElement).getByRole('combobox', { name: 'Place' })
+    )
+    const input = await body.findByRole('combobox', { name: 'Find or create' })
+    await userEvent.type(input, '.')
+    await expect(body.queryByRole('option', { name: /^Create / })).toBeNull()
+    await expect(args.onChange).not.toHaveBeenCalled()
+    await userEvent.clear(input)
+    await userEvent.type(input, 'дшвд')
+    await expect(input).toHaveValue('дшвд')
+    await userEvent.click(body.getByRole('option', { name: 'Lidl' }))
+    await expect(args.onChange).toHaveBeenCalledTimes(1)
+    await expect(args.onChange).toHaveBeenCalledWith({
+      id: 'lidl',
+      title: 'Lidl',
+    })
+    await waitFor(() =>
+      expect(body.queryByRole('listbox')).not.toBeInTheDocument()
+    )
+  },
+}
+
 export const CreateWithArrowKeys: Story = {
   args: BarePayee.args,
   render: () => <PickerHarness />,

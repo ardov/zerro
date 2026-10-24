@@ -1,4 +1,5 @@
 import type { TAccountId } from '@/6-shared/types'
+import { searchQueries } from '@/6-shared/helpers/searchQueries'
 
 export type AccountChoice = {
   id: TAccountId
@@ -24,15 +25,16 @@ export function accountChoices<T extends AccountChoice>(
     expanded = false,
   }: AccountChoicesOptions = {}
 ) {
-  const search = query.trim().toLocaleLowerCase()
+  const search = query.trim()
+  const queries = searchQueries(query)
   let hasMore = false
   const items = accounts.filter(account => {
     if (excludeIds.includes(account.id)) return false
     if (account.isService && !selectedIds.includes(account.id)) return false
     if (search)
-      return `${account.title} ${account.fxCode}`
-        .toLocaleLowerCase()
-        .includes(search)
+      return queries.some(text =>
+        `${account.title} ${account.fxCode}`.toLocaleLowerCase().includes(text)
+      )
     if (!expanded && account.archive && !selectedIds.includes(account.id)) {
       hasMore = true
       return false

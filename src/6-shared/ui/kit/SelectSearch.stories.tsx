@@ -49,7 +49,7 @@ const meta = {
 
 \`<Select search label="Account" items={items} value={value} onChange={setValue} />\`
 
-- Search matches labels and optional **keywords** across the full source. Selection closes the popup; closing resets the query and expansion.
+- Search matches labels and optional **keywords** across the full source, including English/Russian keyboard-layout variants without changing the input. Selection closes the popup; closing resets the query and expansion.
 - **search.filter(items, query, { expanded })** returns **{ items, hasMore }**. The selector owns expansion and resets it on close. Show more is a separate button in the scrollport, reached with Tab; Shift-Tab returns to search.
 - Custom filtering returns the final filtered/ranked items, without a second filter. Keep the full source in **items** so the closed value and icon remain available.
 - Search focuses automatically on desktop. Below 500px the panel receives focus, keeping the software keyboard closed; Tab or tapping reaches search. **search.autoFocus** explicitly overrides either default.
@@ -70,6 +70,35 @@ const meta = {
 } satisfies Meta<typeof Select>
 export default meta
 type Story = StoryObj<typeof meta>
+
+export const KeyboardLayouts: Story = {
+  args: {
+    items: [
+      { value: 'food', label: 'Продукты', keywords: ['еда'] },
+      { value: 'bank', label: 'Revolut' },
+    ],
+    onChange: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      within(canvasElement).getByRole('combobox', { name: 'Account' })
+    )
+    const search = await body.findByRole('combobox', { name: 'Search Account' })
+    for (const query of ['ghjlerns', 'tlf']) {
+      await userEvent.clear(search)
+      await userEvent.type(search, query)
+      await expect(search).toHaveValue(query)
+      await expect(body.getAllByRole('option')).toHaveLength(1)
+      await expect(body.getByRole('option', { name: 'Продукты' })).toBeVisible()
+    }
+    await userEvent.keyboard('{ArrowDown}{Enter}')
+    await expect(args.onChange).toHaveBeenCalledWith('food')
+    await waitFor(() =>
+      expect(body.queryByRole('listbox')).not.toBeInTheDocument()
+    )
+  },
+}
 
 function Demo(props: { autoFocus?: boolean; required?: boolean }) {
   const { autoFocus, required } = props
@@ -176,6 +205,7 @@ export const Expansion: Story = {
     })
     await userEvent.click(trigger)
     const search = await body.findByRole('combobox', { name: 'Search Account' })
+    await waitFor(() => expect(search).toHaveFocus())
     await userEvent.tab()
     const more = body.getByRole('button', { name: 'Show all accounts' })
     await expect(more).toHaveFocus()
@@ -488,7 +518,7 @@ export const ExpansionExit: Story = {
       body.getByRole('button', { name: 'Show all accounts' })
     ).toHaveFocus()
     await userEvent.tab()
-    await expect(search).toHaveFocus()
+    await waitFor(() => expect(search).toHaveFocus())
     await expect(body.getByRole('listbox')).toBeVisible()
     await userEvent.keyboard('{Escape}')
     await waitFor(() =>
