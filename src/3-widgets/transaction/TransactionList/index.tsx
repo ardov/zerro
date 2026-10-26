@@ -251,15 +251,18 @@ function useFilteredTransactions(
   const allTransactionIds = useAppSelector(core.transactions.selectIds)
   const context = useAppSelector(core.transactions.selectQueryContext)
   const today = useLocalDay()
-  const groups = useMemo(() => {
+  // Ordering depends on the data, not on each search or filter change.
+  const ordered = useMemo(
+    () =>
+      (trIds || allTransactionIds)
+        .map(id => transactionsById[id])
+        .sort(core.transactions.compareTransactionDates),
+    [trIds, allTransactionIds, transactionsById]
+  )
+  return useMemo(() => {
     const checker = core.transactions.compileQuery(query, context, today)
-    const list = trIds || allTransactionIds
-    return list
-      .map(id => transactionsById[id])
-      .filter(checker)
-      .sort(core.transactions.compareTransactionDates)
-  }, [trIds, allTransactionIds, context, query, transactionsById, today])
-  return groups
+    return ordered.filter(checker)
+  }, [ordered, context, query, today])
 }
 
 const EmptyState = () => {

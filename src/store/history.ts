@@ -306,10 +306,14 @@ const selectLiveHistoryRows = createSelector(
   }
 )
 
+const selectJournalRows = createSelector(
+  [selectHistoryEntries, selectExpandedRuns],
+  (entries, expandedRuns) => groupJournalRows(entries, new Set(expandedRuns))
+)
+
 export const selectHistoryRows = createSelector(
-  [selectLiveHistoryRows, selectHistoryEntries, selectExpandedRuns],
-  (liveRows, entries, expandedRuns): THistoryRow[] => {
-    const journalRows = groupJournalRows(entries, new Set(expandedRuns))
+  [selectLiveHistoryRows, selectJournalRows],
+  (liveRows, journalRows): THistoryRow[] => {
     const localSection: THistoryRow[] = liveRows.length
       ? [{ type: 'section', id: 'local' }]
       : []
@@ -328,11 +332,15 @@ export function historyRowPoint(row: THistoryRow): THistoryPointRef | null {
 }
 
 const selectSelectablePoints = createSelector(
-  [selectHistoryRows],
-  (rows): THistoryPointRef[] =>
-    rows
+  [selectOutbox, selectJournalRows],
+  (outbox, journalRows): THistoryPointRef[] => [
+    ...outbox
+      .map((_, index): THistoryPointRef => ({ kind: 'local', index }))
+      .reverse(),
+    ...journalRows
       .map(historyRowPoint)
-      .filter((point): point is THistoryPointRef => point !== null)
+      .filter((point): point is THistoryPointRef => point !== null),
+  ]
 )
 
 /**

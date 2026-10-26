@@ -13,6 +13,38 @@ const build = (transactions: ReturnType<typeof makeTransaction>[]) =>
   buildMerchantUsage({ transactions, currentDate, debtAccountId: 'debt' })
 
 describe('buildMerchantUsage', () => {
+  it('preserves first-seen alias order independently for each merchant', () => {
+    const usage = build([
+      makeTransaction({
+        id: 'a',
+        merchant: 'first',
+        payee: 'Shop, One',
+        originalPayee: 'shop.example.com',
+      }),
+      makeTransaction({
+        id: 'b',
+        merchant: 'first',
+        payee: 'Other name',
+        originalPayee: 'shop.example.com',
+      }),
+      makeTransaction({
+        id: 'c',
+        merchant: 'first',
+        payee: 'SHOP. ONE',
+        originalPayee: 'shop.example.com',
+      }),
+      makeTransaction({
+        id: 'd',
+        merchant: 'second',
+        payee: 'SHOP. ONE',
+        originalPayee: 'shop.example.com',
+      }),
+    ])
+    expect(usage.first.searchTerms?.payee).toEqual(['shop one', 'other name'])
+    expect(usage.second.searchTerms?.payee).toEqual(['shop one'])
+    expect(usage.first.website?.transactionCount).toBe(3)
+    expect(usage.second.website?.transactionCount).toBe(1)
+  })
   it('tells regular use from debt use and counts both', () => {
     const usage = build([
       makeTransaction({ id: 'spent', outcome: 10, merchant: 'shop' }),

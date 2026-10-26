@@ -1,5 +1,5 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, original } from '@reduxjs/toolkit'
 import {
   acceptCanonicalPatch,
   type TAcceptedPushChunk,
@@ -197,13 +197,16 @@ const { reducer, actions } = createSlice({
     appendClientCommand: withPerf(
       'appendClientCommand',
       (state, { payload }: PayloadAction<TCommand>) => {
-        const next = appendOutbox(state.outbox, payload)
+        // Core reads immutable snapshots; passing an Immer proxy would draft
+        // every transaction while copying the touched map.
+        const snapshot = original(state)!
+        const next = appendOutbox(snapshot.outbox, payload)
         state.outbox = next.outbox
         state.redo = next.redo
         // `current` already reflects the durable outbox, so advancing by this
         // one entry is equivalent to a full replay but keeps unrelated entity
         // maps reference-stable for memoized selectors.
-        state.current = applyOutboxCommand(state.current, payload)
+        state.current = applyOutboxCommand(snapshot.current, payload)
       }
     ),
     prepareClientSync: withPerf('prepareClientSync', state => {

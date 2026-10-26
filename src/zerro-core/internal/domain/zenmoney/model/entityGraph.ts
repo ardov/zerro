@@ -261,8 +261,7 @@ export function eachReferenceIssue(
     if (!references.length) return
     Object.values(store[key]).forEach((row, index) => {
       references.forEach(reference => {
-        const path = `${key}[${index}].${reference.field}`
-        checkReference(store, reference, row as TRowLike, path, visit)
+        checkReference(store, reference, row as TRowLike, key, index, visit)
       })
     })
   })
@@ -272,24 +271,30 @@ function checkReference(
   store: TDataStore,
   reference: TEntityReference,
   row: TRowLike,
-  path: string,
+  key: TDataEntityKey,
+  rowIndex: number,
   visit: (issue: TReferenceIssue) => void
 ): void {
   const value = row[reference.field]
   const present = (id: unknown) => hasRow(store, reference.to, id)
+  // Built only for an issue: most references resolve.
+  const pathOf = (suffix = '') =>
+    `${key}[${rowIndex}].${reference.field}${suffix}`
 
   if (reference.many) {
     if (value === null || value === undefined) return
     if (!Array.isArray(value)) {
+      const path = pathOf()
       visit({ reference, path, message: `${path} is invalid` })
       return
     }
     value.forEach((item, index) => {
       if (!present(item)) {
+        const path = pathOf(`[${index}]`)
         visit({
           reference,
-          path: `${path}[${index}]`,
-          message: `${path}[${index}] references a missing entity`,
+          path,
+          message: `${path} references a missing entity`,
         })
       }
     })
@@ -298,6 +303,7 @@ function checkReference(
 
   if (isEmptyReference(reference, value, row)) return
   if (!present(value)) {
+    const path = pathOf()
     visit({
       reference,
       path,
@@ -319,7 +325,7 @@ function isEmptyReference(
 
 function hasRow(store: TDataStore, key: TDataEntityKey, id: unknown): boolean {
   if (typeof id !== 'string' && typeof id !== 'number') return false
-  return Object.prototype.hasOwnProperty.call(store[key], String(id))
+  return Object.hasOwn(store[key], id)
 }
 
 /** Whether a row exists in the world a write is about to produce. */

@@ -37,9 +37,23 @@ export const historyPanelScreen = defineScreen<true>('historyPanel')
 
 export function HistoryPanel() {
   const { t } = useTranslation('history')
-  const dispatch = useAppDispatch()
   const [opened, setOpened] = historyPanelScreen.use()
-  const open = !!opened
+  return (
+    <DrawerSurface
+      title={t('panelTitle')}
+      controller={{ open: !!opened, setOpen: next => !next && setOpened(null) }}
+      className="w-95"
+      contentScrolls
+    >
+      <HistoryPanelContent />
+    </DrawerSurface>
+  )
+}
+
+/** Subscriptions and summaries live inside the drawer's mounted content. */
+function HistoryPanelContent() {
+  const { t } = useTranslation('history')
+  const dispatch = useAppDispatch()
   const rows = useAppSelector(selectHistoryRows)
   const canLoadOlder = useAppSelector(selectCanLoadOlderHistory)
   const pageStatus = useAppSelector(selectHistoryPageStatus)
@@ -49,22 +63,17 @@ export function HistoryPanel() {
   const head = useAppSelector(selectHistoryHeadPoint)
 
   useEffect(() => {
-    if (open && pageStatus === 'idle') {
+    if (pageStatus === 'idle') {
       void dispatch(loadHistoryPage({ replace: true }))
     }
-  }, [dispatch, open, pageStatus])
+  }, [dispatch, pageStatus])
 
   const select = (point: THistoryPointRef) => {
     void dispatch(selectHistoryPoint(point))
   }
 
   return (
-    <DrawerSurface
-      title={t('panelTitle')}
-      controller={{ open, setOpen: next => !next && setOpened(null) }}
-      className="w-95"
-      contentScrolls
-    >
+    <>
       <hr className="m-0 mt-3 border-0 border-t border-ui-border" />
       <HistoryControls />
       <hr className="m-0 border-0 border-t border-ui-border" />
@@ -94,7 +103,7 @@ export function HistoryPanel() {
       {/* Pinned under the list: it belongs to the selection, not to the row
           that happens to be scrolled into view. */}
       <HistoryRestorePreview />
-    </DrawerSurface>
+    </>
   )
 }
 

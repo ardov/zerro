@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import type { TISODate } from '@/6-shared/types'
@@ -55,16 +54,12 @@ export function useCashFlow(
   const debtAccId = useAppSelector(core.accounts.selectDebtAccountId)
   const instCodeMap = core.instruments.useCodeMap()
   const accounts = core.accounts.usePopulated()
-  const aggregatedNodes = useMemo(
-    () =>
-      calcCashflow(
-        transactionHistory,
-        debtAccId,
-        instCodeMap,
-        accounts,
-        aggregation
-      ),
-    [accounts, aggregation, debtAccId, instCodeMap, transactionHistory]
+  const aggregatedNodes = calcCashflow(
+    transactionHistory,
+    debtAccId,
+    instCodeMap,
+    accounts,
+    aggregation
   )
 
   const toDisplay = core.currency.useToDisplay('current')

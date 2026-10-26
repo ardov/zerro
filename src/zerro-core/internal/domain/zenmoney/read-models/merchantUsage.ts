@@ -43,6 +43,24 @@ export function buildMerchantUsage({
   const since = daysBefore(currentDate, recentDays)
   const usage: TMerchantUsageById = {}
   const domainCounts: Record<TMerchantId, Map<string, number>> = {}
+  const seenTerms: Record<
+    TMerchantId,
+    { payee: Set<string>; originalPayee: Set<string> }
+  > = {}
+  // Bank descriptions repeat across transactions. Keep this cache local to
+  // one build so old snapshots and arbitrary payee strings are never retained.
+  const payees = new Map<string | null, { term: string; domains: string[] }>()
+  const readPayee = (value: string | null) => {
+    let result = payees.get(value)
+    if (!result) {
+      result = {
+        term: normalizePayee(value),
+        domains: extractWebsiteDomains(value),
+      }
+      payees.set(value, result)
+    }
+    return result
+  }
 
   transactions.forEach(transaction => {
     if (!transaction.merchant) return
@@ -60,13 +78,21 @@ export function buildMerchantUsage({
     }
 
     if (transaction.date >= since) entry.recentUses++
-    addSearchTerm(entry, 'payee', transaction.payee)
-    addSearchTerm(entry, 'originalPayee', transaction.originalPayee)
+    const payee = readPayee(transaction.payee)
+    const originalPayee = readPayee(transaction.originalPayee)
+    const seen = (seenTerms[transaction.merchant] ??= {
+      payee: new Set(),
+      originalPayee: new Set(),
+    })
+    addSearchTerm(entry, 'payee', payee.term, seen.payee)
+    addSearchTerm(
+      entry,
+      'originalPayee',
+      originalPayee.term,
+      seen.originalPayee
+    )
 
-    const domains = new Set([
-      ...extractWebsiteDomains(transaction.payee),
-      ...extractWebsiteDomains(transaction.originalPayee),
-    ])
+    const domains = new Set([...payee.domains, ...originalPayee.domains])
     if (!domains.size) return
 
     const counts = (domainCounts[transaction.merchant] ??= new Map())
@@ -91,16 +117,17 @@ export function buildMerchantUsage({
 function addSearchTerm(
   usage: TMerchantUsage,
   field: keyof NonNullable<TMerchantUsage['searchTerms']>,
-  value: string | null
+  term: string,
+  seen: Set<string>
 ) {
-  const term = normalizePayee(value)
-  if (!term) return
+  if (!term || seen.has(term)) return
+  seen.add(term)
 
   const terms = (usage.searchTerms ??= {
     payee: [],
     originalPayee: [],
   })[field]
-  if (!terms.includes(term)) terms.push(term)
+  terms.push(term)
 }
 
 export function extractWebsiteDomains(value: string | null): string[] {

@@ -1,3 +1,4 @@
+import { weakMapMemoize } from '@reduxjs/toolkit'
 import { core } from '@/zerro-core/redux'
 
 import { GroupBy, toGroup } from '@/6-shared/helpers/date'
@@ -28,8 +29,11 @@ type TPoint = {
  * Calculates the cashflow for a given period, aggregated by time groups.
  * Returns a map of date groups to cashflow points containing income, outcome,
  * transfers and debt movements in their original currencies.
+ *
+ * Memoized by argument identity: widgets reading the same snapshot share one
+ * result, and weak keys let old transaction histories go.
  */
-export function calcCashflow(
+export const calcCashflow = weakMapMemoize(function calcCashflow(
   transactions: TTransaction[],
   debtAccId: TAccountId | undefined,
   instCodeMap: core.instruments.TInstrumentCodeMap,
@@ -104,4 +108,4 @@ export function calcCashflow(
   })
 
   return result
-}
+})
