@@ -1,9 +1,13 @@
 # UI styling
 
-Zerro's interface is built with Tailwind CSS v4, Base UI primitives and a
+Zerro's interface is built with Tailwind CSS, Base UI primitives and a
 small set of application-owned React components under `src/6-shared/ui`.
 Storybook uses the same theme, tokens and component implementations as the
 application.
+
+Keep concrete values and defaults in their owning source files. This document
+describes contracts, ownership and reasons for rules; link to the source when
+documenting where to tune appearance or behavior.
 
 ## Entry points and cascade
 
@@ -33,13 +37,9 @@ predictably.
 
 ## Theme boot and persistence
 
-`public/theme-init.js` runs before the application bundle. It:
-
-- reads the color-scheme preference from local storage key `theme`;
-- accepts `light`, `dark`, or `system`, including JSON-encoded string values;
-- follows the operating-system preference when no explicit override is stored;
-- applies the root `.dark` class and the matching `color-scheme` before paint;
-- exposes `window.themeManager` for reading, toggling and subscribing.
+`public/theme-init.js` owns preference persistence and applies the color scheme
+before the application paints. Consumers read, toggle and subscribe through
+`window.themeManager` rather than maintaining a second preference store.
 
 The toggle stores only an override. When the selected scheme matches the system
 scheme, the key is removed and the application resumes following the system.
@@ -54,7 +54,7 @@ leaves it unset so `themeManager` remains the owner of preference.
 `src/6-shared/ui/kit/theme.css` authors the UI colors for both schemes.
 Use semantic utilities such as `bg-ui-base`, `bg-ui-card`, `text-ui-primary`,
 `text-ui-secondary` and `border-ui-border`. Tertiary text uses `ui-tertiary`;
-`ui-placeholder` currently shares its value but names the input-specific role.
+input placeholders use the separate semantic role `ui-placeholder`.
 Disabled controls use `opacity-ui-disabled` on the whole control.
 
 Interaction colors have distinct roles: `ui-highlight` is a subtle surface or
@@ -87,11 +87,7 @@ Feature code must not import scales or semantic levels.
 
 Kit typography, shadows, stacking levels, radii and easing live in
 `src/6-shared/ui/kit/theme.css`. Legacy application recipes remain in
-`src/tailwind.css`. Typography recipes are `text-body`, `text-body-sm`,
-`text-caption`, `text-overline`, `text-title`, `text-title-lg` and `text-display`;
-`text-overline` sets size, line height and weight but not text transform.
-Use `uppercase` at the call site when needed. Numeric spacing still uses the
-shared `--spacing` unit.
+`src/tailwind.css`. Typography and spacing usage is described below.
 
 ## Dynamic color input and foregrounds
 
@@ -100,26 +96,17 @@ Choose dynamic foreground colors through `getContrastText` from
 
 ## Breakpoints
 
-`src/6-shared/ui/theme/breakpoints.ts` is the TypeScript source of truth:
-
-| Name |  Width |
-| ---- | -----: |
-| `xs` |    0px |
-| `sm` |  600px |
-| `md` |  900px |
-| `lg` | 1200px |
-| `xl` | 1536px |
-
-`src/tailwind.css` mirrors these values in pixels. Pixel units are deliberate:
+`src/6-shared/ui/theme/breakpoints.ts` owns the named application breakpoints.
+`src/tailwind.css` mirrors their values in pixels. Pixel units are deliberate:
 the CSS variants and `useBreakpointDown` must agree even when the browser's root
-font size is not 16px. A down query ends 0.05px before its boundary, preventing
-both sides of a breakpoint from matching simultaneously.
+font size changes. Down queries exclude the boundary, preventing both sides of
+a breakpoint from matching simultaneously.
 
 Use `useBreakpointDown` for the named application breakpoints.
 `useMediaQueryValue` supports media features and component-specific layout
-policies. Keep a shared component policy in one named hook. UI Kit Drawer and
-Menu use `useBottomSheetLayout`: bottom sheets below 500px, independently of
-the application's `md` layout breakpoint. Explicit Drawer sides override it.
+policies. Keep a shared component policy in one named hook.
+`src/6-shared/ui/kit/useBottomSheetLayout.ts` owns the narrow-screen policy for
+kit surfaces, independently of the app shell. Explicit Drawer sides override it.
 
 ## Canvas, panels and scrolling
 
@@ -133,12 +120,11 @@ The other columns have numeric collapse orders, lowest first. `resolveColumns`
 in `src/6-shared/ui/layout/columnLayout.ts`
 selects columns at their minimum widths, removes optional columns until they
 fit, and leaves sizing to CSS Flexbox. Each minimum is both the flex basis and
-the growth weight: columns with minima 280px and 560px share surplus 1:2.
-A capped column leaves further surplus to the others. The rail has a fixed width of 56px and
-does not participate in column sizing. The primary column can shrink below its minimum; a fully capped
-group is centered to the right of the rail. Desktop panel margins and gaps are
-8px, without a gap after the rail. A single Accounts column uses the same
-mechanism.
+the growth weight. A capped column leaves further surplus to the others. The
+rail has a fixed width and does not participate in column sizing. The primary
+column can shrink below its minimum; a fully capped group is centered to the
+right of the rail. Desktop panels have outer margins and gaps between columns,
+without a gap after the rail. A single Accounts column uses the same mechanism.
 
 `src/1-app/Layout.css` owns shell styles, safe-area variables and mobile
 layout rules. Shared `layout.css` styles only columns and panel surfaces.
@@ -154,19 +140,28 @@ update after resize. Navigation lists Accounts
 as a destination while the Transactions columns at the same width leave out the
 Accounts column.
 
-Below 600px there is one mobile shell. `useMobileLayout` in the shared layout
-module uses the shared
-`sm` breakpoint; the shell's `data-mobile` attribute drives its CSS too. A Panel
+Column visibility changes animate the surface and the space it occupies.
+Animation settings live in `src/6-shared/ui/layout/layout.css`.
+Ordinary resizing between visibility thresholds stays immediate. Exit content retains
+its last width and props until the transition finishes, then an adaptive editor
+can move into its drawer without remounting. Exiting columns become inert
+immediately; blur caused by hiding that column does not commit pending edits.
+Portalled drawers retain ordinary blur/save behavior. Initial measurement does
+not animate. Under reduced motion, flex space changes immediately and only
+opacity fades.
+
+The mobile shell is shared by panel and Canvas pages. `useMobileLayout` in the
+shared layout module owns breakpoint selection; the shell's `data-mobile`
+attribute drives its CSS too. A Panel
 fills the area above navigation and scrolls internally. Ordinary Canvas content
 fills the page's scrollport and can scroll underneath the same navigation. The
-navigation has a 64px action region plus bottom safe area. Color and blur layers
-cover that full height: a Canvas gradient (0% at the top, 90% at halfway, 100% at
-the bottom) and a separate 2px backdrop blur masked from transparent to fully
-visible at 40%. These stops are visual tuning values in `MobileNavigation.css`. The
+navigation includes the bottom safe area. Its Canvas gradient and masked
+backdrop blur cover the full navigation height; visual settings live in
+`src/3-widgets/Navigation/MobileNavigation.css`. The
 shell reserves top, left and right safe areas in both orientations; desktop also
 reserves the bottom safe area. Safe areas are separate from decorative panel
-margins. Panel radius is 16px at every width; `--mobile-panel-top` and
-`--mobile-panel-sides` default to zero.
+margins. Panel radius is shared across layouts; `--mobile-panel-top` and
+`--mobile-panel-sides` control decorative mobile insets in `src/1-app/Layout.css`.
 
 The optional history toolbar takes its natural height above both rail and page.
 While mobile navigation is mounted, CSS reserves its height plus bottom safe
@@ -211,26 +206,20 @@ scrolls instead of the panel.
 
 ## Typography and spacing
 
-The application font is IBM Plex Sans. Typography recipes are defined as
-compound `--text-*` theme variables in `src/tailwind.css`. Each variable sets
-size, line height and weight together, generating native Tailwind utilities:
-
-- `text-body`
-- `text-body-sm`
-- `text-caption`
-- `text-overline` (pair with `uppercase` — the theme variable does not set
-  `text-transform`)
-- `text-title`
-- `text-title-lg`
-- `text-display`
+Font loading and global font styles live in `src/6-shared/ui/theme/styles.css`;
+font utilities and typography recipes live in `src/tailwind.css`. Compound
+`--text-*` variables combine size, line height and weight into native Tailwind
+utilities. Use these recipes rather than assembling typography at each call
+site. Pair `text-overline` with `uppercase` when needed: the recipe does not
+set text transform.
 
 Apply margins and text color separately at the call site. Because compound
 `text-*` recipes share the font-size namespace in `tailwind-merge`, competing
 recipes passed through `cn()` resolve in favor of the last one.
 
-Tailwind spacing units are 4px. Prefer named utilities and explicit `gap` on
-layout containers. Use arbitrary values only when the component contract calls
-for a value outside the shared scale.
+Use the shared `--spacing` scale from `src/tailwind.css`. Prefer named utilities
+and explicit `gap` on layout containers. Use arbitrary values only when the
+component contract calls for a value outside the shared scale.
 
 ## Class composition and shadcn files
 
@@ -307,10 +296,9 @@ native callbacks within one event-loop task. A later Back request closes the
 next owner even while the previous history step is pending; the existing
 history queue serializes those steps. The originating
 Drawer's own dismissal is canceled; its visibility still follows its owner.
-Native close watchers are consumed even when that dismissal is canceled. The
-Base UI 1.8.0 patch renews the watcher's effect after cancellation so the next
-Android Back can dismiss the remaining drawer. Keep this patch until upstream
-handles that lifecycle. Android stories must require a live native watcher on
+Native close watchers are consumed even when that dismissal is canceled;
+the remaining drawer must still respond to the next Android Back.
+Android stories must require a live native watcher on
 every Back request, without falling back to router history, and check that the
 underlying page is hit-testable after the final close.
 Escape, backdrop, swipe and explicit close retain their surface-specific behavior.
@@ -340,9 +328,9 @@ The body scrolls in a kit `ScrollArea` that fills the rest of the panel;
 `contentClassName` is the padding and layout of the content inside that
 scroll. A Drawer whose children bring their own scroller, such as a virtual
 list, sets `contentScrolls`: the body is then a plain column they fill.
-Centered Dialog shows a close button by default (`closeButton={false}` hides
-it). Bottom drawers, Popover and Confirm have no visible close button; the
-surface owns this rule, so forms do not need breakpoint logic. Popover accepts `anchor`, `side`, and `align`; its anchor controls position,
+The surface owns close-control presentation, so forms do not need breakpoint
+logic for it. Dialog exposes `closeButton` when a caller needs an explicit
+choice. Popover accepts `anchor`, `side`, and `align`; its anchor controls position,
 while the trigger controls focus restoration. It is modal.
 
 Dialog and Drawer render their own dimming backdrops, including nested surfaces.
@@ -354,14 +342,13 @@ suppression is disabled for Dialog/Drawer. Popover and bottom Drawer retain a
 screen-reader close control without an icon; Popover also needs that primitive
 for Base UI's modal focus trap.
 
-Below **500px**, Popover and Menu default to `mobile="drawer"`; use
-`mobile="popover"` to keep them anchored. Dialog stays centered by default
-(`mobile="dialog"`) and supports `mobile="drawer"`. Drawer uses
-`side="auto" | "bottom" | "right"`. Shared application breakpoints are unchanged.
-From 500px, right drawers use the theme token `--spacing-ui-drawer-inset` (4px)
-on all viewport edges and round every corner; below 500px a right drawer fills
-the screen as a page, without inset or radius. Bottom drawers remain flush with
-the viewport and round only their top corners.
+Kit surface presentation follows `useBottomSheetLayout`. Use the `mobile` prop
+on Dialog, Popover or Menu, or `side` on Drawer, when a caller needs an explicit
+presentation. Supported options and defaults live in those components.
+On wider screens, right drawers use `--spacing-ui-drawer-inset` from
+`src/6-shared/ui/kit/theme.css` and round every corner; on narrow screens they
+fill the screen as a page. Bottom drawers remain flush with the viewport and
+round only their top corners. Geometry lives in `src/6-shared/ui/kit/Drawer.tsx`.
 Adaptive branches can remount content and lose local input. Keep important drafts
 above those branches. Switching presentation neither closes nor adds history.
 
@@ -389,8 +376,8 @@ Save/Cancel forms save only on explicit submission. Pending operations must not
 require their window to remain open. The component stories demonstrate close notification and explicit Save/Cancel
 separately. The transaction editor uses kit fields, selection controls, menus
 and an adaptive `DrawerSurface`; its existing popup or screen owns history.
-The editor opens as a full-width bottom sheet below 500px and a right drawer
-on wider screens. Its date and time inputs retain native segmented editing.
+The editor follows the shared bottom-sheet policy, using a right drawer on
+wider screens. Its date and time inputs retain native segmented editing.
 Existing transactions apply completed field edits automatically, one command
 per finished action. Amounts finish on Enter or field exit; comments finish on
 field exit. Date/time typing stays in the draft until field exit, while calendar
@@ -434,8 +421,8 @@ Transitions must have a reduced-motion variant. Reduced motion may keep an
 opacity change when it conveys visibility, but must remove spatial movement and
 decorative transforms.
 
-`AnimatedItem` wraps keyed items inside Motion's `AnimatePresence` with
-`mode="popLayout"`. It animates entrance, exit and neighbouring positions;
+`AnimatedItem` wraps keyed items inside Motion's `AnimatePresence`.
+It owns entrance, exit and neighbouring-position animations;
 exiting items become inert immediately. Keep item keys stable during editing.
 `TextFade` clips one line with a trailing mask only when its text overflows.
 Use it for constrained text throughout the interface. `render={<h2 />}` preserves
@@ -444,8 +431,9 @@ Place icons and actions outside it. `Chip` always applies that rule
 to its label while retaining the complete accessible name.
 
 Select panels opened from compact custom triggers size to their options, with
-`popupMinWidth` setting their minimum (13rem by default). Editing a chip's
-summary therefore does not resize its open list. Ordinary Select field surfaces
+`popupMinWidth` setting their minimum. See the kit Select components for
+defaults. Editing a chip's summary therefore does not resize its open list.
+Ordinary Select field surfaces
 still establish the panel's minimum width.
 
 ### Scrolling
@@ -470,21 +458,24 @@ viewport rendered as that element would replace its listbox role.
 
 The transaction list uses TanStack Virtual with the kit ScrollArea viewport
 passed through `viewportRef`. Dates and individual operations are virtual rows
-with stable keys and fixed heights of 48px and 72px. Filters precede the list in DOM order. Their unscaled border-box height
-supplies the virtualizer's top padding and scroll alignment, and ScrollArea's
-`insetTop` keeps native focus scrolling and the thumb clear of the overlay. The bottom 48px of the filter surface blend from the card background to
-60% opacity with a 2px backdrop blur. Below it, a separate date chip floats
-over the list without a full-width background. Its local `PinnedDateChip` uses ButtonBase with a 24px height,
-compensates its horizontal padding to align with ordinary date text,
-and shares the date typography and tabular numerals. The local component owns its background, outline and date typography.
-Pinning fades only the shell, keeping the date text continuously visible. It changes its label with a 4px directional crossfade (opacity only
-with reduced motion). The chip switches dates 8px before the next header reaches the filter edge,
-without pushing against it. The active source heading is hidden while its
-chip is pinned, preserving its row height. A focused source date hands focus
-to the chip without scrolling; returning to the top hands it back. Label motion and reduced-motion
-variants live in the co-located CSS. Restoration and calendar navigation
-retain the date-based contract, including when empty search results become
-nonempty again.
+with stable keys and fixed heights. Row dimensions and the date-switch offset
+live in `src/3-widgets/transaction/TransactionList/GroupedList.tsx`.
+Filters precede the list in DOM order. Their unscaled border-box height supplies
+the virtualizer's top padding and scroll alignment, and ScrollArea's `insetTop`
+keeps native focus scrolling and the thumb clear of the overlay. The filter
+surface fades into the list; its visual settings live in
+`src/6-shared/ui/kit/HeaderSurface.css`.
+Below it, a separate date chip floats over the list without a full-width
+background. The local `PinnedDateChip` owns its appearance and aligns with
+ordinary date text. Its motion settings live in `GroupedList.css` beside the
+component. Pinning fades only the shell, keeping the date text continuously
+visible. Label changes use directional motion, reduced to opacity when reduced
+motion is requested. The chip switches dates before the next header reaches
+the filter edge, without pushing against it. The active source heading is
+hidden while its chip is pinned, preserving its row height. A focused source
+date hands focus to the chip without scrolling; returning to the top hands it
+back. Restoration and calendar navigation retain the date-based contract,
+including when empty search results become nonempty again.
 
 ## Component CSS
 
@@ -509,8 +500,9 @@ barrel instead of importing an icon package throughout feature code.
 
 Stories use the same `AppThemeProvider`, locale providers and Tailwind source as
 the application. Cover both color schemes when a token-sensitive component is
-introduced or changed, and use the 899px/900px viewports for behavior that
-switches at `md`; kit bottom sheets use the 499px/500px viewports.
+introduced or changed. Check responsive behavior immediately below and at its
+boundary, taking the current threshold from the owning breakpoint or layout
+hook.
 
 Useful checks:
 
@@ -519,7 +511,7 @@ pnpm verify
 pnpm test:storybook src/6-shared/ui/kit/InlineField.stories.tsx
 ```
 
-Run only task-relevant stories in both themes with the configured two-worker
+Run only task-relevant stories in both themes with the configured worker
 limit. Include direct consumers of a changed shared component. Full browser
 runs (`verify:ui`, `verify:all`, or unfiltered `test:storybook`) are reserved for
 an explicit user request or genuinely global UI changes. Explain the global
