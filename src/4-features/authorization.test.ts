@@ -37,7 +37,11 @@ describe('logOut', () => {
   it('clears transient views', async () => {
     const store = configureStore({ reducer: { token, view } })
     store.dispatch(
-      patchTransactionsPage({ search: 'view from the previous account' })
+      patchTransactionsPage({
+        search: 'view from the previous account',
+        checked: ['previous-transaction'],
+        scrollOffset: 1477,
+      })
     )
 
     await (store.dispatch as any)(logOut())
@@ -46,6 +50,8 @@ describe('logOut', () => {
       query: { clauses: [] },
       search: '',
       topDate: null,
+      scrollOffset: null,
+      checked: [],
     })
     expect(clearLocalDataMock).toHaveBeenCalledOnce()
   })

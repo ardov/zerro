@@ -8,7 +8,7 @@ import { core } from '@/zerro-core/redux'
 
 import type { FC } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { track } from '@/6-shared/analytics'
 import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
@@ -42,9 +42,12 @@ export type TTransactionListView = {
   query: core.transactions.TTransactionQuery
   search: string
   restoredTopDate: TISODate | null
+  restoredScrollOffset: number | null
+  checked: TTransactionId[]
   onQueryChange: (query: core.transactions.TTransactionQuery) => void
   onSearchChange: (search: string) => void
-  onTopDateChange: (date: TISODate) => void
+  onCheckedChange: (checked: TTransactionId[]) => void
+  onScrollChange: (date: TISODate, scrollOffset: number) => void
 }
 
 export const TransactionList: FC<TTransactionListProps> = props => {
@@ -97,26 +100,37 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   const trList = useFilteredTransactions(transactionIds, appliedQuery)
 
-  const [checked, setChecked] = useState<TTransactionId[]>([])
-  const uncheckAll = useCallback(() => setChecked([]), [])
+  const [localChecked, setLocalChecked] = useState<TTransactionId[]>([])
+  const checkedIds = view?.checked ?? localChecked
+  const setChecked = view?.onCheckedChange ?? setLocalChecked
+  const allTransactions = useAppSelector(core.transactions.selectAll)
+  // A saved selection can outlive transactions removed while on another page.
+  const checked = useMemo(
+    () => checkedIds.filter(id => allTransactions[id]),
+    [checkedIds, allTransactions]
+  )
+  const uncheckAll = useCallback(() => setChecked([]), [setChecked])
   const checkAll = useCallback(
     () => setChecked(trList.map(tr => tr.id)),
-    [trList]
+    [trList, setChecked]
   )
-  const toggleTransaction = useCallback((id: TTransactionId) => {
-    setChecked(current => {
-      return current.includes(id)
-        ? current.filter(checked => id !== checked)
-        : [...current, id]
-    })
-  }, [])
+  const toggleTransaction = useCallback(
+    (id: TTransactionId) => {
+      setChecked(
+        checked.includes(id)
+          ? checked.filter(checked => id !== checked)
+          : [...checked, id]
+      )
+    },
+    [checked, setChecked]
+  )
   const onSelectSimilar = useCallback(
     (date: Date | number) => {
       const ids = trList.filter(tr => tr.changed === +date).map(tr => tr.id)
       setChecked(ids)
       track('similar_transactions_selected', {})
     },
-    [trList]
+    [trList, setChecked]
   )
   const onMarkOlderViewed = useCallback(
     (id: TTransactionId) => {
@@ -134,11 +148,12 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   const ask = useAsk()
 
-  const [prevCheckedDate, setPrevCheckedDate] = useState(checkedDate)
-  if (prevCheckedDate !== checkedDate) {
-    setPrevCheckedDate(checkedDate)
+  const prevCheckedDate = useRef(checkedDate)
+  useEffect(() => {
+    if (prevCheckedDate.current === checkedDate) return
+    prevCheckedDate.current = checkedDate
     if (checkedDate) onSelectSimilar(checkedDate)
-  }
+  }, [checkedDate, onSelectSimilar])
 
   // Groups carry only ids and depend on the list alone, so opening or checking
   // a transaction never rebuilds them. The heavy `<Transaction>` elements are
@@ -234,7 +249,8 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           renderTransaction={renderTransaction}
           initialDate={initialDate}
           restoredTopDate={view?.restoredTopDate}
-          onTopDateChange={view?.onTopDateChange}
+          restoredScrollOffset={view?.restoredScrollOffset}
+          onScrollChange={view?.onScrollChange}
           header={header}
           emptyState={<EmptyState />}
         />

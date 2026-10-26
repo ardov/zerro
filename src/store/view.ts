@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
-import type { TISODate } from '@/6-shared/types'
+import type { TISODate, TTransactionId } from '@/6-shared/types'
 import type { core } from '@/zerro-core/redux'
 import type { RootState } from '@/store'
 
@@ -8,6 +8,8 @@ export type TTransactionsPageView = {
   query: core.transactions.TTransactionQuery
   search: string
   topDate: TISODate | null
+  scrollOffset: number | null
+  checked: TTransactionId[]
 }
 
 export type TViewState = {
@@ -23,6 +25,8 @@ function createInitialState(generation = 0): TViewState {
       query: { clauses: [] },
       search: '',
       topDate: null,
+      scrollOffset: null,
+      checked: [],
     },
   }
 }
@@ -37,12 +41,17 @@ const { reducer, actions } = createSlice({
     ) => {
       Object.assign(state.transactionsPage, action.payload)
     },
-    saveTransactionsTopDate: (
+    saveTransactionsScroll: (
       state,
-      action: PayloadAction<{ topDate: TISODate; generation: number }>
+      action: PayloadAction<{
+        topDate: TISODate
+        scrollOffset: number
+        generation: number
+      }>
     ) => {
       if (action.payload.generation !== state.generation) return
       state.transactionsPage.topDate = action.payload.topDate
+      state.transactionsPage.scrollOffset = action.payload.scrollOffset
     },
     resetViews: state => createInitialState(state.generation + 1),
   },
@@ -50,7 +59,7 @@ const { reducer, actions } = createSlice({
 
 export default reducer
 
-export const { patchTransactionsPage, saveTransactionsTopDate, resetViews } =
+export const { patchTransactionsPage, saveTransactionsScroll, resetViews } =
   actions
 
 export const selectTransactionsPageView = (state: RootState) =>

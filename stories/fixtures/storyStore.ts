@@ -11,6 +11,7 @@ import {
 export type StoryScenario =
   | 'debtor-navigation'
   | 'transaction-filters'
+  | 'transaction-navigation'
   | 'receipt-and-map'
   | 'demo'
   | 'off-budget-transfers'
@@ -74,6 +75,32 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
               comment: 'Bob loan',
             }),
           },
+        })
+      }
+      case 'transaction-navigation': {
+        const current = demoState.data.current
+        return makeCoreNextDemoRootState({
+          ...current,
+          transaction: Object.fromEntries(
+            Array.from({ length: 80 }, (_, index) => {
+              const id = `purchase-${index}`
+              return [
+                id,
+                makeTransaction({
+                  id,
+                  date: '2026-10-09',
+                  created: index,
+                  comment: `Purchase ${index}`,
+                  outcome: 12,
+                  incomeAccount: 'HSBC USD',
+                  outcomeAccount: 'HSBC USD',
+                  tag: ['Food'],
+                  incomeInstrument: 1,
+                  outcomeInstrument: 1,
+                }),
+              ]
+            })
+          ),
         })
       }
       case 'transaction-filters': {

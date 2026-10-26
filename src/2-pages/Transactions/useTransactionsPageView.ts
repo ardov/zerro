@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import type { TISODate } from '@/6-shared/types'
+import type { TISODate, TTransactionId } from '@/6-shared/types'
 import { useDebouncedCallback } from '@/6-shared/hooks/useDebouncedCallback'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   patchTransactionsPage,
-  saveTransactionsTopDate,
+  saveTransactionsScroll,
   selectTransactionsPageView,
   selectViewGeneration,
 } from '@/store/view'
 import type { TTransactionListView } from '@/3-widgets/transaction/TransactionList'
 import type { core } from '@/zerro-core/redux'
 
-const TOP_DATE_SAVE_DELAY = 400
+const SCROLL_SAVE_DELAY = 400
 
 export function useTransactionsPageView(): TTransactionListView {
   const dispatch = useAppDispatch()
@@ -29,33 +29,53 @@ export function useTransactionsPageView(): TTransactionListView {
     },
     [dispatch]
   )
-  // The list reads the top date back only when it mounts, so it is saved once
+  const onCheckedChange = useCallback(
+    (checked: TTransactionId[]) => {
+      dispatch(patchTransactionsPage({ checked }))
+    },
+    [dispatch]
+  )
+  // The list reads the position back only when it mounts, so it is saved once
   // scrolling settles, or when the page unmounts. A save made after the views
   // were reset carries the old generation and is ignored.
   const generation = useAppSelector(selectViewGeneration)
-  const saveTopDate = useDebouncedCallback(
-    (topDate: TISODate, savedGeneration: number) =>
+  const saveScroll = useDebouncedCallback(
+    (topDate: TISODate, scrollOffset: number, savedGeneration: number) =>
       dispatch(
-        saveTransactionsTopDate({ topDate, generation: savedGeneration })
+        saveTransactionsScroll({
+          topDate,
+          scrollOffset,
+          generation: savedGeneration,
+        })
       ),
     [dispatch],
-    TOP_DATE_SAVE_DELAY
+    SCROLL_SAVE_DELAY
   )
-  const onTopDateChange = useCallback(
-    (topDate: TISODate) => saveTopDate(topDate, generation),
-    [saveTopDate, generation]
+  const onScrollChange = useCallback(
+    (topDate: TISODate, scrollOffset: number) =>
+      saveScroll(topDate, scrollOffset, generation),
+    [saveScroll, generation]
   )
-  useEffect(() => () => saveTopDate.flush(), [saveTopDate])
+  useEffect(() => () => saveScroll.flush(), [saveScroll])
 
   return useMemo(
     () => ({
       query: transactionsPage.query,
       search: transactionsPage.search,
       restoredTopDate: transactionsPage.topDate,
+      restoredScrollOffset: transactionsPage.scrollOffset,
+      checked: transactionsPage.checked,
       onQueryChange,
       onSearchChange,
-      onTopDateChange,
+      onCheckedChange,
+      onScrollChange,
     }),
-    [onQueryChange, onSearchChange, onTopDateChange, transactionsPage]
+    [
+      onQueryChange,
+      onSearchChange,
+      onCheckedChange,
+      onScrollChange,
+      transactionsPage,
+    ]
   )
 }

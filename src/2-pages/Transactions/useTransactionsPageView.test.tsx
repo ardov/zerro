@@ -27,9 +27,12 @@ describe('useTransactionsPageView', () => {
     })
 
     act(() => {
-      first.result.current.onQueryChange({ clauses: [] })
+      first.result.current.onQueryChange({
+        clauses: [{ kind: 'account', ids: ['account'] }],
+      })
       first.result.current.onSearchChange('coffee')
-      first.result.current.onTopDateChange('2026-07-23')
+      first.result.current.onCheckedChange(['a', 'b', 'c', 'd', 'e'])
+      first.result.current.onScrollChange('2026-07-23', 1873)
     })
     first.unmount()
 
@@ -37,13 +40,15 @@ describe('useTransactionsPageView', () => {
       wrapper: Wrapper,
     })
     expect(restored.result.current).toMatchObject({
-      query: { clauses: [] },
+      query: { clauses: [{ kind: 'account', ids: ['account'] }] },
       search: 'coffee',
       restoredTopDate: '2026-07-23',
+      restoredScrollOffset: 1873,
+      checked: ['a', 'b', 'c', 'd', 'e'],
     })
   })
 
-  it('saves the top date once scrolling settles, not on every day', () => {
+  it('saves the position once scrolling settles, including movement within a day', () => {
     vi.useFakeTimers()
     const { store, Wrapper } = makeWrapper()
     const { result } = renderHook(() => useTransactionsPageView(), {
@@ -52,32 +57,41 @@ describe('useTransactionsPageView', () => {
     const view = result.current
 
     act(() => {
-      view.onTopDateChange('2026-07-23')
-      view.onTopDateChange('2026-07-22')
-      view.onTopDateChange('2026-07-21')
+      view.onScrollChange('2026-07-23', 1873)
+      view.onScrollChange('2026-07-23', 2345)
+      view.onScrollChange('2026-07-23', 3456)
     })
-    expect(store.getState().view.transactionsPage.topDate).toBeNull()
+    expect(store.getState().view.transactionsPage).toMatchObject({
+      topDate: null,
+      scrollOffset: null,
+    })
     expect(result.current).toBe(view)
 
     act(() => vi.advanceTimersByTime(1000))
-    expect(store.getState().view.transactionsPage.topDate).toBe('2026-07-21')
+    expect(store.getState().view.transactionsPage).toMatchObject({
+      topDate: '2026-07-23',
+      scrollOffset: 3456,
+    })
   })
 
-  it('drops a pending top date when the views are reset before unmount', () => {
+  it('drops a pending position when the views are reset before unmount', () => {
     vi.useFakeTimers()
     const { store, Wrapper } = makeWrapper()
     const { result, unmount } = renderHook(() => useTransactionsPageView(), {
       wrapper: Wrapper,
     })
 
-    act(() => result.current.onTopDateChange('2026-07-21'))
+    act(() => result.current.onScrollChange('2026-07-21', 3456))
     act(() => {
       store.dispatch(resetViews())
     })
     unmount()
     act(() => vi.advanceTimersByTime(1000))
 
-    expect(store.getState().view.transactionsPage.topDate).toBeNull()
+    expect(store.getState().view.transactionsPage).toMatchObject({
+      topDate: null,
+      scrollOffset: null,
+    })
   })
 
   it('starts from defaults in a new store', () => {
@@ -90,6 +104,8 @@ describe('useTransactionsPageView', () => {
       query: { clauses: [] },
       search: '',
       restoredTopDate: null,
+      restoredScrollOffset: null,
+      checked: [],
     })
   })
 })

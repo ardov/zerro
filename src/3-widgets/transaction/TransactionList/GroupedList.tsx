@@ -27,7 +27,9 @@ type GroupedListProps = {
   renderTransaction: (id: TTransactionId) => ReactNode
   initialDate?: TDateDraft
   restoredTopDate?: TISODate | null
+  restoredScrollOffset?: number | null
   onTopDateChange?: (date: TISODate) => void
+  onScrollChange?: (date: TISODate, scrollOffset: number) => void
   header?: ReactNode
   emptyState?: ReactNode
 }
@@ -37,7 +39,9 @@ export const GroupedList: FC<GroupedListProps> = ({
   renderTransaction,
   initialDate,
   restoredTopDate,
+  restoredScrollOffset,
   onTopDateChange,
+  onScrollChange,
   header,
   emptyState,
 }) => {
@@ -117,6 +121,7 @@ export const GroupedList: FC<GroupedListProps> = ({
       : rows[0]?.date
   const pinned = offset > 0 && Boolean(topDate)
   const reportedDate = useRef<TISODate | null>(null)
+  const reportedOffset = useRef<number | null>(null)
   useLayoutEffect(() => {
     // Empty results collapse the native scroll offset. When rows return,
     // restore from the current props, not a target captured before filtering.
@@ -126,17 +131,27 @@ export const GroupedList: FC<GroupedListProps> = ({
     }
     if (measuredFilterHeight === null) return
     if (!positioned.current || initialDate !== previousInitialDate.current) {
+      const restoreOffset =
+        !positioned.current && !initialDate && restoredScrollOffset != null
       const target = positioned.current
         ? initialDate
         : (initialDate ?? restoredTopDate)
       positioned.current = true
       previousInitialDate.current = initialDate
-      if (target) {
-        scrollToDate(target)
+      if (restoreOffset || target) {
+        if (restoreOffset) virtualizer.scrollToOffset(restoredScrollOffset)
+        else if (target) scrollToDate(target)
         // Do not publish the pre-restoration date and overwrite the saved one.
         // The virtualizer reports the actual date on the following scroll render.
         if (viewportRef.current?.scrollTop !== offset) return
       }
+    }
+    if (
+      topDate &&
+      (topDate !== reportedDate.current || offset !== reportedOffset.current)
+    ) {
+      reportedOffset.current = offset
+      onScrollChange?.(topDate, offset)
     }
     if (topDate && topDate !== reportedDate.current) {
       reportedDate.current = topDate
@@ -147,11 +162,27 @@ export const GroupedList: FC<GroupedListProps> = ({
     measuredFilterHeight,
     initialDate,
     restoredTopDate,
+    restoredScrollOffset,
     scrollToDate,
+    virtualizer,
     offset,
     topDate,
     onTopDateChange,
+    onScrollChange,
   ])
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport || !onScrollChange) return
+    // The virtualizer may skip React updates while scrolling within the same
+    // row range. Capture every native offset so an immediate exit saves it too.
+    const onScroll = () => {
+      if (positioned.current && rows.length && topDate)
+        onScrollChange(topDate, viewport.scrollTop)
+    }
+    viewport.addEventListener('scroll', onScroll, { passive: true })
+    return () => viewport.removeEventListener('scroll', onScroll)
+  }, [onScrollChange, rows.length, topDate])
 
   useLayoutEffect(() => {
     const active = document.activeElement

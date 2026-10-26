@@ -14,6 +14,7 @@ function Example() {
   })
   const [search, setSearch] = useState('')
   const [opened, setOpened] = useState('')
+  const [checked, setChecked] = useState<string[]>([])
   return (
     <div className="h-[600px] w-[560px] max-w-[95vw]">
       <TransactionList
@@ -25,7 +26,10 @@ function Example() {
           onQueryChange: setQuery,
           onSearchChange: setSearch,
           restoredTopDate: null,
-          onTopDateChange: () => {},
+          restoredScrollOffset: null,
+          checked,
+          onCheckedChange: setChecked,
+          onScrollChange: () => {},
         }}
       />
       <output aria-label="Opened operation" className="sr-only">

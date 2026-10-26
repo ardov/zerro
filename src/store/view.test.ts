@@ -6,6 +6,8 @@ const initialView: TTransactionsPageView = {
   query: { clauses: [] },
   search: '',
   topDate: null,
+  scrollOffset: null,
+  checked: [],
 }
 
 describe('view reducer', () => {
@@ -34,6 +36,8 @@ describe('view reducer', () => {
         query: { clauses: [{ kind: 'search', value: 'coffee' }] },
         search: 'coffee',
         topDate: '2026-07-23',
+        scrollOffset: 1873,
+        checked: ['a', 'b'],
       })
     )
 
