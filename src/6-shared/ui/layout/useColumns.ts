@@ -5,7 +5,7 @@ export const ColumnsContext = createContext<ReturnType<
   typeof resolveColumns
 > | null>(null)
 
-/** The shell owns measurement and distribution; pages consume its result. */
+/** The shell selects visible columns; CSS distributes their widths. */
 export function useColumns() {
   const layout = useContext(ColumnsContext)
   if (!layout) throw new Error('Columns require the application layout')

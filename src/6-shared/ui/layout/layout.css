@@ -1,13 +1,22 @@
 @layer components {
   .layout-columns {
-    display: grid;
+    display: flex;
     flex: 1;
     min-width: 0;
     min-height: 0;
-    grid-template-rows: minmax(0, 1fr);
     justify-content: center;
     gap: 8px;
     padding: 8px 8px 8px 0;
+  }
+
+  .layout-column {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .layout-column > .layout-panel {
+    flex: 1;
   }
 
   .layout-panel {

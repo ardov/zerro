@@ -9,8 +9,7 @@ import { type TDestination, useDestinations } from './destinations'
 
 /** The icon-only strip of destinations on the left of a wide window. It sits
  * on the canvas, not on a panel, and holds no lists of data. */
-export const Rail: FC<{ width: number; accountsPanelFits: boolean }> = ({
-  width,
+export const Rail: FC<{ accountsPanelFits: boolean }> = ({
   accountsPanelFits,
 }) => {
   const { t } = useTranslation('navigation')
@@ -18,8 +17,7 @@ export const Rail: FC<{ width: number; accountsPanelFits: boolean }> = ({
   return (
     <nav
       aria-label={t('main')}
-      className="flex h-full shrink-0 flex-col items-center gap-2 py-3"
-      style={{ width }}
+      className="flex h-full w-[56px] shrink-0 flex-col items-center gap-2 py-3"
     >
       <Link
         to="/transactions"

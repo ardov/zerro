@@ -13,13 +13,13 @@ const meta = {
     viewport: {
       options: {
         belowAccounts: {
-          name: 'Before accounts panel (1271px)',
-          styles: { width: '1271px', height: '900px' },
+          name: 'Before accounts panel (1279px)',
+          styles: { width: '1279px', height: '900px' },
           type: 'desktop',
         },
         withAccounts: {
-          name: 'With accounts panel (1272px)',
-          styles: { width: '1272px', height: '900px' },
+          name: 'With accounts panel (1280px)',
+          styles: { width: '1280px', height: '900px' },
           type: 'desktop',
         },
       },
@@ -38,7 +38,7 @@ export const BeforeAccountsPanel: Story = {
   globals: { viewport: { value: 'belowAccounts' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    expect(window.innerWidth).toBe(1271)
+    expect(window.innerWidth).toBe(1279)
     expect(canvas.queryByRole('button', { name: /HSBC USD/ })).toBeNull()
     const panels = canvasElement.querySelector<HTMLElement>('.layout-columns')!
     // DnD also renders visually hidden announcement nodes beside the panels.
@@ -57,7 +57,7 @@ export const WithAccountsPanel: Story = {
   globals: { viewport: { value: 'withAccounts' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    expect(window.innerWidth).toBe(1272)
+    expect(window.innerWidth).toBe(1280)
     const account = canvas.getByRole('button', { name: /HSBC USD/ })
     expect(account.getBoundingClientRect().height).toBe(40)
     const panels = canvasElement.querySelector<HTMLElement>('.layout-columns')!

@@ -20,7 +20,7 @@ type Story = StoryObj
 export const DesktopRail: Story = {
   render: () => (
     <div className="flex h-[720px] bg-ui-base">
-      <Rail width={56} accountsPanelFits />
+      <Rail accountsPanelFits />
       <div className="grow" />
     </div>
   ),

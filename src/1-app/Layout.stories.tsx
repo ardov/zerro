@@ -120,6 +120,36 @@ export const ToolbarAboveRail: Story = {
   },
 }
 
+export const DesktopResize: Story = {
+  globals: { viewport: { value: 'desktop' } },
+  render: () => (
+    <div data-testid="resize-container" style={{ width: 900 }}>
+      <PanelPage />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const container = within(canvasElement).getByTestId('resize-container')
+    const nav = within(container).getByRole('navigation')
+    const panel = container.querySelector<HTMLElement>('.layout-panel')!
+    await waitFor(() =>
+      expect(panel.getBoundingClientRect().left).toBe(
+        nav.getBoundingClientRect().right
+      )
+    )
+    for (const width of [1000, 1100, 850, 200, 900]) {
+      container.style.width = `${width}px`
+      // The browser must lay out the panel at the new width immediately,
+      // including before ResizeObserver delivers its next notification.
+      expect(panel.getBoundingClientRect().left).toBe(
+        nav.getBoundingClientRect().right
+      )
+      expect(panel.getBoundingClientRect().right).toBe(
+        container.getBoundingClientRect().right - 8
+      )
+    }
+  },
+}
+
 export const MobileToolbar: Story = {
   globals: { viewport: { value: 'iphone13' } },
   render: () => <PanelPage toolbar />,
@@ -137,7 +167,7 @@ export const MobileToolbar: Story = {
 function CappedPage() {
   const columns = [
     { id: 'main', min: 200, max: 400 },
-    { id: 'aside', min: 200, max: 240, collapseOrder: 0 },
+    { id: 'aside', min: 100, max: 240, collapseOrder: 0 },
   ]
   return (
     <Layout navigation columns={columns}>
@@ -227,5 +257,31 @@ export const DesktopSafeAreas: Story = {
     } finally {
       for (const name of Object.keys(values)) root.style.removeProperty(name)
     }
+  },
+}
+
+export const ProportionalColumns: Story = {
+  globals: { viewport: { value: 'desktop' } },
+  render: () => (
+    <div data-testid="resize-container" style={{ width: 522 }}>
+      <CappedPage />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const container = within(canvasElement).getByTestId('resize-container')
+    const panels = container.querySelectorAll<HTMLElement>('.layout-panel')
+    await waitFor(() => {
+      expect(panels[0].getBoundingClientRect().width).toBe(300)
+      expect(panels[1].getBoundingClientRect().width).toBe(150)
+    })
+    container.style.width = '722px'
+    // The main column hits its max; the remaining room centers the capped pair.
+    expect(panels[0].getBoundingClientRect().width).toBe(400)
+    expect(panels[1].getBoundingClientRect().width).toBe(240)
+    expect(panels[0].getBoundingClientRect().left - 56).toBeCloseTo(
+      container.getBoundingClientRect().right -
+        8 -
+        panels[1].getBoundingClientRect().right
+    )
   },
 }

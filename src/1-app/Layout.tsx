@@ -24,10 +24,10 @@ export function Layout({
   children: ReactNode
 }) {
   const mobile = useMobileLayout()
-  const body = useRef<HTMLDivElement>(null)
+  const content = useRef<HTMLElement>(null)
   const [width, setWidth] = useState(() => window.innerWidth)
   useLayoutEffect(() => {
-    const element = body.current!
+    const element = content.current!
     const measure = () => setWidth(element.getBoundingClientRect().width)
     measure()
     const observer = new ResizeObserver(measure)
@@ -54,14 +54,13 @@ export function Layout({
         data-mobile={mobile || undefined}
       >
         {toolbar && <div className="shrink-0">{toolbar}</div>}
-        <div ref={body} className="flex min-h-0 min-w-0 flex-1">
+        <div className="flex min-h-0 min-w-0 flex-1">
           {navigation && !mobile && (
-            <Rail
-              width={layout.sizes.rail}
-              accountsPanelFits={accountsPanelFits}
-            />
+            <Rail accountsPanelFits={accountsPanelFits} />
           )}
-          <main className="flex min-h-0 min-w-0 flex-1">{children}</main>
+          <main ref={content} className="flex min-h-0 min-w-0 flex-1">
+            {children}
+          </main>
         </div>
         {navigation && mobile && <MobileNavigation />}
       </div>

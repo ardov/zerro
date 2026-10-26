@@ -132,9 +132,10 @@ Each definition is an array in visual order. Exactly one column omits
 The other columns have numeric collapse orders, lowest first. `resolveColumns`
 in `src/6-shared/ui/layout/columnLayout.ts`
 selects columns at their minimum widths, removes optional columns until they
-fit, then distributes surplus equally among growing elements. The rail
-participates with min 48px and max 56px. A capped element leaves further surplus
-to the others. The primary column can shrink below its minimum; a fully capped
+fit, and leaves sizing to CSS Flexbox. Each minimum is both the flex basis and
+the growth weight: columns with minima 280px and 560px share surplus 1:2.
+A capped column leaves further surplus to the others. The rail has a fixed width of 56px and
+does not participate in column sizing. The primary column can shrink below its minimum; a fully capped
 group is centered to the right of the rail. Desktop panel margins and gaps are
 8px, without a gap after the rail. A single Accounts column uses the same
 mechanism.
@@ -142,10 +143,14 @@ mechanism.
 `src/1-app/Layout.css` owns shell styles, safe-area variables and mobile
 layout rules. Shared `layout.css` styles only columns and panel surfaces.
 
-`Layout` measures the space inside the shell's safe areas once and provides
-one result to the rail and page columns. The app supplies the column array;
-omitting it gives an ordinary Canvas page, with only the rail to size. Page
-components consume the result through `useColumns`. Navigation lists Accounts
+`Layout` measures the main content area after navigation and safe areas, then
+provides the visible column set and definitions to page columns. The app supplies the column array;
+omitting it gives an ordinary Canvas page. Page
+components consume the result through `useColumns`. `Columns` gives each child
+a flex container, in definition order; conditional children retain their slots.
+The containers own width and visibility, while panels own surfaces and scrolling.
+Widths adapt immediately to the available space, without waiting for a React
+update after resize. Navigation lists Accounts
 as a destination while the Transactions columns at the same width leave out the
 Accounts column.
 
