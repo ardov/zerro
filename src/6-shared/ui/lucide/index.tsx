@@ -49,7 +49,6 @@ import {
   Globe,
   GripVertical,
   Heart,
-  House,
   Landmark,
   LogIn,
   LogOut,
@@ -136,7 +135,7 @@ export const IncomeDebtIcon = createIcon(ArrowRightToLine, 'IncomeDebtIcon')
 export const OutcomeDebtIcon = createIcon(ArrowLeftFromLine, 'OutcomeDebtIcon')
 
 // Money and its parts
-export const AccountBalanceIcon = createIcon(House, 'AccountBalanceIcon')
+export const BudgetIcon = createIcon(PiggyBank, 'BudgetIcon')
 export const AccountBalanceWalletIcon = createIcon(
   CreditCard,
   'AccountBalanceWalletIcon'

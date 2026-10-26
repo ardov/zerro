@@ -70,8 +70,13 @@ Status text and icons use `ui-success`, `ui-warning`, `ui-error`, or `ui-link`
 for information. Solid status surfaces use `ui-{success,warning,info,error}-solid`
 paired with `ui-on-{success,warning,info,error}`. These pairs are independent
 from status text and chart colors. `UI Kit/Foundations` demonstrates the roles.
-The browser `theme-color` is converted from the kit's card color to sRGB by
-`kit/themeColor.ts`, without reading computed DOM styles during mounting.
+The browser `theme-color` follows the application scheme using literal sRGB
+colors in `kit/themeColor.ts`. Keep these values aligned with Canvas in
+`kit/theme.css` when changing the palette. The static `public/manifest.json`
+uses the dark Canvas color for the PWA launch background and default theme color;
+update those values manually when dark Canvas changes. The running application's
+theme is independent of the launch background. Installed launch screens may keep
+the manifest metadata captured by the browser at installation/update.
 
 `src/6-shared/ui/theme/colors.ts` retains the generated palette consumed by
 charts and legacy warning surfaces. Its values are evaluated once
@@ -118,12 +123,59 @@ the application's `md` layout breakpoint. Explicit Drawer sides override it.
 
 ## Canvas, panels and scrolling
 
-The logged-in layout is a canvas (`--background`) with panels (`--card`) on it.
-`src/6-shared/ui/layout/panelWidths.ts` holds the minimum widths of the rail,
-the canvas gap and each panel. A page decides its arrangement by asking
-whether the window fits a set of panels side by side (`useWindowFits`). It
-does not use a named breakpoint for this. A panel that does not fit opens as
-a drawer instead, or is not shown.
+The application shell uses Canvas (`ui-base`) behind panels (`ui-card`).
+`src/1-app/pageColumns.ts` defines each page's columns: minimum,
+optional maximum and collapse order. Every column grows from its required minimum
+to its maximum; equal bounds fix its width, and no maximum means unlimited growth.
+Each definition is an array in visual order. Exactly one column omits
+`collapseOrder`: it is the primary, retained on mobile and never removed.
+The other columns have numeric collapse orders, lowest first. `resolveColumns`
+in `src/6-shared/ui/layout/columnLayout.ts`
+selects columns at their minimum widths, removes optional columns until they
+fit, then distributes surplus equally among growing elements. The rail
+participates with min 48px and max 56px. A capped element leaves further surplus
+to the others. The primary column can shrink below its minimum; a fully capped
+group is centered to the right of the rail. Desktop panel margins and gaps are
+8px, without a gap after the rail. A single Accounts column uses the same
+mechanism.
+
+`src/1-app/Layout.css` owns shell styles, safe-area variables and mobile
+layout rules. Shared `layout.css` styles only columns and panel surfaces.
+
+`Layout` measures the space inside the shell's safe areas once and provides
+one result to the rail and page columns. The app supplies the column array;
+omitting it gives an ordinary Canvas page, with only the rail to size. Page
+components consume the result through `useColumns`. Navigation lists Accounts
+as a destination while the Transactions columns at the same width leave out the
+Accounts column.
+
+Below 600px there is one mobile shell. `useMobileLayout` in the shared layout
+module uses the shared
+`sm` breakpoint; the shell's `data-mobile` attribute drives its CSS too. A Panel
+fills the area above navigation and scrolls internally. Ordinary Canvas content
+fills the page's scrollport and can scroll underneath the same navigation. The
+navigation has a 64px action region plus bottom safe area. Color and blur layers
+cover that full height: a Canvas gradient (0% at the top, 90% at halfway, 100% at
+the bottom) and a separate 2px backdrop blur masked from transparent to fully
+visible at 40%. These stops are visual tuning values in `MobileNavigation.css`. The
+shell reserves top, left and right safe areas in both orientations; desktop also
+reserves the bottom safe area. Safe areas are separate from decorative panel
+margins. Panel radius is 16px at every width; `--mobile-panel-top` and
+`--mobile-panel-sides` default to zero.
+
+The optional history toolbar takes its natural height above both rail and page.
+While mobile navigation is mounted, CSS reserves its height plus bottom safe
+area for portalled toasts through `--toast-bottom-inset`.
+`CanvasPage` provides the full-height scrollport; each page owns its content
+width and padding.
+`Panel` is a clipped surface for content with its own scroller, such as the
+transaction list. `PanelScrollable` owns a `ScrollArea` and accepts
+`contentClassName` for its inner content. Both use the same panel styling;
+`PanelScrollable` makes the scroller itself the surface without an extra wrapper.
+`AdaptivePanel` retains one React editor and scrollport while moving its stable
+host between a docked column and the existing Drawer surface. Selection, unfinished
+input and scroll state survive the change without adding history entries.
+Drawer presence owns the modal content lifetime, including its closing transition.
 
 A scrolling surface follows four rules. Each one prevents a specific artifact:
 
@@ -140,16 +192,13 @@ A scrolling surface follows four rules. Each one prevents a specific artifact:
   `visible`. An `overflow: hidden` wrapper added for rounding becomes that
   ancestor, and it never scrolls. A sticky element's parent should also span
   the whole scrolled content, or the element leaves with it.
-- **Overlaps are insets inside the scroll.** The bottom bar measures how much
-  of the window it covers, and the layout sets that as `--bottom-inset` on
-  the canvas, so every page scroller sees it and no overlay does. `Panel` is
-  a kit `ScrollArea` with `insetBottom`: the inset goes at the end of the
-  content, into `scroll-padding-bottom` and under the thumb's track. Content
-  then scrolls on under the bar instead of stopping above it. A panel whose
-  content brings its own scroller, such as a virtual list, sets
-  `contentScrolls` and passes `insetBottom={bottomBarInset}` to its nested
-  `ScrollArea`. For a top overlay, `insetTop` reserves native scroll padding
-  and shortens the track; the content supplies its own leading space.
+- **Overlaps are insets inside the scroll.** `CanvasPage` reserves
+  `--mobile-navigation-inset` inside its scroll, so the final content can move
+  clear of navigation while earlier content passes underneath. Panels end above
+  navigation and do not reserve that inset inside their own scrollers. Overlays
+  remain outside the app shell and do not inherit its navigation inset. For a
+  top overlay, `insetTop` reserves native scroll padding and shortens the track;
+  the content supplies its own leading space.
 
 Every flex ancestor between `h-dvh` and a scroller needs `min-h-0` (or
 `min-w-0` across). Without it the item grows to its content, and the window

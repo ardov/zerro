@@ -4,7 +4,6 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { ListRowSubheader } from '@/6-shared/ui/ListRow'
 import { ScrollArea } from '@/6-shared/ui/kit/ScrollArea'
 import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
-import { bottomBarInset } from '@/6-shared/ui/layout/Panel'
 import { formatDate, toISODate } from '@/6-shared/helpers/date'
 import type { TDateDraft, TISODate, TTransactionId } from '@/6-shared/types'
 import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
@@ -203,7 +202,6 @@ export const GroupedList: FC<GroupedListProps> = ({
       <ScrollArea
         className="h-full"
         viewportRef={viewportRef}
-        insetBottom={bottomBarInset}
         insetTop={`${headerHeight}px`}
       >
         <div

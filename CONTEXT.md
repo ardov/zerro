@@ -98,8 +98,9 @@ _Avoid_: Page background, backdrop
 
 **Panel**:
 One rounded region of the canvas that scrolls on its own and has a minimum
-width. When the screen has no room for it, it opens as a drawer instead, or is
-not shown.
+width for sharing space with other panels. The panel that remains when the
+others give way can shrink to the available width. A panel with no room opens
+as a drawer instead, or is not shown.
 _Avoid_: Card, work area, pane
 
 **Accounts panel**:

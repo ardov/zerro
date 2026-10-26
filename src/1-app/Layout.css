@@ -1,0 +1,33 @@
+@layer components {
+  :root {
+    --layout-safe-top: env(safe-area-inset-top, 0px);
+    --layout-safe-right: env(safe-area-inset-right, 0px);
+    --layout-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --layout-safe-left: env(safe-area-inset-left, 0px);
+    --mobile-navigation-height: 64px;
+  }
+
+  .app-layout {
+    --mobile-navigation-inset: 0px;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--color-ui-base);
+    padding: var(--layout-safe-top) var(--layout-safe-right)
+      var(--layout-safe-bottom) var(--layout-safe-left);
+  }
+
+  .app-layout[data-mobile][data-navigation] {
+    --mobile-navigation-inset: calc(
+      var(--mobile-navigation-height) + var(--layout-safe-bottom)
+    );
+    padding-bottom: 0;
+  }
+
+  .app-layout[data-mobile] .layout-columns {
+    gap: 0;
+    padding: var(--mobile-panel-top, 0px) var(--mobile-panel-sides, 0px)
+      var(--mobile-navigation-inset);
+  }
+}

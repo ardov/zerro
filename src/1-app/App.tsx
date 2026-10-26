@@ -1,4 +1,3 @@
-import type { FC } from 'react'
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 import {
   BrowserRouter,
@@ -22,15 +21,12 @@ import { core } from '@/zerro-core/redux'
 
 import { HistoryShortcuts } from '@/4-features/historyShortcuts'
 import { RegularSyncHandler } from '@/3-widgets/RegularSyncHandler'
+import { Layout } from './Layout'
 import { HistoryTopBar } from '@/3-widgets/History/HistoryTopBar'
-import {
-  MobileNavigation,
-  Rail,
-  useBottomBarShown,
-} from '@/3-widgets/Navigation'
-import { panelWidths } from '@/6-shared/ui/layout/panelWidths'
-import { Panel, bottomBarInset } from '@/6-shared/ui/layout/Panel'
-import { ScrollArea } from '@/6-shared/ui/kit/ScrollArea'
+import { pageColumns } from '@/1-app/pageColumns'
+import { Columns } from '@/6-shared/ui/layout/Columns'
+import { PanelScrollable } from '@/6-shared/ui/layout/Panel'
+import { CanvasPage } from '@/6-shared/ui/layout/CanvasPage'
 import ErrorBoundary from '@/3-widgets/ErrorBoundary'
 import Transactions from '@/2-pages/Transactions'
 import Auth from '@/2-pages/Auth'
@@ -45,42 +41,111 @@ const Stats = lazy(() => import('@/2-pages/Stats'))
 const Review = lazy(() => import('@/2-pages/Review'))
 
 export default function App() {
+  return (
+    <BrowserRouter>
+      <Application />
+    </BrowserRouter>
+  )
+}
+
+function Application() {
   const isLoggedIn = useAppSelector(getLoginState)
   const hasData = useAppSelector(state => !!getLastSyncTime(state))
+  const navigation = isLoggedIn && hasData
   const userId = core.users.useRootId()
   useEffect(() => {
     setAnalyticsUser(userId || null)
   }, [userId])
 
-  const publicRoutes = (wrap: (page: React.ReactNode) => React.ReactNode) => [
-    <Route key="about" path="/about/*" element={wrap(<About />)} />,
-    <Route key="donation" path="/donation" element={wrap(<Donation />)} />,
+  const publicRoutes = [
+    <Route
+      key="about"
+      path="/about/*"
+      element={
+        <CanvasRoute>
+          <About />
+        </CanvasRoute>
+      }
+    />,
+    <Route
+      key="donation"
+      path="/donation"
+      element={
+        <CanvasRoute>
+          <Donation />
+        </CanvasRoute>
+      }
+    />,
   ]
 
   const notLoggedIn = [
-    ...publicRoutes(page => page),
-    <Route key="*" path="*" element={<Auth />} />,
+    ...publicRoutes,
+    <Route
+      key="*"
+      path="*"
+      element={
+        <CanvasRoute>
+          <Auth />
+        </CanvasRoute>
+      }
+    />,
   ]
 
   const loggedInNoData = [
-    ...publicRoutes(inPanel),
-    <Route key="token" path="/token" element={inPanel(<Token />)} />,
+    ...publicRoutes,
+    <Route
+      key="token"
+      path="/token"
+      element={
+        <CanvasRoute>
+          <Token />
+        </CanvasRoute>
+      }
+    />,
     <Route key="*" path="*" element={<MainLoader />} />,
   ]
 
   const loggedInWithData = [
-    ...publicRoutes(inPanel),
-    <Route key="token" path="/token" element={inPanel(<Token />)} />,
+    ...publicRoutes,
+    <Route
+      key="token"
+      path="/token"
+      element={
+        <CanvasRoute>
+          <Token />
+        </CanvasRoute>
+      }
+    />,
     <Route
       key="transactions"
       path="/transactions"
       element={<Transactions />}
     />,
-    <Route key="review" path="/review" element={onCanvas(<Review />)} />,
-    <Route key="accounts" path="/accounts" element={inPanel(<Accounts />)} />,
+    <Route
+      key="review"
+      path="/review"
+      element={
+        <CanvasRoute>
+          <Review />
+        </CanvasRoute>
+      }
+    />,
+    <Route key="accounts" path="/accounts" element={<AccountsPage />} />,
     <Route key="budget" path="/budget" element={<Budgets />} />,
-    <Route key="stats" path="/stats" element={onCanvas(<Stats />)} />,
-    <Route key="*" path="*" element={<Navigate to="/budget" replace />} />,
+    <Route
+      key="stats"
+      path="/stats"
+      element={
+        <CanvasRoute>
+          <Stats />
+        </CanvasRoute>
+      }
+    />,
+    <Route
+      key="*"
+      path="*"
+      element={<Navigate to="/transactions" replace />}
+    />,
   ]
 
   const getRoutes = () => {
@@ -92,21 +157,24 @@ export default function App() {
   const routes = getRoutes()
 
   return (
-    <BrowserRouter>
+    <>
       <AnalyticsNavigation />
       <OverlayHost>
         <RegularSyncHandler />
-        {isLoggedIn && hasData && <HistoryShortcuts />}
-        <Layout isLoggedIn={isLoggedIn} hasData={hasData}>
+        {navigation && <HistoryShortcuts />}
+        <RouteLayout
+          navigation={navigation}
+          toolbar={navigation ? <HistoryTopBar /> : undefined}
+        >
           <ErrorBoundary>
             <Suspense fallback={<FallbackLoader />}>
               <Routes>{routes}</Routes>
             </Suspense>
           </ErrorBoundary>
-        </Layout>
+        </RouteLayout>
         <GlobalWidgets />
       </OverlayHost>
-    </BrowserRouter>
+    </>
   )
 }
 
@@ -119,53 +187,36 @@ function AnalyticsNavigation() {
   return null
 }
 
-const Layout: FC<{
-  isLoggedIn: boolean
-  hasData: boolean
-  children: React.ReactNode
-}> = props => {
-  const { isLoggedIn, hasData, children } = props
-  const bottomBar = useBottomBarShown()
-  // Measured by the bar itself, which can change height.
-  const [bottomBarHeight, setBottomBarHeight] = useState(0)
-  if (!isLoggedIn) return <div className="min-h-screen">{children}</div>
+/** The route picks the page's columns. Reading the location here rather than
+ * in `Application` keeps a screen opening from rebuilding every route. */
+function RouteLayout(
+  props: Omit<React.ComponentProps<typeof Layout>, 'columns'>
+) {
+  const { pathname } = useLocation()
+  const columns = pathname.startsWith('/transactions')
+    ? pageColumns.transactions
+    : pathname.startsWith('/budget')
+      ? pageColumns.budget
+      : pathname.startsWith('/accounts')
+        ? pageColumns.accounts
+        : undefined
+  return <Layout {...props} columns={columns} />
+}
 
-  const canvas = {
-    // The canvas padding above, below and after the panels, and the gap
-    // between them; the rail spaces the first panel from the left edge. None
-    // under the bottom bar, where panels run edge to edge.
-    '--canvas-gap': `${bottomBar ? 0 : panelWidths.gap}px`,
-    // How much of the window the bottom bar covers. Set here rather than on
-    // the document so that it reaches every page scroller and no overlay;
-    // panels add it inside their scroll (see `bottomBarInset`).
-    '--bottom-inset': `${bottomBarHeight}px`,
-  } as React.CSSProperties
-
+function AccountsPage() {
   return (
-    <div className="flex h-dvh bg-ui-base" style={canvas}>
-      {!bottomBar && <Rail />}
-      <div className="flex min-w-0 grow flex-col">
-        {hasData && <HistoryTopBar />}
-        <main className="flex min-h-0 grow gap-(--canvas-gap) py-(--canvas-gap) pr-(--canvas-gap)">
-          {children}
-        </main>
-      </div>
-      {bottomBar && <MobileNavigation onHeightChange={setBottomBarHeight} />}
-    </div>
+    <Columns>
+      <PanelScrollable>
+        <Accounts />
+      </PanelScrollable>
+    </Columns>
   )
 }
 
-/** A page not laid out in panels yet: one panel holds all of it. */
-const inPanel = (page: React.ReactNode) => (
-  <Panel className="min-w-0 grow">{page}</Panel>
-)
-
-/** A page made of its own cards, laid straight on the canvas. */
-const onCanvas = (page: React.ReactNode) => (
-  <ScrollArea className="min-w-0 grow" insetBottom={bottomBarInset}>
-    {page}
-  </ScrollArea>
-)
+function CanvasRoute({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation()
+  return <CanvasPage key={pathname}>{children}</CanvasPage>
+}
 
 function FallbackLoader() {
   const { t } = useTranslation('loadingHints')

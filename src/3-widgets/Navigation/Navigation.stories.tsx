@@ -20,7 +20,7 @@ type Story = StoryObj
 export const DesktopRail: Story = {
   render: () => (
     <div className="flex h-[720px] bg-ui-base">
-      <Rail />
+      <Rail width={56} accountsPanelFits />
       <div className="grow" />
     </div>
   ),
@@ -33,7 +33,7 @@ export const MobileBottomNavigation: Story = {
     <div className="flex min-h-[600px] flex-col bg-ui-base">
       <span hidden data-testid="primary" className="text-ui-primary" />
       <span hidden data-testid="secondary" className="text-ui-secondary" />
-      <MobileNavigation onHeightChange={() => {}} />
+      <MobileNavigation />
     </div>
   ),
   play: async ({ canvasElement }) => {
@@ -43,7 +43,7 @@ export const MobileBottomNavigation: Story = {
       within(nav)
         .getAllByRole('link')
         .map(link => link.getAttribute('href'))
-    ).toEqual(['/budget', '/transactions', '/accounts', '/stats'])
+    ).toEqual(['/transactions', '/budget', '/accounts', '/stats'])
     const primary = getComputedStyle(canvas.getByTestId('primary')).color
     const secondary = getComputedStyle(canvas.getByTestId('secondary')).color
     const checkColors = () => {
@@ -71,7 +71,6 @@ export const MobileBottomNavigation: Story = {
 
 function ToastAboveNavigationHarness() {
   const [visible, setVisible] = useState(true)
-  const [, setHeight] = useState(0)
   return (
     <>
       <button
@@ -86,7 +85,7 @@ function ToastAboveNavigationHarness() {
         Show toast
       </button>
       <button onClick={() => setVisible(false)}>Hide navigation</button>
-      {visible && <MobileNavigation onHeightChange={setHeight} />}
+      {visible && <MobileNavigation />}
     </>
   )
 }
@@ -110,13 +109,26 @@ export const ToastAboveNavigation: Story = {
     expect(
       nav.getBoundingClientRect().top - toast.getBoundingClientRect().bottom
     ).toBeCloseTo(16, 0)
-    // A resized bar must move the portalled stack too, without hardcoded height.
-    nav.style.paddingTop = '24px'
-    await waitFor(() =>
-      expect(
-        nav.getBoundingClientRect().top - toast.getBoundingClientRect().bottom
-      ).toBeCloseTo(16, 0)
-    )
+    const root = canvasElement.ownerDocument.documentElement
+    try {
+      root.style.setProperty('--layout-safe-bottom', '34px')
+      await waitFor(() => {
+        expect(nav.getBoundingClientRect().height).toBe(98)
+        expect(
+          nav.getBoundingClientRect().top - toast.getBoundingClientRect().bottom
+        ).toBeCloseTo(16, 0)
+      })
+      root.style.setProperty('--mobile-navigation-height', '72px')
+      await waitFor(() => {
+        expect(nav.getBoundingClientRect().height).toBe(106)
+        expect(
+          nav.getBoundingClientRect().top - toast.getBoundingClientRect().bottom
+        ).toBeCloseTo(16, 0)
+      })
+    } finally {
+      root.style.removeProperty('--layout-safe-bottom')
+      root.style.removeProperty('--mobile-navigation-height')
+    }
     await userEvent.click(
       canvas.getByRole('button', { name: 'Hide navigation' })
     )

@@ -6,7 +6,7 @@ import { Select } from './Select'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import {
-  TransactionPreviewDrawer,
+  TransactionScreenPanel,
   useTransactionPreview,
 } from '@/3-widgets/global/TransactionPreviewDrawer'
 
@@ -207,7 +207,7 @@ function TransactionDemo() {
       <button onClick={() => transaction && open(transaction.id)}>
         Open transaction
       </button>
-      <TransactionPreviewDrawer />
+      <TransactionScreenPanel docked={false} />
     </>
   )
 }

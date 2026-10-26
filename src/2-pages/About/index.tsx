@@ -4,7 +4,7 @@ import { Route, Routes } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { Logo } from '@/6-shared/ui/Logo'
 import { LangSwitcher } from '@/6-shared/localization'
-import { ScrollToTop, TextLink } from './Components'
+import { TextLink } from './Components'
 import MethodRu from './pages/MethodRu.mdx'
 import MethodEn from './pages/MethodEn.mdx'
 import AboutRu from './pages/AboutRu.mdx'
@@ -42,8 +42,7 @@ const QuickStart = () => {
 
 export default function Main() {
   return (
-    <main className="w-full bg-ui-card">
-      <ScrollToTop />
+    <div className="w-full">
       <Header />
       <div className="flex flex-col items-center px-4 py-16">
         <div className="article w-full min-w-[100px] max-w-[680px]">
@@ -54,7 +53,7 @@ export default function Main() {
           </Routes>
         </div>
       </div>
-    </main>
+    </div>
   )
 }
 
@@ -62,7 +61,7 @@ const Header = () => {
   return (
     <header className="sticky inset-x-0 top-0 z-[100] flex flex-col items-center p-2">
       <Link to="/">
-        <div className="rounded-3xl bg-ui-base px-6 py-2 leading-[0]">
+        <div className="rounded-3xl bg-ui-card px-6 py-2 leading-[0]">
           <Logo fill="var(--color-ui-primary)" width="100" />
         </div>
       </Link>

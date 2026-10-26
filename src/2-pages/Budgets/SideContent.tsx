@@ -1,10 +1,9 @@
 import type { core } from '@/zerro-core/redux'
-import type { FC } from 'react'
-import { memo, useCallback } from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '@/6-shared/helpers/date'
 import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
-import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
+import { AdaptivePanel } from '@/6-shared/ui/layout/AdaptivePanel'
 import type { SurfaceName } from '@/6-shared/ui/kit/SurfaceContent'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
@@ -24,31 +23,12 @@ export function useSelectedEnvelope() {
   return id && id !== 'overview' ? id : undefined
 }
 
-export const SideContent: FC<{ docked?: boolean }> = props => {
-  const [id, setId] = envelopeScreen.use()
-  const onClose = useCallback(() => setId(null), [setId])
-  return (
-    <MemoSideContent
-      open={!!id}
-      onClose={onClose}
-      id={id}
-      docked={props.docked}
-    />
-  )
-}
-
-type TSideContentProps = {
-  open: boolean
-  onClose: () => void
-  id?: TDrawerId
-  docked?: boolean
-}
-
 /** Docked beside the table, the month overview is part of the page and has no
  * header. As a drawer it is modal, so it takes the drawer's header and close
  * button. An envelope draws its own header either way. */
-const MemoSideContent = memo<TSideContentProps>(props => {
-  const { open, onClose, id, docked } = props
+export function SideContent({ docked = false }: { docked?: boolean }) {
+  const [id, setId] = envelopeScreen.use()
+  const onClose = useCallback(() => setId(null), [setId])
   const { t } = useTranslation('common')
   const [month] = useMonth()
   // The screen value is gone while the drawer slides out. Keep showing what
@@ -62,20 +42,18 @@ const MemoSideContent = memo<TSideContentProps>(props => {
   ) : (
     <MonthInfo />
   )
-  if (docked) return content
 
   const name: SurfaceName = envelopeId
     ? { label: t('category') }
     : { title: formatDate(month, 'LLLL').toUpperCase() }
   return (
-    <DrawerSurface
+    <AdaptivePanel
+      docked={docked}
       {...name}
-      controller={{ open, setOpen: next => !next && onClose() }}
-      // The content is drawn on the card colour, as in the docked column.
-      className="bg-ui-card"
+      controller={{ open: !!id, setOpen: next => !next && onClose() }}
       contentClassName="p-0"
     >
       {content}
-    </DrawerSurface>
+    </AdaptivePanel>
   )
-})
+}

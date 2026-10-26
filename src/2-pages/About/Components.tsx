@@ -1,18 +1,9 @@
 import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC, HTMLAttributes, ReactNode } from 'react'
-import { useEffect } from 'react'
-import { useLocation, Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { ChevronRightIcon } from '@/6-shared/ui/Icons'
 import { useToggle } from '@/6-shared/hooks/useToggle'
-
-export function ScrollToTop() {
-  const { pathname } = useLocation()
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [pathname])
-  return null
-}
 
 type ExampleBoxProps = HTMLAttributes<HTMLDivElement> & { symbol: string }
 export const ExampleBox: FC<ExampleBoxProps> = ({
@@ -23,7 +14,7 @@ export const ExampleBox: FC<ExampleBoxProps> = ({
 }) => {
   return (
     <div
-      className={cn('my-4 flex rounded-lg bg-ui-base p-6', className)}
+      className={cn('my-4 flex rounded-lg bg-ui-card p-6', className)}
       {...rest}
     >
       {symbol && <span className="mr-2 min-w-6">{symbol}</span>}
@@ -37,7 +28,7 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
   const { children, title, className, ...rest } = props
   const [isOpen, toggle] = useToggle(false)
   return (
-    <div className={cn('my-4 rounded-lg bg-ui-base p-6', className)} {...rest}>
+    <div className={cn('my-4 rounded-lg bg-ui-card p-6', className)} {...rest}>
       <ButtonBase
         onClick={toggle}
         className="-m-4 w-full justify-start rounded-lg p-4 text-left text-[length:inherit] hover:underline"

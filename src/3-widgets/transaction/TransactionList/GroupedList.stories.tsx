@@ -120,7 +120,6 @@ function LongList({
             height: 400,
             width: 700,
             maxWidth: '100%',
-            '--bottom-inset': '40px',
           } as React.CSSProperties
         }
       >
@@ -184,7 +183,6 @@ export const VirtualRowsAndSurface: Story = {
         canvasElement.querySelector('.transaction-filter-surface')!
       ).backdropFilter
     ).toBe('blur(2px) saturate(1.2)')
-    await expect(getComputedStyle(viewport).paddingBottom).toBe('40px')
     await expect(chip).not.toBeVisible()
     viewport.scrollTop = 150
     await waitFor(() => expect(chip).toHaveAttribute('data-pinned'))
@@ -477,7 +475,6 @@ function GeometryExample({
             height,
             width: 400,
             scale: scaled ? '.99' : undefined,
-            '--bottom-inset': '40px',
           } as React.CSSProperties
         }
       >

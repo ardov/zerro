@@ -1,0 +1,20 @@
+@layer components {
+  .layout-columns {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 8px 8px 0;
+  }
+
+  .layout-panel {
+    min-width: 0;
+    min-height: 0;
+    border-radius: var(--radius-ui-card);
+    background: var(--color-ui-card);
+    color: var(--color-ui-primary);
+  }
+}

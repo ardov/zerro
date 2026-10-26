@@ -51,7 +51,7 @@ import { convertZmBudgetsToZerro } from '@/4-features/budget/convertZmBudgetsToZ
 import { useAsk, useAsked } from '@/6-shared/overlays'
 import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useColorScheme } from '@/6-shared/ui/theme'
-import { useBottomBarShown } from './destinations'
+import { useMobileLayout } from '@/6-shared/ui/layout/useMobileLayout'
 
 /** The settings menu opens from the bottom on phones and beside the rail on desktop.
  * Items act on the app themselves, so it answers nothing. */
@@ -233,7 +233,7 @@ function LangItem(_props: ItemProps) {
  * them only under the bottom bar: the rail shows it. */
 function NavItems(_props: ItemProps) {
   const { t } = useTranslation('navigation')
-  const showAbout = useBottomBarShown()
+  const showAbout = useMobileLayout()
   const navigate = useNavigate()
   // Leaving the page takes the menu with it, so navigating is the whole of
   // it: closing first would be a Back step racing a push.

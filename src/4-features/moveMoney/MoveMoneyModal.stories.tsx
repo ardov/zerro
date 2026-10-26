@@ -38,15 +38,18 @@ function AmountHarness({ longNames = false }: { longNames?: boolean }) {
   const [month] = useMonth()
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const metrics = useAppSelector(core.activity.selectEnvelopeMetrics)[month][id]
-  const [currency] = core.currency.useDisplayCurrency()
+  const [, setCurrency] = core.currency.useDisplayCurrency()
   const convert = useAppSelector(core.currency.selectConvertFx)
-  const assigned = convert(metrics.totalAssigned, currency, month)
+  const assigned = convert(metrics.totalAssigned, envelopes[id].currency, month)
   const commands = useAppSelector(state => state.data.outbox.length)
   return (
     <>
       <button
         type="button"
         onClick={event => {
+          // This is an input/commit regression, not an FX round-trip test.
+          // Edit in the envelope currency so cent rounding cannot change 30.
+          setCurrency(envelopes[id].currency)
           if (longNames) {
             dispatch(
               core.envelopes.rename(

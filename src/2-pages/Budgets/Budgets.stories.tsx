@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import Budgets from './index'
-import { panelWidths } from '@/6-shared/ui/layout/panelWidths'
+import { Layout } from '@/1-app/Layout'
+import { pageColumns } from '@/1-app/pageColumns'
 
 const meta = {
   title: 'App/Budgets/Page',
@@ -12,32 +13,22 @@ const meta = {
     viewport: {
       options: {
         belowAccounts: {
-          name: 'Before accounts panel (1559px)',
-          styles: { width: '1559px', height: '900px' },
+          name: 'Before accounts panel (1271px)',
+          styles: { width: '1271px', height: '900px' },
           type: 'desktop',
         },
         withAccounts: {
-          name: 'With accounts panel (1560px)',
-          styles: { width: '1560px', height: '900px' },
+          name: 'With accounts panel (1272px)',
+          styles: { width: '1272px', height: '900px' },
           type: 'desktop',
         },
       },
     },
   },
   render: () => (
-    <div className="flex h-dvh bg-ui-base">
-      <div style={{ width: panelWidths.rail }} className="shrink-0" />
-      <div
-        data-testid="budget-panels"
-        className="flex min-w-0 flex-1"
-        style={{
-          gap: panelWidths.gap,
-          padding: `${panelWidths.gap}px ${panelWidths.gap}px ${panelWidths.gap}px 0`,
-        }}
-      >
-        <Budgets />
-      </div>
-    </div>
+    <Layout navigation columns={pageColumns.budget}>
+      <Budgets />
+    </Layout>
   ),
 } satisfies Meta<typeof Budgets>
 export default meta
@@ -47,9 +38,9 @@ export const BeforeAccountsPanel: Story = {
   globals: { viewport: { value: 'belowAccounts' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    expect(window.innerWidth).toBe(1559)
+    expect(window.innerWidth).toBe(1271)
     expect(canvas.queryByRole('button', { name: /HSBC USD/ })).toBeNull()
-    const panels = canvas.getByTestId('budget-panels')
+    const panels = canvasElement.querySelector<HTMLElement>('.layout-columns')!
     // DnD also renders visually hidden announcement nodes beside the panels.
     const columns = Array.from(panels.children).filter(
       child =>
@@ -66,10 +57,10 @@ export const WithAccountsPanel: Story = {
   globals: { viewport: { value: 'withAccounts' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    expect(window.innerWidth).toBe(1560)
+    expect(window.innerWidth).toBe(1272)
     const account = canvas.getByRole('button', { name: /HSBC USD/ })
     expect(account.getBoundingClientRect().height).toBe(40)
-    const panels = canvas.getByTestId('budget-panels')
+    const panels = canvasElement.querySelector<HTMLElement>('.layout-columns')!
     // DnD also renders visually hidden announcement nodes beside the panels.
     const columns = Array.from(panels.children).filter(
       child =>
@@ -78,7 +69,7 @@ export const WithAccountsPanel: Story = {
     )
     expect(columns).toHaveLength(3)
     expect(columns[0].getBoundingClientRect().width).toBe(280)
-    expect(columns[1].getBoundingClientRect().width).toBe(848)
+    expect(columns[1].getBoundingClientRect().width).toBe(560)
     expect(columns[2].getBoundingClientRect().width).toBe(360)
     expect(panels.scrollWidth).toBeLessThanOrEqual(panels.clientWidth)
   },

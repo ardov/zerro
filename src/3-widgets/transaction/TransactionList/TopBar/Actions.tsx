@@ -193,7 +193,7 @@ const Actions: FC<ActionsProps> = ({
       />
       <div
         style={{ transform: 'translateX(-50%)' }}
-        className="pointer-events-none absolute bottom-[calc(var(--bottom-inset,0px)+1rem)] left-1/2 z-[1000] max-w-full px-2"
+        className="pointer-events-none absolute bottom-4 left-1/2 z-[1000] max-w-full px-2"
       >
         <div
           data-visible={visible ? '' : undefined}

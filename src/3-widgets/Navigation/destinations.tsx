@@ -1,21 +1,14 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import {
-  AccountBalanceIcon,
+  BudgetIcon,
   AccountBalanceWalletIcon,
   BarChartIcon,
   HelpOutlineIcon,
   SyncAltIcon,
 } from '@/6-shared/ui/Icons'
-import { useAccountsPanelFits } from '@/6-shared/ui/layout/panelWidths'
 
 export type TDestination = { path: string; label: string; icon: ReactNode }
-
-/** Whether navigation is the bottom bar rather than the rail. */
-export function useBottomBarShown() {
-  return useBreakpointDown('sm')
-}
 
 /** The places the rail and the bottom bar lead to, in order.
  *
@@ -23,13 +16,15 @@ export function useBottomBarShown() {
  * panel: past that width the accounts live beside the transaction list
  * instead. About is one only in the rail; the bottom bar leaves it to the
  * settings menu. */
-export function useDestinations() {
+export function useDestinations(props: {
+  mobile: boolean
+  accountsPanelFits: boolean
+}) {
+  const { mobile, accountsPanelFits } = props
   const { t } = useTranslation('navigation')
-  const accountsPanelFits = useAccountsPanelFits()
-  const bottomBar = useBottomBarShown()
   const destinations: TDestination[] = [
-    { path: '/budget', label: t('budget'), icon: <AccountBalanceIcon /> },
     { path: '/transactions', label: t('transactions'), icon: <SyncAltIcon /> },
+    { path: '/budget', label: t('budget'), icon: <BudgetIcon /> },
   ]
   if (!accountsPanelFits)
     destinations.push({
@@ -42,7 +37,7 @@ export function useDestinations() {
     label: t('stats'),
     icon: <BarChartIcon />,
   })
-  if (!bottomBar)
+  if (!mobile)
     destinations.push({
       path: '/about',
       label: t('about'),

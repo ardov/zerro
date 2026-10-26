@@ -6,6 +6,8 @@ import {
   useTransactionPreview,
 } from './TransactionPreviewDrawer'
 import TransactionsView from '@/2-pages/Transactions'
+import { Layout } from '@/1-app/Layout'
+import { pageColumns } from '@/1-app/pageColumns'
 import { Button } from '@/6-shared/ui/kit/Button'
 import { useTransactionDrawer } from './TransactionListDrawer'
 import { useEnvTransactionsDrawer } from './EnvTransactionsDrawer'
@@ -72,9 +74,9 @@ function Harness() {
       >
         Open envelope list
       </Button>
-      <div className="flex h-[700px] gap-2">
+      <Layout navigation columns={pageColumns.transactions}>
         <TransactionsView />
-      </div>
+      </Layout>
     </>
   )
 }
@@ -117,12 +119,18 @@ const checkLayer =
     fireEvent.click(canvas.getByTestId('forward'))
     const restored = await body.findByRole('dialog', { name: 'Transaction' })
     expect(restored).toBeVisible()
+    await waitFor(() =>
+      expect(restored.contains(document.activeElement)).toBe(true)
+    )
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(restored).not.toBeInTheDocument())
     expect(list).toBeVisible()
     await userEvent.click(within(list).getByText('Dinner groceries'))
     const another = await body.findByRole('dialog', { name: 'Transaction' })
     expect(another).toBeVisible()
+    await waitFor(() =>
+      expect(another.contains(document.activeElement)).toBe(true)
+    )
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(another).not.toBeInTheDocument())
     await userEvent.keyboard('{Escape}')

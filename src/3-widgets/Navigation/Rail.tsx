@@ -3,24 +3,26 @@ import { Link, useMatch } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import { LogoMark } from '@/6-shared/ui/Logo'
-import { panelWidths } from '@/6-shared/ui/layout/panelWidths'
 import RefreshButton from '@/3-widgets/RefreshButton'
 import { MenuButton } from './MenuButton'
 import { type TDestination, useDestinations } from './destinations'
 
 /** The icon-only strip of destinations on the left of a wide window. It sits
  * on the canvas, not on a panel, and holds no lists of data. */
-export const Rail: FC = () => {
+export const Rail: FC<{ width: number; accountsPanelFits: boolean }> = ({
+  width,
+  accountsPanelFits,
+}) => {
   const { t } = useTranslation('navigation')
-  const destinations = useDestinations()
+  const destinations = useDestinations({ mobile: false, accountsPanelFits })
   return (
     <nav
       aria-label={t('main')}
       className="flex h-full shrink-0 flex-col items-center gap-2 py-3"
-      style={{ width: panelWidths.rail }}
+      style={{ width }}
     >
       <Link
-        to="/budget"
+        to="/transactions"
         aria-label="Zerro"
         className="focusable flex size-10 items-center justify-center rounded-ui-control-inner rounded-smooth text-ui-primary"
       >

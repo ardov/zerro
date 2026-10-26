@@ -19,6 +19,8 @@ import {
 } from '@/3-widgets/global/TransactionPreviewDrawer'
 import { AccountField } from './AccountField'
 import TransactionsView from '@/2-pages/Transactions'
+import { Layout } from '@/1-app/Layout'
+import { pageColumns } from '@/1-app/pageColumns'
 
 const meta = {
   title: 'App/Transactions/TransactionPreview',
@@ -345,9 +347,9 @@ function ModalSaveHarness({ docked = false }: { docked?: boolean }) {
           : ''}
       </output>
       {docked && (
-        <div className="flex h-[700px] gap-2">
+        <Layout navigation columns={pageColumns.transactions}>
           <TransactionsView />
-        </div>
+        </Layout>
       )}
       <TransactionPreviewDrawer />
     </>
@@ -783,13 +785,11 @@ export const DockedBackFinishesInput: Story = {
   },
 }
 
-/** An inactive drawer must forget the editor that its adaptive branch removed. */
-export const AdaptiveRemountDiscardsPendingEdit: Story = {
+/** Resize keeps the same input and its unsaved value, without adding history. */
+export const AdaptiveLayoutPreservesPendingEdit: Story = {
   ...DockedBackFinishesInput,
   tags: ['check', '!dev', '!autodocs'],
   play: async ({ canvasElement }) => {
-    // Resizing the real browser exercises both owners and their media queries.
-    // The interactive Storybook canvas has no test-browser viewport controller.
     if (!('__vitest_browser_runner__' in window)) return
     const { page } = await import('vitest/browser')
     const canvas = within(canvasElement)
@@ -797,60 +797,42 @@ export const AdaptiveRemountDiscardsPendingEdit: Story = {
     const originalWidth = window.innerWidth
     const originalHeight = window.innerHeight
     try {
-      for (const closeWhileDocked of [false, true]) {
-        await page.viewport(900, 900)
-        await userEvent.click(
-          canvas.getByRole('button', { name: 'Edit transaction' })
-        )
-        const dialog = await body.findByRole('dialog', { name: 'Transaction' })
-        const comment = within(dialog).getByRole<HTMLTextAreaElement>(
-          'textbox',
-          { name: 'Comment' }
-        )
-        const originalComment = comment.value
-        await userEvent.clear(comment)
-        await userEvent.type(comment, 'Saved from modal')
-        expect(canvas.getByLabelText('Saved comment')).toBeEmptyDOMElement()
+      await page.viewport(900, 900)
+      await userEvent.click(
+        canvas.getByRole('button', { name: 'Edit transaction' })
+      )
+      const dialog = await body.findByRole('dialog', { name: 'Transaction' })
+      const comment = within(dialog).getByRole<HTMLTextAreaElement>('textbox', {
+        name: 'Comment',
+      })
+      await userEvent.clear(comment)
+      await userEvent.type(comment, 'Saved from modal')
+      expect(canvas.getByLabelText('Saved comment')).toBeEmptyDOMElement()
 
-        await page.viewport(1440, 900)
-        await waitFor(() =>
-          expect(body.queryByRole('dialog', { name: 'Transaction' })).toBeNull()
-        )
-        expect(canvas.getByRole('textbox', { name: 'Comment' })).toHaveValue(
-          originalComment
-        )
-        await userEvent.click(canvas.getByText('Delivery', { exact: true }))
-        if (closeWhileDocked) {
-          await userEvent.click(canvas.getByRole('button', { name: 'Close' }))
-          await userEvent.click(canvas.getByText('Delivery', { exact: true }))
-        }
+      await page.viewport(1440, 900)
+      await waitFor(() =>
+        expect(body.queryByRole('dialog', { name: 'Transaction' })).toBeNull()
+      )
+      expect(canvas.getByRole('textbox', { name: 'Comment' })).toBe(comment)
+      expect(comment).toHaveValue('Saved from modal')
+      expect(canvas.getByLabelText('Saved comment')).toBeEmptyDOMElement()
 
-        await page.viewport(900, 900)
-        const nextDialog = await body.findByRole('dialog', {
-          name: 'Transaction',
-        })
-        expect(
-          within(nextDialog).getByRole('textbox', { name: 'Comment' })
-        ).toHaveValue('Food delivery')
-        expect(canvas.getByLabelText('Saved comment')).toBeEmptyDOMElement()
-        await userEvent.keyboard('{Escape}')
-        await waitFor(() =>
-          expect(body.queryByRole('dialog', { name: 'Transaction' })).toBeNull()
-        )
-        await userEvent.click(
-          canvas.getByRole('button', { name: 'Edit transaction' })
-        )
-        const reopened = await body.findByRole('dialog', {
-          name: 'Transaction',
-        })
-        expect(
-          within(reopened).getByRole('textbox', { name: 'Comment' })
-        ).toHaveValue(originalComment)
-        await userEvent.keyboard('{Escape}')
-        await waitFor(() =>
-          expect(body.queryByRole('dialog', { name: 'Transaction' })).toBeNull()
-        )
-      }
+      await page.viewport(900, 900)
+      const nextDialog = await body.findByRole('dialog', {
+        name: 'Transaction',
+      })
+      expect(within(nextDialog).getByRole('textbox', { name: 'Comment' })).toBe(
+        comment
+      )
+      expect(comment).toHaveValue('Saved from modal')
+      expect(canvas.getByLabelText('Saved comment')).toBeEmptyDOMElement()
+      await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
+      await waitFor(() =>
+        expect(body.queryByRole('dialog', { name: 'Transaction' })).toBeNull()
+      )
+      expect(canvas.getByLabelText('Saved comment')).toHaveTextContent(
+        'Saved from modal'
+      )
     } finally {
       await page.viewport(originalWidth, originalHeight)
     }

@@ -1,0 +1,57 @@
+@layer components {
+  /* Toasts are portalled outside the shell and share the navigation's inset. */
+  :root:has(.mobile-navigation) {
+    --toast-bottom-inset: calc(
+      var(--mobile-navigation-height, 64px) +
+        var(--layout-safe-bottom, env(safe-area-inset-bottom))
+    );
+  }
+
+  .mobile-navigation {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 5;
+    height: calc(
+      var(--mobile-navigation-height, 64px) +
+        var(--layout-safe-bottom, env(safe-area-inset-bottom))
+    );
+    pointer-events: none;
+  }
+
+  .mobile-navigation-color,
+  .mobile-navigation-blur {
+    position: absolute;
+    inset: 0;
+  }
+
+  .mobile-navigation-color {
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      oklch(from var(--color-ui-base) l c h / 10%) 10%,
+      oklch(from var(--color-ui-base) l c h / 90%) 50%,
+      var(--color-ui-base)
+    );
+  }
+
+  .mobile-navigation-blur {
+    backdrop-filter: blur(2px);
+    mask-image: linear-gradient(to bottom, transparent, black 40%);
+  }
+
+  .mobile-navigation-actions {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: var(--mobile-navigation-height, 64px);
+    padding: 8px
+      calc(8px + var(--layout-safe-right, env(safe-area-inset-right))) 8px
+      calc(8px + var(--layout-safe-left, env(safe-area-inset-left)));
+
+    a,
+    button {
+      pointer-events: auto;
+    }
+  }
+}

@@ -346,7 +346,7 @@ export const ForeignDisplayCurrency: Story = {
     const input = await body.findByRole('textbox', { name: 'Assigned' })
     await userEvent.clear(input)
     await userEvent.type(input, '100')
-    await expect(input).toHaveAccessibleDescription(/\$.*Balance.*₽.*\$/)
+    await expect(input).toHaveAccessibleDescription(/\$.*Balance.*€.*\$/)
     await userEvent.keyboard('{Escape}')
   },
 }
@@ -394,7 +394,7 @@ const checkTableAlignment =
       }
     })
     if (foreign)
-      await expect(input).toHaveAccessibleDescription(/\$.*Balance.*₽.*\$/)
+      await expect(input).toHaveAccessibleDescription(/\$.*Balance.*€.*\$/)
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(trigger).toHaveFocus())
   }

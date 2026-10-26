@@ -4,10 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
-import { panelWidths, useWindowFits } from '@/6-shared/ui/layout/panelWidths'
+import { AdaptivePanel } from '@/6-shared/ui/layout/AdaptivePanel'
 import { defineScreen } from '@/6-shared/overlays'
 import type { TTransactionId } from '@/6-shared/types'
-import { TransactionPreview } from '../transaction/TransactionPreview'
+import {
+  TransactionPreview,
+  TrEmptyState,
+} from '../transaction/TransactionPreview'
+import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
 import { usePendingEdit } from '../transaction/TransactionPreview/usePendingEdit'
 
 /** A screen: one transaction, described by its id alone, so Back, Forward and
@@ -49,46 +53,56 @@ function useTransactionGone(id: string | undefined) {
   return !!id && !transactions[id]
 }
 
-/** Whether this screen is being laid out as a column in the page rather than
- * drawn over it.
- *
- * One fact read from both sides: the transactions page asks it to decide
- * whether to draw its column, and the drawer asks it to decide whether to
- * stand aside. Keeping it in one place is what stops the two from disagreeing
- * and showing the transaction twice, or not at all. */
-export function useTransactionScreenDocked() {
-  const fits = useWindowFits(
-    panelWidths.accounts,
-    panelWidths.transactionList,
-    panelWidths.transactionDetail
-  )
-  const { pathname } = useLocation()
-  return fits && pathname.startsWith('/transactions')
-}
-
+/** The transactions page owns its persistent adaptive editor. Other pages
+ * open the same URL-backed screen in a modal. */
 export const TransactionPreviewDrawer = () => {
-  const docked = useTransactionScreenDocked()
+  const { pathname } = useLocation()
   return (
     <>
-      <TransactionScreenDrawer screen={transactionScreen} docked={docked} />
+      {!pathname.startsWith('/transactions') && (
+        <TransactionScreenDrawer screen={transactionScreen} />
+      )}
       <TransactionScreenDrawer screen={modalTransactionScreen} />
     </>
+  )
+}
+
+export function TransactionScreenPanel({
+  docked,
+  onSelectSimilar,
+}: {
+  docked: boolean
+  onSelectSimilar?: (date: number) => void
+}) {
+  return (
+    <TransactionScreenDrawer
+      screen={transactionScreen}
+      docked={docked}
+      adaptive
+      onSelectSimilar={onSelectSimilar}
+    />
   )
 }
 
 function TransactionScreenDrawer({
   screen,
   docked = false,
+  adaptive = false,
+  onSelectSimilar,
 }: {
   screen: typeof transactionScreen
   docked?: boolean
+  adaptive?: boolean
+  onSelectSimilar?: (date: number) => void
 }) {
   const { t } = useTranslation('common')
-  const pending = usePendingEdit(!docked)
-  const [id, setId] = screen.use(docked ? undefined : pending.finish)
+  const pending = usePendingEdit()
+  const [id, setId] = screen.use(pending.finish)
   const openOther = screen.useOpen()
   const onClose = useCallback(() => setId(null), [setId])
   const gone = useTransactionGone(id)
+  const shownId = useCachedValue(id, !!id)
+  const currentId = docked ? id : shownId
 
   // Deleting the transaction from inside this screen, or a sync taking it
   // away, leaves the address naming something that no longer exists. It closes
@@ -106,30 +120,41 @@ function TransactionScreenDrawer({
     return () => clearTimeout(timer)
   }, [gone, setId])
 
-  if (docked) return null
+  const controller = {
+    open: !!id,
+    setOpen: (open: boolean) => {
+      if (!open) onClose()
+    },
+  }
+  const content = currentId ? (
+    <TransactionPreview
+      id={currentId}
+      key={currentId}
+      onClose={onClose}
+      onPendingEdit={pending.register}
+      onOpenOther={openOther}
+      onSelectSimilar={onSelectSimilar}
+    />
+  ) : (
+    <TrEmptyState />
+  )
 
-  return (
+  return adaptive ? (
+    <AdaptivePanel
+      docked={docked}
+      controller={controller}
+      contentClassName="flex min-h-full flex-col"
+      label={t('transaction')}
+    >
+      {content}
+    </AdaptivePanel>
+  ) : (
     <DrawerSurface
-      controller={{
-        open: !!id,
-        setOpen: open => {
-          if (!open) onClose()
-        },
-      }}
+      controller={controller}
       contentClassName="flex min-h-full flex-col p-0"
       label={t('transaction')}
     >
-      <div className="flex grow flex-col">
-        {id && (
-          <TransactionPreview
-            id={id}
-            key={id}
-            onClose={onClose}
-            onPendingEdit={pending.register}
-            onOpenOther={openOther}
-          />
-        )}
-      </div>
+      {content}
     </DrawerSurface>
   )
 }

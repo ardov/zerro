@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { Layout } from '@/1-app/Layout'
+import { pageColumns } from '@/1-app/pageColumns'
 import TransactionsView from './index'
 const meta = {
   title: 'App/Transactions/Page',
@@ -12,8 +14,8 @@ export const PageSurface: Story = {
     app: { scenario: 'demo', route: '/transactions' },
   },
   render: () => (
-    <div className="flex h-dvh gap-2 bg-ui-base p-2">
+    <Layout navigation columns={pageColumns.transactions}>
       <TransactionsView />
-    </div>
+    </Layout>
   ),
 }
