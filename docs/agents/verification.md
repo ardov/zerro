@@ -27,6 +27,16 @@ by itself is not a reason for a full run. State the global impact before
 starting one. Keep full runs available locally; this policy does not move them
 to CI or change CI configuration.
 
+## Test design
+
+Test the current observable behavior. When code or a feature is intentionally
+removed or replaced, delete its obsolete assertions; do not add tests whose
+purpose is to keep that old implementation or feature from returning. This
+includes checks for absent source text, imports, props, styles or controls.
+Test the replacement behavior only when it merits coverage. An absence that is
+itself a current interaction outcome (such as a dialog closing) is different
+from guarding a historical removal.
+
 ## Implementation loop
 
 Run the narrow test that observes the changed contract while implementing:

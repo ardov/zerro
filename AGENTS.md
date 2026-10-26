@@ -45,7 +45,8 @@ Single-context layout with root `CONTEXT.md` and `docs/adr/`. See `docs/agents/d
 ### Verification
 
 Use the public command tiers and change-routing matrix in
-`docs/agents/verification.md`. Run focused tests during the implementation loop,
+`docs/agents/verification.md`. For test additions and removals, follow its
+Test design rules. Run focused tests during the implementation loop,
 then the required aggregate verification tier once before handoff. Changed or
 related-test selection is a convenience, not proof that every required gate ran.
 
