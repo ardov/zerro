@@ -66,11 +66,18 @@ export const StableSize: Story = {
     const canvas = within(canvasElement)
     const button = within(canvas.getByTestId('refresh')).getByRole('button')
     const initial = button.getBoundingClientRect()
+    const checkIconSize = () => {
+      const icon = button.querySelector('svg')!
+      expect(getComputedStyle(icon).width).toBe('24px')
+      expect(getComputedStyle(icon).height).toBe('24px')
+    }
+    checkIconSize()
     for (const action of ['Load', 'Push', 'Finish']) {
       await userEvent.click(canvas.getByRole('button', { name: action }))
       const current = button.getBoundingClientRect()
       expect(current.width, `${action}: width`).toBe(initial.width)
       expect(current.height, `${action}: height`).toBe(initial.height)
+      checkIconSize()
     }
   },
 }

@@ -8,6 +8,11 @@
   }
 
   .mobile-navigation {
+    --navigation-action-bottom-inset: var(
+      --layout-safe-bottom,
+      env(safe-area-inset-bottom)
+    );
+
     position: fixed;
     inset: auto 0 0;
     z-index: 5;
@@ -44,14 +49,21 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    height: var(--mobile-navigation-height, 64px);
-    padding: 8px
-      calc(8px + var(--layout-safe-right, env(safe-area-inset-right))) 8px
-      calc(8px + var(--layout-safe-left, env(safe-area-inset-left)));
+    height: 100%;
+    padding: 0 calc(8px + var(--layout-safe-right, env(safe-area-inset-right)))
+      0 calc(8px + var(--layout-safe-left, env(safe-area-inset-left)));
 
     a,
     button {
       pointer-events: auto;
     }
+  }
+
+  .mobile-navigation .navigation-action {
+    flex: 1;
+  }
+
+  .mobile-navigation-sync {
+    margin-bottom: var(--layout-safe-bottom, env(safe-area-inset-bottom));
   }
 }

@@ -65,20 +65,20 @@ const RefreshButton: FC<RefreshButtonProps> = props => {
   const progressValue = progressRatio(progress?.rows ?? [])
 
   const components = {
-    idle: regular ? <SyncIcon /> : <SyncDisabledIcon />,
+    idle: regular ? <SyncIcon size={24} /> : <SyncDisabledIcon size={24} />,
     pending: progress ? (
       <RadialProgress
         aria-hidden
-        size={20}
+        size={24}
         value={progressValue}
         active={progress.kind === 'pushing' && progress.phase === 'sending'}
       />
     ) : (
-      <RadialProgress size={20} />
+      <RadialProgress size={24} />
     ),
-    stopped: <WarningIcon className="text-ui-error" />,
-    success: <RadialProgress size={20} value={1} />,
-    fail: <WarningIcon className="text-ui-error" />,
+    stopped: <WarningIcon size={24} className="text-ui-error" />,
+    success: <RadialProgress size={24} value={1} />,
+    fail: <WarningIcon size={24} className="text-ui-error" />,
   }
   const label = hasDetails
     ? t('syncProgress:detailsTitle')

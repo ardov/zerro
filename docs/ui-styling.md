@@ -166,6 +166,14 @@ margins. Panel radius is shared across layouts; `--mobile-panel-top` and
 The optional history toolbar takes its natural height above both rail and page.
 While mobile navigation is mounted, CSS reserves its height plus bottom safe
 area for portalled toasts through `--toast-bottom-inset`.
+Navigation actions stretch their transparent hit areas across the rail's width
+or the bottom bar's full height, including its safe area. Each action centers a
+40px tile with a 24px icon. The current destination uses `ui-selected` and a 2px
+icon stroke; other icons use 1.5px. Hover highlights only the tile. Button press
+motion applies to that tile through the shared `kit-press-trigger` rule while the
+hit area stays fixed. Keyboard focus outlines the tile. Its `will-change: scale`
+hint keeps the small animated surface ready for compositing; reduced motion
+omits the hint and deformation. Sync remains a separate circular action with 24px icons.
 `CanvasPage` provides the full-height scrollport; each page owns its content
 width and padding.
 `Panel` is a clipped surface for content with its own scroller, such as the
