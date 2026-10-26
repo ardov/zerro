@@ -3,8 +3,9 @@
   "name": "Zerro",
   "start_url": "/?source=pwa",
   "display": "standalone",
-  "theme_color": "#00090F",
-  "background_color": "#00090F",
+  "id": "/?source=pwa",
+  "theme_color": "#111212",
+  "background_color": "#111212",
   "icons": [
     {
       "src": "icons/192px.png",

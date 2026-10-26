@@ -36,12 +36,12 @@ export const ShowcaseView: StoryObj<typeof meta> = {
       ).toBeGreaterThanOrEqual(4.5)
     }
 
-    const card = canvas.getByText('Main text · 16 px').closest('section')!
+    const surface = canvas.getByRole('main')
     await expect(
       document.querySelector('meta[name="theme-color"]')
     ).toHaveAttribute(
       'content',
-      formatHex(getComputedStyle(card).backgroundColor)
+      formatHex(getComputedStyle(surface).backgroundColor)
     )
   },
   render: () => (
