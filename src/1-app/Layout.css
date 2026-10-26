@@ -26,8 +26,17 @@
   }
 
   .app-layout[data-mobile] .layout-columns {
-    gap: 0;
+    --column-gap: 0px;
     padding: var(--mobile-panel-top, 0px) var(--mobile-panel-sides, 0px)
       var(--mobile-navigation-inset);
+  }
+
+  .app-layout[data-mobile] .layout-column {
+    max-width: none;
+  }
+
+  .app-layout[data-mobile] .layout-column[data-visible] {
+    flex-grow: 1;
+    flex-basis: 0px;
   }
 }

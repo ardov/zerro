@@ -1,21 +1,58 @@
 @layer components {
   .layout-columns {
+    --column-gap: 8px;
     display: flex;
     flex: 1;
     min-width: 0;
     min-height: 0;
     justify-content: center;
-    gap: 8px;
+    gap: var(--column-gap);
     padding: 8px 8px 8px 0;
   }
 
   .layout-column {
     display: flex;
+    flex: 0 1 0px;
     min-width: 0;
     min-height: 0;
+    max-width: var(--column-max, none);
+    margin-inline-end: calc(-1 * var(--column-gap));
   }
 
-  .layout-column > .layout-panel {
+  .layout-column[data-visible] {
+    flex-grow: var(--column-min);
+    flex-basis: calc(var(--column-min) * 1px);
+    margin-inline-end: 0;
+  }
+
+  .layout-columns[data-animate] > .layout-column {
+    transition:
+      flex-grow 250ms cubic-bezier(0.25, 1, 0.5, 1),
+      flex-basis 250ms cubic-bezier(0.25, 1, 0.5, 1),
+      margin-inline-end 250ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .layout-column-content {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  .layout-columns[data-animate] .layout-column-content {
+    transition:
+      opacity 250ms cubic-bezier(0.25, 1, 0.5, 1),
+      transform 250ms cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .layout-columns .layout-column[data-visible] > .layout-column-content {
+    opacity: 1;
+    transform: none;
+  }
+
+  .layout-column-content > .layout-panel {
     flex: 1;
   }
 
@@ -25,5 +62,16 @@
     border-radius: var(--radius-ui-card);
     background: var(--color-ui-card);
     color: var(--color-ui-primary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .layout-columns[data-animate] > .layout-column {
+      transition: none;
+    }
+
+    .layout-columns[data-animate] .layout-column-content {
+      transform: none;
+      transition: opacity 120ms ease-out;
+    }
   }
 }
