@@ -13,9 +13,10 @@
         from var(--surface-color)
           calc(l + var(--surface-direction) * (var(--surface-shift)) + 20) c h
       ),
+      var(--surface-color),
       lch(
         from var(--surface-color)
-          calc(l + var(--surface-direction) * (var(--surface-shift))) c h
+          calc(l + var(--surface-direction) * (var(--surface-shift)) - 20) c h
       )
     );
     /* stylelint-disable-next-line custom-property-no-missing-var-function -- The transition names the animated property; it does not read its value. */
