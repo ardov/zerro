@@ -1,0 +1,47 @@
+@layer components {
+  .navigation-action {
+    align-self: stretch;
+    min-width: 48px;
+    min-height: 48px;
+    color: var(--color-ui-secondary);
+  }
+
+  .navigation-action-tile {
+    display: flex;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .navigation-action[aria-current='page'] .navigation-action-tile {
+    background: var(--color-ui-selected);
+    color: var(--color-ui-primary);
+  }
+
+  .navigation-action:focus-visible .navigation-action-tile {
+    outline: var(--stroke-ui-control) solid var(--color-ui-focus);
+    outline-offset: 1px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .navigation-action:not([aria-current='page']):hover
+      .navigation-action-tile::before {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .navigation-action:hover .navigation-action-tile {
+      color: var(--color-ui-primary);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .navigation-action-tile {
+      /* Keep the small animated surface composited before and after a press. */
+      will-change: scale;
+    }
+  }
+}

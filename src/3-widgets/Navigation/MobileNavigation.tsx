@@ -1,11 +1,9 @@
 import type { FC } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { SettingsIcon } from '@/6-shared/ui/Icons'
-import { cn } from '@/6-shared/ui/shadcn/utils'
 import RefreshButton from '@/3-widgets/RefreshButton'
-import { useAsk } from '@/6-shared/overlays'
-import { SettingsMenu } from './SettingsMenu'
+import { NavigationAction } from './NavigationAction'
+import { MenuButton } from './MenuButton'
 import { useDestinations } from './destinations'
 
 import './MobileNavigation.css'
@@ -16,7 +14,6 @@ import './MobileNavigation.css'
 export const MobileNavigation: FC = () => {
   const { t } = useTranslation('navigation')
   const path = useLocation().pathname
-  const ask = useAsk()
   const destinations = useDestinations({
     mobile: true,
     accountsPanelFits: false,
@@ -32,36 +29,23 @@ export const MobileNavigation: FC = () => {
           {destinations.map(destination => {
             const selected = current?.path === destination.path
             return (
-              <Link
+              <NavigationAction
                 key={destination.path}
-                to={destination.path}
-                aria-label={destination.label}
+                nativeButton={false}
+                role="link"
+                render={<Link to={destination.path} />}
+                label={destination.label}
+                icon={destination.icon}
                 aria-current={selected ? 'page' : undefined}
-                className={navigationActionClass(selected)}
-              >
-                {destination.icon}
-              </Link>
+              />
             )
           })}
-          <button
-            type="button"
-            aria-label={t('settings')}
-            onClick={() => ask(<SettingsMenu />)}
-            className={navigationActionClass(false)}
-          >
-            <SettingsIcon />
-          </button>
+          <MenuButton />
         </div>
-        <div className="flex size-12 shrink-0 items-center justify-center">
+        <div className="mobile-navigation-sync flex size-12 shrink-0 items-center justify-center">
           <RefreshButton shape="circle" muted />
         </div>
       </div>
     </nav>
   )
 }
-
-const navigationActionClass = (selected: boolean) =>
-  cn(
-    'relative flex min-w-8 flex-1 items-center justify-center border-0 bg-transparent font-sans text-ui-secondary no-underline transition-colors hover:bg-ui-highlight focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ui-focus',
-    selected && 'text-ui-primary'
-  )

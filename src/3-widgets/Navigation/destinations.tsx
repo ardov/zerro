@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import type { ComponentType } from 'react'
+import type { TIconProps } from '@/6-shared/ui/lucide/createIcon'
 import { useTranslation } from 'react-i18next'
 import {
   BudgetIcon,
@@ -8,7 +9,11 @@ import {
   SyncAltIcon,
 } from '@/6-shared/ui/Icons'
 
-export type TDestination = { path: string; label: string; icon: ReactNode }
+export type TDestination = {
+  path: string
+  label: string
+  icon: ComponentType<TIconProps>
+}
 
 /** The places the rail and the bottom bar lead to, in order.
  *
@@ -23,25 +28,25 @@ export function useDestinations(props: {
   const { mobile, accountsPanelFits } = props
   const { t } = useTranslation('navigation')
   const destinations: TDestination[] = [
-    { path: '/transactions', label: t('transactions'), icon: <SyncAltIcon /> },
-    { path: '/budget', label: t('budget'), icon: <BudgetIcon /> },
+    { path: '/transactions', label: t('transactions'), icon: SyncAltIcon },
+    { path: '/budget', label: t('budget'), icon: BudgetIcon },
   ]
   if (!accountsPanelFits)
     destinations.push({
       path: '/accounts',
       label: t('accounts'),
-      icon: <AccountBalanceWalletIcon />,
+      icon: AccountBalanceWalletIcon,
     })
   destinations.push({
     path: '/stats',
     label: t('stats'),
-    icon: <BarChartIcon />,
+    icon: BarChartIcon,
   })
   if (!mobile)
     destinations.push({
       path: '/about',
       label: t('about'),
-      icon: <HelpOutlineIcon />,
+      icon: HelpOutlineIcon,
     })
   return destinations
 }

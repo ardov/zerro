@@ -13,7 +13,9 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .kit-press:not(:disabled, [aria-disabled='true']):active {
+    .kit-press:not(:disabled, [aria-disabled='true']):active,
+    .kit-press-trigger:not(:disabled, [aria-disabled='true']):active
+      > .kit-press {
       scale: var(--press-scale-x) var(--press-scale-y);
       transition-duration: 50ms;
       transition-timing-function: ease;
