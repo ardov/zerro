@@ -30,6 +30,8 @@ type DialogOptions = SurfaceName & {
   contentClassName?: string
   initialFocus?: Primitive.Popup.Props['initialFocus']
   finalFocus?: Primitive.Popup.Props['finalFocus']
+  /** Called after the surface finishes opening or closing. */
+  onOpenChangeComplete?: (open: boolean) => void
 }
 export type DialogProps = DialogOptions & {
   /** Register once in the owner; includes Back, never technical unmount. */
@@ -84,6 +86,7 @@ function CenteredDialog(props: DialogSurfaceProps & { alert?: boolean }) {
     contentClassName,
     initialFocus,
     finalFocus,
+    onOpenChangeComplete,
     alert = false,
     closeButton = true,
     'aria-describedby': descriptionId,
@@ -98,6 +101,7 @@ function CenteredDialog(props: DialogSurfaceProps & { alert?: boolean }) {
     <Root
       open={open}
       onOpenChange={onOpenChange}
+      onOpenChangeComplete={onOpenChangeComplete}
       {...(alert ? {} : { disablePointerDismissal })}
     >
       {trigger && <Primitive.Trigger render={trigger} disabled={disabled} />}
@@ -117,7 +121,7 @@ function CenteredDialog(props: DialogSurfaceProps & { alert?: boolean }) {
             initialFocus={initialFocus}
             finalFocus={finalFocus}
             className={cn(
-              'kit-surface-fade pointer-events-auto flex max-h-full w-full max-w-120 flex-col overflow-hidden rounded-ui-card rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
+              'kit-surface-fade kit-modal-popup pointer-events-auto flex max-h-full w-full max-w-120 flex-col overflow-hidden rounded-ui-card rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
               className
             )}
           >

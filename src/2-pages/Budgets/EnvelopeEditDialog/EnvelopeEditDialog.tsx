@@ -14,7 +14,7 @@ import { core } from '@/zerro-core/redux'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisibilitySelect'
 import { defineScreen, useAsk } from '@/6-shared/overlays'
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 /** A screen: the envelope it edits is an id, and the envelope itself is looked
@@ -26,9 +26,13 @@ export const useEditDialog = () => envelopeEditScreen.useOpen()
 
 export const EnvelopeEditDialog: FC = () => {
   const [id, setId] = envelopeEditScreen.use()
+  // Keep the draft until the surface finishes its closing transition.
+  const [retainedId, setRetainedId] = useState(id)
+  if (id !== undefined && id !== retainedId) setRetainedId(id)
   const envelopes = useAppSelector(core.envelopes.selectAll)
   const close = useCallback(() => setId(null), [setId])
-  const envelope = id ? envelopes[id] : undefined
+  const renderedId = id ?? retainedId
+  const envelope = renderedId ? envelopes[renderedId] : undefined
   if (!envelope) return null
 
   return (
@@ -37,15 +41,21 @@ export const EnvelopeEditDialog: FC = () => {
     <EnvelopeEditDialogForm
       key={envelope.id}
       envelope={envelope}
+      open={id !== undefined}
       onClose={close}
+      onOpenChangeComplete={open => {
+        if (!open) setRetainedId(undefined)
+      }}
     />
   )
 }
 
 const EnvelopeEditDialogForm: FC<{
   envelope: core.envelopes.TPresentedEnvelope
+  open: boolean
   onClose: () => void
-}> = ({ envelope, onClose }) => {
+  onOpenChangeComplete: (open: boolean) => void
+}> = ({ envelope, open, onClose, onOpenChangeComplete }) => {
   const narrow = useBottomSheetLayout()
   const formRef = useRef<HTMLFormElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
@@ -73,6 +83,7 @@ const EnvelopeEditDialogForm: FC<{
       }
     },
     onSubmit: values => {
+      if (!open) return
       onClose()
       dispatch(
         core.envelopes.updateSettings({
@@ -95,8 +106,9 @@ const EnvelopeEditDialogForm: FC<{
       closeButton={false}
       initialFocus={narrow ? formRef : nameRef}
       className="max-w-100"
+      onOpenChangeComplete={onOpenChangeComplete}
       controller={{
-        open: true,
+        open,
         setOpen: open => {
           // Preserve dirty drafts on surface dismissal; Back still closes the screen.
           if (!open && shallowEqual(values, initialValues)) onClose()
@@ -105,6 +117,7 @@ const EnvelopeEditDialogForm: FC<{
     >
       <form
         ref={formRef}
+        inert={!open}
         tabIndex={-1}
         onSubmit={handleSubmit}
         className="flex flex-col gap-4 outline-none"

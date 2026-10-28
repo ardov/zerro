@@ -8,6 +8,8 @@
     justify-content: center;
     gap: var(--column-gap);
     padding: 8px 8px 8px 0;
+    /* Keep receding columns above the canvas and below the visible content. */
+    isolation: isolate;
   }
 
   .layout-column {
@@ -17,12 +19,14 @@
     min-height: 0;
     max-width: var(--column-max, none);
     margin-inline-end: calc(-1 * var(--column-gap));
+    z-index: -1;
   }
 
   .layout-column[data-visible] {
     flex-grow: var(--column-min);
     flex-basis: calc(var(--column-min) * 1px);
     margin-inline-end: 0;
+    z-index: auto;
   }
 
   .layout-columns[data-animate] > .layout-column {

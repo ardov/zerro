@@ -14,10 +14,6 @@
   }
 
   .kit-drawer-popup {
-    transition:
-      translate 250ms ease-out,
-      opacity 250ms ease-out;
-
     &[data-side='bottom'] {
       --drawer-exit-translate: 0 100%;
       translate: 0 var(--drawer-swipe-movement-y, 0px);
@@ -80,15 +76,9 @@
         translate: none;
       }
 
-      &[data-starting-style],
-      &[data-ending-style] {
-        opacity: 0;
-      }
-
       @starting-style {
         &[data-side] {
           translate: none;
-          opacity: 0;
         }
       }
     }

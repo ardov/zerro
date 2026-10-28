@@ -378,6 +378,11 @@ and the convenience component. Rendering-only Surfaces have no `onClose` prop.
 Technical unmount and adaptive remount do not save drafts; closing the browser
 has no save guarantee. No close guard is implemented.
 
+`Dialog`, `Drawer` and their rendering-only Surfaces expose
+`onOpenChangeComplete(open)` after the CSS transition finishes. Conditional
+editors retain their form with `open={false}` until this callback reports
+`false`, then release it so reopening starts a fresh draft.
+
 An editor can hold a local draft and commit a changed valid value in `onClose`.
 It owns validation and error handling. Never save from effect cleanup.
 Save/Cancel forms save only on explicit submission. Pending operations must not

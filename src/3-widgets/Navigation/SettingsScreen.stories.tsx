@@ -95,6 +95,52 @@ export const Mobile: Story = {
   render: () => <Harness />,
   play: checkScreen,
 }
+
+const checkClosingMotion: Story['play'] = async ({ canvasElement }) => {
+  const screen = await openSettings(canvasElement)
+  await Promise.allSettled(
+    screen.getAnimations().map(animation => animation.finished)
+  )
+  if (window.innerWidth < 500) await userEvent.keyboard('{Escape}')
+  else
+    await userEvent.click(within(screen).getByRole('button', { name: 'Close' }))
+  await waitFor(() => expect(screen).toHaveAttribute('data-ending-style'))
+  const animations = screen.getAnimations()
+  try {
+    for (const animation of animations) {
+      animation.pause()
+      animation.currentTime = Number(animation.effect!.getTiming().duration) / 2
+    }
+    const style = getComputedStyle(screen)
+    expect(screen.isConnected).toBe(true)
+    expect(Number(style.opacity)).toBeGreaterThan(0)
+    expect(Number(style.opacity)).toBeLessThan(1)
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      expect(style.scale).toBe('none')
+      expect(style.filter).toBe('none')
+    } else {
+      expect(Number(style.scale)).toBeGreaterThan(1)
+      expect(Number(style.scale)).toBeLessThan(1.04)
+      const blur = Number.parseFloat(style.filter.slice(5))
+      expect(blur).toBeGreaterThan(0)
+      expect(blur).toBeLessThan(1)
+    }
+  } finally {
+    for (const animation of animations) animation.finish()
+  }
+  await waitFor(() => expect(screen).not.toBeInTheDocument())
+}
+
+export const ClosingMotion: Story = {
+  tags: ['!dev', '!autodocs'],
+  render: () => <Harness />,
+  play: checkClosingMotion,
+}
+export const ClosingMotionMobile: Story = {
+  ...ClosingMotion,
+  globals: { viewport: { value: 'iphone13' } },
+}
+
 export const Russian: Story = {
   globals: { locale: 'ru' },
   render: () => <Harness />,
