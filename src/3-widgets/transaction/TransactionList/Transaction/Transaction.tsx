@@ -19,7 +19,7 @@ export type TTransactionProps = {
   onSearchPayee?: (payee: string) => void
   // Actions
   onOpen?: (id: TTransactionId) => void
-  onToggle?: (id: TTransactionId) => void
+  onToggle?: (id: TTransactionId, extendRange?: boolean) => void
   onContextMenu?: (
     event: React.MouseEvent | React.TouchEvent,
     id: TTransactionId
@@ -42,7 +42,10 @@ export const Transaction = React.memo(function Transaction(
   } = props
 
   const propsToPass = useContextMenu({
-    onClick: () => onOpen?.(id),
+    onClick: event => {
+      if (event.shiftKey && onToggle) onToggle(id, true)
+      else onOpen?.(id)
+    },
     onContextMenu: event => onContextMenu?.(event, id),
   })
   const tr = useAppSelector(state => core.transactions.selectAll(state)[id])

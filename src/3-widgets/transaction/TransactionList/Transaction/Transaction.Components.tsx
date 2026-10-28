@@ -28,7 +28,7 @@ type TrElementProps = Omit<HTMLDivProps, 'onToggle'> & {
 type SymbolProps = TrElementProps & {
   isChecked: boolean
   isInSelectionMode: boolean
-  onToggle?: (id: string) => void
+  onToggle?: (id: string, extendRange?: boolean) => void
 }
 
 export const Symbol: FC<SymbolProps> = ({
@@ -48,7 +48,9 @@ export const Symbol: FC<SymbolProps> = ({
         symbol={symbol}
         showCheckBox={isInSelectionMode}
         checked={isChecked}
-        onCheckedChange={() => onToggle?.(tr.id)}
+        onCheckedChange={(_, { event }) =>
+          onToggle?.(tr.id, 'shiftKey' in event && event.shiftKey === true)
+        }
         color={color}
         size="m"
       />

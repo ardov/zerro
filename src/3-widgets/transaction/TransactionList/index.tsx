@@ -109,24 +109,56 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     () => checkedIds.filter(id => allTransactions[id]),
     [checkedIds, allTransactions]
   )
-  const uncheckAll = useCallback(() => setChecked([]), [setChecked])
-  const checkAll = useCallback(
-    () => setChecked(trList.map(tr => tr.id)),
-    [trList, setChecked]
-  )
+  const selectionAnchor = useRef<TTransactionId | null>(null)
+  useEffect(() => {
+    if (
+      selectionAnchor.current !== null &&
+      !trList.some(tr => tr.id === selectionAnchor.current)
+    )
+      selectionAnchor.current = null
+  }, [trList])
+  const uncheckAll = useCallback(() => {
+    selectionAnchor.current = null
+    setChecked([])
+  }, [setChecked])
+  const checkAll = useCallback(() => {
+    selectionAnchor.current = null
+    setChecked(trList.map(tr => tr.id))
+  }, [trList, setChecked])
   const toggleTransaction = useCallback(
-    (id: TTransactionId) => {
-      setChecked(
-        checked.includes(id)
-          ? checked.filter(checked => id !== checked)
-          : [...checked, id]
-      )
+    (id: TTransactionId, extendRange = false) => {
+      const anchorIndex = extendRange
+        ? trList.findIndex(tr => tr.id === selectionAnchor.current)
+        : -1
+      const targetIndex = extendRange
+        ? trList.findIndex(tr => tr.id === id)
+        : -1
+      selectionAnchor.current = id
+      if (anchorIndex >= 0 && targetIndex >= 0) {
+        const range = trList.slice(
+          Math.min(anchorIndex, targetIndex),
+          Math.max(anchorIndex, targetIndex) + 1
+        )
+        const rangeIds = new Set(range.map(tr => tr.id))
+        setChecked(
+          checked.includes(id)
+            ? checked.filter(id => !rangeIds.has(id))
+            : [...new Set([...checked, ...rangeIds])]
+        )
+      } else {
+        setChecked(
+          checked.includes(id)
+            ? checked.filter(checked => id !== checked)
+            : [...checked, id]
+        )
+      }
     },
-    [checked, setChecked]
+    [checked, setChecked, trList]
   )
   const onSelectSimilar = useCallback(
     (date: Date | number) => {
       const ids = trList.filter(tr => tr.changed === +date).map(tr => tr.id)
+      selectionAnchor.current = null
       setChecked(ids)
       track('similar_transactions_selected', {})
     },

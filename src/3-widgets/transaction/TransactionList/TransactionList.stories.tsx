@@ -38,6 +38,9 @@ function Example() {
       <output aria-label="Applied query" className="sr-only">
         {JSON.stringify({ query, search })}
       </output>
+      <output aria-label="Selected operations" className="sr-only">
+        {JSON.stringify(checked)}
+      </output>
     </div>
   )
 }
@@ -52,6 +55,193 @@ const meta = {
 } satisfies Meta<typeof Example>
 export default meta
 type Story = StoryObj<typeof meta>
+
+export const RangeSelection: Story = {
+  tags: ['!dev', '!autodocs'],
+  play: async ({ canvasElement }) => {
+    const user = userEvent.setup()
+    const canvas = within(canvasElement)
+    const list = await canvas.findByRole('list', { name: 'Transactions' })
+    const checkboxes = within(list).getAllByRole('checkbox')
+    const expectChecked = async (indexes: number[]) => {
+      for (const [index, checkbox] of checkboxes.entries()) {
+        if (indexes.includes(index)) await expect(checkbox).toBeChecked()
+        else await expect(checkbox).not.toBeChecked()
+      }
+    }
+    expect(checkboxes).toHaveLength(4)
+    // Deselecting the final checked row keeps the latest click as the anchor.
+    await user.click(checkboxes[0])
+    await user.click(checkboxes[0])
+    await expectChecked([])
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes[2])
+    await user.keyboard('{/Shift}')
+    await expectChecked([0, 1, 2])
+    await user.click(
+      canvas.getByRole('button', { name: 'Remove Selected 3 transactions' })
+    )
+    await expectChecked([])
+    // Keep the separate first selection when extending from the latest click.
+    await user.click(checkboxes[0])
+    await user.click(checkboxes[2])
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes[3])
+    await user.keyboard('{/Shift}')
+    await expectChecked([0, 2, 3])
+    await expect(
+      canvas.getByLabelText('Opened operation')
+    ).toBeEmptyDOMElement()
+
+    // Reverse direction, using the last range endpoint as the new anchor.
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes[1])
+    await user.keyboard('{/Shift}')
+    await expectChecked([0, 1, 2, 3])
+
+    // Shift on a checked endpoint clears the range, preserving outside rows.
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes[3])
+    await user.keyboard('{/Shift}')
+    await expectChecked([0])
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes[1])
+    await user.keyboard('{/Shift}')
+    await expectChecked([0, 1, 2, 3])
+
+    // A normal click toggles one row; Shift applies the endpoint's action
+    // uniformly even when the range contains a mixture of states.
+    await user.click(checkboxes[2])
+    await expectChecked([0, 1, 3])
+    await user.keyboard('{Shift>}')
+    await user.click(
+      checkboxes[0]
+        .closest('[data-row-key]')!
+        .querySelector<HTMLElement>('.transaction-line')!
+    )
+    await user.keyboard('{/Shift}')
+    await expectChecked([3])
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes[2])
+    await user.keyboard('{/Shift}')
+    await expectChecked([0, 1, 2, 3])
+    await expect(
+      canvas.getByLabelText('Opened operation')
+    ).toBeEmptyDOMElement()
+
+    await user.click(
+      canvas.getByRole('button', { name: 'Remove Selected 4 transactions' })
+    )
+    await expectChecked([])
+    // Clearing selection also forgets its old anchor.
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes[0])
+    await user.keyboard('{/Shift}')
+    await expectChecked([0])
+    checkboxes[2].focus()
+    await user.keyboard('{Shift>} {/Shift}')
+    await expectChecked([0, 1, 2])
+    checkboxes[0].focus()
+    await user.keyboard('{Shift>} {/Shift}')
+    await expectChecked([])
+    // The same anchor survives when Shift clears the entire selected range.
+    checkboxes[2].focus()
+    await user.keyboard('{Shift>} {/Shift}')
+    await expectChecked([0, 1, 2])
+  },
+}
+
+export const FilteredRangeSelection: Story = {
+  tags: ['!dev', '!autodocs'],
+  play: async ({ canvasElement }) => {
+    const user = userEvent.setup()
+    const canvas = within(canvasElement)
+    const list = await canvas.findByRole('list', { name: 'Transactions' })
+    const coffeeCheckbox = within(
+      within(list).getByText('Coffee').closest<HTMLElement>('[data-row-key]')!
+    ).getByRole('checkbox')
+    await user.click(coffeeCheckbox)
+    await user.click(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    )
+    await user.type(
+      canvas.getByRole('textbox', { name: 'Search transactions' }),
+      'lunch'
+    )
+    await user.keyboard('{Enter}')
+    await waitFor(() => expect(within(list).queryByText('Coffee')).toBeNull())
+    const checkboxes = within(list).getAllByRole('checkbox')
+    expect(checkboxes).toHaveLength(2)
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes[0])
+    await user.keyboard('{/Shift}')
+    await expect(checkboxes[0]).toBeChecked()
+    await expect(checkboxes[1]).not.toBeChecked()
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes[1])
+    await user.keyboard('{/Shift}')
+    await expect(checkboxes[0]).toBeChecked()
+    await expect(checkboxes[1]).toBeChecked()
+    const selected = JSON.parse(
+      canvas.getByLabelText('Selected operations').textContent!
+    )
+    expect(selected.sort()).toEqual(['legacy', 'lunch', 'other'])
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes[0])
+    await user.keyboard('{/Shift}')
+    for (const checkbox of checkboxes) await expect(checkbox).not.toBeChecked()
+    await expect(
+      canvas.getByLabelText('Selected operations')
+    ).toHaveTextContent('["legacy"]')
+  },
+}
+
+export const VirtualizedRangeSelection: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: {
+    app: { scenario: 'transaction-navigation', route: '/transactions' },
+  },
+  play: async ({ canvasElement }) => {
+    const user = userEvent.setup()
+    const canvas = within(canvasElement)
+    const list = await canvas.findByRole('list', { name: 'Transactions' })
+    const first = within(list).getAllByRole('checkbox')[0]
+    const firstKey =
+      first.closest<HTMLElement>('[data-row-key]')!.dataset.rowKey
+    await user.click(first)
+    const viewport = list.closest<HTMLElement>('.kit-scroll-viewport')!
+    viewport.scrollTop = viewport.scrollHeight
+    fireEvent.scroll(viewport)
+    await waitFor(() =>
+      expect(list.querySelector(`[data-row-key="${firstKey}"]`)).toBeNull()
+    )
+    const checkboxes = within(list).getAllByRole('checkbox')
+    await user.keyboard('{Shift>}')
+    await user.click(checkboxes.at(-1)!)
+    await user.keyboard('{/Shift}')
+    // The full range includes operations that were never mounted together.
+    await expect(canvas.getByText('Selected 80 transactions')).toBeVisible()
+    const selected = JSON.parse(
+      canvas.getByLabelText('Selected operations').textContent!
+    )
+    expect(new Set(selected)).toEqual(
+      new Set(Array.from({ length: 80 }, (_, index) => `purchase-${index}`))
+    )
+    viewport.scrollTop = 0
+    fireEvent.scroll(viewport)
+    await waitFor(() =>
+      expect(list.querySelector(`[data-row-key="${firstKey}"]`)).not.toBeNull()
+    )
+    for (const checkbox of within(list).getAllByRole('checkbox'))
+      await expect(checkbox).toBeChecked()
+    await user.keyboard('{Shift>}')
+    await user.click(within(list).getAllByRole('checkbox')[0])
+    await user.keyboard('{/Shift}')
+    await expect(
+      canvas.getByLabelText('Selected operations')
+    ).toHaveTextContent('[]')
+  },
+}
 
 export const SearchAndMerchant: Story = {
   play: async ({ canvasElement }) => {
