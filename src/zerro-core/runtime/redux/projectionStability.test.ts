@@ -15,7 +15,7 @@ const NOW = Date.parse('2026-05-15T12:00:00Z')
  * this, an unrelated write silently recomputes `buildRawActivity` (~18ms on a
  * large account) and everything downstream of it.
  *
- * `reminderMarker` is the probe because no projection reads it, so every node
+ * `reminderMarker` is changed because no projection reads it, so every node
  * below must survive a change to it with its reference intact.
  */
 const nodes: Record<string, (state: RootState) => unknown> = {

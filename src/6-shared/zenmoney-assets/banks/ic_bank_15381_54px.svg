@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
   <defs/>
-  <path d="M0,64V0h64v64Z" fill="#147e4b" fill-rule="evenodd"/>
-  <path d="M5.72,46.6v-9.29C18.39,38.77 26,45.35 27,58.55h-9.3C17,51.48 12.91,47.59 5.72,46.6" fill="#fff" fill-rule="evenodd"/>
-  <path d="M5.72,31.73V21.65c20.2,0.78 35.79,14.66 36.9,36.9H32.8c-0.92,-16.26 -12.05,-26.39 -27.08,-26.82" fill="#fff" fill-rule="evenodd"/>
-  <path d="M5.72,15.81V5.45h52.56v10.36h-22c14.35,10.35 21.83,24.52 22,42.74h-9.82C47.49,32.26 28.87,16.5 5.72,15.81" fill="#fff" fill-rule="evenodd"/>
+  <path d="M0,0h54v54h-54z" fill="#285F47"/>
+  <path d="M4,30C15.046,30 24,38.954 24,50H14C14,44.477 9.523,40 4,40V30ZM4,27C16.702,27 27,37.297 27,50H37C37,31.775 22.225,17 4,17V27ZM50,50H40C40,30.118 23.882,14 4,14V4H49V14H32.638C43.219,22.428 50,35.422 50,50Z" fill="#ffffff" fill-rule="evenodd"/>
 </svg>

@@ -130,63 +130,68 @@ function makeThunkRunner(initial: RootState) {
 }
 
 describe('parseFullBackup', () => {
-  it('accepts the wire variants observed in a complete ZenMoney backup', () => {
-    const file = JSON.parse(
-      toBackupFile(
-        makeSnapshot({
-          merchant: {
-            shop: makeMerchant({ id: 'shop', title: 'Shop' }),
-          },
-          account: {
-            acc: makeAccount({ id: 'acc', title: 'Cash' }),
-          },
-          reminder: {
-            reminder: makeReminder({
-              id: 'reminder',
-              incomeAccount: 'acc',
-              outcomeAccount: 'acc',
-            }),
-          },
-          transaction: {
-            transaction: makeTransaction({
-              id: 'transaction',
-              incomeAccount: 'acc',
-              outcomeAccount: 'acc',
-            }),
-          },
-        })
+  it.each([null, 5411])(
+    'accepts observed wire variants with merchant MCC %s',
+    mcc => {
+      const file = JSON.parse(
+        toBackupFile(
+          makeSnapshot({
+            merchant: {
+              shop: makeMerchant({ id: 'shop', title: 'Shop' }),
+            },
+            account: {
+              acc: makeAccount({ id: 'acc', title: 'Cash' }),
+            },
+            reminder: {
+              reminder: makeReminder({
+                id: 'reminder',
+                incomeAccount: 'acc',
+                outcomeAccount: 'acc',
+              }),
+            },
+            transaction: {
+              transaction: makeTransaction({
+                id: 'transaction',
+                incomeAccount: 'acc',
+                outcomeAccount: 'acc',
+              }),
+            },
+          })
+        )
+      ) as {
+        merchant: Array<Record<string, unknown>>
+        account: Array<Record<string, unknown>>
+        reminder: Array<Record<string, unknown>>
+        transaction: Array<Record<string, unknown>>
+      }
+      file.merchant[0].mcc = mcc
+      file.account.find(
+        account => account.id === 'acc'
+      )!.balanceCorrectionType = 'createCorrection'
+      file.reminder[0].endDate = null
+      file.transaction[0].incomeBankID = 'income-operation'
+      file.transaction[0].outcomeBankID = 'outcome-operation'
+
+      const parsed = parseFullBackup(JSON.stringify(file))
+
+      expect(parsed.ok).toBe(true)
+      if (!parsed.ok) return
+      expect(parsed.store.merchant.shop.mcc).toBe(mcc)
+      expect(parsed.store.account.acc.balanceCorrectionType).toBe(
+        'createCorrection'
       )
-    ) as {
-      merchant: Array<Record<string, unknown>>
-      account: Array<Record<string, unknown>>
-      reminder: Array<Record<string, unknown>>
-      transaction: Array<Record<string, unknown>>
+      expect(parsed.store.reminder.reminder.endDate).toBeNull()
+      expect(parsed.store.transaction.transaction).toMatchObject({
+        incomeBankID: 'income-operation',
+        outcomeBankID: 'outcome-operation',
+      })
     }
-    file.merchant[0].mcc = null
-    file.account.find(account => account.id === 'acc')!.balanceCorrectionType =
-      'createCorrection'
-    file.reminder[0].endDate = null
-    file.transaction[0].incomeBankID = 'income-operation'
-    file.transaction[0].outcomeBankID = 'outcome-operation'
-
-    const parsed = parseFullBackup(JSON.stringify(file))
-
-    expect(parsed.ok).toBe(true)
-    if (!parsed.ok) return
-    expect(parsed.store.account.acc.balanceCorrectionType).toBe(
-      'createCorrection'
-    )
-    expect(parsed.store.reminder.reminder.endDate).toBeNull()
-    expect(parsed.store.transaction.transaction).toMatchObject({
-      incomeBankID: 'income-operation',
-      outcomeBankID: 'outcome-operation',
-    })
-  })
+  )
 
   /**
    * Every warning the file itself can produce, in one backup: a collection and
-   * a row field this version has no meaning for, a known field the write API
-   * gives it no way to send back, and a discriminator value it does not know.
+   * a row field this version has no meaning for, and a discriminator value it
+   * does not know.
    * None of them may reject the backup.
    */
   it('reports everything it does not fully understand and still accepts', () => {
@@ -209,7 +214,6 @@ describe('parseFullBackup', () => {
     file.merchant.forEach(merchant => {
       merchant.futureField = true
     })
-    file.merchant[0].mcc = 5411
     file.account.find(account => account.id === 'future')!.type = 'future-type'
 
     const parsed = parseFullBackup(JSON.stringify(file))
@@ -219,7 +223,6 @@ describe('parseFullBackup', () => {
     expect(parsed.warnings).toEqual([
       { reason: 'unknownField', path: 'futureCollection', count: 2 },
       { reason: 'unknownField', path: 'merchant.futureField', count: 2 },
-      { reason: 'unwritableField', path: 'merchant.mcc', count: 1 },
       { reason: 'unknownValue', path: 'account.type', count: 1 },
     ])
     expect(parsed.store.account.future.type).toBe('future-type')
@@ -314,7 +317,7 @@ describe('parseFullBackup', () => {
     expect(parsed.store.transaction.tr).toMatchObject({ id: 'tr', outcome: 10 })
   })
 
-  // Round 9: deleting an account nulls the leg that pointed at it on a debt
+  // Deleting an account nulls the leg that pointed at it on a debt
   // operation and soft-deletes the row. A real account can already hold that
   // shape, so an export of it has to stay importable — otherwise the backup a
   // person already has quietly stops working.

@@ -174,7 +174,7 @@ describe('routeTransactionToActivity', () => {
     ).toBeNull()
   })
 
-  // Round 9: deleting an account nulls the leg that pointed at it on a
+  // Deleting an account nulls the leg that pointed at it on a
   // soft-deleted debt operation. Such a row moves no money and belongs to no
   // month's activity.
   it('routes nothing for a row whose account leg was nulled', () => {

@@ -64,10 +64,8 @@ ZenMoney stores transaction amounts with four decimals, and a row whose `income`
 and `outcome` both land on zero is purged: the write response carries a real
 `{ object: 'transaction', id, stamp, user }` tombstone and a follow-up
 `forceFetch` pull shows the transaction absent — not `deleted: true`, gone. The
-trigger is the stored amounts and nothing else. Round 7 verified it on a create
-as well as a rewrite, across two accounts as well as one, and with the debt
-account on a side; the earlier same-account reading of this rule was a property
-of the one fixture that produced it, not a condition.
+trigger is the stored amounts. It applies to creation and updates, with one or
+two accounts, including debt operations.
 
 `materializeCommand` therefore drops the entity from the patch and emits the
 deletion instead. Three properties make this safe:
@@ -169,12 +167,11 @@ nothing on deposit and loan, where the base reads 0.
 Deleting an account is another true purge path: transactions contained in it
 are hard-deleted (even one created in the same request) and real `deletion[]`
 tombstones are published. A transaction that also references a surviving
-account is not purged: Round 6 canonical fixtures show the server copies the
+account is not purged: the server copies the
 survivor id into both account fields, zeroes the removed side's amount, and
 leaves the survivor balance unchanged. The transfer becomes one-sided income or
-outcome without a dangling account reference. A tagged fixture was already
-canonicalized to `tag: null` before account deletion, so category is stripped
-by transfer materialization rather than this cascade.
+outcome without a dangling account reference. Transfer materialization clears
+category references before this cascade.
 
 A local prediction must reproduce both branches, otherwise the UI shows
 transactions belonging to an account that no longer exists. The implementation
@@ -187,11 +184,9 @@ and already invisible in local read models.
 ## 6. Tag deletion has two effects
 
 Deleting a tag nulls `transaction.tag` on referencing transactions **and**
-removes the budget rows keyed to that tag. Round 6.1 confirmed the transaction
-effect on one single-tag income and one single-tag outcome: both rows survived,
-each `tag` became `null`, and their account balance stayed unchanged. The
-second half is easy to forget: Round 6.2 independently confirmed that the
-matching budget row is removed rather than zeroed. ZenMoney budgets are
+removes the budget rows keyed to that tag. Single-tag income and outcome rows
+survive with `tag: null`, keeping their account balances unchanged. The matching
+budget row is removed rather than zeroed. ZenMoney budgets are
 identified by `(user, tag, date)` and have no id, so their removal is invisible
 in the deletion array.
 
@@ -215,9 +210,8 @@ transaction; `originalPayee` is left alone. Consequences to keep in mind:
   hundreds of transaction intents, and every one of them would be client
   intent the server is going to write anyway;
 - read paths must resolve the display name through the merchant id, so the new
-  title appears immediately without touching transaction rows. The ZenMoney
-  client does exactly this (`COALESCE(merchant.lowerTitle, lowerPayee)`), and
-  Core's debtor/balance read models already prefer merchant title over
+  title appears immediately without touching transaction rows. Core's
+  debtor/balance read models prefer merchant title over
   `transaction.payee`;
 - the next pull will therefore carry a large canonical diff of transactions
   whose only change is `payee` and `changed`. That is expected, not a conflict;
@@ -225,7 +219,7 @@ transaction; `originalPayee` is left alone. Consequences to keep in mind:
   on the same transaction is rebased over them under the usual
   last-write-wins-in-command-order policy.
 
-**Delete.** Round 6.3 settled the clean fixture: an ordinary transaction,
+**Delete.** An ordinary transaction,
 reminder, and reminder marker survive with `merchant: null` and `payee: null`.
 For the transaction, `originalPayee` remains unchanged. A cash transfer stores
 neither merchant nor payee before deletion, so it needs no cascade rewrite.

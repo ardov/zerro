@@ -27,7 +27,7 @@ export type TZmTransaction = {
   incomeInstrument: TInstrumentId
   /**
    * Null only on a soft-deleted row: deleting an account nulls the leg that
-   * pointed at it on a debt operation, instead of purging the row (round 9).
+   * pointed at it on a debt operation, instead of purging the row.
    */
   incomeAccount: TAccountId | null
   income: TUnits

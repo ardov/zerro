@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <defs/>
-  <path d="M45.857,27v1.714H8.143V27H3v24h48V27z" fill="#221f20"/>
-  <path d="M3,3v24h5.143v-1.714h37.714V27H51V3z" fill="#de4149"/>
+  <path d="M0.5,0.961h30.078V31.039H0.5z" fill="#fffffe"/>
+  <path d="M1.538,15.999h28.003V1.998H1.538z" fill="#e60029" fill-rule="evenodd"/>
+  <path d="M1.538,30.001h28.003V16H1.538z" fill="#000" fill-rule="evenodd"/>
+  <path d="M6.411,16.854h18.256v-1.708H6.411z" fill="#fffffe" fill-rule="evenodd"/>
 </svg>

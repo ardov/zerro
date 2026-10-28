@@ -1,13 +1,13 @@
 # ZenMoney-derived assets
 
-This directory contains assets extracted from ZenMoney Android application
-version. It is intentionally separate from application-owned artwork.
+This directory contains Zenmoney category artwork and bank logos, kept
+separate from application-owned artwork.
 
 ## Contents
 
 - `categories/` — 167 category icons indexed by the full ZenMoney `tag.icon`
   value (for example, `3004_taxi`), plus the uncategorized fallback.
-- `banks/` — 382 numbered bank icons indexed by ZenMoney bank icon ID, plus
+- `banks/` — 432 numbered bank icons indexed by Zenmoney bank icon ID, plus
   three `unknown bank` fallbacks indexed by native size.
 - `index.ts` — runtime category mapping and uncategorized fallback.
 - `bankIcons.ts` — local bank asset URLs indexed by `account.company`.

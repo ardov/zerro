@@ -37,10 +37,10 @@ export function predictDeletionCascades(
 /**
  * Deleting an ordinary account hard-purges transactions wholly contained in
  * it. A transfer that touches one surviving account remains, with that id on
- * both legs and the deleted side zeroed. This is the exact Round 6 shape.
+ * both legs and the deleted side zeroed.
  *
  * A debt operation is the exception, because the server rejects the debt
- * account on both sides. Round 9 observed it soft-deleted instead, with the leg
+ * account on both sides. It is soft-deleted instead, with the leg
  * that pointed at the deleted account nulled and both amounts untouched.
  *
  * An already soft-deleted transaction stays out of the prediction: its server
@@ -101,15 +101,13 @@ function predictAccountDeletion(
     const survivor = incomeDeleted ? outcomeAccount : incomeAccount
 
     // A debt operation cannot collapse the way an ordinary transfer does: the
-    // server refuses a row with the debt account on both sides. Round 9
-    // observed what it does instead — the row is soft-deleted and the leg that
+    // server refuses a row with the debt account on both sides. The row is
+    // soft-deleted and the leg that
     // pointed at the deleted account becomes null, while both amounts are kept
     // as they were. The row stops counting towards the debt account's balance
-    // because `isDeletedTransaction` excludes it, which is what the observed
-    // balance change confirms.
+    // because `isDeletedTransaction` excludes it.
     //
-    // `tag` is deliberately left alone: the observed fixture carried none, so
-    // whether the server clears it is unknown, and this file predicts only
+    // `tag` is deliberately left alone; this file predicts only
     // effects it has actually seen.
     if (snapshot.account[survivor]?.type === AccountType.Debt) {
       primaryTransactions.set(transaction.id, {

@@ -69,8 +69,7 @@ export function compareTransactionDates(
  * semantics; the write shape that produces a tombstone lives in the
  * materializer.
  *
- * Round 7 (2026-08-02) narrowed what the threshold can still match without
- * making it wrong. The server stores four decimals, so a canonical row with
+ * The server stores four decimals, so a canonical row with
  * both amounts under `0.0001` has both amounts at `0` — and such a row is
  * purged, not stored. Anything this hides is therefore a row the current server
  * behavior cannot produce: data predating it, or local state that has not been

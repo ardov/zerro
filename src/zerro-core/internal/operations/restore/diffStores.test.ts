@@ -36,6 +36,37 @@ function applyDiff(current: TDataStore, desired: TDataStore): TDataStore {
 }
 
 describe('diffStores', () => {
+  it.each([5812, null])('restores merchant MCC to %s', mcc => {
+    const current = makeSnapshot({
+      merchant: {
+        shop: makeMerchant({ id: 'shop', title: 'Shop', mcc: 5411 }),
+      },
+    })
+    const desired = makeSnapshot({
+      merchant: { shop: makeMerchant({ id: 'shop', title: 'Shop', mcc }) },
+    })
+
+    expect(diffStores(current, desired)).toEqual({
+      merchant: [{ id: 'shop', mcc }],
+    })
+    expect(applyDiff(current, desired).merchant.shop.mcc).toBe(mcc)
+    expect(current.merchant.shop.mcc).toBe(5411)
+  })
+
+  it('preserves merchant MCC when an older backup omits the field', () => {
+    const current = makeSnapshot({
+      merchant: {
+        shop: makeMerchant({ id: 'shop', title: 'Shop', mcc: 5411 }),
+      },
+    })
+    const desired = makeSnapshot({
+      merchant: { shop: makeMerchant({ id: 'shop', title: 'Shop' }) },
+    })
+
+    expect(diffStores(current, desired)).toEqual({})
+    expect(applyDiff(current, desired).merchant.shop.mcc).toBe(5411)
+  })
+
   it('produces nothing for identical stores', () => {
     const store = makeSnapshot({
       account: { acc: makeAccount({ id: 'acc', title: 'Cash' }) },
@@ -544,19 +575,22 @@ describe('diffStores and account deletion cascades', () => {
 describe('restore reconciliation', () => {
   const allocateId = (key: string, id: string) => `fresh:${key}:${id}`
 
-  it('matches semantically equal rows with different backup ids', () => {
+  it('matches merchant titles across backup ids and restores their MCC', () => {
     const current = makeSnapshot({
-      merchant: { live: makeMerchant({ id: 'live', title: 'Corner shop' }) },
+      merchant: {
+        live: makeMerchant({ id: 'live', title: 'Corner shop', mcc: null }),
+      },
     })
     const desired = makeSnapshot({
       merchant: {
-        backup: makeMerchant({ id: 'backup', title: 'Corner shop' }),
+        backup: makeMerchant({ id: 'backup', title: 'Corner shop', mcc: 5411 }),
       },
     })
 
     const plan = buildRestorePlan(current, desired, { allocateId })
-    expect(plan.patch).toEqual({})
+    expect(plan.patch).toEqual({ merchant: [{ id: 'live', mcc: 5411 }] })
     expect(plan.mappings.merchant).toEqual({ backup: 'live' })
+    expect(applyDiff(current, desired).merchant.live.mcc).toBe(5411)
   })
 
   it('allocates fresh ids and rewrites dependent references in dependency order', () => {

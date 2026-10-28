@@ -63,6 +63,42 @@ const budget = (amount: number): TZerroIntent => ({
 })
 
 describe('unified command lifecycle', () => {
+  it('keeps merchant MCC edits through creation, reload, undo/redo and push planning', () => {
+    const original = base()
+    let current = original
+    let outbox: ReturnType<typeof prepareOperations>[] = []
+
+    for (const [index, mcc] of [5411, 5812, null].entries()) {
+      const command = prepareOperations(
+        current,
+        [
+          index === 0
+            ? {
+                type: 'merchant.create',
+                value: { id: 'shop', title: 'Shop', mcc },
+              }
+            : { type: 'merchant.patch', value: { id: 'shop', mcc } },
+        ],
+        1000 + index * 1000
+      )
+      outbox = parseCommandOutbox(
+        JSON.parse(JSON.stringify([...outbox, command]))
+      )
+      current = replayOutbox(original, outbox)
+      expect(current.merchant.shop.mcc).toBe(mcc)
+      expect(original.merchant.shop).toBeUndefined()
+      const push = beginPush({ base: original, outbox }, 10_000)!
+      expect(push.request.merchant).toEqual([
+        expect.objectContaining({ id: 'shop', title: 'Shop', mcc }),
+      ])
+    }
+
+    const undone = undoOutbox(outbox, [])
+    expect(replayOutbox(original, undone.outbox).merchant.shop.mcc).toBe(5812)
+    const redone = redoOutbox(undone.outbox, undone.redo)
+    expect(replayOutbox(original, redone.outbox).merchant.shop.mcc).toBeNull()
+  })
+
   it('prepares mixed operations in order and preserves the action label across reload and undo/redo', () => {
     const original = base()
     const label = { verb: 'settings-changed' as const }

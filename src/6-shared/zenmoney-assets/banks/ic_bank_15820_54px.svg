@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
   <defs>
-    <linearGradient gradientUnits="userSpaceOnUse" id="gradient-id1" x1="7.941" y1="45.56" x2="49.553" y2="14.136">
+    <linearGradient gradientUnits="userSpaceOnUse" id="gradient-id1" x1="2.623" y1="51.128" x2="56.719" y2="10.277">
       <stop offset="0.25" stop-color="#140757"/>
       <stop offset="0.286" stop-color="#270953"/>
       <stop offset="0.427" stop-color="#6D1042"/>
@@ -11,6 +11,5 @@
       <stop offset="0.8" stop-color="#ED1C24"/>
     </linearGradient>
   </defs>
-  <path d="M0,27a27,27 0,1 1,54 0,27 27,0 1,1 -54,0" fill="#fff"/>
-  <path d="m13.192,17.39 l9.855,9.499 -9.855,9.498zM43.649,7 L26.258,23.767 9,7.134v39.51l17.124,-16.59 3.3,-3.165 9.855,-9.499v18.997l-6.556,-6.377 -3.21,3.122L43.827,47V7z" fill="url(#gradient-id1)"/>
+  <path d="M9.449,14.507L22.261,26.855L9.449,39.203V14.507ZM49.043,1L26.435,22.797L4,1.174V52.536L26.261,30.971L30.551,26.855L43.362,14.507V39.203L34.841,30.913L30.667,34.971L49.275,53V1H49.043Z" fill="url(#gradient-id1)"/>
 </svg>

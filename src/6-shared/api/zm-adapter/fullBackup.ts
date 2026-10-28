@@ -37,16 +37,8 @@ const fullBackupWireSchema = z
 type TFullBackupWire = z.output<typeof fullBackupWireSchema>
 type TWireRow = Record<string, unknown>
 
-/** Fields a snapshot may carry that Zerro can read but cannot write back. */
-const unwritableWireFields = ['merchant.mcc'] as const
-
 export type TFullBackupWarning = {
-  reason:
-    | 'unknownField'
-    | 'unknownValue'
-    /** A field Zerro reads and understands but has no way to write back. */
-    | 'unwritableField'
-    | 'danglingReference'
+  reason: 'unknownField' | 'unknownValue' | 'danglingReference'
   path: string
   count: number
 }
@@ -101,7 +93,6 @@ function collectWarnings(
 ): TFullBackupWarning[] {
   return [
     ...unknownFieldWarnings(backup),
-    ...unwritableFieldWarnings(backup),
     ...unknownValueWarnings(backup),
     ...danglingReferenceWarnings(store),
   ]
@@ -142,19 +133,6 @@ function unknownFieldWarnings(backup: TFullBackupWire): TFullBackupWarning[] {
   })
 
   return warnings
-}
-
-/** Known fields a restore reads but the write API gives it no way to send. */
-function unwritableFieldWarnings(
-  backup: TFullBackupWire
-): TFullBackupWarning[] {
-  return unwritableWireFields.flatMap(path => {
-    const [collection, field] = path.split('.')
-    const count = rowsOf(backup, collection).filter(
-      row => row[field] !== undefined && row[field] !== null
-    ).length
-    return count ? [{ reason: 'unwritableField' as const, path, count }] : []
-  })
 }
 
 /** Values the protocol allows but this version has no behavior for. */

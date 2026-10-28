@@ -160,7 +160,7 @@ describe('validateDataStore', () => {
     expect(validateDataStore(store)).toEqual({ ok: true })
   })
 
-  // Round 9: deleting an ordinary account nulls the leg that pointed at it on
+  // Deleting an ordinary account nulls the leg that pointed at it on
   // a debt operation and soft-deletes the row instead of purging it. That row
   // is canonical state the server keeps sending, so rejecting it would put a
   // replica into a recovery it cannot leave.

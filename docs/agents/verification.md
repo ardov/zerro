@@ -94,7 +94,7 @@ Area-specific policies can require more evidence, never less:
 
 ## CI
 
-Pull requests and direct pushes to `master` and `core-next` run the baseline
+Pull requests and direct pushes to `master` and `beta` run the baseline
 verification job. A dependent UI job runs only when application/UI sources,
 stories, public assets, relevant build/test configuration, dependencies, or its
 workflow change. Core remains UI-relevant because fixture-backed App Scenarios

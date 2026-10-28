@@ -14,7 +14,6 @@ export type TMerchant = {
   changed: TMsTime
   user: TUserId
   title: string
-  /** Observed in complete snapshots; write semantics are not established. */
   mcc?: number | null
 }
 /** Fields the factory cannot default: creation intent must supply them. */
@@ -24,6 +23,7 @@ export const merchantRequiredFields = [
 
 export const merchantWritableFields = [
   'title',
+  'mcc',
 ] as const satisfies readonly (keyof TMerchant)[]
 export type TMerchantWritableField = (typeof merchantWritableFields)[number]
 export type TMerchantPatch = EntityPatch<TMerchant, TMerchantWritableField>
@@ -47,6 +47,7 @@ export function makeMerchant(
     title: draft.title,
     id: draft.id ?? (ctx.uuid() as TMerchantId),
     changed: draft.changed ?? ctx.now(),
+    ...(draft.mcc !== undefined ? { mcc: draft.mcc } : {}),
   }
 }
 export function compilePatchMerchant(

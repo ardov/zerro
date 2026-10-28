@@ -112,6 +112,8 @@ const entityDefinitions: Record<TIntentEntityKey, TEntityDefinition> = {
   },
   merchant: {
     writableFields: merchantWritableFields,
+    // MCC is editable metadata; it does not change title-based backup matching.
+    semanticFields: ['title'],
     removal: 'deletion',
     // The server silently refuses merchant deletion while an active debt
     // transaction references it. Keeping the merchant is the only local

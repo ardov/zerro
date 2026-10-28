@@ -368,8 +368,8 @@ function largestFittingPrefix(
   const guess = Math.min(items.length, estimateFittingPrefix(items, base, run))
   if (!fits(guess)) return narrowFittingPrefix(fits, 1, guess)
 
-  // The estimate was low. Doubling steps find an overshoot in a few probes,
-  // and every probe stays near the bound instead of near the remainder.
+  // The estimate was low. Doubling steps find an overshoot in a few checks,
+  // and every check stays near the bound instead of near the remainder.
   let fitting = guess
   let step = 1
   while (fitting < items.length) {

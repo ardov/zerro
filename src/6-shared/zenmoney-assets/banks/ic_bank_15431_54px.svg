@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26.933 26.988" width="26.933" height="26.988">
   <defs/>
-  <path d="M45.857,27v1.714H8.143V27H3v24h48V27z" fill="#221f20"/>
-  <path d="M3,3v24h5.143v-1.714h37.714V27H51V3z" fill="#de4149"/>
+  <path d="M26.933,0h-26.933v13.494h26.933z" fill="#e4032e"/>
+  <path d="M26.933,13.494h-26.933v13.494h26.933z" fill="#000000"/>
+  <path d="M22.262,12.619h-17.517v1.605h17.517z" fill="#fff"/>
 </svg>

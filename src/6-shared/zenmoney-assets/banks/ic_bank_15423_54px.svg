@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" id="gradient-id1" x1="13.5" y1="26.806" x2="13.5" y2="3.205">
+      <stop offset="0" stop-color="#3C3C3B"/>
+      <stop offset="1" stop-color="#11130F"/>
+    </linearGradient>
+    <clipPath id="clip-id2">
+      <path d="M0,0h54v54h-54z"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip-id2)">
+    <path d="M27,53.806C41.911,53.806 54,41.804 54,27H27L14.18,50.597C17.994,52.644 22.36,53.806 27,53.806Z" fill="#E3071A"/>
+    <path d="M27,0C41.911,0 54,12.196 54,27H27L14.18,3.209C17.994,1.162 22.36,0 27,0Z" fill="#D81119"/>
+    <path d="M27,27H0C0,37.201 5.739,46.071 14.186,50.601L27,27Z" fill="#000000"/>
+    <path d="M27,27H0C0,16.799 5.739,7.735 14.186,3.205L27,27Z" fill="url(#gradient-id1)"/>
+    <path d="M19.813,27L14.18,50.601L42.151,27L14.18,3.205L19.813,27Z" fill="#ffffff"/>
+  </g>
+</svg>

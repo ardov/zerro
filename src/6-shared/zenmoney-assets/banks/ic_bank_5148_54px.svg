@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27.058 27.046" width="27.058" height="27.046">
+  <defs/>
+  <path d="M20.743,27.046L20.743,6.312L27.058,0v27.046z" fill="#fa0000"/>
+  <path d="M0,6.312L0,0L27.058,0l-6.315,6.312z" fill="#c00000"/>
+  <path d="m0,27.046 l20.743,-20.734v20.734z" fill="#c6c6c6"/>
+  <path d="M0,27.046L0,6.312h20.743z" fill="#008ecf"/>
+</svg>

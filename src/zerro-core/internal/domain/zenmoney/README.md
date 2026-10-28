@@ -29,6 +29,8 @@ prefix where the protocol differs: for example, `changed` is milliseconds in
 Core and Unix seconds on the wire. Field comments and factories are the
 reference for individual fields and defaults.
 
+Merchant MCC can be changed or cleared with `null`.
+
 Entity reads expose maps and domain facts. Currency conversion, localized
 labels, pinned-account conventions, and the hidden Zerro data account belong
 outside this module. ZenMoney tag budgets are separate from Zerro envelope

@@ -1,11 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 434.4 434.6" width="434.4" height="434.6">
   <defs>
-    <clipPath id="clip-id1">
-      <path d="M0,0h54v54H0z"/>
-    </clipPath>
+    <linearGradient gradientUnits="userSpaceOnUse" id="gradient-id1" x1="0" y1="217.4" x2="180.8" y2="217.4">
+      <stop offset="0" stop-color="#003D74"/>
+      <stop offset="0.35" stop-color="#003D74"/>
+      <stop offset="0.73" stop-color="#006CBC"/>
+      <stop offset="1" stop-color="#006CBC"/>
+    </linearGradient>
+    <linearGradient gradientUnits="userSpaceOnUse" id="gradient-id2" x1="76.5" y1="90.4" x2="358" y2="90.4">
+      <stop offset="0" stop-color="#B41D52"/>
+      <stop offset="0.35" stop-color="#B41D52"/>
+      <stop offset="0.61" stop-color="#710830"/>
+      <stop offset="1" stop-color="#2C2E35"/>
+    </linearGradient>
+    <linearGradient gradientUnits="userSpaceOnUse" id="gradient-id3" x1="253.6" y1="217.4" x2="434.4" y2="217.4">
+      <stop offset="0" stop-color="#006CBC"/>
+      <stop offset="0.27" stop-color="#006CBC"/>
+      <stop offset="0.65" stop-color="#003D74"/>
+      <stop offset="1" stop-color="#003D74"/>
+    </linearGradient>
+    <linearGradient gradientUnits="userSpaceOnUse" id="gradient-id4" x1="217.2" y1="434.6" x2="217.2" y2="253.8">
+      <stop offset="0" stop-color="#003D74"/>
+      <stop offset="0.35" stop-color="#003D74"/>
+      <stop offset="0.73" stop-color="#006CBC"/>
+      <stop offset="1" stop-color="#006CBC"/>
+    </linearGradient>
   </defs>
-  <g clip-path="url(#clip-id1)">
-    <path d="M47.305,53.999 L32.132,38.826V54h-9.818V38.682L7.14,54 0,46.859l15.318,-15.173H0v-9.82h15.172L0,6.696 7.14,0l15.174,15.173V0.001h9.818v15.03L47.305,0 54,6.695 38.972,21.867H54v9.82H38.827L54,46.858z" fill="#305da2" fill-rule="evenodd"/>
-  </g>
+  <path d="M0,217.4c0,-7.3 0.6,-14.5 1.9,-22.1h103.1L25.8,116c6.4,-13.2 15.4,-26.3 26.2,-39.5l120.4,120.4c5.6,5.6 8.4,13.1 8.4,20.5 0,7.3 -2.8,14.7 -8.4,20.3L52,358.2c-10.8,-13.2 -19.8,-26.4 -26.2,-39.5l79.2,-79.3L1.9,239.4c-1.3,-7.6 -1.9,-14.9 -1.9,-22" fill="url(#gradient-id1)"/>
+  <path d="M217.2,0c7.2,0 14.5,0.6 22,1.9v103.2l79.3,-79.4c13.2,6.4 26.3,15.5 39.5,26.4L237.6,172.5c-5.6,5.6 -13,8.4 -20.4,8.4s-14.8,-2.8 -20.3,-8.4L76.5,52.1c13.1,-10.9 26.3,-20 39.5,-26.4l79.2,79.4L195.2,1.9c7.5,-1.3 14.9,-1.9 22,-1.9" fill="url(#gradient-id2)"/>
+  <path d="M434.4,217.4c0,7.1 -0.6,14.4 -1.8,22L329.5,239.4l79.2,79.3c-6.4,13.1 -15.5,26.3 -26.3,39.5L262,237.7c-5.5,-5.6 -8.4,-13 -8.4,-20.3 0,-7.4 2.9,-14.9 8.4,-20.5L382.4,76.5c10.8,13.2 19.9,26.3 26.3,39.5L329.5,195.3h103.1c1.2,7.6 1.8,14.8 1.8,22.1" fill="url(#gradient-id3)"/>
+  <path d="M217.2,434.6c-7.1,0.1 -14.5,-0.5 -22,-1.8L195.2,329.6l-79.2,79.3c-13.2,-6.4 -26.4,-15.4 -39.5,-26.3l120.4,-120.4c5.5,-5.7 12.9,-8.4 20.3,-8.4s14.8,2.7 20.4,8.4l120.4,120.4c-13.2,10.9 -26.3,19.9 -39.5,26.3l-79.3,-79.3v103.2c-7.5,1.3 -14.8,1.9 -22,1.8" fill="url(#gradient-id4)"/>
 </svg>

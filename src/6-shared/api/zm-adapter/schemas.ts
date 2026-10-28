@@ -247,7 +247,7 @@ const transactionWireSchema = z
     incomeBankID: nullable(z.union([numberId, stringId])),
     incomeInstrument: numberId,
     // Nullable only because deleting an account nulls the leg that pointed at
-    // it on a soft-deleted debt operation (round 9). The shape rule — a null
+    // it on a soft-deleted debt operation. The shape rule — a null
     // leg is legal only on a deleted row — is enforced in `hasValidReferences`,
     // which can see `deleted` alongside it.
     incomeAccount: nullable(stringId),

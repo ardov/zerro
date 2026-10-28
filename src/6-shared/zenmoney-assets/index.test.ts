@@ -10,7 +10,7 @@ describe('ZenMoney asset catalog', () => {
   })
 
   it('exposes every numbered bank icon and the no-category fallback', () => {
-    expect(Object.keys(bankIconById)).toHaveLength(382)
+    expect(Object.keys(bankIconById)).toHaveLength(432)
     expect(bankIconById['12574']).toBeTruthy()
     expect(Object.keys(unknownBankIconBySize)).toEqual(['24', '36', '54'])
     expect(noCategoryIconUrl).toBeTruthy()

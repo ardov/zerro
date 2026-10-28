@@ -696,7 +696,7 @@ describe('materializeCommand', () => {
     expect(applyPatch(snapshot, patch).account[survivor.id].balance).toBe(11)
   })
 
-  // Round 9: the debt account cannot be the survivor of a collapse, because a
+  // The debt account cannot be the survivor of a collapse, because a
   // row with debt on both sides is rejected. The server soft-deletes the row
   // and nulls the leg that pointed at the deleted account, keeping the amounts.
   it('soft-deletes a debt operation instead of collapsing it onto the debt account', () => {

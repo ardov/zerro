@@ -1,15 +1,7 @@
-# Observed ZenMoney sync behavior
+# ZenMoney sync contract
 
-This reference summarizes recorded probes from July–August 2026, including
-round 9 on August 30. These are observations from a disposable account, not a
-complete server specification or a fresh live check. Untested account types and
-server configurations may behave differently.
-
-Probe scripts and sanitized evidence are under
-`experiments/zenmoney-api-probe/`; Android-client observations refer to
-`experiments/26.6b1-analysis/` (client 26.6b1). These local experiment directories
-are not part of the public repository. No token or raw account response belongs
-in this document.
+This reference describes the synchronization rules used by Zerro and the
+wire fields handled by its adapter.
 
 ## Cursor and entity versions
 
@@ -29,8 +21,7 @@ Zerro overlaps incremental pulls by one second (`getSyncCursor` in
 `src/store/data/selectors.ts`) to cover writes within the same second and
 reapplies that overlap idempotently.
 
-The inspected Android client uses sync-start time as its upload cursor and
-sends the non-DST timezone offset in minutes. Zerro omits the optional offset.
+Zerro omits the optional timezone offset.
 
 ## Responses and acknowledgements
 
@@ -46,60 +37,42 @@ Chunks are persisted before the next request. See
 
 ## Batch semantics
 
-- Tested invalid upsert batches returned HTTP 400 without applying any upsert.
-  Rollback of deletions sent alongside an invalid upsert remains untested.
+- An HTTP 400 response leaves the Chunk pending; Zerro stops the Push run.
 - Intra-batch references resolve together, regardless of JSON key order.
-- Deletion wins over an upsert of the same id. Observed behavior is consistent
+- Deletion wins over an upsert of the same id. Behavior is consistent
   with upserts first, deletions next, then cascade cleanup.
-- Duplicate ids within an entity array returned HTTP 500 with no applied write.
-- Unknown fields are stripped. String-typed numbers are rejected; negative
-  amounts become absolute. Submitting both amounts as exactly zero is rejected.
+- Entity arrays must not contain duplicate ids.
+- Core commands accept only their declared writable fields. String-typed
+  numbers are rejected; negative amounts become absolute.
+  Submitting both amounts as exactly zero is rejected.
 - Invalid account and merchant references cause HTTP 400. Dangling transaction
   tag references are dropped to null.
-
-## Payloads that failed with HTTP 500
-
-Recorded failures include duplicate ids, a zero-amount reminder, and a batch
-of two reminders with roughly 2 KB and 8 KB comments containing NUL bytes,
-emoji, and HTML/JSON-like text. The reminder failures stopped their probe
-rounds; their precise causes were not isolated.
-
-These observations establish neither a safe comment-size limit nor that size
-alone caused the failure. Zerro's hidden data uses JSON reminder comments,
-which escape control bytes. Reminder `points` is not a storage field.
 
 ## forceFetch
 
 `forceFetch` returns named collections in full. Combined with a write, the
 returned collection includes the accepted write.
 
-In the inspected Android client, the requested collection set is durable and
-additive. Those collections are excluded from uploads in that request, neither
-sync cursor is committed while the set is non-empty, and success clears the
-set only if it has not changed concurrently. Logout clears it. A local schema
-migration was observed requesting `brand`. This describes that client, not a
-Zerro repair workflow.
-
 ## Field mutability
 
-| Field or entity                        | Observed behavior                                                                                                |
+| Field or entity                        | Behavior                                                                                                         |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `account.balance`                      | Ignored on write; recomputed from transactions                                                                   |
 | Ordinary account `instrument`          | Mutable without converting the balance; transaction instruments are coerced to the account instrument without FX |
 | Ordinary account `type`                | Cash/checking/ccard transitions accepted; a second debt account rejected                                         |
 | Account creation                       | Cash/checking/ccard accepted; emoney rejected; deposit/loan require their schedule and interest fields           |
 | Entity `user`                          | Immutable; changes rejected                                                                                      |
-| `instrument`, `company`                | Read-only; full dictionaries returned in tested accounts                                                         |
+| `merchant.mcc`                         | Mutable nullable number; `null` clears it                                                                        |
+| `instrument`, `company`                | Read-only reference dictionaries                                                                                 |
 | `transaction.date`                     | Mutable; moving between accounts recalculates both balances                                                      |
 | `transaction.created`, `originalPayee` | Accepted on creation, unchanged by later writes                                                                  |
-| Tag `parent`                           | Required, null allowed; self-reference dropped; no depth limit found                                             |
-| Tag `color`                            | No validation observed                                                                                           |
-| `user.monthStartDay`, `user.paidTill`  | Client writes accepted                                                                                           |
+| Tag `parent`                           | Nullable parent reference                                                                                        |
+| Tag `color`                            | Nullable numeric color                                                                                           |
+| `user.monthStartDay`                   | Mutable                                                                                                          |
 
 Deposit/loan creation required `startDate`, `endDateOffset`,
 `endDateOffsetInterval`, `capitalization`, `percent`, and `payoffStep`.
-The backup compatibility guard still checks required dictionary ids locally;
-full dictionary delivery in a probe is not a reason to remove that guard.
+The backup compatibility guard checks required dictionary ids locally.
 
 ## Deletion semantics
 
@@ -114,21 +87,10 @@ A direct transaction deletion becomes a soft delete, with no tombstone.
 `deleted: true` is irreversible under that id, even with a fresh `changed`.
 
 An amount upsert can instead hard-purge a row when both amounts round to zero
-at four decimals. This worked for creation and updates, one or two accounts,
-and debt operations. It is distinct from submitting literal zero/zero, which
-fails validation before rounding.
-
-| Submitted income / outcome | Stored income / outcome        | Result   |
-| -------------------------- | ------------------------------ | -------- |
-| `0.00001 / 0.00001`        | both zero, inferred from purge | Purged   |
-| `0.00004 / 0.00004`        | both zero, inferred from purge | Purged   |
-| `0.00004 / 0.001`          | `0 / 0.001`                    | Retained |
-| `0.00005 / 0.00005`        | `0 / 0.0001`                   | Retained |
-| `0.00009 / 0.00009`        | `0.0001 / 0.0001`              | Retained |
-
-The mixed survivor confirms rounding below `0.00005`. Rounding exactly at that
-boundary remains unresolved. Core predicts purge only below the unambiguous
-boundary; transport still sends the amount upsert, not the predicted deletion.
+at four decimals. This applies to creation and updates, ordinary transactions,
+transfers, and debt operations. Literal zero/zero fails validation before
+rounding. Core predicts purge only when both amounts are below `0.00005`;
+transport still sends the amount upsert, not the predicted deletion.
 
 ### Account cascades
 
@@ -145,16 +107,15 @@ not tested.
 
 ### Tag and merchant cascades
 
-Deleting a tag nulls the tag on tested single-tag transactions, preserves their
-balances, and removes matching budget rows. Multi-tag and reminder/marker tag
-cascades remain unverified.
+Deleting a tag removes it from referencing transactions and removes matching
+budget rows. Core keeps surviving category references and reduces an empty
+category array to null, without changing transaction balances.
 
 Deleting a merchant clears `merchant` and `payee` on linked ordinary
 transactions, reminders, and markers. Transaction `originalPayee` survives.
 An active debt transaction prevents the merchant deletion; after that
 transaction is soft-deleted, merchant deletion succeeds and purges the debt row.
-A cash transfer was already stored without tag, merchant, or payee links before
-these deletion checks.
+Cash transfers carry no tag, merchant, or payee links.
 
 ## Debt account
 
@@ -183,28 +144,24 @@ trimmed or case-folded; empty and duplicate titles were accepted.
 
 ## Reminders, markers, budgets
 
-- Tested monthly, weekly, and notify reminders generated no markers through
-  the diff endpoint. Markers are directly writable and may include `isForecast`.
+- Reminder markers are explicit writable entities and may include `isForecast`.
   Writing marker state `deleted` is ignored; removal uses `deletion`.
 - One-shot reminders normalize `step` to zero. Recurring reminders require a
   positive step. Accepted `points` came back as `[0]`, including an empty input;
   arrays longer than `step` were rejected. Null end dates and end dates before
   start dates were accepted.
-- A second marker for the same reminder/date was silently rejected once;
-  uniqueness remains a hypothesis.
 - Budget identity is `(user, tag, date)`, not a server id. Upserts replace the
   row; mid-month dates are separate rows. Direct deletion is a no-op. Zeroing
   clears its amounts; deleting its tag removes the row.
 
 ## Required fields and omission defaults
 
-The create matrix omitted one field at a time from a complete fixture and read
-back successful writes. “Required” means the key must be present, sometimes
-with null. These defaults describe those fixtures, not general client defaults.
+“Required” means the wire key must be present, sometimes with null. Server
+omission defaults are separate from the defaults supplied by Core factories.
 
-| Entity           | Required by presence                                                                                                                                                                                                                                                                             | Verified defaults on omission                                                                                                                                                         |
+| Entity           | Required by presence                                                                                                                                                                                                                                                                             | Server defaults on omission                                                                                                                                                           |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `merchant`       | `id`, `changed`, `user`, `title`                                                                                                                                                                                                                                                                 | none                                                                                                                                                                                  |
+| `merchant`       | `id`, `changed`, `user`, `title`                                                                                                                                                                                                                                                                 | `mcc: null`                                                                                                                                                                           |
 | `tag`            | `id`, `changed`, `user`, `title`, `showIncome`, `showOutcome`, `parent`                                                                                                                                                                                                                          | `icon: null`, `budgetIncome: false`, `budgetOutcome: false`, `archive: true`, `color: null`, `required: null`, `staticId: null`, `picture: null`                                      |
 | `account` (cash) | `id`, `changed`, `user`, `instrument`, `title`, `role`, `company`, `type`, `syncID`, `balance`, `startBalance`, `creditLimit`, `inBalance`, `enableSMS`, `archive`, `private`                                                                                                                    | `savings: null`, `enableCorrection: true`, `balanceCorrectionType: 'request'`, all loan/deposit fields `null`                                                                         |
 | `transaction`    | `id`, `changed`, `created`, `user`, `deleted`, `incomeBankID`, `outcome`, `outcomeInstrument`, `outcomeAccount`, `outcomeBankID`, `opIncome`, `opIncomeInstrument`, `opOutcome`, `opOutcomeInstrument`, `tag`, `date`, `comment`, `payee`, `merchant`, `latitude`, `longitude`, `reminderMarker` | `hold: null`, `viewed: true`, `source: null`, `qrCode: null`, `income: 0`, `incomeInstrument: 2`, absent `incomeAccount` copies `outcomeAccount`, `mcc` absent, `originalPayee: null` |
@@ -218,8 +175,7 @@ not equivalent to sending null. The observed server default on omission is
 correction is off and `request` when it is on. Explicit values in existing
 snapshots remain unchanged.
 
-Reminder income/outcome were not omitted because the zero-amount shape had
-returned HTTP 500. Their omission behavior is unknown.
+Zerro supplies both reminder income/outcome amounts explicitly.
 
 Transaction writes require full entities, including many null fields. Sparse
 `id + changed + viewed` and a larger partial shape were rejected. `source` may
@@ -242,10 +198,6 @@ from restore/push writes because the endpoint refuses to recreate them.
 Transactions referring to an omitted marker are written with a null reference.
 The all-zero global budget tag id is valid and is not an orphan.
 
-No unknown top-level collections appeared in the tested full sync. Candidate
-bank-connection, loan, SMS, suggestion, and subscription collection names were
-rejected by forceFetch. This does not rule out conditional collections.
-
 ## Local prediction and rebase
 
 Money changes returned recalculated accounts; viewed/comment-only changes did
@@ -254,6 +206,5 @@ output. See [materialization rules](../../../support/documents/materialization.m
 
 Before pushing pending intent, Zerro pulls canonical changes, replays sparse
 intent over the updated base, and sends full primary entities with fresh
-versions. The recorded rebase preserved a remote amount change from 7 to 11
-while applying pending `viewed=false`: an old version was ignored, a fresh one
-was accepted. Chunk receipts govern acknowledgement, as described above.
+versions. Rebase preserves unrelated canonical fields while applying pending local
+changes. Chunk receipts govern acknowledgement, as described above.

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
   <defs/>
-  <path d="M0,27a27,27 0,1 1,54 0,27 27,0 1,1 -54,0" fill="#fff"/>
-  <path d="M9,9h36v36L9,45zM14.108,14.108v26.027h26.027L40.135,14.108zM30.648,17.757h6.568l-13.621,18.73h-6.568z" fill="#0018a8" fill-rule="evenodd"/>
+  <path d="M1,1H53V53H1V1ZM8.378,8.378V45.973H45.973V8.378H8.378ZM32.27,13.649H41.757L22.081,40.703H12.595L32.27,13.649Z" fill="#0018A8" fill-rule="evenodd"/>
 </svg>

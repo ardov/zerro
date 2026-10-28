@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
   <defs>
-    <linearGradient gradientUnits="userSpaceOnUse" id="gradient-id1" x1="0" y1="32" x2="64" y2="32">
-      <stop offset="0" stop-color="#89CEEF"/>
-      <stop offset="1" stop-color="#E88BB9"/>
-    </linearGradient>
+    <clipPath id="clip-id1">
+      <path d="M0,0h54v54h-54z"/>
+    </clipPath>
+    <clipPath id="clip-id2">
+      <path d="M27,0L27,0A27,27 0,0 1,54 27L54,27A27,27 0,0 1,27 54L27,54A27,27 0,0 1,0 27L0,27A27,27 0,0 1,27 0z"/>
+    </clipPath>
   </defs>
-  <path d="M0,32a32,32 0,1 1,64 0,32 32,0 1,1 -64,0" fill="url(#gradient-id1)"/>
-  <path d="M37.09,54.2H26.91V27.05H15V16.87h34v10.18H37.09Z" fill="#231f20" fill-rule="evenodd"/>
+  <g clip-path="url(#clip-id1)">
+    <path d="M27,0L27,0A27,27 0,0 1,54 27L54,27A27,27 0,0 1,27 54L27,54A27,27 0,0 1,0 27L0,27A27,27 0,0 1,27 0z" fill="#7744D8"/>
+    <g clip-path="url(#clip-id2)"/>
+    <path d="M21.633,46V19.224H11V10H42.388V19.224H31.883V46H21.633Z" fill="#ffffff"/>
+  </g>
 </svg>
