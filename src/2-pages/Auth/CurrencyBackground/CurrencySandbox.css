@@ -1,0 +1,131 @@
+@layer components {
+  .currency-sandbox {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    height: 100svh;
+    color: var(--color-ui-primary);
+    background: var(--color-ui-base);
+  }
+
+  .currency-sandbox-stage {
+    position: relative;
+    min-width: 0;
+    overflow: clip;
+  }
+
+  .currency-sandbox-hint {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    right: 24px;
+    max-width: 380px;
+    pointer-events: none;
+  }
+
+  .currency-sandbox-hint h1 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .currency-sandbox-hint p,
+  .currency-sandbox-note {
+    margin: 0;
+    color: var(--color-ui-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .currency-sandbox-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+    overflow-y: auto;
+    border-left: 1px solid var(--color-ui-border);
+    background: var(--color-ui-card);
+  }
+
+  .currency-sandbox-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .currency-sandbox-controls fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .currency-sandbox-controls legend {
+    margin-bottom: 12px;
+    color: var(--color-ui-secondary);
+    font-size: 12px;
+  }
+
+  .currency-sandbox-control {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 8px;
+    font-size: 12px;
+  }
+
+  .currency-sandbox-control output {
+    color: var(--color-ui-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .currency-sandbox-control input {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 24px;
+    accent-color: var(--color-ui-link);
+  }
+
+  .currency-sandbox-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .currency-sandbox-toggle input {
+    accent-color: var(--color-ui-link);
+  }
+
+  .currency-sandbox-json {
+    font-size: 12px;
+  }
+
+  .currency-sandbox-json textarea {
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px;
+    border: 1px solid var(--color-ui-border);
+    border-radius: 8px;
+    background: var(--color-ui-base);
+    font-family: monospace;
+    font-size: 11px;
+  }
+
+  @media (max-width: 760px) {
+    .currency-sandbox {
+      display: block;
+      height: auto;
+    }
+
+    .currency-sandbox-stage {
+      height: 65svh;
+      min-height: 360px;
+    }
+
+    .currency-sandbox-controls {
+      border-left: 0;
+      border-top: 1px solid var(--color-ui-border);
+    }
+  }
+}

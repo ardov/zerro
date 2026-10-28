@@ -99,3 +99,37 @@ export const BackupDragFeedback: Story = {
     }
   },
 }
+
+export const BackgroundGestures: Story = {
+  tags: ['!dev', '!autodocs'],
+  play: async ({ canvasElement }) => {
+    const ui = within(canvasElement)
+    const page = canvasElement.querySelector<HTMLElement>('.auth-page')!
+    const art = page.querySelector('canvas')!
+    const context = art.getContext('2d')!
+    const ink = () =>
+      context
+        .getImageData(0, 0, art.width, art.height)
+        .data.some((v, i) => i % 4 === 3 && v > 0)
+    await waitFor(() => expect(ink()).toBe(true))
+    const press = { button: 0, pointerType: 'touch', isPrimary: true }
+    for (let i = 0; i < 10; i++) {
+      fireEvent.pointerDown(page.querySelector('svg')!, press)
+      fireEvent.pointerDown(
+        ui.getByRole('button', { name: i18n.t('btnAbout') }),
+        press
+      )
+    }
+    // The transparent foreground wrapper contains empty gaps above the artwork.
+    const gap = art.nextElementSibling!
+    for (let i = 0; i < 9; i++) fireEvent.pointerDown(gap, press)
+    await expect(art).toHaveAttribute('data-currency-state', 'flowing')
+    fireEvent.pointerDown(gap, press)
+    await waitFor(() => expect(art.dataset.currencyState).not.toBe('flowing'))
+    await waitFor(
+      () => expect(art).toHaveAttribute('data-currency-state', 'settled'),
+      { timeout: 20000 }
+    )
+    await expect(ink()).toBe(true)
+  },
+}
