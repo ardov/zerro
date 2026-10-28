@@ -1,4 +1,28 @@
 @layer components {
+  .auth-page {
+    color: var(--color-ui-primary);
+    background: var(--color-ui-base);
+    overflow: clip;
+    transition: background-color 300ms ease;
+  }
+
+  .auth-page[data-dragging] {
+    background: var(--color-ui-selected);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .auth-page {
+      transition:
+        transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 300ms ease;
+    }
+
+    /* A backup can be dropped anywhere on this screen. */
+    .auth-page[data-dragging] {
+      transform: scale(1.1);
+    }
+  }
+
   /* The login screen reveals three sections in sequence. Nothing fades back
      out, so this is an entrance animation rather than a state transition:
      `both` holds the first frame before it starts and the last one after.
