@@ -2,7 +2,6 @@ import { useImperativeHandle, useRef, useState, type Ref } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { TextFade } from './TextFade'
-import { ListRowText } from '../ListRow'
 
 const meta = {
   title: 'UI Kit/Data display/TextFade',
@@ -72,10 +71,12 @@ export const InheritedWrapping: Story = {
   render: () => (
     <div className="w-40">
       <div className="whitespace-nowrap" data-testid="single">
-        <ListRowText secondary={label}>Single line</ListRowText>
+        Single line
+        <TextFade style={{ whiteSpace: 'inherit' }}>{label}</TextFade>
       </div>
       <div className="whitespace-normal" data-testid="wrapped">
-        <ListRowText secondary={label}>Wrapping</ListRowText>
+        Wrapping
+        <TextFade style={{ whiteSpace: 'inherit' }}>{label}</TextFade>
       </div>
     </div>
   ),

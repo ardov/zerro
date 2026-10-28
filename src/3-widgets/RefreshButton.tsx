@@ -3,7 +3,7 @@ import type { FC, ReactNode } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
-import { SyncIcon, SyncDisabledIcon, WarningIcon } from '@/6-shared/ui/Icons'
+import { SyncIcon, WarningIcon } from '@/6-shared/ui/Icons'
 
 import { getChangedNum } from '@/store/data'
 import {
@@ -14,7 +14,6 @@ import {
 } from '@/store/sync'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { syncData } from '@/4-features/sync'
-import { useRegularSync } from '@/3-widgets/RegularSyncHandler'
 
 type ButtonState = 'idle' | 'pending' | 'stopped' | 'success' | 'fail'
 type RefreshButtonProps = Pick<
@@ -38,7 +37,6 @@ const RefreshButton: FC<RefreshButtonProps> = props => {
   }, [dispatch, hasDetails])
   const lastResult = useAppSelector(selectLastSyncResult)
   const finishedAt = lastResult?.finishedAt || 0
-  const [regular] = useRegularSync()
 
   let buttonState: ButtonState = 'idle'
   if (isPending)
@@ -65,7 +63,7 @@ const RefreshButton: FC<RefreshButtonProps> = props => {
   const progressValue = progressRatio(progress?.rows ?? [])
 
   const components = {
-    idle: regular ? <SyncIcon size={24} /> : <SyncDisabledIcon size={24} />,
+    idle: <SyncIcon size={24} />,
     pending: progress ? (
       <RadialProgress
         aria-hidden

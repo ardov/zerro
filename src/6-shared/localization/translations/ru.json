@@ -466,8 +466,10 @@
 
   "settings": {
     "settings": "Настройки",
+    "advancedSettings": "Дополнительно",
+    "budgets": "Бюджеты",
+    "displayCurrency": "Валюта отображения",
     "language": "Язык",
-    "advancedSettings": "Расширенные настройки...",
     "clearIconCache": "Сбросить кэш иконок",
     "iconCacheCleared": "Кэш иконок очищен",
     "iconCacheClearFailed": "Не удалось очистить кэш иконок. Попробуйте ещё раз.",
@@ -528,9 +530,6 @@
     "darkMode": "Тёмная тема",
     "lightMode": "Светлая тема",
     "reloadData": "Перезагрузить данные",
-    "regularSync": "Автосинхронизация",
-    "useIcons": "Использовать иконки",
-    "useEmojis": "Использовать эмодзи",
     "useZmBudgets": "Бюджеты Дзен-мани",
     "useZmBudgetsDescription": "Использовать те же бюджеты что и ДМ",
     "convertBudgetsFromZm": "Конвертировать бюджеты из Дзен-мани",

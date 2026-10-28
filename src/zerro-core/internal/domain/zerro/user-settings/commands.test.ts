@@ -30,7 +30,6 @@ describe('user settings commands', () => {
             type: HiddenDataType.UserSettings,
             payload: {
               preferZmBudgets: true,
-              emojiIcons: true,
             },
           }),
         }),
@@ -44,7 +43,6 @@ describe('user settings commands', () => {
         {
           preferZmBudgets: undefined,
           sawMigrationAlert: true,
-          emojiIcons: false,
         },
         {
           now: () => 100,
@@ -59,19 +57,16 @@ describe('user settings commands', () => {
       JSON.stringify({
         type: HiddenDataType.UserSettings,
         payload: {
-          emojiIcons: false,
           sawMigrationAlert: true,
         },
       })
     )
     expect(getStoredUserSettings(next.reminder)).toEqual({
-      emojiIcons: false,
       sawMigrationAlert: true,
     })
     expect(getUserSettings(next.reminder)).toEqual({
       sawMigrationAlert: true,
       preferZmBudgets: false,
-      emojiIcons: false,
     })
   })
 

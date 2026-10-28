@@ -20,7 +20,7 @@ export type TDestination = {
  * Accounts is one of them only while the window has no room for the accounts
  * panel: past that width the accounts live beside the transaction list
  * instead. About is one only in the rail; the bottom bar leaves it to the
- * settings menu. */
+ * settings panel. */
 export function useDestinations(props: {
   mobile: boolean
   accountsPanelFits: boolean

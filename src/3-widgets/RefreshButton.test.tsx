@@ -15,9 +15,6 @@ vi.mock('@/store', () => ({
   useAppSelector: (selector: (root: unknown) => unknown) =>
     selector(state.current),
 }))
-vi.mock('@/3-widgets/RegularSyncHandler', () => ({
-  useRegularSync: () => [true],
-}))
 vi.mock('react-i18next', async importOriginal => ({
   ...(await importOriginal<typeof import('react-i18next')>()),
   useTranslation: () => ({ t: (key: string) => key }),

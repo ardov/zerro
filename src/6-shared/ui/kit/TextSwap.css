@@ -1,0 +1,51 @@
+@layer components {
+  .text-swap {
+    --text-swap-distance: 4px;
+
+    &[data-direction='backward'] {
+      --text-swap-distance: -4px;
+    }
+
+    &[data-changing] > span {
+      animation-duration: 160ms;
+      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    &[data-changing] > .text-swap-outgoing {
+      animation-name: text-swap-exit;
+    }
+
+    &[data-changing] > .text-swap-current {
+      animation-name: text-swap-enter;
+    }
+  }
+
+  @keyframes text-swap-enter {
+    from {
+      opacity: 0;
+      transform: translateY(var(--text-swap-distance));
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes text-swap-exit {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(calc(-1 * var(--text-swap-distance)));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .text-swap,
+    .text-swap[data-direction='backward'] {
+      --text-swap-distance: 0px;
+    }
+  }
+}

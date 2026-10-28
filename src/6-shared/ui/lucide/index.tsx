@@ -28,7 +28,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  CirclePause,
   CircleCheck,
   CircleQuestionMark,
   CornerUpLeft,
@@ -81,7 +80,6 @@ export type { TIconProps, TIconSize } from './createIcon'
 
 // Synchronisation
 export const SyncIcon = createIcon(RefreshCw, 'SyncIcon')
-export const SyncDisabledIcon = createIcon(CirclePause, 'SyncDisabledIcon')
 export const HistoryIcon = createIcon(RotateCcwClock, 'HistoryIcon')
 export const UndoIcon = createIcon(CornerUpLeft, 'UndoIcon')
 export const RedoIcon = createIcon(CornerUpRight, 'RedoIcon')

@@ -13,7 +13,6 @@ import {
   makeUser,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
 import { AccountType } from '@/zerro-core/internal/domain/zenmoney'
-import { ActionList } from '@/6-shared/ui/ActionList'
 
 import { ImportBackupItem } from './ImportBackupItem'
 
@@ -118,11 +117,7 @@ describe('ImportBackupItem', () => {
   })
 
   it('reports an unreadable backup as an error without opening confirmation', async () => {
-    const view = render(
-      <ActionList>
-        <ImportBackupItem />
-      </ActionList>
-    )
+    const view = render(<ImportBackupItem />)
     const input = view.container.querySelector('input[type="file"]')!
     const file = new File([], 'backup.json')
     Object.defineProperty(file, 'text', {
@@ -141,12 +136,7 @@ describe('ImportBackupItem', () => {
   })
 
   it('offers an explicit restore-anyway action for a valid warned backup', async () => {
-    const onClose = vi.fn()
-    const view = render(
-      <ActionList>
-        <ImportBackupItem onClose={onClose} />
-      </ActionList>
-    )
+    const view = render(<ImportBackupItem />)
     const input = view.container.querySelector('input[type="file"]')
     if (!(input instanceof HTMLInputElement)) {
       throw new Error('file input was not rendered')
@@ -158,7 +148,6 @@ describe('ImportBackupItem', () => {
     fireEvent.change(input, { target: { files: [file] } })
 
     await waitFor(() => expect(askMock).toHaveBeenCalledOnce())
-    expect(onClose).toHaveBeenCalledOnce()
     render(askedOverlay.element as ReactElement)
 
     expect(

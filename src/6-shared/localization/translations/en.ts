@@ -486,8 +486,10 @@ export const en: typeof ru = {
 
   settings: {
     settings: 'Settings',
+    advancedSettings: 'Advanced',
+    budgets: 'Budgets',
+    displayCurrency: 'Display currency',
     language: 'Language',
-    advancedSettings: 'Advanced settings...',
     clearIconCache: 'Clear icon cache',
     iconCacheCleared: 'Icon cache cleared',
     iconCacheClearFailed: 'Could not clear icon cache. Please try again.',
@@ -557,9 +559,6 @@ export const en: typeof ru = {
     darkMode: 'Dark Mode',
     lightMode: 'Light Mode',
     reloadData: 'Reload data',
-    regularSync: 'Auto-sync',
-    useIcons: 'Use icons',
-    useEmojis: 'Use emojis',
     useZmBudgets: 'Zenmoney budgets',
     useZmBudgetsDescription: 'Use the same budgets as Zenmoney',
     convertBudgetsFromZm: 'Convert budgets from Zenmoney',

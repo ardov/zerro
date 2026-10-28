@@ -6,7 +6,6 @@ type TSyncPolicyInput = {
   isLoggedIn: boolean
   isPending: boolean
   lastSync: number
-  regular: boolean
   isDocumentHidden: boolean
   now: number
 }
@@ -17,7 +16,6 @@ export function needSync({
   isLoggedIn,
   isPending,
   lastSync,
-  regular,
   isDocumentHidden,
   now,
 }: TSyncPolicyInput) {
@@ -25,7 +23,6 @@ export function needSync({
   if (!isLoggedIn) return false
   if (isPending) return false
   if (lastSync === 0) return true
-  if (!regular) return false
   if (isDocumentHidden) return false
 
   return now - lastSync > IDLE_SYNC_DELAY

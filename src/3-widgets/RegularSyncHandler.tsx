@@ -5,22 +5,14 @@ import { refreshData } from '@/4-features/sync'
 import { getLastSyncTime, getPersistenceWarning } from '@/store/data'
 import { selectIsSyncPending } from '@/store/sync'
 import { loadLocalData } from '@/4-features/localData'
-import useLocalStorageState from 'use-local-storage-state'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { needSync } from './regularSyncPolicy'
-
-/** Local storage hook for regular sync setting */
-export const useRegularSync = () =>
-  useLocalStorageState<boolean>('regularSync', {
-    defaultValue: true,
-  })
 
 /** Delay between checks if sync is needed */
 const CHECK_INTERVAL = 5_000 // 5sec
 
 function useConditionalSync() {
   const dispatch = useAppDispatch()
-  const [regular] = useRegularSync()
   const isLoggedIn = useAppSelector(getLoginState)
   const lastSync = useAppSelector(getLastSyncTime)
   const isPending = useAppSelector(selectIsSyncPending)
@@ -31,14 +23,13 @@ function useConditionalSync() {
       isLoggedIn,
       isPending,
       lastSync,
-      regular,
       isDocumentHidden: document.hidden,
       now: Date.now(),
     })
     // Pull only: a background push would acknowledge the outbox prefix and
     // silently destroy the undo history behind the user's back.
     if (shouldSync) dispatch(refreshData())
-  }, [isLoggedIn, isPending, lastSync, regular, dispatch])
+  }, [isLoggedIn, isPending, lastSync, dispatch])
 
   return trySyncing
 }

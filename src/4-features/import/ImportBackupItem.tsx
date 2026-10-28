@@ -3,8 +3,7 @@ import type { ChangeEvent } from 'react'
 import { useCallback, useId, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
-import { ActionListItem } from '@/6-shared/ui/ActionList'
-import { ListRowIcon, ListRowText } from '@/6-shared/ui/ListRow'
+import { ListRow } from '@/6-shared/ui/kit/ListRow'
 import { UploadIcon } from '@/6-shared/ui/Icons'
 import {
   byLabelKey,
@@ -35,14 +34,12 @@ type TPending = {
   warnings: TFullBackupWarning[]
 }
 
-const noop = () => {}
-
 /**
  * Restores the state a backup file describes. The confirmation is not
  * decoration: an import overwrites whatever changed since the backup, so the
  * user sees the size of that before anything is written.
  */
-export function ImportBackupItem({ onClose = noop }: { onClose?: () => void }) {
+export function ImportBackupItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -111,7 +108,6 @@ export function ImportBackupItem({ onClose = noop }: { onClose?: () => void }) {
         foreign: compatibility.foreign,
         warnings: parsed.warnings,
       }
-      onClose()
       const confirmed = await ask<boolean>(
         <BackupImportDialog pending={pending} />
       )
@@ -131,17 +127,20 @@ export function ImportBackupItem({ onClose = noop }: { onClose?: () => void }) {
         })
       }
     },
-    [ask, confirmReload, dispatch, onClose, t]
+    [ask, confirmReload, dispatch, t]
   )
 
   return (
     <>
-      <ActionListItem onClick={() => inputRef.current?.click()}>
-        <ListRowIcon>
-          <UploadIcon />
-        </ListRowIcon>
-        <ListRowText>{t('restoreFromBackup')}</ListRowText>
-      </ActionListItem>
+      <ListRow
+        render={
+          <button type="button" onClick={() => inputRef.current?.click()} />
+        }
+        start={<UploadIcon />}
+        className="cursor-pointer focusable hover:after:opacity-100"
+      >
+        {t('restoreFromBackup')}
+      </ListRow>
 
       <input
         ref={inputRef}

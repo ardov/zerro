@@ -1,6 +1,5 @@
 import { i18n } from '@/6-shared/localization'
 import type { RootState } from '@/store'
-import { getUserSettings } from '../../internal/domain/zerro'
 import { fromGraph, graph } from './graph'
 import { presentEnvelopes, type TEnvelopeLabels } from './envelopePresentation'
 import { presentTags } from './tagPresentation'
@@ -17,7 +16,7 @@ export const getCommandDomainEnvelopes = fromGraph(graph.envelopes)
 export function getCommandPresentedEnvelopes(state: RootState) {
   const data = selectData(state)
   const domain = getCommandDomainEnvelopes(state)
-  const tags = presentTags(data.tag, getUserSettings(data.reminder))
+  const tags = presentTags(data.tag)
   return presentEnvelopes(domain, tags, getCommandEnvelopeLabels()).byId
 }
 

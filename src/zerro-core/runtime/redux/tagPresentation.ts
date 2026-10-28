@@ -5,7 +5,6 @@ import { toGraphemes } from '@/6-shared/helpers/graphemes'
 import type { TTag, TTagId } from '../../internal/domain/zenmoney/entities/tags'
 import { int2hex } from '../../internal/domain/zenmoney/model/color'
 import { getColorForString } from '../presentation/colors'
-import { getTagIconEmoji } from '../presentation/tag-icons'
 
 export type TTagPopulated = TTag & {
   name: string
@@ -19,9 +18,6 @@ export type TTagPopulated = TTag & {
   currencyCode?: TFxCode | null
   group?: string | null
 }
-
-type TTagPresentationSettings = Pick<TUserSettings, 'emojiIcons'>
-type TUserSettings = { emojiIcons: boolean }
 
 export const nullTag: TTag = {
   id: 'null',
@@ -41,10 +37,7 @@ export const nullTag: TTag = {
   picture: null,
 }
 
-export function presentTags(
-  rawTags: ById<TTag>,
-  userSettings: TTagPresentationSettings
-): ById<TTagPopulated> {
+export function presentTags(rawTags: ById<TTag>): ById<TTagPopulated> {
   const names: Record<string, number> = {}
   const populated: ById<TTagPopulated> = {}
   const tags: ById<TTag> = { ...rawTags, null: nullTag }
@@ -64,7 +57,7 @@ export function presentTags(
       name,
       uniqueName: name,
       children: [],
-      symbol: getSymbol(tag, userSettings),
+      symbol: getSymbol(tag),
       colorHEX,
       colorGenerated,
       colorDisplay: colorHEX || colorGenerated,
@@ -94,20 +87,9 @@ function getTagName(title: string): string {
   return title
 }
 
-function getSymbol(tag: TTag, userSettings: TTagPresentationSettings) {
-  const useSvgIcons = !userSettings.emojiIcons
-  if (tag.id === 'null') {
-    return useSvgIcons ? noCategoryIconUrl : '?'
-  }
-  if (tag.icon) {
-    if (useSvgIcons && categoryIconById[tag.icon]) {
-      return categoryIconById[tag.icon]
-    }
-    const emoji = getTagIconEmoji(tag.icon)
-    if (!useSvgIcons && emoji) {
-      return emoji
-    }
-  }
+function getSymbol(tag: TTag) {
+  if (tag.id === 'null') return noCategoryIconUrl
+  if (tag.icon && categoryIconById[tag.icon]) return categoryIconById[tag.icon]
   const titleArr = toGraphemes(tag.title)
   if (getTagName(tag.title) !== tag.title) return titleArr[0]
   return (titleArr[0] + titleArr[1]).trim() || '?'

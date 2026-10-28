@@ -24,12 +24,7 @@ export type AnalyticsEventMap = {
   logout: { source: 'settings_menu' }
   setting_changed: {
     setting:
-      | 'auto_sync'
-      | 'display_currency'
-      | 'emoji_icons'
-      | 'language'
-      | 'prefer_zenmoney_budgets'
-      | 'theme'
+      'display_currency' | 'language' | 'prefer_zenmoney_budgets' | 'theme'
     value: boolean | 'changed' | 'set'
   }
   similar_transactions_selected: Record<string, never>

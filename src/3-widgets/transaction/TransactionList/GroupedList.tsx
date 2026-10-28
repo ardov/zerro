@@ -9,6 +9,7 @@ import type { TDateDraft, TISODate, TTransactionId } from '@/6-shared/types'
 import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
 import { useAsk, useAsked } from '@/6-shared/overlays'
 import { Calendar } from '@/6-shared/ui/kit/Calendar'
+import { TextSwap } from '@/6-shared/ui/kit/TextSwap'
 import { useTranslation } from 'react-i18next'
 import './GroupedList.css'
 import '@/6-shared/ui/kit/HeaderSurface.css'
@@ -308,43 +309,15 @@ function PinnedDateChip({
       onClick={onClick}
       aria-label={formatDate(date)}
     >
-      <DateLabel date={date} />
+      <TextSwap
+        value={date}
+        formatValue={formatDate}
+        getDirection={(next, previous) =>
+          next > previous ? 'backward' : 'forward'
+        }
+        className="text-start"
+      />
     </ButtonBase>
-  )
-}
-
-/** Two bounded layers: rapid scrolling replaces the outgoing label rather than
- * accumulating an animation queue. The button's accessible name is always current. */
-function DateLabel({ date }: { date: TISODate }) {
-  const [labels, setLabels] = useState<{
-    date: TISODate
-    outgoing: TISODate | null
-  }>({ date, outgoing: null })
-  if (labels.date !== date) {
-    setLabels({
-      date,
-      outgoing: labels.date,
-    })
-  }
-  return (
-    <span
-      key={labels.date}
-      className="transaction-date-label relative block overflow-hidden"
-      data-direction={
-        labels.outgoing && labels.date > labels.outgoing
-          ? 'backward'
-          : 'forward'
-      }
-      data-changing={labels.outgoing ? '' : undefined}
-      aria-hidden="true"
-    >
-      <span className="transaction-date-outgoing absolute inset-0 opacity-0">
-        {labels.outgoing && formatDate(labels.outgoing)}
-      </span>
-      <span className="transaction-date-current block">
-        {formatDate(labels.date)}
-      </span>
-    </span>
   )
 }
 

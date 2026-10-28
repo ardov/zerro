@@ -30,9 +30,8 @@ import { HistoryRowList } from './HistoryRowList'
  * behind a horizontal scrollbar. Overlaying costs nothing that was working.
  */
 /** A screen: it holds nothing but its own presence, and comes back from Back,
- * Forward and a reload alike. Opening it from the settings menu takes the
- * menu's place rather than stacking on it — a screen opened while popups are
- * alive replaces them, so nothing here has to say so. */
+ * Forward and a reload alike. Opening it from settings adds a screen above
+ * that panel, so Back returns to settings. */
 export const historyPanelScreen = defineScreen<true>('historyPanel')
 
 export function HistoryPanel() {

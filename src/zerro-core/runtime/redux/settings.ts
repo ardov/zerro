@@ -1,5 +1,5 @@
 export { patchSettings as patch } from './commands'
-export { setEmojiIcons, setPreferZmBudgets } from './commands'
+export { setPreferZmBudgets } from './commands'
 import { useAppSelector } from '@/store'
 import { fromGraph, graph } from './graph'
 

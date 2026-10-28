@@ -263,7 +263,7 @@ export const PinnedDateAlignment: Story = {
       '.transaction-date-chip'
     )!
     await waitFor(() => expect(chip).toHaveAttribute('data-pinned'))
-    const label = chip.querySelector('.transaction-date-current')!
+    const label = chip.querySelector('.text-swap-current')!
     const after = textBounds(label)
     await expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
     await expect(after.right).toBeLessThanOrEqual(
@@ -307,12 +307,10 @@ export const DateSwitchThreshold: Story = {
       '[data-row-key="date:2026-09-10"] button'
     )!
     await expect(sourceDate).not.toBeVisible()
-    const animated = chip.querySelector('.transaction-date-label')!
+    const animated = chip.querySelector('.text-swap')!
     await expect(animated).toHaveAttribute('data-direction', 'forward')
     await expect(
-      getComputedStyle(animated)
-        .getPropertyValue('--date-label-distance')
-        .trim()
+      getComputedStyle(animated).getPropertyValue('--text-swap-distance').trim()
     ).toBe(
       matchMedia('(prefers-reduced-motion: reduce)').matches ? '0px' : '4px'
     )
@@ -322,12 +320,10 @@ export const DateSwitchThreshold: Story = {
       expect(chip).toHaveAccessibleName(formatDate('2026-09-20'))
     )
     await expect(sourceDate).toBeVisible()
-    const reversed = chip.querySelector('.transaction-date-label')!
+    const reversed = chip.querySelector('.text-swap')!
     await expect(reversed).toHaveAttribute('data-direction', 'backward')
     await expect(
-      getComputedStyle(reversed)
-        .getPropertyValue('--date-label-distance')
-        .trim()
+      getComputedStyle(reversed).getPropertyValue('--text-swap-distance').trim()
     ).toBe(
       matchMedia('(prefers-reduced-motion: reduce)').matches ? '0px' : '-4px'
     )
@@ -434,7 +430,7 @@ export const DateLabelHorizontalStability: Story = {
     await waitFor(() =>
       expect(chip).toHaveAccessibleName(formatDate('2026-09-20'))
     )
-    const originalLeft = textLeft('.transaction-date-current')
+    const originalLeft = textLeft('.text-swap-current')
     for (const [offset, date] of [
       [72040, '2026-09-09'],
       [72039, '2026-09-20'],
@@ -442,10 +438,10 @@ export const DateLabelHorizontalStability: Story = {
       viewport.scrollTop = offset
       await waitFor(() => expect(chip).toHaveAccessibleName(formatDate(date)))
       await expect(
-        Math.abs(textLeft('.transaction-date-outgoing') - originalLeft)
+        Math.abs(textLeft('.text-swap-outgoing') - originalLeft)
       ).toBeLessThan(0.1)
       await expect(
-        Math.abs(textLeft('.transaction-date-current') - originalLeft)
+        Math.abs(textLeft('.text-swap-current') - originalLeft)
       ).toBeLessThan(0.1)
     }
   },

@@ -33,15 +33,14 @@ describe('user settings read helpers', () => {
       reminder: {
         settings: makeReminder('settings', {
           type: HiddenDataType.UserSettings,
-          payload: { emojiIcons: true },
+          payload: { preferZmBudgets: true },
         }),
       },
     })
 
     expect(getUserSettings(data.reminder)).toEqual({
       sawMigrationAlert: false,
-      preferZmBudgets: false,
-      emojiIcons: true,
+      preferZmBudgets: true,
     })
   })
 })

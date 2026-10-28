@@ -38,27 +38,25 @@ describe('Core tag presentation adapter', () => {
   })
 
   it('owns display names, duplicate labels, colors, and the tag tree', () => {
-    const tags = presentTags(
-      {
-        parent: makeTag({
-          id: 'parent',
-          title: '🍔 Food',
-          color: 0xff8800,
-        }),
-        child: makeTag({
-          id: 'child',
-          title: '🍔 Food',
-          parent: 'parent',
-        }),
-      },
-      { emojiIcons: true }
-    )
+    const tags = presentTags({
+      parent: makeTag({
+        id: 'parent',
+        title: '🍔 Food',
+        color: 0xff8800,
+      }),
+      child: makeTag({
+        id: 'child',
+        title: '🍔 Food',
+        parent: 'parent',
+      }),
+    })
 
     expect(tags.parent).toMatchObject({
       name: 'Food',
       uniqueName: 'Food',
       children: ['child'],
       colorHEX: '#ff8800',
+      symbol: '🍔',
     })
     expect(tags.child).toMatchObject({
       name: 'Food',

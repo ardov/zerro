@@ -20,6 +20,7 @@ const meta = z.object({
   carryNegatives: z.boolean(),
 })
 const settings = z.object({
+  // Retained for replay of settings commands already stored in the Outbox.
   emojiIcons: z.boolean(),
   preferZmBudgets: z.boolean(),
   sawMigrationAlert: z.boolean(),

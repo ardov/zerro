@@ -161,14 +161,6 @@ export function resetFxRates(month: TISOMonth): AppThunk {
   )
 }
 
-export function setEmojiIcons(enabled: boolean): AppThunk {
-  return executeCommand(
-    (state, ctx) =>
-      compilePatchUserSettings(selectData(state), { emojiIcons: enabled }, ctx),
-    { verb: 'settings-changed' }
-  )
-}
-
 export function setPreferZmBudgets(enabled: boolean): AppThunk {
   return executeCommand(
     (state, ctx) =>
