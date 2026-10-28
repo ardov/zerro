@@ -28,6 +28,7 @@ import {
   HelpOutlineIcon,
   FavoriteBorderIcon,
   ExitToAppIcon,
+  KeyIcon,
 } from '@/6-shared/ui/Icons'
 import { clearFaviconCache } from '@/6-shared/favicon-cache'
 import { track } from '@/6-shared/analytics'
@@ -117,6 +118,13 @@ function SettingsContent(props: { onClose: () => void }) {
                 onClick={reload}
               />
               <ClearIconCache />
+              <ListRow
+                render={<Link to="/token" />}
+                start={<KeyIcon />}
+                className="cursor-pointer focusable hover:after:opacity-100 no-underline"
+              >
+                {t('token:pageTitle')}
+              </ListRow>
               <div className="pt-4">
                 <BudgetSettings />
               </div>

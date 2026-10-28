@@ -48,6 +48,7 @@ import {
   Globe,
   GripVertical,
   Heart,
+  KeyRound,
   Landmark,
   LogIn,
   LogOut,
@@ -170,6 +171,7 @@ export const WhatshotIcon = createIcon(Rewind, 'WhatshotIcon')
 export const SettingsIcon = createIcon(Settings, 'SettingsIcon')
 export const HelpOutlineIcon = createIcon(CircleQuestionMark, 'HelpOutlineIcon')
 export const ExitToAppIcon = createIcon(LogOut, 'ExitToAppIcon')
+export const KeyIcon = createIcon(KeyRound, 'KeyIcon')
 export const FavoriteBorderIcon = createIcon(Heart, 'FavoriteBorderIcon')
 export const GlobeIcon = createIcon(Globe, 'GlobeIcon')
 export const WbSunnyIcon = createIcon(Sun, 'WbSunnyIcon')
