@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
+import { mediaQueryDown } from '../theme/breakpoints'
 import { Toaster, createToastManager, toast, type ToastType } from './Toast'
 import { Button } from './Button'
 import { Dialog } from './Dialog'
@@ -178,7 +179,14 @@ export const Stack: Story = {
     )
     const bounds = front.getBoundingClientRect()
     expect(bounds.width).toBeLessThanOrEqual(360)
-    expect(bounds.right).toBeGreaterThan(window.innerWidth - 25)
+    if (matchMedia(mediaQueryDown('sm')).matches) {
+      expect(bounds.left + bounds.width / 2).toBeCloseTo(
+        window.innerWidth / 2,
+        0
+      )
+    } else {
+      expect(bounds.right).toBeGreaterThan(window.innerWidth - 25)
+    }
     expect(bounds.bottom).toBeGreaterThan(window.innerHeight - 25)
     expect(getComputedStyle(front).borderRadius).toBe('16px')
     await userEvent.keyboard('{F6}')

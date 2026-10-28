@@ -128,14 +128,14 @@
     }
   }
 
-  @media (width < 500px) {
-    .kit-toast-viewport {
-      right: 16px;
-      bottom: max(
-        env(safe-area-inset-bottom),
-        calc(var(--toast-bottom-inset, 0px) + 16px)
-      );
-    }
+  .kit-toast-screen[data-mobile] .kit-toast-viewport {
+    right: 0;
+    left: 0;
+    bottom: max(
+      env(safe-area-inset-bottom),
+      calc(var(--toast-bottom-inset, 0px) + 16px)
+    );
+    margin-inline: auto;
   }
 
   @media (prefers-reduced-motion: reduce) {

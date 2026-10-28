@@ -8,6 +8,7 @@ import {
   X,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useMobileLayout } from '../layout/useMobileLayout'
 import { useVisualViewport } from '../useVisualViewport'
 import { Button, IconButton } from './Button'
 import './Toast.css'
@@ -75,9 +76,14 @@ function ToastViewport() {
   const { toasts } = Primitive.useToastManager()
   const { t } = useTranslation()
   const viewport = useVisualViewport()
+  const mobile = useMobileLayout()
   return (
     <Primitive.Portal>
-      <div className="kit-toast-screen" style={viewport ?? undefined}>
+      <div
+        className="kit-toast-screen"
+        data-mobile={mobile || undefined}
+        style={viewport ?? undefined}
+      >
         <Primitive.Viewport
           aria-label={t('notifications')}
           className="kit-toast-viewport"
