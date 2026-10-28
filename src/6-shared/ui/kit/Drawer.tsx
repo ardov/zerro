@@ -17,6 +17,7 @@ import {
 } from './SurfaceContent'
 import { useOwnedPopup } from './useOwnedPopup'
 import { useBottomSheetLayout } from './useBottomSheetLayout'
+import './Surface.css'
 import './Drawer.css'
 
 export type DrawerProps = SurfaceName & {
@@ -35,6 +36,8 @@ export type DrawerProps = SurfaceName & {
   contentScrolls?: boolean
   children: ReactNode
   onClose?: () => void
+  /** Called after the surface finishes opening or closing. */
+  onOpenChangeComplete?: (open: boolean) => void
   disabled?: boolean
   /** Keep the editor open when its backdrop is pressed. */
   disablePointerDismissal?: boolean
@@ -93,6 +96,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
     finalFocus,
     disabled,
     disablePointerDismissal,
+    onOpenChangeComplete,
     side: requestedSide = 'auto',
     className,
     contentClassName,
@@ -126,6 +130,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
         onOpenChange(next)
       }}
       disablePointerDismissal={disablePointerDismissal}
+      onOpenChangeComplete={onOpenChangeComplete}
       swipeDirection={side === 'bottom' ? 'down' : side}
     >
       {trigger && <Primitive.Trigger disabled={disabled} render={trigger} />}
@@ -154,7 +159,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
             data-attached={side === 'bottom' || page ? '' : undefined}
             finalFocus={finalFocus}
             className={cn(
-              'kit-drawer-popup pointer-events-auto relative flex flex-col rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
+              'kit-modal-popup kit-drawer-popup pointer-events-auto relative flex flex-col rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
               // A floating drawer clips its content to all four corners. An
               // attached one has nothing at its rounded corners to clip, and
               // must not clip the surface it extends past the screen edge.

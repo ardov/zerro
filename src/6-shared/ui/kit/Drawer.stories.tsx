@@ -169,19 +169,23 @@ export const MountedEntrance: Story = {
       name: 'Open mounted drawer',
     })
     let entrances = 0
+    const entranceProperties = new Set<string>()
     const onTransition = (event: TransitionEvent) => {
       if (
-        event.propertyName === (reducedMotion ? 'opacity' : 'translate') &&
         event.target instanceof HTMLElement &&
         event.target.getAttribute('role') === 'dialog' &&
         !event.target.hasAttribute('data-ending-style')
-      )
-        entrances++
+      ) {
+        entranceProperties.add(event.propertyName)
+        if (event.propertyName === (reducedMotion ? 'opacity' : 'translate'))
+          entrances++
+      }
     }
     doc.addEventListener('transitionrun', onTransition)
     try {
       for (let opening = 0; opening < 2; opening++) {
         entrances = 0
+        entranceProperties.clear()
         await userEvent.click(trigger)
         const dialog = await within(doc.body).findByRole('dialog', {
           name: 'Mounted drawer',
@@ -191,8 +195,16 @@ export const MountedEntrance: Story = {
           window.innerWidth < 500 ? 'bottom' : 'right'
         )
         await waitFor(() => expect(entrances).toBeGreaterThan(0))
-        if (reducedMotion)
+        if (reducedMotion) {
           await expect(getComputedStyle(dialog).translate).toBe('none')
+          await expect(getComputedStyle(dialog).scale).toBe('none')
+          await expect(getComputedStyle(dialog).filter).toBe('none')
+        } else {
+          await waitFor(() => {
+            expect(entranceProperties.has('scale')).toBe(true)
+            expect(entranceProperties.has('filter')).toBe(true)
+          })
+        }
         await userEvent.keyboard('{Escape}')
         await waitFor(() =>
           expect(within(doc.body).queryByRole('dialog')).not.toBeInTheDocument()
@@ -394,9 +406,8 @@ export const HistorySwipeClose: Story = {
     drag(within(sheet).getByRole('heading', { name: 'History drawer' }), 300, 0)
     await waitFor(() => expect(sheet).not.toBeVisible())
     await userEvent.click(canvas.getByRole('button', { name: 'Forward' }))
-    await expect(
-      body.findByRole('dialog', { name: 'History drawer' })
-    ).resolves.toBeVisible()
+    const restored = await body.findByRole('dialog', { name: 'History drawer' })
+    await waitFor(() => expect(restored).toBeVisible())
     await userEvent.keyboard('{Escape}')
   },
 }

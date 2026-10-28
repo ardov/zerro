@@ -98,6 +98,9 @@ export const ReturnsFocusAfterRemount: Story = {
       await userEvent.click(
         within(dialog).getByRole('button', { name: 'Cancel' })
       )
+      expect(dialog).toBeInTheDocument()
+      expect(dialog).toHaveAttribute('data-ending-style')
+      expect(name).toHaveValue('Discard this draft')
       await waitFor(() => expect(dialog).not.toBeVisible())
       await waitFor(() => expect(trigger).toHaveFocus())
     }

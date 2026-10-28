@@ -12,4 +12,37 @@
       opacity: 0;
     }
   }
+
+  .kit-modal-popup {
+    opacity: 1;
+    transition: opacity 250ms ease-out;
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+    }
+
+    @starting-style {
+      opacity: 0;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        opacity 250ms ease-out,
+        translate 250ms ease-out,
+        scale 250ms ease-out,
+        filter 250ms ease-out;
+
+      &[data-starting-style],
+      &[data-ending-style] {
+        scale: 1.04;
+        filter: blur(1px);
+      }
+
+      @starting-style {
+        scale: 1.04;
+        filter: blur(1px);
+      }
+    }
+  }
 }
