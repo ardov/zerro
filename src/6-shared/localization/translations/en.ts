@@ -492,7 +492,7 @@ export const en: typeof ru = {
     language: 'Language',
     clearIconCache: 'Clear icon cache',
     iconCacheCleared: 'Icon cache cleared',
-    iconCacheClearFailed: 'Could not clear icon cache. Please try again.',
+    iconCacheClearFailed: 'Could not clear icon cache. Try again.',
     data: 'Data',
     downloadCSV: 'Download CSV',
     fullBackup: 'Full backup',
@@ -566,6 +566,19 @@ export const en: typeof ru = {
     logOut: 'Log out',
     version: '{{version}}-{{date}}',
     build: 'Build {{build}}',
+    checkUpdates: 'Check for updates',
+    appUpdate: {
+      checking: 'Checking for updates',
+      current: 'You already have the latest version',
+      downloading: 'Downloading new version',
+      installing: 'Installing new version',
+      finishing: 'New version almost ready',
+      reloading: "We're about to update",
+      offline: "You're offline. Connect to the internet to update",
+      unavailable: 'Update checks are unavailable',
+      failed: 'Could not update the app. Try again.',
+      saveFailed: 'Could not save changes. App has not restarted.',
+    },
   },
 
   history: {

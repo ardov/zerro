@@ -262,6 +262,23 @@ export const ControlsMobile: Story = {
   globals: { viewport: { value: 'iphone13' } },
 }
 
+export const CheckAppUpdates: Story = {
+  tags: ['!dev', '!autodocs'],
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const screen = await openSettings(canvasElement)
+    await userEvent.click(
+      within(screen).getByRole('button', { name: 'Check for updates' })
+    )
+    // Storybook has no production worker. The toast proves the version button
+    // invokes the updater while the settings screen stays open.
+    await within(canvasElement.ownerDocument.body).findByText(
+      'Update checks are unavailable'
+    )
+    await expect(screen).toBeVisible()
+  },
+}
+
 export const CurrencyCycle: Story = {
   tags: ['!dev', '!autodocs'],
   render: function Render() {

@@ -5,8 +5,9 @@ import { appRelease, appVersion, buildDate } from '@/6-shared/config'
 import { formatDate } from '@/6-shared/helpers/date'
 import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import { toast } from '@/6-shared/ui/kit/Toast'
+import { checkAppUpdates } from '@/4-features/appUpdates'
 
-/** Press to reload; hold to show and copy the complete build for a bug report. */
+/** Press to check for updates; hold to show and copy the build for a bug report. */
 export function SettingsVersion() {
   const { t } = useTranslation('settings')
   const date = new Date(buildDate)
@@ -20,6 +21,7 @@ export function SettingsVersion() {
   useEffect(() => () => clearTimeout(timer.current), [])
   return (
     <ButtonBase
+      aria-label={t('checkUpdates')}
       className="min-w-0 py-2 text-ui-14 text-ui-tertiary select-none [-webkit-touch-callout:none]"
       onPointerDown={() => {
         cancel()
@@ -35,7 +37,7 @@ export function SettingsVersion() {
       onPointerCancel={cancel}
       onContextMenu={event => event.preventDefault()}
       onClick={() => {
-        if (!held.current) window.location.reload()
+        if (!held.current) void checkAppUpdates()
         held.current = false
       }}
     >

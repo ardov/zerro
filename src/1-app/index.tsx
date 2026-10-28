@@ -1,28 +1,26 @@
 import { initSentry } from '@/6-shared/diagnostics'
 import { store } from '@/store'
 import { resetData } from '@/store/data'
+import { useEffect } from 'react'
+import { startAppUpdates } from '@/4-features/appUpdates'
+import { registerSW } from 'virtual:pwa-register'
 
 import GlobalErrorBoundary from './GlobalErrorBoundary'
 import App from './App'
 import { Providers } from './Providers'
-import { registerSW } from 'virtual:pwa-register'
-
-registerSW({
-  immediate: true,
-  onRegisterError(error) {
-    console.error('SW registration error', error)
-  },
-})
 initSentry()
 createZerroInstance(store)
 
-export const MainApp = () => (
-  <GlobalErrorBoundary>
-    <Providers store={store}>
-      <App />
-    </Providers>
-  </GlobalErrorBoundary>
-)
+export const MainApp = () => {
+  useEffect(() => startAppUpdates(registerSW), [])
+  return (
+    <GlobalErrorBoundary>
+      <Providers store={store}>
+        <App />
+      </Providers>
+    </GlobalErrorBoundary>
+  )
+}
 
 /** `zerro` can be used in console to access state and modify data */
 function createZerroInstance(s: typeof store) {
