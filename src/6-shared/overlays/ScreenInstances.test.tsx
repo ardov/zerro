@@ -85,6 +85,109 @@ function App() {
 }
 
 describe('repeatable screens', () => {
+  it.each([
+    { initialIndex: 1, source: 'after reload' },
+    { initialIndex: 0, source: 'after arriving on a newer entry' },
+  ])(
+    'retains the lower list view $source when Back uncovers an older history entry',
+    async ({ initialIndex }) => {
+      const views = defineScreenInstances<{
+        query: { clauses: { kind: 'merchant'; ids: string[] }[] }
+        search: string
+        checked: string[]
+        topDate: string | null
+        scrollOffset: number | null
+      }>('restored-list')
+      const details = defineScreenInstances<{ ownerListId: string }>(
+        'restored-details'
+      )
+      const listId = 'screen:restored-list:list'
+      const detailsId = 'screen:restored-details:details'
+      const savedView = {
+        query: { clauses: [{ kind: 'merchant', ids: ['lidl'] }] },
+        search: 'groceries',
+        checked: ['lunch'],
+        topDate: '2026-10-09',
+        scrollOffset: 647,
+      }
+      function RestoredView() {
+        const { instances } = views.use()
+        const children = details.use().instances
+        const navigate = useNavigate()
+        return (
+          <>
+            <button onClick={() => navigate(-1)}>Back after reload</button>
+            <button onClick={() => navigate(1)}>
+              Forward to restored entry
+            </button>
+            <output data-testid="restored-view">
+              {JSON.stringify(instances[0]?.value)}
+            </output>
+            <output data-testid="restored-details">{children.length}</output>
+          </>
+        )
+      }
+      render(
+        <MemoryRouter
+          initialEntries={[
+            {
+              pathname: '/',
+              state: {
+                overlays: {
+                  ours: true,
+                  screens: {
+                    [listId]: {
+                      query: { clauses: [] },
+                      search: 'old',
+                      checked: [],
+                      topDate: null,
+                      scrollOffset: 0,
+                    },
+                  },
+                  revisions: { [listId]: 0 },
+                },
+              },
+            },
+            {
+              pathname: '/',
+              state: {
+                overlays: {
+                  ours: true,
+                  screens: {
+                    [listId]: savedView,
+                    [detailsId]: { ownerListId: listId },
+                  },
+                  revisions: { [listId]: 1 },
+                },
+              },
+            },
+          ]}
+          initialIndex={initialIndex}
+        >
+          <OverlayHost>
+            <RestoredView />
+          </OverlayHost>
+        </MemoryRouter>
+      )
+      if (initialIndex === 0) {
+        fireEvent.click(screen.getByText('Forward to restored entry'))
+        await waitFor(() =>
+          expect(screen.getByTestId('restored-details').textContent).toBe('1')
+        )
+      }
+      expect(
+        JSON.parse(screen.getByTestId('restored-view').textContent!)
+      ).toEqual(savedView)
+      fireEvent.click(screen.getByText('Back after reload'))
+      await waitFor(() =>
+        expect(screen.getByTestId('restored-details').textContent).toBe('0')
+      )
+      expect(
+        JSON.parse(screen.getByTestId('restored-view').textContent!)
+      ).toEqual(savedView)
+    }
+  )
+
   it('opens independent instances of the same screen and returns through them', async () => {
     render(<App />)
     fireEvent.click(screen.getByText('open pair'))

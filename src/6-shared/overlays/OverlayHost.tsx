@@ -44,6 +44,22 @@ let askCounter = 0
 
 type SavedScreen = { value: unknown; revision: number }
 
+function rememberScreenValues(
+  saved: Record<string, SavedScreen>,
+  entry: OverlayEntry
+) {
+  let result = saved
+  for (const [id, value] of Object.entries(entry.screens ?? {})) {
+    if (!id.startsWith('screen:') && entry.revisions?.[id] === undefined)
+      continue
+    const revision = entry.revisions?.[id] ?? 0
+    if (saved[id] && saved[id].revision >= revision) continue
+    if (result === saved) result = { ...saved }
+    result[id] = { value, revision }
+  }
+  return result
+}
+
 function restoreScreenValues(
   entry: OverlayEntry,
   saved: Record<string, SavedScreen>,
@@ -142,7 +158,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   // A wide pair can change its list while Details are open; Back must not
   // restore the older copy of that list's view state from an earlier entry.
   const [savedScreens, setSavedScreens] = useState<Record<string, SavedScreen>>(
-    {}
+    () => rememberScreenValues({}, readEntry(location))
   )
   const [removedScreens, setRemovedScreens] = useState<ReadonlySet<string>>(
     new Set()
@@ -170,7 +186,10 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     locationRef.current = location
     // A cache update can render before the router's transition lands. Keep
     // the optimistic entry until its location arrives, including new children.
-    if (arrived) entryRef.current = entry
+    if (arrived) {
+      entryRef.current = entry
+      setSavedScreens(saved => rememberScreenValues(saved, recordedEntry))
+    }
     recordedEntryRef.current = recordedEntry
     const ids = new Set(Object.keys(entry.screens ?? {}))
     previousScreenIds.current.forEach(id => {
@@ -186,18 +205,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
    * overlay ever changes about it. */
   const write = useCallback(
     (next: OverlayEntry, replace: boolean) => {
-      setSavedScreens(saved => {
-        let result = saved
-        for (const [id, value] of Object.entries(next.screens ?? {})) {
-          if (!id.startsWith('screen:') && next.revisions?.[id] === undefined)
-            continue
-          const revision = next.revisions?.[id] ?? 0
-          if (saved[id] && saved[id].revision >= revision) continue
-          if (result === saved) result = { ...saved }
-          result[id] = { value, revision }
-        }
-        return result
-      })
+      setSavedScreens(saved => rememberScreenValues(saved, next))
       const { pathname, search, hash } = locationRef.current
       navigate(pathname + search + hash, {
         state: withEntry(locationRef.current.state, next),
