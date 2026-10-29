@@ -22,7 +22,10 @@ import {
  * control itself with `focusVisible: false` and tells Base UI to stand down. */
 export function useOverlayFinalFocus(
   open: boolean,
-  { fallback = false }: { fallback?: boolean } = {}
+  {
+    fallback = false,
+    target: getTarget,
+  }: { fallback?: boolean; target?: () => HTMLElement | null } = {}
 ) {
   // Capture before the popup commits and its autofocus moves focus. The
   // initializer also covers forms that mount already open with a fresh key.
@@ -45,9 +48,10 @@ export function useOverlayFinalFocus(
     if (open) forgetLastInteraction()
   }, [open])
 
-  const target = opening.target
-
   return (closeType: InteractionType) => {
+    // A list can replace its selected Details without reopening them. In that
+    // case the latest row, rather than the first one, is the return target.
+    const target = getTarget ? getTarget() : opening.target
     // An action menu may disappear after opening another surface. Let that
     // surface use Base UI's restoration chain when explicitly enabled.
     if (!target?.isConnected) return fallback

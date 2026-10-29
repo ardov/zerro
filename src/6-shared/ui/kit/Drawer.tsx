@@ -1,4 +1,9 @@
-import { useId, type ReactElement, type ReactNode } from 'react'
+import {
+  useId,
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+} from 'react'
 import { Drawer as Primitive } from '@base-ui/react/drawer'
 import { useTranslation } from 'react-i18next'
 import {
@@ -27,6 +32,7 @@ export type DrawerProps = SurfaceName & {
    * the other edge. */
   side?: 'auto' | 'bottom' | 'right' | 'left'
   className?: string
+  style?: CSSProperties
   contentClassName?: string
   /** The children bring their own scroller, such as a virtual list, and fill
    * the drawer's body instead of scrolling in it. The body then has no
@@ -99,6 +105,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
     onOpenChangeComplete,
     side: requestedSide = 'auto',
     className,
+    style,
     contentClassName,
     contentScrolls,
     bottomInsetOwner = 'drawer',
@@ -150,6 +157,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
         >
           <Primitive.Popup
             id={id}
+            style={style}
             aria-label={label}
             aria-describedby={descriptionId}
             aria-labelledby={title != null ? titleId : undefined}
