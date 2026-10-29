@@ -1,0 +1,253 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom'
+import { describe, expect, it, vi } from 'vitest'
+import { OverlayHost } from './OverlayHost'
+import { usePopup } from './usePopup'
+import { defineScreen } from './defineScreen'
+import { defineScreenInstances } from './defineScreenInstances'
+
+const lists = defineScreenInstances<{ title: string; search: string }>(
+  'test-list'
+)
+
+function Harness({ onClose }: { onClose?: (id: string) => void } = {}) {
+  const { instances, setValue, close, remove } = lists.use()
+  const open = lists.useOpen()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const menu = usePopup()
+  const childMenu = usePopup()
+  return (
+    <>
+      <button onClick={() => open({ title: 'List', search: '' })}>
+        open list
+      </button>
+      <button
+        onClick={() => {
+          open({ title: 'List', search: '' })
+          open({ title: 'List', search: '' })
+        }}
+      >
+        open pair
+      </button>
+      <button onClick={() => menu.setOpen(true)}>open menu</button>
+      <button onClick={() => childMenu.setOpen(true)}>open child menu</button>
+      {menu.open && <div>menu body</div>}
+      {childMenu.open && <div>child menu body</div>}
+      <button onClick={() => navigate(-1)}>back</button>
+      <button onClick={() => navigate(1)}>forward</button>
+      <output data-testid="address">{JSON.stringify(location.state)}</output>
+      {instances.map(({ id, value }) => (
+        <section key={id} data-testid="instance">
+          <CloseObserver id={id} onClose={() => onClose?.(id)} />
+          <h2>{value.title}</h2>
+          <input
+            aria-label={`search ${id}`}
+            value={value.search}
+            onChange={e =>
+              setValue(id, old => ({ ...old, search: e.target.value }))
+            }
+          />
+          <button onClick={() => close(id)}>close</button>
+          <button onClick={() => close(id, { through: true })}>
+            close through
+          </button>
+          <button onClick={() => remove(id)}>remove</button>
+        </section>
+      ))}
+    </>
+  )
+}
+
+function CloseObserver({ id, onClose }: { id: string; onClose: () => void }) {
+  lists.useInstance(id, onClose)
+  return null
+}
+
+function App() {
+  return (
+    <MemoryRouter>
+      <OverlayHost>
+        <Harness />
+      </OverlayHost>
+    </MemoryRouter>
+  )
+}
+
+describe('repeatable screens', () => {
+  it('opens independent instances of the same screen and returns through them', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByText('open pair'))
+    expect(screen.getAllByTestId('instance')).toHaveLength(2)
+    fireEvent.click(screen.getByText('back'))
+    await waitFor(() =>
+      expect(screen.getAllByTestId('instance')).toHaveLength(1)
+    )
+    fireEvent.click(screen.getByText('back'))
+    await waitFor(() =>
+      expect(screen.queryAllByTestId('instance')).toHaveLength(0)
+    )
+  })
+  it('keeps a lower list view changed while its child is open when Back uncovers it', async () => {
+    const mounted = render(<App />)
+    fireEvent.click(screen.getByText('open list'))
+    fireEvent.click(screen.getByText('open list'))
+    fireEvent.change(screen.getAllByRole('textbox')[0], {
+      target: { value: 'updated while covered' },
+    })
+    expect((screen.getAllByRole('textbox')[0] as HTMLInputElement).value).toBe(
+      'updated while covered'
+    )
+    fireEvent.click(screen.getByText('back'))
+    await waitFor(() =>
+      expect(screen.getAllByTestId('instance')).toHaveLength(1)
+    )
+    expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe(
+      'updated while covered'
+    )
+    const saved = JSON.parse(screen.getByTestId('address').textContent!)
+    expect(Object.values(saved.overlays.screens)[0]).toEqual({
+      title: 'List',
+      search: 'updated while covered',
+    })
+    mounted.unmount()
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/', state: saved }]}>
+        <OverlayHost>
+          <Harness />
+        </OverlayHost>
+      </MemoryRouter>
+    )
+    expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe(
+      'updated while covered'
+    )
+  })
+
+  it('notifies a closing owner before its passive cleanup even when Back unmounts it', async () => {
+    const onClose = vi.fn()
+    function Tracked({ id }: { id: string }) {
+      lists.useInstance(id, onClose)
+      return <div>tracked editor</div>
+    }
+    function Owner() {
+      const { instances } = lists.use()
+      const open = lists.useOpen()
+      const navigate = useNavigate()
+      return (
+        <>
+          <button onClick={() => open({ title: 'Tracked', search: '' })}>
+            open tracked
+          </button>
+          <button onClick={() => navigate(-1)}>back tracked</button>
+          {instances.map(instance => (
+            <Tracked key={instance.id} id={instance.id} />
+          ))}
+        </>
+      )
+    }
+    render(
+      <MemoryRouter>
+        <OverlayHost>
+          <Owner />
+        </OverlayHost>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('open tracked'))
+    fireEvent.click(screen.getByText('back tracked'))
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(screen.queryByText('tracked editor')).toBeNull()
+  })
+
+  it('removes an unavailable covered instance without closing its child or restoring it on Back', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByText('open list'))
+    fireEvent.click(screen.getByText('open list'))
+    const child = screen.getAllByRole('textbox')[1]
+    fireEvent.click(screen.getAllByText('remove')[0])
+    await waitFor(() =>
+      expect(screen.getAllByTestId('instance')).toHaveLength(1)
+    )
+    expect(screen.getByRole('textbox')).toBe(child)
+    fireEvent.click(screen.getByText('back'))
+    await waitFor(() =>
+      expect(screen.queryAllByTestId('instance')).toHaveLength(0)
+    )
+  })
+
+  it('closes a list and its Details together without consuming an extra Back later', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByText('open list'))
+    fireEvent.click(screen.getByText('open list'))
+    fireEvent.click(screen.getAllByText('close through')[0])
+    await waitFor(() =>
+      expect(screen.queryAllByTestId('instance')).toHaveLength(0)
+    )
+    fireEvent.click(screen.getByText('open list'))
+    fireEvent.click(screen.getByText('back'))
+    await waitFor(() =>
+      expect(screen.queryAllByTestId('instance')).toHaveLength(0)
+    )
+  })
+  it('closes through Popup slots left below a child Screen and notifies each owner once', async () => {
+    const onClose = vi.fn()
+    render(
+      <MemoryRouter>
+        <OverlayHost>
+          <Harness onClose={onClose} />
+        </OverlayHost>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('open list'))
+    fireEvent.click(screen.getByText('open menu'))
+    fireEvent.click(screen.getByText('open child menu'))
+    fireEvent.click(screen.getByText('open list'))
+    expect(screen.queryByText('menu body')).toBeNull()
+    fireEvent.click(screen.getAllByText('close through')[0])
+    await waitFor(() => {
+      const address = JSON.parse(
+        screen.getByTestId('address').textContent || 'null'
+      )
+      expect(Object.keys(address?.overlays?.screens ?? {})).toHaveLength(0)
+    })
+    expect(onClose).toHaveBeenCalledTimes(2)
+    expect(new Set(onClose.mock.calls.map(([id]) => id)).size).toBe(2)
+    fireEvent.click(screen.getByText('open list'))
+    fireEvent.click(screen.getByText('back'))
+    await waitFor(() =>
+      expect(screen.queryAllByTestId('instance')).toHaveLength(0)
+    )
+  })
+  it('can open another singleton value after its unavailable value was removed', async () => {
+    const singleton = defineScreen<string>('existing-singleton')
+    function Owner() {
+      const [value, set] = singleton.use()
+      const { remove } = lists.use()
+      return (
+        <>
+          <button onClick={() => set('A')}>open singleton A</button>
+          <button onClick={() => set('B')}>open singleton B</button>
+          <button onClick={() => remove(singleton.name)}>
+            remove singleton
+          </button>
+          <output data-testid="singleton">{value ?? 'closed'}</output>
+        </>
+      )
+    }
+    render(
+      <MemoryRouter>
+        <OverlayHost>
+          <Owner />
+        </OverlayHost>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('open singleton A'))
+    fireEvent.click(screen.getByText('remove singleton'))
+    await waitFor(() =>
+      expect(screen.getByTestId('singleton').textContent).toBe('closed')
+    )
+    fireEvent.click(screen.getByText('open singleton B'))
+    await waitFor(() =>
+      expect(screen.getByTestId('singleton').textContent).toBe('B')
+    )
+  })
+})

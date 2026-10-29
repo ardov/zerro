@@ -27,6 +27,9 @@ export type OverlayEntry = {
    * is the other half of every comparison below, and the two must not read
    * alike. */
   slots?: number
+  /** Revisions let a live instance retain newer view state when Back restores
+   * an earlier entry containing that same instance. They do not order layers. */
+  revisions?: Record<string, number>
   /** We pushed this entry ourselves. A first entry of a session — a typed
    * address, a shared link — has no state at all, and closing an overlay there
    * must not step out of the app. */
@@ -41,6 +44,10 @@ export type LiveLayers = {
    * ready, a good few frames later, so until then the entry we are on is not
    * the entry we are going to be on. */
   stepping?: boolean
+  /** The raw entry ended in an instance already removed as unavailable. */
+  removedTop?: boolean
+  /** Explicitly closing a group may need to cross old Popup slots too. */
+  closingThrough?: string
 }
 
 export type OverlayAction =
@@ -52,7 +59,9 @@ export type OverlayAction =
        * sitting on top of it. */
       instead?: boolean
     }
-  | { kind: 'closeScreen'; name: string }
+  | { kind: 'closeScreen'; name: string; through?: boolean }
+  | { kind: 'updateScreen'; name: string; update: (value: unknown) => unknown }
+  | { kind: 'removeScreen'; name: string }
   | { kind: 'openPopup' }
   | { kind: 'closePopup' }
   /** We have landed on an entry — mounted, navigated, went back, reloaded. */
@@ -122,6 +131,7 @@ export function decide(
           // behind it appear, and claiming otherwise would send the next close
           // stepping out of the app.
           entry: {
+            ...entry,
             screens: next,
             slots: 0,
             ours: handover ? entry.ours : true,
@@ -131,11 +141,46 @@ export function decide(
       }
     }
 
+    case 'removeScreen': {
+      if (!(action.name in screens)) return nothing
+      if (Object.keys(screens).at(-1) === action.name && entry.ours)
+        return {
+          history: { kind: 'go', delta: -(slots + 1) },
+          dismiss: live.popups,
+        }
+      const next = { ...screens }
+      delete next[action.name]
+      return {
+        history: { kind: 'replace', entry: { ...entry, screens: next } },
+        dismiss: 0,
+      }
+    }
+
+    case 'updateScreen': {
+      if (!(action.name in screens)) return nothing
+      const value = action.update(screens[action.name])
+      if (Object.is(value, screens[action.name])) return nothing
+      return {
+        history: {
+          kind: 'replace',
+          entry: {
+            ...entry,
+            screens: { ...screens, [action.name]: value },
+            revisions: {
+              ...entry.revisions,
+              [action.name]: (entry.revisions?.[action.name] ?? 0) + 1,
+            },
+          },
+        },
+        dismiss: 0,
+      }
+    }
+
     case 'closeScreen': {
       const names = Object.keys(screens)
       if (!names.includes(action.name))
         return { ...nothing, complaint: `Screen "${action.name}" is not open` }
-      if (names[names.length - 1] !== action.name)
+      if (names[names.length - 1] !== action.name && !action.through)
         return {
           ...nothing,
           complaint: `Screen "${action.name}" is not the top one; close what is above it first`,
@@ -144,17 +189,26 @@ export function decide(
       // piled on top of it.
       if (entry.ours)
         return {
-          history: { kind: 'go', delta: -(slots + 1) },
+          history: {
+            kind: 'go',
+            delta: -(
+              slots +
+              (action.through ? names.length - names.indexOf(action.name) : 1)
+            ),
+          },
           dismiss: live.popups,
         }
       // Never pushed by us, so there is nothing behind to go back to: swap the
       // screen out of the address instead of stepping out of the app.
       const next = { ...screens }
-      delete next[action.name]
+      for (const name of action.through
+        ? names.slice(names.indexOf(action.name))
+        : [action.name])
+        delete next[name]
       return {
         history: {
           kind: 'replace',
-          entry: { screens: next, slots: 0, ours: entry.ours },
+          entry: { ...entry, screens: next, slots: 0, ours: entry.ours },
         },
         dismiss: live.popups,
       }
@@ -164,7 +218,7 @@ export function decide(
       return {
         history: {
           kind: 'push',
-          entry: { screens, slots: slots + 1, ours: true },
+          entry: { ...entry, screens, slots: slots + 1, ours: true },
         },
         dismiss: 0,
       }
@@ -173,6 +227,21 @@ export function decide(
     // different moments: does the history stack still match what is alive?
     case 'closePopup':
     case 'arrive':
+      if (
+        action.kind === 'arrive' &&
+        live.closingThrough &&
+        live.closingThrough in screens
+      )
+        return decide(entry, live, {
+          kind: 'closeScreen',
+          name: live.closingThrough,
+          through: true,
+        })
+      if (action.kind === 'arrive' && live.removedTop && entry.ours)
+        return {
+          history: { kind: 'go', delta: -(slots + 1) },
+          dismiss: live.popups,
+        }
       return reconcile(slots, live.popups)
   }
 }

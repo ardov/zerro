@@ -11,7 +11,9 @@ export type OverlayMethods = {
   closePopup: (id: string, notify?: boolean) => void
   ask: <T>(element: ReactElement) => Promise<T | undefined>
   openScreen: (name: string, value: unknown, instead?: boolean) => void
-  closeScreen: (name: string) => void
+  closeScreen: (name: string, options?: { through?: boolean }) => void
+  removeScreen: (name: string) => void
+  updateScreen: (name: string, update: (value: unknown) => unknown) => void
 }
 
 export const OverlayMethodsContext = createContext<OverlayMethods | null>(null)
