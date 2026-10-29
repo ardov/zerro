@@ -352,6 +352,7 @@ export const MobileSelection: Story = {
     const trigger = canvas.getByRole('combobox', { name: 'Choose accounts' })
     await userEvent.click(trigger)
     const sheet = await body.findByRole('dialog', { name: 'Accounts' })
+    await waitFor(() => expect(sheet).toBeVisible())
     await expect(sheet).toHaveAttribute('data-side', 'bottom')
     await userEvent.click(
       body.getByRole('option', { name: 'Savings account EUR' })
