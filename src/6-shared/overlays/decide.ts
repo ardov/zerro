@@ -191,10 +191,10 @@ export function decide(
         return {
           history: {
             kind: 'go',
-            delta: -(
-              slots +
-              (action.through ? names.length - names.indexOf(action.name) : 1)
-            ),
+            // Screen count is not history depth: several Screens can be
+            // present in an initial entry that we never pushed. Group close
+            // continues on arrival, one known-safe owned entry at a time.
+            delta: -(slots + 1),
           },
           dismiss: live.popups,
         }

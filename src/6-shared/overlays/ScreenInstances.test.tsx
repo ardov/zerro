@@ -30,6 +30,15 @@ function Harness({ onClose }: { onClose?: (id: string) => void } = {}) {
       >
         open pair
       </button>
+      <button
+        onClick={() => {
+          const first = instances[0]
+          if (first) close(first.id, { through: true })
+          open({ title: 'Next', search: '' })
+        }}
+      >
+        close pair and open next
+      </button>
       <button onClick={() => menu.setOpen(true)}>open menu</button>
       <button onClick={() => childMenu.setOpen(true)}>open child menu</button>
       {menu.open && <div>menu body</div>}
@@ -37,6 +46,7 @@ function Harness({ onClose }: { onClose?: (id: string) => void } = {}) {
       <button onClick={() => navigate(-1)}>back</button>
       <button onClick={() => navigate(1)}>forward</button>
       <output data-testid="address">{JSON.stringify(location.state)}</output>
+      <output data-testid="path">{location.pathname}</output>
       {instances.map(({ id, value }) => (
         <section key={id} data-testid="instance">
           <CloseObserver id={id} onClose={() => onClose?.(id)} />
@@ -221,14 +231,12 @@ describe('repeatable screens', () => {
     const singleton = defineScreen<string>('existing-singleton')
     function Owner() {
       const [value, set] = singleton.use()
-      const { remove } = lists.use()
+      const remove = singleton.useRemove()
       return (
         <>
           <button onClick={() => set('A')}>open singleton A</button>
           <button onClick={() => set('B')}>open singleton B</button>
-          <button onClick={() => remove(singleton.name)}>
-            remove singleton
-          </button>
+          <button onClick={remove}>remove singleton</button>
           <output data-testid="singleton">{value ?? 'closed'}</output>
         </>
       )
@@ -249,5 +257,91 @@ describe('repeatable screens', () => {
     await waitFor(() =>
       expect(screen.getByTestId('singleton').textContent).toBe('B')
     )
+  })
+  it('closes an initial multi-screen group after a pushed child without leaving the app', async () => {
+    const initial = {
+      overlays: {
+        screens: {
+          'screen:test-list:initial-list': {
+            title: 'Initial list',
+            search: '',
+          },
+          'screen:test-list:initial-details': {
+            title: 'Initial Details',
+            search: '',
+          },
+        },
+        ours: false,
+      },
+    }
+    render(
+      <MemoryRouter
+        initialEntries={['/external', { pathname: '/budget', state: initial }]}
+        initialIndex={1}
+      >
+        <OverlayHost>
+          <Harness />
+        </OverlayHost>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('open list'))
+    fireEvent.click(screen.getAllByText('close through')[0])
+    await waitFor(() =>
+      expect(screen.queryAllByTestId('instance')).toHaveLength(0)
+    )
+    expect(screen.getByTestId('path').textContent).toBe('/budget')
+    fireEvent.click(screen.getByText('back'))
+    await waitFor(() =>
+      expect(screen.getByTestId('path').textContent).toBe('/external')
+    )
+    expect(screen.getByTestId('address').textContent).toBe('null')
+  })
+
+  it('finishes a group close before replaying an immediately requested new list', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByText('open pair'))
+    fireEvent.click(screen.getByText('close pair and open next'))
+    await waitFor(() =>
+      expect(screen.getAllByTestId('instance')).toHaveLength(1)
+    )
+    expect(screen.getByRole('heading').textContent).toBe('Next')
+    fireEvent.click(screen.getByText('back'))
+    await waitFor(() =>
+      expect(screen.queryAllByTestId('instance')).toHaveLength(0)
+    )
+  })
+
+  it('removes an unavailable singleton below a live child without closing the child', async () => {
+    const singleton = defineScreen<string>('covered-singleton')
+    function Owner() {
+      const [value, set] = singleton.use()
+      const remove = singleton.useRemove()
+      return (
+        <>
+          <button onClick={() => set('A')}>open base A</button>
+          <button onClick={remove}>remove base A</button>
+          <output data-testid="base A">{value ?? 'closed'}</output>
+        </>
+      )
+    }
+    render(
+      <MemoryRouter>
+        <OverlayHost>
+          <Owner />
+          <Harness />
+        </OverlayHost>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('open base A'))
+    fireEvent.click(screen.getByText('open list'))
+    fireEvent.click(screen.getByText('remove base A'))
+    expect(screen.getByTestId('base A').textContent).toBe('closed')
+    expect(screen.getAllByTestId('instance')).toHaveLength(1)
+    fireEvent.click(screen.getByText('back'))
+    await waitFor(() => {
+      expect(screen.queryAllByTestId('instance')).toHaveLength(0)
+      expect(screen.getByTestId('address').textContent).toBe('null')
+    })
+    expect(screen.getByTestId('base A').textContent).toBe('closed')
   })
 })

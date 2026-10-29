@@ -305,6 +305,8 @@ export function OverlayHost({ children }: { children: ReactNode }) {
         pendingRef.current.push(action)
         return true
       }
+      if (action.kind === 'closeScreen' && action.through)
+        closingThroughRef.current = action.name
       dismiss(decision.dismiss)
       applyOp(decision.history)
       return true
@@ -404,7 +406,6 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       const closingIds =
         options?.through && index >= 0 ? names.slice(index) : [name]
       if (perform({ kind: 'closeScreen', name, through: options?.through })) {
-        if (options?.through) closingThroughRef.current = name
         closingIds.toReversed().forEach(notifyScreenClose)
         setClosing(previous => new Set([...previous, ...closingIds]))
       }
@@ -452,6 +453,14 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     // Persist a restored live value into this entry so a reload sees it too.
     if (!stepRef.current && entry !== recordedEntry)
       write(entryRef.current, true)
+    // Finish an explicit group close before replaying new opens. Otherwise a
+    // child opened on an intermediate entry would be closed with that group.
+    if (!stepRef.current && closingThroughRef.current) {
+      if (closingThroughRef.current in (entryRef.current.screens ?? {}))
+        perform({ kind: 'arrive' })
+      if (!(closingThroughRef.current in (entryRef.current.screens ?? {})))
+        closingThroughRef.current = undefined
+    }
     // What was held while the step was in flight is asked again here, against
     // the entry we have actually landed on. Each answer writes its own entry,
     // so popups that piled up in that window still get one Back apiece.
