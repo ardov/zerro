@@ -3,6 +3,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type ComponentProps,
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -10,6 +11,7 @@ import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { ScrollArea } from '@/6-shared/ui/kit/ScrollArea'
 import type { SurfaceName } from '@/6-shared/ui/kit/SurfaceContent'
 import type { SurfaceController } from '@/6-shared/overlays'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 import './layout.css'
 
 /** One editor and one scrollport, with two possible homes. Moving their stable
@@ -20,12 +22,17 @@ export function AdaptivePanel({
   controller,
   children,
   contentClassName,
+  className,
+  finalFocus,
   ...name
 }: SurfaceName & {
   docked: boolean
   controller: SurfaceController
   children: ReactNode
   contentClassName?: string
+  /** Styles the docked home; the drawer keeps its standard geometry. */
+  className?: string
+  finalFocus?: ComponentProps<typeof DrawerSurface>['finalFocus']
 }) {
   const [host] = useState(() => {
     const element = document.createElement('div')
@@ -100,7 +107,11 @@ export function AdaptivePanel({
       <section
         ref={inlineRef}
         hidden={!docked}
-        className="layout-panel flex rounded-smooth overflow-hidden"
+        aria-label={name.label}
+        className={cn(
+          'layout-panel flex rounded-smooth overflow-hidden',
+          className
+        )}
       />
       <DrawerSurface
         {...name}
@@ -108,7 +119,7 @@ export function AdaptivePanel({
           open: !docked && controller.open,
           setOpen: controller.setOpen,
         }}
-        finalFocus={docked ? false : undefined}
+        finalFocus={docked ? false : finalFocus}
         initialFocus={() => {
           const field = focusedField.current
           if (!field || !host.contains(field)) return true
