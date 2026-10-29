@@ -275,7 +275,9 @@ Overlay components portal to the document body and share the stacking tokens
 Openness belongs to `6-shared/overlays`, which is the only place that
 touches browser history: `usePopup` for a surface with its own trigger,
 `useAsk` for one that is asked a question, `defineScreen` for one a person can
-come back to. A surface that holds its own `useState` for openness is a Back
+come back to, and `defineScreenInstances` for independent repeated openings.
+Their descriptors share one ordered Screen map. Updating a saved view or
+replacing a selected row does not add history. A surface that holds its own `useState` for openness is a Back
 press that leaves the page.
 
 ### Kit surfaces
@@ -296,6 +298,22 @@ system Back is dispatched through the host. This also applies to the drawer
 presentations of Dialog, Popover and Menu. Their owners must register in that
 same host so Back can identify the top layer. Do not register the same opening
 twice.
+
+`ListDetailsSurface` presents one list/Details pair. When both panes fit, they
+share one modal region and both remain interactive. On a narrow screen,
+Details is the active drawer above its still-mounted list. The owner supplies
+controllers and the `active` flag from Screen order; the surface does not
+create history. Covered Drawer surfaces retain their content with `active={false}`,
+without focus trapping, initial focus or direct outside/Escape dismissal.
+Native Back still goes through the host from any originating drawer. Uncovering
+a surface restores an active focus boundary. `AdaptivePanel` retains the same
+Details subtree and scrollport across the presentation change.
+
+Ordinary pair dismissal closes Details first, then the list. The list's explicit
+close button closes both. Focus returns to the latest row or to the active
+surface when the original opener no longer exists. Transaction lists save
+query, search, checked identifiers and exact scroll position per instance.
+The main Transactions page keeps its independent view and selected editor.
 
 Android system Back can reach a Drawer through Base UI's `CloseWatcher` even
 when a Select is above it. `DrawerFrame` routes that reason through

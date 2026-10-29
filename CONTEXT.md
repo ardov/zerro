@@ -71,9 +71,25 @@ never durable.
 ### Overlays
 
 **Screen**:
-An overlay a person can come back to. Its whole content is described by a value
-in the address, so Back, Forward and a reload all restore it.
+An overlay a person can come back to. Its serializable descriptor and saved
+view live in router history; restoration reads current entity data. Unfinished
+editor input belongs to the mounted editor, not to history.
 _Avoid_: Route overlay, page dialog
+
+**Screen instance**:
+One opening of a repeatable Screen family, with its own identity and position
+in the shared Screen order. Entity identity is a value: opening the same
+transaction through another list does not reuse its earlier editor.
+
+**List/Details pair**:
+A list instance and its owned Details instance. Selecting another row replaces
+Details; opening another list creates another pair. Closing the list closes its
+owned Details, while ordinary Back dismisses the top instance.
+
+**Details**:
+Content owned by a list's secondary area, described separately from its
+presentation. The current content kind is a transaction. The shared surface
+owns geometry, focus and dismissal; transaction Details owns saving and drafts.
 
 **Popup**:
 An overlay Back only dismisses. It lives in memory, dies whenever the page

@@ -5,7 +5,7 @@ import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { AdaptivePanel } from '@/6-shared/ui/layout/AdaptivePanel'
-import { defineScreen } from '@/6-shared/overlays'
+import { defineScreen, useScreenOrder } from '@/6-shared/overlays'
 import type { TTransactionId } from '@/6-shared/types'
 import {
   TransactionPreview,
@@ -97,6 +97,7 @@ function TransactionScreenDrawer({
   onSelectSimilar?: (date: number) => void
 }) {
   const { t } = useTranslation('common')
+  const active = useScreenOrder().at(-1) === screen.name
   const pending = usePendingEdit()
   const openCounterparty = useOpenCounterpartyTransactions()
   const [id, setId] = screen.use(pending.finish)
@@ -144,6 +145,7 @@ function TransactionScreenDrawer({
 
   return adaptive ? (
     <AdaptivePanel
+      active={active}
       docked={docked}
       controller={controller}
       contentClassName="flex min-h-full flex-col"
@@ -153,6 +155,7 @@ function TransactionScreenDrawer({
     </AdaptivePanel>
   ) : (
     <DrawerSurface
+      active={active}
       controller={controller}
       contentClassName="flex min-h-full flex-col p-0"
       label={t('transaction')}

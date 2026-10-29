@@ -24,6 +24,7 @@ export function AdaptivePanel({
   contentClassName,
   className,
   finalFocus,
+  active,
   ...name
 }: SurfaceName & {
   docked: boolean
@@ -32,6 +33,7 @@ export function AdaptivePanel({
   contentClassName?: string
   /** Styles the docked home; the drawer keeps its standard geometry. */
   className?: string
+  active?: boolean
   finalFocus?: ComponentProps<typeof DrawerSurface>['finalFocus']
 }) {
   const [host] = useState(() => {
@@ -114,6 +116,7 @@ export function AdaptivePanel({
         )}
       />
       <DrawerSurface
+        active={active}
         {...name}
         controller={{
           open: !docked && controller.open,

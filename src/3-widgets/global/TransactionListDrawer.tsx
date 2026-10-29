@@ -1,8 +1,9 @@
+import type { EnvTransactionsDrawerProps } from './EnvTransactionsDrawer'
 import type { TTransactionId } from '@/6-shared/types'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
-import { defineScreenInstances } from '@/6-shared/overlays'
+import { defineScreenInstances, useScreenOrder } from '@/6-shared/overlays'
 import { ListDetailsSurface } from '@/6-shared/ui/layout/ListDetailsSurface'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
@@ -25,6 +26,8 @@ export type TransactionDrawerProps = {
 
 type TransactionListValue = TransactionDrawerProps & {
   view?: TransactionListViewState
+  /** The serialized envelope-list entry used before repeated instances. */
+  envelopeConditions?: EnvTransactionsDrawerProps['envelopeConditions']
 }
 type DetailsValue = {
   ownerListId: string
@@ -33,6 +36,9 @@ type DetailsValue = {
 
 const transactionLists =
   defineScreenInstances<TransactionListValue>('transactionList')
+const legacyEnvelopeLists = defineScreenInstances<TransactionListValue>(
+  'envelopeTransactions'
+)
 const transactionDetails =
   defineScreenInstances<DetailsValue>('transactionDetails')
 
@@ -41,7 +47,12 @@ export const useTransactionDrawer = () => transactionLists.useOpen()
 /** Both list openers share a family, so DOM order follows opening order even
  * when an envelope list and an ordinary list are restored together. */
 export function TransactionListDrawer() {
-  const { instances } = transactionLists.use()
+  const current = transactionLists.use()
+  const legacy = legacyEnvelopeLists.use()
+  const order = useScreenOrder()
+  const instances = [...current.instances, ...legacy.instances].sort(
+    (a, b) => order.indexOf(a.id) - order.indexOf(b.id)
+  )
   const [rendered, setRendered] = useState(instances)
   const additions = instances.filter(
     instance => !rendered.some(old => old.id === instance.id)
@@ -70,12 +81,19 @@ function TransactionListInstance({
   const { close } = transactionLists.use()
   const details = transactionDetails.use()
   const openDetails = transactionDetails.useOpen()
+  const topScreen = useScreenOrder().at(-1)
   const liveDetails = details.instances.find(
     instance => instance.value.ownerListId === id
   )
   const shownDetailsId = useCachedValue(liveDetails?.id, !!liveDetails)
-  const shown = useCachedValue(value, !!value)
-  const { view, flushScroll } = useTransactionListView(shown, setValue)
+  const saved = useCachedValue(value, !!value)
+  const shown = saved && normalizeListValue(saved)
+  const setViewValue = useCallback(
+    (update: (previous: TransactionListValue) => TransactionListValue) =>
+      setValue(previous => update(normalizeListValue(previous))),
+    [setValue]
+  )
+  const { view, flushScroll } = useTransactionListView(shown, setViewValue)
   const closeList = () => {
     flushScroll()
     close(id, { through: true })
@@ -90,6 +108,7 @@ function TransactionListInstance({
 
   return (
     <ListDetailsSurface
+      active={topScreen === id || topScreen === liveDetails?.id}
       title={shown?.title || t('transactions')}
       controller={{ open: !!value, setOpen: open => !open && closeList() }}
       onOpenChangeComplete={open => !open && onExited()}
@@ -157,4 +176,46 @@ export function useOpenCounterpartyTransactions() {
     },
     [openList]
   )
+}
+
+function normalizeListValue(value: TransactionListValue): TransactionListValue {
+  return value.envelopeConditions
+    ? {
+        ...value,
+        ...envelopeTransactionsValue({
+          ...value,
+          envelopeConditions: value.envelopeConditions,
+        }),
+      }
+    : value
+}
+
+/** Read old saved envelope entries through the same query and owner as new ones. */
+export function envelopeTransactionsValue({
+  envelopeConditions,
+  ...props
+}: EnvTransactionsDrawerProps): TransactionDrawerProps {
+  const {
+    id,
+    month,
+    isExact,
+    mode = core.transactions.TrFilterMode.Envelope,
+  } = envelopeConditions
+  return {
+    ...props,
+    initialQuery: {
+      clauses: [
+        {
+          kind: 'activity',
+          envelopeIds: id === 'transferFees' || id === null ? [] : [id],
+          scope: isExact ? 'self' : 'tree',
+          mode:
+            id === 'transferFees'
+              ? core.transactions.TrFilterMode.TransferFees
+              : mode,
+          month,
+        },
+      ],
+    },
+  }
 }

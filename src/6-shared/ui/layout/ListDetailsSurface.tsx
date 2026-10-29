@@ -19,6 +19,7 @@ function usePairedDetailsLayout(detailsWidth: number) {
 
 export type ListDetailsSurfaceProps = {
   title: string
+  active?: boolean
   controller: SurfaceController
   children: ReactNode
   onOpenChangeComplete?: (open: boolean) => void
@@ -34,6 +35,7 @@ export type ListDetailsSurfaceProps = {
  * Details view in one modal region when they fit, or nested when they do not. */
 export function ListDetailsSurface({
   title,
+  active = true,
   controller,
   children,
   details,
@@ -64,6 +66,7 @@ export function ListDetailsSurface({
 
   return (
     <DrawerSurface
+      active={active && (wide || !detailsOpen)}
       label={title}
       onOpenChangeComplete={onOpenChangeComplete}
       controller={{
@@ -99,6 +102,7 @@ export function ListDetailsSurface({
           {children}
         </section>
         <AdaptivePanel
+          active={active}
           docked={paired}
           controller={details.controller}
           label={details.label}
