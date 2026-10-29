@@ -15,15 +15,29 @@ export type TransactionActions = {
   onSetViewed: (viewed: boolean) => void
   /** Only offered where the surface has somewhere to show the result. */
   onSelectSimilar?: () => void
+  counterparty?: { label: string; onOpen: () => void }
 }
 
 export function ActionsMenu(
   props: TransactionActions & { deleted: boolean; viewed: boolean }
 ) {
-  const { deleted, viewed, onDelete, onRestore, onSetViewed, onSelectSimilar } =
-    props
+  const {
+    deleted,
+    viewed,
+    onDelete,
+    onRestore,
+    onSetViewed,
+    onSelectSimilar,
+    counterparty,
+  } = props
   const { t } = useTranslation(['transaction', 'transactionContextMenu'])
   const items: MenuItem[] = []
+  if (counterparty)
+    items.push({
+      id: 'counterparty',
+      label: counterparty.label,
+      onSelect: counterparty.onOpen,
+    })
   if (onSelectSimilar)
     items.push({
       id: 'similar',

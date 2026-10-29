@@ -304,6 +304,10 @@ function useFilteredTransactions(
     () =>
       (trIds || allTransactionIds)
         .map(id => transactionsById[id])
+        .filter(
+          (transaction): transaction is NonNullable<typeof transaction> =>
+            !!transaction
+        )
         .sort(core.transactions.compareTransactionDates),
     [trIds, allTransactionIds, transactionsById]
   )

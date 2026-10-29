@@ -43,7 +43,12 @@ const Actions: FC<ActionsProps> = ({
   const dispatch = useAppDispatch()
   const allTransactions = useAppSelector(core.transactions.selectAll)
   const [ids, setIds] = useState(checkedIds)
-  const transactions = ids?.map(id => allTransactions[id])
+  const transactions = ids
+    .map(id => allTransactions[id])
+    .filter(
+      (transaction): transaction is NonNullable<typeof transaction> =>
+        !!transaction
+    )
   const actions = getAvailableActions(transactions)
   // Both are on the overlay stack, so Back closes the dialog or the menu
   // instead of leaving the page — which is what it used to do here.

@@ -13,6 +13,7 @@ import {
 } from '../transaction/TransactionPreview'
 import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
 import { usePendingEdit } from '../transaction/TransactionPreview/usePendingEdit'
+import { useOpenCounterpartyTransactions } from './TransactionListDrawer'
 
 /** A screen: one transaction, described by its id alone, so Back, Forward and
  * a reload all bring it back.
@@ -97,8 +98,10 @@ function TransactionScreenDrawer({
 }) {
   const { t } = useTranslation('common')
   const pending = usePendingEdit()
+  const openCounterparty = useOpenCounterpartyTransactions()
   const [id, setId] = screen.use(pending.finish)
   const openOther = screen.useOpen()
+  const remove = screen.useRemove()
   const onClose = useCallback(() => setId(null), [setId])
   const gone = useTransactionGone(id)
   const shownId = useCachedValue(id, !!id)
@@ -116,9 +119,9 @@ function TransactionScreenDrawer({
   // something that exists.
   useEffect(() => {
     if (!gone) return
-    const timer = setTimeout(() => setId(null), HANDOVER_MS)
+    const timer = setTimeout(remove, HANDOVER_MS)
     return () => clearTimeout(timer)
-  }, [gone, setId])
+  }, [gone, remove])
 
   const controller = {
     open: !!id,
@@ -129,11 +132,11 @@ function TransactionScreenDrawer({
   const content = currentId ? (
     <TransactionPreview
       id={currentId}
-      key={currentId}
       onClose={onClose}
       onPendingEdit={pending.register}
       onOpenOther={openOther}
       onSelectSimilar={onSelectSimilar}
+      onOpenCounterparty={openCounterparty}
     />
   ) : (
     <TrEmptyState />

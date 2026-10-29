@@ -1,6 +1,5 @@
 import { TransactionListDrawer } from '@/3-widgets/global/TransactionListDrawer'
 import { TransactionPreviewDrawer } from '@/3-widgets/global/TransactionPreviewDrawer'
-import { EnvTransactionsDrawer } from '@/3-widgets/global/EnvTransactionsDrawer'
 import { JournalRecoveryNotice } from '@/3-widgets/JournalRecoveryNotice'
 import { HistoryPanel } from '@/3-widgets/History/HistoryPanel'
 import { PersistenceWarningNotice } from '@/3-widgets/PersistenceWarningNotice'
@@ -23,9 +22,8 @@ export const GlobalWidgets = () => {
 
       <SettingsScreen />
       <HistoryPanel />
-      <TransactionListDrawer />
-      <EnvTransactionsDrawer />
       <TransactionPreviewDrawer />
+      <TransactionListDrawer />
     </>
   )
 }
