@@ -22,6 +22,7 @@ import {
   ArrowLeftRight,
   ArrowRight,
   ArrowUp,
+  BookOpen,
   Calendar,
   ChartNoAxesColumn,
   Check,
@@ -170,6 +171,7 @@ export const WhatshotIcon = createIcon(Rewind, 'WhatshotIcon')
 // Application chrome
 export const SettingsIcon = createIcon(Settings, 'SettingsIcon')
 export const HelpOutlineIcon = createIcon(CircleQuestionMark, 'HelpOutlineIcon')
+export const HowToUseIcon = createIcon(BookOpen, 'HowToUseIcon')
 export const ExitToAppIcon = createIcon(LogOut, 'ExitToAppIcon')
 export const KeyIcon = createIcon(KeyRound, 'KeyIcon')
 export const FavoriteBorderIcon = createIcon(Heart, 'FavoriteBorderIcon')

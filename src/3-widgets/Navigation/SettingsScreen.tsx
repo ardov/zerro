@@ -25,7 +25,7 @@ import {
   NightsStayIcon,
   AccountBalanceWalletIcon,
   WhatshotIcon,
-  HelpOutlineIcon,
+  HowToUseIcon,
   FavoriteBorderIcon,
   ExitToAppIcon,
   KeyIcon,
@@ -152,7 +152,7 @@ function NavigationLinks() {
       : []),
     { to: '/review', label: t('yearWrapped'), icon: <WhatshotIcon /> },
     ...(mobile
-      ? [{ to: '/about', label: t('about'), icon: <HelpOutlineIcon /> }]
+      ? [{ to: '/about', label: t('about'), icon: <HowToUseIcon /> }]
       : []),
     { to: '/donation', label: t('donate'), icon: <FavoriteBorderIcon /> },
   ]

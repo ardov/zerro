@@ -5,7 +5,7 @@ import {
   BudgetIcon,
   AccountBalanceWalletIcon,
   BarChartIcon,
-  HelpOutlineIcon,
+  HowToUseIcon,
   SyncAltIcon,
 } from '@/6-shared/ui/Icons'
 
@@ -46,7 +46,7 @@ export function useDestinations(props: {
     destinations.push({
       path: '/about',
       label: t('about'),
-      icon: HelpOutlineIcon,
+      icon: HowToUseIcon,
     })
   return destinations
 }
