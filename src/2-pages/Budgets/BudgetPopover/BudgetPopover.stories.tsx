@@ -216,7 +216,8 @@ const checkBreakpoint: Story['play'] = async ({ canvasElement }) => {
   const operator = within(popup as HTMLElement).queryByRole('button', {
     name: '+',
   })
-  if (window.innerWidth < 500) await expect(operator).toBeVisible()
+  if (window.innerWidth < 500)
+    await waitFor(() => expect(operator).toBeVisible())
   else await expect(operator).not.toBeInTheDocument()
   const assigned = canvas.getByTestId('assigned').textContent
   await userEvent.clear(input)

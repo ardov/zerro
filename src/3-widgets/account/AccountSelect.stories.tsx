@@ -184,8 +184,10 @@ export const BankMarks: Story = {
     expect(image).toHaveAttribute('src', bankIconById[12574])
     expect(image).toHaveAttribute('alt', '')
     await waitFor(() => expect(image.naturalWidth).toBeGreaterThan(0))
-    expect(image.getBoundingClientRect().width).toBe(20)
-    expect(image.getBoundingClientRect().height).toBe(20)
+    await waitFor(() => {
+      expect(image.getBoundingClientRect().width).toBe(20)
+      expect(image.getBoundingClientRect().height).toBe(20)
+    })
     const cash = body.getByRole('option', { name: /^Cash/ })
     expect(cash.querySelector('img')).toBeNull()
     await userEvent.click(cash)

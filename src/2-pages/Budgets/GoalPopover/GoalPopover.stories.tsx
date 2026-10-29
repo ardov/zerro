@@ -242,10 +242,15 @@ export const GoalDraftAndNestedMonth: Story = {
     const monthButton = await body.findByRole('button', {
       name: formatDate(month, 'LLL'),
     })
+    await waitFor(() =>
+      expect(monthButton.closest('[role="dialog"]')).toContainElement(
+        canvasElement.ownerDocument.activeElement as HTMLElement
+      )
+    )
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(monthButton).not.toBeVisible())
-    await waitFor(() => expect(dateTrigger).toHaveFocus())
     await expect(amount).toBeVisible()
+    await waitFor(() => expect(dateTrigger).toHaveFocus())
     await userEvent.click(dateTrigger)
     await userEvent.click(
       await body.findByRole('button', {
