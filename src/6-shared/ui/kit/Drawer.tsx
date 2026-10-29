@@ -2,6 +2,7 @@ import {
   useId,
   useLayoutEffect,
   useRef,
+  useState,
   type CSSProperties,
   type ReactElement,
   type ReactNode,
@@ -120,6 +121,11 @@ function DrawerFrame(props: DrawerSurfaceProps) {
   const popup = useRef<HTMLDivElement>(null)
   // A real close retains its opener; a covered owner must not restore focus.
   const wasActive = useRef(active)
+  const [lastOpenActive, setLastOpenActive] = useState(active)
+  if (open && lastOpenActive !== active) setLastOpenActive(active)
+  // Covered roots sit below the active modal; a former active root keeps its
+  // closing layer. The override must beat the shared custom z-modal utility.
+  const covered = !active && (open || !lastOpenActive)
   useLayoutEffect(() => {
     if (
       active &&
@@ -167,11 +173,16 @@ function DrawerFrame(props: DrawerSurfaceProps) {
       <Primitive.Portal>
         <Primitive.Backdrop
           forceRender
-          className={cn('kit-drawer-backdrop', modalBackdropClass)}
+          className={cn(
+            'kit-drawer-backdrop',
+            modalBackdropClass,
+            covered && 'z-[calc(var(--z-index-modal)-1)]!'
+          )}
         />
         <MobileDrawerViewport
           className={cn(
             'flex',
+            covered && 'z-[calc(var(--z-index-modal)-1)]!',
             side === 'bottom' && 'items-end',
             side === 'right' && 'justify-end',
             side === 'left' && 'justify-start',

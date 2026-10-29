@@ -638,6 +638,73 @@ export const RestoredEnvelopeEntry: Story = {
   },
 }
 
+export const RestoredLegacyModalEntry: Story = {
+  tags: ['check'],
+  parameters: {
+    app: {
+      state: {
+        overlays: {
+          screens: {
+            envelopeTransactions: {
+              title: 'Saved envelope',
+              envelopeConditions: { id: 'tag#Food', month: '2026-10' },
+            },
+            modalTransaction: 'lunch',
+          },
+          ours: false,
+        },
+      },
+    },
+  },
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const document = canvasElement.ownerDocument
+    const body = within(document.body)
+    const editor = await body.findByRole('dialog', { name: 'Transaction' })
+    const expectPointerTarget = async (element: HTMLElement) => {
+      await waitFor(() => {
+        const rect = element.getBoundingClientRect()
+        const hit = document.elementFromPoint(
+          rect.x + rect.width / 2,
+          rect.y + rect.height / 2
+        )
+        expect(
+          element.contains(hit),
+          `${element.getAttribute('aria-label') ?? element.textContent} blocked by ${hit?.outerHTML.slice(0, 500)}`
+        ).toBe(true)
+      })
+    }
+    const more = within(editor).getByRole('button', { name: 'More' })
+    await expectPointerTarget(more)
+    await userEvent.click(more)
+    const action = await body.findByRole('menuitem', {
+      name: 'Merchant transactions',
+    })
+    await expectPointerTarget(action)
+    await userEvent.click(action)
+    const child = await body.findByRole('dialog', { name: 'Lidl' })
+    const row = await within(child).findByText('Dinner groceries')
+    await expectPointerTarget(row)
+    await userEvent.click(row)
+    const childDetails = await within(child).findByRole('region', {
+      name: 'Transaction',
+    })
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(childDetails).not.toBeVisible())
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(child).not.toBeInTheDocument())
+    await expectPointerTarget(more)
+    await userEvent.click(
+      within(editor).getAllByRole('button', { name: 'Close' })[0]
+    )
+    await waitFor(() => expect(editor).not.toBeInTheDocument())
+    const list = await body.findByRole('dialog', { name: 'Saved envelope' })
+    await expectPointerTarget(within(list).getByText('Lunch groceries'))
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(list).not.toBeInTheDocument())
+  },
+}
+
 export const RestoredBudgetStackMobile: Story = {
   ...RestoredMixedStackMobile,
   parameters: {
