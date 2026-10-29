@@ -258,6 +258,59 @@ export const GlobalManager: Story = {
   },
 }
 
+export const ContentResizing: Story = {
+  render: () => <Toaster />,
+  tags: ['!dev', '!autodocs'],
+  globals: { viewport: { value: 'iphone13' } },
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body)
+    const shortTitle = 'Checking for updates'
+    const longTitle = 'The update could not be downloaded. Please try again.'
+    await canvasElement.ownerDocument.fonts.ready
+    const id = toast.add({ title: shortTitle, type: 'loading', timeout: 0 })
+    const notification = await body.findByRole('status', { name: shortTitle })
+    await waitFor(() =>
+      expect(getComputedStyle(notification).opacity).toBe('1')
+    )
+    await Promise.all(
+      notification.getAnimations().map(animation => animation.finished)
+    )
+    const singleLineHeight = notification.getBoundingClientRect().height
+    const expectBalancedPadding = () => {
+      const bounds = notification.getBoundingClientRect()
+      const title = within(notification)
+        .getByRole('heading')
+        .getBoundingClientRect()
+      expect(bounds.bottom - title.bottom).toBeCloseTo(
+        title.top - bounds.top,
+        0
+      )
+    }
+    expectBalancedPadding()
+
+    toast.add({ id, title: longTitle, type: 'error', timeout: 0 })
+    await body.findByText(longTitle)
+    await waitFor(() => {
+      expect(notification.getBoundingClientRect().height).toBeGreaterThan(
+        singleLineHeight
+      )
+      expectBalancedPadding()
+    })
+
+    toast.update(id, { title: shortTitle, type: 'success' })
+    await body.findByText(shortTitle)
+    await waitFor(() => {
+      expect(notification.getBoundingClientRect().height).toBeCloseTo(
+        singleLineHeight,
+        0
+      )
+      expectBalancedPadding()
+    })
+    toast.close(id)
+    await waitFor(() => expect(notification).not.toBeInTheDocument())
+  },
+}
+
 export const PausedTimer: Story = {
   ...Showcase,
   play: async ({ canvasElement }) => {

@@ -39,10 +39,10 @@
     transform: translateY(var(--toast-y))
       scale(calc(1 - var(--toast-index) * 0.06));
     filter: blur(var(--toast-blur));
+    /* Height must change immediately for Base UI's natural-size measurements. */
     transition:
       transform 500ms var(--ease-overshoot-soft),
-      opacity 160ms ease,
-      height 350ms ease;
+      opacity 160ms ease;
     touch-action: pan-x;
   }
 
