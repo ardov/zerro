@@ -61,10 +61,16 @@ export function defineScreen<T>(name: string) {
     )
   }
 
+  /** Remove an unavailable entity even when a child Screen is above it. */
+  function useRemove() {
+    const { removeScreen } = useOverlayMethods()
+    return useCallback(() => removeScreen(name), [removeScreen])
+  }
+
   /** Reads it without the setter, for a surface that only draws. */
   function useValue(): T | undefined {
     return useOverlayState().screens[name] as T | undefined
   }
 
-  return { name, use, useOpen, useOpenInstead, useValue }
+  return { name, use, useOpen, useOpenInstead, useValue, useRemove }
 }
