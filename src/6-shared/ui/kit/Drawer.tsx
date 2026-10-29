@@ -201,13 +201,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
             data-side={side}
             // Against the screen edge rather than floating beside the page.
             data-attached={side === 'bottom' || page ? '' : undefined}
-            finalFocus={closeType => {
-              if (!active && (open || !wasActive.current)) return false
-              if (typeof finalFocus === 'function') return finalFocus(closeType)
-              if (finalFocus && typeof finalFocus === 'object')
-                return finalFocus.current
-              return finalFocus ?? true
-            }}
+            finalFocus={covered ? false : finalFocus}
             className={cn(
               'kit-modal-popup kit-drawer-popup pointer-events-auto relative flex flex-col rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
               // A floating drawer clips its content to all four corners. An
