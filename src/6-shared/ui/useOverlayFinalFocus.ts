@@ -69,5 +69,7 @@ export function useOverlayFinalFocus(
 function getFocusedElement() {
   if (typeof document === 'undefined') return null
   const focused = document.activeElement
-  return focused instanceof HTMLElement ? focused : null
+  return focused instanceof HTMLElement && focused !== document.body
+    ? focused
+    : null
 }

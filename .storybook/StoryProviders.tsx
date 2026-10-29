@@ -16,6 +16,8 @@ export type AppStoryParameters = {
   app?: {
     scenario?: StoryScenario
     route?: string
+    /** Serializable router state for a genuinely fresh restored overlay host. */
+    state?: unknown
     globalWidgets?: boolean
   }
   /** Alt+ArrowLeft and Alt+ArrowRight drive the story's router history. */
@@ -82,7 +84,11 @@ function StoryRouter(props: {
   }, [locale])
 
   return (
-    <MemoryRouter initialEntries={[route]}>
+    <MemoryRouter
+      initialEntries={[
+        { pathname: route, state: props.context.parameters.app?.state },
+      ]}
+    >
       {props.context.parameters.historyShortcuts && <HistoryShortcuts />}
       <OverlayHost>{props.children}</OverlayHost>
     </MemoryRouter>

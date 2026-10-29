@@ -1,8 +1,11 @@
 import type { TISOMonth } from '@/6-shared/types'
 import { useCallback } from 'react'
-import { core } from '@/zerro-core/redux'
+import type { core } from '@/zerro-core/redux'
 import type { TTransactionListProps } from '../transaction/TransactionList'
-import { useTransactionDrawer } from './TransactionListDrawer'
+import {
+  envelopeTransactionsValue,
+  useTransactionDrawer,
+} from './TransactionListDrawer'
 
 type TEnvConditions = {
   month: TISOMonth
@@ -21,31 +24,8 @@ export type EnvTransactionsDrawerProps = {
 export function useEnvTransactionsDrawer() {
   const openList = useTransactionDrawer()
   return useCallback(
-    ({ envelopeConditions, ...props }: EnvTransactionsDrawerProps) => {
-      const {
-        id,
-        month,
-        isExact,
-        mode = core.transactions.TrFilterMode.Envelope,
-      } = envelopeConditions
-      return openList({
-        ...props,
-        initialQuery: {
-          clauses: [
-            {
-              kind: 'activity',
-              envelopeIds: id === 'transferFees' || id === null ? [] : [id],
-              scope: isExact ? 'self' : 'tree',
-              mode:
-                id === 'transferFees'
-                  ? core.transactions.TrFilterMode.TransferFees
-                  : mode,
-              month,
-            },
-          ],
-        },
-      })
-    },
+    (props: EnvTransactionsDrawerProps) =>
+      openList(envelopeTransactionsValue(props)),
     [openList]
   )
 }

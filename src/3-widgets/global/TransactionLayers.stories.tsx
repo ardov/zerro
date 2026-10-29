@@ -6,12 +6,13 @@ import {
   useTransactionPreview,
 } from './TransactionPreviewDrawer'
 import TransactionsView from '@/2-pages/Transactions'
+import Budgets from '@/2-pages/Budgets'
 import { Layout } from '@/1-app/Layout'
 import { pageColumns } from '@/1-app/pageColumns'
 import { Button } from '@/6-shared/ui/kit/Button'
 import { useTransactionDrawer } from './TransactionListDrawer'
 import { useEnvTransactionsDrawer } from './EnvTransactionsDrawer'
-import { useAppDispatch } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 
 const meta = {
@@ -38,8 +39,9 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-function Harness() {
+function Harness({ budget = false }: { budget?: boolean }) {
   const dispatch = useAppDispatch()
+  const lunch = useAppSelector(core.transactions.selectAll).lunch
   const navigate = useNavigate()
   const openPagePreview = useTransactionPreview()
   const pageTransaction = transactionScreen.useValue()
@@ -60,6 +62,27 @@ function Harness() {
         }
       >
         Apply remote removal
+      </button>
+      <button
+        data-testid="recreate-lunch"
+        onClick={() =>
+          dispatch(
+            core.transactions.recreate({
+              ...lunch,
+              comment: 'Remote replacement',
+            })
+          )
+        }
+      >
+        Apply remote recreation
+      </button>
+      <button
+        data-testid="change-lunch-merchant"
+        onClick={() =>
+          dispatch(core.transactions.update({ id: 'lunch', merchant: 'other' }))
+        }
+      >
+        Apply remote merchant change
       </button>
       <output aria-label="Page transaction">{pageTransaction ?? 'none'}</output>
       <Button onClick={() => openPagePreview('other')}>
@@ -98,8 +121,11 @@ function Harness() {
       >
         Open envelope list
       </Button>
-      <Layout navigation columns={pageColumns.transactions}>
-        <TransactionsView />
+      <Layout
+        navigation
+        columns={budget ? pageColumns.budget : pageColumns.transactions}
+      >
+        {budget ? <Budgets /> : <TransactionsView />}
       </Layout>
     </>
   )
@@ -244,10 +270,10 @@ export const RecursivePairs: Story = {
     expect(canvas.getByLabelText('Page transaction')).toHaveTextContent('lunch')
     fireEvent.click(canvas.getByTestId('back'))
     await waitFor(() => expect(secondDetails).not.toBeVisible())
-    expect(secondList).toBeVisible()
+    await waitFor(() => expect(secondList).toBeVisible())
     fireEvent.click(canvas.getByTestId('back'))
     await waitFor(() => expect(secondList).not.toBeInTheDocument())
-    expect(firstDetails).toBeVisible()
+    await waitFor(() => expect(firstDetails).toBeVisible())
     expect(comment).toHaveValue('Dinner saved in first pair')
     await userEvent.click(within(firstList).getByText('Lunch groceries'))
     await waitFor(() =>
@@ -257,7 +283,7 @@ export const RecursivePairs: Story = {
     )
     fireEvent.click(canvas.getByTestId('back'))
     await waitFor(() => expect(firstDetails).not.toBeVisible())
-    expect(firstList).toBeVisible()
+    await waitFor(() => expect(firstList).toBeVisible())
     fireEvent.click(canvas.getByTestId('back'))
     await waitFor(() => expect(firstList).not.toBeInTheDocument())
     expect(canvas.getByLabelText('Page transaction')).toHaveTextContent('lunch')
@@ -413,5 +439,333 @@ export const RapidRowsUseOneDetailsStep: Story = {
       ).toBeNull()
     )
     expect(list).toBeVisible()
+  },
+}
+
+// These values enter a new MemoryRouter and OverlayHost. No live owner/cache
+// from an earlier opening participates in the restoration.
+const mixedStack = {
+  overlays: {
+    screens: {
+      transaction: 'other',
+
+      'screen:transactionList:envelope': {
+        title: 'Restored envelope',
+        initialQuery: {
+          clauses: [
+            {
+              kind: 'activity',
+              envelopeIds: ['tag#Food'],
+              scope: 'tree',
+              mode: 'envelope',
+              month: '2026-10',
+            },
+          ],
+        },
+      },
+      'screen:transactionDetails:lower': {
+        ownerListId: 'screen:transactionList:envelope',
+        content: { kind: 'transaction', id: 'lunch' },
+      },
+      'screen:transactionList:merchant': {
+        title: 'Restored merchant',
+        initialQuery: { clauses: [{ kind: 'merchant', ids: ['lidl'] }] },
+      },
+      'screen:transactionDetails:upper': {
+        ownerListId: 'screen:transactionList:merchant',
+        content: { kind: 'transaction', id: 'dinner' },
+      },
+    },
+    ours: false,
+  },
+}
+
+export const RestoredMixedStack: Story = {
+  tags: ['check'],
+  parameters: { app: { state: mixedStack } },
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const baseTransaction =
+      canvas.getByLabelText('Page transaction').textContent
+    const document = canvasElement.ownerDocument
+    const body = within(document.body)
+    const list = await body.findByRole('dialog', {
+      name: 'Restored merchant',
+      hidden: true,
+    })
+    const wide = window.innerWidth >= 776
+    const editor = await (wide ? within(list) : body).findByRole(
+      wide ? 'region' : 'dialog',
+      { name: 'Transaction' }
+    )
+    await waitFor(() => expect(editor).toBeVisible())
+    await waitFor(() =>
+      expect(
+        (wide ? list : editor).contains(document.activeElement),
+        `Initial focus: ${document.activeElement?.getAttribute('aria-label')}`
+      ).toBe(true)
+    )
+    const comment = within(editor).getByRole('textbox', { name: 'Comment' })
+    await waitFor(() => {
+      const rect = comment.getBoundingClientRect()
+      expect(
+        document.elementFromPoint(
+          rect.x + rect.width / 2,
+          rect.y + rect.height / 2
+        )
+      ).toBe(comment)
+    })
+    await userEvent.clear(comment)
+    await userEvent.type(comment, 'Restored top is interactive')
+    await userEvent.tab()
+    expect(comment).toHaveValue('Restored top is interactive')
+    if (wide) {
+      await userEvent.click(within(list).getByText('Lunch groceries'))
+      await waitFor(() => expect(comment).toHaveValue('Lunch groceries'))
+    }
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(editor).not.toBeVisible())
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(list).not.toBeInTheDocument())
+    const lower = await body.findByRole('dialog', {
+      name: 'Restored envelope',
+      hidden: true,
+    })
+    const lowerEditor = await (wide ? within(lower) : body).findByRole(
+      wide ? 'region' : 'dialog',
+      { name: 'Transaction' }
+    )
+    await waitFor(() => expect(lowerEditor).toBeVisible())
+    await waitFor(() =>
+      expect(
+        (wide ? lower : lowerEditor).contains(document.activeElement),
+        `Uncovered focus: ${document.activeElement?.getAttribute('aria-label')}`
+      ).toBe(true)
+    )
+    expect(
+      within(lowerEditor).getByRole('textbox', { name: 'Comment' })
+    ).toHaveValue('Lunch groceries')
+    expect(canvas.getByLabelText('Page transaction')).toHaveTextContent(
+      baseTransaction!
+    )
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(lowerEditor).not.toBeVisible())
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(lower).not.toBeInTheDocument())
+    expect(canvas.getByLabelText('Page transaction')).toHaveTextContent(
+      baseTransaction!
+    )
+  },
+}
+
+export const RestoredMixedStackMobile: Story = {
+  ...RestoredMixedStack,
+  globals: { viewport: { value: 'iphone13' } },
+}
+
+export const CoveredTransactionDisappears: Story = {
+  tags: ['check'],
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByText('Lunch groceries'))
+    const editor = await canvas.findByRole('region', { name: 'Transaction' })
+    await userEvent.click(within(editor).getByRole('button', { name: 'More' }))
+    await userEvent.click(
+      await body.findByRole('menuitem', { name: 'Merchant transactions' })
+    )
+    const list = await body.findByRole('dialog', { name: 'Lidl' })
+    await within(list).findByText('Lunch groceries')
+    // External Core recreation purges the original id without asking its
+    // navigation owner to follow the replacement.
+    fireEvent.click(canvas.getByTestId('recreate-lunch'))
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Page transaction')).toHaveTextContent(
+        'none'
+      )
+    )
+    expect(list).toBeVisible()
+    expect(within(list).queryByText('Lunch groceries')).toBeNull()
+    await userEvent.click(await within(list).findByText('Remote replacement'))
+    const childEditor = await within(list).findByRole('region', {
+      name: 'Transaction',
+    })
+    expect(
+      within(childEditor).getByRole('textbox', { name: 'Comment' })
+    ).toHaveValue('Remote replacement')
+    fireEvent.click(canvas.getByTestId('back'))
+    await waitFor(() => expect(childEditor).not.toBeVisible())
+    expect(list).toBeVisible()
+    fireEvent.click(canvas.getByTestId('back'))
+    await waitFor(() => expect(list).not.toBeInTheDocument())
+    expect(canvas.getByLabelText('Page transaction')).toHaveTextContent('none')
+    expect(body.queryByRole('dialog', { name: 'Transaction' })).toBeNull()
+  },
+}
+
+export const RestoredEnvelopeEntry: Story = {
+  tags: ['check'],
+  parameters: {
+    app: {
+      state: {
+        overlays: {
+          screens: {
+            envelopeTransactions: {
+              title: 'Saved envelope',
+              envelopeConditions: { id: 'tag#Food', month: '2026-10' },
+            },
+          },
+          ours: false,
+        },
+      },
+    },
+  },
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body)
+    const list = await body.findByRole('dialog', { name: 'Saved envelope' })
+    await within(list).findByText('Lunch groceries')
+    const checkbox = within(list).getAllByRole('checkbox')[0]
+    await userEvent.click(checkbox)
+    await waitFor(() =>
+      expect(checkbox).toHaveAttribute('aria-checked', 'true')
+    )
+    expect(within(list).getByRole('button', { name: 'Food' })).toBeVisible()
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(list).not.toBeInTheDocument())
+  },
+}
+
+export const RestoredBudgetStackMobile: Story = {
+  ...RestoredMixedStackMobile,
+  parameters: {
+    app: {
+      route: '/budget',
+      state: {
+        overlays: {
+          ...mixedStack.overlays,
+          screens: {
+            envelope: 'tag#Food',
+            ...Object.fromEntries(
+              Object.entries(mixedStack.overlays.screens).filter(
+                ([key]) => key !== 'transaction'
+              )
+            ),
+          },
+        },
+      },
+    },
+  },
+  render: () => <Harness budget />,
+  play: async context => {
+    await RestoredMixedStack.play!(context)
+    const body = within(context.canvasElement.ownerDocument.body)
+    const envelope = await body.findByRole('dialog', { name: 'Category' })
+    await waitFor(() => expect(envelope).toBeVisible())
+    await waitFor(() =>
+      expect(envelope.contains(document.activeElement)).toBe(true)
+    )
+  },
+}
+
+export const RestoredMissingTransaction: Story = {
+  tags: ['check'],
+  parameters: {
+    app: {
+      state: {
+        overlays: {
+          ...mixedStack.overlays,
+          screens: {
+            ...mixedStack.overlays.screens,
+            transaction: 'unavailable',
+          },
+        },
+      },
+    },
+  },
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Page transaction')).toHaveTextContent(
+        'none'
+      )
+    )
+    const list = await body.findByRole('dialog', { name: 'Restored merchant' })
+    const editor = await within(list).findByRole('region', {
+      name: 'Transaction',
+    })
+    expect(
+      within(editor).getByRole('textbox', { name: 'Comment' })
+    ).toHaveValue('Dinner groceries')
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(editor).not.toBeVisible())
+    expect(list).toBeVisible()
+  },
+}
+
+export const ExplicitListCloseRestoresOpener: Story = {
+  tags: ['check'],
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByText('Lunch groceries'))
+    const editor = await canvas.findByRole('region', { name: 'Transaction' })
+    const opener = within(editor).getByRole('button', { name: 'More' })
+    await userEvent.click(opener)
+    await userEvent.click(
+      await body.findByRole('menuitem', { name: 'Merchant transactions' })
+    )
+    const list = await body.findByRole('dialog', { name: 'Lidl' })
+    await userEvent.click(
+      within(within(list).getByRole('region', { name: 'Lidl' })).getByRole(
+        'button',
+        { name: 'Close' }
+      )
+    )
+    await waitFor(() => expect(list).not.toBeInTheDocument())
+    await waitFor(() => expect(opener).toHaveFocus())
+  },
+}
+
+export const MissingDetailsOpenerRestoresListFocus: Story = {
+  tags: ['check'],
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Open filtered list' })
+    )
+    const list = await body.findByRole('dialog', {
+      name: 'Filtered transactions',
+    })
+    const row = await within(list).findByText('Lunch groceries')
+    const checkbox = within(list).getAllByRole('checkbox').at(-1)!
+    await userEvent.click(checkbox)
+    expect(checkbox).toHaveFocus()
+    await userEvent.click(row)
+    const editor = await within(list).findByRole('region', {
+      name: 'Transaction',
+    })
+    fireEvent.click(canvas.getByTestId('change-lunch-merchant'))
+    await waitFor(() => expect(row).not.toBeInTheDocument())
+    expect(checkbox).not.toBeInTheDocument()
+    const comment = within(editor).getByRole('textbox', { name: 'Comment' })
+    await userEvent.click(comment)
+    expect(comment).toHaveValue('Lunch groceries')
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(editor).not.toBeVisible())
+    await waitFor(() =>
+      expect(
+        within(list)
+          .getByRole('region', { name: 'Filtered transactions' })
+          .contains(document.activeElement)
+      ).toBe(true)
+    )
   },
 }

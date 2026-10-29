@@ -10,6 +10,11 @@ import {
   useTransactionPreview,
 } from '@/3-widgets/global/TransactionPreviewDrawer'
 
+import {
+  TransactionListDrawer,
+  useTransactionDrawer,
+} from '@/3-widgets/global/TransactionListDrawer'
+
 const editorScreen = defineScreen<string>('back-editor')
 const items = [
   { value: 'one', label: 'One' },
@@ -240,5 +245,64 @@ export const Transaction: Story = {
         body.queryByRole('dialog', { name: 'Transaction' })
       ).not.toBeInTheDocument()
     )
+  },
+}
+
+function TransactionPairDemo() {
+  const open = useTransactionDrawer()
+  return (
+    <>
+      <button onClick={() => open({ title: 'Back test transactions' })}>
+        Open transaction pair
+      </button>
+      <TransactionListDrawer />
+    </>
+  )
+}
+
+export const TransactionPairs: Story = {
+  parameters: {
+    app: { scenario: 'transaction-filters', route: '/transactions' },
+  },
+  render: () => <TransactionPairDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const opener = canvas.getByRole('button', { name: 'Open transaction pair' })
+    await userEvent.click(opener)
+    const list = await body.findByRole('dialog', {
+      name: 'Back test transactions',
+    })
+    await userEvent.click(await within(list).findByText('Lunch groceries'))
+    const editor = await body.findByRole('dialog', { name: 'Transaction' })
+    const type = within(editor).getByRole('combobox', {
+      name: 'Transaction type',
+    })
+    await userEvent.click(type)
+    await body.findByRole('listbox')
+    await back()
+    await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
+    await waitFor(() => expect(type).toHaveFocus())
+    await expect(editor).toBeVisible()
+    await userEvent.click(within(editor).getByRole('button', { name: 'More' }))
+    await userEvent.click(
+      await body.findByRole('button', { name: 'Merchant transactions' })
+    )
+    const child = await body.findByRole('dialog', { name: 'Lidl' })
+    await userEvent.click(await within(child).findByText('Dinner groceries'))
+    const childEditor = await body.findByRole('dialog', { name: 'Transaction' })
+    expect(childEditor).not.toBe(editor)
+    await back()
+    await waitFor(() => expect(childEditor).not.toBeInTheDocument())
+    expect(child).toBeVisible()
+    await back()
+    await waitFor(() => expect(child).not.toBeInTheDocument())
+    await waitFor(() => expect(editor).toBeVisible())
+    await back()
+    await waitFor(() => expect(editor).not.toBeInTheDocument())
+    expect(list).toBeVisible()
+    await back()
+    await waitFor(() => expect(list).not.toBeInTheDocument())
+    await expectUnblocked(opener)
   },
 }

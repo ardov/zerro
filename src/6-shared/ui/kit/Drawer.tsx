@@ -1,5 +1,7 @@
 import {
   useId,
+  useLayoutEffect,
+  useRef,
   type CSSProperties,
   type ReactElement,
   type ReactNode,
@@ -64,6 +66,8 @@ export function Drawer(props: DrawerProps) {
 
 type DrawerSurfaceProps = Omit<DrawerProps, 'popup' | 'onClose'> & {
   controller: SurfaceController
+  /** Covered surfaces retain content without creating another modal boundary. */
+  active?: boolean
   /** Content ownership puts safe area in --kit-scroll-bottom-inset for the
    * child scrollport, so it scrolls with the last row instead of clipping it. */
   bottomInsetOwner?: 'drawer' | 'content'
@@ -99,6 +103,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
     children,
     trigger,
     controller,
+    active = true,
     finalFocus,
     disabled,
     disablePointerDismissal,
@@ -112,6 +117,19 @@ function DrawerFrame(props: DrawerSurfaceProps) {
   } = props
   const { open, setOpen: onOpenChange } = controller
   const back = useOverlayBack()
+  const popup = useRef<HTMLDivElement>(null)
+  // A real close retains its opener; a covered owner must not restore focus.
+  const wasActive = useRef(active)
+  useLayoutEffect(() => {
+    if (
+      active &&
+      !wasActive.current &&
+      open &&
+      !popup.current?.contains(document.activeElement)
+    )
+      popup.current?.focus({ preventScroll: true })
+    if (open) wasActive.current = active
+  }, [active, open])
   const { t } = useTranslation()
   const titleId = useId()
   const bottomSheet = useBottomSheetLayout()
@@ -127,10 +145,15 @@ function DrawerFrame(props: DrawerSurfaceProps) {
   return (
     <Primitive.Root
       open={open}
+      modal={active}
       onOpenChange={(next, details) => {
         if (!next && details.reason === 'close-watcher' && back()) {
           // Android Back belongs to the whole stack. Prevent Base UI from
           // closing this drawer when the host dismissed a child instead.
+          details.cancel()
+          return
+        }
+        if (!active) {
           details.cancel()
           return
         }
@@ -156,16 +179,24 @@ function DrawerFrame(props: DrawerSurfaceProps) {
           )}
         >
           <Primitive.Popup
+            ref={popup}
+            inert={!active || undefined}
             id={id}
             style={style}
             aria-label={label}
             aria-describedby={descriptionId}
             aria-labelledby={title != null ? titleId : undefined}
-            initialFocus={initialFocus}
+            initialFocus={active ? initialFocus : false}
             data-side={side}
             // Against the screen edge rather than floating beside the page.
             data-attached={side === 'bottom' || page ? '' : undefined}
-            finalFocus={finalFocus}
+            finalFocus={closeType => {
+              if (!active && (open || !wasActive.current)) return false
+              if (typeof finalFocus === 'function') return finalFocus(closeType)
+              if (finalFocus && typeof finalFocus === 'object')
+                return finalFocus.current
+              return finalFocus ?? true
+            }}
             className={cn(
               'kit-modal-popup kit-drawer-popup pointer-events-auto relative flex flex-col rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
               // A floating drawer clips its content to all four corners. An
