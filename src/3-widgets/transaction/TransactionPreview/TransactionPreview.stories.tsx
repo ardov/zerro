@@ -85,6 +85,38 @@ export const Bench: Story = {
   },
 }
 
+export const MissingSelection: Story = {
+  ...Bench,
+  tags: ['check'],
+  render: args => {
+    const outcome = useByType().outcome
+    const [missing, setMissing] = useState(false)
+    return (
+      <>
+        <button onClick={() => setMissing(true)}>
+          Show unavailable transaction
+        </button>
+        <Frame>
+          {outcome && (
+            <TransactionPreview
+              {...args}
+              id={missing ? 'unavailable' : outcome.id}
+            />
+          )}
+        </Frame>
+      </>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await canvas.findByRole('textbox', { name: 'Comment' })
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Show unavailable transaction' })
+    )
+    expect(canvas.queryByRole('textbox', { name: 'Comment' })).toBeNull()
+  },
+}
+
 export const Showcase: Story = {
   args: { id: '', onClose: () => {}, onOpenOther: () => {} },
   render: args => {

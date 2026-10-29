@@ -21,6 +21,7 @@ export type ListDetailsSurfaceProps = {
   title: string
   controller: SurfaceController
   children: ReactNode
+  onOpenChangeComplete?: (open: boolean) => void
   details: {
     label: string
     controller: SurfaceController
@@ -36,6 +37,7 @@ export function ListDetailsSurface({
   controller,
   children,
   details,
+  onOpenChangeComplete,
 }: ListDetailsSurfaceProps) {
   const width = details.width ?? 360
   const wide = usePairedDetailsLayout(width)
@@ -63,6 +65,7 @@ export function ListDetailsSurface({
   return (
     <DrawerSurface
       label={title}
+      onOpenChangeComplete={onOpenChangeComplete}
       controller={{
         open: controller.open,
         setOpen: next => {

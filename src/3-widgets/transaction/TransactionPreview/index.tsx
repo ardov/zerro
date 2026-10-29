@@ -1,4 +1,5 @@
 import { TextFade } from '@/6-shared/ui/kit/TextFade'
+import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
 import type { FC, ReactNode } from 'react'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import { useStore } from 'react-redux'
@@ -91,14 +92,22 @@ export type TransactionPreviewProps = {
   onOpenOther: (id: TTransactionId) => void
   onSelectSimilar?: (date: number) => void
   onPendingEdit?: TPendingEdit
+  onOpenCounterparty?: (
+    query: core.transactions.TTransactionQuery,
+    title: string
+  ) => void
 }
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const transaction = useAppSelector(
     state => core.transactions.selectAll(state)[props.id]
   )
-  return transaction ? (
-    <TransactionEditor {...props} tr={transaction} />
+  // Time edits replace the entity before navigation names its new id. Keep
+  // the editor and its focused action alive during that brief handover.
+  const shown = useCachedValue(transaction, !!transaction)
+  const current = transaction ?? (shown?.id === props.id ? shown : undefined)
+  return current ? (
+    <TransactionEditor {...props} tr={current} />
   ) : (
     <TrEmptyState />
   )
@@ -128,6 +137,7 @@ const TransactionEditor = ({
   onOpenOther,
   onSelectSimilar,
   onPendingEdit,
+  onOpenCounterparty,
   createQuery,
   createPopup,
   onCreated,
@@ -137,6 +147,7 @@ const TransactionEditor = ({
   onOpenOther: (id: TTransactionId) => void
   onSelectSimilar?: (date: number) => void
   onPendingEdit?: TPendingEdit
+  onOpenCounterparty?: TransactionPreviewProps['onOpenCounterparty']
   createQuery?: core.transactions.TTransactionQuery
   createPopup?: SurfaceController
   onCreated?: () => void
@@ -223,7 +234,7 @@ const TransactionEditor = ({
     // Only what the form is editing replaces what is in it. Marking the
     // operation viewed from its Actions menu applies at once and leaves
     // unsaved fields alone; a content change from a sync still refreshes.
-    if (!source || !sameDraftSource(source, tr)) {
+    if (!source || source.id !== tr.id || !sameDraftSource(source, tr)) {
       setDraft(toDraft(tr, ctx))
       setMarked([])
     }
@@ -373,6 +384,35 @@ const TransactionEditor = ({
           <ActionsMenu
             deleted={tr.deleted}
             viewed={core.transactions.isViewed(tr)}
+            counterparty={
+              onOpenCounterparty &&
+              ((tr.merchant && merchants[tr.merchant]) || tr.payee?.trim())
+                ? {
+                    label:
+                      tr.merchant && merchants[tr.merchant]
+                        ? t('btnMerchantTransactions')
+                        : t('btnSearchPayeeTransactions'),
+                    onOpen: () => {
+                      // Covering keeps this editor alive. A time change must
+                      // follow its recreated id before the new list opens.
+                      save(draft)
+                      const merchant = tr.merchant && merchants[tr.merchant]
+                      onOpenCounterparty(
+                        {
+                          clauses: [
+                            merchant
+                              ? { kind: 'merchant', ids: [merchant.id] }
+                              : { kind: 'search', value: tr.payee!.trim() },
+                          ],
+                        },
+                        merchant
+                          ? merchant.title
+                          : t('counterpartySearch', { name: tr.payee!.trim() })
+                      )
+                    },
+                  }
+                : undefined
+            }
             onDelete={() => {
               remove([id])
               track('transaction_deleted', {

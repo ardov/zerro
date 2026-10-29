@@ -1,55 +1,160 @@
 import type { TTransactionId } from '@/6-shared/types'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
-import { defineScreen } from '@/6-shared/overlays'
-import type { core } from '@/zerro-core/redux'
-
+import { defineScreenInstances } from '@/6-shared/overlays'
+import { ListDetailsSurface } from '@/6-shared/ui/layout/ListDetailsSurface'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 import type { TTransactionListProps } from '../transaction/TransactionList'
 import { TransactionList } from '../transaction/TransactionList'
-import { useTransactionPreview } from './TransactionPreviewDrawer'
+import { TransactionPreview } from '../transaction/TransactionPreview'
+import { usePendingEdit } from '../transaction/TransactionPreview/usePendingEdit'
+import {
+  useTransactionListView,
+  type TransactionListViewState,
+} from './useTransactionListView'
 
 export type TransactionDrawerProps = {
   title?: string
-  /** A list someone else has already worked out — the year review's cards.
-   * Ids rather than whole transactions: the value has to survive a reload,
-   * and the invisible half of the address has no length limit to mind. */
+  /** Entity identifiers keep the list live across edits and reloads. */
   ids?: TTransactionId[]
   initialQuery?: core.transactions.TTransactionQuery
   initialDate?: TTransactionListProps['initialDate']
 }
 
-/** A screen: a list of transactions, described either by a query or by the
- * ids it was handed. */
-const transactionListScreen =
-  defineScreen<TransactionDrawerProps>('transactionList')
+type TransactionListValue = TransactionDrawerProps & {
+  view?: TransactionListViewState
+}
+type DetailsValue = {
+  ownerListId: string
+  content: { kind: 'transaction'; id: TTransactionId }
+}
 
-export const useTransactionDrawer = () => transactionListScreen.useOpen()
+const transactionLists =
+  defineScreenInstances<TransactionListValue>('transactionList')
+const transactionDetails =
+  defineScreenInstances<DetailsValue>('transactionDetails')
 
-export const TransactionListDrawer = () => {
+export const useTransactionDrawer = () => transactionLists.useOpen()
+
+/** Both list openers share a family, so DOM order follows opening order even
+ * when an envelope list and an ordinary list are restored together. */
+export function TransactionListDrawer() {
+  const { instances } = transactionLists.use()
+  const [rendered, setRendered] = useState(instances)
+  const additions = instances.filter(
+    instance => !rendered.some(old => old.id === instance.id)
+  )
+  if (additions.length) setRendered([...rendered, ...additions])
+  return rendered.map(({ id }) => (
+    <TransactionListInstance
+      key={id}
+      id={id}
+      onExited={() =>
+        setRendered(previous => previous.filter(instance => instance.id !== id))
+      }
+    />
+  ))
+}
+
+function TransactionListInstance({
+  id,
+  onExited,
+}: {
+  id: string
+  onExited: () => void
+}) {
   const { t } = useTranslation('common')
-  const [value, setValue] = transactionListScreen.use()
-  const showTransaction = useTransactionPreview({ modal: true })
-  const onClose = useCallback(() => setValue(null), [setValue])
-  // The screen value is gone while the drawer slides out. Keep showing what
-  // it showed, so the closing list keeps its title and its filter.
+  const [value, setValue] = transactionLists.useInstance(id)
+  const { close } = transactionLists.use()
+  const details = transactionDetails.use()
+  const openDetails = transactionDetails.useOpen()
+  const liveDetails = details.instances.find(
+    instance => instance.value.ownerListId === id
+  )
+  const shownDetailsId = useCachedValue(liveDetails?.id, !!liveDetails)
   const shown = useCachedValue(value, !!value)
-  const { title, ids, initialQuery, initialDate } = shown ?? {}
+  const { view, flushScroll } = useTransactionListView(shown, setValue)
+  const closeList = () => {
+    flushScroll()
+    close(id, { through: true })
+  }
+  const showTransaction = (transactionId: TTransactionId) => {
+    flushScroll()
+    const content = { kind: 'transaction' as const, id: transactionId }
+    if (liveDetails)
+      details.setValue(liveDetails.id, { ownerListId: id, content })
+    else openDetails({ ownerListId: id, content })
+  }
 
   return (
-    <DrawerSurface
-      title={title || t('transactions')}
-      controller={{ open: !!value, setOpen: open => !open && onClose() }}
-      contentScrolls
+    <ListDetailsSurface
+      title={shown?.title || t('transactions')}
+      controller={{ open: !!value, setOpen: open => !open && closeList() }}
+      onOpenChangeComplete={open => !open && onExited()}
+      details={{
+        label: t('transaction'),
+        controller: {
+          open: !!liveDetails,
+          setOpen: open =>
+            !open && liveDetails && details.close(liveDetails.id),
+        },
+        children: shownDetailsId && (
+          <TransactionDetails key={shownDetailsId} id={shownDetailsId} />
+        ),
+      }}
     >
       <TransactionList
-        transactionIds={ids}
-        initialQuery={initialQuery}
-        initialDate={initialDate}
+        transactionIds={shown?.ids}
+        initialDate={
+          view.restoredScrollOffset === null ? shown?.initialDate : undefined
+        }
+        view={view}
+        opened={liveDetails?.value.content.id}
         onTrOpen={showTransaction}
         className="grow"
       />
-    </DrawerSurface>
+    </ListDetailsSurface>
+  )
+}
+
+function TransactionDetails({ id }: { id: string }) {
+  const pending = usePendingEdit()
+  const [value, setValue] = transactionDetails.useInstance(id, pending.finish)
+  const { remove } = transactionDetails.use()
+  const shown = useCachedValue(value, !!value)
+  const transactions = useAppSelector(core.transactions.selectAll)
+  const gone = !!value && !transactions[value.content.id]
+  const openCounterparty = useOpenCounterpartyTransactions()
+  useEffect(() => {
+    if (!gone) return
+    const timer = setTimeout(() => remove(id), 250)
+    return () => clearTimeout(timer)
+  }, [gone, id, remove])
+  if (!shown) return null
+  return (
+    <TransactionPreview
+      id={shown.content.id}
+      onClose={() => setValue(null)}
+      onOpenOther={transactionId =>
+        setValue(previous => ({
+          ...previous,
+          content: { kind: 'transaction', id: transactionId },
+        }))
+      }
+      onPendingEdit={pending.register}
+      onOpenCounterparty={openCounterparty}
+    />
+  )
+}
+
+export function useOpenCounterpartyTransactions() {
+  const openList = useTransactionDrawer()
+  return useCallback(
+    (query: core.transactions.TTransactionQuery, title: string) => {
+      openList({ initialQuery: query, title })
+    },
+    [openList]
   )
 }
