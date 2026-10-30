@@ -14,6 +14,7 @@ import {
 import { describe, expect, it, vi } from 'vitest'
 import { OverlayHost } from './OverlayHost'
 import { defineScreen } from './defineScreen'
+import { defineScreenInstances } from './defineScreenInstances'
 import { useAsk, useAsked } from './useAsk'
 import { usePopup } from './usePopup'
 import { useOverlayBack } from './useOverlayBack'
@@ -339,6 +340,38 @@ describe('defineScreen', () => {
 describe('a screen closing through a slow history step', () => {
   const sheet = defineScreen<string>('sheet')
 
+  it('dismisses a popup when Back cancels its uncommitted push', () => {
+    function Owner() {
+      const [value, setValue] = sheet.use()
+      const popup = usePopup()
+      const navigate = useNavigate()
+      return (
+        <>
+          <button onClick={() => setValue('owner')}>open stable owner</button>
+          <button
+            onClick={() => {
+              popup.setOpen(true)
+              navigate(-1)
+            }}
+          >
+            open popup then immediately Back
+          </button>
+          {value && <div>stable owner</div>}
+          {popup.open && <div>cancelled popup</div>}
+        </>
+      )
+    }
+    render(
+      <App>
+        <Owner />
+      </App>
+    )
+    fireEvent.click(screen.getByText('open stable owner'))
+    fireEvent.click(screen.getByText('open popup then immediately Back'))
+    expect(screen.getByText('stable owner')).toBeTruthy()
+    expect(screen.queryByText('cancelled popup')).toBeNull()
+  })
+
   function Sheet() {
     const [id, setId] = sheet.use()
     return (
@@ -379,11 +412,78 @@ describe('a screen closing through a slow history step', () => {
       vi.useRealTimers()
     }
   })
+
+  it.each(['Back', 'reload'])(
+    'keeps the owner when sync removes the top Details after %s',
+    source => {
+      const layers = defineScreenInstances<string>('sync-removal')
+      function Pair() {
+        const { instances, remove } = layers.use()
+        const open = layers.useOpen()
+        const navigate = useNavigate()
+        return (
+          <>
+            {['owner', 'details', 'child'].map(value => (
+              <button key={value} onClick={() => open(value)}>
+                open {value}
+              </button>
+            ))}
+            <button onClick={() => navigate(-1)}>browser back</button>
+            <button onClick={() => remove(instances.at(-1)!.id)}>
+              sync removes details
+            </button>
+            {instances.map(({ id, value }) => (
+              <div key={id}>{value} body</div>
+            ))}
+          </>
+        )
+      }
+      const owner = { 'screen:sync-removal:owner': 'owner' }
+      const history = renderWithSlowHistory(
+        <Pair />,
+        source === 'reload'
+          ? [
+              null,
+              { overlays: { screens: owner, ours: true } },
+              {
+                overlays: {
+                  screens: {
+                    ...owner,
+                    'screen:sync-removal:details': 'details',
+                  },
+                  ours: true,
+                },
+              },
+            ]
+          : undefined
+      )
+      if (source === 'Back') {
+        fireEvent.click(screen.getByText('open owner'))
+        fireEvent.click(screen.getByText('open details'))
+        fireEvent.click(screen.getByText('open child'))
+        fireEvent.click(screen.getByText('browser back'))
+        history.land()
+      }
+      expect(screen.getByText('details body')).toBeTruthy()
+
+      fireEvent.click(screen.getByText('sync removes details'))
+      // Let every requested browser step land, including an accidental second
+      // Back: the observable contract is that the owner remains open.
+      for (let remaining = 3; history.pendingSteps() && remaining; remaining--)
+        history.land()
+      expect(screen.queryByText('details body')).toBeNull()
+      expect(screen.getByText('owner body')).toBeTruthy()
+      expect(history.pendingSteps()).toBe(0)
+    }
+  )
 })
 
 /** A history whose steps land only when the test says so, as a browser's do
  * a few frames after they are asked for. Pushes and replaces land at once. */
-function renderWithSlowHistory(children: ReactNode) {
+function renderWithSlowHistory(
+  children: ReactNode,
+  initialStates: unknown[] = [null]
+) {
   let keys = 0
   // Steps asked for and not landed yet, each landing when called.
   const steps: Array<() => void> = []
@@ -399,8 +499,8 @@ function renderWithSlowHistory(children: ReactNode) {
 
   function SlowRouter() {
     const [stack, set] = useState<Stack>({
-      entries: [toLocation('/budget', null)],
-      index: 0,
+      entries: initialStates.map(state => toLocation('/budget', state)),
+      index: initialStates.length - 1,
       type: NavigationType.Pop,
     })
     const navigator = useState<Navigator>(() => ({
@@ -439,6 +539,7 @@ function renderWithSlowHistory(children: ReactNode) {
 
   render(<SlowRouter />)
   return {
+    pendingSteps: () => steps.length,
     land: () =>
       act(() => {
         const step = steps.shift()
@@ -449,6 +550,46 @@ function renderWithSlowHistory(children: ReactNode) {
 }
 
 describe('owner close notifications', () => {
+  it('finishes the latest singleton input when Back unmounts its owner', () => {
+    const singleton = defineScreen<string>('pending-singleton')
+    const finished = vi.fn()
+    function Editor() {
+      const [draft, setDraft] = useState('initial')
+      singleton.use(() => finished(draft))
+      return (
+        <input
+          aria-label="singleton draft"
+          value={draft}
+          onChange={event => setDraft(event.target.value)}
+        />
+      )
+    }
+    function Owner() {
+      const value = singleton.useValue()
+      const open = singleton.useOpen()
+      const navigate = useNavigate()
+      return (
+        <>
+          <button onClick={() => open('A')}>open singleton editor</button>
+          <button onClick={() => navigate(-1)}>leave singleton editor</button>
+          {value && <Editor />}
+        </>
+      )
+    }
+    render(
+      <App>
+        <Owner />
+      </App>
+    )
+    fireEvent.click(screen.getByText('open singleton editor'))
+    fireEvent.change(screen.getByLabelText('singleton draft'), {
+      target: { value: 'latest' },
+    })
+    fireEvent.click(screen.getByText('leave singleton editor'))
+    expect(screen.queryByLabelText('singleton draft')).toBeNull()
+    expect(finished).toHaveBeenCalledExactlyOnceWith('latest')
+  })
+
   function Editor({ onClose }: { onClose: (value: string) => void }) {
     const [draft, setDraft] = useState('initial')
     const popup = usePopup(() => onClose(draft))

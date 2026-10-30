@@ -36,9 +36,9 @@ export type OverlayEntry = {
   ours?: boolean
 }
 
-/** The overlays actually alive in memory. Screens are not here: they are read
- * back from the entry, which is the whole point of them. */
-export type LiveLayers = {
+/** Popup count and pending navigation. Screen membership and order still
+ * come exclusively from the history entry. */
+export type OverlayRuntime = {
   popups: number
   /** A step we asked for has not landed yet. The browser takes one when it is
    * ready, a good few frames later, so until then the entry we are on is not
@@ -88,7 +88,7 @@ const nothing: Decision = { history: { kind: 'none' }, dismiss: 0 }
 
 export function decide(
   entry: OverlayEntry,
-  live: LiveLayers,
+  live: OverlayRuntime,
   action: OverlayAction
 ): Decision {
   const screens = entry.screens ?? {}

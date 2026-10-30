@@ -11,6 +11,7 @@ import type { Location } from 'react-router-dom'
 import { useLocation, useNavigate, useNavigationType } from 'react-router-dom'
 import type { HistoryOp, OverlayAction, OverlayEntry } from './decide'
 import { decide } from './decide'
+import { remember, restore, type ScreenMemory } from './screenMemory'
 import type { OverlayMethods, OverlayState } from './context'
 import {
   AskedContext,
@@ -41,53 +42,6 @@ type AskLayer = {
 }
 
 let askCounter = 0
-
-type SavedScreen = { value: unknown; revision: number }
-
-function rememberScreenValues(
-  saved: Record<string, SavedScreen>,
-  entry: OverlayEntry
-) {
-  let result = saved
-  for (const [id, value] of Object.entries(entry.screens ?? {})) {
-    if (!id.startsWith('screen:') && entry.revisions?.[id] === undefined)
-      continue
-    const revision = entry.revisions?.[id] ?? 0
-    if (saved[id] && saved[id].revision >= revision) continue
-    if (result === saved) result = { ...saved }
-    result[id] = { value, revision }
-  }
-  return result
-}
-
-function restoreScreenValues(
-  entry: OverlayEntry,
-  saved: Record<string, SavedScreen>,
-  removed: ReadonlySet<string>
-) {
-  let next = entry
-  for (const [id, value] of Object.entries(saved)) {
-    if (
-      !(id in (entry.screens ?? {})) ||
-      value.revision <= (entry.revisions?.[id] ?? 0)
-    )
-      continue
-    if (next === entry)
-      next = {
-        ...entry,
-        screens: { ...entry.screens },
-        revisions: { ...entry.revisions },
-      }
-    next.screens![id] = value.value
-    next.revisions![id] = value.revision
-  }
-  for (const id of removed) {
-    if (!(id in (entry.screens ?? {}))) continue
-    if (next === entry) next = { ...entry, screens: { ...entry.screens } }
-    delete next.screens![id]
-  }
-  return next
-}
 
 /** The one place in the app that touches browser history.
  *
@@ -157,18 +111,22 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   // Values are cached by instance id, but order always comes from history.
   // A wide pair can change its list while Details are open; Back must not
   // restore the older copy of that list's view state from an earlier entry.
-  const [savedScreens, setSavedScreens] = useState<Record<string, SavedScreen>>(
-    () => rememberScreenValues({}, readEntry(location))
+  const [memory, setMemory] = useState<ScreenMemory>(() =>
+    remember({}, readEntry(location))
   )
-  const [removedScreens, setRemovedScreens] = useState<ReadonlySet<string>>(
-    new Set()
+  const memoryRef = useRef(memory)
+  const updateMemory = useCallback(
+    (update: (previous: ScreenMemory) => ScreenMemory) => {
+      memoryRef.current = update(memoryRef.current)
+      setMemory(memoryRef.current)
+    },
+    []
   )
-  const removedScreensRef = useRef(removedScreens)
   const recordedEntryRef = useRef<OverlayEntry>({})
   const recordedEntry = useMemo(() => readEntry(location), [location])
   const entry = useMemo(
-    () => restoreScreenValues(recordedEntry, savedScreens, removedScreens),
-    [recordedEntry, savedScreens, removedScreens]
+    () => restore(recordedEntry, memory),
+    [recordedEntry, memory]
   )
 
   // The entry as we believe it to be, which is not always the one the router
@@ -188,7 +146,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     // the optimistic entry until its location arrives, including new children.
     if (arrived) {
       entryRef.current = entry
-      setSavedScreens(saved => rememberScreenValues(saved, recordedEntry))
+      updateMemory(previous => remember(previous, recordedEntry))
     }
     recordedEntryRef.current = recordedEntry
     const ids = new Set(Object.keys(entry.screens ?? {}))
@@ -199,13 +157,13 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       if (!previousScreenIds.current.has(id)) notifiedScreens.current.delete(id)
     })
     previousScreenIds.current = ids
-  }, [location, entry, recordedEntry, notifyScreenClose])
+  }, [location, entry, recordedEntry, notifyScreenClose, updateMemory])
 
   /** Writes an entry at the address we are on, which is the only thing an
    * overlay ever changes about it. */
   const write = useCallback(
     (next: OverlayEntry, replace: boolean) => {
-      setSavedScreens(saved => rememberScreenValues(saved, next))
+      updateMemory(previous => remember(previous, next))
       const { pathname, search, hash } = locationRef.current
       navigate(pathname + search + hash, {
         state: withEntry(locationRef.current.state, next),
@@ -213,7 +171,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       })
       entryRef.current = next
     },
-    [navigate]
+    [navigate, updateMemory]
   )
 
   /** Asks the browser for a history step and waits for it. A step is the one
@@ -298,9 +256,10 @@ export function OverlayHost({ children }: { children: ReactNode }) {
           popups: liveRef.current.length,
           stepping: !!stepRef.current,
           closingThrough: closingThroughRef.current,
-          removedTop: removedScreensRef.current.has(
-            Object.keys(recordedEntryRef.current.screens ?? {}).at(-1) ?? ''
-          ),
+          removedTop:
+            memoryRef.current[
+              Object.keys(recordedEntryRef.current.screens ?? {}).at(-1) ?? ''
+            ]?.removed,
         },
         action
       )
@@ -317,6 +276,9 @@ export function OverlayHost({ children }: { children: ReactNode }) {
         closingThroughRef.current = action.name
       dismiss(decision.dismiss)
       applyOp(decision.history)
+      const through = closingThroughRef.current
+      if (through && !(through in (entryRef.current.screens ?? {})))
+        closingThroughRef.current = undefined
       return true
     },
     [applyOp, dismiss]
@@ -371,33 +333,27 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     (name: string, value: unknown, instead?: boolean) => {
       setClosing(names => without(names, name))
       notifiedScreens.current.delete(name)
-      if (removedScreensRef.current.has(name)) {
-        removedScreensRef.current = without(removedScreensRef.current, name)
-        setRemovedScreens(removedScreensRef.current)
-      }
-      // A singleton name can now refer to a different entity. Only repeated
-      // instance ids carry their latest values across separate openings.
-      if (!name.startsWith('screen:'))
-        setSavedScreens(saved => {
-          if (!(name in saved)) return saved
-          const next = { ...saved }
-          delete next[name]
-          return next
-        })
+      // Every explicit opening starts a fresh value, including singleton
+      // reuse. New instance ids are already unique; no id protocol is needed.
+      updateMemory(previous => {
+        if (!(name in previous)) return previous
+        const next = { ...previous }
+        delete next[name]
+        return next
+      })
       perform({ kind: 'openScreen', name, value, instead })
     },
-    [perform]
+    [perform, updateMemory]
   )
 
   const removeScreen = useCallback(
     (name: string) => {
-      if (removedScreensRef.current.has(name)) return
+      if (memoryRef.current[name]?.removed) return
       perform({ kind: 'removeScreen', name })
-      removedScreensRef.current = new Set(removedScreensRef.current).add(name)
-      setRemovedScreens(removedScreensRef.current)
+      updateMemory(previous => ({ ...previous, [name]: { removed: true } }))
       notifyScreenClose(name)
     },
-    [perform, notifyScreenClose]
+    [perform, notifyScreenClose, updateMemory]
   )
 
   const updateScreen = useCallback(
@@ -450,25 +406,25 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     return false
   }, [closePopup, closeScreen, closing])
 
-  // Landing on an entry — mounted, navigated, went back, reloaded — is the one
-  // moment history and memory can disagree, so it is the one moment they are
-  // brought back together.
+  // A changed location can settle a history step. Local memory changes can
+  // also need reconciliation, but must not settle a step still in flight.
+  const lastArrival = useRef<string | undefined>(undefined)
   useEffect(() => {
+    const arrived = lastArrival.current !== location.key
+    lastArrival.current = location.key
     // The step we asked for, arriving. It is a POP, which is what tells it
     // apart from a page navigated to while it was in flight — that one leaves
     // the step pending, and the stuck timer has the last word on it.
-    if (navigationType === 'POP') stepRef.current = null
+    if (arrived && navigationType === 'POP') stepRef.current = null
+    // Back may cancel a popup push before that location commits. Its key then
+    // stays the same, but live layers still need reconciling with history.
     // Persist a restored live value into this entry so a reload sees it too.
     if (!stepRef.current && entry !== recordedEntry)
       write(entryRef.current, true)
     // Finish an explicit group close before replaying new opens. Otherwise a
     // child opened on an intermediate entry would be closed with that group.
-    if (!stepRef.current && closingThroughRef.current) {
-      if (closingThroughRef.current in (entryRef.current.screens ?? {}))
-        perform({ kind: 'arrive' })
-      if (!(closingThroughRef.current in (entryRef.current.screens ?? {})))
-        closingThroughRef.current = undefined
-    }
+    if (!stepRef.current && closingThroughRef.current)
+      perform({ kind: 'arrive' })
     // What was held while the step was in flight is asked again here, against
     // the entry we have actually landed on. Each answer writes its own entry,
     // so popups that piled up in that window still get one Back apiece.
@@ -479,14 +435,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     }
     // Reconcile only once the stack is ours again: an answer that stepped has
     // left history mid-move, and there is nothing to compare it against yet.
-    if (!stepRef.current) {
-      if (
-        closingThroughRef.current &&
-        !(closingThroughRef.current in (entryRef.current.screens ?? {}))
-      )
-        closingThroughRef.current = undefined
-      perform({ kind: 'arrive' })
-    }
+    if (!stepRef.current) perform({ kind: 'arrive' })
     // Settled: nothing in flight, nothing held. From here the entry alone says
     // what is open — including a close the browser refused, which shows the
     // screen again rather than leaving it hidden over a live entry.

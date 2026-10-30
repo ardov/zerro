@@ -5,6 +5,125 @@ import { decide } from './decide'
 /** No decision to carry out. */
 const nothing: Decision = { history: { kind: 'none' }, dismiss: 0 }
 
+describe('instance updates, removal and group closing', () => {
+  const entry: OverlayEntry = {
+    screens: { list: 'search', details: 'A' },
+    ours: true,
+  }
+
+  it('replaces a view and increments its revision without adding a Back step', () => {
+    expect(
+      decide(
+        entry,
+        { popups: 0 },
+        { kind: 'updateScreen', name: 'list', update: () => 'new search' }
+      )
+    ).toEqual({
+      history: {
+        kind: 'replace',
+        entry: {
+          ...entry,
+          screens: { list: 'new search', details: 'A' },
+          revisions: { list: 1 },
+        },
+      },
+      dismiss: 0,
+    })
+    expect(entry.screens).toEqual({ list: 'search', details: 'A' })
+  })
+
+  it('ignores updates to missing or unchanged screens', () => {
+    expect(
+      decide(
+        entry,
+        { popups: 0 },
+        { kind: 'updateScreen', name: 'missing', update: () => 'new' }
+      )
+    ).toEqual(nothing)
+    expect(
+      decide(
+        entry,
+        { popups: 0 },
+        { kind: 'updateScreen', name: 'list', update: value => value }
+      )
+    ).toEqual(nothing)
+  })
+
+  it('steps off unavailable top Details, including their popup slots', () => {
+    expect(
+      decide(
+        { ...entry, slots: 2 },
+        { popups: 2 },
+        { kind: 'removeScreen', name: 'details' }
+      )
+    ).toEqual({ history: { kind: 'go', delta: -3 }, dismiss: 2 })
+  })
+
+  it('removes a covered editor without closing its child', () => {
+    expect(
+      decide(entry, { popups: 0 }, { kind: 'removeScreen', name: 'list' })
+    ).toEqual({
+      history: {
+        kind: 'replace',
+        entry: { ...entry, screens: { details: 'A' } },
+      },
+      dismiss: 0,
+    })
+  })
+
+  it('continues a group close one owned entry at a time', () => {
+    expect(
+      decide(
+        entry,
+        { popups: 0 },
+        { kind: 'closeScreen', name: 'list', through: true }
+      ).history
+    ).toEqual({ kind: 'go', delta: -1 })
+    expect(
+      decide(
+        { screens: { list: 'search' }, ours: true },
+        { popups: 0, closingThrough: 'list' },
+        { kind: 'arrive' }
+      ).history
+    ).toEqual({ kind: 'go', delta: -1 })
+    expect(
+      decide({}, { popups: 0, closingThrough: 'list' }, { kind: 'arrive' })
+    ).toEqual(nothing)
+  })
+
+  it('finishes a group on an initial entry without leaving the app', () => {
+    const decision = decide(
+      { ...entry, ours: false },
+      { popups: 0, closingThrough: 'list' },
+      { kind: 'arrive' }
+    )
+    expect(decision.history).toEqual({
+      kind: 'replace',
+      entry: { ...entry, ours: false, screens: {}, slots: 0 },
+    })
+  })
+
+  it('skips removed history entries but never steps out of an initial entry', () => {
+    expect(
+      decide(
+        { ours: true },
+        { popups: 0, removedTop: true },
+        { kind: 'arrive' }
+      ).history
+    ).toEqual({ kind: 'go', delta: -1 })
+    expect(
+      decide({}, { popups: 0, removedTop: true }, { kind: 'arrive' })
+    ).toEqual(nothing)
+    expect(
+      decide(
+        { ours: true },
+        { popups: 0, removedTop: false },
+        { kind: 'arrive' }
+      )
+    ).toEqual(nothing)
+  })
+})
+
 /** A history stack plus the app's live popup layers, driven exactly the way
  * `OverlayHost` drives them. Scenarios below read as a person's session:
  * open, press Back, reload. */

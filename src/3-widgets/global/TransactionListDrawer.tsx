@@ -1,16 +1,20 @@
 import type { EnvTransactionsDrawerProps } from './EnvTransactionsDrawer'
 import type { TTransactionId } from '@/6-shared/types'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
-import { defineScreenInstances, useScreenOrder } from '@/6-shared/overlays'
+import {
+  defineScreenInstances,
+  useIsTopScreen,
+  useScreenOrder,
+} from '@/6-shared/overlays'
 import { ListDetailsSurface } from '@/6-shared/ui/layout/ListDetailsSurface'
-import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import type { TTransactionListProps } from '../transaction/TransactionList'
 import { TransactionList } from '../transaction/TransactionList'
 import { TransactionPreview } from '../transaction/TransactionPreview'
 import { usePendingEdit } from '../transaction/TransactionPreview/usePendingEdit'
+import { useTransactionHandover } from '../transaction/TransactionPreview/useTransactionHandover'
 import {
   useTransactionListView,
   type TransactionListViewState,
@@ -81,10 +85,10 @@ function TransactionListInstance({
   const { close } = transactionLists.use()
   const details = transactionDetails.use()
   const openDetails = transactionDetails.useOpen()
-  const topScreen = useScreenOrder().at(-1)
   const liveDetails = details.instances.find(
     instance => instance.value.ownerListId === id
   )
+  const active = useIsTopScreen(id, liveDetails?.id)
   const shownDetailsId = useCachedValue(liveDetails?.id, !!liveDetails)
   const saved = useCachedValue(value, !!value)
   const shown = saved && normalizeListValue(saved)
@@ -108,7 +112,7 @@ function TransactionListInstance({
 
   return (
     <ListDetailsSurface
-      active={topScreen === id || topScreen === liveDetails?.id}
+      active={active}
       title={shown?.title || t('transactions')}
       controller={{ open: !!value, setOpen: open => !open && closeList() }}
       onOpenChangeComplete={open => !open && onExited()}
@@ -142,19 +146,13 @@ function TransactionDetails({ id }: { id: string }) {
   const pending = usePendingEdit()
   const [value, setValue] = transactionDetails.useInstance(id, pending.finish)
   const { remove } = transactionDetails.use()
-  const shown = useCachedValue(value, !!value)
-  const transactions = useAppSelector(core.transactions.selectAll)
-  const gone = !!value && !transactions[value.content.id]
+  const removeSelf = useCallback(() => remove(id), [id, remove])
+  const shownId = useTransactionHandover(value?.content.id, removeSelf)
   const openCounterparty = useOpenCounterpartyTransactions()
-  useEffect(() => {
-    if (!gone) return
-    const timer = setTimeout(() => remove(id), 250)
-    return () => clearTimeout(timer)
-  }, [gone, id, remove])
-  if (!shown) return null
+  if (!shownId) return null
   return (
     <TransactionPreview
-      id={shown.content.id}
+      id={shownId}
       onClose={() => setValue(null)}
       onOpenOther={transactionId =>
         setValue(previous => ({

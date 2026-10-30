@@ -371,6 +371,45 @@ export const IdenticalRowsDiscardPreviousDraft: Story = {
   },
 }
 
+export const SwitchingRowsResetsLocalEdits: Story = {
+  name: 'Switching rows resets local edits',
+  tags: ['check'],
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Open filtered list' })
+    )
+    const list = await body.findByRole('dialog', {
+      name: 'Filtered transactions',
+    })
+    await userEvent.click(await within(list).findByText('Lunch groceries'))
+    const details = await within(list).findByRole('region', {
+      name: 'Transaction',
+    })
+    const amount = within(details).getByRole('textbox', { name: 'Amount' })
+    await userEvent.clear(amount)
+    await userEvent.type(amount, '6+6')
+    const date = within(details).getByLabelText('Date')
+    await userEvent.click(date)
+    fireEvent.change(date, { target: { value: '' } })
+    await userEvent.click(within(list).getByText('Dinner groceries'))
+    await waitFor(() =>
+      expect(
+        within(details).getByRole('textbox', { name: 'Comment' })
+      ).toHaveValue('Dinner groceries')
+    )
+    expect(within(details).getByLabelText('Date')).toHaveValue('2026-10-09')
+    const nextAmount = within(details).getByRole('textbox', { name: 'Amount' })
+    await userEvent.click(nextAmount)
+    await userEvent.keyboard('{Control>}z{/Control}')
+    // Equal amounts must not make the previous operation's local expression
+    // or Undo history part of the new operation's editing session.
+    expect(nextAmount).toHaveValue('12')
+  },
+}
+
 export const MissingSelectedRows: Story = {
   tags: ['check'],
   render: () => <Harness />,
@@ -522,7 +561,11 @@ export const RestoredMixedStack: Story = {
     expect(comment).toHaveValue('Restored top is interactive')
     if (wide) {
       await userEvent.click(within(list).getByText('Lunch groceries'))
-      await waitFor(() => expect(comment).toHaveValue('Lunch groceries'))
+      await waitFor(() =>
+        expect(
+          within(editor).getByRole('textbox', { name: 'Comment' })
+        ).toHaveValue('Lunch groceries')
+      )
     }
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(editor).not.toBeVisible())

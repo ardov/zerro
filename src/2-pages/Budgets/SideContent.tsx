@@ -8,7 +8,7 @@ import type { SurfaceName } from '@/6-shared/ui/kit/SurfaceContent'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
 import { useMonth } from './MonthProvider'
-import { defineScreen, useScreenOrder } from '@/6-shared/overlays'
+import { defineScreen, useIsTopScreen } from '@/6-shared/overlays'
 
 type TDrawerId = core.envelopes.TEnvelopeId | 'overview'
 
@@ -28,7 +28,7 @@ export function useSelectedEnvelope() {
  * button. An envelope draws its own header either way. */
 export function SideContent({ docked = false }: { docked?: boolean }) {
   const [id, setId] = envelopeScreen.use()
-  const active = useScreenOrder().at(-1) === envelopeScreen.name
+  const active = useIsTopScreen(envelopeScreen.name)
   const onClose = useCallback(() => setId(null), [setId])
   const { t } = useTranslation('common')
   const [month] = useMonth()

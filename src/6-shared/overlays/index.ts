@@ -10,4 +10,4 @@ export type {
   PopupController,
 } from './controller'
 export { useOverlayBack } from './useOverlayBack'
-export { useScreenOrder } from './useScreenOrder'
+export { useScreenOrder, useIsTopScreen } from './useScreenOrder'

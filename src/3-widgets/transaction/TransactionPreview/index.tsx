@@ -69,6 +69,7 @@ import {
   toPatch,
 } from './draft'
 import { createDefaultsFromQuery } from './createDefaults'
+import { counterpartyList } from './counterparty'
 import {
   loadLastTransactionAccount,
   saveLastTransactionAccount,
@@ -99,6 +100,17 @@ export type TransactionPreviewProps = {
 }
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
+  const [editor, setEditor] = useState({
+    id: props.id,
+    key: props.id,
+    replacement: undefined as string | undefined,
+  })
+  if (editor.id !== props.id)
+    setEditor({
+      id: props.id,
+      key: editor.replacement === props.id ? editor.key : props.id,
+      replacement: undefined,
+    })
   const transaction = useAppSelector(
     state => core.transactions.selectAll(state)[props.id]
   )
@@ -107,7 +119,17 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const shown = useCachedValue(transaction, !!transaction)
   const current = transaction ?? (shown?.id === props.id ? shown : undefined)
   return current ? (
-    <TransactionEditor {...props} tr={current} />
+    <TransactionEditor
+      key={editor.key}
+      {...props}
+      tr={current}
+      onOpenOther={id => {
+        // A time edit recreates this operation; keep its fields and focus.
+        // Selecting an unrelated operation starts a fresh local Undo session.
+        setEditor(previous => ({ ...previous, replacement: id }))
+        props.onOpenOther(id)
+      }}
+    />
   ) : (
     <TrEmptyState />
   )
@@ -363,6 +385,14 @@ const TransactionEditor = ({
       : instruments[instrument]?.shortTitle
   }
 
+  const counterparty =
+    tr &&
+    counterpartyList(
+      tr.merchant ? merchants[tr.merchant] : undefined,
+      tr.payee,
+      t
+    )
+
   const content = (
     // `min-h-full` fills a column it is laid out in; `grow` fills a drawer's
     // scroll content, which is a flex column with no height of its own.
@@ -385,30 +415,13 @@ const TransactionEditor = ({
             deleted={tr.deleted}
             viewed={core.transactions.isViewed(tr)}
             counterparty={
-              onOpenCounterparty &&
-              ((tr.merchant && merchants[tr.merchant]) || tr.payee?.trim())
+              onOpenCounterparty && counterparty
                 ? {
-                    label:
-                      tr.merchant && merchants[tr.merchant]
-                        ? t('btnMerchantTransactions')
-                        : t('btnSearchPayeeTransactions'),
+                    label: counterparty.label,
                     onOpen: () => {
-                      // Covering keeps this editor alive. A time change must
-                      // follow its recreated id before the new list opens.
+                      // A time edit must name its recreated id before this is covered.
                       save(draft)
-                      const merchant = tr.merchant && merchants[tr.merchant]
-                      onOpenCounterparty(
-                        {
-                          clauses: [
-                            merchant
-                              ? { kind: 'merchant', ids: [merchant.id] }
-                              : { kind: 'search', value: tr.payee!.trim() },
-                          ],
-                        },
-                        merchant
-                          ? merchant.title
-                          : t('counterpartySearch', { name: tr.payee!.trim() })
-                      )
+                      onOpenCounterparty(counterparty.query, counterparty.title)
                     },
                   }
                 : undefined

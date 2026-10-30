@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback } from 'react'
 import { useOverlayMethods, useOverlayState } from './context'
+import { useScreenClose } from './useScreenClose'
 
 /** Declares an overlay a person can come back to.
  *
@@ -35,13 +36,7 @@ export function defineScreen<T>(name: string) {
           : openScreen(name, value),
       [openScreen, closeScreen]
     )
-    const open = screens[name] !== undefined
-    const wasOpen = useRef(open)
-    useEffect(() => {
-      const closed = wasOpen.current && !open
-      wasOpen.current = open
-      if (closed) onClose?.()
-    }, [open, onClose])
+    useScreenClose(name, onClose)
     return [screens[name] as T | undefined, set]
   }
 
