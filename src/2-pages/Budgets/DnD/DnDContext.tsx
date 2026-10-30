@@ -1,7 +1,7 @@
 import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { createPortal } from 'react-dom'
 import type { FC, ReactNode } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { usePopup } from '@/6-shared/overlays'
 import { useCallback } from 'react'
 import type { DragEndEvent } from '@dnd-kit/core'
@@ -51,6 +51,8 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   // On the overlay stack, so Back closes the move-money dialog rather than
   // leaving the budget page.
   const { open: isOpen, setOpen: setMoveOpen } = usePopup()
+  const openTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(openTimer.current), [])
 
   const onDragEnd = useCallback(
     (e: DragEndEvent) => {
@@ -61,7 +63,10 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
       if (dataType === DragTypes.amount && active.id !== over.id) {
         setMoneySource(active.id)
         setMoneyDestination(over.id)
-        setMoveOpen(true)
+        // Let the drag's release click finish before mounting outside-press
+        // listeners; dnd-kit stops that click before it reaches its target.
+        clearTimeout(openTimer.current)
+        openTimer.current = setTimeout(() => setMoveOpen(true), 0)
       }
 
       if (

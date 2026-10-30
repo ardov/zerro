@@ -144,3 +144,32 @@ export const SelectedCategory: Story = {
     expect(second).not.toHaveAttribute('data-selected')
   },
 }
+
+export const MoveMoneyAfterDrag: Story = {
+  tags: ['!dev', '!autodocs'],
+  globals: { viewport: { value: 'belowAccounts' } },
+  play: async ({ canvasElement }) => {
+    const { page, server } = await import('vitest/browser')
+    const body = within(canvasElement.ownerDocument.body)
+    // The native release click and its propagation are part of the regression.
+    await server.commands.dragPointer(
+      '[data-envelope-id="tag#Transportation"] [aria-roledescription="draggable"]',
+      '[data-envelope-id="tag#Entertainment"]'
+    )
+    const dialog = await body.findByRole('dialog', {
+      name: 'Transportation → Entertainment',
+    })
+    const input = within(dialog).getByRole('textbox', { name: 'Amount' })
+    await page.elementLocator(input).click()
+
+    // A wrongly dismissed dialog remains visible during its exit transition.
+    await new Promise(resolve => setTimeout(resolve, 400))
+    expect(dialog).toBeVisible()
+    expect(input).toHaveFocus()
+    await page.elementLocator(input).fill('3.60')
+    expect(input).toHaveValue('3,60')
+
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(dialog).not.toBeVisible())
+  },
+}

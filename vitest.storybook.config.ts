@@ -2,6 +2,7 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import { playwright } from '@vitest/browser-playwright'
 import { defineConfig, mergeConfig } from 'vitest/config'
 import viteConfig from './vite.storybook.config'
+import { dragPointer } from './stories/browserCommands'
 
 export default mergeConfig(
   viteConfig,
@@ -22,6 +23,7 @@ export default mergeConfig(
           name: `storybook-${theme}`,
           browser: {
             enabled: true,
+            commands: { dragPointer },
             provider: playwright({
               contextOptions: {
                 ...(process.env.STORYBOOK_REDUCED_MOTION === '1'
