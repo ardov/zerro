@@ -10,6 +10,9 @@ const REQUEST_TIMEOUT = 30_000
 const DOWNLOAD_TIMEOUT = 2 * 60_000
 const RELOAD_DELAY = 1_500
 
+type UnavailableReason =
+  'development' | 'insecureContext' | 'unsupportedBrowser'
+
 type Status =
   | 'checking'
   | 'current'
@@ -21,6 +24,7 @@ type Status =
   | 'unavailable'
   | 'failed'
   | 'saveFailed'
+  | UnavailableReason
 
 function notify(status: Status) {
   const loading = [
@@ -40,9 +44,15 @@ function notify(status: Status) {
 
 let updater: ReturnType<typeof createUpdater> | undefined
 
+function getUnavailableReason(): UnavailableReason | undefined {
+  if (!import.meta.env.PROD) return 'development'
+  if (!window.isSecureContext) return 'insecureContext'
+  if (!('serviceWorker' in navigator)) return 'unsupportedBrowser'
+}
+
 /** Start after the global Toaster mounts. Registration itself checks at startup. */
 export function startAppUpdates(register: typeof registerSW) {
-  if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
+  if (getUnavailableReason()) return
   if (updater) return
   const current = createUpdater(register)
   updater = current
@@ -53,8 +63,9 @@ export function startAppUpdates(register: typeof registerSW) {
 }
 
 export function checkAppUpdates(): Promise<void> {
-  if (!updater) {
-    notify('unavailable')
+  const reason = getUnavailableReason()
+  if (reason || !updater) {
+    notify(reason ?? 'unavailable')
     return Promise.resolve()
   }
   return updater.check(true)

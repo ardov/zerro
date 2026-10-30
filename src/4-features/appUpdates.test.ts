@@ -73,6 +73,7 @@ beforeEach(async () => {
   vi.resetModules()
   vi.useFakeTimers()
   vi.stubEnv('PROD', true)
+  vi.stubGlobal('isSecureContext', true)
   vi.clearAllMocks()
   registration = new Registration()
   container = new Container()
@@ -109,6 +110,40 @@ afterEach(() => {
 })
 
 describe('application updates', () => {
+  it.each([
+    { name: 'a dev build', prod: false, secure: false, reason: 'development' },
+    {
+      name: 'an insecure origin',
+      prod: true,
+      secure: false,
+      reason: 'insecureContext',
+    },
+    {
+      name: 'a browser without service workers',
+      prod: true,
+      secure: true,
+      reason: 'unsupportedBrowser',
+    },
+  ])(
+    'explains why updates are unavailable in $name',
+    async ({ prod, secure, reason }) => {
+      stop?.()
+      vi.clearAllMocks()
+      vi.stubEnv('PROD', prod)
+      vi.stubGlobal('isSecureContext', secure)
+      vi.stubGlobal('navigator', { onLine: true })
+      const updates = await import('./appUpdates')
+      stop = updates.startAppUpdates(register)
+
+      await check()
+
+      expect(titles()).toEqual([`appUpdate.${reason}`])
+      expect(register).not.toHaveBeenCalled()
+      expect(registration.update).not.toHaveBeenCalled()
+      expect(reload).not.toHaveBeenCalled()
+    }
+  )
+
   it('reports a manual check with no new version without reloading', async () => {
     await check()
     expect(registration.update).toHaveBeenCalledOnce()

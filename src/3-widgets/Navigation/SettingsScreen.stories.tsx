@@ -265,18 +265,31 @@ export const ControlsMobile: Story = {
 export const CheckAppUpdates: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => <Harness />,
-  play: async ({ canvasElement }) => {
-    const screen = await openSettings(canvasElement)
-    await userEvent.click(
-      within(screen).getByRole('button', { name: 'Check for updates' })
+  play: async ({ canvasElement, globals }) => {
+    const russian = globals.locale === 'ru'
+    const screen = await openSettings(
+      canvasElement,
+      russian ? 'Настройки' : 'Settings'
     )
-    // Storybook has no production worker. The toast proves the version button
-    // invokes the updater while the settings screen stays open.
+    await userEvent.click(
+      within(screen).getByRole('button', {
+        name: russian ? 'Проверить обновления' : 'Check for updates',
+      })
+    )
+    // Storybook runs a dev build. The toast explains why checks are disabled
+    // while the settings screen stays open.
     await within(canvasElement.ownerDocument.body).findByText(
-      'Update checks are unavailable'
+      russian
+        ? 'Для dev-сборки обновления не проверяем'
+        : "We don't check for updates in dev builds"
     )
     await expect(screen).toBeVisible()
   },
+}
+
+export const CheckAppUpdatesRussian: Story = {
+  ...CheckAppUpdates,
+  globals: { locale: 'ru' },
 }
 
 export const CurrencyCycle: Story = {
