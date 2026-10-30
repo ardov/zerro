@@ -1,6 +1,6 @@
 @layer components {
   .layout-columns {
-    --column-gap: 8px;
+    --column-gap: var(--spacing-ui-panel-gap);
     display: flex;
     flex: 1;
     min-width: 0;
@@ -31,9 +31,9 @@
 
   .layout-columns[data-animate] > .layout-column {
     transition:
-      flex-grow 250ms cubic-bezier(0.25, 1, 0.5, 1),
-      flex-basis 250ms cubic-bezier(0.25, 1, 0.5, 1),
-      margin-inline-end 250ms cubic-bezier(0.25, 1, 0.5, 1);
+      flex-grow var(--duration-ui-panel) var(--ease-ui-panel),
+      flex-basis var(--duration-ui-panel) var(--ease-ui-panel),
+      margin-inline-end var(--duration-ui-panel) var(--ease-ui-panel);
   }
 
   .layout-column-content {
@@ -47,8 +47,8 @@
 
   .layout-columns[data-animate] .layout-column-content {
     transition:
-      opacity 250ms cubic-bezier(0.25, 1, 0.5, 1),
-      transform 250ms cubic-bezier(0.25, 1, 0.5, 1);
+      opacity var(--duration-ui-panel) var(--ease-ui-panel),
+      transform var(--duration-ui-panel) var(--ease-ui-panel);
   }
 
   .layout-columns .layout-column[data-visible] > .layout-column-content {

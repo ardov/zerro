@@ -1,4 +1,10 @@
-import { useLayoutEffect, useRef, type ReactNode } from 'react'
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 import type { SurfaceController } from '@/6-shared/overlays'
 import { useMediaQueryValue } from '@/6-shared/hooks/useMediaQueryValue'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
@@ -6,14 +12,22 @@ import { SurfaceCloseButton } from '@/6-shared/ui/kit/SurfaceContent'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useOverlayFinalFocus } from '@/6-shared/ui/useOverlayFinalFocus'
 import { AdaptivePanel } from './AdaptivePanel'
+import './ListDetailsSurface.css'
 
 const LIST_WIDTH = 400
-const GAP = 8
-const OUTER_INSETS = 8
 
 function usePairedDetailsLayout(detailsWidth: number) {
+  // Media queries cannot resolve CSS variables. Read the shared pixel tokens
+  // once per surface; geometry and the fit threshold then use the same values.
+  const [spacing] = useState(() => {
+    const style = getComputedStyle(document.documentElement)
+    return {
+      gap: parseFloat(style.getPropertyValue('--spacing-ui-panel-gap')),
+      inset: parseFloat(style.getPropertyValue('--spacing-ui-drawer-inset')),
+    }
+  })
   return useMediaQueryValue(
-    `(min-width: ${LIST_WIDTH + detailsWidth + GAP + OUTER_INSETS}px)`
+    `(min-width: ${LIST_WIDTH + detailsWidth + spacing.gap + 2 * spacing.inset}px)`
   )
 }
 
@@ -44,7 +58,17 @@ export function ListDetailsSurface({
   const width = details.width ?? 360
   const wide = usePairedDetailsLayout(width)
   const detailsOpen = details.controller.open
-  const paired = wide && detailsOpen
+  // Keep the docked host until its exit finishes; moving it into a closed
+  // drawer would remove the editor before it can slide out.
+  const [presence, setPresence] = useState({
+    open: detailsOpen,
+    exiting: false,
+  })
+  if (presence.open !== detailsOpen)
+    setPresence({ open: detailsOpen, exiting: !detailsOpen })
+  const exiting = presence.exiting && !detailsOpen
+  const paired = wide && (detailsOpen || exiting)
+  const detailsPanel = useRef<HTMLDivElement>(null)
   const content = useRef<HTMLDivElement>(null)
   const listFocus = useRef<HTMLElement | null>(null)
   const previousOpen = useRef(false)
@@ -52,6 +76,20 @@ export function ListDetailsSurface({
     fallback: true,
     target: () => listFocus.current,
   })
+
+  useLayoutEffect(() => {
+    if (!exiting) return
+    let cancelled = false
+    const animations = detailsPanel.current?.getAnimations() ?? []
+    void Promise.allSettled(
+      animations.map(animation => animation.finished)
+    ).then(() => {
+      if (!cancelled) setPresence({ open: false, exiting: false })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [exiting, wide])
 
   useLayoutEffect(() => {
     const opening = detailsOpen && !previousOpen.current
@@ -77,21 +115,34 @@ export function ListDetailsSurface({
           else controller.setOpen(false)
         },
       }}
-      className="w-100"
-      style={paired ? { width: LIST_WIDTH + width + GAP } : undefined}
+      className={cn(
+        'w-(--list-width)',
+        wide &&
+          'list-details-surface overflow-visible bg-transparent shadow-none'
+      )}
+      style={
+        {
+          '--list-width': `${LIST_WIDTH}px`,
+          '--details-width': `${width}px`,
+          width: paired
+            ? 'calc(var(--list-width) + var(--details-width) + var(--spacing-ui-panel-gap))'
+            : undefined,
+        } as CSSProperties
+      }
       contentScrolls
+      bottomInsetOwner="content"
       contentClassName="p-0"
     >
-      <div className={cn('flex min-h-0 flex-1', paired && 'gap-2')}>
+      <div
+        className="list-details-content flex min-h-0 flex-1"
+        data-details-open={detailsOpen || undefined}
+      >
         <section
           aria-label={title}
           onFocusCapture={event => {
             listFocus.current = event.target as HTMLElement
           }}
-          className={cn(
-            'flex min-h-0 min-w-0 flex-1 flex-col',
-            paired && 'w-100 flex-none'
-          )}
+          className="list-details-list layout-panel rounded-smooth flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
         >
           <header className="flex shrink-0 items-start gap-3 px-4 pt-3">
             <h2 className="min-w-0 flex-1 py-1 text-ui-20 font-medium wrap-anywhere">
@@ -101,23 +152,31 @@ export function ListDetailsSurface({
           </header>
           {children}
         </section>
-        <AdaptivePanel
-          active={active}
-          docked={paired}
-          controller={details.controller}
-          label={details.label}
-          finalFocus={restoreFocus}
-          className="min-w-0 flex-1"
-          contentClassName="flex min-h-full flex-col p-0"
+        <div
+          ref={detailsPanel}
+          className="list-details-detail flex min-h-0 min-w-0"
+          hidden={!paired}
+          inert={wide && !detailsOpen}
+          aria-hidden={(wide && !detailsOpen) || undefined}
         >
-          <div
-            ref={content}
-            tabIndex={-1}
-            className="flex min-h-full flex-1 flex-col outline-none"
+          <AdaptivePanel
+            active={active}
+            docked={paired}
+            controller={details.controller}
+            label={details.label}
+            finalFocus={restoreFocus}
+            className="min-w-0 flex-1"
+            contentClassName="flex min-h-full flex-col p-0"
           >
-            {details.children}
-          </div>
-        </AdaptivePanel>
+            <div
+              ref={content}
+              tabIndex={-1}
+              className="flex min-h-full flex-1 flex-col outline-none"
+            >
+              {details.children}
+            </div>
+          </AdaptivePanel>
+        </div>
       </div>
     </DrawerSurface>
   )

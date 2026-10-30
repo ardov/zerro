@@ -65,7 +65,12 @@ emitted, not only those Tailwind finds used. */
   --color-ui-toggle-pressed:   oklch(0.5 0 0 / 0.22);
 
   /* 📏 Surface spacing */
-  --spacing-ui-drawer-inset: 4px;
+  --spacing-ui-drawer-inset: 8px;
+  --spacing-ui-panel-gap: 8px;
+
+  /* Panel layout and paired surfaces move as one interaction. */
+  --ease-ui-panel: cubic-bezier(0.25, 1, 0.5, 1);
+  --duration-ui-panel: 250ms;
 
   /* 📏 Stroke thickness */
   --stroke-ui-control: 1.5px;

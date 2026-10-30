@@ -77,6 +77,7 @@ export const Right: Story = {
       expect(bounds.right).toBeLessThan(window.innerWidth)
       expect(bounds.top).toBeGreaterThan(0)
       expect(bounds.bottom).toBeLessThan(window.innerHeight)
+      expect(bounds.top).toBeCloseTo(8, 0)
       expect(
         Math.abs(bounds.top - (window.innerWidth - bounds.right))
       ).toBeLessThan(1)

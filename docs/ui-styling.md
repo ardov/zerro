@@ -309,6 +309,11 @@ Native Back still goes through the host from any originating drawer. Uncovering
 a surface restores an active focus boundary. `AdaptivePanel` retains the same
 Details subtree and scrollport across the presentation change.
 
+The wide region is transparent: list and Details retain separate panel surfaces,
+with the page columns' gap and outer insets. Both panes translate together as
+Details enters or exits; the exiting pane stays mounted until its transition
+finishes. Reduced motion changes layout immediately and fades Details instead.
+
 Ordinary pair dismissal closes Details first, then the list. The list's explicit
 close button closes both. Focus returns to the latest row or to the active
 surface when the original opener no longer exists. Transaction lists save
