@@ -5,6 +5,9 @@ import { TDateDraft, TFxCode, TISODate } from '6-shared/types'
 /*
 Currency rates are loaded from this great repository by Fawaz Ahmed
 https://github.com/fawazahmed0/exchange-api
+
+If all of its mirrors fail, ECB reference rates (~30 currencies) are loaded
+as a fallback: "Exchange rates by AllRatesToday" https://allratestoday.com
 */
 
 export const firstPossibleDate: TISODate = '2024-03-10'
@@ -19,18 +22,10 @@ export async function requestRates(date: TDateDraft) {
     )
   }
 
-  const response = await fetchWithFallback([
-    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${isoDate}/v1/currencies/${base}.min.json`,
-    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${isoDate}/v1/currencies/${base}.json`,
-    `https://${isoDate}.currency-api.pages.dev/v1/currencies/${base}.json`,
-  ]).then(
-    resp => resp?.json(),
-    reason => {
-      throw new Error(`Unable to load rates. ${reason}`)
-    }
-  )
-  const rates = response?.[base] as Record<TFxCode, number>
-  if (!rates) throw new Error(`No rates found in a response. ${response}`)
+  const rates =
+    (await requestFawazRates(isoDate, base)) ??
+    (await requestFallbackRates(isoDate, base))
+  if (!rates) throw new Error(`Unable to load rates for ${isoDate}`)
 
   let result: Record<TFxCode, number> = {}
 
@@ -58,6 +53,38 @@ export async function requestRates(date: TDateDraft) {
     }
   })
   return result
+}
+
+async function requestFawazRates(isoDate: TISODate, base: string) {
+  try {
+    const response = await fetchWithFallback([
+      `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${isoDate}/v1/currencies/${base}.min.json`,
+      `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${isoDate}/v1/currencies/${base}.json`,
+      `https://${isoDate}.currency-api.pages.dev/v1/currencies/${base}.json`,
+    ]).then(resp => resp?.json())
+    return response?.[base] as Record<TFxCode, number> | undefined
+  } catch (e) {
+    return undefined
+  }
+}
+
+/** Frankfurter-compatible ECB rates; returns lowercase codes like the main source */
+async function requestFallbackRates(isoDate: TISODate, base: string) {
+  try {
+    const response = await fetch(
+      `https://allratestoday.com/api/compat/frankfurter/${isoDate}?base=${base.toUpperCase()}`
+    )
+    if (!response.ok) return undefined
+    const data = await response.json()
+    if (!data?.rates) return undefined
+    const rates: Record<string, number> = { [base]: 1 }
+    keys(data.rates as Record<string, number>).forEach(code => {
+      rates[code.toLowerCase()] = data.rates[code]
+    })
+    return rates as Record<TFxCode, number>
+  } catch (e) {
+    return undefined
+  }
 }
 
 async function fetchWithFallback(links: string[]) {
