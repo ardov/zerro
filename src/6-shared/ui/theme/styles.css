@@ -142,6 +142,10 @@
 }
 
 @layer components {
+  :root[data-input-modality='pointer'] .recharts-wrapper :focus {
+    outline: none;
+  }
+
   .hidden-scroll {
     scrollbar-width: none;
   }

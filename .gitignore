@@ -41,6 +41,7 @@ yarn-error.log*
 storybook-static/
 experiments/
 .scratch/
+.codex-attachments/
 
 # private notes (separate repository, never published)
 /private/
