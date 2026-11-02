@@ -1,6 +1,6 @@
 # Zerro Core architecture
 
-Core is a set of domain functions over normalized ZenMoney data. Redux owns the
+Core is a set of domain functions over normalized Zenmoney data. Redux owns the
 live state. HTTP, IndexedDB, React, localization, and assets stay in adapters.
 The [glossary](../../../../CONTEXT.md) defines the domain terms.
 
@@ -10,7 +10,7 @@ There are two snapshots and two command stacks:
 
 ```ts
 type ReplicaState = {
-  base: TDataStore // latest canonical state accepted from ZenMoney
+  base: TDataStore // latest canonical state accepted from Zenmoney
   current: TDataStore // replayOutbox(base, outbox)
   outbox: TCommand[] // applied commands not yet acknowledged
   redo: TCommand[] // undone commands, kept only in this session
@@ -113,7 +113,7 @@ children without own assignments continue spending from the parent pool.
 
 Restart resets the preceding and selected months' leftovers, then clears future
 assignments of existing envelopes, preserving transactions and goals. Copy
-replaces own assignments, including zero. ZenMoney's global budget and
+replaces own assignments, including zero. Zenmoney's global budget and
 assignments of absent envelopes are preserved by restart. `setOwnAssigned`
 writes own values directly; `setTotalAssigned` subtracts the current child
 assignments from the requested total. All amounts are expressed in the

@@ -8,7 +8,7 @@
  * `6-shared/ui/Icons` re-exports the whole module and is what call sites
  * import from; nothing outside this directory names `lucide` directly.
  *
- * The icons ZenMoney supplies — category glyphs and bank marks — are not part
+ * The icons Zenmoney supplies — category glyphs and bank marks — are not part
  * of this set. They arrive as data with the user's own data and are drawn by
  * `TagIcon` from `6-shared/zenmoney-assets`.
  */
@@ -158,7 +158,7 @@ export const SyncAltIcon = createIcon(ArrowLeftRight, 'SyncAltIcon')
 export const MoneyOutIcon = createIcon(LogOut, 'MoneyOutIcon')
 export const MoneyInIcon = createIcon(LogIn, 'MoneyInIcon')
 /** A category. Not to be confused with `ui/TagIcon`, which draws the icon
- * ZenMoney stores on the category itself. */
+ * Zenmoney stores on the category itself. */
 export const CategoryIcon = createIcon(Tag, 'CategoryIcon')
 /** Where the money was spent, and who it was spent with: a shop keeps the
  * shop glyph, a person a person's. */

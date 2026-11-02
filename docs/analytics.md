@@ -21,7 +21,7 @@ declared in a typed catalog, so a name or property that is not in
   first one.
 - `track(name, properties)` sends one catalog event; outside production it logs
   to the console instead.
-- `setAnalyticsUser(userId)` sets the GA `user_id` to the ZenMoney user id, and
+- `setAnalyticsUser(userId)` sets the GA `user_id` to the Zenmoney user id, and
   clears it on logout.
 - A provider failure is caught and warned about; it can never change a product
   result.

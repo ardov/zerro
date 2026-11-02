@@ -1,5 +1,5 @@
 /**
- * Field equality as ZenMoney canonicalizes it.
+ * Field equality as Zenmoney canonicalizes it.
  *
  * A value that differs from the stored one only by a canonicalization is not a
  * change: writing it would produce the value already there. Both the command
@@ -25,7 +25,7 @@ export function isSameEntityFieldValue(
   left: unknown,
   right: unknown
 ): boolean {
-  // ZenMoney canonicalizes an empty transaction comment to null.
+  // Zenmoney canonicalizes an empty transaction comment to null.
   if (field === 'comment') return (left ?? '') === (right ?? '')
 
   // Tag order is presentation only for operations. Reordering the same tags

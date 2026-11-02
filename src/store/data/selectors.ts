@@ -57,7 +57,7 @@ export const getLastSyncTime = (state: RootState) => {
 }
 
 /**
- * Read cursor sent to ZenMoney, deliberately one second behind the accepted
+ * Read cursor sent to Zenmoney, deliberately one second behind the accepted
  * base.
  *
  * The server returns its own wall clock as `serverTimestamp` and the diff

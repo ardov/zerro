@@ -29,7 +29,7 @@ export type TMerchantWritableField = (typeof merchantWritableFields)[number]
 export type TMerchantPatch = EntityPatch<TMerchant, TMerchantWritableField>
 export type TZmMerchant = Omit<TMerchant, 'changed'> & { changed: TUnixTime }
 export type TMerchantIntent = { merchant: TMerchantPatch[] }
-/** Canonical payee key used by ZenMoney. Merchant titles and free-text payees
+/** Canonical payee key used by Zenmoney. Merchant titles and free-text payees
  * share one namespace, and this is how that namespace is keyed. */
 export function normalizePayee(name: string | null | undefined) {
   return (name || '')

@@ -197,7 +197,7 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
   const { Checking, Cash, Debt } = AccountType
 
   const accounts = {
-    // ZenMoney requires a separate debt ledger; it is hidden from bank accounts.
+    // Zenmoney requires a separate debt ledger; it is hidden from bank accounts.
     debt: makeAccount({
       title: 'Debts',
       instrument: mainUser.currency,

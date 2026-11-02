@@ -127,7 +127,7 @@ export const syncData =
 
 function stopMessage(outcome: Extract<TPushOutcome, { kind: 'stopped' }>) {
   return outcome.itemTooLarge
-    ? 'One sync item is too large for ZenMoney'
+    ? 'One sync item is too large for Zenmoney'
     : outcome.message
 }
 

@@ -155,7 +155,7 @@ describe('zerro-core API boundary', () => {
     expect(violations).toEqual([])
   })
 
-  it('keeps domain foundation independent of ZenMoney and Zerro', () => {
+  it('keeps domain foundation independent of Zenmoney and Zerro', () => {
     const foundationRoot = join(coreRoot, 'internal/domain/foundation')
     const domainRoot = join(coreRoot, 'internal/domain')
     const forbiddenRoots = [
@@ -188,7 +188,7 @@ describe('zerro-core API boundary', () => {
     expect(violations).toEqual([])
   })
 
-  it('keeps ZenMoney entities independent of its aggregate model', () => {
+  it('keeps Zenmoney entities independent of its aggregate model', () => {
     const entitiesRoot = join(coreRoot, 'internal/domain/zenmoney/entities')
     const forbiddenRoots = [
       join(coreRoot, 'internal/domain/zenmoney/model'),
@@ -233,7 +233,7 @@ describe('zerro-core API boundary', () => {
     expect(violations).toEqual([])
   })
 
-  it('keeps production imports off the broad ZenMoney barrel', () => {
+  it('keeps production imports off the broad Zenmoney barrel', () => {
     const violations = readProductionCoreFiles().flatMap(file => {
       const source = readFileSync(file, 'utf8')
       return readModuleSpecifiers(source)
@@ -245,7 +245,7 @@ describe('zerro-core API boundary', () => {
         )
         .map(
           specifier =>
-            `${relative(coreRoot, file)}: broad ZenMoney import '${specifier}'`
+            `${relative(coreRoot, file)}: broad Zenmoney import '${specifier}'`
         )
     })
 

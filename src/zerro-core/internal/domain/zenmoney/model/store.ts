@@ -1,4 +1,4 @@
-// The normalized ZenMoney data store and patch shapes. This is the core
+// The normalized Zenmoney data store and patch shapes. This is the core
 // domain contract: `applyPatch(store, patch)` and command compilers speak in
 // these types.
 import type { ById } from '../../foundation/types'

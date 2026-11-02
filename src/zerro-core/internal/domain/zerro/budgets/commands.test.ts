@@ -50,7 +50,7 @@ describe('env budget commands', () => {
     })
   })
 
-  it('routes tag envelopes to ZenMoney budgets when preferred', () => {
+  it('routes tag envelopes to Zenmoney budgets when preferred', () => {
     const foodId = envId.get(EnvType.Tag, 'food')
     const data = makeStore({
       user: {
@@ -93,7 +93,7 @@ describe('env budget commands', () => {
     })
   })
 
-  it('splits mixed budget updates between ZenMoney and hidden env budgets', () => {
+  it('splits mixed budget updates between Zenmoney and hidden env budgets', () => {
     const foodId = envId.get(EnvType.Tag, 'food')
     const cashId = envId.get(EnvType.Account, 'cash')
     const data = makeStore({

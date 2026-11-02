@@ -33,7 +33,7 @@ export enum AccountType {
 }
 
 /**
- * ZenMoney owns these discriminators and may add values before Zerro knows
+ * Zenmoney owns these discriminators and may add values before Zerro knows
  * their behavior. The known values are listed once here: the domain type, the
  * wire schema and the backup warning all read the same list, and an unknown
  * string stays representable so a complete backup can still be restored.
@@ -67,7 +67,7 @@ export type TAccountPayoffInterval = TOpenEnum<
 export type TAccount = {
   id: TAccountId
 
-  /** Normalized timestamp in milliseconds. ZenMoney wire data uses seconds. */
+  /** Normalized timestamp in milliseconds. Zenmoney wire data uses seconds. */
   changed: TMsTime
 
   user: TUserId
@@ -149,7 +149,7 @@ export type TAccountWritableField = (typeof accountWritableFields)[number]
 export type TAccountPatch = EntityPatch<TAccount, TAccountWritableField>
 
 export type TZmAccount = Omit<TAccount, 'changed'> & {
-  /** ZenMoney wire timestamp in seconds. */
+  /** Zenmoney wire timestamp in seconds. */
   changed: TUnixTime
 }
 
@@ -202,7 +202,7 @@ export function makeAccount(
     inBalance: draft.inBalance ?? false,
     savings: draft.savings === undefined ? false : draft.savings,
     enableCorrection: draft.enableCorrection ?? false,
-    // New accounts need a mode accepted by ZenMoney. Preserve explicit legacy
+    // New accounts need a mode accepted by Zenmoney. Preserve explicit legacy
     // values when replaying or restoring a complete account.
     balanceCorrectionType:
       draft.balanceCorrectionType === undefined

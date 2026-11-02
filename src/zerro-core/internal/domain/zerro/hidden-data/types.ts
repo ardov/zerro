@@ -19,7 +19,7 @@ export type THiddenDataComment<TPayload = unknown> = {
  * Stable names for what a hidden-data payload holds, used wherever a change
  * is reported to the user.
  *
- * These payloads are not ZenMoney entities — they are JSON inside a reminder's
+ * These payloads are not Zenmoney entities — they are JSON inside a reminder's
  * comment — so without a name of their own every budget, goal and envelope
  * setting is reported as a changed reminder, which is true about the row and
  * useless about the act.

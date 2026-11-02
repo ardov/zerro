@@ -287,7 +287,7 @@ describe('materializeCommand', () => {
       { id: 'source', object: 'transaction', stamp: 300, user: 1 },
     ])
 
-    // Transport keeps the exact amount write: that upsert is what makes ZenMoney
+    // Transport keeps the exact amount write: that upsert is what makes Zenmoney
     // purge the row, while a `deletion` entry would only soft-delete it.
     const transport = materializePrimaryCommand(snapshot, command, 400)
     expect(transport.transaction).toEqual([

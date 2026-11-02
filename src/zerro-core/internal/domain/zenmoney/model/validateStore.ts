@@ -16,7 +16,7 @@ export type TDataStoreValidationResult =
  * Once both users and accounts exist, the server graph must have one root user,
  * one debt account, the references Zerro must dereference, and an acyclic
  * tag-parent relation. References come from the entity graph, which also names
- * the two ZenMoney-retained orphans that are canonical data rather than
+ * the two Zenmoney-retained orphans that are canonical data rather than
  * corruption.
  */
 export function validateDataStore(

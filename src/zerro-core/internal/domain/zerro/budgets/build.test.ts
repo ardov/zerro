@@ -4,7 +4,7 @@ import { EnvType, envId } from '../envelope-id'
 import { buildBudgets } from './build'
 
 describe('buildBudgets', () => {
-  it('uses hidden envelope budgets when ZenMoney budgets are not preferred', () => {
+  it('uses hidden envelope budgets when Zenmoney budgets are not preferred', () => {
     const tagId = envId.get(EnvType.Tag, 'food')
     const accountId = envId.get(EnvType.Account, 'safe')
 
@@ -33,7 +33,7 @@ describe('buildBudgets', () => {
     })
   })
 
-  it('uses ZenMoney tag budgets and skips hidden tag budgets when preferred', () => {
+  it('uses Zenmoney tag budgets and skips hidden tag budgets when preferred', () => {
     const tagId = envId.get(EnvType.Tag, 'food')
     const accountId = envId.get(EnvType.Account, 'safe')
 
@@ -67,7 +67,7 @@ describe('buildBudgets', () => {
     })
   })
 
-  it('maps ZenMoney null tag budgets to the uncategorized envelope', () => {
+  it('maps Zenmoney null tag budgets to the uncategorized envelope', () => {
     const nullTagId = envId.get(EnvType.Tag, null)
 
     expect(

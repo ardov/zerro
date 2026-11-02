@@ -30,7 +30,7 @@ export type TReminderInterval = TOpenEnum<(typeof reminderIntervals)[number]>
 export type TReminder = {
   id: TReminderId
 
-  /** Normalized timestamp in milliseconds. ZenMoney wire data uses seconds. */
+  /** Normalized timestamp in milliseconds. Zenmoney wire data uses seconds. */
   changed: TMsTime
 
   user: TUserId
@@ -82,7 +82,7 @@ export type TReminderWritableField = (typeof reminderWritableFields)[number]
 export type TReminderPatch = EntityPatch<TReminder, TReminderWritableField>
 
 export type TZmReminder = Omit<TReminder, 'changed'> & {
-  /** ZenMoney wire timestamp in seconds. */
+  /** Zenmoney wire timestamp in seconds. */
   changed: TUnixTime
 }
 

@@ -7,7 +7,7 @@
 
 [architecture.md](./architecture.md#materialization) defines the pipeline; this
 document defines its content: for every write, what Core predicts locally, what
-ZenMoney does on its own, and where the two deliberately differ.
+Zenmoney does on its own, and where the two deliberately differ.
 
 Three layers must stay distinct:
 
@@ -15,7 +15,7 @@ Three layers must stay distinct:
 | ---------------- | ---------------- | -------------- | ---------------------------------------- |
 | Primary intent   | command compiler | yes            | the persisted ordered operations         |
 | Predicted effect | materializer     | **no**         | local-only, so the UI is correct at once |
-| Canonical effect | ZenMoney         | n/a            | arrives in the diff, bypasses this layer |
+| Canonical effect | Zenmoney         | n/a            | arrives in the diff, bypasses this layer |
 
 Predicting an effect is a UI-latency decision, never a correctness one: the
 server recomputes everything it owns. So the rule for adding a prediction is
@@ -60,7 +60,7 @@ server-side, so ids are never reused.
 
 ## 2. Zeroed amounts purge the row
 
-ZenMoney stores transaction amounts with four decimals, and a row whose `income`
+Zenmoney stores transaction amounts with four decimals, and a row whose `income`
 and `outcome` both land on zero is purged: the write response carries a real
 `{ object: 'transaction', id, stamp, user }` tombstone and a follow-up
 `forceFetch` pull shows the transaction absent — not `deleted: true`, gone. The
@@ -186,7 +186,7 @@ and already invisible in local read models.
 Deleting a tag nulls `transaction.tag` on referencing transactions **and**
 removes the budget rows keyed to that tag. Single-tag income and outcome rows
 survive with `tag: null`, keeping their account balances unchanged. The matching
-budget row is removed rather than zeroed. ZenMoney budgets are
+budget row is removed rather than zeroed. Zenmoney budgets are
 identified by `(user, tag, date)` and have no id, so their removal is invisible
 in the deletion array.
 
@@ -245,7 +245,7 @@ soft-deleted transaction shapes.
   server stores. These belong in pre-flight validation and in the wire types,
   not in predicted state. Rule 2 predicts the one consequence of that snapping
   that is not cosmetic: a row that lands on zero on both sides stops existing.
-- Anything ZenMoney refuses outright (`income == outcome == 0`, dictionary
+- Anything Zenmoney refuses outright (`income == outcome == 0`, dictionary
   writes, a second debt account). Rejection is a validation concern. The first
   of those is the boundary of rule 2: the 400 is decided on the submitted
   numbers, before the rounding that rule 2 predicts.
@@ -262,5 +262,5 @@ Each rule lands as its own commit and must:
 2. cover batches, upsert creation, deletion, and repeated writes on one field;
 3. keep the predicted effect out of `buildOutboxTransport` output;
 4. leave `applyPatch` dumb and canonical diffs unmaterialized;
-5. compare against a real ZenMoney response where one exists — recording which
+5. compare against a real Zenmoney response where one exists — recording which
    response became the fixture.

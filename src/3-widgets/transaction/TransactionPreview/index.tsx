@@ -298,7 +298,7 @@ const TransactionEditor = ({
   )
 
   /** Types this transaction has nowhere to go: a transfer needs a second
-   * account, and a debt needs the account ZenMoney keeps them on. */
+   * account, and a debt needs the account Zenmoney keeps them on. */
   const unavailable = useMemo(
     () =>
       draftTypes.filter(type => {
@@ -715,7 +715,7 @@ const TransactionEditor = ({
 
 /** The fields `toDraft` reads, named rather than derived by excluding the two
  * that are known not to matter: an allowlist says what the form is editing,
- * and a field ZenMoney adds later cannot quietly join it. */
+ * and a field Zenmoney adds later cannot quietly join it. */
 const draftSourceFields = [
   'date',
   'created',

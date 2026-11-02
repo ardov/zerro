@@ -50,7 +50,7 @@ capabilities, not just fields currently exposed by the UI.
 
 Primary transport and local effects use separate replay paths. For example,
 zeroed transaction amounts may predict a local purge, but sending a deletion
-instead of those amounts would ask ZenMoney for a different operation.
+instead of those amounts would ask Zenmoney for a different operation.
 [Materialization](./materialization.md) owns the exact rules.
 
 Background sync is pull-only because acknowledging commands also removes their
@@ -65,7 +65,7 @@ reporting. This keeps protocol rules out of UI orchestration.
 
 The entity reference graph is shared by validation, backup compatibility,
 restore, and push sanitation. Read tolerance is separate from write validity:
-ZenMoney may retain orphaned budgets and reminder markers that cannot be
+Zenmoney may retain orphaned budgets and reminder markers that cannot be
 recreated. Cleanup order records server behavior rather than assuming every
 cascade is the reverse of an ordinary reference.
 
@@ -85,7 +85,7 @@ position. The current history and backup flows restore complete snapshots.
 Identity rules:
 
 - A live same-ID entity is updated in place. An absent backup ID is never
-  reused: ZenMoney tombstones are permanent.
+  reused: Zenmoney tombstones are permanent.
 - Other eligible entities may reuse one exact semantic match; otherwise they
   get fresh IDs, with dependent references remapped.
 - Accounts match only by ID. Reusing a resembling account would leave its old

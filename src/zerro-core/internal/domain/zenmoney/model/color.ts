@@ -1,4 +1,4 @@
-// ZenMoney persists entity colors as 24-bit RGB integers.
+// Zenmoney persists entity colors as 24-bit RGB integers.
 
 export function int2hex(int: number | null): string | null {
   if (typeof int !== 'number') return null

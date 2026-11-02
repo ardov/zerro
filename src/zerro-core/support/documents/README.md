@@ -1,6 +1,6 @@
 # Zerro Core
 
-Core turns ZenMoney data and local commands into the state Zerro displays. It
+Core turns Zenmoney data and local commands into the state Zerro displays. It
 owns domain rules and calculations; Redux owns the live replica, and browser
 adapters own HTTP and IndexedDB.
 
@@ -15,7 +15,7 @@ response, and a read through the code. The vocabulary is in
 | [Materialization](./materialization.md)                         | Exact predicted server effects and their evidence |
 | [Code map](./notes.md)                                          | Where to make a particular change                 |
 | [Testing](./testing.md)                                         | Required checks and useful test surfaces          |
-| [ZenMoney protocol](../../internal/domain/zenmoney/sync-api.md) | Observed wire behavior                            |
+| [Zenmoney protocol](../../internal/domain/zenmoney/sync-api.md) | Observed wire behavior                            |
 
 These documents describe the current implementation. Plans and open questions
 live in `private/work/` and `private/open-decisions.md`, which are not part of

@@ -1,4 +1,4 @@
-/** Category palette from ZenMoney App */
+/** Category palette from Zenmoney App */
 export const colors = [
   '#F35239',
   '#FB8D00',

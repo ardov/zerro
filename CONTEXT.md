@@ -1,6 +1,6 @@
 # Zerro Finance Replica
 
-Zerro maintains a local, undoable view of a user's ZenMoney data while keeping
+Zerro maintains a local, undoable view of a user's Zenmoney data while keeping
 the server's accepted state distinct from changes that have not been sent yet.
 
 ## Language
@@ -8,7 +8,7 @@ the server's accepted state distinct from changes that have not been sent yet.
 ### Replica
 
 **Canonical state**:
-The latest state accepted from ZenMoney, before any unsent local commands.
+The latest state accepted from Zenmoney, before any unsent local commands.
 _Avoid_: Server cache, raw data
 
 **Replica**:
@@ -44,7 +44,7 @@ transition.
 _Avoid_: Patch response, event
 
 **Outbox**:
-The ordered, durable commands applied locally but not yet accepted by ZenMoney.
+The ordered, durable commands applied locally but not yet accepted by Zenmoney.
 It is also the durable undo stack.
 _Avoid_: Local journal, pending patch
 

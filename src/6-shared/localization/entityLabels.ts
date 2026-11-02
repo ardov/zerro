@@ -6,7 +6,7 @@ import type { TChangeSummaryKey } from '@/zerro-core/replica'
  *
  * Shared so the backup confirmation and the change history name the same
  * things the same way — a user who reads "Операции 3" in one place should not
- * meet "Транзакции" in the other. A restore writes ZenMoney entities only, so
+ * meet "Транзакции" in the other. A restore writes Zenmoney entities only, so
  * it simply never matches the Zerro-side keys.
  */
 export const entityLabelKeys = [

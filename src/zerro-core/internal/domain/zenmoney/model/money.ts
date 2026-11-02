@@ -1,4 +1,4 @@
-// Currency-specific amounts are ZenMoney domain values. Generic rounding stays
+// Currency-specific amounts are Zenmoney domain values. Generic rounding stays
 // in foundation so this module has no reverse dependency.
 import { keys } from '../../foundation/keys'
 import { round } from '../../foundation/numbers'

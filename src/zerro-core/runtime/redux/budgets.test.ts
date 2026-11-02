@@ -63,7 +63,7 @@ function makeSeededStore() {
 const makeRootState = makeTestRootState
 
 describe('selectBudgets', () => {
-  it('exposes the raw ZenMoney budget slice separately', () => {
+  it('exposes the raw Zenmoney budget slice separately', () => {
     const { store } = makeSeededStore()
 
     expect(selectRaw(makeRootState(store))).toBe(store.budget)
@@ -76,11 +76,11 @@ describe('selectBudgets', () => {
     const core = selectBudgets(state)
     expect(core[MONTH][envId.get(EnvType.Tag, tagA)]).toBe(10_000)
     expect(core[NEXT_MONTH][envId.get(EnvType.Tag, tagB)]).toBe(5_000)
-    // ZenMoney tag budget is ignored while preferZmBudgets is off
+    // Zenmoney tag budget is ignored while preferZmBudgets is off
     expect(core[MONTH][envId.get(EnvType.Tag, tagB)]).toBeUndefined()
   })
 
-  it('uses ZenMoney tag budgets when preferZmBudgets is enabled', () => {
+  it('uses Zenmoney tag budgets when preferZmBudgets is enabled', () => {
     const { store, tagB } = makeSeededStore()
     const settingsPatch = materializeTestInput(
       store,
@@ -90,7 +90,7 @@ describe('selectBudgets', () => {
     const state = makeRootState(applyPatch(store, settingsPatch))
 
     const core = selectBudgets(state)
-    // ZenMoney tag budget wins for tag envelopes now
+    // Zenmoney tag budget wins for tag envelopes now
     expect(core[MONTH][envId.get(EnvType.Tag, tagB)]).toBe(7_000)
   })
 

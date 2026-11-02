@@ -2,7 +2,7 @@
  * Reading a full backup file back into the app.
  *
  * The file format is the export format, so nothing new is defined here: a
- * backup is a complete ZenMoney diff, and importing it means diffing the store
+ * backup is a complete Zenmoney diff, and importing it means diffing the store
  * it describes against the current one. The result is an ordinary command, so
  * the import lands in the outbox, is undoable, and is only sent on a manual
  * sync like any other change.

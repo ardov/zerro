@@ -257,7 +257,7 @@ describe('outbox operations', () => {
     expect(replayOutbox(base, [purge]).transaction).toEqual({})
 
     // The request still carries the exact amount write, which is what makes
-    // ZenMoney purge the verified row and answer with a real tombstone.
+    // Zenmoney purge the verified row and answer with a real tombstone.
     expect(buildOutboxTransport(base, [purge], 100)).toEqual({
       transaction: [
         {
@@ -302,7 +302,7 @@ describe('outbox operations', () => {
     ]
 
     // `new` never reached the server, so its tombstone stays local; `old` is a
-    // row ZenMoney already holds and must learn about the soft delete.
+    // row Zenmoney already holds and must learn about the soft delete.
     expect(buildOutboxTransport(base, commands, 100)).toEqual({
       transaction: [{ ...base.transaction.old, deleted: true, changed: 6000 }],
     })

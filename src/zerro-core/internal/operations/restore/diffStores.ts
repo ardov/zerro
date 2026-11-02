@@ -1,7 +1,7 @@
 /**
  * Store-to-store reconciliation for restore and backup import.
  *
- * Restore cannot create under an absent backup id: ZenMoney hard-deletion
+ * Restore cannot create under an absent backup id: Zenmoney hard-deletion
  * tombstones are permanent and this replica does not retain enough history to
  * prove an id is safe to reuse. The planner therefore reconciles desired rows
  * to live current rows first, then allocates a new id only where necessary.
@@ -104,7 +104,7 @@ const entityDefinitions: Record<TIntentEntityKey, TEntityDefinition> = {
     writableFields: accountWritableFields,
     removal: 'deletion',
     skip: row => row.type === AccountType.Debt,
-    // ZenMoney's debt account is a protected singleton: deletion is a server
+    // Zenmoney's debt account is a protected singleton: deletion is a server
     // no-op, so predicting its removal would make current lie until sync.
     skipRemoval: row => row.type === AccountType.Debt,
     generatedId: true,
@@ -376,7 +376,7 @@ export function buildRestorePlan(
 }
 
 /**
- * Canonical ZenMoney snapshots may retain historical dependants after their
+ * Canonical Zenmoney snapshots may retain historical dependants after their
  * owner disappeared. They are valid to read but cannot be recreated through
  * the write API, so the entity graph's write rules decide what a restore
  * target may contain: required-owner orphans are dropped, and references that
@@ -496,7 +496,7 @@ function remapEntity(
 }
 
 /**
- * Rewrites Zerro-owned payload keys after their ZenMoney entities receive new
+ * Rewrites Zerro-owned payload keys after their Zenmoney entities receive new
  * ids. Unknown and unreadable comments remain untouched: the reminder is
  * still part of the backup even if this version cannot interpret its payload.
  */

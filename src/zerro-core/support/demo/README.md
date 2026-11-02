@@ -1,6 +1,6 @@
 # Zerro Core Demo Data
 
-This optional Zerro Core module owns deterministic public demo data. It describes what a realistic normalized ZenMoney/Zerro snapshot can look like without using private account data.
+This optional Zerro Core module owns deterministic public demo data. It describes what a realistic normalized Zenmoney/Zerro snapshot can look like without using private account data.
 
 ## Creating demo data is needed for:
 

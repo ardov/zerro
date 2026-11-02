@@ -136,7 +136,7 @@ export function applyIntentPatch(
     intents.forEach(intent => {
       map[intent.id] = { ...map[intent.id], ...intent }
     })
-    // @ts-expect-error Dynamic ZenMoney entity access.
+    // @ts-expect-error Dynamic Zenmoney entity access.
     next[key] = map
   })
 
@@ -145,7 +145,7 @@ export function applyIntentPatch(
       next[object as Exclude<keyof TDataStore, 'serverTimestamp'>]
     const map = { ...entities } as Record<string | number, object>
     delete map[id]
-    // @ts-expect-error Dynamic ZenMoney entity access.
+    // @ts-expect-error Dynamic Zenmoney entity access.
     next[object] = map
   })
 

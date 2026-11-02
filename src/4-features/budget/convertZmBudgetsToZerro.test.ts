@@ -18,7 +18,7 @@ vi.mock('@/zerro-core/redux', () => ({
 }))
 
 describe('convertZmBudgetsToZerro', () => {
-  it('reads ZenMoney budgets and writes converted updates through Core', () => {
+  it('reads Zenmoney budgets and writes converted updates through Core', () => {
     const state = {} as RootState
     const action = { type: 'budget/set' }
     const dispatch = vi.fn()

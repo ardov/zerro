@@ -86,7 +86,7 @@ function makeSnapshot(
   })
 }
 
-/** The same file `exportJSON` writes: a full store as a ZenMoney diff. */
+/** The same file `exportJSON` writes: a full store as a Zenmoney diff. */
 function toBackupFile(store: TDataStore): string {
   const patch: TNormalizedPatch = { serverTimestamp: store.serverTimestamp }
   const target = patch as Record<string, unknown>
@@ -228,7 +228,7 @@ describe('parseFullBackup', () => {
     expect(parsed.store.account.future.type).toBe('future-type')
   })
 
-  it('warns about orphaned budgets and markers retained by ZenMoney', () => {
+  it('warns about orphaned budgets and markers retained by Zenmoney', () => {
     const parsed = parseFullBackup(
       toBackupFile(
         makeSnapshot({
@@ -493,7 +493,7 @@ describe('importBackup', () => {
     expect(restored.transaction.later.deleted).toBe(true)
   })
 
-  it('restores and re-exports the observed ZenMoney wire variants', () => {
+  it('restores and re-exports the observed Zenmoney wire variants', () => {
     const current = makeSnapshot({
       account: { acc: makeAccount({ id: 'acc', title: 'Cash' }) },
       reminder: {

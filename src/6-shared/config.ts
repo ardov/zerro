@@ -1,4 +1,4 @@
-// Parameters for ZenMoney requests
+// Parameters for Zenmoney requests
 export const clientId = import.meta.env.REACT_APP_CLIENT_ID as string
 export const clientSecret = import.meta.env.REACT_APP_CLIENT_SECRET as string
 export const redirectUri = import.meta.env.REACT_APP_REDIRECT_URI as string

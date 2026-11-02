@@ -15,7 +15,7 @@ const unknownBankModules = import.meta.glob<string>(
 )
 
 /**
- * ZenMoney bank icon ID to its original-color asset.
+ * Zenmoney bank icon ID to its original-color asset.
  *
  * AccountIcon resolves account.company directly against this catalog.
  * Keep bank artwork separate from monochrome category assets.
@@ -23,7 +23,7 @@ const unknownBankModules = import.meta.glob<string>(
 export const bankIconById = Object.fromEntries(
   Object.entries(bankModules).map(([path, url]) => {
     const match = /ic_bank_(\d+)_54px\.svg$/.exec(path)
-    if (!match) throw new Error(`Unexpected ZenMoney bank asset: ${path}`)
+    if (!match) throw new Error(`Unexpected Zenmoney bank asset: ${path}`)
     return [match[1], url]
   })
 ) as Partial<Record<string, string>>
@@ -32,7 +32,7 @@ export const bankIconById = Object.fromEntries(
 export const unknownBankIconBySize = Object.fromEntries(
   Object.entries(unknownBankModules).map(([path, url]) => {
     const match = /ic_unknown_bank_(\d+)px\.svg$/.exec(path)
-    if (!match) throw new Error(`Unexpected ZenMoney bank fallback: ${path}`)
+    if (!match) throw new Error(`Unexpected Zenmoney bank fallback: ${path}`)
     return [match[1], url]
   })
 ) as Record<string, string>

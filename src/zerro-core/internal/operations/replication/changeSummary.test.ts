@@ -108,7 +108,7 @@ describe('change summary', () => {
     const transition = compactCanonicalTransition(before, after)
 
     // Budgets and goals are Zerro's own state; only the third row is the
-    // ZenMoney concept a user would call a reminder.
+    // Zenmoney concept a user would call a reminder.
     expect(summarizeCanonicalTransition(transition!)).toEqual({
       'envelope-budget': { changed: 1, removed: 0 },
       goal: { changed: 1, removed: 0 },

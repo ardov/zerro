@@ -178,7 +178,7 @@ export function getMaterializedOutboxPatches(
  *
  * An entity born and buried inside the same prefix never reaches the server:
  * the replay starts from `base`, so an id missing there is one the server has
- * never seen, and sending its final state would ask ZenMoney to store a row
+ * never seen, and sending its final state would ask Zenmoney to store a row
  * whose only purpose is to be dead. Both shapes of burial are dropped — the
  * soft delete of transactions, which is `deleted: true` on the entity itself,
  * and the real deletion of reminders, which is a `deletion` object.

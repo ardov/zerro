@@ -18,7 +18,7 @@ export type TAccountPopulated = TAccount & {
   fxCode: TFxCode
 }
 
-/** Zerro's UI account projection; ZenMoney entities remain policy-free. */
+/** Zerro's UI account projection; Zenmoney entities remain policy-free. */
 export function getPopulatedAccounts(
   accounts: ById<TAccount>,
   instrumentCodeById: Record<TInstrumentId, TFxCode>

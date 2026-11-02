@@ -43,7 +43,7 @@ export type TZmTransaction = {
   originalPayee: string | null
   comment: string | null
   date: TISODate
-  /** ZenMoney may omit the field instead of returning `null`. */
+  /** Zenmoney may omit the field instead of returning `null`. */
   mcc?: number | null
   reminderMarker: TReminderMarkerId | null
   opIncome: TUnits | null
@@ -55,10 +55,10 @@ export type TZmTransaction = {
 }
 
 export type TTransaction = Omit<TZmTransaction, 'changed' | 'created'> & {
-  /** Normalized timestamp in milliseconds. ZenMoney wire data uses seconds. */
+  /** Normalized timestamp in milliseconds. Zenmoney wire data uses seconds. */
   changed: TMsTime
 
-  /** Normalized timestamp in milliseconds. ZenMoney wire data uses seconds. */
+  /** Normalized timestamp in milliseconds. Zenmoney wire data uses seconds. */
   created: TMsTime
 }
 

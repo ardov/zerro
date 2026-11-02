@@ -1,5 +1,5 @@
 /**
- * The reference graph between ZenMoney entities: who points at whom, whether
+ * The reference graph between Zenmoney entities: who points at whom, whether
  * the pointer may be empty, and what a reader and a writer each do when it
  * dangles.
  *
@@ -45,7 +45,7 @@ export type TEntityReference = {
 }
 
 /**
- * `read: 'tolerate'` marks the two places where ZenMoney keeps a row after its
+ * `read: 'tolerate'` marks the two places where Zenmoney keeps a row after its
  * owner is gone. Those rows are canonical to read and impossible to write, so
  * every write path prunes them and the import seam reports them.
  */
@@ -333,7 +333,7 @@ export type TRowPresence = (key: TDataEntityKey, id: unknown) => boolean
 
 /**
  * Whether a write may contain this row at all. Only `write: 'prune'` decides
- * that: those are the references ZenMoney leaves dangling in a snapshot and
+ * that: those are the references Zenmoney leaves dangling in a snapshot and
  * refuses to recreate, so the row has to go. A dangling `reject` reference is
  * corruption the reader already refused, not something to drop silently here.
  */

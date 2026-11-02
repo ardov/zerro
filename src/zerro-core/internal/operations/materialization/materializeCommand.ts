@@ -323,14 +323,14 @@ function withPredictedEffects(
 }
 
 /**
- * Rule 2: a write that leaves both amounts stored as zero makes ZenMoney purge
+ * Rule 2: a write that leaves both amounts stored as zero makes Zenmoney purge
  * the row and answer with a real tombstone rather than an updated entity.
  * Predicting the removal keeps `current` identical to the state the next
  * canonical diff will confirm.
  *
  * The primary patch still carries the amount write, because that is what
  * triggers the server-side purge. A `deletion` entry would not:
- * ZenMoney converts a direct transaction deletion into a soft delete instead.
+ * Zenmoney converts a direct transaction deletion into a soft delete instead.
  */
 function withPurgedTransactions(
   snapshot: TDataStore,
@@ -363,7 +363,7 @@ function withPurgedTransactions(
 }
 
 /**
- * ZenMoney stores amounts with four decimals, so anything below half of the
+ * Zenmoney stores amounts with four decimals, so anything below half of the
  * last place is stored as `0`. A row whose income and outcome are both stored
  * as `0` is purged — on a create as much as on a rewrite, and for any
  * combination of accounts.
@@ -592,7 +592,7 @@ function patchIsApplied(
 }
 
 function nextChanged(changedAt: number, currentChanged = 0): number {
-  // ZenMoney compares second-resolution entity versions strictly.
+  // Zenmoney compares second-resolution entity versions strictly.
   return Math.max(changedAt, currentChanged + 1000)
 }
 

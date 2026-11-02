@@ -15,7 +15,7 @@ export type TTag = {
   /** Root user ID. */
   user: TUserId
 
-  /** Normalized timestamp in milliseconds. ZenMoney wire data uses seconds. */
+  /** Normalized timestamp in milliseconds. Zenmoney wire data uses seconds. */
   changed: TMsTime
 
   /** Icon name. */
@@ -32,7 +32,7 @@ export type TTag = {
   parent: TTagId | null
   color: number | null
 
-  /** Used to be used in ZenMoney analytics */
+  /** Used to be used in Zenmoney analytics */
   required: boolean | null
   /** Deprecated field */
   staticId: string | null
@@ -63,7 +63,7 @@ export type TTagPatch = EntityPatch<TTag, TTagWritableField>
 export type TTagIntent = { tag: TTagPatch[] }
 
 export type TZmTag = Omit<TTag, 'changed'> & {
-  /** ZenMoney wire timestamp in seconds. */
+  /** Zenmoney wire timestamp in seconds. */
   changed: TUnixTime
 }
 

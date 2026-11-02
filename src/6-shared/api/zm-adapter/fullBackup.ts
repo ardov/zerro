@@ -2,7 +2,7 @@
  * Decode the complete file produced by Zerro's JSON exporter.
  *
  * This is a protocol adapter: it validates untrusted wire JSON, converts it
- * through the shared ZenMoney codec, then returns a normalized Core snapshot.
+ * through the shared Zenmoney codec, then returns a normalized Core snapshot.
  * Structural rules that are about the data rather than the file — references,
  * tag cycles, cardinalities — belong to the store validator, which every
  * other source of a snapshot passes through as well.
@@ -152,7 +152,7 @@ function unknownValueWarnings(backup: TFullBackupWire): TFullBackupWarning[] {
   return warnings
 }
 
-/** Rows ZenMoney kept after their owner was deleted — see the entity graph. */
+/** Rows Zenmoney kept after their owner was deleted — see the entity graph. */
 function danglingReferenceWarnings(store: TDataStore): TFullBackupWarning[] {
   const counts = new Map<string, number>()
   eachReferenceIssue(store, issue => {

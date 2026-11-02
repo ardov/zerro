@@ -320,7 +320,7 @@ function predictMerchantDeletion(
   const requestedMerchants = getDeletedMerchants(snapshot, patch)
   if (!requestedMerchants.size) return patch
 
-  // ZenMoney silently leaves a merchant in place while an active debt row
+  // Zenmoney silently leaves a merchant in place while an active debt row
   // references it. Keep local current canonical by withholding only that
   // predicted deletion; transport still receives the user's primary command.
   const debtBlockedMerchants = getDebtBlockedMerchants(snapshot, patch)

@@ -587,7 +587,7 @@ export const en: typeof ru = {
   history: {
     panelTitle: 'Change history',
     noHistory: 'No history yet',
-    noHistoryHint: 'Changes you make and updates from ZenMoney appear here.',
+    noHistoryHint: 'Changes you make and updates from Zenmoney appear here.',
     historyLoading: 'Loading history…',
     loadOlder: 'Load older',
     sectionLocal: 'Not sent',

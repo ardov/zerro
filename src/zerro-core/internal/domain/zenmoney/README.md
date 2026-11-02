@@ -1,6 +1,6 @@
-# ZenMoney domain
+# Zenmoney domain
 
-This module owns normalized ZenMoney entities, their factories and command
+This module owns normalized Zenmoney entities, their factories and command
 compilers, and reads over accounts and transaction history. Zerro-specific
 budgets, envelopes, hidden data, and FX live in the adjacent `zerro/` domain.
 
@@ -33,7 +33,7 @@ Merchant MCC can be changed or cleared with `null`.
 
 Entity reads expose maps and domain facts. Currency conversion, localized
 labels, pinned-account conventions, and the hidden Zerro data account belong
-outside this module. ZenMoney tag budgets are separate from Zerro envelope
+outside this module. Zenmoney tag budgets are separate from Zerro envelope
 budgets stored in hidden data.
 
 Compilers produce sparse intent. They do not update balances or discover

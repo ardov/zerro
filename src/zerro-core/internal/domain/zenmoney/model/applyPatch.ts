@@ -12,7 +12,7 @@ export function applyPatch(
   // cloning all maps here would invalidate every calculation on any change.
   const next: TDataStore = { ...base }
   touchedEntityKeys(patch).forEach(key => {
-    // @ts-expect-error Dynamic ZenMoney entity access.
+    // @ts-expect-error Dynamic Zenmoney entity access.
     next[key] = { ...base[key] }
   })
   applyPatchMutable(next, patch)
@@ -44,7 +44,7 @@ export function applyPatchMutable(
   patch.deletion?.forEach(obj => {
     try {
       // TODO: replace with typed entity-map access when core owns data types.
-      // @ts-expect-error Dynamic ZenMoney entity access.
+      // @ts-expect-error Dynamic Zenmoney entity access.
       delete store[obj.object][obj.id]
     } catch (error) {
       console.error('Error deleting object', error, obj)
@@ -66,7 +66,7 @@ export function applyPatchMutable(
     patch[key].forEach(el => {
       try {
         // TODO: replace with typed entity-map access when core owns data types.
-        // @ts-expect-error Dynamic ZenMoney entity access.
+        // @ts-expect-error Dynamic Zenmoney entity access.
         store[key][el.id] = { ...store[key][el.id], ...el }
       } catch (error) {
         console.error('Error adding object', error, el)

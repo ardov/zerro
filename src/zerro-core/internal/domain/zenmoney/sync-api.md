@@ -1,4 +1,4 @@
-# ZenMoney sync contract
+# Zenmoney sync contract
 
 This reference describes the synchronization rules used by Zerro and the
 wire fields handled by its adapter.

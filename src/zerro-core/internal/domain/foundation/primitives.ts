@@ -1,4 +1,4 @@
-/** Timestamp from ZenMoney wire data, measured in seconds. */
+/** Timestamp from Zenmoney wire data, measured in seconds. */
 export type TUnixTime = number
 
 /** Timestamp in normalized Core data, measured in milliseconds. */

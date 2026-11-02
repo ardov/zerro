@@ -1,5 +1,5 @@
 /**
- * Runtime contracts for ZenMoney's wire representation.
+ * Runtime contracts for Zenmoney's wire representation.
  *
  * The adapter owns untrusted JSON at the protocol boundary. Normalized Core
  * entities remain type-only contracts after conversion.
@@ -26,7 +26,7 @@ const numberArray = z.array(z.number())
 const isoDate = z.string().refine(isISODate, 'Expected a calendar ISO date')
 
 /**
- * Discriminators ZenMoney owns, by the wire path that carries them. Unknown
+ * Discriminators Zenmoney owns, by the wire path that carries them. Unknown
  * values parse — a complete backup has to stay importable when the server
  * learns a new account type — so this table is both what the schema accepts
  * with a known meaning and what the import seam reports against.
@@ -295,7 +295,7 @@ const deletionWireSchema = z
   .strict()
 
 /**
- * Every entity collection a ZenMoney payload can carry, in dependency order.
+ * Every entity collection a Zenmoney payload can carry, in dependency order.
  * Individual schemas stay private on purpose: a consumer that needs one of
  * them needs the set.
  * The diff schema, the full-backup schema and the import warnings all read
@@ -344,7 +344,7 @@ export const zenMoneyDiffWireSchema = z
 /** A complete exported snapshot: every collection present, no deletions. */
 export const fullBackupCollectionsShape = collections(schema => z.array(schema))
 
-export type TZenMoneyWireDiff = z.output<typeof zenMoneyDiffWireSchema>
+export type TZenmoneyWireDiff = z.output<typeof zenMoneyDiffWireSchema>
 
 function isISODate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false

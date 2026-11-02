@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { bankIconById, unknownBankIconBySize } from './bankIcons'
 import { categoryIconById, noCategoryIconUrl } from './index'
 
-describe('ZenMoney asset catalog', () => {
+describe('Zenmoney asset catalog', () => {
   it('exposes every extracted category by its full tag.icon name', () => {
     expect(Object.keys(categoryIconById)).toHaveLength(167)
     expect(categoryIconById['3004_motorcycle']).toBeTruthy()

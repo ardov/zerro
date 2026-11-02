@@ -10,7 +10,7 @@ import {
 } from '../../domain/zenmoney'
 
 /**
- * Materializer rule 3: ZenMoney ignores a client-submitted `account.balance`
+ * Materializer rule 3: Zenmoney ignores a client-submitted `account.balance`
  * and recomputes it as
  * `getAccStartBalance(account) + sum(income) - sum(outcome)`.
  *

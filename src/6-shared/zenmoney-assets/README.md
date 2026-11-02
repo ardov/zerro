@@ -1,11 +1,11 @@
-# ZenMoney-derived assets
+# Zenmoney-derived assets
 
 This directory contains Zenmoney category artwork and bank logos, kept
 separate from application-owned artwork.
 
 ## Contents
 
-- `categories/` — 167 category icons indexed by the full ZenMoney `tag.icon`
+- `categories/` — 167 category icons indexed by the full Zenmoney `tag.icon`
   value (for example, `3004_taxi`), plus the uncategorized fallback.
 - `banks/` — 432 numbered bank icons indexed by Zenmoney bank icon ID, plus
   three `unknown bank` fallbacks indexed by native size.
@@ -24,7 +24,7 @@ Lookup needs no network request to the company directory and no name matching.
 
 ## Rights and provenance
 
-The category artwork is owned by ZenMoney. Bank logos and trademarks belong to
+The category artwork is owned by Zenmoney. Bank logos and trademarks belong to
 their respective rights holders. These files are not original Zerro artwork.
-They are included with permission from ZenMoney; do not copy, redistribute, or
+They are included with permission from Zenmoney; do not copy, redistribute, or
 reuse them outside the scope of that permission.

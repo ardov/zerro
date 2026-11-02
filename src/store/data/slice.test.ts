@@ -265,7 +265,7 @@ describe('command outbox boundaries', () => {
     expect(accepted.current.transaction['tr-1'].viewed).toBe(false)
   })
 
-  it('acknowledges an empty comment canonicalized by ZenMoney to null', () => {
+  it('acknowledges an empty comment canonicalized by Zenmoney to null', () => {
     const base = applyServerPatch(undefined, {
       transaction: [makeTransaction({ id: 'tr-1', comment: 'Before' })],
     })

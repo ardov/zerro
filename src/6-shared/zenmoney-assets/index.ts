@@ -15,7 +15,7 @@ const noCategoryModules = import.meta.glob<string>(
   }
 )
 
-/** ZenMoney `tag.icon` name to its monochrome category asset. */
+/** Zenmoney `tag.icon` name to its monochrome category asset. */
 export const categoryIconById = createCategoryIconMap(categoryModules)
 
 /** Fallback used for the synthetic uncategorized tag. */

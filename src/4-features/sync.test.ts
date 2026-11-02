@@ -61,7 +61,7 @@ describe('syncData', () => {
     syncMock.mockClear()
   })
 
-  it('acknowledges enabling and disabling ZenMoney budgets back to the stored value', async () => {
+  it('acknowledges enabling and disabling Zenmoney budgets back to the stored value', async () => {
     const store = makeSyncedStore()
     store.dispatch(
       applyServerPatch({
