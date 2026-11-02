@@ -162,7 +162,7 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
     const colorId = 'gradient' + acc.id.replace(/[^a-zA-Z0-9]/g, '')
 
     return (
-      <div className="rounded-lg bg-card text-card-foreground shadow-elevation-1 relative mb-2 overflow-hidden">
+      <div className="layout-panel rounded-smooth relative mb-2 overflow-hidden">
         <div className="relative z-[1] min-w-40 pointer-events-none p-4">
           <p className="m-0 text-body-sm">
             <span

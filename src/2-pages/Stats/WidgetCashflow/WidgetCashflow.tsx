@@ -54,7 +54,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
   const colorAxisText = 'var(--disabled-foreground)'
 
   return (
-    <div className="rounded-lg bg-card text-card-foreground shadow-elevation-1">
+    <div className="layout-panel rounded-smooth">
       <div className="min-w-full p-4">
         <h2 className="m-0 text-title-lg">
           {t('incomesAndOutcomes')}{' '}
