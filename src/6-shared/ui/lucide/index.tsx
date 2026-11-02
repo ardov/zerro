@@ -31,6 +31,7 @@ import {
   ChevronRight,
   CircleCheck,
   CircleQuestionMark,
+  Copy,
   CornerUpLeft,
   CornerUpRight,
   CreditCard,
@@ -101,6 +102,7 @@ export const CloseIcon = createIcon(X, 'CloseIcon')
 export const SearchIcon = createIcon(Search, 'SearchIcon')
 export const AddIcon = createIcon(Plus, 'AddIcon')
 export const EditIcon = createIcon(Pencil, 'EditIcon')
+export const CopyIcon = createIcon(Copy, 'CopyIcon')
 export const DeleteIcon = createIcon(Trash2, 'DeleteIcon')
 /** Puts back what was deleted. The name is the one the application already
  * used; the drawing is no longer a bin, because the counter-clockwise arrow

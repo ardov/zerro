@@ -176,6 +176,7 @@ export const en: typeof ru = {
   },
 
   transactionContextMenu: {
+    copy: 'Copy',
     filterMerchant: 'Filter by “{{name}}”',
     searchPayee: 'Search for “{{name}}”',
     selectSimilar: 'Select others from this sync',

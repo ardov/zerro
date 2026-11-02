@@ -493,6 +493,98 @@ describe('draftIssues', () => {
 })
 
 describe('toCreateInput', () => {
+  it.each([
+    {
+      kind: 'expense',
+      income: 0,
+      outcome: 100,
+      incomeAccount: 'card',
+      outcomeAccount: 'card',
+    },
+    {
+      kind: 'income',
+      income: 100,
+      outcome: 0,
+      incomeAccount: 'card',
+      outcomeAccount: 'card',
+    },
+    {
+      kind: 'lent',
+      income: 100,
+      outcome: 100,
+      incomeAccount: 'debt',
+      outcomeAccount: 'card',
+    },
+    {
+      kind: 'borrowed',
+      income: 100,
+      outcome: 100,
+      incomeAccount: 'card',
+      outcomeAccount: 'debt',
+    },
+    {
+      kind: 'transfer',
+      income: 4,
+      outcome: 100,
+      incomeAccount: 'euro',
+      outcomeAccount: 'card',
+    },
+  ])('copies only form fields from a $kind', ({ kind, ...legs }) => {
+    const source = makeTransaction({
+      ...expense,
+      ...legs,
+      incomeInstrument: kind === 'transfer' ? 2 : 1,
+      merchant: 'shop',
+      payee: 'Shop',
+      comment: 'Keep this comment',
+      deleted: true,
+      viewed: false,
+      hold: true,
+      source: 'bank',
+      incomeBankID: 'bank-in',
+      outcomeBankID: 'bank-out',
+      originalPayee: 'BANK SHOP',
+      qrCode: 'receipt',
+      latitude: 50,
+      longitude: 14,
+      mcc: 5411,
+      reminderMarker: 'reminder',
+      opOutcome: 4,
+      opOutcomeInstrument: 2,
+    })
+    const draft = toDraft(source, ctx)
+    const details = {
+      date: '2026-01-10',
+      createdAt: +new Date(2026, 0, 10, 18, 56),
+      comment: 'Keep this comment',
+    }
+    expect(toCreateInput(draft, ctx, Date.now())).toEqual(
+      kind === 'transfer'
+        ? {
+            type: 'transfer',
+            input: {
+              ...details,
+              fromAccountId: 'card',
+              toAccountId: 'euro',
+              sent: 100,
+              received: 4,
+            },
+          }
+        : {
+            type: 'posting',
+            input: {
+              ...details,
+              kind,
+              accountId: 'card',
+              amount: 100,
+              ...(['expense', 'income'].includes(kind) && { tagIds: ['food'] }),
+              merchant: { id: 'shop' },
+              payee: 'Shop',
+            },
+          }
+    )
+  })
+
   it('builds a posting with its one-account metadata', () => {
     const now = +new Date(2026, 4, 17, 14, 30)
     const draft = setDraftMerchant(

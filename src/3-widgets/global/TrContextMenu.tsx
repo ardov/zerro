@@ -6,11 +6,12 @@ import {
 } from '@/6-shared/ui/kit/Menu'
 import type { TTransaction, TTransactionId } from '@/6-shared/types'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { useAsked } from '@/6-shared/overlays'
+import { useAsk, useAsked } from '@/6-shared/overlays'
 import { track } from '@/6-shared/analytics'
 import { core } from '@/zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
+import { TransactionCopy } from '../transaction/TransactionPreview'
 
 export type TransactionMenuProps = {
   id: TTransactionId
@@ -34,6 +35,7 @@ export const TransactionMenu: FC<TransactionMenuProps> = props => {
   } = props
   const { t } = useTranslation('transactionContextMenu')
   const { controller } = useAsked<void>()
+  const ask = useAsk()
   const dispatch = useAppDispatch()
   const transaction = useAppSelector(
     state => core.transactions.selectAll(state)[id]
@@ -42,6 +44,11 @@ export const TransactionMenu: FC<TransactionMenuProps> = props => {
   const merchants = core.merchants.useAll()
   const items: MenuItem[] = []
   if (transaction) {
+    items.push({
+      id: 'copy',
+      label: t('copy'),
+      onSelect: () => ask(<TransactionCopy transaction={transaction} />),
+    })
     const merchant = transaction.merchant && merchants[transaction.merchant]
     if (merchant && onFilterMerchant) {
       items.push({

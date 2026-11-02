@@ -423,6 +423,13 @@ closing discards that invalid draft. Stable screen owners finish valid active
 input on close or selection change. New transactions retain explicit creation.
 Other application editors may still use legacy surfaces.
 
+Copy in transaction actions and the row context menu opens a fresh creation
+Popup. It seeds the editor through `toDraft` and saves through `toCreateInput`,
+so only form fields carry over, including the selected date and time. Provider
+metadata, receipt, location and lifecycle flags stay with the source. Opening
+or dismissing the Popup writes nothing; creation requires explicit submission,
+and another Copy starts from the source again.
+
 `Confirm` is passed to `useAsk<boolean>()`. Explicit confirmation answers `true`;
 all dismissals answer `undefined`. `intent="danger"` uses AlertDialog semantics,
 a destructive action and initial focus on Cancel. Ordinary confirmation initially

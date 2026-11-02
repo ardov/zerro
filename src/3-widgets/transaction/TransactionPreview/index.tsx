@@ -14,6 +14,7 @@ import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useShake } from '@/6-shared/ui/useShake'
 import type { SurfaceController } from '@/6-shared/overlays'
+import { useAsk, useAsked } from '@/6-shared/overlays'
 import { FieldAddon } from '@/6-shared/ui/kit/Field'
 import { Textarea } from '@/6-shared/ui/kit/Textarea'
 import {
@@ -138,20 +139,41 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
 export const TransactionCreate = ({
   popup,
   query,
+  copyFrom,
   onCreated,
 }: {
   popup: SurfaceController
-  query: core.transactions.TTransactionQuery
   onCreated: () => void
-}) => (
+} & (
+  | { query: core.transactions.TTransactionQuery; copyFrom?: never }
+  | { copyFrom: TTransaction; query?: never }
+)) => (
   <TransactionEditor
     onClose={() => popup.setOpen(false)}
     onOpenOther={() => {}}
     createQuery={query}
+    createFrom={copyFrom}
     createPopup={popup}
     onCreated={onCreated}
   />
 )
+
+/** A fresh creation popup per request. The source is only a snapshot for
+ * `toDraft`; it never becomes the entity being edited or a creation payload. */
+export function TransactionCopy({
+  transaction,
+}: {
+  transaction: TTransaction
+}) {
+  const { controller, answer } = useAsked<void>()
+  return (
+    <TransactionCreate
+      popup={controller}
+      copyFrom={transaction}
+      onCreated={answer}
+    />
+  )
+}
 
 const TransactionEditor = ({
   tr,
@@ -161,6 +183,7 @@ const TransactionEditor = ({
   onPendingEdit,
   onOpenCounterparty,
   createQuery,
+  createFrom,
   createPopup,
   onCreated,
 }: {
@@ -171,10 +194,12 @@ const TransactionEditor = ({
   onPendingEdit?: TPendingEdit
   onOpenCounterparty?: TransactionPreviewProps['onOpenCounterparty']
   createQuery?: core.transactions.TTransactionQuery
+  createFrom?: TTransaction
   createPopup?: SurfaceController
   onCreated?: () => void
 }) => {
   const store = useStore<RootState>()
+  const ask = useAsk()
   const narrow = useBottomSheetLayout()
   const id = tr?.id ?? ''
   const { t } = useTranslation('transaction')
@@ -221,6 +246,7 @@ const TransactionEditor = ({
 
   const [storedDraft, setDraft] = useState(() => {
     if (tr) return toDraft(tr, ctx)
+    if (createFrom) return toDraft(createFrom, ctx)
 
     const defaults = createQuery ? createDefaultsFromQuery(createQuery) : {}
     const lastAccount = loadLastTransactionAccount()
@@ -414,6 +440,7 @@ const TransactionEditor = ({
           <ActionsMenu
             deleted={tr.deleted}
             viewed={core.transactions.isViewed(tr)}
+            onCopy={() => ask(<TransactionCopy transaction={tr} />)}
             counterparty={
               onOpenCounterparty && counterparty
                 ? {

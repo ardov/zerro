@@ -169,6 +169,7 @@
   },
 
   "transactionContextMenu": {
+    "copy": "Копировать",
     "filterMerchant": "Фильтровать по «{{name}}»",
     "searchPayee": "Искать «{{name}}»",
     "selectSimilar": "Выбрать другие из этой синхронизации",

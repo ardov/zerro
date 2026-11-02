@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import { Menu, type MenuItem } from '@/6-shared/ui/kit/Menu'
 import {
+  CopyIcon,
   DeleteIcon,
   MoreVertIcon,
   RestoreFromTrashIcon,
@@ -10,6 +11,7 @@ import {
 } from '@/6-shared/ui/Icons'
 
 export type TransactionActions = {
+  onCopy: () => void
   onDelete: () => void
   onRestore: () => void
   onSetViewed: (viewed: boolean) => void
@@ -24,6 +26,7 @@ export function ActionsMenu(
   const {
     deleted,
     viewed,
+    onCopy,
     onDelete,
     onRestore,
     onSetViewed,
@@ -31,7 +34,14 @@ export function ActionsMenu(
     counterparty,
   } = props
   const { t } = useTranslation(['transaction', 'transactionContextMenu'])
-  const items: MenuItem[] = []
+  const items: MenuItem[] = [
+    {
+      id: 'copy',
+      start: <CopyIcon />,
+      label: t('transactionContextMenu:copy'),
+      onSelect: onCopy,
+    },
+  ]
   if (counterparty)
     items.push({
       id: 'counterparty',
