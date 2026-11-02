@@ -15,10 +15,12 @@ const rowHeight = 40
 const angle = (36 * Math.PI) / 180
 const cosAngle = Math.cos(angle)
 const sinAngle = Math.sin(angle)
-const brightnessLight = 16
-const brightnessDark = 10
+const darkValue = 0
+const darkFlash = 36
+const lightValue = 255
+const lightFlash = 232
 const speed = -3.5
-const speedSpread = 1.5
+const speedSpread = 3
 const glitchRate = 12
 const glitchDuration = 0.6
 const pool = [...new Set(Object.values(symbols).flat())]
@@ -27,6 +29,13 @@ const pick = <T>(values: readonly T[]): T =>
   values[Math.floor(Math.random() * values.length)]
 const modulo = (value: number, length: number) =>
   ((value % length) + length) % length
+
+const getColor = (mode: ColorScheme, flash: boolean) => {
+  if (mode === 'dark') {
+    return flash ? darkFlash : darkValue
+  }
+  return flash ? lightFlash : lightValue
+}
 
 function shuffledWords() {
   const result = [...words]
@@ -105,10 +114,8 @@ export function startCurrencyBackground(
   function paintCell(row: Row, index: number, glyph: string, flash = false) {
     const g = row.context
     g.clearRect(index * cellWidth, 0, cellWidth, rowHeight)
-    const brightness = mode === 'dark' ? brightnessDark : brightnessLight
-    const contrast = flash ? brightness * 2.2 : brightness
-    const value = mode === 'dark' ? 255 : 0
-    g.fillStyle = `rgb(${value} ${value} ${value} / ${contrast / 255})`
+    const value = getColor(mode, flash)
+    g.fillStyle = `rgb(${value} ${value} ${value})`
     g.fillText(glyph, (index + 0.5) * cellWidth, rowHeight / 2)
   }
 
@@ -136,9 +143,8 @@ export function startCurrencyBackground(
     g.font = font
     g.textAlign = 'center'
     g.textBaseline = 'middle'
-    const brightness = mode === 'dark' ? brightnessDark : brightnessLight
-    const value = mode === 'dark' ? 255 : 0
-    g.fillStyle = `rgb(${value} ${value} ${value} / ${brightness / 255})`
+    const value = getColor(mode, false)
+    g.fillStyle = `rgb(${value} ${value} ${value})`
     const artwork = new Map<string, GlyphArtwork>()
     pool.forEach((glyph, index) => {
       const metrics = g.measureText(glyph)

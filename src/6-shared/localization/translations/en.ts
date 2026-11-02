@@ -4,10 +4,9 @@ export const en: typeof ru = {
   common: {
     commandWriteBlocked: 'Editing is currently unavailable.',
     btnLogin: 'Sign in with Zenmoney',
-    btnAbout: 'What is Zerro?',
-    haveTrouble: 'Not loading?',
-    btnAlternativeSignIn: 'Try this',
-    btnDemoMode: 'Demo mode',
+    authHeading: 'An independent Zenmoney web app with envelope budgeting',
+    btnAbout: 'What is envelope budgeting?',
+    btnDemoMode: 'Demo',
     refreshData: 'Refresh Data',
     leftover: 'Balance',
     category: 'Category',

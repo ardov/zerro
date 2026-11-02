@@ -10,6 +10,17 @@
     background: var(--color-ui-selected);
   }
 
+  .auth-layout {
+    max-width: 25rem;
+    grid-template-rows: 1fr auto;
+  }
+
+  .auth-heading {
+    font-size: clamp(1.75rem, 5vw, 2rem);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     .auth-page {
       transition:

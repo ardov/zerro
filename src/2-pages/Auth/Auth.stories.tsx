@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, waitFor, within } from 'storybook/test'
 import Auth from './index'
 import { i18n } from '@/6-shared/localization'
+import { defaultCurrencySettings } from './CurrencyBackground/interaction'
 
 const meta = {
   title: 'App/Auth',
@@ -13,12 +14,22 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Login: Story = {
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement, globals }) => {
     const canvas = within(canvasElement)
-    const about = canvas.getByRole('button', { name: i18n.t('btnAbout') })
+    const about = canvas.getByRole('link', { name: i18n.t('btnAbout') })
+    await waitFor(() =>
+      expect(canvas.getByRole('heading', { level: 1 })).toBeVisible()
+    )
     await expect(about).toHaveAttribute('href', '/about')
     about.focus()
     await expect(about).toHaveFocus()
+    await expect(
+      canvas.getByRole('button', {
+        name: i18n.t(
+          globals.theme === 'dark' ? 'settings:lightMode' : 'settings:darkMode'
+        ),
+      })
+    ).toBeVisible()
     const page = canvasElement.querySelector('.auth-page')!
     const art = canvasElement.querySelector('canvas')!
     await waitFor(() => {
@@ -114,15 +125,17 @@ export const BackgroundGestures: Story = {
     await waitFor(() => expect(ink()).toBe(true))
     const press = { button: 0, pointerType: 'touch', isPrimary: true }
     for (let i = 0; i < 10; i++) {
-      fireEvent.pointerDown(page.querySelector('svg')!, press)
+      fireEvent.pointerDown(ui.getByRole('img', { name: 'Zerro' }), press)
+      fireEvent.pointerDown(ui.getByRole('heading', { level: 1 }), press)
       fireEvent.pointerDown(
-        ui.getByRole('button', { name: i18n.t('btnAbout') }),
+        ui.getByRole('link', { name: i18n.t('btnAbout') }),
         press
       )
     }
     // The transparent foreground wrapper contains empty gaps above the artwork.
-    const gap = art.nextElementSibling!
-    for (let i = 0; i < 9; i++) fireEvent.pointerDown(gap, press)
+    const gap = page.querySelector('.auth-layout')!
+    for (let i = 0; i < defaultCurrencySettings.collapseAfterClicks - 1; i++)
+      fireEvent.pointerDown(gap, press)
     await expect(art).toHaveAttribute('data-currency-state', 'flowing')
     fireEvent.pointerDown(gap, press)
     await waitFor(() => expect(art.dataset.currencyState).not.toBe('flowing'))
