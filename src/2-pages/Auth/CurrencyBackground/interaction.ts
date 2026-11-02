@@ -1,5 +1,5 @@
 export const defaultCurrencySettings = {
-  radius: 280,
+  radius: 320,
   rowImpulse: 400,
   pileImpulse: 350,
   springStiffness: 140,
@@ -8,7 +8,7 @@ export const defaultCurrencySettings = {
   restitution: 0.3,
   airFriction: 0.008,
   releaseDuration: 3500,
-  collapseAfterClicks: 10,
+  collapseAfterClicks: 7,
 }
 
 export type CurrencySettings = typeof defaultCurrencySettings

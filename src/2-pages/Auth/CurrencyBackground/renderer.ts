@@ -9,10 +9,10 @@ import {
 import type { CurrencySettings, Point, SpringState } from './interaction'
 
 // Selected in the currency-field prototype. All dimensions are CSS pixels.
-const size = 16
-const cellWidth = 20
-const rowHeight = 30
-const angle = (29 * Math.PI) / 180
+const size = 24
+const cellWidth = 32
+const rowHeight = 40
+const angle = (36 * Math.PI) / 180
 const cosAngle = Math.cos(angle)
 const sinAngle = Math.sin(angle)
 const brightnessLight = 16
@@ -20,7 +20,7 @@ const brightnessDark = 10
 const speed = -3.5
 const speedSpread = 1.5
 const glitchRate = 12
-const glitchDuration = 0.4
+const glitchDuration = 0.6
 const pool = [...new Set(Object.values(symbols).flat())]
 const font = `${size}px "Zerro Currency Glyphs", "Zerro Currency Extras"`
 const pick = <T>(values: readonly T[]): T =>
