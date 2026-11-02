@@ -30,7 +30,7 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
 
   return (
     <div>
-      <p className="m-0 text-right text-body">
+      <p className="m-0 flex items-center justify-end gap-1.5 text-right text-body">
         {!!hiddenOverspend && (
           <Tooltip
             content={
@@ -41,10 +41,7 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
               </span>
             }
           >
-            <WarningIcon
-              color="warning"
-              className="-translate-x-[6px] translate-y-1"
-            />
+            <WarningIcon className="text-ui-warning" />
           </Tooltip>
         )}
 
@@ -52,6 +49,7 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
           <span
             className={cn(
               '-my-1 -mx-4 inline-block rounded-lg px-4 py-1',
+              !!hiddenOverspend && 'ml-0 pl-0',
               getAvailableColorClass(availableColor)
             )}
           >
