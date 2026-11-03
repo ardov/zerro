@@ -134,6 +134,9 @@ const { reducer, actions } = createSlice({
     applyServerPatch: withPerf(
       'applyServerPatch',
       (state, { payload }: PayloadAction<TServerPatch>) => {
+        // Core results share entity references with their input. Keep Immer
+        // drafts out of those snapshots, including when auto-freeze is off.
+        const snapshot = original(state)!
         const { fullReload, ...canonicalPatch } = payload
         if (fullReload) {
           const recoveringJournal = state.journalRecoveryRequired
@@ -148,8 +151,9 @@ const { reducer, actions } = createSlice({
             state.outbox = []
             state.redo = []
           }
+          const outbox = rootUserChanged ? [] : snapshot.outbox
           if (recoveringJournal) {
-            const replayed = replayAndValidateOutbox(checkpoint, state.outbox)
+            const replayed = replayAndValidateOutbox(checkpoint, outbox)
             if (!replayed.ok) {
               state.base = checkpoint
               state.current = checkpoint
@@ -160,7 +164,7 @@ const { reducer, actions } = createSlice({
             }
             state.current = replayed.current
           } else {
-            state.current = replayOutbox(checkpoint, state.outbox)
+            state.current = replayOutbox(checkpoint, outbox)
           }
           state.journalRecoveryRequired = false
           state.journalRecoveryReason = null
@@ -168,10 +172,7 @@ const { reducer, actions } = createSlice({
           state.base = checkpoint
           return
         }
-        const accepted = acceptCanonicalPatch(
-          { base: state.base, outbox: state.outbox, redo: state.redo },
-          canonicalPatch
-        )
+        const accepted = acceptCanonicalPatch(snapshot, canonicalPatch)
 
         state.base = accepted.base
         state.current = accepted.current
@@ -214,17 +215,19 @@ const { reducer, actions } = createSlice({
     }),
     undoClientCommand: withPerf('undoClientCommand', state => {
       if (!state.outbox.length) return
-      const next = undoOutbox(state.outbox, state.redo)
+      const snapshot = original(state)!
+      const next = undoOutbox(snapshot.outbox, snapshot.redo)
       state.outbox = next.outbox
       state.redo = next.redo
-      state.current = replayOutbox(state.base, state.outbox)
+      state.current = replayOutbox(snapshot.base, next.outbox)
     }),
     redoClientCommand: withPerf('redoClientCommand', state => {
       if (!state.redo.length) return
-      const next = redoOutbox(state.outbox, state.redo)
+      const snapshot = original(state)!
+      const next = redoOutbox(snapshot.outbox, snapshot.redo)
       state.outbox = next.outbox
       state.redo = next.redo
-      state.current = replayOutbox(state.base, state.outbox)
+      state.current = replayOutbox(snapshot.base, next.outbox)
     }),
     hydrateRecoveryOutbox: withPerf(
       'hydrateRecoveryOutbox',
@@ -270,10 +273,11 @@ const { reducer, actions } = createSlice({
     restoreOutboxPosition: withPerf(
       'restoreOutboxPosition',
       (state, { payload: index }: PayloadAction<number>) => {
-        const next = undoOutboxTo(state.outbox, state.redo, index + 1)
+        const snapshot = original(state)!
+        const next = undoOutboxTo(snapshot.outbox, snapshot.redo, index + 1)
         state.outbox = next.outbox
         state.redo = next.redo
-        state.current = replayOutbox(state.base, state.outbox)
+        state.current = replayOutbox(snapshot.base, next.outbox)
       }
     ),
     resetData: () => {

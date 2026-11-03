@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next'
 import ru from './translations/ru.json'
 import { en } from './translations/en'
 import { isProduction } from '@/6-shared/config'
+import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 
 const LOCAL_STORAGE_KEY = 'language'
 export const resources = { ru, en }
@@ -13,10 +14,9 @@ function detectBestLanguage(languges: string[]) {
   const getLangOnly = (lang: string) => lang.split(/-|_/)[0]
 
   // Try with cached language
-  let cachedLanguage = ''
-  try {
-    cachedLanguage = getLangOnly(localStorage.getItem(LOCAL_STORAGE_KEY) || '')
-  } catch {}
+  const cachedLanguage = getLangOnly(
+    safeLocalStorage.getItem(LOCAL_STORAGE_KEY) || ''
+  )
   if (languges.includes(cachedLanguage)) return cachedLanguage
 
   // Try with browser language list
@@ -53,7 +53,7 @@ try {
 
 // Cache language on change
 i18n.on('languageChanged', function (lng) {
-  localStorage.setItem(LOCAL_STORAGE_KEY, i18n.resolvedLanguage || lng)
+  safeLocalStorage.setItem(LOCAL_STORAGE_KEY, i18n.resolvedLanguage || lng)
   document.documentElement.lang = i18n.resolvedLanguage || lng
 })
 

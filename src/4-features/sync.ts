@@ -1,6 +1,7 @@
 import { getSyncCursor } from '@/store/data/selectors'
 import { getToken } from '@/store/token'
 import { track } from '@/6-shared/analytics'
+import { captureError } from '@/6-shared/diagnostics'
 import {
   syncFinished,
   syncStarted,
@@ -42,19 +43,28 @@ export const syncData =
   (runtime: TSyncRuntime = {}): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     if (syncIsBlocked(getState())) return
-    dispatch(prepareClientSync())
-    const state = getState()
     const sentAt = now(runtime)
     const maxBytes = runtime.maxBytes ?? DEFAULT_PUSH_MAX_BYTES
-    const prepared = beginPush(state.data, sentAt, {
-      maxBytes,
-      measure: measureRequestBytes,
-    })
+    let prepared: ReturnType<typeof beginPush>
+    try {
+      dispatch(prepareClientSync())
+      prepared = beginPush(getState().data, sentAt, {
+        maxBytes,
+        measure: measureRequestBytes,
+      })
+    } catch (error) {
+      console.error('Preparing sync failed', error)
+      captureError(
+        error instanceof Error ? error : new Error(getErrorMessage(error))
+      )
+      dispatch(syncFinished(failedResult(sentAt, getErrorMessage(error))))
+      return
+    }
 
     // An empty Outbox still performs the existing explicit refresh. This is
     // how a freshly authenticated replica gets its first canonical snapshot.
     if (!prepared) {
-      if (state.data.outbox.length) {
+      if (getState().data.outbox.length) {
         dispatch(
           syncFinished(
             failedResult(sentAt, 'Pending changes produced no request')

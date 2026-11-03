@@ -16,6 +16,7 @@ function runThemeManager(options?: {
   prefersDark?: boolean
   stored?: Record<string, string>
   storageThrows?: boolean
+  storageWritesThrow?: boolean
 }) {
   const values = new Map(Object.entries(options?.stored ?? {}))
   const classes = new Set<string>()
@@ -43,11 +44,13 @@ function runThemeManager(options?: {
       return values.get(key) ?? null
     },
     setItem(key: string, value: string) {
-      if (options?.storageThrows) throw new Error('storage blocked')
+      if (options?.storageThrows || options?.storageWritesThrow)
+        throw new Error('storage blocked')
       values.set(key, value)
     },
     removeItem(key: string) {
-      if (options?.storageThrows) throw new Error('storage blocked')
+      if (options?.storageThrows || options?.storageWritesThrow)
+        throw new Error('storage blocked')
       values.delete(key)
     },
   }
@@ -125,6 +128,19 @@ describe('theme-init', () => {
     expect(() => page.manager.toggle()).not.toThrow()
     expect(page.manager.getTheme()).toBe('dark')
     expect(page.root.classList.contains('dark')).toBe(true)
+  })
+
+  it('toggles past a stale preference when storage is read-only', () => {
+    const page = runThemeManager({
+      stored: { theme: 'dark' },
+      storageWritesThrow: true,
+    })
+
+    page.manager.toggle()
+    expect(page.manager.getTheme()).toBe('light')
+    page.manager.toggle()
+    expect(page.manager.getTheme()).toBe('dark')
+    expect(page.values.get('theme')).toBe('dark')
   })
 
   it('accepts the JSON-quoted values written by the original theme setting', () => {

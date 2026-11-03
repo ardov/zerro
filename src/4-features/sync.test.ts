@@ -4,7 +4,10 @@ import {
   operationPatch,
 } from '@/zerro-core/support/testing/commandTestData'
 import { configureStore } from '@reduxjs/toolkit'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { configureImmer } from '@/store/immer'
+import * as replica from '@/zerro-core/replica'
+import { captureError } from '@/6-shared/diagnostics'
 
 const { syncMock } = vi.hoisted(() => ({
   syncMock: vi.fn(),
@@ -13,6 +16,7 @@ const { syncMock } = vi.hoisted(() => ({
 vi.mock('@/6-shared/api/syncDiff', () => ({ sync: syncMock }))
 
 vi.mock('@/6-shared/analytics', () => ({ track: vi.fn() }))
+vi.mock('@/6-shared/diagnostics', () => ({ captureError: vi.fn() }))
 
 import {
   makeAccount,
@@ -57,8 +61,96 @@ function makeSyncedStore() {
 }
 
 describe('syncData', () => {
+  afterEach(() => {
+    configureImmer(false)
+    vi.restoreAllMocks()
+  })
   beforeEach(() => {
     syncMock.mockClear()
+    vi.mocked(captureError).mockClear()
+  })
+
+  it('pushes a pending budget after a background pull in production', async () => {
+    configureImmer(true)
+    const store = makeSyncedStore()
+    const comment = JSON.stringify({
+      type: 'budgets',
+      month: '2026-11',
+      payload: {},
+    })
+    store.dispatch(
+      applyServerPatch({
+        user: [makeUser({ id: 1, parent: null, currency: 1 })],
+        account: [makeAccount({ id: 'data', title: '🤖 [Zerro Data]' })],
+        reminder: [makeReminder({ id: 'budget', comment })],
+      })
+    )
+    store.dispatch(
+      appendClientCommand({
+        issuedAt: 100,
+        operations: [
+          {
+            type: 'budgets.set',
+            month: '2026-11',
+            values: [{ envelopeId: 'tag#food', amount: 100 }],
+            nativeTags: false,
+            storage: { accountId: 'data', reminderId: 'budget' },
+          },
+        ],
+      })
+    )
+    store.dispatch(
+      applyServerPatch({
+        serverTimestamp: 200_000,
+        reminder: [makeReminder({ id: 'remote', comment: 'Another reminder' })],
+      })
+    )
+    syncMock.mockImplementationOnce(async (_token, _endpoint, patch) => ({
+      data: { ...patch, serverTimestamp: 300_000 },
+    }))
+
+    await store.dispatch(syncData())
+
+    expect(syncMock).toHaveBeenCalledOnce()
+    expect(store.getState().sync.lastResult?.isSuccessful).toBe(true)
+    expect(store.getState().data.outbox).toEqual([])
+    expect(
+      JSON.parse(store.getState().data.base.reminder.budget.comment!)
+    ).toMatchObject({ payload: { 'tag#food': 100 } })
+    expect(store.getState().data.current.reminder.remote.comment).toBe(
+      'Another reminder'
+    )
+  })
+
+  it('reports a preparation failure and leaves pending changes retryable', async () => {
+    const store = makeSyncedStore()
+    store.dispatch(appendClientCommand(renameCashTo('Wallet', 10)))
+    const pending = store.getState().data.outbox
+    const error = new TypeError('Cannot perform get on a revoked proxy')
+    const prepare = vi
+      .spyOn(replica, 'beginPush')
+      .mockImplementationOnce(() => {
+        throw error
+      })
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    await expect(store.dispatch(syncData())).resolves.toBeUndefined()
+
+    expect(syncMock).not.toHaveBeenCalled()
+    expect(captureError).toHaveBeenCalledExactlyOnceWith(error)
+    expect(store.getState().data.outbox).toEqual(pending)
+    expect(store.getState().sync).toMatchObject({
+      status: { kind: 'idle' },
+      lastResult: {
+        isSuccessful: false,
+        errorMessage: 'Cannot perform get on a revoked proxy',
+      },
+    })
+    prepare.mockRestore()
+    syncMock.mockResolvedValueOnce({ data: { serverTimestamp: 200_000 } })
+    await store.dispatch(syncData())
+    expect(store.getState().sync.lastResult?.isSuccessful).toBe(true)
+    expect(store.getState().data.outbox).toEqual([])
   })
 
   it('acknowledges enabling and disabling Zenmoney budgets back to the stored value', async () => {

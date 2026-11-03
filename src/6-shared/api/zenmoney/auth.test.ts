@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { authorize } from './auth'
+import { authorize, processAuthCode } from './auth'
 import { endpoints } from './endpoints'
 
 vi.mock('../../config', () => ({
@@ -15,6 +15,59 @@ afterEach(() => {
 })
 
 describe('authorize', () => {
+  it('accepts only its same-origin popup when storage is unavailable', async () => {
+    vi.useFakeTimers()
+    vi.stubGlobal('localStorage', null)
+    const popup = { closed: false } as Window
+    vi.spyOn(window, 'open').mockReturnValue(popup)
+    const fetch = vi.fn().mockResolvedValue({
+      json: async () => ({ access_token: 'test-token' }),
+    })
+    vi.stubGlobal('fetch', fetch)
+    const pending = authorize('app')
+    const send = (origin: string, source: Window, code: unknown) =>
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          origin,
+          source,
+          data: { type: 'zerro:auth-code', code },
+        })
+      )
+    send('https://untrusted.test', popup, 'wrong-origin')
+    send(window.location.origin, window, 'wrong-window')
+    send(window.location.origin, popup, 123)
+    expect(fetch).not.toHaveBeenCalled()
+    send(window.location.origin, popup, 'test-code')
+    await expect(pending).resolves.toBe('test-token')
+    expect(fetch).toHaveBeenCalledWith(
+      endpoints.app.token,
+      expect.objectContaining({
+        body: expect.stringContaining('test-code'),
+      })
+    )
+    expect(vi.getTimerCount()).toBe(0)
+    send(window.location.origin, popup, 'late-code')
+    expect(fetch).toHaveBeenCalledOnce()
+  })
+
+  it('returns a callback code to its opener when storage is unavailable', () => {
+    vi.stubGlobal('localStorage', null)
+    const postMessage = vi.fn()
+    vi.stubGlobal('opener', { postMessage })
+    const close = vi.spyOn(window, 'close').mockImplementation(() => undefined)
+    window.history.replaceState(null, '', '/?code=test-code')
+    try {
+      processAuthCode()
+      expect(postMessage).toHaveBeenCalledWith(
+        { type: 'zerro:auth-code', code: 'test-code' },
+        window.location.origin
+      )
+      expect(close).toHaveBeenCalledOnce()
+    } finally {
+      window.history.replaceState(null, '', '/')
+    }
+  })
+
   it('reports a blocked popup and returns without waiting for a code', async () => {
     vi.spyOn(window, 'open').mockReturnValue(null)
     const alert = vi.fn()

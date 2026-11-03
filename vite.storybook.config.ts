@@ -20,6 +20,7 @@ export default defineConfig({
       'clsx',
       'tailwind-merge',
       '@dnd-kit/core',
+      '@sentry/browser',
       'formik',
       'recharts',
       '@base-ui/react/button',

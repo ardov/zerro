@@ -8,30 +8,26 @@
 
 ;(() => {
   const STORAGE_KEY = 'theme'
-  const fallback = new Map()
+  let preference = null
+  let unsaved = false
 
-  const storage = {
-    get(key) {
+  const readPreference = () => {
+    if (!unsaved) {
       try {
-        return localStorage.getItem(key) ?? fallback.get(key) ?? null
-      } catch {
-        return fallback.get(key) ?? null
-      }
-    },
-    set(key, value) {
-      try {
-        localStorage.setItem(key, value)
-        fallback.delete(key)
-      } catch {
-        fallback.set(key, value)
-      }
-    },
-    clear(key) {
-      try {
-        localStorage.removeItem(key)
+        preference = localStorage.getItem(STORAGE_KEY)
       } catch {}
-      fallback.delete(key)
-    },
+    }
+    return preference
+  }
+
+  const writePreference = value => {
+    preference = value
+    unsaved = true
+    try {
+      if (value === null) localStorage.removeItem(STORAGE_KEY)
+      else localStorage.setItem(STORAGE_KEY, value)
+      unsaved = false
+    } catch {}
   }
 
   const parsePreference = value => {
@@ -54,7 +50,7 @@
   const getSystemTheme = () => (query.matches ? 'dark' : 'light')
 
   const getTheme = () => {
-    const preference = parsePreference(storage.get(STORAGE_KEY))
+    const preference = parsePreference(readPreference())
     return preference === 'light' || preference === 'dark'
       ? preference
       : getSystemTheme()
@@ -72,8 +68,7 @@
 
     toggle() {
       const target = getTheme() === 'dark' ? 'light' : 'dark'
-      if (target === getSystemTheme()) storage.clear(STORAGE_KEY)
-      else storage.set(STORAGE_KEY, target)
+      writePreference(target === getSystemTheme() ? null : target)
       apply()
     },
 

@@ -1,6 +1,7 @@
 import React from 'react'
 import { captureError } from '@/6-shared/diagnostics'
 import { tokenStorage } from '@/6-shared/api/tokenStorage'
+import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 import { useTranslation } from 'react-i18next'
 import { clearPersistedLocalData } from '@/store/data'
 
@@ -18,13 +19,18 @@ export default class GlobalErrorBoundary extends React.Component<{
       error.message.includes('Loading chunk') ||
       error.message.includes('dynamically imported module')
     ) {
-      const isReloaded = sessionStorage.getItem('global_error_retry')
-      if (!isReloaded) {
-        sessionStorage.setItem('global_error_retry', 'true')
-        window.location.reload()
-        return
+      try {
+        const isReloaded = sessionStorage.getItem('global_error_retry')
+        if (!isReloaded) {
+          sessionStorage.setItem('global_error_retry', 'true')
+          window.location.reload()
+          return
+        }
+        sessionStorage.removeItem('global_error_retry')
+      } catch {
+        // Without a durable retry marker, show the fallback instead of
+        // risking a reload loop or throwing from the error boundary itself.
       }
-      sessionStorage.removeItem('global_error_retry')
     }
 
     captureError(error, errorInfo)
@@ -43,7 +49,7 @@ function ErrorFallback() {
     } catch (error) {
       console.error('Failed to clear local replica before reload', error)
     } finally {
-      localStorage.clear()
+      safeLocalStorage.clear()
       tokenStorage.clear()
       window.location.reload()
     }

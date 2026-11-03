@@ -1,5 +1,6 @@
 import type { EndpointPreference } from './endpoints'
 import { endpoints } from './endpoints'
+import { safeLocalStorage } from '../browserStorage'
 // Have to use relative path here because of using in worker
 import { clientId, clientSecret, redirectUri } from '../../config'
 
@@ -10,7 +11,7 @@ type TAccessToken = {
   refresh_token: string
 }
 
-/** Checks if the auth code is in the URL and puts it in localStorage */
+/** Returns the popup's auth code to the page that opened it. */
 export function processAuthCode() {
   const parsedUrl = new URL(window.location.href)
   const code = parsedUrl.searchParams.get('code')
@@ -48,10 +49,10 @@ export async function authorize(preference: EndpointPreference) {
   /*
     - User logs in to Zenmoney
     - Zenmoney redirects to Zerro with an authorization code in the URL
-    - Zerro puts the code in localStorage (`processAuthCode`)
+    - Zerro returns the code through postMessage or a storage event
   */
 
-  /* Listen to the authorization code from localStorage and return it */
+  /* Wait for the authorization code from the popup. */
   const authCode = await waitForAuthCode(popup)
   if (!authCode) return null
 
@@ -78,18 +79,29 @@ export async function authorize(preference: EndpointPreference) {
 // HELPERS
 
 const AUTH_CODE_KEY = 'auth-code-data'
+const AUTH_CODE_MESSAGE = 'zerro:auth-code'
 
-/** Puts the authorization code in localStorage */
+/** postMessage also works when the browser blocks localStorage. */
 function setAuthCode(code: string) {
-  window.localStorage.setItem(AUTH_CODE_KEY, code)
+  try {
+    window.opener?.postMessage(
+      { type: AUTH_CODE_MESSAGE, code },
+      window.location.origin
+    )
+  } catch {
+    // Keep the storage channel for popups without an accessible opener.
+  }
+  safeLocalStorage.setItem(AUTH_CODE_KEY, code)
 }
 
-/** Listens to the authorization code from localStorage */
+/** Accepts messages only from this popup after it returns to our origin. */
 function waitForAuthCode(popup: Window) {
   return new Promise((resolve: (s?: string) => void) => {
     function finish(code?: string) {
       window.removeEventListener('storage', storageEventHandler)
+      window.removeEventListener('message', messageEventHandler)
       window.clearInterval(closedTimer)
+      if (code) safeLocalStorage.removeItem(AUTH_CODE_KEY)
       resolve(code)
     }
     const closedTimer = window.setInterval(() => {
@@ -98,10 +110,16 @@ function waitForAuthCode(popup: Window) {
     function storageEventHandler(e: StorageEvent) {
       if (e.key !== AUTH_CODE_KEY) return
       if (!e.newValue) return
-      window.localStorage.removeItem(AUTH_CODE_KEY)
       finish(e.newValue)
     }
+    function messageEventHandler(e: MessageEvent) {
+      if (e.origin !== window.location.origin || e.source !== popup) return
+      if (e.data?.type !== AUTH_CODE_MESSAGE) return
+      if (typeof e.data.code !== 'string' || !e.data.code) return
+      finish(e.data.code)
+    }
     window.addEventListener('storage', storageEventHandler)
+    window.addEventListener('message', messageEventHandler)
   })
 }
 

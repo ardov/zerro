@@ -1,6 +1,13 @@
 import '@testing-library/jest-dom'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { captureError } from '@/6-shared/diagnostics'
 
 const { clearPersistedLocalDataMock, tokenClearMock } = vi.hoisted(() => ({
   clearPersistedLocalDataMock: vi.fn(),
@@ -25,6 +32,50 @@ function BrokenChild(): never {
 }
 
 describe('GlobalErrorBoundary', () => {
+  afterEach(() => {
+    cleanup()
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+    vi.clearAllMocks()
+  })
+
+  it('shows and reports chunk failures when a reload marker cannot be persisted', () => {
+    vi.stubGlobal('sessionStorage', null)
+    const reload = vi
+      .spyOn(window.location, 'reload')
+      .mockImplementation(() => undefined)
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const error = new Error('Failed to fetch dynamically imported module')
+    function BrokenChunk(): never {
+      throw error
+    }
+    render(
+      <GlobalErrorBoundary>
+        <BrokenChunk />
+      </GlobalErrorBoundary>
+    )
+    expect(screen.getByRole('button', { name: 'btnFix' })).toBeVisible()
+    expect(reload).not.toHaveBeenCalled()
+    expect(captureError).toHaveBeenCalledWith(error, expect.any(Object))
+  })
+
+  it('can reload from the fallback when localStorage is unavailable', async () => {
+    vi.stubGlobal('localStorage', null)
+    clearPersistedLocalDataMock.mockResolvedValueOnce(undefined)
+    const reload = vi
+      .spyOn(window.location, 'reload')
+      .mockImplementation(() => undefined)
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    render(
+      <GlobalErrorBoundary>
+        <BrokenChild />
+      </GlobalErrorBoundary>
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'btnFix' }))
+    await waitFor(() => expect(reload).toHaveBeenCalledOnce())
+    expect(tokenClearMock).toHaveBeenCalledOnce()
+  })
+
   it('waits for queued replica cleanup before reloading', async () => {
     let finishCleanup!: () => void
     clearPersistedLocalDataMock.mockReturnValueOnce(

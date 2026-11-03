@@ -3,11 +3,12 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { AppThunk, RootState } from '@/store'
 import type { TFxCode } from '@/6-shared/types'
 import { track } from '@/6-shared/analytics'
+import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 
 const KEY = 'display-currency'
 const savedCurrency = {
   get: () => {
-    const raw = localStorage.getItem(KEY)
+    const raw = safeLocalStorage.getItem(KEY)
     if (!raw) return null
     try {
       return JSON.parse(raw) as TFxCode
@@ -16,8 +17,8 @@ const savedCurrency = {
     }
   },
   set: (currency: TFxCode | null) => {
-    if (currency) localStorage.setItem(KEY, JSON.stringify(currency))
-    else localStorage.removeItem(KEY)
+    if (currency) safeLocalStorage.setItem(KEY, JSON.stringify(currency))
+    else safeLocalStorage.removeItem(KEY)
   },
 }
 

@@ -1,4 +1,5 @@
 import { initSentry } from '@/6-shared/diagnostics'
+import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 import { store } from '@/store'
 import { resetData } from '@/store/data'
 import { useEffect } from 'react'
@@ -24,7 +25,7 @@ export const MainApp = () => {
 
 /** `zerro` can be used in console to access state and modify data */
 function createZerroInstance(s: typeof store) {
-  let logsShow = localStorage.getItem('showLogs') === 'true'
+  let logsShow = safeLocalStorage.getItem('showLogs') === 'true'
 
   // @ts-expect-error window.zerro is an untyped debug object
   window.zerro = {
@@ -37,7 +38,7 @@ function createZerroInstance(s: typeof store) {
     },
     toggleLogs: () => {
       logsShow = !logsShow
-      localStorage.setItem('showLogs', String(logsShow))
+      safeLocalStorage.setItem('showLogs', String(logsShow))
       return logsShow
     },
     logs: {},

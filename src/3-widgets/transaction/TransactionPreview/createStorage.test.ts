@@ -3,9 +3,10 @@ import {
   loadLastTransactionAccount,
   saveLastTransactionAccount,
 } from './createStorage'
+import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 
 beforeEach(() => {
-  localStorage.clear()
+  safeLocalStorage.clear()
 })
 
 afterEach(() => {
@@ -18,6 +19,7 @@ describe('transaction creation storage', () => {
     vi.stubGlobal('localStorage', undefined)
     expect(loadLastTransactionAccount()).toBeNull()
     expect(() => saveLastTransactionAccount('card')).not.toThrow()
+    expect(loadLastTransactionAccount()).toBe('card')
   })
 
   it('tolerates failed reads and full storage', () => {

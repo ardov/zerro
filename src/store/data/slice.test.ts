@@ -1,5 +1,6 @@
 import { testOperations } from '@/zerro-core/support/testing/commandTestData'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { configureImmer } from '../immer'
 
 import {
   makeAccount,
@@ -19,6 +20,7 @@ import reducer, {
   prepareClientSync,
   applyServerPatch as serverPatchApplied,
   redoClientCommand,
+  restoreOutboxPosition,
   resetData,
   undoClientCommand,
 } from './slice'
@@ -64,7 +66,72 @@ function makeAccountEntry(title: string, issuedAt: number): TCommand {
   }
 }
 
-describe('command outbox boundaries', () => {
+describe.each([false, true])('outbox (production: %s)', production => {
+  beforeEach(() => configureImmer(production))
+  afterEach(() => configureImmer(false))
+
+  it('keeps pending transactions readable and syncable after a canonical pull', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      transaction: [makeTransaction({ id: 'edited', comment: 'Before' })],
+    })
+    const pending = reducer(
+      base,
+      appendClientCommand({
+        issuedAt: 200,
+        operations: testOperations({
+          transaction: [{ id: 'edited', comment: 'After' }],
+        }),
+      })
+    )
+    const pulled = applyServerPatch(pending, {
+      serverTimestamp: 300,
+      transaction: [makeTransaction({ id: 'remote', comment: 'Remote' })],
+    })
+
+    expect(pulled.current.transaction.edited.comment).toBe('After')
+    expect(pulled.base.transaction.edited.comment).toBe('Before')
+    expect(beginPush(pulled, 400)).toBeDefined()
+  })
+
+  it('keeps transaction history navigable and syncable through undo and redo', () => {
+    const base = applyServerPatch(undefined, {
+      transaction: [
+        makeTransaction({ id: 'first' }),
+        makeTransaction({ id: 'second' }),
+      ],
+    })
+    const first = reducer(
+      base,
+      appendClientCommand({
+        issuedAt: 100,
+        operations: testOperations({
+          transaction: [{ id: 'first', comment: 'First edit' }],
+        }),
+      })
+    )
+    const second = reducer(
+      first,
+      appendClientCommand({
+        issuedAt: 200,
+        operations: testOperations({
+          transaction: [{ id: 'second', comment: 'Second edit' }],
+        }),
+      })
+    )
+    const undone = reducer(second, undoClientCommand())
+    expect(undone.current.transaction.first.comment).toBe('First edit')
+    expect(undone.current.transaction.second.comment).toBeNull()
+    expect(beginPush(undone, 300)).toBeDefined()
+    const redone = reducer(undone, redoClientCommand())
+    expect(redone.current.transaction.second.comment).toBe('Second edit')
+    expect(beginPush(redone, 300)).toBeDefined()
+    const restored = reducer(redone, restoreOutboxPosition(0))
+    expect(restored.current.transaction.first.comment).toBe('First edit')
+    expect(restored.current.transaction.second.comment).toBeNull()
+    expect(beginPush(restored, 300)).toBeDefined()
+  })
+
   it('hydrates base and current from one reconstructed replica', () => {
     const base = applyServerPatch(undefined, {
       serverTimestamp: 100,
