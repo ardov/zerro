@@ -1,5 +1,5 @@
 import { toISODate, toISOMonth } from '../domain/foundation/date'
-import type { TDataStore, TFxCode } from '../domain/zenmoney'
+import type { TDataStore, TFxCode, TISODate } from '../domain/zenmoney'
 import type { TCoreContext } from '../../types'
 import type { TTransactionQueryContext } from '../domain/zerro/transactions'
 import {
@@ -9,6 +9,7 @@ import {
   buildDebtorNames,
   buildMerchantUsage,
   getDebtAccountId,
+  getBalancesAtDate,
   getHistoryStart,
   getInstCodeMap,
   getSortedTransactions,
@@ -316,16 +317,18 @@ export function createProjectionGraph(ctx: TCoreContext) {
   const goalTotals = node(d => [goals(d), convertFx(d)], buildGoalTotals)
 
   // --- balances ------------------------------------------------------------
-  const balances = nodeObj(
-    d => ({
-      transactions: transactionsHistory(d),
-      accounts: d.account,
-      debtors: debtors(d),
-      merchants: d.merchant,
-      instrumentCodeById: instrumentCodeById(d),
-      debtAccountId: debtAccountId(d),
-    }),
-    buildBalances
+  const balanceInputs = (d: TDataStore) => ({
+    transactions: transactionsHistory(d),
+    accounts: d.account,
+    debtors: debtors(d),
+    merchants: d.merchant,
+    instrumentCodeById: instrumentCodeById(d),
+    debtAccountId: debtAccountId(d),
+  })
+  const balances = nodeObj(balanceInputs, buildBalances)
+  const balancesAtDate = nodeObj(
+    balanceInputs,
+    input => (date: TISODate) => getBalancesAtDate(input, date)
   )
   const balancesByDate = nodeObj(
     d => ({
@@ -377,6 +380,7 @@ export function createProjectionGraph(ctx: TCoreContext) {
     goals,
     goalTotals,
     balances,
+    balancesAtDate,
     balancesByDate,
   }
 }

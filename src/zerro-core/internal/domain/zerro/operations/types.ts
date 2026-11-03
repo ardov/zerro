@@ -9,6 +9,8 @@ const envelopeId = z.custom<TEnvelopeId>(
     typeof value === 'string' && /^(tag|account|merchant|payee)#.+$/.test(value)
 )
 const amount = z.number().finite()
+const currency = z.string().min(1)
+const fxRates = z.record(currency, amount.positive())
 const meta = z.object({
   group: z.string(),
   index: amount,
@@ -70,8 +72,19 @@ export const zerroIntentSchema = z.discriminatedUnion('type', [
     .object({
       type: z.literal('fxRates.patch'),
       month,
-      set: z.record(z.string().min(1), amount.positive()).optional(),
-      unset: z.array(z.string().min(1)).optional(),
+      set: fxRates.optional(),
+      unset: z.array(currency).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal('fxRates.setQuote'),
+      month,
+      code: currency,
+      quoteCode: currency,
+      quotePerUnit: amount.positive(),
+      initialRates: fxRates,
+      fallbackQuoteRate: amount.positive(),
     })
     .strict(),
   z.object({ type: z.literal('fxRates.reset'), month }).strict(),
@@ -92,6 +105,8 @@ export function parseZerroOperation(value: unknown): TZerroOperation {
     throw new Error('Invalid Zerro operation')
   const { storage, ...intent } = value as Record<string, unknown>
   const parsed = zerroIntentSchema.parse(intent)
+  if (parsed.type === 'fxRates.setQuote' && parsed.code === parsed.quoteCode)
+    throw new Error('A quote requires two different currencies')
   if (
     'set' in parsed &&
     parsed.unset?.some(key => Object.hasOwn(parsed.set ?? {}, key))

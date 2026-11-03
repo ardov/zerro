@@ -61,7 +61,8 @@ A command is one undoable user action. Its ordered operations include entity
 creation and editing (`transaction.create`, `transaction.patch`, and equivalent
 operations for writable entities), `entity.delete`, and domain operations such
 as `budgets.set`, `goals.set`, `goals.stop`, `goals.clearOverride`,
-`envelopes.patchMeta`, `settings.patch`, and `fxRates.patch`/`fxRates.reset`.
+`envelopes.patchMeta`, `settings.patch`, `fxRates.setQuote`, `fxRates.patch`,
+and `fxRates.reset`.
 There is no separate batch or raw-patch command format.
 
 Command compilers return one shape, `{ operations, receipt? }`. The receipt
@@ -134,8 +135,13 @@ Clearing an absent value does not create storage.
 A budget assignment owns one envelope's monthly amount. A goal assignment owns
 the entire goal, avoiding mixtures of one goal's type and another goal's amount.
 Stopping stores `null`; clearing removes the monthly override. Metadata, settings
-and FX edits own only explicitly set/unset fields. An empty monthly payload can
-remove its storage document. `fxRates.reset` explicitly removes the whole month.
+and FX patches own only explicitly set/unset fields. A manual FX quote records
+the price of one instrument unit in the other instrument's units. It seeds a
+missing month from the rates visible when the quote was entered. Replay against
+an existing month uses its saved quote currency rate, or pins the captured
+fallback if that rate is missing. Other currencies retain their saved values.
+An empty monthly payload can remove its storage document. `fxRates.reset`
+explicitly removes the whole month.
 
 Restore is prepared once as concrete entity changes. It does not repeatedly
 compare future canonical snapshots to the backup. Its existing planner omits

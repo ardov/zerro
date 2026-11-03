@@ -24,7 +24,8 @@ export const loadFxRates =
 
     const date = getRequestDate(month)
     const rates = await requestRates(
-      date < firstPossibleDate ? firstPossibleDate : date
+      date < firstPossibleDate ? firstPossibleDate : date,
+      core.instruments.selectAll(getState())
     )
     dispatch(core.fxRates.edit(month, rates))
   }

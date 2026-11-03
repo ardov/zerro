@@ -9,6 +9,7 @@ import { Input } from '@/6-shared/ui/kit/Input'
 import { Button as KitButton } from '@/6-shared/ui/kit/Button'
 import { useTranslation } from 'react-i18next'
 import { keys } from '@/6-shared/helpers/keys'
+import { unitsPerWhole } from '@/6-shared/helpers/money/currencyHelpers'
 import { useDebouncedCallback } from '@/6-shared/hooks/useDebouncedCallback'
 import { useToggle } from '@/6-shared/hooks/useToggle'
 import { formatDate } from '@/6-shared/helpers/date'
@@ -22,21 +23,26 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   const { t } = useTranslation('fxRates')
   const [displCurrency] = core.currency.useDisplayCurrency()
   const funds = useAppSelector(core.months.selectTotals)[month].fundsEnd
+  const balances = useAppSelector(state =>
+    core.balances.selectMonthEnd(state, month)
+  )
+  const instruments = core.instruments.useByCode()
   const ratesGetter = useAppSelector(core.fxRates.selectGetter)
   const rateData = ratesGetter(month)
 
-  const currencies = keys(funds)
-    .map(code => {
-      return {
-        code,
-        amount: funds[code],
-        rate: rateData.rates[code] / rateData.rates[displCurrency],
+  const currencies = new Set(keys(funds).sort((a, b) => funds[b] - funds[a]))
+  if (balances) {
+    for (const amounts of [
+      ...Object.values(balances.accounts),
+      ...Object.values(balances.debtors),
+    ]) {
+      for (const [code, amount] of Object.entries(amounts)) {
+        if (amount !== 0) currencies.add(code)
       }
-    })
-    .sort((a, b) => b.amount - a.amount)
-    .filter(c => c.code !== displCurrency)
-
-  if (currencies.length === 0) return null
+    }
+  }
+  currencies.delete(displCurrency)
+  if (currencies.size === 0) return null
 
   const isSaved = rateData.type === 'saved' && rateData.date === month
   const canFetch = canFetchFxRates(month)
@@ -45,14 +51,25 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   return (
     <div className="rounded-lg bg-ui-base p-4">
       <div className="flex flex-col gap-2">
-        {currencies.map(c => (
+        {Array.from(currencies, code => (
           <FxRateInput
-            key={c.code + month}
-            code={c.code}
+            key={`${month}-${code}-${displCurrency}`}
+            code={code}
             mainCode={displCurrency}
-            rates={rateData.rates}
-            onChange={rate =>
-              dispatch(core.fxRates.edit(month, { [c.code]: rate }))
+            quotePerUnit={rateData.rates[code] / rateData.rates[displCurrency]}
+            unitRatio={
+              unitsPerWhole(instruments[code]?.symbol) /
+              unitsPerWhole(instruments[displCurrency]?.symbol)
+            }
+            onChange={quotePerUnit =>
+              dispatch(
+                core.fxRates.setQuote({
+                  month,
+                  code,
+                  quoteCode: displCurrency,
+                  quotePerUnit,
+                })
+              )
             }
           />
         ))}
@@ -89,34 +106,29 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
 const FxRateInput: FC<{
   code: TFxCode
   mainCode: TFxCode
-  rates: core.fxRates.TFxRates
+  quotePerUnit: number
+  unitRatio: number
   onChange: (rate: number) => void
 }> = props => {
-  const { code, mainCode, rates, onChange } = props
+  const { code, mainCode, quotePerUnit, unitRatio, onChange } = props
   const { t } = useTranslation('fxRates')
 
   const [isSwapped, swap] = useToggle()
-  const [focused, setFocused] = useState(false)
+  const [draft, setDraft] = useState<string | null>(null)
 
   const leftCode = isSwapped ? mainCode : code
   const rightCode = isSwapped ? code : mainCode
-  const rate = roundRate(rates[leftCode] / rates[rightCode])
-
-  const [value, setValue] = useState(String(rate))
-
-  // Update rate when not focused
-  const [prevRate, setPrevRate] = useState({ rate, focused })
-  if (prevRate.rate !== rate || prevRate.focused !== focused) {
-    setPrevRate({ rate, focused })
-    if (!focused) setValue(String(rate))
-  }
+  const wholePrice = quotePerUnit * unitRatio
+  const rate = Number((isSwapped ? 1 / wholePrice : wholePrice).toPrecision(12))
 
   const onChg = useDebouncedCallback(
-    (v: string) =>
-      +v > 0 &&
-      +v !== rate &&
-      onChange(isSwapped ? rates[mainCode] / +v : +v * rates[mainCode]),
-    [onChange, isSwapped, rates],
+    (text: string) => {
+      const value = Number(text.replace(',', '.'))
+      if (!(value > 0) || value === rate) return
+      const next = (isSwapped ? 1 / value : value) / unitRatio
+      if (Number.isFinite(next) && next > 0) onChange(next)
+    },
+    [onChange, isSwapped, unitRatio, rate],
     400
   )
 
@@ -124,14 +136,16 @@ const FxRateInput: FC<{
     <Input
       label={`${leftCode} / ${rightCode}`}
       size="sm"
-      type="tel"
-      value={value}
+      inputMode="decimal"
+      value={draft ?? String(rate)}
       onValueChange={value => {
-        setValue(value)
+        setDraft(value)
         onChg(value)
       }}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      onBlur={() => {
+        onChg.flush()
+        setDraft(null)
+      }}
       prefix={`1 ${leftCode} =`}
       end={
         <FieldAddon kind="action">
@@ -139,7 +153,11 @@ const FxRateInput: FC<{
             variant="ghost"
             size="sm"
             aria-label={t('swap', { from: rightCode, to: leftCode })}
-            onClick={swap}
+            onClick={() => {
+              onChg.flush()
+              setDraft(null)
+              swap()
+            }}
           >
             {rightCode}
           </KitButton>
@@ -148,5 +166,3 @@ const FxRateInput: FC<{
     />
   )
 }
-
-const roundRate = (r: number) => Math.round(r * 1000) / 1000

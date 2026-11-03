@@ -50,6 +50,32 @@ export type TBalances = {
 export function buildBalances(input: TBuildBalancesInput): TBalances {
   const byDay: Record<TISODate, TBalanceState> = {}
   const byTransaction: Record<TTransactionId, TBalanceState> = {}
+  const startingBalances = rewindBalances(
+    input,
+    undefined,
+    (change, balances) => {
+      byDay[change.date] ??= balances
+      byTransaction[change.id] = balances
+    }
+  )
+
+  Object.values(startingBalances.debtors).forEach(amount => {
+    console.assert(isZero(amount), 'Starting amount of debtor is not zero')
+  })
+
+  return { byDay, byTransaction, startingBalances }
+}
+
+/** Rewind only the transactions after the requested day's closing balance. */
+export function getBalancesAtDate(input: TBuildBalancesInput, date: TISODate) {
+  return rewindBalances(input, date)
+}
+
+function rewindBalances(
+  input: TBuildBalancesInput,
+  date?: TISODate,
+  visit?: (change: TTransactionEffect, balances: TBalanceState) => void
+) {
   let lastState = getCurrentBalanceState(
     input.accounts,
     input.debtors,
@@ -57,17 +83,14 @@ export function buildBalances(input: TBuildBalancesInput): TBalances {
   )
 
   for (let index = input.transactions.length - 1; index >= 0; index--) {
-    const change = buildTransactionEffect(input.transactions[index], input)
-    byDay[change.date] = byDay[change.date] || lastState
-    byTransaction[change.id] = lastState
+    const transaction = input.transactions[index]
+    if (date && transaction.date <= date) break
+    const change = buildTransactionEffect(transaction, input)
+    visit?.(change, lastState)
     lastState = subtractChange(lastState, change)
   }
 
-  Object.values(lastState.debtors).forEach(amount => {
-    console.assert(isZero(amount), 'Starting amount of debtor is not zero')
-  })
-
-  return { byDay, byTransaction, startingBalances: lastState }
+  return lastState
 }
 
 export function buildTransactionEffect(

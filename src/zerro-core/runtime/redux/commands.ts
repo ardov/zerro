@@ -42,6 +42,7 @@ import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
 import { buildRestorePlan } from '../../internal/operations/restore/diffStores'
 import { checkBackupCompatibility } from '../../internal/operations/restore/backupCompatibility'
 import { selectData } from './state'
+import { graph } from './graph'
 import {
   compileApplyEnvelopeStructure,
   compileCreateEnvelope,
@@ -150,6 +151,47 @@ export function editFxRates(month: TISOMonth, patch: TFxRates): AppThunk {
         ),
         ctx
       ),
+    { verb: 'fx-rates-set' }
+  )
+}
+
+export function setFxQuote(
+  input: Pick<
+    TZerroInput<'fxRates.setQuote'>,
+    'month' | 'code' | 'quoteCode' | 'quotePerUnit'
+  >
+): AppThunk {
+  return executeCommand(
+    (state, ctx) => {
+      const data = selectData(state)
+      const effective = graph.fxRatesGetter(data)(input.month).rates
+      const initialRates = Object.fromEntries(
+        Object.entries(effective).filter(
+          ([, rate]) => Number.isFinite(rate) && rate > 0
+        )
+      )
+      const storedRate = input.quotePerUnit * initialRates[input.quoteCode]
+      if (!Number.isFinite(storedRate) || storedRate <= 0)
+        return { operations: [] }
+      // Older partial tables use the live instrument for a missing quote currency.
+      const liveRate = graph.currentFxRates(data).rates[input.quoteCode]
+      const fallbackQuoteRate =
+        Number.isFinite(liveRate) && liveRate > 0
+          ? liveRate
+          : initialRates[input.quoteCode]
+      return prepareZerro(
+        data,
+        [
+          {
+            type: 'fxRates.setQuote',
+            ...input,
+            initialRates,
+            fallbackQuoteRate,
+          },
+        ],
+        ctx
+      )
+    },
     { verb: 'fx-rates-set' }
   )
 }

@@ -90,6 +90,27 @@ export function materializeZerro(
         return {}
       return write({ ...payload, rates, date: month, changed: issuedAt })
     }
+    case 'fxRates.setQuote': {
+      const { code, quoteCode, quotePerUnit, initialRates, fallbackQuoteRate } =
+        operation
+      // A concurrent writer may have created the month in another base.
+      const rates = reminder
+        ? ((payload.rates as Record<string, number> | undefined) ?? {})
+        : initialRates
+      const quoteRate =
+        rates[quoteCode] > 0 ? rates[quoteCode] : fallbackQuoteRate
+      const rate = quotePerUnit * quoteRate
+      if (!Number.isFinite(rate) || rate <= 0)
+        throw new Error('Unrepresentable FX quote')
+      if (reminder && rates[code] === rate && rates[quoteCode] === quoteRate)
+        return {}
+      return write({
+        ...payload,
+        date: month,
+        changed: issuedAt,
+        rates: { ...rates, [quoteCode]: quoteRate, [code]: rate },
+      })
+    }
     case 'fxRates.reset':
       return compileResetMonthlyHiddenData(data, type, month!)
   }

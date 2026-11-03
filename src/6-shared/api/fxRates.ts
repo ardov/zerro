@@ -1,6 +1,12 @@
 import { toISODate } from '@/6-shared/helpers/date'
-import { keys } from '@/6-shared/helpers/keys'
-import type { TDateDraft, TFxCode, TISODate } from '@/6-shared/types'
+import { unitsPerWhole } from '@/6-shared/helpers/money/currencyHelpers'
+import type {
+  TDateDraft,
+  TFxCode,
+  TInstrument,
+  TInstrumentId,
+  TISODate,
+} from '@/6-shared/types'
 
 /*
 Currency rates are loaded from this great repository by Fawaz Ahmed
@@ -9,7 +15,10 @@ https://github.com/fawazahmed0/exchange-api
 
 export const firstPossibleDate: TISODate = '2024-03-10'
 
-export async function requestRates(date: TDateDraft) {
+export async function requestRates(
+  date: TDateDraft,
+  instruments: Record<TInstrumentId, TInstrument>
+) {
   const base = 'usd'
   const isoDate = toISODate(date)
   const isInFuture = toISODate(new Date()) < isoDate
@@ -34,22 +43,13 @@ export async function requestRates(date: TDateDraft) {
 
   const result: Record<TFxCode, number> = {}
 
-  // Convert BTC and other crypto currencies to µ-units.
-  // Probably, should be automatically calculated for all currencies with 'μ' prefix
-  // or add a multiplier field to currencySymbols.json
+  for (const { shortTitle: code, symbol } of Object.values(instruments)) {
+    const rate = rates[code.toLowerCase()]
+    if (!(rate > 0)) continue
 
-  const MICRO_CURRENCIES = new Set(['ASH', 'BCH', 'BTC', 'ETH', 'LTC', 'XMR'])
-
-  keys(rates).forEach(key => {
-    const code = key.toUpperCase()
-    const rate = rates[key]
-    if (MICRO_CURRENCIES.has(code)) {
-      // micro-currencies are tiny after scaling; keep more decimal places
-      result[code] = round(1 / rate / 1_000_000, 12)
-    } else {
-      result[code] = round(1 / rate)
-    }
-  })
+    const units = unitsPerWhole(symbol)
+    result[code] = round(1 / rate / units, units === 1 ? 6 : 12)
+  }
   return result
 }
 
@@ -64,7 +64,7 @@ async function fetchWithFallback(links: string[]) {
   return response
 }
 
-function round(amount: number, decimals = 6) {
+function round(amount: number, decimals: number) {
   const p = Math.pow(10, decimals)
   return Math.round(amount * p) / p
 }

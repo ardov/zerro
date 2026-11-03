@@ -1,5 +1,9 @@
 export { patchFxRates as patch } from './commands'
-export { editFxRates as edit, resetFxRates as reset } from './commands'
+export {
+  editFxRates as edit,
+  resetFxRates as reset,
+  setFxQuote as setQuote,
+} from './commands'
 import { fromGraph, graph } from './graph'
 
 export const selectCurrent = fromGraph(graph.currentFxRates)

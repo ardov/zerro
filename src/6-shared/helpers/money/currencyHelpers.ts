@@ -1,6 +1,11 @@
 import type { TFxAmount, TFxCode } from '@/6-shared/types'
 import { keys } from '@/6-shared/helpers/keys'
 
+/** Zenmoney denotes millionths of a coin with Greek mu or the micro sign. */
+export function unitsPerWhole(symbol: string | undefined): number {
+  return symbol && /^[μµ]/u.test(symbol) ? 1_000_000 : 1
+}
+
 /** Decimal arithmetic used by financial calculations.
  *
  * Money is counted to two decimals, and a half-cent rounds up. Ties on

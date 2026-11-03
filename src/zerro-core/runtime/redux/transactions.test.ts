@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { makeDemoStore } from '../../support/demo'
 import { makeTestRootState } from '@/store/testing'
 import {
@@ -7,6 +7,8 @@ import {
   makeTag,
 } from '../../support/testing/zenmoneyTestData'
 import { compileQuery, selectQueryContext } from './transactions'
+import { selectMonthEnd } from './balances'
+import { toISOMonth } from '../../internal/domain/foundation/date'
 import {
   selectDebtors,
   selectBalancesByDate,
@@ -25,6 +27,20 @@ const NOW = Date.parse('2026-05-15T12:00:00Z')
 const makeRootState = makeTestRootState
 
 describe('Core transaction adapter reads', () => {
+  it('opens a previously visited future month after midnight with the same state', () => {
+    const state = makeRootState(makeDemoStore({ now: NOW }))
+    const clock = vi.spyOn(Date, 'now')
+    try {
+      clock.mockReturnValue(new Date(2026, 4, 31, 23, 59).getTime())
+      expect(selectMonthEnd(state, '2026-06')).toBeUndefined()
+      clock.mockReturnValue(new Date(2026, 5, 1, 0, 1).getTime())
+      expect(selectMonthEnd(state, '2026-06')).toEqual(
+        selectBalancesByDate(state).at(-1)?.balances
+      )
+    } finally {
+      clock.mockRestore()
+    }
+  })
   it.each(['account', 'tag', 'merchant'] as const)(
     'refreshes search after a %s rename, but retains context for unrelated writes',
     kind => {
@@ -121,6 +137,11 @@ describe('Core transaction adapter reads', () => {
     const ids = selectTransactionIds(makeRootState(store))
     const debtors = selectDebtors(makeRootState(store))
     const balancesByDate = selectBalancesByDate(makeRootState(store))
+    const month = toISOMonth(balancesByDate[0].date)
+    const monthEnd = selectMonthEnd(makeRootState(store), month)
+    expect(monthEnd).toEqual(
+      balancesByDate.findLast(row => row.date.startsWith(month))?.balances
+    )
     const unrelatedChange = makeRootState({
       ...store,
       company: { ...store.company },
@@ -130,6 +151,7 @@ describe('Core transaction adapter reads', () => {
     expect(selectTransactionIds(unrelatedChange)).toBe(ids)
     expect(selectDebtors(unrelatedChange)).toBe(debtors)
     expect(selectBalancesByDate(unrelatedChange)).toBe(balancesByDate)
+    expect(selectMonthEnd(unrelatedChange, month)).toBe(monthEnd)
   })
 
   it('recomputes transaction-dependent projections when history changes', () => {
@@ -138,6 +160,8 @@ describe('Core transaction adapter reads', () => {
     const ids = selectTransactionIds(makeRootState(store))
     const debtors = selectDebtors(makeRootState(store))
     const balancesByDate = selectBalancesByDate(makeRootState(store))
+    const month = toISOMonth(balancesByDate[0].date)
+    const monthEnd = selectMonthEnd(makeRootState(store), month)
     const transaction = makeTransaction({
       id: 'core-adapter-transaction',
       date: '2026-05-16',
@@ -153,6 +177,7 @@ describe('Core transaction adapter reads', () => {
     expect(selectTransactionIds(changed)).not.toBe(ids)
     expect(selectDebtors(changed)).not.toBe(debtors)
     expect(selectBalancesByDate(changed)).not.toBe(balancesByDate)
+    expect(selectMonthEnd(changed, month)).not.toBe(monthEnd)
   })
 })
 
