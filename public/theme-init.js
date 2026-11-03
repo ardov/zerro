@@ -46,28 +46,33 @@
   }
 
   const listeners = new Set()
+  const darkFrame = document.querySelector('meta[name="theme-color"][media]')
   const query = matchMedia('(prefers-color-scheme: dark)')
   const getSystemTheme = () => (query.matches ? 'dark' : 'light')
 
-  const getTheme = () => {
+  const resolveTheme = () => {
     const preference = parsePreference(readPreference())
     return preference === 'light' || preference === 'dark'
       ? preference
       : getSystemTheme()
   }
 
+  let appliedTheme
   const apply = () => {
-    const theme = getTheme()
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-    document.documentElement.style.colorScheme = theme
+    appliedTheme = resolveTheme()
+    const dark = appliedTheme === 'dark'
+    document.documentElement.classList.toggle('dark', dark)
+    document.documentElement.style.colorScheme = appliedTheme
+    // The first matching theme-color wins. The light tag is the fallback.
+    darkFrame?.setAttribute('media', dark ? 'all' : 'not all')
     listeners.forEach(listener => listener())
   }
 
   window.themeManager = {
-    getTheme,
+    getTheme: () => appliedTheme,
 
     toggle() {
-      const target = getTheme() === 'dark' ? 'light' : 'dark'
+      const target = appliedTheme === 'dark' ? 'light' : 'dark'
       writePreference(target === getSystemTheme() ? null : target)
       apply()
     },

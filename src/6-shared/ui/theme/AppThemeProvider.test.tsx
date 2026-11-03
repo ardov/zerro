@@ -10,18 +10,26 @@ afterEach(() => {
 })
 
 describe('AppThemeProvider', () => {
-  it('uses one manager subscription for its colour metadata', () => {
-    const subscribe = vi.fn(() => () => {})
-    window.themeManager = {
-      getTheme: () => 'light',
-      toggle: vi.fn(),
-      subscribe,
-    }
+  it('preserves the page theme color across mounting and unmounting', ({
+    onTestFinished,
+  }) => {
+    const meta = document.createElement('meta')
+    meta.name = 'theme-color'
+    meta.content = '#111212'
+    document.head.append(meta)
+    onTestFinished(() => meta.remove())
 
-    render(<AppThemeProvider>content</AppThemeProvider>)
-
-    expect(subscribe).toHaveBeenCalledOnce()
-    expect(document.querySelector('meta[name="theme-color"]')).not.toBeNull()
+    const colors = () =>
+      Array.from(
+        document.head.querySelectorAll<HTMLMetaElement>(
+          'meta[name="theme-color"]'
+        ),
+        tag => tag.content
+      )
+    const view = render(<AppThemeProvider>content</AppThemeProvider>)
+    expect(colors()).toEqual(['#111212'])
+    view.unmount()
+    expect(colors()).toEqual(['#111212'])
   })
 
   it('updates an isolated scheme without toggling the stored preference', () => {

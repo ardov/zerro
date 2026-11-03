@@ -4,7 +4,6 @@
   "start_url": "/?source=pwa",
   "display": "standalone",
   "id": "/?source=pwa",
-  "theme_color": "#111212",
   "background_color": "#111212",
   "icons": [
     {

@@ -3,7 +3,7 @@ import { useLayoutEffect } from 'react'
 import type { ColorScheme } from './colors'
 import { themeTokensCss } from './colors'
 import { getThemeColor } from '../kit/themeColor'
-import { ColorSchemeOverrideContext, useColorScheme } from './hooks'
+import { ColorSchemeOverrideContext } from './hooks'
 
 import './styles.css'
 
@@ -23,33 +23,25 @@ export const AppThemeProvider: FC<AppThemeProviderProps> = props => {
   return (
     <ColorSchemeOverrideContext.Provider value={override}>
       <style>{themeTokensCss}</style>
-      <ColorSchemeMetadata pinned={override !== null} />
+      {override && <PinnedScheme mode={override} />}
       {props.children}
     </ColorSchemeOverrideContext.Provider>
   )
 }
 
-/** Mirrors a pinned renderer's scheme onto the root so the CSS tokens follow
- * it, and hands back the undo. */
-function pinScheme(root: HTMLElement, mode: ColorScheme) {
-  const wasDark = root.classList.contains('dark')
-  const previousColorScheme = root.style.colorScheme
-  root.classList.toggle('dark', mode === 'dark')
-  root.style.colorScheme = mode
-
-  return () => {
-    root.classList.toggle('dark', wasDark)
-    root.style.colorScheme = previousColorScheme
-  }
-}
-
-const ColorSchemeMetadata: FC<{ pinned: boolean }> = ({ pinned }) => {
-  const { mode } = useColorScheme()
-
+const PinnedScheme: FC<{ mode: ColorScheme }> = ({ mode }) => {
   useLayoutEffect(() => {
-    if (!pinned) return
-    return pinScheme(document.documentElement, mode)
-  }, [mode, pinned])
+    const root = document.documentElement
+    const wasDark = root.classList.contains('dark')
+    const previousColorScheme = root.style.colorScheme
+    root.classList.toggle('dark', mode === 'dark')
+    root.style.colorScheme = mode
+
+    return () => {
+      root.classList.toggle('dark', wasDark)
+      root.style.colorScheme = previousColorScheme
+    }
+  }, [mode])
 
   return <meta name="theme-color" content={getThemeColor(mode)} />
 }

@@ -70,13 +70,12 @@ Status text and icons use `ui-success`, `ui-warning`, `ui-error`, or `ui-link`
 for information. Solid status surfaces use `ui-{success,warning,info,error}-solid`
 paired with `ui-on-{success,warning,info,error}`. These pairs are independent
 from status text and chart colors. `UI Kit/Foundations` demonstrates the roles.
-The browser `theme-color` follows the application scheme using literal sRGB
-colors in `kit/themeColor.ts`. Keep these values aligned with Canvas in
-`kit/theme.css` when changing the palette. The static `public/manifest.json`
-uses the dark Canvas color for the PWA launch background and default theme color;
-update those values manually when dark Canvas changes. The running application's
-theme is independent of the launch background. Installed launch screens may keep
-the manifest metadata captured by the browser at installation/update.
+The PWA manifest leaves the initial frame to the browser and uses dark Canvas
+for the launch background. The `theme-color` tags in `index.html` follow the
+system scheme until `theme-init.js` reads the saved preference. It selects the
+frame color together with the page scheme on startup and on later changes.
+Keep these colors and the isolated renderer's `kit/themeColor.ts` aligned with
+Canvas in `kit/theme.css`.
 
 `src/6-shared/ui/theme/colors.ts` retains the generated palette consumed by
 charts and legacy warning surfaces. Its values are evaluated once

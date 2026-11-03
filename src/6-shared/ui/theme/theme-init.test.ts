@@ -2,15 +2,18 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { runInNewContext } from 'node:vm'
 import { describe, expect, it, vi } from 'vitest'
+import { getThemeColor } from '../kit/themeColor'
 
 const source = readFileSync(resolve('public/theme-init.js'), 'utf8')
+const entry = new DOMParser().parseFromString(
+  readFileSync(resolve('index.html'), 'utf8').split('</head>')[0],
+  'text/html'
+)
+const manifest = JSON.parse(
+  readFileSync(resolve('public/manifest.json'), 'utf8')
+)
 
 type Theme = 'light' | 'dark'
-type ThemeManager = {
-  getTheme: () => Theme
-  toggle: () => void
-  subscribe: (listener: () => void) => () => void
-}
 
 function runThemeManager(options?: {
   prefersDark?: boolean
@@ -19,19 +22,9 @@ function runThemeManager(options?: {
   storageWritesThrow?: boolean
 }) {
   const values = new Map(Object.entries(options?.stored ?? {}))
-  const classes = new Set<string>()
+  const page = entry.cloneNode(true) as Document
   const mediaListeners = new Set<() => void>()
   const storageListeners = new Set<(event: { key: string | null }) => void>()
-  const root = {
-    classList: {
-      contains: (name: string) => classes.has(name),
-      toggle: (name: string, force: boolean) => {
-        if (force) classes.add(name)
-        else classes.delete(name)
-      },
-    },
-    style: { colorScheme: '' },
-  }
   const query = {
     matches: options?.prefersDark ?? false,
     addEventListener: (_event: string, listener: () => void) => {
@@ -54,14 +47,14 @@ function runThemeManager(options?: {
       values.delete(key)
     },
   }
-  const window: { themeManager?: ThemeManager } = {}
+  const window: Pick<Window, 'themeManager'> = {}
 
   runInNewContext(source, {
     Map,
     Set,
     JSON,
     window,
-    document: { documentElement: root },
+    document: page,
     localStorage,
     matchMedia: () => query,
     addEventListener: (
@@ -77,7 +70,16 @@ function runThemeManager(options?: {
   return {
     manager: window.themeManager,
     values,
-    root,
+    root: page.documentElement,
+    query,
+    get themeColor() {
+      const frames = page.head.querySelectorAll<HTMLMetaElement>(
+        'meta[name="theme-color"]'
+      )
+      return [...frames].find(
+        frame => matchMedia(frame.getAttribute('media') ?? '').matches
+      )?.content
+    },
     setSystemTheme(theme: Theme) {
       query.matches = theme === 'dark'
       mediaListeners.forEach(listener => listener())
@@ -89,11 +91,39 @@ function runThemeManager(options?: {
 }
 
 describe('theme-init', () => {
-  it('applies the resolved system scheme during script execution', () => {
+  it('leaves the native launch frame to the browser and declares both page colors before boot', () => {
+    const frames = entry.head.querySelectorAll<HTMLMetaElement>(
+      'meta[name="theme-color"]'
+    )
+    const boot = entry.head.querySelector<HTMLScriptElement>(
+      'meta[name="theme-color"] ~ script[src="/theme-init.js"]'
+    )
+    expect(manifest.theme_color).toBeUndefined()
+    expect(
+      [...frames].map(frame => [frame.getAttribute('media'), frame.content])
+    ).toEqual([
+      ['(prefers-color-scheme: dark)', getThemeColor('dark')],
+      [null, getThemeColor('light')],
+    ])
+    expect(boot).toMatchObject({ async: false, defer: false })
+    expect(['', 'text/javascript', 'application/javascript']).toContain(
+      boot?.type
+    )
+  })
+
+  it('keeps the reported theme and frame in sync from boot through a system change', () => {
     const page = runThemeManager({ prefersDark: true })
 
     expect(page.root.classList.contains('dark')).toBe(true)
     expect(page.root.style.colorScheme).toBe('dark')
+    expect(page.themeColor).toBe(getThemeColor('dark'))
+    page.query.matches = false
+    expect(page.manager.getTheme()).toBe('dark')
+    expect(page.themeColor).toBe(getThemeColor('dark'))
+
+    page.setSystemTheme('light')
+    expect(page.manager.getTheme()).toBe('light')
+    expect(page.themeColor).toBe(getThemeColor('light'))
   })
 
   it('keeps explicit choices and returns to the system default reversibly', () => {
@@ -103,9 +133,11 @@ describe('theme-init', () => {
     })
 
     expect(page.manager.getTheme()).toBe('light')
+    expect(page.themeColor).toBe(getThemeColor('light'))
     page.manager.toggle()
 
     expect(page.manager.getTheme()).toBe('dark')
+    expect(page.themeColor).toBe(getThemeColor('dark'))
     expect(page.values.has('theme')).toBe(false)
   })
 
@@ -120,6 +152,7 @@ describe('theme-init', () => {
     expect(page.root.classList.contains('dark')).toBe(true)
     expect(page.root.style.colorScheme).toBe('dark')
     expect(listener).toHaveBeenCalledOnce()
+    expect(page.themeColor).toBe(getThemeColor('dark'))
   })
 
   it('keeps working in memory when localStorage is blocked', () => {
