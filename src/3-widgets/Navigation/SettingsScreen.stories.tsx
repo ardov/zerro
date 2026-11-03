@@ -1,8 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { getRootUserId } from '@/zerro-core/replica'
 import { core } from '@/zerro-core/redux'
 import { makeStoryStore } from 'stories/fixtures/storyStore'
+import { setToken } from '@/store/token'
+import {
+  getBackupFolder,
+  setBackupFolder,
+} from '@/4-features/export/backupFolder'
+import { parseFullBackup } from '@/6-shared/api/zm-adapter'
 import { getBackupContent } from '@/4-features/export/exportJSON'
 import { MenuButton } from './MenuButton'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
@@ -456,4 +464,129 @@ export const ImportConfirmation: Story = {
 export const ImportConfirmationMobile: Story = {
   ...ImportConfirmation,
   globals: { viewport: { value: 'iphone13' } },
+}
+
+function FolderBackupHarness() {
+  const dispatch = useAppDispatch()
+  useEffect(() => {
+    dispatch(setToken('storybook-folder-backup'))
+    return () => {
+      dispatch(setToken(null))
+    }
+  }, [dispatch])
+  return <MenuButton />
+}
+
+// The native picker itself is a browser dialog. Give it a real, isolated
+// directory so Chromium exercises file writing and IndexedDB handle cloning.
+function checkDailyFolderBackup(
+  surface: 'dialog' | 'menu'
+): NonNullable<Story['play']> {
+  return async ({ canvasElement }) => {
+    const rootId = getRootUserId(makeStoryStore().getState().data.base.user)
+    if (rootId === null) throw new Error('Missing fixture owner')
+    const root = await navigator.storage.getDirectory()
+    const directory = await root.getDirectoryHandle(
+      `Backups-${crypto.randomUUID()}`,
+      { create: true }
+    )
+    const replacement = await root.getDirectoryHandle(
+      `Backups-${crypto.randomUUID()}`,
+      { create: true }
+    )
+    let chosen = directory
+    const picker = Object.getOwnPropertyDescriptor(
+      window,
+      'showDirectoryPicker'
+    )
+    Object.defineProperty(window, 'showDirectoryPicker', {
+      configurable: true,
+      value: async () => chosen,
+    })
+    try {
+      await setBackupFolder(rootId)
+      const screen = await openSettings(canvasElement)
+      const row = await within(screen).findByRole('button', {
+        name: 'Daily backup to folder',
+      })
+      await userEvent.click(row)
+      await within(canvasElement.ownerDocument.body).findByText('Backup saved')
+      const configured = await within(screen).findByRole('button', {
+        name: new RegExp(`Daily backup to folder.*${directory.name}`),
+      })
+      expect(configured).toHaveAttribute('aria-haspopup', surface)
+      const entries = []
+      for await (const file of directory.values()) entries.push(file)
+      expect(entries).toHaveLength(1)
+      const file = await (entries[0] as FileSystemFileHandle).getFile()
+      const data = await file.text()
+      expect(file.name).toMatch(
+        new RegExp(`^zm-backup-${rootId}-[0-9]{4}-[0-9]{2}-[0-9]{2}\\.json$`)
+      )
+      expect(parseFullBackup(data).ok).toBe(true)
+      const saved = await getBackupFolder(rootId)
+      if (!saved) throw new Error('Backup folder was not persisted')
+      await setBackupFolder(rootId, {
+        ...saved,
+        lastSavedAt: null,
+        problem: 'access',
+      })
+      const body = within(canvasElement.ownerDocument.body)
+      async function selectOption(label: RegExp, action: string) {
+        const trigger = await within(screen).findByRole('button', {
+          name: label,
+        })
+        await waitFor(() => expect(trigger).toBeEnabled())
+        await userEvent.click(trigger)
+        const options = await body.findByRole(surface, {
+          name: 'Backup options',
+        })
+        const item = within(options).getByRole(
+          surface === 'dialog' ? 'button' : 'menuitem',
+          { name: action }
+        )
+        await waitFor(() => {
+          expect(item).toBeVisible()
+          expect(getComputedStyle(item).pointerEvents).not.toBe('none')
+        })
+        await userEvent.click(item)
+        await waitFor(() => expect(options).not.toBeInTheDocument())
+      }
+      await selectOption(/Automatic backups paused/, 'Resume automatic backups')
+      const original = await directory.getFileHandle(file.name)
+      expect((await original.getFile()).lastModified).toBe(file.lastModified)
+      chosen = replacement
+      await selectOption(/Daily backup to folder/, 'Change backup folder')
+      await selectOption(
+        new RegExp(`Daily backup to folder.*${replacement.name}`),
+        'Turn off automatic backups'
+      )
+      const copied = await (
+        await replacement.getFileHandle(file.name)
+      ).getFile()
+      expect(await copied.text()).toBe(data)
+      await within(screen).findByRole('button', {
+        name: 'Daily backup to folder',
+      })
+      expect(await directory.getFileHandle(file.name)).toBeDefined()
+    } finally {
+      if (picker) Object.defineProperty(window, 'showDirectoryPicker', picker)
+      else Reflect.deleteProperty(window, 'showDirectoryPicker')
+      await setBackupFolder(rootId)
+      await root.removeEntry(directory.name, { recursive: true })
+      await root.removeEntry(replacement.name, { recursive: true })
+    }
+  }
+}
+
+export const DailyFolderBackup: Story = {
+  tags: ['!autodocs'],
+  render: () => <FolderBackupHarness />,
+  play: checkDailyFolderBackup('menu'),
+}
+
+export const DailyFolderBackupMobile: Story = {
+  ...DailyFolderBackup,
+  globals: { viewport: { value: 'iphone13' } },
+  play: checkDailyFolderBackup('dialog'),
 }

@@ -35,6 +35,7 @@ import { track } from '@/6-shared/analytics'
 import { Button, IconButton } from '@/6-shared/ui/kit/Button'
 import { historyPanelScreen } from '@/3-widgets/History/HistoryPanel'
 import { ImportBackupItem } from '@/4-features/import/ImportBackupItem'
+import { BackupFolderItem } from '@/4-features/export/BackupFolderItem'
 import { exportCSV } from '@/4-features/export/exportCSV'
 import { exportJSON } from '@/4-features/export/exportJSON'
 import { convertZmBudgetsToZerro } from '@/4-features/budget/convertZmBudgetsToZerro'
@@ -79,6 +80,7 @@ function SettingsContent(props: { onClose: () => void }) {
           onClick={() => openHistory(true)}
         />
         <ExportBackup />
+        <BackupFolderItem />
         <ListRow
           render={
             <button

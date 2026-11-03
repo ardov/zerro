@@ -3,6 +3,7 @@ import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 import { store } from '@/store'
 import { resetData } from '@/store/data'
 import { useEffect } from 'react'
+import { startDailyBackups } from '@/4-features/export/dailyBackup'
 import { startAppUpdates } from '@/4-features/appUpdates'
 import { registerSW } from 'virtual:pwa-register'
 
@@ -13,6 +14,7 @@ initSentry()
 createZerroInstance(store)
 
 export const MainApp = () => {
+  useEffect(() => startDailyBackups(store), [])
   useEffect(() => startAppUpdates(registerSW), [])
   return (
     <GlobalErrorBoundary>

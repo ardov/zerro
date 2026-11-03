@@ -45,6 +45,7 @@ import {
   EllipsisVertical,
   Eye,
   Flag,
+  FolderClock,
   Funnel,
   ListFilter,
   Globe,
@@ -86,6 +87,7 @@ export const SyncIcon = createIcon(RefreshCw, 'SyncIcon')
 export const HistoryIcon = createIcon(RotateCcwClock, 'HistoryIcon')
 export const UndoIcon = createIcon(CornerUpLeft, 'UndoIcon')
 export const RedoIcon = createIcon(CornerUpRight, 'RedoIcon')
+export const BackupFolderIcon = createIcon(FolderClock, 'BackupFolderIcon')
 export const SaveAltIcon = createIcon(Download, 'SaveAltIcon')
 export const UploadIcon = createIcon(Upload, 'UploadIcon')
 export const SendIcon = createIcon(Send, 'SendIcon')
