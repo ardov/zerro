@@ -60,6 +60,16 @@ function checkFocusOutline(action: HTMLElement) {
   expect(getComputedStyle(tile).outlineOffset).toBe('1px')
 }
 
+export const ArticleInAnotherLanguage: Story = {
+  globals: { locale: 'ru' },
+  parameters: { app: { route: '/en/about/method' } },
+  render: () => <Rail accountsPanelFits />,
+  play: async ({ canvasElement }) => {
+    const current = within(canvasElement).getByRole('link', { current: 'page' })
+    await expect(current).toHaveAttribute('href', '/en/about')
+  },
+}
+
 export const DesktopRail: Story = {
   parameters: { app: { route: '/transactions' } },
   render: () => (

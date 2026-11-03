@@ -15,10 +15,9 @@ loaded from `REACT_APP_GAID`, which must be a GA4 measurement id. Events are
 declared in a typed catalog, so a name or property that is not in
 `AnalyticsEventMap` does not compile.
 
-- `initAnalytics()` loads the tag once, in production only, with automatic page
-  views disabled.
-- `trackPageView(pathname)` sends every page view explicitly, including the
-  first one.
+- `trackPageView(pathname, referrer)` initializes the configured tag once in a
+  production build and sends explicit page views. Client-side navigation uses
+  the previous route as its referrer. The first view uses the browser referrer.
 - `track(name, properties)` sends one catalog event; outside production it logs
   to the console instead.
 - `setAnalyticsUser(userId)` sets the GA `user_id` to the Zenmoney user id, and
@@ -28,6 +27,24 @@ declared in a typed catalog, so a name or property that is not in
 
 Sentry is the destination for exceptions and diagnostics. Product analytics and
 diagnostics do not share a channel.
+
+## Missing pages
+
+Both the standalone HTTP 404 and the client router report a standard
+`page_view` with the title `404 · Zerro`. In GA4 Explore, filter **Page title**
+to that value, use **Page path and screen class** and **Page referrer** as
+rows, and **Views** as the metric. Filter **Hostname** to the desired site.
+These are built-in dimensions.
+
+The page location contains the requested path. Queries and fragments are
+omitted, and malformed segments, email addresses and common identifier patterns
+are masked. An internal referrer includes its cleaned path. External referrers
+include only the origin. A browser that withholds the referrer leaves it empty.
+The count covers views for which the browser ran the tag.
+
+The app handles history-based views itself. The GA4 web stream's enhanced
+measurement setting for automatic page views on browser history changes
+should be off to avoid a second view for the same navigation.
 
 ## Yandex Metrica — configured but not loaded
 

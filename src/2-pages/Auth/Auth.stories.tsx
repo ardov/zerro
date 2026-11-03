@@ -20,7 +20,10 @@ export const Login: Story = {
     await waitFor(() =>
       expect(canvas.getByRole('heading', { level: 1 })).toBeVisible()
     )
-    await expect(about).toHaveAttribute('href', '/about')
+    await expect(about).toHaveAttribute(
+      'href',
+      i18n.resolvedLanguage === 'en' ? '/en/about' : '/about'
+    )
     about.focus()
     await expect(about).toHaveFocus()
     await expect(
@@ -124,20 +127,19 @@ export const BackgroundGestures: Story = {
         .data.some((v, i) => i % 4 === 3 && v > 0)
     await waitFor(() => expect(ink()).toBe(true))
     const press = { button: 0, pointerType: 'touch', isPrimary: true }
-    for (let i = 0; i < 10; i++) {
-      fireEvent.pointerDown(ui.getByRole('img', { name: 'Zerro' }), press)
-      fireEvent.pointerDown(ui.getByRole('heading', { level: 1 }), press)
-      fireEvent.pointerDown(
-        ui.getByRole('link', { name: i18n.t('btnAbout') }),
-        press
-      )
-    }
-    // The transparent foreground wrapper contains empty gaps above the artwork.
-    const gap = page.querySelector('.auth-layout')!
+    const targets = [
+      ui.getByRole('img', { name: 'Zerro' }),
+      ui.getByRole('heading', { level: 1 }),
+      ui.getByRole('link', { name: i18n.t('btnAbout') }),
+      page.querySelector('.auth-layout')!,
+    ]
     for (let i = 0; i < defaultCurrencySettings.collapseAfterClicks - 1; i++)
-      fireEvent.pointerDown(gap, press)
+      fireEvent.pointerDown(targets[i % targets.length], press)
     await expect(art).toHaveAttribute('data-currency-state', 'flowing')
-    fireEvent.pointerDown(gap, press)
+    fireEvent.pointerDown(
+      ui.getByRole('button', { name: i18n.t('btnLogin') }),
+      press
+    )
     await waitFor(() => expect(art.dataset.currencyState).not.toBe('flowing'))
     await waitFor(
       () => expect(art).toHaveAttribute('data-currency-state', 'settled'),

@@ -1,0 +1,32 @@
+@layer components {
+  @media (prefers-reduced-motion: no-preference) {
+    .not-found-logo,
+    .not-found-four {
+      animation: not-found-appear 4000ms ease-in-out backwards;
+    }
+
+    .not-found-four {
+      animation-delay: 500ms;
+      transform-origin: right;
+    }
+
+    .not-found-four:last-child {
+      animation-delay: 800ms;
+      transform-origin: left;
+    }
+  }
+
+  @keyframes not-found-appear {
+    from {
+      opacity: 0;
+      filter: blur(8px);
+      scale: 0.9;
+    }
+
+    to {
+      opacity: 1;
+      filter: blur(0);
+      scale: 1;
+    }
+  }
+}

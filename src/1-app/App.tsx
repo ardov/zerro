@@ -1,6 +1,14 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react'
+import React, {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import {
   BrowserRouter,
+  Link,
   Navigate,
   Route,
   Routes,
@@ -8,11 +16,7 @@ import {
 } from 'react-router-dom'
 import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import { useTranslation } from 'react-i18next'
-import {
-  initAnalytics,
-  setAnalyticsUser,
-  trackPageView,
-} from '@/6-shared/analytics'
+import { setAnalyticsUser, trackPageView } from '@/6-shared/analytics'
 import { OverlayHost } from '@/6-shared/overlays'
 import { useAppSelector } from '@/store'
 import { getLoginState } from '@/store/token'
@@ -30,8 +34,11 @@ import { CanvasPage } from '@/6-shared/ui/layout/CanvasPage'
 import ErrorBoundary from '@/3-widgets/ErrorBoundary'
 import Transactions from '@/2-pages/Transactions'
 import Auth from '@/2-pages/Auth'
+import { NotFound } from '@/2-pages/NotFound'
 import Budgets from '@/2-pages/Budgets'
 import Accounts from '@/2-pages/Accounts'
+import { articleRoutes, resolvePage, type AppPath } from '@/6-shared/pageRoutes'
+import { PageHead } from '@/2-pages/About/Head'
 import { GlobalWidgets } from './GlobalWidgets'
 
 const About = lazy(() => import('@/2-pages/About'))
@@ -39,6 +46,30 @@ const Donation = lazy(() => import('@/2-pages/Donation'))
 const Token = lazy(() => import('@/2-pages/Token'))
 const Stats = lazy(() => import('@/2-pages/Stats'))
 const Review = lazy(() => import('@/2-pages/Review'))
+
+const defaultPage = <Navigate to="/transactions" replace />
+const signedInPages = {
+  '/': defaultPage,
+  '/login': defaultPage,
+  '/transactions': <Transactions />,
+  '/accounts': <AccountsPage />,
+  '/budget': <Budgets />,
+  '/review': (
+    <CanvasRoute>
+      <Review />
+    </CanvasRoute>
+  ),
+  '/stats': (
+    <CanvasRoute>
+      <Stats />
+    </CanvasRoute>
+  ),
+  '/token': (
+    <CanvasRoute>
+      <Token />
+    </CanvasRoute>
+  ),
+} satisfies Record<Exclude<AppPath, '/donation'>, React.ReactNode>
 
 export default function App() {
   return (
@@ -57,107 +88,15 @@ function Application() {
     setAnalyticsUser(userId || null)
   }, [userId])
 
-  const publicRoutes = [
-    <Route
-      key="about"
-      path="/about/*"
-      element={
-        <CanvasRoute>
-          <About />
-        </CanvasRoute>
-      }
-    />,
-    <Route
-      key="donation"
-      path="/donation"
-      element={
-        <CanvasRoute>
-          <Donation />
-        </CanvasRoute>
-      }
-    />,
-  ]
-
-  const notLoggedIn = [
-    ...publicRoutes,
-    <Route
-      key="*"
-      path="*"
-      element={
-        <CanvasRoute>
-          <Auth />
-        </CanvasRoute>
-      }
-    />,
-  ]
-
-  const loggedInNoData = [
-    ...publicRoutes,
-    <Route
-      key="token"
-      path="/token"
-      element={
-        <CanvasRoute>
-          <Token />
-        </CanvasRoute>
-      }
-    />,
-    <Route key="*" path="*" element={<MainLoader />} />,
-  ]
-
-  const loggedInWithData = [
-    ...publicRoutes,
-    <Route
-      key="token"
-      path="/token"
-      element={
-        <CanvasRoute>
-          <Token />
-        </CanvasRoute>
-      }
-    />,
-    <Route
-      key="transactions"
-      path="/transactions"
-      element={<Transactions />}
-    />,
-    <Route
-      key="review"
-      path="/review"
-      element={
-        <CanvasRoute>
-          <Review />
-        </CanvasRoute>
-      }
-    />,
-    <Route key="accounts" path="/accounts" element={<AccountsPage />} />,
-    <Route key="budget" path="/budget" element={<Budgets />} />,
-    <Route
-      key="stats"
-      path="/stats"
-      element={
-        <CanvasRoute>
-          <Stats />
-        </CanvasRoute>
-      }
-    />,
-    <Route
-      key="*"
-      path="*"
-      element={<Navigate to="/transactions" replace />}
-    />,
-  ]
-
-  const getRoutes = () => {
-    if (!isLoggedIn) return notLoggedIn
-    if (!hasData) return loggedInNoData
-    return loggedInWithData
-  }
-
-  const routes = getRoutes()
+  const auth = (
+    <CanvasRoute>
+      <Auth />
+    </CanvasRoute>
+  )
 
   return (
     <>
+      <PageMetadata signedIn={isLoggedIn} />
       <AnalyticsNavigation />
       <OverlayHost>
         <RegularSyncHandler />
@@ -168,7 +107,53 @@ function Application() {
         >
           <ErrorBoundary>
             <Suspense fallback={<FallbackLoader />}>
-              <Routes>{routes}</Routes>
+              <Routes>
+                {articleRoutes.map(article => (
+                  <Route
+                    key={article.path}
+                    path={article.path}
+                    caseSensitive
+                    element={
+                      <CanvasRoute>
+                        <About {...article} />
+                      </CanvasRoute>
+                    }
+                  />
+                ))}
+                <Route
+                  path="/donation"
+                  caseSensitive
+                  element={
+                    <CanvasRoute>
+                      <Donation />
+                    </CanvasRoute>
+                  }
+                />
+                {Object.entries(signedInPages).map(([path, page]) => {
+                  let element = page
+                  if (!isLoggedIn) element = auth
+                  else if (!hasData && path !== '/token')
+                    element = <MainLoader />
+                  return (
+                    <Route
+                      key={path}
+                      path={path}
+                      caseSensitive
+                      element={element}
+                    />
+                  )
+                })}
+                <Route
+                  path="*"
+                  element={
+                    <>
+                      <title>404 · Zerro</title>
+                      <meta name="robots" content="noindex" />
+                      <NotFound homeLink={<Link to="/" />} />
+                    </>
+                  }
+                />
+              </Routes>
             </Suspense>
           </ErrorBoundary>
         </RouteLayout>
@@ -178,11 +163,38 @@ function Application() {
   )
 }
 
+function PageMetadata({ signedIn }: { signedIn: boolean }) {
+  const { pathname } = useLocation()
+  const { i18n } = useTranslation()
+  const page = resolvePage(pathname)
+  const article = page?.article
+  const language = article?.language ?? i18n.resolvedLanguage ?? i18n.language
+  useLayoutEffect(() => {
+    document.documentElement.lang = language
+  }, [language, i18n.resolvedLanguage])
+  return (
+    <PageHead
+      article={article}
+      includeTitleAndDescription={
+        !!article || (!!page && !signedIn && page.path !== '/donation')
+      }
+    />
+  )
+}
+
 function AnalyticsNavigation() {
   const { pathname } = useLocation()
 
-  useEffect(() => initAnalytics(), [])
-  useEffect(() => trackPageView(pathname), [pathname])
+  const previousPath = useRef<string | null>(null)
+  useEffect(() => {
+    if (previousPath.current === pathname) return
+    const referrer =
+      previousPath.current === null
+        ? document.referrer
+        : location.origin + previousPath.current
+    trackPageView(pathname, referrer)
+    previousPath.current = pathname
+  }, [pathname])
 
   return null
 }

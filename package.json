@@ -90,6 +90,8 @@
     "tailwind-merge": "^3.7.0",
     "tldts": "^7.4.18",
     "uuid": "^14.0.3",
+    "workbox-core": "^7.4.1",
+    "workbox-precaching": "^7.4.1",
     "workbox-window": "^7.4.1",
     "zod": "4.6.7"
   },

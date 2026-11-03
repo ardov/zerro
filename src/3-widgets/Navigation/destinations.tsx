@@ -1,3 +1,4 @@
+import { useAboutPath } from '@/6-shared/localization/useAboutPath'
 import type { ComponentType } from 'react'
 import type { TIconProps } from '@/6-shared/ui/lucide/createIcon'
 import { useTranslation } from 'react-i18next'
@@ -27,6 +28,7 @@ export function useDestinations(props: {
 }) {
   const { mobile, accountsPanelFits } = props
   const { t } = useTranslation('navigation')
+  const aboutPath = useAboutPath()
   const destinations: TDestination[] = [
     { path: '/transactions', label: t('transactions'), icon: SyncAltIcon },
     { path: '/budget', label: t('budget'), icon: BudgetIcon },
@@ -44,7 +46,7 @@ export function useDestinations(props: {
   })
   if (!mobile)
     destinations.push({
-      path: '/about',
+      path: aboutPath,
       label: t('about'),
       icon: HowToUseIcon,
     })

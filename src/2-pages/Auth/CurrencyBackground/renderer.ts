@@ -442,17 +442,7 @@ export function startCurrencyBackground(
   }
 
   function handlePointerDown(event: PointerEvent) {
-    const target = event.target
-    if (
-      !loaded ||
-      event.defaultPrevented ||
-      event.button !== 0 ||
-      !(target instanceof Element) ||
-      target.closest(
-        'button, a, input, select, textarea, label, [role="button"], [contenteditable], svg, p, h1, h2, h3'
-      )
-    )
-      return
+    if (!loaded || event.defaultPrevented || event.button !== 0) return
     const bounds = canvas.getBoundingClientRect()
     const cursor = {
       x: ((event.clientX - bounds.left) * width) / bounds.width,
@@ -643,7 +633,11 @@ export function startCurrencyBackground(
   resize()
   document.addEventListener('visibilitychange', syncMotion)
   motion.addEventListener('change', syncMotion)
-  host?.addEventListener('pointerdown', handlePointerDown)
+  // Observe presses before foreground controls handle them, without taking the gesture.
+  host?.addEventListener('pointerdown', handlePointerDown, {
+    capture: true,
+    passive: true,
+  })
   void Promise.all([
     document.fonts.load(`${size}px "Zerro Currency Glyphs"`, pool.join('')),
     document.fonts.load(`${size}px "Zerro Currency Extras"`, pool.join('')),
@@ -664,7 +658,7 @@ export function startCurrencyBackground(
     observer.disconnect()
     document.removeEventListener('visibilitychange', syncMotion)
     motion.removeEventListener('change', syncMotion)
-    host?.removeEventListener('pointerdown', handlePointerDown)
+    host?.removeEventListener('pointerdown', handlePointerDown, true)
     pile?.dispose()
     sprites = []
     delete canvas.dataset.currencyState

@@ -17,8 +17,7 @@ root.render(
 
 function RemoveStaticHeadFallback() {
   useLayoutEffect(() => {
-    document.getElementById('static-title')?.remove()
-    document.getElementById('static-description')?.remove()
+    document.querySelectorAll('[data-static-head]').forEach(tag => tag.remove())
   }, [])
 
   return null

@@ -1,4 +1,6 @@
 import { appVersion, gaid, isProduction } from '@/6-shared/config'
+import { resolvePage } from '@/6-shared/pageRoutes'
+import { reportablePath, reportableReferrer } from './pageUrls'
 import type { AnalyticsEventMap, AnalyticsEventName } from './events'
 
 type Gtag = (
@@ -16,28 +18,60 @@ declare global {
 
 let tagInitialized = false
 
-export function initAnalytics(): void {
-  if (!isProduction || !gaid) return
+type PageContext = { page_location: string; page_referrer: string }
 
-  if (!tagInitialized) {
-    tagInitialized = true
-    window.dataLayer = window.dataLayer || []
-    window.gtag = (...args) => window.dataLayer?.push(args)
-
-    const script = document.createElement('script')
-    script.async = true
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaid)}`
-    document.head.appendChild(script)
-
-    window.gtag('js', new Date())
-    window.gtag('config', gaid, { send_page_view: false })
-    window.gtag('set', { app_version: appVersion })
+function configurePage(context: PageContext, notFound: boolean): void {
+  if (tagInitialized) {
+    window.gtag?.('config', gaid, {
+      update: true,
+      send_page_view: false,
+      ...context,
+    })
+    return
   }
+  window.dataLayer ??= []
+  window.gtag ??= function () {
+    // Google's command queue expects an arguments object.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer?.push(arguments)
+  }
+
+  const script = document.createElement('script')
+  script.async = true
+  script.referrerPolicy = 'origin'
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaid)}`
+  document.head.appendChild(script)
+
+  window.gtag('js', new Date())
+  // Preserve campaign attribution on regular landings. A missing URL may contain private data.
+  window.gtag('config', gaid, {
+    send_page_view: false,
+    ...(notFound && context),
+  })
+  window.gtag('set', { app_version: appVersion })
+  tagInitialized = true
 }
 
-export function trackPageView(pathname: string): void {
+export function trackPageView(
+  pathname: string,
+  referrer = document.referrer
+): void {
   if (!isProduction || !gaid) return
-  pageView(pathname)
+  const notFound = !resolvePage(pathname)
+  const path = notFound ? reportablePath(pathname) : pathname
+  const context = {
+    page_location: location.origin + path,
+    page_referrer: reportableReferrer(referrer),
+  }
+  safelySend(() => {
+    configurePage(context, notFound)
+    window.gtag?.('event', 'page_view', {
+      ...context,
+      page_path: path,
+      ...(notFound && { page_title: '404 · Zerro' }),
+      send_to: gaid,
+    })
+  })
 }
 
 export function track<K extends AnalyticsEventName>(
@@ -54,15 +88,6 @@ export function track<K extends AnalyticsEventName>(
 export function setAnalyticsUser(userId: number | null): void {
   if (!isProduction) return
   safelySend(() => window.gtag?.('set', { user_id: userId || null }))
-}
-
-function pageView(pathname: string): void {
-  safelySend(() =>
-    window.gtag?.('event', 'page_view', {
-      page_location: `${window.location.origin}${pathname}`,
-      page_path: pathname,
-    })
-  )
 }
 
 function clean(properties: object): Record<string, unknown> {

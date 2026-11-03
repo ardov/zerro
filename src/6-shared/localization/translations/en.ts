@@ -3,6 +3,8 @@ import type ru from './ru.json'
 export const en: typeof ru = {
   common: {
     commandWriteBlocked: 'Editing is currently unavailable.',
+    pageNotFound: 'Page not found.',
+    returnToApp: 'Return to the app',
     btnLogin: 'Sign in with Zenmoney',
     authHeading: 'An independent Zenmoney web app with envelope budgeting',
     btnAbout: 'What is envelope budgeting?',

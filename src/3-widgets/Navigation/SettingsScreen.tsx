@@ -1,3 +1,4 @@
+import { useAboutPath } from '@/6-shared/localization/useAboutPath'
 import { useId, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
@@ -141,6 +142,7 @@ function SettingsContent(props: { onClose: () => void }) {
 
 function NavigationLinks() {
   const { t } = useTranslation('navigation')
+  const aboutPath = useAboutPath()
   const mobile = useMobileLayout()
   const destinations = [
     ...(mobile
@@ -154,7 +156,13 @@ function NavigationLinks() {
       : []),
     { to: '/review', label: t('yearWrapped'), icon: <WhatshotIcon /> },
     ...(mobile
-      ? [{ to: '/about', label: t('about'), icon: <HowToUseIcon /> }]
+      ? [
+          {
+            to: aboutPath,
+            label: t('about'),
+            icon: <HowToUseIcon />,
+          },
+        ]
       : []),
     { to: '/donation', label: t('donate'), icon: <FavoriteBorderIcon /> },
   ]

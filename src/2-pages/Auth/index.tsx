@@ -1,3 +1,4 @@
+import { useAboutPath } from '@/6-shared/localization/useAboutPath'
 import { Button, IconButton } from '@/6-shared/ui/kit/Button'
 import type { CSSProperties } from 'react'
 import { useEffect, useState } from 'react'
@@ -23,6 +24,7 @@ zenmoney.processAuthCode()
 export default function Auth() {
   const dispatch = useAppDispatch()
   const { t, i18n } = useTranslation()
+  const aboutPath = useAboutPath()
   const theme = useColorScheme()
   const russian = (i18n.resolvedLanguage || i18n.language).startsWith('ru')
   const nextLanguage = russian ? 'en' : 'ru'
@@ -122,7 +124,7 @@ export default function Auth() {
           style={reveal(3000)}
         >
           <RouterLink
-            to="/about"
+            to={aboutPath}
             className="-m-2 rounded-ui-control-inner p-2 no-underline hover:text-ui-primary focusable"
           >
             {t('btnAbout')}

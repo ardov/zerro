@@ -1,6 +1,6 @@
 # Merchant favicon cache
 
-The generated service worker imports `public/favicon-cache-sw.js`. It intercepts
+The service worker in `src/service-worker.ts` imports `public/favicon-cache-sw.js`. It intercepts
 only Google favicon image requests made by the shared `Favicon` component.
 The component reports successful decoding or failure; opaque responses are saved
 only after a matching client reports `load` for the exact image attempt. Each
