@@ -103,6 +103,11 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   )
 }
 
+const rateFormat = new Intl.NumberFormat('en', {
+  maximumFractionDigits: 3,
+  useGrouping: false,
+})
+
 const FxRateInput: FC<{
   code: TFxCode
   mainCode: TFxCode
@@ -119,7 +124,9 @@ const FxRateInput: FC<{
   const leftCode = isSwapped ? mainCode : code
   const rightCode = isSwapped ? code : mainCode
   const wholePrice = quotePerUnit * unitRatio
-  const rate = Number((isSwapped ? 1 / wholePrice : wholePrice).toPrecision(12))
+  const rate = isSwapped ? 1 / wholePrice : wholePrice
+  const formattedRate = rateFormat.format(rate)
+  const showUpperBound = draft === null && rate > 0 && formattedRate === '0'
 
   const onChg = useDebouncedCallback(
     (text: string) => {
@@ -137,7 +144,7 @@ const FxRateInput: FC<{
       label={`${leftCode} / ${rightCode}`}
       size="sm"
       inputMode="decimal"
-      value={draft ?? String(rate)}
+      value={draft ?? (showUpperBound ? '0.001' : formattedRate)}
       onValueChange={value => {
         setDraft(value)
         onChg(value)
@@ -146,7 +153,7 @@ const FxRateInput: FC<{
         onChg.flush()
         setDraft(null)
       }}
-      prefix={`1 ${leftCode} =`}
+      prefix={`1 ${leftCode} ${showUpperBound ? '<' : '='}`}
       end={
         <FieldAddon kind="action">
           <KitButton

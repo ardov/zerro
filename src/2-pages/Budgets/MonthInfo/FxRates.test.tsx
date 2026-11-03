@@ -68,7 +68,7 @@ it('edits a whole SOL held outside the budget at the end of the selected month',
         payload: {
           date: '2025-07',
           changed: 1,
-          rates: { USD: 1, SOL: 0.000125 },
+          rates: { USD: 1, SOL: 0.000125123789 },
         },
       }),
     },
@@ -84,24 +84,27 @@ it('edits a whole SOL held outside the budget at the end of the selected month',
   )
   const view = render(editor('2025-08'))
   const field = screen.getByRole('textbox', { name: 'SOL / USD' })
-  expect(field).toHaveValue('125')
-  fireEvent.change(field, { target: { value: '127,5' } })
+  expect(field).toHaveValue('125.124')
+  fireEvent.change(field, { target: { value: '127,500123' } })
+  expect(field).toHaveValue('127,500123')
   fireEvent.blur(field)
-  const convert = core.currency.selectDisplayConverter(store.getState())
-  expect(convert({ SOL: 2_000_000 }, '2025-08')).toBe(255)
+  const { rates } = core.fxRates.selectGetter(store.getState())('2025-08')
+  expect((rates.SOL / rates.USD) * 1_000_000).toBeCloseTo(127.500123, 10)
   expect(field).toHaveValue('127.5')
 
   fireEvent.click(screen.getByRole('button', { name: /USD/ }))
   const inverse = screen.getByRole('textbox', { name: 'USD / SOL' })
-  expect(Number((inverse as HTMLInputElement).value)).toBeCloseTo(1 / 127.5, 10)
-  fireEvent.change(inverse, { target: { value: '0.01' } })
+  expect(inverse).toHaveValue('0.008')
+  fireEvent.change(inverse, { target: { value: '0.00001' } })
   fireEvent.blur(inverse)
+  expect(screen.getByText('1 USD <')).toBeVisible()
+  expect(inverse).toHaveValue('0.001')
   expect(
     core.currency.selectDisplayConverter(store.getState())(
       { SOL: 1_000_000 },
       '2025-08'
     )
-  ).toBe(100)
+  ).toBeCloseTo(100_000, 6)
 
   view.rerender(editor('2025-09'))
   expect(
