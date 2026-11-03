@@ -37,6 +37,7 @@
      cover and the last row can still be scrolled clear of it. The content
      resets it: an area nested inside does not reach the cover. */
   .kit-scroll-viewport {
+    isolation: isolate;
     scroll-padding-top: var(--kit-scroll-top-inset, 0px);
     padding-bottom: var(--kit-scroll-bottom-inset, 0px);
     scroll-padding-bottom: var(--kit-scroll-bottom-inset, 0px);
