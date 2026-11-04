@@ -110,6 +110,18 @@ export function appendOutbox(
   return { outbox: [...outbox, command], redo: [] }
 }
 
+/** Replace the editable tail with one command; a `null` command drops it. */
+export function editOutbox(
+  outbox: readonly TCommand[],
+  command: TCommand | null,
+  replacing: boolean
+): TOutboxState {
+  const prefix = replacing ? outbox.slice(0, -1) : outbox
+  return command
+    ? appendOutbox(prefix, command)
+    : { outbox: [...prefix], redo: [] }
+}
+
 export function undoOutbox(
   outbox: readonly TCommand[],
   redo: readonly TCommand[]

@@ -20,19 +20,8 @@ describe('getBackupContent', () => {
         current: makeAccount({ id: 'current', title: 'Unsynchronized' }),
       },
     })
-    const state = makeTestRootState(current, {
-      data: {
-        base,
-        current,
-        outbox: [{} as TCommand],
-        redo: [],
-        rootUserId: null,
-        journalRecoveryRequired: false,
-        journalRecoveryReason: null,
-        outboxRecoveryReason: null,
-        persistenceWarning: null,
-      },
-    })
+    const state = makeTestRootState(current)
+    state.data = { ...state.data, base, outbox: [{} as TCommand] }
 
     const backup = JSON.parse(getBackupContent(state))
 

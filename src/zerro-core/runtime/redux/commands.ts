@@ -1,3 +1,4 @@
+import { int2hex } from '../../internal/domain/zenmoney/model/color'
 import { entityOperations } from '../../internal/domain/zenmoney/operations'
 import { prepareZerro } from '../../internal/domain/zerro/operations/prepare'
 import type {
@@ -44,10 +45,11 @@ import { checkBackupCompatibility } from '../../internal/operations/restore/back
 import { selectData } from './state'
 import { graph } from './graph'
 import {
+  envId,
   compileApplyEnvelopeStructure,
   compileCreateEnvelope,
   compileRenameEnvelope,
-  compileSetEnvelopeColor,
+  compileSetEnvelopeAppearance,
   compileSetEnvelopeComment,
   compileUpdateEnvelopeSettings,
   compileSetBudget,
@@ -72,6 +74,7 @@ import {
 } from './commandRead'
 import {
   coreContext,
+  editGroupedCommand,
   executeReduxCommand,
   executeReduxCommandWithStatus,
   type TReduxCommandCompiler,
@@ -260,13 +263,24 @@ export function renameEnvelope(id: TEnvelopeId, name: string): AppThunk {
   )
 }
 
-export function setEnvelopeColor(
+export function setEnvelopeAppearance(
   id: TEnvelopeId,
-  colorHex: string | null
+  change: { colorHex?: string | null; icon?: string | null },
+  group: string
 ): AppThunk {
-  return executeCommand(
-    state => compileSetEnvelopeColor(selectData(state), { id, colorHex }),
-    { verb: 'envelope-color-set', args: { id } }
+  return editGroupedCommand(
+    group,
+    { verb: 'envelope-settings-changed', args: { id } },
+    (before, live) => {
+      const tag = live.tag[envId.parse(id).id]
+      if (!tag) return { operations: [] }
+      return compileSetEnvelopeAppearance(before, {
+        id,
+        colorHex: int2hex(tag.color),
+        icon: tag.icon,
+        ...change,
+      })
+    }
   )
 }
 

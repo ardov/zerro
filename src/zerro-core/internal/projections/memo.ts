@@ -85,3 +85,13 @@ export function sameItems<T>(
 ): boolean {
   return sameValues(previous, next)
 }
+
+/** Result equality for nodes that rebuild an id set from a wider entity map. */
+export function sameSet<T>(
+  previous: ReadonlySet<T>,
+  next: ReadonlySet<T>
+): boolean {
+  if (previous.size !== next.size) return false
+  for (const item of next) if (!previous.has(item)) return false
+  return true
+}

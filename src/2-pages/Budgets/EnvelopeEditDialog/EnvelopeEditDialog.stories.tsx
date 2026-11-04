@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { useAppSelector } from '@/store'
@@ -19,12 +20,16 @@ function EditHarness() {
   // The same selector the envelope preview edits from: the metrics entry for
   // an envelope is a different shape and has no `originalName`.
   const envelopes = useAppSelector(core.envelopes.selectAll)
-  const envelope = Object.values(envelopes).find(e => e.name === 'Food')!
+  const [id] = useState(
+    () => Object.values(envelopes).find(e => e.name === 'Food')!.id
+  )
+  const envelope = envelopes[id]
   return (
     <>
       <button type="button" onClick={() => open(envelope.id)}>
         Edit envelope
       </button>
+      <output aria-label="Stored name">{envelope.originalName}</output>
       <EnvelopeEditDialog />
     </>
   )
@@ -58,8 +63,6 @@ export const PickingFromTheSelects: Story = {
     const nextLabel = next.textContent
     await userEvent.click(next)
 
-    // The picked value has to reach formik, which is the whole point of the
-    // change from `handleChange` to `setFieldValue`.
     await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
     await waitFor(() => expect(visibility).toHaveTextContent(nextLabel!))
 
@@ -92,16 +95,19 @@ export const ReturnsFocusAfterRemount: Story = {
       } else {
         await waitFor(() => expect(name).toHaveFocus())
       }
-      await expect(name).toHaveValue('Food')
-      await userEvent.clear(name)
-      await userEvent.type(name, 'Discard this draft')
-      await userEvent.click(
-        within(dialog).getByRole('button', { name: 'Cancel' })
-      )
-      expect(dialog).toBeInTheDocument()
-      expect(dialog).toHaveAttribute('data-ending-style')
-      expect(name).toHaveValue('Discard this draft')
+      await expect(name).toHaveValue(i === 0 ? 'Food' : 'Groceries')
+      if (i === 0) {
+        await userEvent.clear(name)
+        await userEvent.type(name, 'Groceries')
+        await expect(canvas.getByLabelText('Stored name')).toHaveTextContent(
+          'Food'
+        )
+      }
+      await userEvent.keyboard('{Escape}')
       await waitFor(() => expect(dialog).not.toBeVisible())
+      await expect(canvas.getByLabelText('Stored name')).toHaveTextContent(
+        'Groceries'
+      )
       await waitFor(() => expect(trigger).toHaveFocus())
     }
   },
@@ -115,27 +121,37 @@ export const PickingColor: Story = {
   ),
   play: async ({ canvasElement }) => {
     const body = await openDialog(canvasElement)
-    const trigger = body.getByRole('button', { name: /^Color$|^Цвет$/ })
-    await userEvent.click(trigger)
-    const picker = await body.findByRole('dialog', { name: /^Color$|^Цвет$/ })
-    await userEvent.click(
-      within(picker).getByRole('button', { name: '#CC3077' })
-    )
-    await waitFor(() => expect(trigger).toHaveFocus())
-    await expect(trigger.querySelector('span[aria-hidden]')).toHaveStyle({
-      backgroundColor: '#CC3077',
+    const trigger = body.getByRole('button', { name: 'Color and icon' })
+    const field = body
+      .getByRole('textbox', { name: 'Name' })
+      .closest('[data-field-control]')!.parentElement!
+    await waitFor(() => {
+      const circle = trigger.getBoundingClientRect()
+      const box = field.getBoundingClientRect()
+      expect(circle.left - box.left).toBeCloseTo(8, 0)
+      expect(circle.top - box.top).toBeCloseTo(8, 0)
+      expect(box.bottom - circle.bottom).toBeCloseTo(8, 0)
     })
     await userEvent.click(trigger)
-    await body.findByRole('dialog', { name: /^Color$|^Цвет$/ })
+    const picker = await body.findByRole('dialog', { name: 'Color and icon' })
+    await userEvent.click(
+      within(picker).getByRole('button', { name: '#414141' })
+    )
+    await userEvent.click(within(picker).getByRole('button', { name: 'Pizza' }))
+    await expect(trigger.querySelector('span[aria-hidden]')).toHaveStyle({
+      backgroundColor: '#414141',
+    })
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(trigger).toHaveFocus())
-    await expect(trigger.querySelector('span[aria-hidden]')).toHaveStyle({
-      backgroundColor: '#CC3077',
-    })
+    await userEvent.click(trigger)
+    const reopened = await body.findByRole('dialog', { name: 'Color and icon' })
+    await expect(
+      within(reopened).getByRole('button', { name: 'Pizza' })
+    ).toHaveAttribute('aria-pressed', 'true')
   },
 }
 
-export const SaveAndValidate: Story = {
+export const AutosaveAndValidate: Story = {
   render: PickingFromTheSelects.render,
   play: async ({ canvasElement }) => {
     const body = await openDialog(canvasElement)
@@ -143,7 +159,7 @@ export const SaveAndValidate: Story = {
     const form = within(dialog)
     const name = form.getByRole('textbox', { name: 'Name' })
     await userEvent.clear(name)
-    await userEvent.click(form.getByRole('button', { name: 'Save' }))
+    await userEvent.tab()
     await waitFor(() => expect(name).toHaveAttribute('aria-invalid', 'true'))
     await expect(dialog).toBeVisible()
     await userEvent.type(name, 'Food')
@@ -159,7 +175,7 @@ export const SaveAndValidate: Story = {
     await expect(
       form.queryByRole('button', { name: 'Clear selection' })
     ).toBeNull()
-    await userEvent.click(form.getByRole('button', { name: 'Save' }))
+    await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(dialog).not.toBeVisible())
     await userEvent.click(
       within(canvasElement).getByRole('button', { name: 'Edit envelope' })
@@ -175,11 +191,11 @@ export const Mobile: Story = {
   ...PickingFromTheSelects,
   globals: { viewport: { value: 'zerro499' } },
 }
-export const MobileSave: Story = {
-  ...SaveAndValidate,
+export const MobileAutosave: Story = {
+  ...AutosaveAndValidate,
   globals: { viewport: { value: 'zerro499' } },
 }
-export const MobileCancel: Story = {
+export const MobileDismiss: Story = {
   ...ReturnsFocusAfterRemount,
   globals: { viewport: { value: 'zerro499' } },
 }

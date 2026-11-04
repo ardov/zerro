@@ -37,9 +37,36 @@ export type TEnvMetrics = {
   totalAvailable: TFxAmount
 }
 
+/** The envelope fields metrics read; colour and icon edits leave them alone. */
+export type TMetricEnvelope = Pick<
+  TEnvelope,
+  'id' | 'name' | 'parent' | 'children' | 'currency' | 'carryNegatives'
+>
+
+export function sameMetricEnvelopes(
+  previous: ById<TMetricEnvelope>,
+  next: ById<TMetricEnvelope>
+): boolean {
+  const ids = keys(next)
+  if (ids.length !== keys(previous).length) return false
+  return ids.every(id => {
+    const a = previous[id]
+    const b = next[id]
+    return (
+      a !== undefined &&
+      a.name === b.name &&
+      a.parent === b.parent &&
+      a.currency === b.currency &&
+      a.carryNegatives === b.carryNegatives &&
+      a.children.length === b.children.length &&
+      a.children.every((child, index) => child === b.children[index])
+    )
+  })
+}
+
 export type TBuildEnvMetricsInput = {
   monthList: TISOMonth[]
-  envelopes: ById<TEnvelope>
+  envelopes: ById<TMetricEnvelope>
   activity: ByMonth<TActivityNode>
   budgets: ByMonth<Record<TEnvelopeId, number>>
   convertFx: TFxConverter

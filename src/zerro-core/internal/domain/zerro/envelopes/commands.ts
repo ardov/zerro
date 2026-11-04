@@ -46,9 +46,10 @@ export type TRenameEnvelopeInput = {
   name: string
 }
 
-export type TSetEnvelopeColorInput = {
+export type TSetEnvelopeAppearanceInput = {
   id: TEnvelopeId
-  colorHex: string | null
+  icon?: string | null
+  colorHex?: string | null
 }
 
 export type TSetEnvelopeCommentInput = {
@@ -280,28 +281,34 @@ export function compileRenameEnvelope(
   }
 }
 
-export function compileSetEnvelopeColor(
-  data: TDataStore,
-  input: TSetEnvelopeColorInput
-): TCompiled {
-  const { type, id } = envId.parse(input.id)
-  if (type !== EnvType.Tag) {
-    throw new Error('Only tag envelopes have configurable colors')
-  }
-  if (id === 'null') {
-    throw new Error('Uncategorized envelope color cannot be changed')
-  }
-  if (input.colorHex !== null && !isHEX(input.colorHex)) {
-    throw new Error('Invalid envelope color')
-  }
+/** Only real categories carry a colour and an icon. */
+export function hasEditableAppearance(envelopeId: TEnvelopeId): boolean {
+  const { type, id } = envId.parse(envelopeId)
+  return type === EnvType.Tag && id !== 'null'
+}
 
-  const color = hex2int(input.colorHex)
-  if (data.tag[id]?.color === color) return { operations: [] }
+export function compileSetEnvelopeAppearance(
+  data: TDataStore,
+  input: TSetEnvelopeAppearanceInput
+): TCompiled {
+  if (!hasEditableAppearance(input.id))
+    throw new Error('Only categories have a configurable appearance')
+  const { id } = envId.parse(input.id)
+  const tag = data.tag[id]
+  if (!tag) throw new Error('Category not found')
+  const patch: TTagPatch = { id }
+  if (input.colorHex !== undefined) {
+    if (input.colorHex !== null && !isHEX(input.colorHex))
+      throw new Error('Invalid envelope color')
+    const color = hex2int(input.colorHex)
+    if (color !== tag.color) patch.color = color
+  }
+  if (input.icon !== undefined && input.icon !== tag.icon)
+    patch.icon = input.icon
+  if (patch.color === undefined && patch.icon === undefined)
+    return { operations: [] }
   return {
-    operations: entityOperations(
-      data,
-      compilePatchTag(data.tag, { id, color })
-    ),
+    operations: entityOperations(data, compilePatchTag(data.tag, patch)),
   }
 }
 
@@ -325,17 +332,13 @@ export function compileUpdateEnvelopeSettings(
   const current = envelopes[input.id]
   if (!current) throw new Error('Envelope not found')
 
-  const { type, id } = envId.parse(input.id)
+  const { type } = envId.parse(input.id)
   if (type === EnvType.Payee && current.originalName !== input.name) {
     throw new Error('Payee envelopes cannot be renamed')
   }
   if (current.colorHex !== input.colorHex) {
-    if (type !== EnvType.Tag) {
-      throw new Error('Only tag envelopes have configurable colors')
-    }
-    if (id === 'null') {
-      throw new Error('Uncategorized envelope color cannot be changed')
-    }
+    if (!hasEditableAppearance(input.id))
+      throw new Error('Only categories have a configurable appearance')
     if (input.colorHex !== null && !isHEX(input.colorHex)) {
       throw new Error('Invalid envelope color')
     }

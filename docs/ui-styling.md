@@ -356,12 +356,15 @@ date, a colour.
 accessible name; without it, `label` is required. `className` styles the panel.
 The body scrolls in a kit `ScrollArea` that fills the rest of the panel;
 `contentClassName` is the padding and layout of the content inside that
-scroll. A Drawer whose children bring their own scroller, such as a virtual
-list, sets `contentScrolls`: the body is then a plain column they fill.
+scroll. A Drawer or Popover whose children bring their own scroller, such as
+a virtual list, sets `contentScrolls`: the body is then a plain column they
+fill.
 The surface owns close-control presentation, so forms do not need breakpoint
 logic for it. Dialog exposes `closeButton` when a caller needs an explicit
 choice. Popover accepts `anchor`, `side`, and `align`; its anchor controls position,
-while the trigger controls focus restoration. It is modal.
+while the trigger controls focus restoration. It is modal. Modal Dialog,
+Drawer and Popover popups stop arrow keys from bubbling past them, so page
+hotkeys such as the budget's month arrows don't fire behind the surface.
 
 Dialog and Drawer render their own dimming backdrops, including nested surfaces.
 Anchored Popover keeps a transparent backdrop: it remains modal without dimming

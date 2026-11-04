@@ -1,4 +1,9 @@
-import type { ReactElement, ReactNode, ComponentProps } from 'react'
+import type {
+  ComponentProps,
+  KeyboardEvent,
+  ReactElement,
+  ReactNode,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import type { SurfaceController } from '@/6-shared/overlays'
 import { CloseIcon } from '../Icons'
@@ -23,6 +28,12 @@ export function useSurfaceFinalFocus<F>(props: {
     fallback: true,
   })
   return props.finalFocus ?? (props.trigger ? undefined : captured)
+}
+
+/** A modal surface owns arrow keys: page hotkeys such as month arrows don't
+ * fire behind it, even when focus rests on the popup itself. */
+export function keepArrowKeys(event: KeyboardEvent) {
+  if (event.key.startsWith('Arrow')) event.stopPropagation()
 }
 
 export function SurfaceCloseButton(

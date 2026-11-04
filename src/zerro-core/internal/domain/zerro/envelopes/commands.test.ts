@@ -17,7 +17,7 @@ import {
   compileCreateEnvelope,
   compilePatchEnvelope,
   compileRenameEnvelope,
-  compileSetEnvelopeColor,
+  compileSetEnvelopeAppearance,
   compileSetEnvelopeComment,
   compileUpdateEnvelopeSettings,
 } from './commands'
@@ -175,14 +175,14 @@ describe('envelope commands', () => {
       data,
       materializeTestInput(
         data,
-        compileSetEnvelopeColor(data, { id, colorHex: '#00ff00' })
+        compileSetEnvelopeAppearance(data, { id, colorHex: '#00ff00' })
       )
     )
     const cleared = applyPatch(
       coloredData,
       materializeTestInput(
         coloredData,
-        compileSetEnvelopeColor(coloredData, { id, colorHex: null })
+        compileSetEnvelopeAppearance(coloredData, { id, colorHex: null })
       )
     )
 
@@ -191,7 +191,7 @@ describe('envelope commands', () => {
     expect(
       materializeTestInput(
         data,
-        compileSetEnvelopeColor(data, { id, colorHex: null })
+        compileSetEnvelopeAppearance(data, { id, colorHex: null })
       )
     ).toEqual({})
   })
@@ -203,7 +203,7 @@ describe('envelope commands', () => {
     expect(() =>
       materializeTestInput(
         data,
-        compileSetEnvelopeColor(data, {
+        compileSetEnvelopeAppearance(data, {
           id: envId.get(EnvType.Tag, 'food'),
           colorHex: 'red',
         })
@@ -212,21 +212,21 @@ describe('envelope commands', () => {
     expect(() =>
       materializeTestInput(
         data,
-        compileSetEnvelopeColor(data, {
+        compileSetEnvelopeAppearance(data, {
           id: envId.get(EnvType.Tag, null),
           colorHex: '#ff0000',
         })
       )
-    ).toThrow('Uncategorized envelope color cannot be changed')
+    ).toThrow('Only categories have a configurable appearance')
     expect(() =>
       materializeTestInput(
         data,
-        compileSetEnvelopeColor(data, {
+        compileSetEnvelopeAppearance(data, {
           id: envId.get(EnvType.Account, 'cash'),
           colorHex: '#ff0000',
         })
       )
-    ).toThrow('Only tag envelopes have configurable colors')
+    ).toThrow('Only categories have a configurable appearance')
   })
 
   it('renames tag, account, and merchant envelopes through entity commands', () => {

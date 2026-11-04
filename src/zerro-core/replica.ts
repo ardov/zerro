@@ -7,6 +7,7 @@
  */
 export {
   appendOutbox,
+  editOutbox,
   applyOutboxCommand,
   buildOutboxTransport,
   getMaterializedOutboxPatches,

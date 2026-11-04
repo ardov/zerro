@@ -4,6 +4,7 @@ export default reducer
 // ACTIONS
 export {
   appendClientCommand,
+  editClientCommand,
   applyServerPatch,
   hydrateReplica,
   hydrateCorruptOutbox,
@@ -16,6 +17,7 @@ export {
   redoClientCommand,
   restoreOutboxPosition,
   resetData,
+  canReplaceTail,
 } from './slice'
 export { applyPushChunk } from './applyServerPatch'
 export {

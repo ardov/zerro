@@ -6,6 +6,7 @@ import { useVisualViewport } from '../useVisualViewport'
 import { cn } from '../shadcn/utils'
 import { BottomSheetSurface } from './Drawer'
 import {
+  keepArrowKeys,
   SurfaceContent,
   SurfaceCloseButton,
   useSurfaceFinalFocus,
@@ -120,6 +121,7 @@ function CenteredDialog(props: DialogSurfaceProps & { alert?: boolean }) {
             aria-labelledby={title != null ? titleId : undefined}
             initialFocus={initialFocus}
             finalFocus={finalFocus}
+            onKeyDown={keepArrowKeys}
             className={cn(
               'kit-surface-fade kit-modal-popup pointer-events-auto flex max-h-full w-full max-w-120 flex-col overflow-hidden rounded-ui-card rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
               className

@@ -1,11 +1,16 @@
 import {
   createSelector,
   createSlice,
+  isAnyOf,
   type PayloadAction,
 } from '@reduxjs/toolkit'
 import type { AppThunk } from '@/store'
 import type { RootState } from './rootReducer'
-import { appendClientCommand, applyServerPatch } from './data/slice'
+import {
+  appendClientCommand,
+  applyServerPatch,
+  editClientCommand,
+} from './data/slice'
 import {
   getMaterializedOutboxPatches,
   replayOutbox,
@@ -134,14 +139,18 @@ const { reducer, actions } = createSlice({
     },
   },
   extraReducers: builder => {
-    builder.addCase(appendClientCommand, state => {
-      state.selection = { status: 'idle', point: null }
-    })
     builder.addCase(applyServerPatch, state => {
       state.entries = []
       state.nextBeforeSequence = undefined
       state.pageStatus = 'idle'
     })
+    builder.addMatcher(
+      isAnyOf(appendClientCommand, editClientCommand),
+      state => {
+        if (state.selection.status !== 'idle')
+          state.selection = { status: 'idle', point: null }
+      }
+    )
   },
 })
 

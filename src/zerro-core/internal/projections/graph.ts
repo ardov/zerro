@@ -1,6 +1,7 @@
 import { toISODate, toISOMonth } from '../domain/foundation/date'
 import type { TDataStore, TFxCode, TISODate } from '../domain/zenmoney'
 import type { TCoreContext } from '../../types'
+import type { ById } from '../domain/foundation/types'
 import type { TTransactionQueryContext } from '../domain/zerro/transactions'
 import {
   buildBalances,
@@ -42,8 +43,10 @@ import {
   getUserSettings,
   getZerroInBudgetAccountIds,
   getZerroSavingAccounts,
+  sameMetricEnvelopes,
+  type TMetricEnvelope,
 } from '../domain/zerro'
-import { memoOn, memoOnObject, sameItems } from './memo'
+import { memoOn, memoOnObject, sameItems, sameSet } from './memo'
 
 /** A projection: one value derived from a snapshot. */
 type TNode<T> = (data: TDataStore) => T
@@ -195,7 +198,16 @@ export function createProjectionGraph(ctx: TCoreContext) {
   const envelopeStructure: TNode<
     ReturnType<typeof envelopesCompiled>['structure']
   > = d => envelopesCompiled(d).structure
-  const keepingEnvelopeIds = node(d => [envelopes(d)], getKeepingEnvelopes)
+  const keepingEnvelopeIds = node(
+    d => [envelopes(d)],
+    getKeepingEnvelopes,
+    sameSet
+  )
+  const metricEnvelopes = node(
+    d => [envelopes(d)],
+    (envelopes): ById<TMetricEnvelope> => envelopes,
+    sameMetricEnvelopes
+  )
 
   // --- budgets and month list ----------------------------------------------
   const budgets = nodeObj(
@@ -276,7 +288,7 @@ export function createProjectionGraph(ctx: TCoreContext) {
   const envMetrics = nodeObj(
     d => ({
       monthList: monthList(d),
-      envelopes: envelopes(d),
+      envelopes: metricEnvelopes(d),
       activity: activity(d),
       budgets: budgets(d),
       convertFx: convertFx(d),

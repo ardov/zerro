@@ -92,7 +92,7 @@ function getSymbol(tag: TTag) {
   if (tag.icon && categoryIconById[tag.icon]) return categoryIconById[tag.icon]
   const titleArr = toGraphemes(tag.title)
   if (getTagName(tag.title) !== tag.title) return titleArr[0]
-  return (titleArr[0] + titleArr[1]).trim() || '?'
+  return titleArr.slice(0, 2).join('').trim() || '?'
 }
 
 function isEmoji(str: string) {

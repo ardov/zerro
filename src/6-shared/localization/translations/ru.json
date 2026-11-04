@@ -157,17 +157,17 @@
     "incomeLabel": "Доходы по категории",
     "keepIncomeLabel": "Сразу класть в конверт",
     "excludeIncomeLabel": "Оставлять для распределения",
-    "btnSave": "Сохранить",
-    "btnCreate": "Создать категорию",
-    "btnCancel": "Отменить",
-    "color": "Цвет"
+    "btnCreate": "Создать категорию"
   },
 
   "colorPicker": {
-    "title": "Цвет",
-    "input": "HEX-цвет",
-    "remove": "Без цвета",
-    "apply": "Применить"
+    "title": "Цвет и иконка",
+    "input": "Значение цвета",
+    "custom": "Свой цвет",
+    "hue": "Оттенок",
+    "plane": "Насыщенность и яркость",
+    "coordinates": "Насыщенность {{s}}%, яркость {{v}}%",
+    "icons": "Иконки"
   },
 
   "transactionContextMenu": {

@@ -128,9 +128,11 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const isSmall = useIsSmall()
   const { columns } = useColumns()
 
-  const envelope = useAppSelector(core.envelopes.selectAll)[id]
-  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)[month][id]
-  const goalInfo = useAppSelector(core.goals.selectAll)[month][id]
+  const envelope = useAppSelector(s => core.envelopes.selectAll(s)[id])
+  const envData = useAppSelector(
+    s => core.activity.selectEnvelopeMetrics(s)[month][id]
+  )
+  const goalInfo = useAppSelector(s => core.goals.selectAll(s)[month][id])
   const toDisplay = core.currency.useToDisplay(month)
 
   const isChild = !!envelope.parent || !!isSelf

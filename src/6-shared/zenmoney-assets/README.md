@@ -11,6 +11,8 @@ separate from application-owned artwork.
   three `unknown bank` fallbacks indexed by native size.
 - `index.ts` — runtime category mapping and uncategorized fallback.
 - `bankIcons.ts` — local bank asset URLs indexed by `account.company`.
+- `categoryColors.ts` — the category colour palette offered by the Zenmoney
+  app.
 
 Category assets are rendered as CSS masks, so their original fill colours are
 ignored and the visible colour is inherited from `currentColor`. Bank assets

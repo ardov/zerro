@@ -1,16 +1,10 @@
 import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { IconButton } from '@/6-shared/ui/kit/Button'
-import type { FC, MouseEvent } from 'react'
-import { useCallback } from 'react'
+import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TagIcon } from '@/6-shared/ui/TagIcon'
 import { CloseIcon, EditIcon } from '@/6-shared/ui/Icons'
-import { ColorPicker } from '@/3-widgets/ColorPicker'
-import { useAsk } from '@/6-shared/overlays'
-import { track } from '@/6-shared/analytics'
-// import { usePopover } from '@shared/ui/PopoverManager'
-
-import { useAppDispatch, useAppSelector } from '@/store'
+import { AppearancePicker } from '@/3-widgets/AppearancePicker'
+import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 
 import { useMonth } from '../MonthProvider'
@@ -62,33 +56,13 @@ const Header: FC<{
   envelope: core.envelopes.TPresentedEnvelope
   onClose: () => void
 }> = ({ envelope, onClose }) => {
-  const { symbol, colorHex: color, name } = envelope
+  const { name } = envelope
   const { t } = useTranslation('common')
   const openEditDialog = useEditDialog()
-  const dispatch = useAppDispatch()
-  const ask = useAsk()
-  const openColorPicker = useCallback(
-    async (e: MouseEvent<HTMLElement>) => {
-      const hex = await ask<string | null>(
-        <ColorPicker value={color} anchorEl={e.currentTarget} />
-      )
-      if (hex === undefined) return
-      track('envelope_color_changed', {})
-      dispatch(core.envelopes.setColor(envelope.id, hex))
-    },
-    [ask, color, dispatch, envelope.id]
-  )
   return (
     <header className="sticky top-0 z-[5] flex items-center bg-ui-card px-6 py-2">
-      <div className="flex min-w-0 grow items-center">
-        <TagIcon
-          size="m"
-          symbol={symbol}
-          className="mr-4 shrink-0"
-          color={color}
-          onClick={openColorPicker}
-          button
-        />
+      <div className="flex min-w-0 grow items-center gap-4">
+        <AppearancePicker envelope={envelope} size="m" />
         <TextFade render={<h2 />} className="m-0 text-title">
           {name}
         </TextFade>

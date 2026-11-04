@@ -5,6 +5,7 @@ import type { PopupController, SurfaceController } from '@/6-shared/overlays'
 import { cn } from '../shadcn/utils'
 import { BottomSheetSurface } from './Drawer'
 import {
+  keepArrowKeys,
   SurfaceContent,
   useSurfaceFinalFocus,
   type SurfaceName,
@@ -27,6 +28,7 @@ type PopoverOptions = SurfaceName & {
   collisionAvoidance?: Primitive.Positioner.Props['collisionAvoidance']
   className?: string
   contentClassName?: string
+  contentScrolls?: boolean
   initialFocus?: Primitive.Popup.Props['initialFocus']
   finalFocus?: Primitive.Popup.Props['finalFocus']
 }
@@ -94,6 +96,7 @@ function AnchoredPopover(props: PopoverSurfaceProps) {
     collisionAvoidance = { side: 'flip', align: 'shift' },
     className,
     contentClassName,
+    contentScrolls,
     initialFocus,
     finalFocus,
   } = props
@@ -121,6 +124,7 @@ function AnchoredPopover(props: PopoverSurfaceProps) {
             aria-labelledby={title != null ? titleId : undefined}
             initialFocus={initialFocus}
             finalFocus={finalFocus}
+            onKeyDown={keepArrowKeys}
             className={cn(
               'kit-surface-fade flex max-h-(--available-height) w-80 max-w-(--available-width) flex-col overflow-hidden rounded-ui-popover rounded-smooth bg-ui-popover text-ui-primary shadow-ui-popover outline-none',
               className
@@ -130,6 +134,7 @@ function AnchoredPopover(props: PopoverSurfaceProps) {
               title={title}
               titleId={titleId}
               className={contentClassName}
+              contentScrolls={contentScrolls}
               scroll={{ scrollbar: 'none', fade: true }}
             >
               {children}

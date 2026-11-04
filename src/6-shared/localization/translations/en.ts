@@ -164,17 +164,17 @@ export const en: typeof ru = {
     incomeLabel: 'Income in this category',
     keepIncomeLabel: 'Put directly into the envelope',
     excludeIncomeLabel: 'Leave available to assign',
-    btnSave: 'Save',
     btnCreate: 'Create category',
-    btnCancel: 'Cancel',
-    color: 'Color',
   },
 
   colorPicker: {
-    title: 'Color',
-    input: 'HEX color',
-    remove: 'No color',
-    apply: 'Apply',
+    title: 'Color and icon',
+    input: 'Color value',
+    custom: 'Custom color',
+    hue: 'Hue',
+    plane: 'Saturation and value',
+    coordinates: 'Saturation {{s}}%, value {{v}}%',
+    icons: 'Icons',
   },
 
   transactionContextMenu: {

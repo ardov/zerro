@@ -18,6 +18,7 @@ import { MobileDrawerViewport } from '../MobileDrawerViewport'
 import { modalBackdropClass } from './backdrop'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import {
+  keepArrowKeys,
   SurfaceContent,
   SurfaceCloseButton,
   useSurfaceFinalFocus,
@@ -198,6 +199,7 @@ function DrawerFrame(props: DrawerSurfaceProps) {
             aria-describedby={descriptionId}
             aria-labelledby={title != null ? titleId : undefined}
             initialFocus={active ? initialFocus : false}
+            onKeyDown={keepArrowKeys}
             data-side={side}
             // Against the screen edge rather than floating beside the page.
             data-attached={side === 'bottom' || page ? '' : undefined}

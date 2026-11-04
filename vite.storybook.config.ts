@@ -21,7 +21,6 @@ export default defineConfig({
       'tailwind-merge',
       '@dnd-kit/core',
       '@sentry/browser',
-      'formik',
       'recharts',
       '@base-ui/react/button',
       '@base-ui/react/field',

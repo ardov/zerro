@@ -1,19 +1,16 @@
-import { Button, IconButton } from '@/6-shared/ui/kit/Button'
 import { FieldAddon } from '@/6-shared/ui/kit/Field'
-import type { FC, MouseEvent } from 'react'
-import { shallowEqual } from 'react-redux'
-import { useFormik } from 'formik'
+import type { FC } from 'react'
 import { Select } from '@/6-shared/ui/kit/Select'
 import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
 import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
 import { Input } from '@/6-shared/ui/kit/Input'
-import { ColorPicker } from '@/3-widgets/ColorPicker'
+import { AppearancePicker } from '@/3-widgets/AppearancePicker'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisibilitySelect'
-import { defineScreen, useAsk } from '@/6-shared/overlays'
+import { defineScreen } from '@/6-shared/overlays'
 import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -25,23 +22,48 @@ const envelopeEditScreen =
 export const useEditDialog = () => envelopeEditScreen.useOpen()
 
 export const EnvelopeEditDialog: FC = () => {
-  const [id, setId] = envelopeEditScreen.use()
-  // Keep the draft until the surface finishes its closing transition.
-  const [retainedId, setRetainedId] = useState(id)
-  if (id !== undefined && id !== retainedId) setRetainedId(id)
+  const dispatch = useAppDispatch()
   const envelopes = useAppSelector(core.envelopes.selectAll)
+  const [retainedId, setRetainedId] = useState<core.envelopes.TEnvelopeId>()
+  // The name draft lives with the screen owner so Back can still save it.
+  const [nameDraft, setNameDraft] = useState<string | null>(null)
+  const [invalidName, setInvalidName] = useState(false)
+  const saveName = () => {
+    const envelope = retainedId ? envelopes[retainedId] : undefined
+    if (nameDraft === null || !envelope) return
+    const name = nameDraft.trim()
+    if (!name) {
+      setInvalidName(true)
+      return
+    }
+    if (name !== envelope.originalName)
+      dispatch(core.envelopes.rename(envelope.id, name))
+    setNameDraft(null)
+  }
+  const [id, setId] = envelopeEditScreen.use(saveName)
+  // Keep the draft until the surface finishes its closing transition.
+  if (id !== undefined && id !== retainedId) {
+    setRetainedId(id)
+    setNameDraft(null)
+    setInvalidName(false)
+  }
   const close = useCallback(() => setId(null), [setId])
   const renderedId = id ?? retainedId
   const envelope = renderedId ? envelopes[renderedId] : undefined
   if (!envelope) return null
 
   return (
-    // A fresh form per envelope: the draft is Formik's, and it starts from
-    // whichever envelope the address names.
     <EnvelopeEditDialogForm
       key={envelope.id}
       envelope={envelope}
       open={id !== undefined}
+      nameDraft={nameDraft}
+      invalidName={invalidName}
+      onNameChange={value => {
+        setNameDraft(value)
+        setInvalidName(false)
+      }}
+      onNameCommit={saveName}
       onClose={close}
       onOpenChangeComplete={open => {
         if (!open) setRetainedId(undefined)
@@ -53,65 +75,44 @@ export const EnvelopeEditDialog: FC = () => {
 const EnvelopeEditDialogForm: FC<{
   envelope: core.envelopes.TPresentedEnvelope
   open: boolean
+  nameDraft: string | null
+  invalidName: boolean
+  onNameChange: (value: string) => void
+  onNameCommit: () => void
   onClose: () => void
   onOpenChangeComplete: (open: boolean) => void
-}> = ({ envelope, open, onClose, onOpenChangeComplete }) => {
+}> = props => {
+  const {
+    envelope,
+    open,
+    nameDraft,
+    invalidName,
+    onNameChange,
+    onNameCommit,
+    onClose,
+    onOpenChangeComplete,
+  } = props
   const narrow = useBottomSheetLayout()
   const formRef = useRef<HTMLFormElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
   const dispatch = useAppDispatch()
   const { t } = useTranslation('envelopeEditDialog')
   const id = envelope.id
-  const {
-    values,
-    initialValues,
-    handleSubmit,
-    errors,
-    handleChange,
-    setFieldValue,
-  } = useFormik({
-    initialValues: {
-      originalName: envelope.originalName,
-      visibility: envelope.visibility || core.envelopes.envelopeVisibility.auto,
-      keepIncome: envelope.keepIncome,
-      colorHex: envelope.colorHex,
-      currency: envelope.currency,
-    },
-    validate: values => {
-      if (!values.originalName.trim()) {
-        return { originalName: t('nameError') }
-      }
-    },
-    onSubmit: values => {
-      if (!open) return
-      onClose()
-      dispatch(
-        core.envelopes.updateSettings({
-          id,
-          name: values.originalName,
-          colorHex: values.colorHex,
-          currency: values.currency,
-          visibility: values.visibility,
-          keepIncome: values.keepIncome,
-        })
-      )
-    },
-    enableReinitialize: true,
-  })
+  const canRename =
+    envelope.type !== core.envelopes.EnvType.Payee &&
+    id !== core.envelopes.envId.get(core.envelopes.EnvType.Tag, null)
 
   return (
     <DialogSurface
       title={t('titleEdit')}
       mobile="drawer"
-      closeButton={false}
       initialFocus={narrow ? formRef : nameRef}
       className="max-w-100"
       onOpenChangeComplete={onOpenChangeComplete}
       controller={{
         open,
         setOpen: open => {
-          // Preserve dirty drafts on surface dismissal; Back still closes the screen.
-          if (!open && shallowEqual(values, initialValues)) onClose()
+          if (!open) onClose()
         },
       }}
     >
@@ -119,83 +120,67 @@ const EnvelopeEditDialogForm: FC<{
         ref={formRef}
         inert={!open}
         tabIndex={-1}
-        onSubmit={handleSubmit}
+        onSubmit={event => {
+          event.preventDefault()
+          nameRef.current?.blur()
+        }}
         className="flex flex-col gap-4 outline-none"
       >
         <Input
           label={t('nameLabel')}
           placeholder={t('nameLabel')}
-          error={errors.originalName}
+          error={invalidName ? t('nameError') : undefined}
+          readOnly={!canRename}
           ref={nameRef}
           name="originalName"
-          value={values.originalName}
-          onChange={handleChange}
+          value={nameDraft ?? envelope.originalName}
+          onValueChange={onNameChange}
+          onBlur={onNameCommit}
           autoComplete="off"
-          end={
-            <FieldAddon kind="action">
-              <Color
-                value={values.colorHex}
-                onChange={v => setFieldValue('colorHex', v)}
-              />
+          start={
+            <FieldAddon kind="action" className="w-12">
+              <AppearancePicker envelope={envelope} />
             </FieldAddon>
           }
         />
 
         <CurrencyCodeSelect
           label={t('currencyLabel')}
-          value={values.currency}
-          onChange={v => setFieldValue('currency', v)}
+          value={envelope.currency}
+          onChange={currency =>
+            dispatch(
+              core.envelopes.patchMeta({ envelopeId: id, set: { currency } })
+            )
+          }
         />
         <VisibilitySelect
           label={t('visibilityLabel')}
-          value={values.visibility}
-          onChange={v => setFieldValue('visibility', v)}
+          value={envelope.visibility}
+          onChange={visibility =>
+            dispatch(
+              core.envelopes.patchMeta({ envelopeId: id, set: { visibility } })
+            )
+          }
         />
         <Select
           label={t('incomeLabel')}
           labelMode="floating"
           required
-          value={values.keepIncome ? 'category' : 'outside'}
-          onChange={value => setFieldValue('keepIncome', value === 'category')}
+          value={envelope.keepIncome ? 'category' : 'outside'}
+          onChange={value =>
+            dispatch(
+              core.envelopes.patchMeta({
+                envelopeId: id,
+                set: { keepIncome: value === 'category' },
+              })
+            )
+          }
           items={[
             { value: 'category', label: t('keepIncomeLabel') },
             { value: 'outside', label: t('excludeIncomeLabel') },
           ]}
         />
-
-        <Button type="submit" size="lg" variant="primary">
-          {t('btnSave')}
-        </Button>
-        <Button onClick={onClose} size="lg" variant="secondary">
-          {t('btnCancel')}
-        </Button>
       </form>
     </DialogSurface>
-  )
-}
-
-type ColorProps = {
-  value: string | null
-  onChange: (v: string | null) => void
-}
-
-const Color: FC<ColorProps> = ({ value, onChange }) => {
-  const { t } = useTranslation('envelopeEditDialog')
-  const ask = useAsk()
-  const pick = async (e: MouseEvent<HTMLElement>) => {
-    const color = await ask<string | null>(
-      <ColorPicker value={value} anchorEl={e.currentTarget} />
-    )
-    // `null` is "no colour"; nothing at all means the question went unanswered.
-    if (color !== undefined) onChange(color)
-  }
-  return (
-    <IconButton onClick={pick} label={t('color')} variant="ghost" size="sm">
-      <span
-        aria-hidden
-        className="size-7 rounded-full border border-ui-border"
-        style={{ backgroundColor: value ?? undefined }}
-      />
-    </IconButton>
   )
 }

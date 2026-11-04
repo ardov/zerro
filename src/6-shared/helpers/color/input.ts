@@ -16,3 +16,11 @@ export function parseColorInput(input: string): string | null | undefined {
   const hex = formatHex(text)
   return hex && /^#[\da-f]{6}$/i.test(hex) ? hex : undefined
 }
+
+/** HEX values compare case-insensitively; two missing colours are the same. */
+export function isSameColor(
+  a: string | null | undefined,
+  b: string | null | undefined
+): boolean {
+  return a?.toLowerCase() === b?.toLowerCase()
+}

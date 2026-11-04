@@ -2,7 +2,12 @@ import { v1 as uuidv1 } from 'uuid'
 import { t } from 'i18next'
 import { toast } from '@/6-shared/ui/kit/Toast'
 import type { AppDispatch, AppThunk, RootState } from '@/store'
-import { appendClientCommand, getReplicaWriteBlocked } from '@/store/data'
+import {
+  appendClientCommand,
+  canReplaceTail,
+  editClientCommand,
+  getReplicaWriteBlocked,
+} from '@/store/data'
 import { selectIsHistoryPointVisible } from '@/store/history'
 
 import {
@@ -12,6 +17,8 @@ import {
 } from '../../internal/operations/materialization'
 import { type TCompiled, type TCoreContext } from '../../types'
 import { selectData } from './state'
+import { applyOutboxCommand, replayOutbox } from '../../replica'
+import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
 
 export type TReduxCommandCompiler<TReceipt = unknown> = (
   state: RootState,
@@ -60,14 +67,8 @@ export function executeReduxCommandWithStatus<TReceipt = unknown>(
 ): AppThunk<TCommandExecution<TReceipt>> {
   return (dispatch, getState) => {
     const state = getState()
-    if (
-      getReplicaWriteBlocked(state) ||
-      (selectIsHistoryPointVisible(state) && !options.allowHistory)
-    ) {
-      toast.add({
-        type: 'error',
-        title: t('commandWriteBlocked', { ns: 'common' }),
-      })
+    if (isWriteBlocked(state, options.allowHistory)) {
+      notifyWriteBlocked()
       return { status: 'blocked', receipt: undefined }
     }
     const result = compile(state, coreContext)
@@ -100,4 +101,57 @@ function appendCommand(
 
   dispatch(appendClientCommand(command))
   return true
+}
+
+function isWriteBlocked(state: RootState, allowHistory = false): boolean {
+  return (
+    getReplicaWriteBlocked(state) ||
+    (!allowHistory && selectIsHistoryPointVisible(state))
+  )
+}
+
+function notifyWriteBlocked() {
+  toast.add({
+    type: 'error',
+    title: t('commandWriteBlocked', { ns: 'common' }),
+  })
+}
+
+// One toast per group, not one per drag frame.
+let blockedGroup: string | null = null
+
+// Live snapshot -> the state before the group's first edit. A pull replaces
+// the snapshot, so a miss replays the outbox prefix from base once.
+const beforeGroupedEdit = new WeakMap<TDataStore, TDataStore>()
+
+/** Replace the group's tail command with one compiled against the state
+ * before the group's first edit. Once the tail is sealed (any other outbox
+ * change, sync or undo), the next edit starts a new command. */
+export function editGroupedCommand(
+  group: string,
+  label: TCommandLabel,
+  compile: (before: TDataStore, live: TDataStore) => TCompiled
+): AppThunk {
+  return (dispatch, getState) => {
+    const state = getState()
+    if (isWriteBlocked(state)) {
+      if (blockedGroup !== group) notifyWriteBlocked()
+      blockedGroup = group
+      return
+    }
+    const { base, current, outbox } = state.data
+    const replacing = canReplaceTail(state.data, group)
+    const before = replacing
+      ? (beforeGroupedEdit.get(current) ??
+        replayOutbox(base, outbox.slice(0, -1)))
+      : current
+    const { operations } = compile(before, current)
+    if (!operations.length && !replacing) return
+    const command = operations.length
+      ? prepareCommand(before, operations, coreContext.now(), label)
+      : null
+    const next = command ? applyOutboxCommand(before, command) : before
+    if (command) beforeGroupedEdit.set(next, before)
+    dispatch(editClientCommand({ group, command, current: next }))
+  }
 }

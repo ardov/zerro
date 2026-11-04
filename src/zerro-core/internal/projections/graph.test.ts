@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   makeInstrument,
   makeStore,
+  makeTag,
   makeUser,
 } from '../../support/testing/zenmoneyTestData'
 import { getInstCodeMap } from '../domain/zenmoney/entities/instruments'
@@ -68,5 +69,39 @@ describe('user currency', () => {
     }
     expect(graph.userCurrency(renamed)).toBe('EURO')
     expect(getInstCodeMap).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('envelope metrics', () => {
+  it('keep their reference when only a tag colour or icon changes', () => {
+    const graph = createProjectionGraph(ctx)
+    const store = makeStore({
+      instrument: instruments,
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      tag: { food: makeTag({ id: 'food', title: 'Food', color: null }) },
+    })
+    const metrics = graph.envMetrics(store)
+    const keeping = graph.keepingEnvelopeIds(store)
+
+    const recoloured = {
+      ...store,
+      tag: {
+        food: makeTag({
+          id: 'food',
+          title: 'Food',
+          color: 0xff0000,
+          icon: 'x',
+        }),
+      },
+    }
+    expect(graph.envelopes(recoloured)).not.toBe(graph.envelopes(store))
+    expect(graph.envMetrics(recoloured)).toBe(metrics)
+    expect(graph.keepingEnvelopeIds(recoloured)).toBe(keeping)
+
+    const renamed = {
+      ...store,
+      tag: { food: makeTag({ id: 'food', title: 'Groceries', color: null }) },
+    }
+    expect(graph.envMetrics(renamed)).not.toBe(metrics)
   })
 })

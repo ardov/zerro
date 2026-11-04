@@ -5,6 +5,7 @@ import { replicaStorage } from '@/6-shared/api/replicaStorage'
 import {
   acceptClientPushChunk,
   appendClientCommand,
+  editClientCommand,
   persistenceFailed,
   applyServerPatch,
   redoClientCommand,
@@ -27,6 +28,12 @@ type TReplicaStateSource = {
 let saveQueue: Promise<unknown> = Promise.resolve()
 let persistenceGeneration = 0
 let primaryWritesDisabled = false
+let waitingOutboxSave: {
+  rootUserId: number
+  outbox: TCommand[]
+  started: boolean
+  queue: Promise<unknown>
+} | null = null
 
 export const replicaPersistenceMiddleware: Middleware =
   api => next => action => {
@@ -103,9 +110,24 @@ export const replicaPersistenceMiddleware: Middleware =
     if (isOutboxMutation(action) && after.data.rootUserId !== null) {
       const rootUserId = after.data.rootUserId
       const outbox = [...after.data.outbox]
-      enqueuePrimary(api.dispatch, () =>
-        replicaStorage.saveOutbox(rootUserId, outbox)
-      )
+      // A colour drag edits the outbox every frame: refresh the save still
+      // waiting at the tail of the queue instead of queuing one per frame.
+      const waiting = waitingOutboxSave
+      if (
+        waiting?.queue === saveQueue &&
+        !waiting.started &&
+        waiting.rootUserId === rootUserId
+      ) {
+        waiting.outbox = outbox
+        return result
+      }
+      const save = { rootUserId, outbox, started: false, queue: saveQueue }
+      enqueuePrimary(api.dispatch, () => {
+        save.started = true
+        return replicaStorage.saveOutbox(save.rootUserId, save.outbox)
+      })
+      save.queue = saveQueue
+      waitingOutboxSave = save
     }
     return result
   }
@@ -196,6 +218,7 @@ export function waitForPersistedReplica(): Promise<void> {
 
 export function resetReplicaPersistenceForTests(): void {
   saveQueue = Promise.resolve()
+  waitingOutboxSave = null
   persistenceGeneration = 0
   primaryWritesDisabled = false
 }
@@ -223,6 +246,7 @@ function enqueuePrimary(
 function isOutboxMutation(action: unknown): boolean {
   return (
     appendClientCommand.match(action) ||
+    editClientCommand.match(action) ||
     undoClientCommand.match(action) ||
     redoClientCommand.match(action) ||
     restoreOutboxPosition.match(action)

@@ -4,6 +4,7 @@ import {
   acceptCanonicalPatch,
   type TAcceptedPushChunk,
   appendOutbox,
+  editOutbox,
   applyPatch,
   applyOutboxCommand,
   createEmptyDataStore,
@@ -24,6 +25,9 @@ interface DataSlice {
   base: TDataStore
   /** Applied local commands. This is the durable undo stack and sync outbox. */
   outbox: TCommand[]
+  /** The outbox tail an `editClientCommand` of the same group may replace.
+   * Any other change to the tail seals it, and so do sync and undo. */
+  editableTail: { group: string; command: TCommand } | null
   /** Undone commands; pulls preserve them, a new command or push clears them. */
   redo: TCommand[]
   /** The replayed canonical journal failed domain validation and needs a full
@@ -52,6 +56,7 @@ const initialState: DataSlice = {
   current: initialBase,
   base: initialBase,
   outbox: [],
+  editableTail: null,
   redo: [],
   journalRecoveryRequired: false,
   journalRecoveryReason: null,
@@ -60,6 +65,15 @@ const initialState: DataSlice = {
 }
 
 // SLICE
+/** True while the outbox tail is still the group's own edit. */
+export function canReplaceTail(
+  data: Pick<DataSlice, 'outbox' | 'editableTail'>,
+  group: string
+): boolean {
+  const tail = data.editableTail
+  return tail?.group === group && data.outbox.at(-1) === tail.command
+}
+
 const { reducer, actions } = createSlice({
   name: 'data',
   initialState,
@@ -210,10 +224,35 @@ const { reducer, actions } = createSlice({
         state.current = applyOutboxCommand(snapshot.current, payload)
       }
     ),
+    editClientCommand: (
+      state,
+      {
+        payload,
+      }: PayloadAction<{
+        group: string
+        command: TCommand | null
+        current: TDataStore
+      }>
+    ) => {
+      const snapshot = original(state)!
+      const next = editOutbox(
+        snapshot.outbox,
+        payload.command,
+        canReplaceTail(snapshot, payload.group)
+      )
+      state.outbox = next.outbox
+      state.redo = next.redo
+      state.editableTail = payload.command
+        ? { group: payload.group, command: payload.command }
+        : null
+      state.current = payload.current
+    },
     prepareClientSync: withPerf('prepareClientSync', state => {
+      state.editableTail = null
       state.redo = []
     }),
     undoClientCommand: withPerf('undoClientCommand', state => {
+      state.editableTail = null
       if (!state.outbox.length) return
       const snapshot = original(state)!
       const next = undoOutbox(snapshot.outbox, snapshot.redo)
@@ -296,6 +335,7 @@ export const {
   hydrateCorruptReplica,
   applyServerPatch,
   appendClientCommand,
+  editClientCommand,
   prepareClientSync,
   acceptClientPushChunk,
   undoClientCommand,

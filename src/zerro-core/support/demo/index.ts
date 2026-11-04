@@ -24,7 +24,6 @@ import type {
   TNormalizedPatch,
 } from '../../internal/domain/zenmoney/model/store'
 import { hex2int } from '../../internal/domain/zenmoney/model/color'
-import { getColorForString } from '../../runtime/presentation/colors'
 
 const since: TISODate = '2022-06-19'
 const defaultDemoNow = Date.parse('2026-07-06T12:00:00.000Z')
@@ -266,14 +265,14 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
     showIncome?: boolean
     showOutcome?: boolean
     icon?: TTagIconId
-    color?: number | null
+    color: string
   }) =>
     makeCoreTag(
       {
         id: tag.title,
         user: mainUser.id,
-        color: tag.color ?? hex2int(getColorForString(tag.title)),
         ...tag,
+        color: hex2int(tag.color),
       },
       demoCtx
     )
@@ -284,19 +283,19 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       title: 'Salary',
       showIncome: true,
       icon: '9002_money_bag',
-      color: hex2int('#4CAF50'),
+      color: '#44A649',
     }),
     freelance: makeTag({
       title: 'Freelance',
       showIncome: true,
       icon: '5505_laptop',
-      color: hex2int('#2196F3'),
+      color: '#28B6F6',
     }),
     gifts: makeTag({
       title: 'Gifts',
       showIncome: true,
       icon: '7001_gift',
-      color: hex2int('#E91E63'),
+      color: '#CC3077',
     }),
 
     // Outcome
@@ -304,43 +303,43 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       title: 'Food',
       showOutcome: true,
       icon: '1002_diningroom',
-      color: hex2int('#FF9800'),
+      color: '#FB8D00',
     }),
     transportation: makeTag({
       title: 'Transportation',
       showOutcome: true,
       icon: '3002_cars',
-      color: hex2int('#3F51B5'),
+      color: '#1764BC',
     }),
     entertainment: makeTag({
       title: 'Entertainment',
       showOutcome: true,
       icon: '2003_film_reel',
-      color: hex2int('#9C27B0'),
+      color: '#9C26B0',
     }),
     shopping: makeTag({
       title: 'Shopping',
       showOutcome: true,
       icon: '5006_shopping',
-      color: hex2int('#F44336'),
+      color: '#F35239',
     }),
     health: makeTag({
       title: 'Health',
       showOutcome: true,
       icon: '6502_pill',
-      color: hex2int('#00BCD4'),
+      color: '#179EC8',
     }),
     bills: makeTag({
       title: 'Bills',
       showOutcome: true,
       icon: '9007_tax',
-      color: hex2int('#795548'),
+      color: '#414141',
     }),
     other: makeTag({
       title: 'Other',
       showOutcome: true,
       icon: '8001_question',
-      color: hex2int('#9E9E9E'),
+      color: '#91929A',
     }),
 
     // Adjustment
@@ -349,7 +348,7 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       showIncome: true,
       showOutcome: true,
       icon: '9003_banknotes',
-      color: hex2int('#607D8B'),
+      color: '#358075',
     }),
   }
 
@@ -359,21 +358,21 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       parent: tags.transportation.id,
       showOutcome: true,
       icon: '3010_bus',
-      color: hex2int('#009688'),
+      color: '#358075',
     }),
     gas: makeTag({
       title: 'Gas',
       parent: tags.transportation.id,
       showOutcome: true,
       icon: '3501_gas_station',
-      color: hex2int('#D4A017'),
+      color: '#FBBB00',
     }),
     taxi: makeTag({
       title: 'Taxi',
       parent: tags.transportation.id,
       showOutcome: true,
       icon: '3004_taxi',
-      color: hex2int('#D81B60'),
+      color: '#CC3077',
     }),
 
     groceries: makeTag({
@@ -381,21 +380,21 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       parent: tags.food.id,
       showOutcome: true,
       icon: '1001_bunch_ingredients',
-      color: hex2int('#7CB342'),
+      color: '#72D176',
     }),
     restaurant: makeTag({
       title: 'Restaurant',
       parent: tags.food.id,
       showOutcome: true,
       icon: '1016_coffee_cup',
-      color: hex2int('#FF7043'),
+      color: '#F35239',
     }),
     delivery: makeTag({
       title: 'Delivery',
       parent: tags.food.id,
       showOutcome: true,
       icon: '2013_scooter',
-      color: hex2int('#AB47BC'),
+      color: '#9C26B0',
     }),
 
     rent: makeTag({
@@ -403,21 +402,21 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       parent: tags.bills.id,
       showOutcome: true,
       icon: '9011_mortgage',
-      color: hex2int('#5C6BC0'),
+      color: '#8066DB',
     }),
     electricity: makeTag({
       title: 'Electricity',
       parent: tags.bills.id,
       showOutcome: true,
       icon: '5503_electrical',
-      color: hex2int('#C0CA33'),
+      color: '#FBBB00',
     }),
     internet: makeTag({
       title: 'Internet',
       parent: tags.bills.id,
       showOutcome: true,
       icon: '8002_globe',
-      color: hex2int('#039BE5'),
+      color: '#179EC8',
     }),
   }
 

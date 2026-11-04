@@ -37,6 +37,19 @@ describe('Core tag presentation adapter', () => {
     })
   })
 
+  it.each([
+    ['Я', 'Я'],
+    ['', '?'],
+  ])(
+    'uses the available graphemes from "%s" without an icon',
+    (title, symbol) => {
+      expect(
+        presentTags({ food: makeTag({ id: 'food', title, icon: null }) }).food
+          .symbol
+      ).toBe(symbol)
+    }
+  )
+
   it('owns display names, duplicate labels, colors, and the tag tree', () => {
     const tags = presentTags({
       parent: makeTag({

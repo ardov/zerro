@@ -42,12 +42,14 @@
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .colored-surface[data-surface-interactive]:hover {
+    .colored-surface[data-surface-interactive]:hover,
+    .tag-icon[data-surface-interactive]:hover > .colored-surface {
       --surface-shift: 10;
     }
   }
 
-  .colored-surface[data-surface-interactive]:active {
+  .colored-surface[data-surface-interactive]:active,
+  .tag-icon[data-surface-interactive]:active > .colored-surface {
     --surface-shift: 20;
   }
 

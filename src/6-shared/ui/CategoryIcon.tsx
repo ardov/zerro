@@ -3,17 +3,22 @@ import './coloredSurface.css'
 import { getContrastText } from '@/6-shared/helpers/color'
 import { cn } from './shadcn/utils'
 
-type CategoryIconProps = { symbol: string; color?: string | null }
+type CategoryIconProps = {
+  symbol: string
+  color?: string | null
+  size?: 's' | 'm'
+}
 
 /** A decorative category mark; selection and interaction belong to its owner. */
 export function CategoryIcon(props: CategoryIconProps) {
-  const { symbol, color } = props
+  const { symbol, color, size = 's' } = props
   const foreground = color ? getContrastText(color) : undefined
   return (
     <span
       aria-hidden
       className={cn(
-        'flex size-8 shrink-0 items-center justify-center rounded-full bg-ui-selected text-ui-primary',
+        'flex shrink-0 items-center justify-center rounded-full bg-ui-selected text-ui-primary',
+        size === 's' ? 'size-8' : 'size-10',
         color && 'colored-surface'
       )}
       style={
@@ -27,7 +32,7 @@ export function CategoryIcon(props: CategoryIconProps) {
           : undefined
       }
     >
-      <CategorySymbol symbol={symbol} />
+      <CategorySymbol symbol={symbol} size={size} />
     </span>
   )
 }

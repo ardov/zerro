@@ -49,6 +49,54 @@ describe('replica persistence queue', () => {
     )
   })
 
+  it('writes a burst of outbox edits once, with the latest outbox', async () => {
+    const state = replicaState()
+    const invoke = middleware(state)
+    const second = { ...entry, issuedAt: 20 }
+    const third = { ...entry, issuedAt: 30 }
+
+    invoke(appendClientCommand(entry))
+    invoke(appendClientCommand(second))
+    invoke(appendClientCommand(third))
+
+    await vi.waitFor(() =>
+      expect(storageMock.saveOutbox).toHaveBeenCalledWith(7, [
+        entry,
+        second,
+        third,
+      ])
+    )
+    expect(storageMock.saveOutbox).toHaveBeenCalledOnce()
+  })
+
+  it('keeps an outbox save queued before a canonical commit in its place', async () => {
+    const state = replicaState()
+    const invoke = middleware(state)
+    const after = makeStore({ serverTimestamp: 150 })
+    const later = { ...entry, issuedAt: 20 }
+    const order: string[] = []
+    storageMock.saveOutbox.mockImplementation(async (_id, outbox) => {
+      order.push(`outbox:${outbox.length}`)
+    })
+    storageMock.commitCanonical.mockImplementation(async () => {
+      order.push('canonical')
+    })
+
+    invoke(appendClientCommand(entry))
+    invoke(
+      acceptClientPushChunk({
+        base: after,
+        current: after,
+        outbox: [],
+        redo: [],
+      })
+    )
+    invoke(appendClientCommand(later))
+
+    await vi.waitFor(() => expect(order).toHaveLength(3))
+    expect(order).toEqual(['outbox:1', 'canonical', 'outbox:1'])
+  })
+
   it('commits canonical base and outbox together, then attempts compaction', async () => {
     const state = replicaState()
     const invoke = middleware(state)

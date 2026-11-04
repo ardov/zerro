@@ -6,4 +6,4 @@ export { ColorScale } from './ColorScale'
 export { clampChroma, formatOklch, oklchToRgb, parseColor } from './oklch'
 
 export { getContrastText } from './contrast'
-export { parseColorInput } from './input'
+export { isSameColor, parseColorInput } from './input'
