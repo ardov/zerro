@@ -16,6 +16,17 @@
     pointer-events: none;
   }
 
+  .navigation-action-notice {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--color-ui-base);
+    border-radius: 50%;
+    background: var(--color-ui-warning-solid);
+  }
+
   .navigation-action[aria-current='page'] .navigation-action-tile {
     background: var(--color-ui-selected);
     color: var(--color-ui-primary);

@@ -1,15 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { formatDate } from '@/6-shared/helpers/date'
 import { BackupFolderIcon, WarningIcon } from '@/6-shared/ui/Icons'
 import { Menu, type MenuItem } from '@/6-shared/ui/kit/Menu'
 import { ListRowButton } from '@/6-shared/ui/kit/ListRow'
-import {
-  getBackupFolder,
-  watchBackupFolder,
-  type BackupFolder,
-} from './backupFolder'
+import { backupProblemKey, useBackupFolder } from './useBackupFolder'
 import {
   chooseBackupFolder,
   disableFolderBackups,
@@ -25,26 +21,8 @@ export function BackupFolderItem() {
 function FolderRow({ userId }: { userId: number }) {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const [folder, setFolder] = useState<BackupFolder | null>()
+  const folder = useBackupFolder(userId)
   const [busy, setBusy] = useState(false)
-
-  useEffect(() => {
-    let active = true
-    async function refresh() {
-      try {
-        const saved = await getBackupFolder(userId)
-        if (active) setFolder(saved ?? null)
-      } catch {
-        if (active) setFolder(undefined)
-      }
-    }
-    const stop = watchBackupFolder(userId, refresh)
-    void refresh()
-    return () => {
-      active = false
-      stop()
-    }
-  }, [userId])
 
   if (folder === undefined) return null
   async function change(action: ReturnType<typeof chooseBackupFolder>) {
@@ -111,9 +89,11 @@ function FolderRow({ userId }: { userId: number }) {
           }
           description={detail}
         >
-          {folder.problem === 'write'
-            ? t('backupFailed')
-            : t(folder.problem ? 'folderBackupsPaused' : 'dailyFolderBackups')}
+          {t(
+            folder.problem
+              ? backupProblemKey(folder.problem)
+              : 'dailyFolderBackups'
+          )}
         </ListRowButton>
       }
     />

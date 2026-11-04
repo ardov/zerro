@@ -9,6 +9,7 @@ import { setToken } from '@/store/token'
 import {
   getBackupFolder,
   setBackupFolder,
+  type BackupFolder,
 } from '@/4-features/export/backupFolder'
 import { parseFullBackup } from '@/6-shared/api/zm-adapter'
 import { getBackupContent } from '@/4-features/export/exportJSON'
@@ -589,4 +590,45 @@ export const DailyFolderBackupMobile: Story = {
   ...DailyFolderBackup,
   globals: { viewport: { value: 'iphone13' } },
   play: checkDailyFolderBackup('dialog'),
+}
+
+/** A paused or failing automatic backup marks the settings button, so it is
+ * noticed without opening settings. */
+export const BackupProblemNotice: Story = {
+  tags: ['!autodocs'],
+  render: () => <FolderBackupHarness />,
+  play: async ({ canvasElement }) => {
+    const rootId = getRootUserId(makeStoryStore().getState().data.base.user)
+    if (rootId === null) throw new Error('Missing fixture owner')
+    const root = await navigator.storage.getDirectory()
+    const directory = await root.getDirectoryHandle(
+      `Backups-${crypto.randomUUID()}`,
+      { create: true }
+    )
+    const button = within(canvasElement).getByRole('button', {
+      name: 'Settings',
+    })
+    const dot = () => button.querySelector('.navigation-action-notice')
+    try {
+      const folder = {
+        directory: directory as BackupFolder['directory'],
+        lastSavedAt: null,
+      }
+      await setBackupFolder(rootId, { ...folder, problem: 'write' })
+      await waitFor(() =>
+        expect(button).toHaveAccessibleDescription('Could not save backup')
+      )
+      expect(dot()).toBeVisible()
+      await setBackupFolder(rootId, { ...folder, problem: 'access' })
+      await waitFor(() =>
+        expect(button).toHaveAccessibleDescription('Automatic backups paused')
+      )
+      await setBackupFolder(rootId, { ...folder, problem: null })
+      await waitFor(() => expect(dot()).toBeNull())
+      expect(button).not.toHaveAccessibleDescription()
+    } finally {
+      await setBackupFolder(rootId)
+      await root.removeEntry(directory.name, { recursive: true })
+    }
+  },
 }
