@@ -72,7 +72,6 @@ function useSlideRevealGesture(revealWidth: number) {
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!revealWidth) return
-      e.currentTarget.setPointerCapture(e.pointerId)
       dragRef.current = {
         x: e.clientX,
         y: e.clientY,
@@ -91,6 +90,12 @@ function useSlideRevealGesture(revealWidth: number) {
     (e: React.PointerEvent) => {
       const t = dragRef.current
       if (!t) return
+      // Released outside the row before the swipe captured the pointer.
+      if (e.pointerType === 'mouse' && e.buttons === 0) {
+        dragRef.current = null
+        setIsDragging(false)
+        return
+      }
       const dx = e.clientX - t.x
       const dy = e.clientY - t.y
       if (!t.axis) {
@@ -100,6 +105,9 @@ function useSlideRevealGesture(revealWidth: number) {
         )
           return
         t.axis = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v'
+        // Capture only a swipe: capturing on press would retarget a plain
+        // mouse click to this wrapper, away from the row's buttons.
+        if (t.axis === 'h') e.currentTarget.setPointerCapture(e.pointerId)
       }
       if (t.axis !== 'h') return
       const now = Date.now()
