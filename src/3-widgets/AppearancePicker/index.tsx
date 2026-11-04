@@ -96,7 +96,11 @@ function AppearancePopover({
           <ColorPickerPanel
             value={tag.colorHEX}
             colors={palette}
-            icon={<CategorySymbol symbol={tag.symbol} size="m" />}
+            icon={
+              tag.icon && categoryIconById[tag.icon] ? (
+                <CategorySymbol symbol={categoryIconById[tag.icon]} size="m" />
+              ) : undefined
+            }
             onChange={colorHex => {
               dispatch(core.envelopes.setAppearance(id, { colorHex }, group))
               if (!colorTracked.current) {
