@@ -50,6 +50,16 @@ describe('Core tag presentation adapter', () => {
     }
   )
 
+  it('uses a leading emoji as the icon only when the tag has none', () => {
+    const tags = presentTags({
+      plain: makeTag({ id: 'plain', title: '🍔 Food', icon: null }),
+      iconic: makeTag({ id: 'iconic', title: '🍔 Food', icon: '1006_pizza' }),
+    })
+    expect(tags.plain).toMatchObject({ name: 'Food', symbol: '🍔' })
+    expect(tags.iconic.name).toBe('🍔 Food')
+    expect(tags.iconic.symbol).not.toBe('🍔')
+  })
+
   it('owns display names, duplicate labels, colors, and the tag tree', () => {
     const tags = presentTags({
       parent: makeTag({

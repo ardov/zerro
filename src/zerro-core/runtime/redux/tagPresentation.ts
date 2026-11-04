@@ -43,13 +43,13 @@ export function presentTags(rawTags: ById<TTag>): ById<TTagPopulated> {
   const tags: ById<TTag> = { ...rawTags, null: nullTag }
 
   Object.values(rawTags).forEach(tag => {
-    const name = getTagName(tag.title)
+    const name = getTagName(tag)
     names[name] = (names[name] || 0) + 1
   })
 
   for (const id in tags) {
     const tag = tags[id]
-    const name = getTagName(tag.title)
+    const name = getTagName(tag)
     const colorHEX = int2hex(tag.color)
     const colorGenerated = getColorForString(tag.title)
     populated[id] = {
@@ -78,21 +78,24 @@ export function presentTags(rawTags: ById<TTag>): ById<TTagPopulated> {
   return populated
 }
 
-function getTagName(title: string): string {
-  const titleArr = toGraphemes(title)
-  if (isEmoji(titleArr[0])) {
-    titleArr.shift()
-    return titleArr.join('').trim()
-  }
-  return title
+/** A leading emoji stands in for a missing icon, so the name drops it. With
+ * an icon the emoji is part of the name. */
+function getTagName(tag: TTag): string {
+  if (hasIcon(tag)) return tag.title
+  const [first, ...rest] = toGraphemes(tag.title)
+  return isEmoji(first) ? rest.join('').trim() : tag.title
 }
 
 function getSymbol(tag: TTag) {
   if (tag.id === 'null') return noCategoryIconUrl
-  if (tag.icon && categoryIconById[tag.icon]) return categoryIconById[tag.icon]
+  if (hasIcon(tag)) return categoryIconById[tag.icon!]
   const titleArr = toGraphemes(tag.title)
-  if (getTagName(tag.title) !== tag.title) return titleArr[0]
+  if (isEmoji(titleArr[0])) return titleArr[0]
   return titleArr.slice(0, 2).join('').trim() || '?'
+}
+
+function hasIcon(tag: TTag): boolean {
+  return Boolean(tag.icon && categoryIconById[tag.icon])
 }
 
 function isEmoji(str: string) {
