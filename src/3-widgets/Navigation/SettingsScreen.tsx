@@ -7,11 +7,12 @@ import { core } from '@/zerro-core/redux'
 import { defineScreen, useAsk } from '@/6-shared/overlays'
 import { DrawerSurface } from '@/6-shared/ui/kit/Drawer'
 import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
-import { ListRow } from '@/6-shared/ui/kit/ListRow'
+import { ListRow, ListRowButton } from '@/6-shared/ui/kit/ListRow'
 import { Divider } from '@/6-shared/ui/kit/Divider'
 import { Collapse } from '@/6-shared/ui/kit/Collapse'
 import { useMobileLayout } from '@/6-shared/ui/layout/useMobileLayout'
 import { SwitchField } from '@/6-shared/ui/kit/Switch'
+import { getStartPage, setStartPage } from '@/6-shared/startPage'
 import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { toast } from '@/6-shared/ui/kit/Toast'
 import { TextSwap } from '@/6-shared/ui/kit/TextSwap'
@@ -30,6 +31,7 @@ import {
   FavoriteBorderIcon,
   ExitToAppIcon,
   KeyIcon,
+  HomeIcon,
 } from '@/6-shared/ui/Icons'
 import { clearFaviconCache } from '@/6-shared/favicon-cache'
 import { track } from '@/6-shared/analytics'
@@ -121,6 +123,7 @@ function SettingsContent(props: { onClose: () => void }) {
                 onClick={reload}
               />
               <ClearIconCache />
+              <StartPageSetting />
               <ListRow
                 render={<Link to="/token" />}
                 start={<KeyIcon />}
@@ -275,6 +278,26 @@ function SettingsAction(props: {
     >
       {label}
     </ListRow>
+  )
+}
+
+function StartPageSetting() {
+  const { t } = useTranslation('settings')
+  const [page, setPage] = useState(getStartPage)
+  const value = t(page === '/budget' ? 'budgets' : 'navigation:transactions')
+  return (
+    <ListRowButton
+      aria-label={`${t('startPage')}: ${value}`}
+      start={<HomeIcon />}
+      end={<TextSwap value={value} className="text-right" />}
+      onClick={() => {
+        const next = page === '/transactions' ? '/budget' : '/transactions'
+        setStartPage(next)
+        setPage(next)
+      }}
+    >
+      {t('startPage')}
+    </ListRowButton>
   )
 }
 

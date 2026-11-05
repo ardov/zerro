@@ -51,6 +51,7 @@ import {
   Globe,
   GripVertical,
   Heart,
+  House,
   KeyRound,
   Landmark,
   LogIn,
@@ -173,6 +174,7 @@ export const BarChartIcon = createIcon(ChartNoAxesColumn, 'BarChartIcon')
 export const WhatshotIcon = createIcon(Rewind, 'WhatshotIcon')
 
 // Application chrome
+export const HomeIcon = createIcon(House, 'HomeIcon')
 export const SettingsIcon = createIcon(Settings, 'SettingsIcon')
 export const HelpOutlineIcon = createIcon(CircleQuestionMark, 'HelpOutlineIcon')
 export const HowToUseIcon = createIcon(BookOpen, 'HowToUseIcon')

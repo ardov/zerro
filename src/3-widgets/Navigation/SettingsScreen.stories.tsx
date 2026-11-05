@@ -13,6 +13,7 @@ import {
 } from '@/4-features/export/backupFolder'
 import { parseFullBackup } from '@/6-shared/api/zm-adapter'
 import { getBackupContent } from '@/4-features/export/exportJSON'
+import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 import { MenuButton } from './MenuButton'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 
@@ -268,6 +269,52 @@ export const Controls: Story = {
 }
 export const ControlsMobile: Story = {
   ...Controls,
+  globals: { viewport: { value: 'iphone13' } },
+}
+
+const checkStartPage: Story['play'] = async ({ canvasElement }) => {
+  const saved = safeLocalStorage.getItem('startPage')
+  safeLocalStorage.removeItem('startPage')
+  try {
+    const screen = await openSettings(canvasElement)
+    const controls = within(screen)
+    const advanced = controls.getByRole('button', { name: 'Advanced' })
+    await userEvent.click(advanced)
+    const button = await controls.findByRole('button', {
+      name: 'Home page: Transactions',
+    })
+    await userEvent.click(button)
+    await expect(button).toHaveAccessibleName('Home page: Budgets')
+    expect(localStorage.getItem('startPage')).toBe('/budget')
+    expect(within(canvasElement).getByLabelText('Route')).toHaveTextContent(
+      '/transactions'
+    )
+
+    // Reopening Advanced remounts the row and reads the saved preference.
+    await userEvent.click(advanced)
+    await waitFor(() => expect(button).not.toBeInTheDocument())
+    await userEvent.click(advanced)
+    const restored = await controls.findByRole('button', {
+      name: 'Home page: Budgets',
+    })
+    restored.focus()
+    await userEvent.keyboard(' ')
+    await expect(restored).toHaveAccessibleName('Home page: Transactions')
+    expect(localStorage.getItem('startPage')).toBe('/transactions')
+  } finally {
+    if (saved === null) safeLocalStorage.removeItem('startPage')
+    else safeLocalStorage.setItem('startPage', saved)
+  }
+}
+
+export const StartPage: Story = {
+  render: () => <Harness />,
+  parameters: { app: { route: '/transactions' } },
+  play: checkStartPage,
+}
+
+export const StartPageMobile: Story = {
+  ...StartPage,
   globals: { viewport: { value: 'iphone13' } },
 }
 

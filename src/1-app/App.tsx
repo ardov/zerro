@@ -38,6 +38,7 @@ import { NotFound } from '@/2-pages/NotFound'
 import Budgets from '@/2-pages/Budgets'
 import Accounts from '@/2-pages/Accounts'
 import { articleRoutes, resolvePage, type AppPath } from '@/6-shared/pageRoutes'
+import { getStartPage } from '@/6-shared/startPage'
 import { PageHead } from '@/2-pages/About/Head'
 import { GlobalWidgets } from './GlobalWidgets'
 
@@ -47,7 +48,7 @@ const Token = lazy(() => import('@/2-pages/Token'))
 const Stats = lazy(() => import('@/2-pages/Stats'))
 const Review = lazy(() => import('@/2-pages/Review'))
 
-const defaultPage = <Navigate to="/transactions" replace />
+const defaultPage = <StartPageRedirect />
 const signedInPages = {
   '/': defaultPage,
   '/login': defaultPage,
@@ -70,6 +71,10 @@ const signedInPages = {
     </CanvasRoute>
   ),
 } satisfies Record<Exclude<AppPath, '/donation'>, React.ReactNode>
+
+function StartPageRedirect() {
+  return <Navigate to={getStartPage()} replace />
+}
 
 export default function App() {
   return (

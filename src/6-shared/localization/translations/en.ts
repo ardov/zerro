@@ -489,6 +489,7 @@ export const en: typeof ru = {
   settings: {
     settings: 'Settings',
     advancedSettings: 'Advanced',
+    startPage: 'Home page',
     budgets: 'Budgets',
     displayCurrency: 'Display currency',
     language: 'Language',

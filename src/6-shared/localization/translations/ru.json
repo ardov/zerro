@@ -469,6 +469,7 @@
   "settings": {
     "settings": "Настройки",
     "advancedSettings": "Дополнительно",
+    "startPage": "Домашняя страница",
     "budgets": "Бюджеты",
     "displayCurrency": "Валюта отображения",
     "language": "Язык",
