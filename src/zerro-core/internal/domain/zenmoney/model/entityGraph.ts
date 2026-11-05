@@ -45,9 +45,9 @@ export type TEntityReference = {
 }
 
 /**
- * `read: 'tolerate'` marks the two places where Zenmoney keeps a row after its
- * owner is gone. Those rows are canonical to read and impossible to write, so
- * every write path prunes them and the import seam reports them.
+ * `read: 'tolerate'` keeps canonical rows whose missing reference does not
+ * prevent reading them. Write policy is separate: only `write: 'prune'`
+ * removes rows from restore/push. The import seam reports tolerated issues.
  */
 export const entityReferences: readonly TEntityReference[] = [
   { from: 'country', field: 'currency', to: 'instrument' },
@@ -58,7 +58,9 @@ export const entityReferences: readonly TEntityReference[] = [
   { from: 'user', field: 'currency', to: 'instrument' },
   { from: 'user', field: 'country', to: 'country', nullable: true },
 
-  { from: 'merchant', field: 'user', to: 'user' },
+  // Ownership metadata is not needed to display or reference a merchant.
+  // Keep the server row intact even when its owner is missing or unavailable.
+  { from: 'merchant', field: 'user', to: 'user', read: 'tolerate' },
 
   { from: 'account', field: 'user', to: 'user' },
   { from: 'account', field: 'instrument', to: 'instrument' },
@@ -334,8 +336,8 @@ export type TRowPresence = (key: TDataEntityKey, id: unknown) => boolean
 /**
  * Whether a write may contain this row at all. Only `write: 'prune'` decides
  * that: those are the references Zenmoney leaves dangling in a snapshot and
- * refuses to recreate, so the row has to go. A dangling `reject` reference is
- * corruption the reader already refused, not something to drop silently here.
+ * refuses to recreate, so the row has to go. Other reference policies never
+ * silently drop the row here.
  */
 export function isRowWritable(
   key: TDataEntityKey,

@@ -1,5 +1,8 @@
 import type { AppThunk } from '@/store'
-import { captureError } from '@/6-shared/diagnostics'
+import {
+  captureError,
+  captureMerchantUserWarnings,
+} from '@/6-shared/diagnostics'
 import {
   clearPersistedLocalData,
   compactPersistedReplica,
@@ -25,6 +28,7 @@ export const loadLocalData = (): AppThunk => async dispatch => {
   try {
     const loaded = await replicaStorage.loadCurrent()
     if (!loaded) return
+    captureMerchantUserWarnings(loaded.base, 'local')
     if (loaded.outbox.status === 'corrupt') {
       reportLocalRecovery('outbox', loaded.outbox.reason)
       dispatch(

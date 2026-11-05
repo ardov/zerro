@@ -16,7 +16,10 @@ const { syncMock } = vi.hoisted(() => ({
 vi.mock('@/6-shared/api/syncDiff', () => ({ sync: syncMock }))
 
 vi.mock('@/6-shared/analytics', () => ({ track: vi.fn() }))
-vi.mock('@/6-shared/diagnostics', () => ({ captureError: vi.fn() }))
+vi.mock('@/6-shared/diagnostics', () => ({
+  captureError: vi.fn(),
+  captureMerchantUserWarnings: vi.fn(),
+}))
 
 import {
   makeAccount,

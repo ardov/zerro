@@ -1,7 +1,10 @@
 import { getSyncCursor } from '@/store/data/selectors'
 import { getToken } from '@/store/token'
 import { track } from '@/6-shared/analytics'
-import { captureError } from '@/6-shared/diagnostics'
+import {
+  captureError,
+  captureMerchantUserWarnings,
+} from '@/6-shared/diagnostics'
 import {
   syncFinished,
   syncStarted,
@@ -204,6 +207,7 @@ function pushPorts(
     },
     commit: async ({ accepted }) => {
       dispatch(applyPushChunk(accepted))
+      captureMerchantUserWarnings(getState().data.base, 'push')
       await waitForPersistedReplica()
       if (getState().data.persistenceWarning) {
         // The server has already accepted this chunk and Redux has already
@@ -286,6 +290,10 @@ function exchangeWithoutPush(
           ...response.data,
           ...(fullReload ? { fullReload: true } : {}),
         })
+      )
+      captureMerchantUserWarnings(
+        getState().data.base,
+        fullReload ? 'full-reload' : 'pull'
       )
       const {
         journalRecoveryRequired,

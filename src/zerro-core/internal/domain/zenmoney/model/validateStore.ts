@@ -2,7 +2,7 @@ import { AccountType } from '../entities/accounts'
 import { eachReferenceIssue } from './entityGraph'
 import { dataEntityKeys, type TDataStore } from './store'
 
-export const dataStoreValidatorVersion = 2 as const
+export const dataStoreValidatorVersion = 3 as const
 
 export type TDataStoreValidationResult =
   { ok: true } | { ok: false; reason: string }
@@ -16,8 +16,7 @@ export type TDataStoreValidationResult =
  * Once both users and accounts exist, the server graph must have one root user,
  * one debt account, the references Zerro must dereference, and an acyclic
  * tag-parent relation. References come from the entity graph, which also names
- * the two Zenmoney-retained orphans that are canonical data rather than
- * corruption.
+ * canonical rows whose unavailable references do not block reading.
  */
 export function validateDataStore(
   store: TDataStore

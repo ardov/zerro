@@ -2,7 +2,10 @@ import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { captureError } from '@/6-shared/diagnostics'
 
-vi.mock('@/6-shared/diagnostics', () => ({ captureError: vi.fn() }))
+vi.mock('@/6-shared/diagnostics', () => ({
+  captureError: vi.fn(),
+  captureMerchantUserWarnings: vi.fn(),
+}))
 
 const { storageMock } = vi.hoisted(() => ({
   storageMock: {

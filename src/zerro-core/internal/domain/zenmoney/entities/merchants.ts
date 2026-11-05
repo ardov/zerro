@@ -12,7 +12,8 @@ export type TMerchantId = string
 export type TMerchant = {
   id: TMerchantId
   changed: TMsTime
-  user: TUserId
+  /** Canonical rows can omit ownership or retain an unavailable owner. */
+  user?: TUserId | null
   title: string
   mcc?: number | null
 }
@@ -39,7 +40,7 @@ export function normalizePayee(name: string | null | undefined) {
 }
 
 export function makeMerchant(
-  draft: OptionalExceptFor<TMerchant, 'user' | 'title'>,
+  draft: OptionalExceptFor<TMerchant, 'title'> & { user: TUserId },
   ctx: TCoreContext
 ): TMerchant {
   return {

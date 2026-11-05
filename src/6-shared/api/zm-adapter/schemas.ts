@@ -114,7 +114,7 @@ const merchantWireSchema = z
   .object({
     id: stringId,
     changed: timestamp,
-    user: numberId,
+    user: nullable(numberId).optional(),
     title: z.string(),
     mcc: nullable(z.number()).optional(),
   })

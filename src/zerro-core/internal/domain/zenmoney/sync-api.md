@@ -198,6 +198,13 @@ from restore/push writes because the endpoint refuses to recreate them.
 Transactions referring to an omitted marker are written with a null reference.
 The all-zero global budget tag id is valid and is not an orphan.
 
+Canonical merchants are also readable when `user` is omitted, null, or points
+to a user absent from the snapshot. Zerro preserves the merchant and its raw
+ownership metadata; it does not delete it or assign a replacement owner.
+Local loading and synchronization report these cases separately as Sentry
+warnings with counts and source only, once per reason/source per page.
+New merchant creation still requires a root user.
+
 ## Local prediction and rebase
 
 Money changes returned recalculated accounts; viewed/comment-only changes did

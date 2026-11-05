@@ -159,6 +159,22 @@ describe('parseFullBackup', () => {
     })
   })
 
+  it.each([undefined, null, 999])(
+    'round-trips merchant user %s without dropping the merchant',
+    user => {
+      const merchant = makeMerchant({ id: 'shop', user, title: 'Shop' })
+      if (user === undefined) delete merchant.user
+      const snapshot = makeSnapshot({ merchant: { shop: merchant } })
+      expect(parseFullBackup(toBackupFile(snapshot))).toEqual({
+        ok: true,
+        store: snapshot,
+        warnings: [
+          { reason: 'danglingReference', path: 'merchant.user', count: 1 },
+        ],
+      })
+    }
+  )
+
   it.each([null, 5411])(
     'accepts observed wire variants with merchant MCC %s',
     mcc => {
