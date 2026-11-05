@@ -20,7 +20,7 @@ export const Rail: FC<{ accountsPanelFits: boolean }> = ({
       className="flex h-full w-[56px] shrink-0 flex-col items-center gap-2 py-3"
     >
       <Link
-        to="/transactions"
+        to="/"
         aria-label="Zerro"
         className="focusable flex h-12 self-stretch items-center justify-center rounded-ui-control-inner rounded-smooth text-ui-primary"
       >
