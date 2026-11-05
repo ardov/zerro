@@ -2,6 +2,19 @@
 
 This optional Zerro Core module owns deterministic public demo data. It describes what a realistic normalized Zenmoney/Zerro snapshot can look like without using private account data.
 
+`getDemoData`, `makeDemoDiff` and `makeDemoStore` accept `locale: 'en' | 'ru'`.
+The default is the English/European fixture. Demo login selects the fixture from
+the current interface language and uses its default display currency.
+The Russian fixture uses RUB, Russian banks, merchants, category/account names
+and transaction comments. Its illustrative household prices and recurring
+transfers are defined in `locales/ru.ts`; they are fixed samples, not live quotes
+or historical prices. Dates, recurrence rules and category appearance are shared
+by both fixtures. Changing the interface language inside an existing session
+does not replace its data; the selected fixture is loaded on the next demo login.
+Demo display-currency preferences are stored separately from signed-in account
+preferences and survive reloads. Each new demo login starts in the fixture's
+default currency; leaving the demo restores the ordinary account preference.
+
 ## Creating demo data is needed for:
 
 - Testing. That's why it should be predictable and repeatable.

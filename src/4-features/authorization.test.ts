@@ -3,6 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import data from '@/store/data'
 import token from '@/store/token'
 import view, { patchTransactionsPage } from '@/store/view'
+import displayCurrency, { setSavedCurrency } from '@/store/displayCurrency'
+import { i18n } from '@/6-shared/localization'
+import { tokenStorage } from '@/6-shared/api/tokenStorage'
+import { convertDiff } from '@/6-shared/api/zm-adapter'
 
 const { clearLocalDataMock, authorizeMock, refreshMock, demoLoads } =
   vi.hoisted(() => ({
@@ -29,9 +33,11 @@ vi.mock('@/4-features/sync', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks()
+  localStorage.clear()
+  tokenStorage.clear()
 })
 
-import { loadDemoData, logIn, logOut } from './authorization'
+import { loadBackup, loadDemoData, logIn, logOut } from './authorization'
 
 describe('logOut', () => {
   it('clears transient views', async () => {
@@ -109,5 +115,89 @@ describe('loadDemoData', () => {
     expect(
       Object.keys(store.getState().data.current.account).length
     ).toBeGreaterThan(0)
+  })
+
+  it.each([
+    ['ru', 2, 'Т-Банк · Зарплатный'],
+    ['ru-RU', 2, 'Т-Банк · Зарплатный'],
+    ['en', 3, 'Revolut EUR'],
+    ['en-US', 3, 'Revolut EUR'],
+  ])(
+    'opens the %s demo in its own currency',
+    async (language, currency, account) => {
+      await i18n.changeLanguage(language)
+      const store = configureStore({
+        reducer: { token, data, displayCurrency },
+        preloadedState: { displayCurrency: 'USD' },
+      })
+
+      await (store.dispatch as any)(loadDemoData())
+
+      expect(store.getState().data.current.user[23880].currency).toBe(currency)
+      expect(store.getState().data.current.account[account].title).toBe(account)
+      expect(store.getState().displayCurrency).toBeNull()
+    }
+  )
+
+  it('keeps the real account currency through demo edits, reload and logout', async () => {
+    const reducer = { token, data, view, displayCurrency }
+    const store = configureStore({ reducer })
+    store.dispatch(setSavedCurrency('USD') as any)
+    await i18n.changeLanguage('ru')
+
+    await (store.dispatch as any)(loadDemoData())
+    expect(store.getState().displayCurrency).toBeNull()
+    store.dispatch(setSavedCurrency('EUR') as any)
+
+    const reloaded = configureStore({
+      reducer,
+      preloadedState: {
+        token: tokenStorage.get(),
+        data: store.getState().data,
+      },
+    })
+    expect(reloaded.getState().displayCurrency).toBe('EUR')
+    await (reloaded.dispatch as any)(logOut())
+    expect(reloaded.getState().displayCurrency).toBe('USD')
+    expect(configureStore({ reducer }).getState().displayCurrency).toBe('USD')
+  })
+
+  it('opens a single demo in the current language after overlapping clicks', async () => {
+    const store = configureStore({ reducer: { token, data, displayCurrency } })
+    void i18n.changeLanguage('en')
+    const first = (store.dispatch as any)(loadDemoData())
+    void i18n.changeLanguage('ru')
+    const second = (store.dispatch as any)(loadDemoData())
+
+    await Promise.all([first, second])
+
+    const current = store.getState().data.current
+    expect(current.user[23880].currency).toBe(2)
+    expect(current.account['Т-Банк · Зарплатный']).toBeDefined()
+    expect(Object.values(current.account)).toHaveLength(9)
+    expect(Object.values(current.tag)).toHaveLength(20)
+    expect(Object.values(current.merchant)).toHaveLength(18)
+  })
+})
+
+describe('loadBackup', () => {
+  it('retains the current currency instead of inheriting the last demo preference', async () => {
+    const reducer = { token, data, view, displayCurrency }
+    const store = configureStore({ reducer })
+    store.dispatch(setSavedCurrency('USD') as any)
+    await (store.dispatch as any)(loadDemoData())
+    store.dispatch(setSavedCurrency('EUR') as any)
+    await (store.dispatch as any)(logOut())
+
+    const { makeDemoDiff } = await import('@/zerro-core/demo')
+    const file = new File(
+      [JSON.stringify(convertDiff.toServer(makeDemoDiff()))],
+      'backup.json'
+    )
+    await (store.dispatch as any)(loadBackup(file))
+
+    expect(store.getState().token).toBe('fake_token')
+    expect(store.getState().displayCurrency).toBe('USD')
+    expect(configureStore({ reducer }).getState().displayCurrency).toBe('USD')
   })
 })

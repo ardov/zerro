@@ -9,12 +9,15 @@ import { refreshData } from '@/4-features/sync'
 import { convertDiff } from '@/6-shared/api/zm-adapter'
 import { clearLocalData } from './localData'
 import { zmPreferenceStorage } from '@/6-shared/api/zmPreferenceStorage'
+import { i18n } from '@/6-shared/localization'
+import { loadSavedCurrency, setSavedCurrency } from '@/store/displayCurrency'
 
 export const logOut = (): AppThunk<Promise<void>> => async dispatch => {
   dispatch(resetData())
   dispatch(resetViews())
   dispatch(setToken(null))
   tokenStorage.clear()
+  dispatch(loadSavedCurrency())
   await dispatch(clearLocalData())
 }
 
@@ -41,32 +44,40 @@ export const logIn =
 
 export const loadBackup =
   (file: File): AppThunk<void> =>
-  async dispatch => {
+  async (dispatch, getState) => {
     try {
       const txt = await file.text()
       const data = JSON.parse(txt)
       const converted = convertDiff.toClient(data)
+      const currency = getState().displayCurrency
       // TODO: maybe later make more elegant solution for local data
       tokenStorage.set(zenmoney.fakeToken)
       dispatch(setToken(zenmoney.fakeToken))
+      dispatch(setSavedCurrency(currency))
       dispatch(applyServerPatch(converted))
     } catch (error) {
       console.error(error)
     }
   }
 
-export const loadDemoData = (): AppThunk<void> => async dispatch => {
-  try {
-    // Demo data is a few hundred kilobytes, so it loads when the demo opens
-    // rather than with the app.
-    const { getDemoData } = await import('@/zerro-core/demo')
-    const diff = getDemoData()
-    console.log(diff)
-    // TODO: maybe later make more elegant solution for local data
-    tokenStorage.set(zenmoney.fakeToken)
-    dispatch(setToken(zenmoney.fakeToken))
-    dispatch(applyServerPatch(diff))
-  } catch (error) {
-    console.error(error)
+export const loadDemoData =
+  (): AppThunk<Promise<void>> => async (dispatch, getState) => {
+    try {
+      // Demo data is a few hundred kilobytes, so it loads when the demo opens
+      // rather than with the app.
+      const { getDemoData } = await import('@/zerro-core/demo')
+      // Another demo click or a completed login may have opened a session while
+      // the chunk loaded. Only the first completed request installs demo data.
+      if (getState().token) return
+      const language = i18n.resolvedLanguage || i18n.language
+      const locale = language.startsWith('ru') ? 'ru' : 'en'
+      const diff = getDemoData({ locale })
+      // TODO: maybe later make more elegant solution for local data
+      tokenStorage.set(zenmoney.fakeToken)
+      dispatch(setToken(zenmoney.fakeToken))
+      dispatch(setSavedCurrency(null))
+      dispatch(applyServerPatch(diff))
+    } catch (error) {
+      console.error(error)
+    }
   }
-}
