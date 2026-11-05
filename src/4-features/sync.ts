@@ -287,6 +287,26 @@ function exchangeWithoutPush(
           ...(fullReload ? { fullReload: true } : {}),
         })
       )
+      const {
+        journalRecoveryRequired,
+        journalRecoveryReason,
+        outboxRecoveryReason,
+      } = getState().data
+      if (
+        fullReload &&
+        (journalRecoveryRequired || outboxRecoveryReason !== null)
+      ) {
+        const kind = outboxRecoveryReason !== null ? 'outbox' : 'journal'
+        const reason =
+          outboxRecoveryReason ??
+          journalRecoveryReason ??
+          'Recovery is still required'
+        captureError(
+          new Error(`Full reload ${kind} recovery required: ${reason}`)
+        )
+        dispatch(syncFinished(failedResult(now(runtime), reason)))
+        return
+      }
       await dispatch(refreshSelectedHistoryPoint())
       track('sync_completed', { mode: fullReload ? 'update' : 'pull' })
       console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)
@@ -294,6 +314,9 @@ function exchangeWithoutPush(
     } catch (error) {
       const errorMessage = getErrorMessage(error)
       console.error('Syncing failed', error)
+      if (fullReload) {
+        captureError(error instanceof Error ? error : new Error(errorMessage))
+      }
       dispatch(syncFinished(failedResult(now(runtime), errorMessage)))
     }
   }

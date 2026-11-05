@@ -56,7 +56,7 @@ export const entityReferences: readonly TEntityReference[] = [
 
   { from: 'user', field: 'parent', to: 'user', nullable: true },
   { from: 'user', field: 'currency', to: 'instrument' },
-  { from: 'user', field: 'country', to: 'country' },
+  { from: 'user', field: 'country', to: 'country', nullable: true },
 
   { from: 'merchant', field: 'user', to: 'user' },
 

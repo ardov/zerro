@@ -96,7 +96,7 @@ const userWireSchema = z
     changed: timestamp,
     currency: numberId,
     parent: nullable(numberId),
-    country: numberId,
+    country: nullable(numberId),
     countryCode: z.string(),
     email: nullable(z.string()),
     login: nullable(z.string()),

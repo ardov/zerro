@@ -468,7 +468,12 @@ describe.each([false, true])('outbox (production: %s)', production => {
       fullReload: true,
       serverTimestamp: 200,
       user: [makeUser({ id: 8, parent: null, currency: 1 })],
-      account: [makeAccount({ id: 'cash', title: 'Other Cash', user: 8 })],
+      country: [{ id: 1, title: 'United States', currency: 1, domain: null }],
+      instrument: [makeInstrument({ id: 1 })],
+      account: [
+        makeAccount({ id: 'cash', title: 'Other Cash', user: 8 }),
+        makeAccount({ id: 'debt', type: AccountType.Debt, user: 8 }),
+      ],
     })
 
     expect(reloaded.rootUserId).toBe(8)

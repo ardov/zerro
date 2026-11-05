@@ -1,4 +1,5 @@
 import type { AppThunk } from '@/store'
+import { captureError } from '@/6-shared/diagnostics'
 import {
   clearPersistedLocalData,
   compactPersistedReplica,
@@ -15,7 +16,7 @@ import {
   replicaStorage,
   type TRecoveryReplica,
 } from '@/6-shared/api/replicaStorage'
-import { getRootUserId } from '@/zerro-core/replica'
+import { getRootUserId, validateDataStore } from '@/zerro-core/replica'
 
 export const loadLocalData = (): AppThunk => async dispatch => {
   // Only hydration decides recovery. Retention runs after it and outside this
@@ -25,6 +26,7 @@ export const loadLocalData = (): AppThunk => async dispatch => {
     const loaded = await replicaStorage.loadCurrent()
     if (!loaded) return
     if (loaded.outbox.status === 'corrupt') {
+      reportLocalRecovery('outbox', loaded.outbox.reason)
       dispatch(
         hydrateCorruptOutbox({
           rootUserId: loaded.rootUserId,
@@ -47,24 +49,26 @@ export const loadLocalData = (): AppThunk => async dispatch => {
       source: 'indexeddb-journal',
       reason,
     })
+    reportLocalRecovery('journal', reason)
     let recovery: TRecoveryReplica | null
     try {
       recovery = await replicaStorage.loadOutboxForRecovery()
     } catch (outboxError) {
       console.warn('Could not preserve the persisted outbox', outboxError)
+      const outboxReason =
+        outboxError instanceof Error ? outboxError.message : String(outboxError)
+      reportLocalRecovery('outbox', outboxReason)
       dispatch(
         hydrateCorruptReplica({
           rootUserId: null,
           journalReason: reason,
-          outboxReason:
-            outboxError instanceof Error
-              ? outboxError.message
-              : String(outboxError),
+          outboxReason,
         })
       )
       return
     }
     if (recovery?.outbox.status === 'corrupt') {
+      reportLocalRecovery('outbox', recovery.outbox.reason)
       dispatch(
         hydrateCorruptReplica({
           rootUserId: recovery.rootUserId,
@@ -101,7 +105,24 @@ export const discardCorruptOutbox =
       rootUserId !== null &&
       getRootUserId(base.user) === rootUserId
     ) {
+      const validation = validateDataStore(base)
+      if (!validation.ok) {
+        dispatch(
+          hydrateRecoveryOutbox({
+            rootUserId,
+            outbox: [],
+            reason: validation.reason,
+          })
+        )
+        reportLocalRecovery('journal', validation.reason)
+        return
+      }
       await persistRecoveryCheckpoint(base)
       dispatch(recoveryCheckpointPersisted())
     }
   }
+
+function reportLocalRecovery(kind: 'journal' | 'outbox', reason: string) {
+  // Send the diagnostic only, never the snapshot or queued commands.
+  captureError(new Error(`Local ${kind} recovery required: ${reason}`))
+}

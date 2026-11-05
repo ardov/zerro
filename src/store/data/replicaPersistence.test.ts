@@ -257,6 +257,7 @@ function middleware(state: ReturnType<typeof replicaState>) {
         serverTimestamp: action.payload.serverTimestamp ?? 100,
       }
       state.data.current = state.data.base
+      state.data.journalRecoveryRequired = false
     }
     if (appendClientCommand.match(action))
       state.data.outbox.push(action.payload)

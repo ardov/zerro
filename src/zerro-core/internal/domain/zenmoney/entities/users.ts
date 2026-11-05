@@ -9,7 +9,7 @@ export type TUser = {
   changed: TMsTime
   currency: TInstrumentId
   parent: TUserId | null
-  country: TCountryId
+  country: TCountryId | null
   countryCode: string
   email: string | null
   login: string | null

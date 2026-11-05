@@ -153,8 +153,16 @@ const { reducer, actions } = createSlice({
         const snapshot = original(state)!
         const { fullReload, ...canonicalPatch } = payload
         if (fullReload) {
-          const recoveringJournal = state.journalRecoveryRequired
           const checkpoint = applyPatch(createEmptyDataStore(), canonicalPatch)
+          // Validate the server snapshot before attributing a replay failure
+          // to local commands. A rejected response must not replace the last
+          // accepted base or discard the pending outbox.
+          const validation = validateDataStore(checkpoint)
+          if (!validation.ok) {
+            state.journalRecoveryRequired = true
+            state.journalRecoveryReason = validation.reason
+            return
+          }
           const checkpointRootUserId = getRootUserId(checkpoint.user)
           const rootUserChanged =
             state.rootUserId !== null &&
@@ -166,20 +174,20 @@ const { reducer, actions } = createSlice({
             state.redo = []
           }
           const outbox = rootUserChanged ? [] : snapshot.outbox
-          if (recoveringJournal) {
-            const replayed = replayAndValidateOutbox(checkpoint, outbox)
-            if (!replayed.ok) {
-              state.base = checkpoint
-              state.current = checkpoint
-              state.outbox = []
-              state.redo = []
-              state.outboxRecoveryReason = replayed.reason
-              return
-            }
-            state.current = replayed.current
-          } else {
-            state.current = replayOutbox(checkpoint, outbox)
+          const replayed = replayAndValidateOutbox(checkpoint, outbox)
+          if (!replayed.ok) {
+            state.base = checkpoint
+            state.current = checkpoint
+            state.outbox = []
+            state.redo = []
+            state.outboxRecoveryReason = replayed.reason
+            // Keep the raw persisted outbox untouched. The validated
+            // checkpoint can be persisted after an explicit discard.
+            state.journalRecoveryRequired = true
+            state.journalRecoveryReason = null
+            return
           }
+          state.current = replayed.current
           state.journalRecoveryRequired = false
           state.journalRecoveryReason = null
           state.outboxRecoveryReason = null
@@ -352,6 +360,8 @@ function replayAndValidateOutbox(
   base: TDataStore,
   outbox: TCommand[]
 ): { ok: true; current: TDataStore } | { ok: false; reason: string } {
+  // The full snapshot has already passed validation.
+  if (!outbox.length) return { ok: true, current: base }
   try {
     const current = replayOutbox(base, outbox)
     const validation = validateDataStore(current)

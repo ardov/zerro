@@ -130,6 +130,35 @@ function makeThunkRunner(initial: RootState) {
 }
 
 describe('parseFullBackup', () => {
+  it('round-trips a family whose users have no country reference', () => {
+    const snapshot = makeSnapshot({
+      user: {
+        1: makeUser({
+          id: 1,
+          parent: null,
+          currency: 2,
+          country: null,
+          countryCode: 'GB',
+        }),
+        2: makeUser({
+          id: 2,
+          parent: 1,
+          currency: 2,
+          country: null,
+          countryCode: 'BY',
+        }),
+      },
+    })
+    const parsed = parseFullBackup(toBackupFile(snapshot))
+    expect(parsed).toEqual({ ok: true, store: snapshot, warnings: [] })
+
+    snapshot.user[2].country = 999
+    expect(parseFullBackup(toBackupFile(snapshot))).toEqual({
+      ok: false,
+      reason: 'notABackup',
+    })
+  })
+
   it.each([null, 5411])(
     'accepts observed wire variants with merchant MCC %s',
     mcc => {

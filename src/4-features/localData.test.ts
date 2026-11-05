@@ -1,5 +1,8 @@
 import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { captureError } from '@/6-shared/diagnostics'
+
+vi.mock('@/6-shared/diagnostics', () => ({ captureError: vi.fn() }))
 
 const { storageMock } = vi.hoisted(() => ({
   storageMock: {
@@ -65,6 +68,7 @@ describe('loadLocalData', () => {
     expect(dataState.current.account.cash.title).toBe('Wallet')
     expect(dataState.outbox).toEqual(outbox)
     expect(storageMock.compactOneBatch).toHaveBeenCalledOnce()
+    expect(captureError).not.toHaveBeenCalled()
   })
 
   it('leaves Redux empty when the new database has no replica', async () => {
@@ -111,6 +115,11 @@ describe('loadLocalData', () => {
     expect(dataState.outboxRecoveryReason).toBe('outbox[0] is invalid')
     expect(dataState.journalRecoveryRequired).toBe(false)
     expect(storageMock.compactOneBatch).not.toHaveBeenCalled()
+    expect(captureError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('outbox[0] is invalid'),
+      })
+    )
   })
 
   it('preserves a readable outbox and requests recovery if replay fails', async () => {
@@ -136,6 +145,11 @@ describe('loadLocalData', () => {
     expect(dataState.rootUserId).toBe(7)
     expect(dataState.journalRecoveryRequired).toBe(true)
     expect(dataState.journalRecoveryReason).toBe('broken checkpoint')
+    expect(captureError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('broken checkpoint'),
+      })
+    )
     warn.mockRestore()
   })
 
@@ -245,5 +259,50 @@ describe('loadLocalData', () => {
     })
     expect(dataState.outboxRecoveryReason).toBeNull()
     expect(dataState.journalRecoveryRequired).toBe(false)
+  })
+
+  it('keeps journal recovery active when discarding an outbox over an invalid snapshot', async () => {
+    const base = makeStore({
+      serverTimestamp: 100,
+      instrument: { 1: makeInstrument({ id: 1 }) },
+      user: { 7: makeUser({ id: 7, parent: null, currency: 1, country: 999 }) },
+      account: {
+        debt: makeAccount({ id: 'debt', user: 7, type: AccountType.Debt }),
+      },
+    })
+    // A recovery already in progress may have kept an invalid snapshot in
+    // memory. Discarding its outbox must not certify that snapshot as valid.
+    let dataState: ReturnType<typeof reducer> = {
+      ...reducer(undefined, { type: 'test/init' }),
+      rootUserId: 7,
+      base,
+      current: base,
+      journalRecoveryRequired: true,
+      outboxRecoveryReason: 'outbox[0] is invalid',
+    }
+    const dispatch: any = (action: any) => {
+      if (typeof action === 'function') {
+        return action(dispatch, () => ({ data: dataState }), undefined)
+      }
+      dataState = reducer(dataState, action)
+      return action
+    }
+
+    await dispatch(discardCorruptOutbox())
+
+    expect(storageMock.discardOutbox).toHaveBeenCalledOnce()
+    expect(storageMock.commitCanonical).not.toHaveBeenCalled()
+    expect(dataState.outboxRecoveryReason).toBeNull()
+    expect(dataState.journalRecoveryRequired).toBe(true)
+    expect(dataState.journalRecoveryReason).toBe(
+      'user[0].country references a missing entity'
+    )
+    expect(captureError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining(
+          'user[0].country references a missing entity'
+        ),
+      })
+    )
   })
 })

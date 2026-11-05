@@ -62,7 +62,8 @@ export const replicaPersistenceMiddleware: Middleware =
       return result
 
     if (applyServerPatch.match(action)) {
-      if (after.data.rootUserId === null) return result
+      if (after.data.rootUserId === null || after.data.journalRecoveryRequired)
+        return result
       const checkpointReason = recoveryRequired
         ? 'recovery'
         : action.payload.fullReload
