@@ -1,14 +1,15 @@
-import type { EndpointPreference } from '6-shared/api/zenmoney'
+import type { EndpointPreference } from '@/6-shared/api/zenmoney'
+import { safeLocalStorage } from './browserStorage'
 
 const STORAGE_KEY = 'zm_server'
 
 export const zmPreferenceStorage = {
   get: (): EndpointPreference => {
-    return window.localStorage.getItem(STORAGE_KEY) === 'app' ? 'app' : 'ru'
+    return safeLocalStorage.getItem(STORAGE_KEY) === 'app' ? 'app' : 'ru'
   },
   set: (preference: EndpointPreference) =>
     preference
-      ? localStorage.setItem(STORAGE_KEY, preference)
-      : localStorage.removeItem(STORAGE_KEY),
-  clear: () => localStorage.removeItem(STORAGE_KEY),
+      ? safeLocalStorage.setItem(STORAGE_KEY, preference)
+      : safeLocalStorage.removeItem(STORAGE_KEY),
+  clear: () => safeLocalStorage.removeItem(STORAGE_KEY),
 }

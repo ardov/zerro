@@ -1,46 +1,47 @@
-import React, { FC } from 'react'
-import { Helmet } from 'react-helmet'
-import { Global, css } from '@emotion/react'
-import CssBaseline from '@mui/material/CssBaseline'
-import { ThemeProvider, Theme } from '@mui/material/styles'
-import { appTheme } from './createTheme'
-import { THEME_KEY, fixOldTheme, useAppTheme, useColorScheme } from './hooks'
+import type { FC, ReactNode } from 'react'
+import { useLayoutEffect } from 'react'
+import type { ColorScheme } from './colors'
+import { themeTokensCss } from './colors'
+import { getThemeColor } from '../kit/themeColor'
+import { ColorSchemeOverrideContext } from './hooks'
 
-import './styles.scss'
+import './styles.css'
 
-fixOldTheme()
-
-const GlobalVaribles = (props: { theme: Theme }) => {
-  const styles = css`
-    :root {
-      --c-bg: ${props.theme.palette.background.default};
-      --c-scrollbar: ${props.theme.palette.divider};
-      --c-primary: ${props.theme.palette.primary.main};
-    }
-  `
-  return <Global styles={styles} />
+export type AppThemeProviderProps = {
+  /** Pins an isolated renderer to one scheme without changing the application
+   * preference. The application itself leaves this unset. */
+  defaultMode?: ColorScheme
+  children?: ReactNode
 }
 
-export const AppThemeProvider: FC<{ children?: React.ReactNode }> = props => {
-  const { mode } = useColorScheme()
+/** Injects both generated token blocks. The page-level theme manager owns the
+ * root class and storage; a pinned renderer temporarily mirrors its local
+ * scheme onto the root for CSS tokens. */
+export const AppThemeProvider: FC<AppThemeProviderProps> = props => {
+  const override = props.defaultMode ?? null
 
   return (
-    <ThemeProvider theme={appTheme} defaultMode={mode}>
-      <WithTheme />
+    <ColorSchemeOverrideContext.Provider value={override}>
+      <style>{themeTokensCss}</style>
+      {override && <PinnedScheme mode={override} />}
       {props.children}
-    </ThemeProvider>
+    </ColorSchemeOverrideContext.Provider>
   )
 }
 
-const WithTheme: FC = () => {
-  const theme = useAppTheme()
-  return (
-    <>
-      <Helmet>
-        <meta name="theme-color" content={theme.palette.background.paper} />
-      </Helmet>
-      <CssBaseline enableColorScheme />
-      <GlobalVaribles theme={theme} />
-    </>
-  )
+const PinnedScheme: FC<{ mode: ColorScheme }> = ({ mode }) => {
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    const wasDark = root.classList.contains('dark')
+    const previousColorScheme = root.style.colorScheme
+    root.classList.toggle('dark', mode === 'dark')
+    root.style.colorScheme = mode
+
+    return () => {
+      root.classList.toggle('dark', wasDark)
+      root.style.colorScheme = previousColorScheme
+    }
+  }, [mode])
+
+  return <meta name="theme-color" content={getThemeColor(mode)} />
 }

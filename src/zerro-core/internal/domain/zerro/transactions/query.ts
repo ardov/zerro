@@ -1,0 +1,279 @@
+import { getDebtorId } from '../../zenmoney/read-models/debtors'
+import type { ById } from '../../foundation/types'
+import type { TAccountId } from '../../zenmoney/entities/accounts'
+import type { TISODate, TISOMonth } from '../../zenmoney/primitives'
+import type { TTagId } from '../../zenmoney/entities/tags'
+import {
+  getTransactionMoney,
+  getTransactionType,
+  isDeletedTransaction,
+  isTransactionViewed,
+  TrType,
+} from '../../zenmoney/entities/transactions'
+import type { TTransaction } from '../../zenmoney/entities/transactions/types'
+import type { TEnvelopeId } from '../envelope-id'
+import type { TEnvelope } from '../envelopes'
+import {
+  compileTransactionSearch,
+  type TTransactionSearchContext,
+} from './search'
+import {
+  routeTransactionToActivity,
+  type TTransactionActivityRoutingContext,
+} from '../activity/transactionRouting'
+
+export enum TrFilterMode {
+  GeneralIncome = 'generalIncome',
+  Envelope = 'envelope',
+  Income = 'income',
+  Outcome = 'outcome',
+  All = 'all',
+  TransferFees = 'transferFees',
+}
+
+export const TrFilterType = {
+  Income: TrType.Income,
+  Outcome: TrType.Outcome,
+  Transfer: TrType.Transfer,
+  Debt: 'debt',
+} as const
+
+export type TrFilterType = (typeof TrFilterType)[keyof typeof TrFilterType]
+
+/** Inclusive start and exclusive end, in local calendar days from today. */
+export const changedPeriods = [
+  { value: 'today', from: 0, before: 1 },
+  { value: 'yesterday', from: -1, before: 0 },
+  { value: '7d', from: -6, before: 1 },
+  { value: '14d', from: -13, before: 1 },
+  { value: '30d', from: -29, before: 1 },
+] as const
+
+export type TChangedPeriod = (typeof changedPeriods)[number]['value']
+
+export type TTransactionFilterClause =
+  | { kind: 'search'; value: string }
+  | { kind: 'account'; ids: TAccountId[] }
+  | { kind: 'debtor'; ids: string[] }
+  | { kind: 'merchant'; ids: Array<string | null> }
+  | { kind: 'tag'; ids: Array<TTagId | 'null'> }
+  | { kind: 'type'; values: TrFilterType[] }
+  | { kind: 'amount'; gte?: number; lte?: number; currencies?: string[] }
+  | { kind: 'date'; from?: TISODate; to?: TISODate }
+  | { kind: 'changed'; period?: TChangedPeriod }
+  | { kind: 'viewed'; value: boolean }
+  | { kind: 'deleted'; mode: 'hide' | 'include' | 'only' }
+  | {
+      kind: 'activity'
+      envelopeIds: TEnvelopeId[]
+      scope: 'self' | 'tree'
+      mode: TrFilterMode
+      month?: TISOMonth
+    }
+
+export type TTransactionQuery = {
+  clauses: TTransactionFilterClause[]
+}
+
+export type TTransactionQueryContext = {
+  instrumentCodeById: Record<number, string>
+  search?: TTransactionSearchContext
+  routing: TTransactionActivityRoutingContext
+  envelopes: ById<Pick<TEnvelope, 'id' | 'children'>>
+  keepingEnvelopeIds: ReadonlySet<TEnvelopeId>
+}
+
+type TTransactionPredicate = (transaction: TTransaction) => boolean
+
+export function compileTransactionQuery(
+  query: TTransactionQuery,
+  context?: TTransactionQueryContext,
+  referenceTime = Date.now()
+): TTransactionPredicate {
+  const deletedClause = query.clauses.find(clause => clause.kind === 'deleted')
+  const predicates = query.clauses.map(clause =>
+    compileClause(clause, context, referenceTime)
+  )
+
+  return transaction => {
+    if (!deletedClause && isDeletedTransaction(transaction)) return false
+    return predicates.every(predicate => predicate(transaction))
+  }
+}
+
+function compileClause(
+  clause: TTransactionFilterClause,
+  context: TTransactionQueryContext | undefined,
+  referenceTime: number
+): TTransactionPredicate {
+  switch (clause.kind) {
+    case 'search': {
+      return compileTransactionSearch(
+        clause.value,
+        context?.search,
+        context?.routing.debtAccountId
+      )
+    }
+    case 'debtor': {
+      const ids = new Set(clause.ids)
+      if (!ids.size) return () => true
+      if (!context?.search)
+        throw new Error('Debtor transaction filters require query context')
+      const merchants = context.search.merchants
+      return transaction => {
+        const type = getTransactionType(
+          transaction,
+          context.routing.debtAccountId
+        )
+        return (
+          (type === TrType.IncomeDebt || type === TrType.OutcomeDebt) &&
+          ids.has(getDebtorId(transaction, merchants))
+        )
+      }
+    }
+    case 'merchant': {
+      const ids = new Set(clause.ids)
+      return transaction => !ids.size || ids.has(transaction.merchant)
+    }
+    case 'account': {
+      // Nullable because a soft-deleted row can carry a leg that an account
+      // deletion nulled. A filter by account simply never matches one.
+      const ids = new Set<string | null>(clause.ids)
+      return transaction =>
+        !ids.size ||
+        ids.has(transaction.incomeAccount) ||
+        ids.has(transaction.outcomeAccount)
+    }
+    case 'tag': {
+      const ids = new Set(clause.ids)
+      return transaction => {
+        if (!ids.size) return true
+        const type = getTransactionType(
+          transaction,
+          context?.routing.debtAccountId
+        )
+        if (type !== TrType.Income && type !== TrType.Outcome) return false
+        if (ids.has('null') && !transaction.tag?.length) return true
+        return transaction.tag?.some(id => ids.has(id)) ?? false
+      }
+    }
+    case 'type': {
+      const values = new Set(clause.values)
+      return transaction => {
+        if (!values.size) return true
+
+        const type = getTransactionType(
+          transaction,
+          context?.routing.debtAccountId
+        )
+        if (type === TrType.IncomeDebt || type === TrType.OutcomeDebt) {
+          return values.has(TrFilterType.Debt)
+        }
+        return values.has(type)
+      }
+    }
+    case 'amount': {
+      const currencies = new Set(clause.currencies)
+      if (currencies.size && !context)
+        throw new Error('Currency transaction filters require query context')
+      return transaction =>
+        getTransactionMoney(transaction, context?.routing.debtAccountId).some(
+          ({ amount, instrument }) =>
+            (!currencies.size ||
+              currencies.has(context!.instrumentCodeById[instrument])) &&
+            (clause.gte === undefined || amount >= clause.gte) &&
+            (clause.lte === undefined || amount <= clause.lte)
+        )
+    }
+    case 'date': {
+      const { from, to } = normalizeDateFilter(clause)
+      return transaction => {
+        if (from && transaction.date < from) return false
+        if (to && transaction.date > to) return false
+        return true
+      }
+    }
+    case 'changed': {
+      if (!clause.period) return () => true
+      const now = new Date(referenceTime)
+      // Calendar boundaries in the user's timezone, including DST changes.
+      const midnight = (offset: number) =>
+        new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() + offset
+        ).getTime()
+      const period = changedPeriods.find(item => item.value === clause.period)!
+      const from = midnight(period.from)
+      const before = midnight(period.before)
+      return transaction =>
+        transaction.changed >= from && transaction.changed < before
+    }
+    case 'viewed':
+      return transaction => isTransactionViewed(transaction) === clause.value
+    case 'deleted':
+      if (clause.mode === 'include') return () => true
+      if (clause.mode === 'only') return isDeletedTransaction
+      return transaction => !isDeletedTransaction(transaction)
+    case 'activity':
+      return compileActivityClause(clause, context)
+  }
+}
+
+export function normalizeDateFilter(
+  clause: Extract<TTransactionFilterClause, { kind: 'date' }>
+): Extract<TTransactionFilterClause, { kind: 'date' }> {
+  return clause.from && clause.to && clause.from > clause.to
+    ? { ...clause, from: clause.to, to: clause.from }
+    : clause
+}
+
+function compileActivityClause(
+  clause: Extract<TTransactionFilterClause, { kind: 'activity' }>,
+  context?: TTransactionQueryContext
+): TTransactionPredicate {
+  if (!context) {
+    throw new Error('Activity transaction filters require query context')
+  }
+
+  const envelopeIds = new Set<TEnvelopeId>()
+  clause.envelopeIds.forEach(id => {
+    envelopeIds.add(id)
+    if (clause.scope === 'tree') {
+      context.envelopes[id]?.children.forEach(childId =>
+        envelopeIds.add(childId)
+      )
+    }
+  })
+
+  return transaction => {
+    const route = routeTransactionToActivity(transaction, context.routing)
+    if (!route) return false
+    if (clause.month && route.month !== clause.month) return false
+    if (clause.mode === TrFilterMode.TransferFees) {
+      return route.direction === 'internal'
+    }
+    if (route.direction === 'internal') return false
+    if (!envelopeIds.has(route.envelopeId)) return false
+
+    switch (clause.mode) {
+      case TrFilterMode.Income:
+        return route.direction === 'income'
+      case TrFilterMode.Outcome:
+        return route.direction === 'outcome'
+      case TrFilterMode.All:
+        return true
+      case TrFilterMode.GeneralIncome:
+        return (
+          route.direction === 'income' &&
+          !context.keepingEnvelopeIds.has(route.envelopeId)
+        )
+      case TrFilterMode.Envelope:
+        return (
+          route.direction === 'outcome' ||
+          (route.direction === 'income' &&
+            context.keepingEnvelopeIds.has(route.envelopeId))
+        )
+    }
+  }
+}

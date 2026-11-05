@@ -1,22 +1,32 @@
-import React, { useState, useRef, useCallback, FC } from 'react'
-import { Box, Typography, IconButton, ButtonBase } from '@mui/material'
-import { BoxProps } from '@mui/system'
-import { TDateDraft, TISOMonth } from '6-shared/types'
-import { ChevronRightIcon, ChevronLeftIcon } from '6-shared/ui/Icons'
-import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
-import { formatDate } from '6-shared/helpers/date'
-import { nextMonth, prevMonth } from '6-shared/helpers/date'
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
+import { useTranslation } from 'react-i18next'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
+import type { FC, HTMLAttributes } from 'react'
+import { useState, useRef, useCallback } from 'react'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
+
+import type { TDateDraft, TISOMonth } from '@/6-shared/types'
+import { ChevronRightIcon, ChevronLeftIcon } from '@/6-shared/ui/Icons'
+import MonthSelectPopover from '@/6-shared/ui/MonthSelectPopover'
+import { formatDate } from '@/6-shared/helpers/date'
+import { nextMonth, prevMonth } from '@/6-shared/helpers/date'
+import { usePopup } from '@/6-shared/overlays'
 
 import { useMonth } from '../../MonthProvider'
-import { balances } from '5-entities/envBalances'
 
-export const MonthSelect: FC<BoxProps> = props => {
+export const MonthSelect: FC<HTMLAttributes<HTMLDivElement>> = props => {
+  const { t: uiT } = useTranslation('common')
   const [month, setMonth] = useMonth()
-  const list = balances.useMonthList()
+  const list = useAppSelector(core.months.selectList)
   const first = list[0]
   const last = list[list.length - 1]
 
   const paperRef = useRef(null)
+  // On the overlay stack, so Back closes the month list rather than leaving
+  // the page. The anchor is plain state beside it.
+  const { open, setOpen } = usePopup()
   const [anchorEl, setAnchorEl] = useState(null)
 
   const prevMonthDate = month > first ? prevMonth(month) : null
@@ -25,11 +35,11 @@ export const MonthSelect: FC<BoxProps> = props => {
   const isLast = !nextMonthDate
   const goPrevMonth = () => prevMonthDate && setMonth(prevMonthDate)
   const goNextMonth = () => nextMonthDate && setMonth(nextMonthDate)
-  const openPopover = useCallback(
-    () => setAnchorEl(paperRef.current),
-    [setAnchorEl]
-  )
-  const closePopover = useCallback(() => setAnchorEl(null), [setAnchorEl])
+  const openPopover = useCallback(() => {
+    setAnchorEl(paperRef.current)
+    setOpen(true)
+  }, [setOpen])
+  const closePopover = useCallback(() => setOpen(false), [setOpen])
   const handleChange = useCallback(
     (date: TISOMonth) => {
       closePopover()
@@ -40,36 +50,39 @@ export const MonthSelect: FC<BoxProps> = props => {
 
   return (
     <>
-      <Box ref={paperRef} sx={{ display: 'flex' }} {...props}>
-        <ButtonBase
-          sx={{ borderRadius: 1, py: 1, pl: 1 }}
-          onClick={openPopover}
-        >
-          <Typography variant="body1" noWrap>
+      <div ref={paperRef} className="flex" {...props}>
+        <ButtonBase className="rounded-lg py-2 pl-2" onClick={openPopover}>
+          <TextFade render={<p />} className="m-0 text-body font-sans">
             <b>{getMonthName(month)}</b> {getYear(month)}
-          </Typography>
+          </TextFade>
         </ButtonBase>
 
-        <Box>
+        <div className="flex">
           <IconButton
+            label={uiT('previousMonth')}
+            variant="ghost"
+            size="xs"
             onClick={goPrevMonth}
             disabled={isFirst}
-            sx={{ color: 'text.secondary' }}
+            className="text-ui-secondary"
           >
             <ChevronLeftIcon />
           </IconButton>
           <IconButton
+            label={uiT('nextMonth')}
+            variant="ghost"
+            size="xs"
             onClick={goNextMonth}
             disabled={isLast}
-            sx={{ color: 'text.secondary', ml: -1 }}
+            className="-ml-2 text-ui-secondary"
           >
             <ChevronRightIcon />
           </IconButton>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       <MonthSelectPopover
-        open={!!anchorEl}
+        open={open}
         anchorEl={anchorEl}
         onClose={closePopover}
         value={month}

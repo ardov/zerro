@@ -1,0 +1,10 @@
+@layer components {
+  .kit-header-surface {
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-ui-card) 60%, transparent),
+      var(--color-ui-card) 48px
+    );
+    backdrop-filter: blur(2px) saturate(120%);
+  }
+}

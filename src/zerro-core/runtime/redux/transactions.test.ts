@@ -1,0 +1,206 @@
+import { describe, expect, it, vi } from 'vitest'
+import { makeDemoStore } from '../../support/demo'
+import { makeTestRootState } from '@/store/testing'
+import {
+  makeTransaction,
+  makeMerchant,
+  makeTag,
+} from '../../support/testing/zenmoneyTestData'
+import { compileQuery, selectQueryContext } from './transactions'
+import { selectMonthEnd } from './balances'
+import { toISOMonth } from '../../internal/domain/foundation/date'
+import {
+  selectDebtors,
+  selectBalancesByDate,
+  selectHistoryStart,
+  selectInstCodeMap,
+  selectInstruments,
+  selectInstrumentsByCode,
+  selectMerchants,
+  selectTransactionIds,
+  selectTransactions,
+  selectTransactionsHistory,
+} from '../../support/testing/reduxSelectors'
+
+const NOW = Date.parse('2026-05-15T12:00:00Z')
+
+const makeRootState = makeTestRootState
+
+describe('Core transaction adapter reads', () => {
+  it('opens a previously visited future month after midnight with the same state', () => {
+    const state = makeRootState(makeDemoStore({ now: NOW }))
+    const clock = vi.spyOn(Date, 'now')
+    try {
+      clock.mockReturnValue(new Date(2026, 4, 31, 23, 59).getTime())
+      expect(selectMonthEnd(state, '2026-06')).toBeUndefined()
+      clock.mockReturnValue(new Date(2026, 5, 1, 0, 1).getTime())
+      expect(selectMonthEnd(state, '2026-06')).toEqual(
+        selectBalancesByDate(state).at(-1)?.balances
+      )
+    } finally {
+      clock.mockRestore()
+    }
+  })
+  it.each(['account', 'tag', 'merchant'] as const)(
+    'refreshes search after a %s rename, but retains context for unrelated writes',
+    kind => {
+      const data = makeDemoStore({ now: NOW })
+      data.account = {
+        ...data.account,
+        'HSBC USD': { ...data.account['HSBC USD'], title: 'Accountneedle' },
+      }
+      data.tag = {
+        ...data.tag,
+        food: makeTag({ id: 'food', title: 'Tagneedle' }),
+      }
+      data.merchant = {
+        ...data.merchant,
+        shop: makeMerchant({ id: 'shop', title: 'Merchantneedle' }),
+      }
+      const transaction = makeTransaction({
+        outcome: 12,
+        outcomeAccount: 'HSBC USD',
+        tag: ['food'],
+        merchant: 'shop',
+      })
+      const first = selectQueryContext(makeRootState(data))
+      const value = `${kind}needle`
+      const query = { clauses: [{ kind: 'search' as const, value }] }
+      expect(compileQuery(query, first)(transaction)).toBe(true)
+      expect(
+        selectQueryContext(
+          makeRootState({ ...data, reminderMarker: { ...data.reminderMarker } })
+        )
+      ).toBe(first)
+      const changed = {
+        ...data,
+        account:
+          kind === 'account'
+            ? {
+                ...data.account,
+                'HSBC USD': { ...data.account['HSBC USD'], title: 'Renamed' },
+              }
+            : data.account,
+        tag:
+          kind === 'tag'
+            ? { ...data.tag, food: { ...data.tag.food, title: 'Renamed' } }
+            : data.tag,
+        merchant:
+          kind === 'merchant'
+            ? {
+                ...data.merchant,
+                shop: { ...data.merchant.shop, title: 'Renamed' },
+              }
+            : data.merchant,
+      }
+      const next = selectQueryContext(makeRootState(changed))
+      expect(next).not.toBe(first)
+      expect(compileQuery(query, next)(transaction)).toBe(false)
+      expect(
+        compileQuery(
+          { clauses: [{ kind: 'search', value: 'Renamed' }] },
+          next
+        )(transaction)
+      ).toBe(true)
+    }
+  )
+  it('exposes reference data through explicit Core contracts', () => {
+    const state = makeRootState(makeDemoStore({ now: NOW }))
+    const instruments = Object.values(state.data.current.instrument)
+
+    expect(selectInstruments(state)).toBe(state.data.current.instrument)
+    expect(selectInstrumentsByCode(state)).toEqual(
+      Object.fromEntries(instruments.map(item => [item.shortTitle, item]))
+    )
+    expect(selectInstCodeMap(state)).toEqual(
+      Object.fromEntries(instruments.map(item => [item.id, item.shortTitle]))
+    )
+    expect(selectMerchants(state)).toBe(state.data.current.merchant)
+  })
+
+  it('keeps transaction, debtor, and balance reads as direct Core contracts', async () => {
+    const state = makeRootState(makeDemoStore({ now: NOW }))
+
+    expect(selectTransactions(state)).toBe(state.data.current.transaction)
+    expect(selectTransactionIds(state)).toHaveLength(
+      Object.keys(state.data.current.transaction).length
+    )
+    expect(selectTransactionsHistory(state)).not.toHaveLength(0)
+    expect(selectHistoryStart(state)).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    expect(selectDebtors(state)).toEqual(expect.any(Object))
+    expect(selectBalancesByDate(state)).toEqual(expect.any(Array))
+  })
+
+  it('stays cached across unrelated data changes', () => {
+    const store = makeDemoStore({ now: NOW })
+    const history = selectTransactionsHistory(makeRootState(store))
+    const ids = selectTransactionIds(makeRootState(store))
+    const debtors = selectDebtors(makeRootState(store))
+    const balancesByDate = selectBalancesByDate(makeRootState(store))
+    const month = toISOMonth(balancesByDate[0].date)
+    const monthEnd = selectMonthEnd(makeRootState(store), month)
+    expect(monthEnd).toEqual(
+      balancesByDate.findLast(row => row.date.startsWith(month))?.balances
+    )
+    const unrelatedChange = makeRootState({
+      ...store,
+      company: { ...store.company },
+    })
+
+    expect(selectTransactionsHistory(unrelatedChange)).toBe(history)
+    expect(selectTransactionIds(unrelatedChange)).toBe(ids)
+    expect(selectDebtors(unrelatedChange)).toBe(debtors)
+    expect(selectBalancesByDate(unrelatedChange)).toBe(balancesByDate)
+    expect(selectMonthEnd(unrelatedChange, month)).toBe(monthEnd)
+  })
+
+  it('recomputes transaction-dependent projections when history changes', () => {
+    const store = makeDemoStore({ now: NOW })
+    const history = selectTransactionsHistory(makeRootState(store))
+    const ids = selectTransactionIds(makeRootState(store))
+    const debtors = selectDebtors(makeRootState(store))
+    const balancesByDate = selectBalancesByDate(makeRootState(store))
+    const month = toISOMonth(balancesByDate[0].date)
+    const monthEnd = selectMonthEnd(makeRootState(store), month)
+    const transaction = makeTransaction({
+      id: 'core-adapter-transaction',
+      date: '2026-05-16',
+      created: NOW,
+      income: 1,
+    })
+    const changed = makeRootState({
+      ...store,
+      transaction: { ...store.transaction, [transaction.id]: transaction },
+    })
+
+    expect(selectTransactionsHistory(changed)).not.toBe(history)
+    expect(selectTransactionIds(changed)).not.toBe(ids)
+    expect(selectDebtors(changed)).not.toBe(debtors)
+    expect(selectBalancesByDate(changed)).not.toBe(balancesByDate)
+    expect(selectMonthEnd(changed, month)).not.toBe(monthEnd)
+  })
+})
+
+it('refreshes currency matching when instrument metadata changes', () => {
+  const data = makeDemoStore({ now: NOW })
+  const transaction = makeTransaction({
+    income: 0,
+    outcome: 10,
+    outcomeInstrument: 1,
+    outcomeAccount: 'HSBC USD',
+  })
+  const query = { clauses: [{ kind: 'amount' as const, currencies: ['USD'] }] }
+  const first = selectQueryContext(makeRootState(data))
+  expect(compileQuery(query, first)(transaction)).toBe(true)
+  const next = selectQueryContext(
+    makeRootState({
+      ...data,
+      instrument: {
+        ...data.instrument,
+        1: { ...data.instrument[1], shortTitle: 'EUR' },
+      },
+    })
+  )
+  expect(next).not.toBe(first)
+  expect(compileQuery(query, next)(transaction)).toBe(false)
+})

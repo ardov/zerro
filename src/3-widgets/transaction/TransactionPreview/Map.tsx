@@ -1,19 +1,26 @@
-import React, { FC } from 'react'
-import { BoxProps, Paper } from '@mui/material'
-import styled from '@emotion/styled'
+import type { FC } from 'react'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 
 interface MapProps {
   longitude?: number | null
   latitude?: number | null
-  sx?: BoxProps['sx']
+  className?: string
 }
 
-export const Map: FC<MapProps> = ({ longitude, latitude, sx }) => {
+export const Map: FC<MapProps> = ({ longitude, latitude, className }) => {
   if (!(longitude && latitude)) return null
 
   return (
-    <Paper sx={{ overflow: 'hidden', ...sx }}>
-      <StyledIframe
+    <div
+      className={cn(
+        'rounded-ui-control rounded-smooth bg-ui-highlight text-ui-primary overflow-hidden',
+        className
+      )}
+    >
+      {/* The bottom pixels of the embed are Google's own chrome, pulled back
+          under the card's edge. */}
+      <iframe
+        className="-mb-1 w-full"
         title="geo"
         src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${longitude}!3d${latitude}!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
         width="200"
@@ -22,11 +29,6 @@ export const Map: FC<MapProps> = ({ longitude, latitude, sx }) => {
         loading="lazy"
         allowFullScreen
       />
-    </Paper>
+    </div>
   )
 }
-
-const StyledIframe = styled.iframe`
-  width: 100%;
-  margin-bottom: -4px;
-`

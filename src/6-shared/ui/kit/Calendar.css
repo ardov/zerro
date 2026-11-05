@@ -1,0 +1,67 @@
+@layer components {
+  .kit-calendar {
+    --calendar-travel: 10px;
+    --calendar-duration: 180ms;
+  }
+
+  /* DayPicker positions this snapshot absolutely during its built-in animation. */
+  .kit-calendar [data-animated-month][aria-hidden='true'] {
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .kit-calendar [aria-hidden='true'] [data-animated-button] {
+    visibility: hidden;
+  }
+
+  .kit-calendar-before-enter,
+  .kit-calendar-before-exit {
+    --calendar-offset: calc(-1 * var(--calendar-travel));
+  }
+
+  .kit-calendar-after-enter,
+  .kit-calendar-after-exit {
+    --calendar-offset: var(--calendar-travel);
+  }
+
+  .kit-calendar-before-enter,
+  .kit-calendar-after-enter {
+    animation: kit-calendar-enter var(--calendar-duration)
+      cubic-bezier(0.25, 1, 0.5, 1) both;
+  }
+
+  .kit-calendar-before-exit,
+  .kit-calendar-after-exit {
+    animation: kit-calendar-exit var(--calendar-duration)
+      cubic-bezier(0.25, 1, 0.5, 1) both;
+  }
+
+  @keyframes kit-calendar-enter {
+    from {
+      opacity: 0;
+      transform: translateX(var(--calendar-offset));
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes kit-calendar-exit {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(var(--calendar-offset));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kit-calendar {
+      --calendar-travel: 0px;
+      --calendar-duration: 120ms;
+    }
+  }
+}

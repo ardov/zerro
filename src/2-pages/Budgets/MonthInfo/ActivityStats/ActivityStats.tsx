@@ -1,30 +1,28 @@
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import { useCallback } from 'react'
-import { ButtonBase, Collapse, Stack } from '@mui/material'
-import { useTranslation } from 'react-i18next'
-import { useToggle } from '6-shared/hooks/useToggle'
-import { TISOMonth } from '6-shared/types'
-import { PercentBar, PercentBarItem } from '6-shared/ui/PercentBar'
+import { core } from '@/zerro-core/redux'
 
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import {
-  balances,
-  EnvActivity,
-  TrFilterMode,
-  TSortedActivityNode,
-} from '5-entities/envBalances'
-import { envelopeModel } from '5-entities/envelope'
-import { DataLine } from '3-widgets/DataLine'
-import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
+import { Collapse } from '@/6-shared/ui/kit/Collapse'
+import { useTranslation } from 'react-i18next'
+import { useToggle } from '@/6-shared/hooks/useToggle'
+import type { TISOMonth } from '@/6-shared/types'
+import type { PercentBarItem } from '@/6-shared/ui/PercentBar'
+import { PercentBar } from '@/6-shared/ui/PercentBar'
+
+import { useAppSelector } from '@/store'
+
+import { DataLine } from '@/3-widgets/DataLine'
+import { useEnvTransactionsDrawer } from '@/3-widgets/global/EnvTransactionsDrawer'
 
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const activity = balances.useSortedActivity()[month]
+  const activity = useAppSelector(core.activity.selectSorted)[month]
   const transactionDrawer = useEnvTransactionsDrawer()
 
   const showTransactions = useCallback(
-    (id: TDataNode['id'], trMode: TrFilterMode) => {
-      transactionDrawer.open({
+    (id: TDataNode['id'], trMode: core.transactions.TrFilterMode) => {
+      transactionDrawer({
         envelopeConditions: { id, month, mode: trMode, isExact: true },
       })
     },
@@ -70,23 +68,23 @@ export function ActivityStats(props: { month: TISOMonth }) {
 }
 
 type TDataNode = {
-  id: TSortedActivityNode['id']
-  trMode: TSortedActivityNode['trMode']
+  id: core.activity.TSortedActivityNode['id']
+  trMode: core.activity.TSortedActivityNode['trMode']
 } & PercentBarItem
 
 function StatWidget(props: {
   month: TISOMonth
   name: string
   showBar?: boolean
-  total: EnvActivity
-  items: TSortedActivityNode[]
-  action: (id: TDataNode['id'], trMode: TrFilterMode) => void
+  total: core.activity.TActivitySummary
+  items: core.activity.TSortedActivityNode[]
+  action: (id: TDataNode['id'], trMode: core.transactions.TrFilterMode) => void
 }) {
   const { month, total, items, name, showBar, action } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const [currency] = displayCurrency.useDisplayCurrency()
-  const toDisplay = displayCurrency.useToDisplay(month)
-  const envelopes = envelopeModel.useEnvelopes()
+  const [currency] = core.currency.useDisplayCurrency()
+  const toDisplay = core.currency.useToDisplay(month)
+  const envelopes = useAppSelector(core.envelopes.selectAll)
   const [opened, toggleOpened] = useToggle(false)
 
   const nodes: TDataNode[] = items.map(node => {
@@ -125,31 +123,16 @@ function StatWidget(props: {
     <>
       <ButtonBase
         onClick={toggleOpened}
-        sx={{
-          bgcolor: 'background.default',
-          borderRadius: 1,
-          p: 2,
-          display: 'flex',
-          alignItems: 'stretch',
-          flexDirection: 'column',
-        }}
+        className="flex flex-col items-stretch rounded-lg bg-ui-base p-4"
       >
-        {/* <Collapse in={opened} unmountOnExit>
-          <ChangesChart mode={props.mode} />
-          <Box height={12} />
-        </Collapse> */}
-
         <DataLine name={name} amount={totalAmount} currency={currency} />
 
-        {showBar && !!totalAmount && <PercentBar data={nodes} mt={1.5} />}
+        {showBar && !!totalAmount && (
+          <PercentBar data={nodes} className="mt-3" />
+        )}
 
-        <Collapse in={opened} unmountOnExit>
-          <Stack
-            sx={{
-              gap: 1.5,
-              mt: 2,
-            }}
-          >
+        <Collapse open={opened}>
+          <div className="mt-4 flex flex-col gap-3">
             {nodes.map(point => (
               <DataLine
                 key={point.id}
@@ -163,7 +146,7 @@ function StatWidget(props: {
                 }}
               />
             ))}
-          </Stack>
+          </div>
         </Collapse>
       </ButtonBase>
     </>

@@ -1,31 +1,52 @@
-import React, { FC, useCallback } from 'react'
+import type { core } from '@/zerro-core/redux'
+import type { FC } from 'react'
+import { useCallback } from 'react'
 
-import { TEnvelopeId } from '5-entities/envelope'
 import { useMonth } from '../MonthProvider'
 import { BudgetPopover } from './BudgetPopover'
-import { registerPopover } from '6-shared/historyPopovers'
-import { TISOMonth } from '6-shared/types'
-import { PopoverProps } from '@mui/material'
+import { useAsk, useAsked } from '@/6-shared/overlays'
+import type { TISOMonth } from '@/6-shared/types'
 
-const budgetPopover = registerPopover<
-  { id?: TEnvelopeId; month?: TISOMonth },
-  PopoverProps
->('budgetPopover', {})
-
+/** A popup, not a screen: this is small editing, like a select. Back closes
+ * it, and there is nothing to come back to. */
 export const useBudgetPopover = () => {
   const [month] = useMonth()
-  const { open } = budgetPopover.useMethods()
-  const openPopover = useCallback(
-    (id: TEnvelopeId, anchorEl?: Element) =>
-      open({ id, month }, { anchorEl, key: Date.now() }),
-    [month, open]
+  const ask = useAsk()
+  return useCallback(
+    (
+      id: core.envelopes.TEnvelopeId,
+      anchor?: Element,
+      { alignAmount }: { alignAmount?: boolean } = {}
+    ) =>
+      ask(
+        <AskedBudgetPopover
+          id={id}
+          month={month}
+          anchor={anchor}
+          alignAmount={alignAmount}
+        />
+      ),
+    [ask, month]
   )
-  return openPopover
 }
 
-export const SmartBudgetPopover: FC = () => {
-  const popover = budgetPopover.useProps()
-  const { month, id } = popover.extraProps
-  if (!month || !id) return null
-  return <BudgetPopover {...popover.displayProps} {...{ month, id }} />
+const AskedBudgetPopover: FC<{
+  id: core.envelopes.TEnvelopeId
+  month: TISOMonth
+  anchor?: Element | null
+  alignAmount?: boolean
+}> = ({ id, month, anchor, alignAmount }) => {
+  const { open, answer } = useAsked<void>()
+  // Built at the moment of the question, so the draft amount starts fresh
+  // without a key to force it.
+  return (
+    <BudgetPopover
+      open={open}
+      onClose={() => answer()}
+      anchor={anchor}
+      alignAmount={alignAmount}
+      month={month}
+      id={id}
+    />
+  )
 }

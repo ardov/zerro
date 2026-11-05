@@ -1,0 +1,659 @@
+import type {
+  TAccountId,
+  TInstrumentId,
+  TISODate,
+  TMerchantId,
+  TTagId,
+  TTransaction,
+  TTransactionEditablePatch,
+} from '@/6-shared/types'
+import { formatDate, parseDate, toISODate } from '@/6-shared/helpers/date'
+import { core } from '@/zerro-core/redux'
+
+/** What a transaction editor is editing.
+ *
+ * A draft is not a transaction: it holds a transfer's two sides *and* a
+ * one-sided operation's single side at once, whichever type is selected. That
+ * is what makes switching type non-destructive — a category chosen for an
+ * expense survives a detour through a transfer, and so do the accounts.
+ *
+ * Nothing here knows about a source transaction. A draft can be read off one
+ * (`toDraft`) or started from nothing (`emptyDraft`), and what it is worth
+ * (`toPatch`) is the same question either way. Only the three functions under
+ * "Against a source" compare it with the transaction it came from. */
+export type TDraftType = `${core.transactions.TrType}`
+
+/** A merchant that exists is `{ id }`; one the save still has to create is
+ * `{ title }`. */
+export type TDraftMerchant = { id: TMerchantId } | { title: string } | null
+
+/** A merchant by name: with an id when one already carries it, without when
+ * saving is what will create it. */
+export type TNamedMerchant = { id?: TMerchantId; title: string }
+
+export type TTransactionDraft = {
+  type: TDraftType
+  /** The account a one-sided operation touches: an expense's, an income's, or
+   * the real account a debt is settled through. */
+  account: TAccountId
+  /** What that operation is worth, in that account's currency. */
+  amount: number
+  /** A transfer's two sides. */
+  fromAccount: TAccountId
+  toAccount: TAccountId
+  fromAmount: number
+  toAmount: number
+  /** Categories. Only an income or an expense sends them; the others keep
+   * them so that coming back restores them. */
+  tag: TTagId[] | null
+  /** Who the operation is with. */
+  merchant: TDraftMerchant
+  /** The free text beside the merchant. An old transaction can carry one with
+   * no merchant at all, and leaving both alone is what keeps it that way. */
+  payee: string | null
+  comment: string | null
+  date: TISODate
+  /** `HH:mm`. */
+  time: string
+}
+
+/** What the draft cannot work out on its own: which accounts exist, what
+ * currency each is in, and which one holds debts. */
+export type TDraftContext = {
+  /** Selectable accounts, in the order a picker offers them. */
+  accountIds: TAccountId[]
+  instrumentOf: (id: TAccountId) => TInstrumentId | undefined
+  /** The user's debt account. A replica always has exactly one —
+   * `validateStore` refuses a store that does not — so this is optional only
+   * because the selector that reads it says so. */
+  debtAccountId?: TAccountId
+}
+
+export type TCreateDraftDefaults = Partial<
+  Pick<TTransactionDraft, 'type' | 'account' | 'amount' | 'tag' | 'date'>
+>
+
+const { TrType } = core.transactions
+
+// ---------------------------------------------------------------------------
+// Making one
+// ---------------------------------------------------------------------------
+
+/** A draft with nothing in it yet, for composing a transaction rather than
+ * editing one. */
+export function emptyDraft(
+  ctx: TDraftContext,
+  now: number,
+  defaults: TCreateDraftDefaults = {}
+): TTransactionDraft {
+  const account =
+    defaults.account === undefined
+      ? (ctx.accountIds[0] ?? '')
+      : ctx.accountIds.includes(defaults.account)
+        ? defaults.account
+        : ''
+  const draft: TTransactionDraft = {
+    type: TrType.Outcome,
+    account,
+    amount: defaults.amount ?? 0,
+    fromAccount: account,
+    toAccount: otherAccount(account, ctx),
+    fromAmount: 0,
+    toAmount: 0,
+    tag: defaults.tag ?? null,
+    merchant: null,
+    payee: null,
+    comment: null,
+    date: defaults.date ?? toISODate(now),
+    time: formatDate(now, 'HH:mm'),
+  }
+  return setDraftType(draft, defaults.type ?? TrType.Outcome, ctx)
+}
+
+/** Removes references absent from the loaded replica, keeping all entered
+ * values and archived entities. Picker visibility is not existence. */
+export function fixDraft(
+  draft: TTransactionDraft,
+  entities: {
+    accounts: Readonly<Record<TAccountId, unknown>>
+    tags: Readonly<Record<TTagId, unknown>>
+    merchants: Readonly<Record<TMerchantId, unknown>>
+  }
+): TTransactionDraft {
+  const account = (id: TAccountId) =>
+    Object.hasOwn(entities.accounts, id) ? id : ''
+  const remainingTags = draft.tag?.filter(id =>
+    Object.hasOwn(entities.tags, id)
+  )
+  const tag =
+    remainingTags?.length === draft.tag?.length
+      ? draft.tag
+      : remainingTags?.length
+        ? remainingTags
+        : null
+  const merchant =
+    draft.merchant &&
+    'id' in draft.merchant &&
+    !Object.hasOwn(entities.merchants, draft.merchant.id)
+      ? null
+      : draft.merchant
+  const next = {
+    ...draft,
+    account: account(draft.account),
+    fromAccount: account(draft.fromAccount),
+    toAccount: account(draft.toAccount),
+    tag,
+    merchant,
+  }
+  return next.account === draft.account &&
+    next.fromAccount === draft.fromAccount &&
+    next.toAccount === draft.toAccount &&
+    next.tag === draft.tag &&
+    next.merchant === draft.merchant
+    ? draft
+    : next
+}
+
+/** Reads a transaction as a draft. Both sides are filled in whatever the type
+ * is, so the first switch has something to switch to. */
+export function toDraft(
+  tr: TTransaction,
+  ctx: Pick<TDraftContext, 'accountIds' | 'debtAccountId'>
+): TTransactionDraft {
+  const type = core.transactions.getType(tr, ctx.debtAccountId)
+  // A soft-deleted row can have a leg with no account at all. The empty
+  // string stands in for it, and nothing downstream can find a currency for
+  // it, so such a draft refuses to build legs rather than inventing one.
+  const outcomeAccount = tr.outcomeAccount ?? tr.incomeAccount ?? ''
+  const incomeAccount = tr.incomeAccount ?? tr.outcomeAccount ?? ''
+
+  const single = isIncoming(type)
+    ? { account: incomeAccount, amount: tr.income }
+    : { account: outcomeAccount, amount: tr.outcome }
+
+  // A transfer states its two sides. Anything else has one account, so the
+  // other side is the first account that is not it — the same choice
+  // switching to a transfer would make.
+  const transfer =
+    type === TrType.Transfer
+      ? {
+          fromAccount: outcomeAccount,
+          toAccount: incomeAccount,
+          fromAmount: tr.outcome,
+          toAmount: tr.income,
+        }
+      : {
+          fromAccount: single.account,
+          toAccount: otherAccount(single.account, ctx),
+          fromAmount: single.amount,
+          toAmount: single.amount,
+        }
+
+  return {
+    type,
+    ...single,
+    ...transfer,
+    tag: tr.tag,
+    merchant: tr.merchant ? { id: tr.merchant } : null,
+    payee: tr.payee,
+    comment: tr.comment,
+    date: tr.date,
+    time: formatDate(tr.created, 'HH:mm'),
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Editing one
+// ---------------------------------------------------------------------------
+
+/** Switches the type, carrying over as much as the new type can hold.
+ *
+ * Both sides are kept, so only the crossing between them moves anything:
+ * leaving a transfer picks the side the new type cares about, and entering
+ * one seeds it from the side that was being edited. */
+export function setDraftType(
+  draft: TTransactionDraft,
+  type: TDraftType,
+  ctx: TDraftContext
+): TTransactionDraft {
+  if (type === draft.type) return draft
+
+  if (type === TrType.Transfer) {
+    const arriving = isIncoming(draft.type)
+    const account = draft.account
+    const previousOther = arriving ? draft.fromAccount : draft.toAccount
+    const other =
+      previousOther && previousOther !== account
+        ? previousOther
+        : otherAccount(account, ctx)
+    const amount = draft.amount
+    const previousAmount = arriving ? draft.fromAmount : draft.toAmount
+    const otherAmount =
+      draft.fromAmount !== draft.toAmount
+        ? previousAmount
+        : sameCurrency(account, other, ctx)
+          ? amount
+          : previousAmount || amount
+    return {
+      ...draft,
+      type,
+      fromAccount: arriving ? other : account,
+      toAccount: arriving ? account : other,
+      fromAmount: arriving ? otherAmount : amount,
+      toAmount: arriving ? amount : otherAmount,
+    }
+  }
+
+  if (draft.type === TrType.Transfer) {
+    // Money arrives on the receiving account and leaves the paying one, so
+    // which side survives is the direction of the new type.
+    const arriving = isIncoming(type)
+    return {
+      ...draft,
+      type,
+      account: arriving ? draft.toAccount : draft.fromAccount,
+      amount: arriving ? draft.toAmount : draft.fromAmount,
+    }
+  }
+
+  return { ...draft, type }
+}
+
+/** Names who the operation is with. The merchant is the link and `payee` the
+ * text every other client reads, so naming one names both. */
+export function setDraftMerchant(
+  draft: TTransactionDraft,
+  named: TNamedMerchant | null
+): TTransactionDraft {
+  const title = named?.title.trim()
+  if (!named || !title) return { ...draft, merchant: null, payee: null }
+  return {
+    ...draft,
+    merchant: named.id ? { id: named.id } : { title },
+    payee: named.title,
+  }
+}
+
+/** Turns a transfer around: accounts and amounts change places together, so
+ * the operation keeps meaning what it meant. */
+export function swapTransferSides(draft: TTransactionDraft): TTransactionDraft {
+  return {
+    ...draft,
+    fromAccount: draft.toAccount,
+    toAccount: draft.fromAccount,
+    fromAmount: draft.toAmount,
+    toAmount: draft.fromAmount,
+  }
+}
+
+/** Equal amounts in the same currency follow outgoing edits. Incoming edits
+ * stay independent, as do transfers whose amounts already differ. */
+export function setTransferAmount(
+  draft: TTransactionDraft,
+  side: 'from' | 'to',
+  amount: number,
+  ctx: TDraftContext
+): TTransactionDraft {
+  const mirrored =
+    draft.fromAmount === draft.toAmount &&
+    sameCurrency(draft.fromAccount, draft.toAccount, ctx)
+  if (side === 'from') {
+    return {
+      ...draft,
+      fromAmount: amount,
+      toAmount: mirrored ? amount : draft.toAmount,
+    }
+  }
+  return {
+    ...draft,
+    toAmount: amount,
+  }
+}
+
+/** Picks a transfer account, keeping the two ends different: choosing the
+ * account already on the other end swaps the two rather than refusing. */
+export function setTransferAccount(
+  draft: TTransactionDraft,
+  side: 'from' | 'to',
+  account: TAccountId
+): TTransactionDraft {
+  const other = side === 'from' ? draft.toAccount : draft.fromAccount
+  return account === other
+    ? swapTransferSides(draft)
+    : side === 'from'
+      ? { ...draft, fromAccount: account }
+      : { ...draft, toAccount: account }
+}
+
+// ---------------------------------------------------------------------------
+// What it is worth
+// ---------------------------------------------------------------------------
+
+/** The two legs: an account, a currency and an amount each. Required, because
+ * a draft always knows all six. */
+export type TDraftLegs = Required<
+  Pick<
+    TTransactionEditablePatch,
+    | 'incomeAccount'
+    | 'incomeInstrument'
+    | 'income'
+    | 'outcomeAccount'
+    | 'outcomeInstrument'
+    | 'outcome'
+  >
+>
+
+/** The two legs the draft describes.
+ *
+ * This is where each type stops being a label: an expense pays itself, a
+ * transfer has two ends, and a debt is a transfer with the debt account on
+ * whichever end the direction puts it. A debt's legs carry the same amount
+ * and the same currency as the real account — the debt account holds debts in
+ * every currency, so it imposes none. */
+export function toLegs(
+  draft: TTransactionDraft,
+  ctx: TDraftContext
+): TDraftLegs | null {
+  if (draft.type === TrType.Transfer) {
+    const outcomeInstrument = ctx.instrumentOf(draft.fromAccount)
+    const incomeInstrument = ctx.instrumentOf(draft.toAccount)
+    if (outcomeInstrument === undefined || incomeInstrument === undefined) {
+      return null
+    }
+    return {
+      outcomeAccount: draft.fromAccount,
+      outcomeInstrument,
+      outcome: draft.fromAmount,
+      incomeAccount: draft.toAccount,
+      incomeInstrument,
+      income: draft.toAmount,
+    }
+  }
+
+  const instrument = ctx.instrumentOf(draft.account)
+  if (instrument === undefined) return null
+
+  if (!isDebt(draft.type)) {
+    const paid = draft.type === TrType.Outcome
+    return {
+      outcomeAccount: draft.account,
+      outcomeInstrument: instrument,
+      outcome: paid ? draft.amount : 0,
+      incomeAccount: draft.account,
+      incomeInstrument: instrument,
+      income: paid ? 0 : draft.amount,
+    }
+  }
+
+  if (!ctx.debtAccountId) return null
+  const lent = draft.type === TrType.OutcomeDebt
+  return {
+    outcomeAccount: lent ? draft.account : ctx.debtAccountId,
+    outcomeInstrument: instrument,
+    outcome: draft.amount,
+    incomeAccount: lent ? ctx.debtAccountId : draft.account,
+    incomeInstrument: instrument,
+    income: draft.amount,
+  }
+}
+
+/** Every field the draft claims. */
+export function toPatch(
+  draft: TTransactionDraft,
+  ctx: TDraftContext
+): (TTransactionEditablePatch & TDraftLegs) | null {
+  const legs = toLegs(draft, ctx)
+  if (!legs) return null
+  const merchant = claimedMerchant(draft)
+  return {
+    ...legs,
+    tag: isCategorized(draft.type) ? nonEmpty(draft.tag) : null,
+    // A merchant that does not exist yet has no id to claim. Leaving the key
+    // out says nothing about it; `newMerchantTitle` is what the save acts on.
+    ...(merchant !== undefined && { merchant }),
+    payee: emptyToNull(draft.payee),
+    comment: emptyToNull(draft.comment),
+    date: draft.date,
+  }
+}
+
+/** The merchant a save has to create before the transaction can point at it.
+ * A draft that names no new one answers `null`. */
+export function newMerchantTitle(draft: TTransactionDraft): string | null {
+  const { merchant } = draft
+  return merchant && 'title' in merchant ? merchant.title : null
+}
+
+/** The merchant the patch may claim: an id, `null` for nobody, and
+ * `undefined` while it is still only a title. */
+function claimedMerchant(
+  draft: TTransactionDraft
+): TMerchantId | null | undefined {
+  const { merchant } = draft
+  if (!merchant) return null
+  return 'id' in merchant ? merchant.id : undefined
+}
+
+/** The moment a transaction claims it was created at, from the draft's date
+ * and time of day. `fallback` answers for a time input that has been cleared. */
+export function draftCreated(
+  draft: TTransactionDraft,
+  fallback: number
+): number {
+  const [hours, minutes] = draft.time.split(':').map(Number)
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return fallback
+  const created = parseDate(draft.date)
+  created.setHours(hours, minutes, 0, 0)
+  return +created
+}
+
+// ---------------------------------------------------------------------------
+// Against a source
+// ---------------------------------------------------------------------------
+
+/** The original-currency amounts to drop, for a leg the draft has moved.
+ *
+ * `opOutcome` records what a card was actually charged abroad. Once the leg
+ * is a different account, a different currency or a different number, that
+ * record is about a transaction this one no longer is. */
+export function staleRates(
+  legs: TDraftLegs,
+  tr: TTransaction
+): TTransactionEditablePatch {
+  const moved = (leg: 'income' | 'outcome') =>
+    legs[`${leg}Account`] !== tr[`${leg}Account`] ||
+    legs[`${leg}Instrument`] !== tr[`${leg}Instrument`] ||
+    legs[leg] !== tr[leg]
+  return {
+    ...(moved('outcome') && { opOutcome: null, opOutcomeInstrument: null }),
+    ...(moved('income') && { opIncome: null, opIncomeInstrument: null }),
+  }
+}
+
+/** Only the fields the patch actually changes. An `update` of nothing is
+ * still a command in the outbox, so a save that changes one field says one
+ * field. */
+export function changedFields(
+  tr: TTransaction,
+  patch: TTransactionEditablePatch
+): TTransactionEditablePatch {
+  const changed: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(patch)) {
+    if (!sameValue(tr[key as keyof TTransaction], value)) changed[key] = value
+  }
+  return changed as TTransactionEditablePatch
+}
+
+/** `created` is immutable on the server, so a changed time is a different
+ * transaction — which is why the editor recreates rather than updates when
+ * this moves. */
+export function timeChanged(
+  draft: TTransactionDraft,
+  tr: TTransaction
+): boolean {
+  return draft.time !== formatDate(tr.created, 'HH:mm')
+}
+
+// ---------------------------------------------------------------------------
+// What is wrong with it
+// ---------------------------------------------------------------------------
+
+/** A field a mark can be put on. */
+export type TDraftField =
+  | 'account'
+  | 'amount'
+  | 'fromAmount'
+  | 'toAmount'
+  | 'fromAccount'
+  | 'toAccount'
+  | 'payee'
+
+/** Why that field is wrong. */
+export type TDraftIssue = 'account' | 'amount' | 'sameAccount' | 'debtor'
+
+export type TDraftIssues = Partial<Record<TDraftField, TDraftIssue>>
+
+/** Everything wrong with the draft, by the field it is wrong on.
+ *
+ * By field rather than one answer for the whole draft, because that is how it
+ * is shown: the mark sits beside the field it is about, and a transfer has
+ * two amounts that can each be the empty one.
+ *
+ * It needs no context. A replica always has exactly one debt account —
+ * `validateStore` refuses a store that does not — so there is no such thing
+ * as a debt with nowhere to record it. */
+export function draftIssues(draft: TTransactionDraft): TDraftIssues {
+  if (draft.type === TrType.Transfer) {
+    const fromMissing = !draft.fromAccount
+    const toMissing = !draft.toAccount
+    const sameAccount =
+      !fromMissing && !toMissing && draft.fromAccount === draft.toAccount
+    return {
+      ...(fromMissing && { fromAccount: 'account' as const }),
+      ...(toMissing && { toAccount: 'account' as const }),
+      ...(sameAccount && {
+        fromAccount: 'sameAccount' as const,
+        toAccount: 'sameAccount' as const,
+      }),
+      ...(draft.fromAmount <= 0 && { fromAmount: 'amount' as const }),
+      ...(draft.toAmount <= 0 && { toAmount: 'amount' as const }),
+    }
+  }
+  return {
+    ...(!draft.account && { account: 'account' as const }),
+    ...(draft.amount <= 0 && { amount: 'amount' as const }),
+    // A debt is owed by somebody. Nothing else here needs a name.
+    ...(isDebt(draft.type) &&
+      !emptyToNull(draft.payee) && { payee: 'debtor' as const }),
+  }
+}
+
+export function hasIssues(issues: TDraftIssues): boolean {
+  return Object.keys(issues).length > 0
+}
+
+// ---------------------------------------------------------------------------
+
+export function isDebt(type: TDraftType): boolean {
+  return type === TrType.IncomeDebt || type === TrType.OutcomeDebt
+}
+
+/** Whether the type puts money on the account or takes it off, which is the
+ * sign the amount is shown with. */
+export function isIncoming(type: TDraftType): boolean {
+  return type === TrType.Income || type === TrType.IncomeDebt
+}
+
+/** Only an income and an expense carry categories. */
+export function isCategorized(type: TDraftType): boolean {
+  return type === TrType.Income || type === TrType.Outcome
+}
+
+function otherAccount(
+  account: TAccountId,
+  ctx: Pick<TDraftContext, 'accountIds'>
+): TAccountId {
+  return ctx.accountIds.find(id => id !== account) ?? account
+}
+
+function sameCurrency(
+  a: TAccountId,
+  b: TAccountId,
+  ctx: TDraftContext
+): boolean {
+  const first = ctx.instrumentOf(a)
+  return first !== undefined && first === ctx.instrumentOf(b)
+}
+
+function nonEmpty(tags: TTagId[] | null): TTagId[] | null {
+  return tags && tags.length ? tags : null
+}
+
+function emptyToNull(value: string | null): string | null {
+  return value?.trim() || null
+}
+
+function sameValue(a: unknown, b: unknown): boolean {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.length === b.length && a.every((item, i) => item === b[i])
+  }
+  return a === b
+}
+
+export type TCreateDraftCommand =
+  | {
+      type: 'posting'
+      input: core.transactions.TCreatePostingInput
+    }
+  | {
+      type: 'transfer'
+      input: core.transactions.TCreateTransferInput
+    }
+
+/** The semantic creation command, sharing the editor's normalization. */
+export function toCreateInput(
+  draft: TTransactionDraft,
+  ctx: TDraftContext,
+  now: number
+): TCreateDraftCommand | null {
+  const patch = toPatch(draft, ctx)
+  if (!patch || hasIssues(draftIssues(draft))) return null
+  const details = {
+    date: draft.date,
+    createdAt: draftCreated(draft, now),
+    comment: patch.comment,
+  }
+  if (draft.type === 'transfer') {
+    return {
+      type: 'transfer',
+      input: {
+        ...details,
+        fromAccountId: draft.fromAccount,
+        toAccountId: draft.toAccount,
+        sent: draft.fromAmount,
+        received: draft.toAmount,
+      },
+    }
+  }
+  return {
+    type: 'posting',
+    input: {
+      ...details,
+      kind:
+        draft.type === 'outcome'
+          ? 'expense'
+          : draft.type === 'incomeDebt'
+            ? 'borrowed'
+            : draft.type === 'outcomeDebt'
+              ? 'lent'
+              : draft.type,
+      accountId: draft.account,
+      amount: draft.amount,
+      ...(isCategorized(draft.type) && {
+        tagIds: patch.tag ?? undefined,
+      }),
+      merchant: draft.merchant,
+      payee: patch.payee,
+    },
+  }
+}

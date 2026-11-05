@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56">
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" id="gradient-id1" x1="28" y1="28.146" x2="23.417" y2="-11.224">
+      <stop offset="0" stop-color="#007E8B"/>
+      <stop offset="1" stop-color="#009C4D"/>
+    </linearGradient>
+    <clipPath id="clip-id2">
+      <path d="M12,12h32v32H12z"/>
+    </clipPath>
+  </defs>
+  <path d="M16,0L40,0A16,16 0,0 1,56 16L56,40A16,16 0,0 1,40 56L16,56A16,16 0,0 1,0 40L0,16A16,16 0,0 1,16 0z" fill="url(#gradient-id1)"/>
+  <g clip-path="url(#clip-id2)">
+    <path d="M44,17.243c0,-0.926 -0.347,-1.852 -1.04,-2.547 -1.386,-1.389 -3.697,-1.389 -5.083,0l-7.624,7.64c-1.386,1.389 -1.386,3.704 0,5.093s3.697,1.389 5.083,0l1.502,-1.505v12.617c0,1.968 1.617,3.588 3.581,3.588S44,40.509 44,38.542z" fill="#fff"/>
+    <path d="M12,17.243c0,-0.926 0.347,-1.852 1.04,-2.547 1.386,-1.389 3.697,-1.389 5.083,0l7.625,7.64c1.386,1.389 1.386,3.704 0,5.093s-3.697,1.389 -5.083,0l-1.502,-1.389v12.617c0,1.968 -1.617,3.588 -3.581,3.588S12,40.625 12,38.657z" fill="#fabf00" fill-rule="evenodd"/>
+  </g>
+</svg>

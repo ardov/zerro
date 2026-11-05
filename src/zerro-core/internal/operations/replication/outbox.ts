@@ -1,0 +1,307 @@
+import {
+  isEntityOperation,
+  validateEntityOperation,
+} from '../../domain/zenmoney/operations'
+import { parseZerroOperation } from '../../domain/zerro/operations/types'
+/**
+ * Engine core: the pure replica operations over durable `base + outbox` and
+ * session-only `redo`.
+ *
+ * Every append, undo, redo, replay, and transport rule lives here as a plain
+ * function, so the only runtime-specific part left is who owns the state. In
+ * this app Redux owns it (`store/data/slice.ts`); a future standalone package
+ * wraps these same functions. Do not grow a second implementation of append,
+ * replay or history-stack rules beside this file.
+ */
+import {
+  materializeCommand,
+  materializePrimaryCommand,
+  type TCommand,
+} from '../materialization'
+import {
+  applyPatch,
+  dataEntityKeys,
+  type TDataEntityKey,
+  type TDataStore,
+  type TDeletionObject,
+  type TNormalizedPatch,
+} from '../../domain/zenmoney'
+import { prepareCommand } from '../materialization'
+import type { TCompiled } from '../../../types'
+
+export type { TCommand } from '../materialization'
+import { sanitizeCommandLabel } from '../materialization'
+
+export type TOutboxState = {
+  outbox: TCommand[]
+  redo: TCommand[]
+}
+
+export type TStagedCompiledCommand<TReceipt> = {
+  base: TDataStore
+  current: TDataStore
+  outbox: TCommand[]
+  command: TCommand
+  receipt: TReceipt | undefined
+}
+
+/**
+ * Validates the durable command-array shape without importing a runtime
+ * persistence format. Entity fields are validated when materialized.
+ */
+export function parseCommandOutbox(value: unknown): TCommand[] {
+  if (!Array.isArray(value)) throw new Error('Command outbox must be an array')
+
+  return value.map((entry, index) => {
+    if (!isRecord(entry))
+      throw new Error(`Command outbox[${index}] must be an object`)
+    if (
+      !isFiniteNumber(entry.issuedAt) ||
+      !Array.isArray(entry.operations) ||
+      'patch' in entry ||
+      'type' in entry
+    )
+      throw new Error(`Command outbox[${index}] uses an unsupported format`)
+    entry.operations.forEach(operation => {
+      if (!isRecord(operation) || typeof operation.type !== 'string')
+        throw new Error('Invalid operation')
+      if (isEntityOperation(operation as { type: string }))
+        validateEntityOperation(operation as never)
+      else parseZerroOperation(operation)
+    })
+
+    // The label is decoration over a durable command: an unrecognized one is
+    // dropped, never a reason to fail the load and lose unsent work.
+    const label = sanitizeCommandLabel(entry.label)
+    const command = entry as unknown as TCommand
+    if (label) return { ...command, label }
+    if (command.label === undefined) return command
+    const { label: _dropped, ...withoutLabel } = command
+    return withoutLabel
+  })
+}
+
+/** Issues and appends one compiled semantic intent against the latest replay. */
+export function stageCompiledCommand<TReceipt>(
+  base: TDataStore,
+  outbox: readonly TCommand[],
+  compiled: TCompiled<TReceipt>,
+  issuedAt: number
+): TStagedCompiledCommand<TReceipt> {
+  const current = replayOutbox(base, outbox)
+  const command = prepareCommand(current, compiled.operations, issuedAt)
+  const materialized = materializeCommand(current, command)
+  if (!Object.keys(materialized).length)
+    throw new Error('Compiled command did not change the snapshot')
+  const next = appendOutbox(outbox, command).outbox
+  return {
+    base,
+    current: applyPatch(current, materialized),
+    outbox: next,
+    command,
+    receipt: compiled.receipt,
+  }
+}
+
+export function appendOutbox(
+  outbox: readonly TCommand[],
+  command: TCommand
+): TOutboxState {
+  return { outbox: [...outbox, command], redo: [] }
+}
+
+/** Replace the editable tail with one command; a `null` command drops it. */
+export function editOutbox(
+  outbox: readonly TCommand[],
+  command: TCommand | null,
+  replacing: boolean
+): TOutboxState {
+  const prefix = replacing ? outbox.slice(0, -1) : outbox
+  return command
+    ? appendOutbox(prefix, command)
+    : { outbox: [...prefix], redo: [] }
+}
+
+export function undoOutbox(
+  outbox: readonly TCommand[],
+  redo: readonly TCommand[]
+): TOutboxState {
+  const command = outbox[outbox.length - 1]
+  if (!command) return { outbox: [...outbox], redo: [...redo] }
+  return {
+    outbox: outbox.slice(0, -1),
+    redo: [...redo, command],
+  }
+}
+
+export function redoOutbox(
+  outbox: readonly TCommand[],
+  redo: readonly TCommand[]
+): TOutboxState {
+  const command = redo[redo.length - 1]
+  if (!command) return { outbox: [...outbox], redo: [...redo] }
+  return {
+    outbox: [...outbox, command],
+    redo: redo.slice(0, -1),
+  }
+}
+
+/**
+ * Undoes every command after `keepCount` in one step, equivalent to calling
+ * `undoOutbox` that many times: the dropped suffix lands on `redo` oldest-last,
+ * so `redoOutbox` restores it one command at a time in the same order a
+ * sequence of single undos would have.
+ */
+export function undoOutboxTo(
+  outbox: readonly TCommand[],
+  redo: readonly TCommand[],
+  keepCount: number
+): TOutboxState {
+  if (
+    !Number.isInteger(keepCount) ||
+    keepCount < 0 ||
+    keepCount > outbox.length
+  )
+    throw new Error('Outbox undo target is out of range')
+
+  return {
+    outbox: outbox.slice(0, keepCount),
+    redo: [...redo, ...outbox.slice(keepCount).reverse()],
+  }
+}
+
+export function replayOutbox(
+  base: TDataStore,
+  outbox: readonly TCommand[]
+): TDataStore {
+  return materializeOutbox(base, outbox).current
+}
+
+export function getMaterializedOutboxPatches(
+  base: TDataStore,
+  outbox: readonly TCommand[]
+): TNormalizedPatch[] {
+  return materializeOutbox(base, outbox).patches
+}
+
+/**
+ * Replays the sent command prefix independently from UI `current` and returns
+ * the final full primary entities plus surviving deletions for transport.
+ *
+ * An entity born and buried inside the same prefix never reaches the server:
+ * the replay starts from `base`, so an id missing there is one the server has
+ * never seen, and sending its final state would ask Zenmoney to store a row
+ * whose only purpose is to be dead. Both shapes of burial are dropped — the
+ * soft delete of transactions, which is `deleted: true` on the entity itself,
+ * and the real deletion of reminders, which is a `deletion` object.
+ */
+export function buildOutboxTransport(
+  base: TDataStore,
+  outbox: readonly TCommand[],
+  sentAt: number
+): TNormalizedPatch | undefined {
+  if (!outbox.length) return undefined
+
+  let current = base
+  const touched = new Map<TDataEntityKey, Set<string | number>>()
+  const deleted = new Map<
+    TDataEntityKey,
+    Map<string | number, TDeletionObject>
+  >()
+  const isUnknownToServer = (key: TDataEntityKey, id: string | number) =>
+    (base[key] as Record<string | number, unknown>)[id] === undefined
+
+  outbox.forEach(command => {
+    const patch = materializePrimaryCommand(current, command, sentAt)
+
+    patch.deletion?.forEach(item => {
+      const key = item.object
+      touched.get(key)?.delete(item.id)
+      getOrCreate(deleted, key, () => new Map()).set(item.id, item)
+    })
+
+    dataEntityKeys.forEach(key => {
+      const entities = patch[key]
+      if (!entities) return
+      entities.forEach(entity => {
+        getOrCreate(touched, key, () => new Set()).add(entity.id)
+        deleted.get(key)?.delete(entity.id)
+      })
+    })
+
+    current = applyPatch(current, patch)
+  })
+
+  const transport: TNormalizedPatch = {}
+  dataEntityKeys.forEach(key => {
+    const ids = touched.get(key)
+    if (!ids?.size) return
+    const currentById = current[key] as Record<
+      string | number,
+      { id: string | number; deleted?: boolean } | undefined
+    >
+    const entities = [...ids].flatMap(id => {
+      const entity = currentById[id]
+      if (!entity) return []
+      if (entity.deleted && isUnknownToServer(key, id)) return []
+      return [entity]
+    })
+    if (entities.length) transport[key] = entities as never
+  })
+
+  const deletions = [...deleted.values()]
+    .flatMap(byId => [...byId.values()])
+    .filter(item => !isUnknownToServer(item.object, item.id))
+  if (deletions.length) transport.deletion = deletions
+
+  return Object.keys(transport).length ? transport : undefined
+}
+
+/**
+ * Advance `current` by one command without replaying from base. Callers
+ * must hold the invariant that `current` already equals the replay of the
+ * durable outbox; append then only needs this command's effect. Undo, redo,
+ * and base changes still require a full `replayOutbox`.
+ */
+export function applyOutboxCommand(
+  current: TDataStore,
+  command: TCommand
+): TDataStore {
+  return applyPatch(current, materializeCommand(current, command))
+}
+
+function materializeOutbox(
+  base: TDataStore,
+  outbox: readonly TCommand[]
+): { current: TDataStore; patches: TNormalizedPatch[] } {
+  let current = base
+  const patches: TNormalizedPatch[] = []
+
+  outbox.forEach(command => {
+    const patch = materializeCommand(current, command)
+    patches.push(patch)
+    current = applyPatch(current, patch)
+  })
+
+  return { current, patches }
+}
+
+function getOrCreate<TKey, TValue>(
+  map: Map<TKey, TValue>,
+  key: TKey,
+  create: () => TValue
+): TValue {
+  const existing = map.get(key)
+  if (existing !== undefined) return existing
+  const value = create()
+  map.set(key, value)
+  return value
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value)
+}

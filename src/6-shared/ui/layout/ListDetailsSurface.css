@@ -1,0 +1,61 @@
+@layer components {
+  /* One focus boundary, with two independent panel surfaces inside it. */
+  .list-details-surface .list-details-content {
+    --details-shift: calc(var(--details-width) + var(--spacing-ui-panel-gap));
+    position: relative;
+  }
+
+  .list-details-surface .list-details-list {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: var(--list-width);
+    transform: translateX(0);
+    transition: transform var(--duration-ui-panel) var(--ease-ui-panel);
+  }
+
+  .list-details-surface .list-details-detail {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: var(--details-width);
+    opacity: 0;
+    transform: translateX(var(--details-shift));
+    transition:
+      transform var(--duration-ui-panel) var(--ease-ui-panel),
+      opacity var(--duration-ui-panel) var(--ease-ui-panel);
+  }
+
+  .list-details-surface [data-details-open] {
+    .list-details-list {
+      transform: translateX(calc(-1 * var(--details-shift)));
+    }
+
+    .list-details-detail {
+      opacity: 1;
+      transform: translateX(0);
+
+      @starting-style {
+        opacity: 0;
+        transform: translateX(var(--details-shift));
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .list-details-surface .list-details-list {
+      transition: none;
+    }
+
+    .list-details-surface .list-details-detail {
+      transform: none;
+      transition: opacity 120ms ease-out;
+    }
+
+    .list-details-surface [data-details-open] .list-details-detail {
+      transform: none;
+
+      @starting-style {
+        transform: none;
+      }
+    }
+  }
+}

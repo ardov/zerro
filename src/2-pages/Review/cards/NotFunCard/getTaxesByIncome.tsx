@@ -1,12 +1,12 @@
 /** Source https://journal.tinkoff.ru/fns-loves-you/ */
-import { round } from '6-shared/helpers/money'
+import { round } from '@/6-shared/helpers/money'
 
 const ruIncomeTaxes = [
   {
     type: 'income',
     name: 'Пенсионные взносы',
     rate: 0.22,
-    comment: 'Работадатель платит в пенсионный фонд 22% от зарплаты.',
+    comment: 'Работодатель платит в пенсионный фонд 22% от зарплаты.',
   },
   { type: 'income', name: 'НДФЛ', rate: 0.13, comment: 'Подоходный налог 13%' },
   {

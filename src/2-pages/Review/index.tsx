@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import { Button } from '@/6-shared/ui/kit/Button'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Button, Stack, Typography } from '@mui/material'
-import './index.scss'
-import { TTransaction } from '6-shared/types'
+import './index.css'
+import type { TTransaction } from '@/6-shared/types'
 
-import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
+import { useTransactionDrawer } from '@/3-widgets/global/TransactionListDrawer'
 import { OutcomeCard } from './cards/OutcomeCard'
 import { NoCategoryCard } from './cards/NoCategoryCard'
 import { QRCard } from './cards/QRCard'
@@ -27,36 +27,36 @@ export default function Review() {
   const trDrawer = useTransactionDrawer()
 
   function showTransactions(list: TTransaction[]) {
-    trDrawer.open({ transactions: list })
+    trDrawer({ ids: list.map(transaction => transaction.id) })
   }
 
   return (
-    <Box className="container">
-      <Stack
-        spacing={2}
-        sx={{
-          p: 3,
-          pb: 10,
-        }}
-      >
-        <CardTitle year={year} />
-        <IncomeCard year={year} onShowTransactions={showTransactions} />
-        <SavingsCard year={year} onShowTransactions={showTransactions} />
-        <NotFunCard year={year} onShowTransactions={showTransactions} />
-        <PayeeByOutcomeCard year={year} onShowTransactions={showTransactions} />
-        <PayeeByFrequencyCard
-          year={year}
-          onShowTransactions={showTransactions}
-        />
-        <OutcomeCard year={year} onShowTransactions={showTransactions} />
-        <OutcomeStatCard year={year} onShowTransactions={showTransactions} />
-        <QRCard year={year} onShowTransactions={showTransactions} />
-        <NoCategoryCard year={year} onShowTransactions={showTransactions} />
-        <Button onClick={() => setYear(y => y - 1)}>
-          {t('whatWasInPreviousYear')}
-        </Button>
-      </Stack>
-    </Box>
+    <>
+      <title>{`${t('pageTitle')} | Zerro`}</title>
+      <div className="review-container">
+        <div className="flex flex-col gap-4 p-6">
+          <CardTitle year={year} />
+          <IncomeCard year={year} onShowTransactions={showTransactions} />
+          <SavingsCard year={year} onShowTransactions={showTransactions} />
+          <NotFunCard year={year} onShowTransactions={showTransactions} />
+          <PayeeByOutcomeCard
+            year={year}
+            onShowTransactions={showTransactions}
+          />
+          <PayeeByFrequencyCard
+            year={year}
+            onShowTransactions={showTransactions}
+          />
+          <OutcomeCard year={year} onShowTransactions={showTransactions} />
+          <OutcomeStatCard year={year} onShowTransactions={showTransactions} />
+          <QRCard year={year} onShowTransactions={showTransactions} />
+          <NoCategoryCard year={year} onShowTransactions={showTransactions} />
+          <Button variant="ghost" size="sm" onClick={() => setYear(y => y - 1)}>
+            {t('whatWasInPreviousYear')}
+          </Button>
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -64,28 +64,17 @@ function CardTitle({ year }: { year: number }) {
   const { t } = useTranslation('yearReview')
   return (
     <Card>
-      <Typography
-        variant="body1"
-        align="center"
-        className="results"
-        sx={{
-          color: 'text.secondary',
-        }}
-      >
+      <p className="results m-0 text-center text-body text-ui-secondary">
         {t('yearReview')}
-      </Typography>
-      <Box
-        sx={{
-          position: 'relative',
-        }}
-      >
-        <Typography variant="h1" align="center" className="year">
+      </p>
+      <div className="relative">
+        <h1 className="year m-0 text-center text-[6rem] leading-[1.167] font-light">
           <b>{year}</b>
-        </Typography>
-        <Typography variant="h1" align="center" className="year shadow">
+        </h1>
+        <p className="year year-shadow m-0 text-center text-[6rem] leading-[1.167] font-light">
           <b>{year}</b>
-        </Typography>
-      </Box>
+        </p>
+      </div>
     </Card>
   )
 }

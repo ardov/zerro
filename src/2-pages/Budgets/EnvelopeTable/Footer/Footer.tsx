@@ -1,11 +1,13 @@
-import React, { FC } from 'react'
-import { Typography } from '@mui/material'
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
+import type { FC } from 'react'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
+
 import { TableRow } from '../shared/shared'
 
-import { Metric } from '../models/useMetric'
-import { TFxAmount, TISOMonth } from '6-shared/types'
-import { balances } from '5-entities/envBalances'
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import type { Metric } from '../models/useMetric'
+import type { TFxAmount, TISOMonth } from '@/6-shared/types'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import { useTranslation } from 'react-i18next'
 
 type FooterProps = {
@@ -13,42 +15,29 @@ type FooterProps = {
   metric: Metric
 }
 
+const Sum: FC<{ value: TFxAmount; month: TISOMonth }> = ({ value, month }) => (
+  <TextFade className="text-right text-overline uppercase text-ui-secondary">
+    <DisplayAmount value={value} decimals="ifOnly" month={month} noCurrency />
+  </TextFade>
+)
+
 export const Footer: FC<FooterProps> = props => {
   const { month } = props
-  const totals = balances.useTotals()[month]
+  const totals = useAppSelector(core.months.selectTotals)[month]
   const { t } = useTranslation('common')
-
-  const Sum: FC<{ value: TFxAmount }> = ({ value }) => (
-    <Typography
-      variant="overline"
-      align="right"
-      noWrap
-      sx={{
-        color: 'text.secondary',
-      }}
-    >
-      <DisplayAmount value={value} decimals="ifOnly" month={month} noCurrency />
-    </Typography>
-  )
 
   return (
     <TableRow
       name={
         <div>
-          <Typography
-            variant="overline"
-            noWrap
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
+          <TextFade className="text-overline uppercase text-ui-secondary">
             {t('total')}
-          </Typography>
+          </TextFade>
         </div>
       }
-      budgeted={<Sum value={totals.budgeted} />}
-      outcome={<Sum value={totals.envActivity} />}
-      available={<Sum value={totals.available} />}
+      assigned={<Sum value={totals.assigned} month={month} />}
+      outcome={<Sum value={totals.envActivity} month={month} />}
+      available={<Sum value={totals.available} month={month} />}
       goal={null}
     />
   )

@@ -1,23 +1,30 @@
-import React, { FC, useRef } from 'react'
-import { ButtonBase, IconButton, Typography, Box } from '@mui/material'
-import { isEqual } from 'lodash'
-import { AddIcon, ArrowDownwardIcon, ArrowUpwardIcon } from '6-shared/ui/Icons'
-import { useFloatingInput } from '6-shared/ui/FloatingInput'
-import { Tooltip } from '6-shared/ui/Tooltip'
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
+import type { FC } from 'react'
+import React, { useRef } from 'react'
+import { core } from '@/zerro-core/redux'
 
-import { useAppDispatch, useAppSelector } from 'store/index'
-import { renameGroup } from '4-features/envelope/renameGroup'
-import { moveGroup } from '4-features/envelope/moveGroup'
-import { createEnvelopeInGroup } from '4-features/envelope/createEnvelope'
+import { deepEqual } from '@/6-shared/helpers/deepEqual'
+import {
+  AddIcon,
+  ArrowDownwardIcon,
+  ArrowUpwardIcon,
+} from '@/6-shared/ui/Icons'
+
+import { useAppDispatch, useAppSelector } from '@/store/index'
+import { renameGroup } from '@/4-features/envelope/renameGroup'
+import { moveGroup } from '@/4-features/envelope/moveGroup'
+import { createEnvelopeInGroup } from '@/4-features/envelope/createEnvelope'
 import { TableRow } from './shared/shared'
-import { TFxAmount } from '6-shared/types'
-import { balances } from '5-entities/envBalances'
-import { envelopeModel } from '5-entities/envelope'
-import { addFxAmount } from '6-shared/helpers/money'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
+import type { TFxAmount } from '@/6-shared/types'
+
+import { addFxAmount } from '@/6-shared/helpers/money'
 import { useMonth } from '../MonthProvider'
-import { Amount } from '6-shared/ui/Amount'
+import { Amount } from '@/6-shared/ui/Amount'
 import { useTranslation } from 'react-i18next'
+import { useAsk } from '@/6-shared/overlays'
+import { RenamePopover } from './RenamePopover'
 
 type TGroupProps = {
   name: string
@@ -27,6 +34,15 @@ type TGroupProps = {
   isReordering: boolean
   children?: React.ReactNode[]
 }
+const Sum: FC<{ value: number }> = ({ value }) => (
+  <TextFade
+    render={<p />}
+    className="m-0 self-baseline text-right text-body text-ui-tertiary"
+  >
+    <Amount value={value} decimals="ifOnly" />
+  </TextFade>
+)
+
 export const Group: FC<TGroupProps> = ({
   name,
   groupIdx,
@@ -37,91 +53,73 @@ export const Group: FC<TGroupProps> = ({
 }) => {
   const { t } = useTranslation('budgets')
   const dispatch = useAppDispatch()
-  const { budgeted, available, activity } = useGroupTotals(name)
-  const ref = useRef()
-
-  const floating = useFloatingInput(ref, val =>
-    dispatch(renameGroup(name, val))
-  )
+  const { assigned, available, activity } = useGroupTotals(name)
+  const ref = useRef<HTMLHeadingElement>(null)
+  const ask = useAsk()
+  const rename = async () => {
+    const next = await ask<string>(
+      <RenamePopover value={name} anchor={ref.current} />
+    )
+    if (next !== undefined) dispatch(renameGroup(name, next))
+  }
 
   const Actions = (
     <>
       {nextIdx !== undefined && (
-        <Tooltip title={t('moveDown')}>
-          <IconButton onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}>
-            <ArrowDownwardIcon />
-          </IconButton>
-        </Tooltip>
+        <IconButton
+          variant="ghost"
+          size="xs"
+          label={t('moveDown')}
+          onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}
+        >
+          <ArrowDownwardIcon />
+        </IconButton>
       )}
 
       {prevIdx !== undefined && (
-        <Tooltip title={t('moveUp')}>
-          <IconButton onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}>
-            <ArrowUpwardIcon />
-          </IconButton>
-        </Tooltip>
+        <IconButton
+          variant="ghost"
+          size="xs"
+          label={t('moveUp')}
+          onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}
+        >
+          <ArrowUpwardIcon />
+        </IconButton>
       )}
 
-      <Tooltip title={t('createEnvelope')}>
-        <IconButton onClick={() => dispatch(createEnvelopeInGroup(name))}>
-          <AddIcon />
-        </IconButton>
-      </Tooltip>
+      <IconButton
+        variant="ghost"
+        size="xs"
+        label={t('createEnvelope')}
+        onClick={() => dispatch(createEnvelopeInGroup(name))}
+      >
+        <AddIcon />
+      </IconButton>
     </>
   )
 
   const NameCell = (
-    <Box
-      ref={ref}
-      sx={{
-        pb: 0,
-        minWidth: 0,
-        display: 'flex',
-        flexDirection: 'row',
-        alignContent: 'flex-end',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-      }}
-    >
-      <ButtonBase
-        sx={{ p: 1, ml: -1, minWidth: 0, flexShrink: 1 }}
-        onClick={() => floating.open(name)}
-      >
-        <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
+    <div className="flex min-w-0 items-center justify-start">
+      <ButtonBase className="-ml-2 min-w-0 shrink p-2" onClick={rename}>
+        <TextFade
+          render={<h6 />}
+          ref={ref}
+          className="m-0 text-title font-sans font-black"
+        >
           {name}
-        </Typography>
+        </TextFade>
       </ButtonBase>
 
       {isReordering && Actions}
-    </Box>
-  )
-
-  const Sum: FC<{ value: number }> = ({ value }) => (
-    <Typography
-      align="right"
-      noWrap
-      sx={{
-        alignSelf: 'baseline',
-        color: 'text.disabled',
-      }}
-    >
-      <Amount value={value} decimals="ifOnly" />
-    </Typography>
+    </div>
   )
 
   return (
     <>
-      {floating.render()}
       <TableRow
-        sx={{
-          pt: 2,
-          alignItems: 'baseline',
-          borderBottom: `0.5px solid black`,
-          borderColor: 'divider',
-          '&:last-child': { border: 0 },
-        }}
+        className="items-baseline border-b-[0.5px] border-ui-border pt-4 last:border-0"
         name={NameCell}
-        budgeted={<Sum value={budgeted} />}
+        assigned={<Sum value={assigned} />}
         outcome={<Sum value={activity} />}
         available={<Sum value={available} />}
         goal={null}
@@ -134,34 +132,34 @@ export const Group: FC<TGroupProps> = ({
 
 const useGroupTotals = (id: string) => {
   type TResultFx = {
-    budgeted: TFxAmount
+    assigned: TFxAmount
     activity: TFxAmount
     available: TFxAmount
   }
   type TResult = {
-    budgeted: number
+    assigned: number
     activity: number
     available: number
   }
   const [month] = useMonth()
-  const data = balances.useEnvData()[month]
-  const structure = useAppSelector(envelopeModel.getEnvelopeStructure, isEqual)
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const data = useAppSelector(core.activity.selectEnvelopeMetrics)[month]
+  const structure = useAppSelector(core.envelopes.selectStructure, deepEqual)
+  const toDisplay = core.currency.useToDisplay(month)
   const group = structure.find(gr => gr.id === id)
-  if (!group || !data) return { budgeted: 0, activity: 0, available: 0 }
+  if (!group || !data) return { assigned: 0, activity: 0, available: 0 }
 
   const fxSum = group.children.reduce(
     (sum, node) => {
-      sum.budgeted = addFxAmount(sum.budgeted, data[node.id].totalBudgeted)
+      sum.assigned = addFxAmount(sum.assigned, data[node.id].totalAssigned)
       sum.activity = addFxAmount(sum.activity, data[node.id].totalActivity)
       sum.available = addFxAmount(sum.available, data[node.id].totalAvailable)
       return sum
     },
-    { budgeted: {}, activity: {}, available: {} } as TResultFx
+    { assigned: {}, activity: {}, available: {} } as TResultFx
   )
 
   return {
-    budgeted: toDisplay(fxSum.budgeted),
+    assigned: toDisplay(fxSum.assigned),
     activity: toDisplay(fxSum.activity),
     available: toDisplay(fxSum.available),
   } as TResult

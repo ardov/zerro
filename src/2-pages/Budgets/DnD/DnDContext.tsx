@@ -1,27 +1,29 @@
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { createPortal } from 'react-dom'
-import React, { FC, ReactNode, useEffect, useState } from 'react'
+import type { FC, ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { usePopup } from '@/6-shared/overlays'
 import { useCallback } from 'react'
+import type { DragEndEvent } from '@dnd-kit/core'
 import {
   useDndMonitor,
   useSensor,
   useSensors,
   DndContext,
   DragOverlay,
-  DragEndEvent,
   MouseSensor,
   TouchSensor,
   KeyboardSensor,
 } from '@dnd-kit/core'
 import { useTranslation } from 'react-i18next'
-import { Box, SxProps } from '@mui/system'
-import { Typography } from '@mui/material'
-import { useToggle } from '6-shared/hooks/useToggle'
-import { useAppDispatch } from 'store/index'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
-import { MoveMoneyModal } from '4-features/moveMoney'
-import { assignNewGroup } from '4-features/envelope/assignNewGroup'
+import { useAppDispatch, useAppSelector } from '@/store/index'
+import { core } from '@/zerro-core/redux'
+
+import { MoveMoneyModal } from '@/4-features/moveMoney'
+import { assignNewGroup } from '@/4-features/envelope/assignNewGroup'
 import { useMonth } from '../MonthProvider'
-import { TDragData, DragTypes } from './dragTypes'
+import type { TDragData } from './dragTypes'
+import { DragTypes } from './dragTypes'
 import { Highlight } from './Highlight'
 
 const vibrate = () => window?.navigator?.vibrate?.(100)
@@ -40,24 +42,31 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
     useSensor(KeyboardSensor)
   )
 
-  const [moneySource, setMoneySource] = useState<TEnvelopeId | 'toBeBudgeted'>(
-    'toBeBudgeted'
-  )
+  const [moneySource, setMoneySource] = useState<
+    core.envelopes.TEnvelopeId | 'toBeAssigned'
+  >('toBeAssigned')
   const [moneyDestination, setMoneyDestination] = useState<
-    TEnvelopeId | 'toBeBudgeted'
-  >('toBeBudgeted')
-  const [isOpen, toggleOpen] = useToggle()
+    core.envelopes.TEnvelopeId | 'toBeAssigned'
+  >('toBeAssigned')
+  // On the overlay stack, so Back closes the move-money dialog rather than
+  // leaving the budget page.
+  const { open: isOpen, setOpen: setMoveOpen } = usePopup()
+  const openTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(openTimer.current), [])
 
   const onDragEnd = useCallback(
     (e: DragEndEvent) => {
       const active = e.active.data.current as TDragData
       const over = e.over?.data.current as TDragData
       if (!active || !over || !month) return
-      let dataType = active?.type
+      const dataType = active?.type
       if (dataType === DragTypes.amount && active.id !== over.id) {
         setMoneySource(active.id)
         setMoneyDestination(over.id)
-        toggleOpen()
+        // Let the drag's release click finish before mounting outside-press
+        // listeners; dnd-kit stops that click before it reaches its target.
+        clearTimeout(openTimer.current)
+        openTimer.current = setTimeout(() => setMoveOpen(true), 0)
       }
 
       if (
@@ -68,7 +77,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
         dispatch(assignNewGroup(active.id))
       }
     },
-    [dispatch, month, toggleOpen]
+    [dispatch, month, setMoveOpen]
   )
 
   return (
@@ -87,23 +96,10 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
         month={month}
         source={moneySource}
         destination={moneyDestination}
-        onClose={toggleOpen}
+        onClose={() => setMoveOpen(false)}
       />
     </DndContext>
   )
-}
-
-const props: SxProps = {
-  position: 'absolute',
-  display: 'flex',
-  bgcolor: 'background.default',
-  py: 0.5,
-  px: 2,
-  borderRadius: 1,
-  width: 'auto',
-  cursor: 'grabbing',
-  userSelect: 'none',
-  transform: 'scale(1.3)',
 }
 
 let moniesRenderCount = 0
@@ -112,14 +108,18 @@ const Monies = () => {
   useEffect(() => {
     moniesRenderCount = (moniesRenderCount + 1) % 7
   }, [])
-  return <Box sx={props}>{t('moneyDnd', { context: String(moniesRenderCount) })}</Box>
+  return (
+    <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-ui-base px-4 py-1">
+      {t('moneyDnd', { context: String(moniesRenderCount) })}
+    </div>
+  )
 }
 
 const DragObj = () => {
   const { t } = useTranslation('common')
   const [activeType, setActiveType] = useState<DragTypes>(DragTypes.amount)
-  const [activeId, setActiveId] = useState<TEnvelopeId>()
-  const envelopes = envelopeModel.useEnvelopes()
+  const [activeId, setActiveId] = useState<core.envelopes.TEnvelopeId>()
+  const envelopes = useAppSelector(core.envelopes.selectAll)
 
   useDndMonitor({
     onDragStart(e) {
@@ -134,11 +134,11 @@ const DragObj = () => {
     activeType === DragTypes.amount ? (
       <Monies />
     ) : activeType === DragTypes.envelope ? (
-      <Box sx={props}>
-        <Typography noWrap>
+      <div className="absolute flex w-auto scale-[1.3] cursor-grabbing select-none rounded-lg bg-ui-base px-4 py-1">
+        <TextFade render={<p />} className="m-0 text-body">
           {activeId ? envelopes[activeId].name : t('category')}
-        </Typography>
-      </Box>
+        </TextFade>
+      </div>
     ) : null
 
   return createPortal(<DragOverlay>{content}</DragOverlay>, document.body)

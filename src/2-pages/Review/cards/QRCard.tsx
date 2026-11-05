@@ -1,7 +1,7 @@
-import React from 'react'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import { useTranslation } from 'react-i18next'
-import { ButtonBase, Stack, Typography } from '@mui/material'
-import { Card, TCardProps } from '../shared/Card'
+import type { TCardProps } from '../shared/Card'
+import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 
 export function QRCard(props: TCardProps) {
@@ -14,21 +14,17 @@ export function QRCard(props: TCardProps) {
   return (
     <Card>
       <ButtonBase
-        sx={{ borderRadius: 1, px: 1 }}
+        className="rounded-lg px-2"
         onClick={() => props.onShowTransactions(hasReceipt)}
       >
-        <Stack
-          sx={{
-            gap: 1,
-          }}
-        >
-          <Typography variant="body1" align="center">
+        <div className="flex flex-col gap-2">
+          <p className="m-0 text-center text-body font-sans">
             {t('youAttached')}
-          </Typography>
-          <Typography variant="h4" align="center">
+          </p>
+          <h2 className="m-0 text-center text-display font-sans">
             {t('receipt', { count: value })}
-          </Typography>
-        </Stack>
+          </h2>
+        </div>
       </ButtonBase>
     </Card>
   )

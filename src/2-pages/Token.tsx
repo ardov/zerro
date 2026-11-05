@@ -1,9 +1,8 @@
+import { Button } from '@/6-shared/ui/kit/Button'
 import React from 'react'
-import { Box, Button, Typography } from '@mui/material'
-import { Helmet } from 'react-helmet'
 import { useTranslation } from 'react-i18next'
-import { getToken } from 'store/token'
-import { useAppSelector } from 'store'
+import { getToken } from '@/store/token'
+import { useAppSelector } from '@/store'
 
 export default function Token() {
   const { t } = useTranslation('token')
@@ -12,41 +11,28 @@ export default function Token() {
 
   return (
     <>
-      <Helmet>
-        <title>{t('pageTitle')} | Zerro</title>
-        <meta name="description" content={t('pageDescription')} />
-        <link rel="canonical" href="https://zerro.app/token" />
-      </Helmet>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'inherit',
-        }}
-      >
-        <Box sx={{ p: 5, mx: 'auto', maxWidth: 500 }}>
-          <Typography variant="h4" sx={{ marginBottom: '16px' }}>
-            {t('heading')}
-          </Typography>
+      <title>{`${t('pageTitle')} | Zerro`}</title>
+      <meta name="description" content={t('pageDescription')} />
+      <link rel="canonical" href="https://zerro.app/token" />
+      <div className="flex h-[inherit] items-center justify-center">
+        <div className="mx-auto max-w-[500px] p-10">
+          <h1 className="mt-0 mb-4 text-display">{t('heading')}</h1>
 
-          <Typography variant="body1" sx={{ marginBottom: '16px' }}>
-            {t('body')}
-          </Typography>
+          <p className="mt-0 mb-4 text-body">{t('body')}</p>
 
-          <Box sx={{ mt: 3 }}>
+          <div className="mt-6">
             <Button
-              variant="contained"
-              color="primary"
+              size="sm"
+              variant="primary"
               onClick={() => setTokenVisibility(!tokenIsVisible)}
             >
               {t(tokenIsVisible ? 'btnHide' : 'btnShow')}
             </Button>
-          </Box>
+          </div>
 
           {tokenIsVisible ? <h3>{token}</h3> : null}
-        </Box>
-      </Box>
+        </div>
+      </div>
     </>
   )
 }

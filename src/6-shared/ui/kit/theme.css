@@ -1,0 +1,216 @@
+/* `static`: plain CSS files read these variables too, so every one must be
+emitted, not only those Tailwind finds used. */
+/* prettier-ignore */
+@theme static {
+  /* 🪟 Opacity */
+  --opacity-ui-border:   0.1;
+  --opacity-ui-disabled: 0.32;
+
+  /* 🌫 Blur */
+  --blur-ui-backdrop: 1.5px;
+
+  /* 📚 Z-index */
+  --z-index-drawer:  1200;
+  --z-index-modal:   1300;
+  --z-index-popover: 1400;
+  --z-index-tooltip: 1500;
+
+  /* Main colors */
+  /* 🎨 Surfaces */
+  --color-ui-base:        oklch(0.97 0.002 214);
+  --color-ui-card:        oklch(1 0 0);
+  --color-ui-popover:     oklch(1 0 0);
+  --color-ui-backdrop:    oklch(from var(--color-ui-base) l c h / 80%);
+  --color-ui-field-hatch: oklch(0 0 0 / 0.03);
+  /* 🎨 State colors */
+  --color-ui-focus:     oklch(0 0 0);
+  --color-ui-highlight: oklch(0 0 0 / 0.04);
+  --color-ui-pressed:   oklch(0 0 0 / 0.06);
+  --color-ui-selected:  oklch(0.95 0.002 214);
+  /* 🎨 Text */
+  --color-ui-primary:     oklch(0 0 0 / 0.95);
+  --color-ui-secondary:   oklch(0 0 0 / 0.6);
+  --color-ui-tertiary:    oklch(0 0 0 / 0.35);
+  --color-ui-placeholder: var(--color-ui-tertiary);
+  --color-ui-link:        oklch(0.5 0.2 240);
+  --color-ui-warning:     oklch(0.65 0.16 70);
+  --color-ui-success:     oklch(0.6 0.2 150);
+  --color-ui-error:       oklch(0.6 0.24 20);
+
+  /* Solid status surfaces are independent from status text and chart colors. */
+  --color-ui-success-solid: #008120;
+  --color-ui-on-success:    #ffffff;
+  --color-ui-warning-solid: #ed6c02;
+  --color-ui-on-warning:    #121212;
+  --color-ui-info-solid:    #2e83da;
+  --color-ui-on-info:       #121212;
+  --color-ui-error-solid:   #d32f2f;
+  --color-ui-on-error:      #ffffff;
+
+  /* 🎨 Border */
+  --color-ui-border: oklch(0 0 0 / var(--opacity-ui-border));
+
+  /* 🎨 Semantic component tokens */
+  --color-ui-button-primary:       oklch(0 0 0);
+  --color-ui-button-primary-hover: oklch(0 0 0);
+  --color-ui-on-button-primary:    oklch(1 0 0);
+  --color-ui-tooltip:              oklch(0.22 0 0);
+  --color-ui-on-tooltip:           oklch(1 0 0);
+  --color-ui-scrollbar:            oklch(0 0 0 / 0.12);
+  /* 🎨 Control colors, checkbox and switch */
+  --color-ui-control-active:   oklch(0 0 0);
+  --color-ui-control-inactive: oklch(0.58 0 0);
+  --color-ui-on-control:       oklch(1 0 0);
+  --color-ui-toggle-hover:     oklch(0.5 0 0 / 0.12);
+  --color-ui-toggle-pressed:   oklch(0.5 0 0 / 0.22);
+
+  /* 📏 Surface spacing */
+  --spacing-ui-drawer-inset: 8px;
+  --spacing-ui-panel-gap: 8px;
+
+  /* Panel layout and paired surfaces move as one interaction. */
+  --ease-ui-panel: cubic-bezier(0.25, 1, 0.5, 1);
+  --duration-ui-panel: 250ms;
+
+  /* 📏 Stroke thickness */
+  --stroke-ui-control: 1.5px;
+
+  /* ⭕ Radius */
+  --radius-ui-card:         16px;
+  --radius-ui-control:      12px;
+  --radius-ui-control-inner: 8px;
+  --radius-ui-popover:      16px;
+
+  /* 🌚 Shadows */
+  --shadow-ui-card: 0 2px 4px oklch(0 0 0 / 0.04);
+  --shadow-ui-popover:
+    0 0 0 0.5px var(--color-ui-border),
+    0 8px 32px oklch(0 0 0 / 0.12), 0 2px 8px oklch(0 0 0 / 0.06);
+
+  --shadow-ui-toast:
+    0 8px 24px oklch(0 0 0 / 0.1), 0 24px 56px oklch(0 0 0 / 0.2);
+
+  /* 💫 Easing */
+  --ease-overshoot-soft: linear(
+    0,
+    0.03 1.8%,
+    0.1 3.9%,
+    0.57 12.4%,
+    0.77 16.9%,
+    0.85 19.2%,
+    0.91 21.6%,
+    0.95 24.1%,
+    0.99 26.8%,
+    1.02 30.9%,
+    1.03 35.9%,
+    1.01 60.4%,
+    1
+  );
+  --ease-overshoot: linear(
+    0,
+    1.07 9.8%,
+    1.36 15.4%,
+    1.5 21.8%,
+    1.51 26.4%,
+    1.48 31.6%,
+    1.17 53.8%,
+    1.06 66.2%,
+    1.01 79.2%,
+    1
+  );
+
+  /* 🅰️ Typography */
+  --text-ui-14: 14px;
+  --text-ui-14--line-height: 20px;
+  --text-ui-14--letter-spacing: 0.02em;
+  --text-ui-16: 16px;
+  --text-ui-16--line-height: 24px;
+  --text-ui-16--letter-spacing: 0.01em;
+  --text-ui-20: 20px;
+  --text-ui-20--line-height: 32px;
+  --text-ui-20--letter-spacing: 0;
+}
+
+:root.dark {
+  --color-ui-base: oklch(0.18 0.002 214);
+  --color-ui-card: oklch(0.22 0.002 214);
+  --color-ui-popover: oklch(0.26 0.002 214);
+  --color-ui-field-hatch: oklch(1 0 0 / 0.04);
+
+  --color-ui-focus: oklch(1 0 0);
+  --color-ui-highlight: oklch(1 0 0 / 0.06);
+  --color-ui-pressed: oklch(1 0 0 / 0.1);
+  --color-ui-selected: oklch(0.34 0.002 214);
+
+  --color-ui-primary: oklch(1 0 0 / 0.95);
+  --color-ui-secondary: oklch(1 0 0 / 0.6);
+  --color-ui-tertiary: oklch(1 0 0 / 0.4);
+  --color-ui-link: oklch(0.75 0.13 240);
+  --color-ui-warning: oklch(0.8 0.15 70);
+  --color-ui-success: oklch(0.75 0.18 150);
+  --color-ui-error: oklch(0.72 0.18 20);
+  --color-ui-border: oklch(1 0 0 / var(--opacity-ui-border));
+
+  --color-ui-success-solid: #00e842;
+  --color-ui-on-success: #121212;
+  --color-ui-warning-solid: #ffa726;
+  --color-ui-on-warning: #121212;
+  --color-ui-info-solid: #5eb0f4;
+  --color-ui-on-info: #121212;
+  --color-ui-error-solid: #f44437;
+  --color-ui-on-error: #121212;
+
+  --color-ui-button-primary: oklch(0.95 0 0);
+  --color-ui-button-primary-hover: oklch(1 0 0);
+  --color-ui-on-button-primary: oklch(0.18 0 0);
+  --color-ui-tooltip: oklch(0.9 0 0);
+  --color-ui-on-tooltip: oklch(0.18 0 0);
+  --color-ui-scrollbar: oklch(1 0 0 / 0.16);
+  --color-ui-control-active: oklch(0.95 0 0);
+  --color-ui-control-inactive: oklch(0.58 0 0);
+  --color-ui-on-control: oklch(0.18 0 0);
+  --color-ui-toggle-hover: oklch(1 0 0 / 0.08);
+  --color-ui-toggle-pressed: oklch(1 0 0 / 0.14);
+
+  --shadow-ui-card: 0 2px 4px oklch(0 0 0 / 0.2);
+  --shadow-ui-popover:
+    0 0 0 0.5px var(--color-ui-border), 0 8px 32px oklch(0 0 0 / 0.4),
+    0 2px 8px oklch(0 0 0 / 0.2);
+}
+
+@utility focusable {
+  outline: var(--stroke-ui-control) solid transparent;
+  outline-offset: -2px;
+  /* Tailwind @utility supplies the selector when compiling this nesting. */
+  /* stylelint-disable-next-line nesting-selector-no-missing-scoping-root */
+  &:is(:focus-visible, :has(:focus-visible)) {
+    outline-color: var(--color-ui-focus);
+    outline-offset: 1px;
+  }
+}
+
+@utility rounded-smooth {
+  corner-shape: superellipse(1.2);
+}
+
+@utility field-hatched {
+  background-image: repeating-linear-gradient(
+    -30deg,
+    var(--color-ui-field-hatch) 0 3px,
+    transparent 3px 9px
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    black 0,
+    transparent 16px,
+    transparent calc(100% - 16px),
+    black 100%
+  );
+}
+
+/* A field shows focus a person should see: any focus in its text, and
+   keyboard focus on a trigger. A trigger that gets focus back after a pointer
+   closed its popup stays quiet, as a plain button does. The modality comes
+   from `6-shared/ui/inputModality.ts`; before any input, visible focus counts. */
+@custom-variant field-focus (&:has(> [data-field-control] :is(input, textarea):focus), :root:not([data-input-modality='pointer']) &:has(> [data-field-control] :focus-visible));
+@custom-variant in-field-focus (:where([data-field-content]:has(:is(input, textarea):focus)) &, :root:not([data-input-modality='pointer']) :where([data-field-content]:has(:focus-visible)) &);

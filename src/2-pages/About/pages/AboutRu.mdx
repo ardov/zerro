@@ -1,12 +1,5 @@
 import { ExampleBox, Muted } from '../Components'
 import wholeImg from './whole-screenshot.png'
-import { Box } from '@mui/material'
-import { Head } from '../Head'
-
-<Head
-  title="Что такое Zerro?"
-  description="Zerro помогает вести личный и семейный бюджет."
-/>
 
 # 👋 Привет!
 
@@ -19,16 +12,10 @@ Zerro — это неофициальное приложение для [Дзе�
   <Muted>Обязательно напишите, что вам понравилось</Muted>
 </ExampleBox>
 
-<Box
-  component="img"
+<img
   src={wholeImg}
   alt="Примерно так выглядит интерфейс внутри"
-  sx={{
-    maxWidth: '100%',
-    borderRadius: 1,
-    border: '1px solid rgba(128,128,128,0.2)',
-    boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-  }}
+  className="max-w-full rounded-lg border border-solid border-[rgba(128,128,128,0.2)] [box-shadow:0_8px_32px_0_rgba(0,0,0,0.2)]"
 />
 
 ## Что внутри?
@@ -81,7 +68,8 @@ Zerro — веб-приложение. Оно такое же классное, 
   у вас в приложении и не передаёт через API, у сторонних сервисов просто нет
   доступа к ним.
 
-  [Документация API](https://github.com/zenmoney/ZenPlugins/wiki/ZenMoney-API)
+[Документация API](https://github.com/zenmoney/ZenPlugins/wiki/Zenmoney-API)
+
 </ExampleBox>
 
 - Zerro ничего не хранит у себя. Данные хранятся локально на вашем компьютере и в Дзен-мани.

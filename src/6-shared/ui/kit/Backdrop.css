@@ -1,0 +1,18 @@
+@layer components {
+  /* While a modal is open, the page behind it steps back a little. Modals
+     are portalled outside #root, so only the page scales; the body behind it
+     is the canvas colour, so its edges show no seam. */
+  #root {
+    transition: scale 250ms ease-out;
+  }
+
+  :root:has(.kit-modal-backdrop[data-open]) #root {
+    scale: 0.99;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #root {
+      transition: none;
+    }
+  }
+}

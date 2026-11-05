@@ -1,17 +1,15 @@
-import React, { FC, ReactNode } from 'react'
-import {
-  Box,
-  BoxProps,
-  TooltipProps,
-  Typography,
-  TypographyProps,
-} from '@mui/material'
-import { AmountProps } from '6-shared/ui/Amount'
-import { Tooltip } from '6-shared/ui/Tooltip'
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
+import type { FC, HTMLAttributes, ReactNode } from 'react'
+import React from 'react'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import type { AmountProps } from '@/6-shared/ui/Amount'
+import type { TooltipProps } from '@/6-shared/ui/kit/Tooltip'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 // TODO: use Amount instead
-import { SmartAmount, TSmartAmountProps } from '3-widgets/Amount'
+import type { TSmartAmountProps } from '@/3-widgets/Amount'
+import { SmartAmount } from '@/3-widgets/Amount'
 
-type DataLineProps = BoxProps & {
+type DataLineProps = HTMLAttributes<HTMLDivElement> & {
   name: ReactNode
   amount?: AmountProps['value']
   currency?: AmountProps['currency']
@@ -19,8 +17,8 @@ type DataLineProps = BoxProps & {
   sign?: AmountProps['sign']
   color?: string
   colorOpacity?: number
-  tooltip?: TooltipProps['title']
-  variant?: TypographyProps['variant']
+  tooltip?: TooltipProps['content']
+  variant?: 'body1' | 'body2' | 'caption' | 'h6'
 }
 
 export const DataLine: FC<DataLineProps> = ({
@@ -33,46 +31,37 @@ export const DataLine: FC<DataLineProps> = ({
   colorOpacity = 1,
   tooltip,
   variant = 'body1',
+  className,
   ...rest
 }) => {
+  const typographyClassName =
+    variant === 'body2'
+      ? 'text-body-sm'
+      : variant === 'caption'
+        ? 'text-caption'
+        : variant === 'h6'
+          ? 'text-title'
+          : 'text-body'
+
   return (
-    <Box
-      {...rest}
-      sx={[
-        {
-          display: 'flex',
-          flexDirection: 'row',
-        },
-        ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx]),
-      ]}
-    >
-      <Box
-        sx={{
-          flexGrow: 1,
-          mr: 1,
-          minWidth: 0,
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
+    <div className={cn('flex flex-row', className)} {...rest}>
+      <div className="mr-2 flex min-w-0 grow items-center">
         {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
-        <Tooltip title={tooltip}>
-          <Typography noWrap variant={variant}>
-            {name}
-          </Typography>
+        <Tooltip content={tooltip}>
+          <TextFade className={typographyClassName}>{name}</TextFade>
         </Tooltip>
-      </Box>
+      </div>
       {amount !== undefined && (
-        <Typography variant={variant}>
+        <span className={typographyClassName}>
           <SmartAmount
             value={amount}
             currency={currency}
             instrument={instrument}
             sign={sign}
           />
-        </Typography>
+        </span>
       )}
-    </Box>
+    </div>
   )
 }
 
@@ -98,23 +87,10 @@ export const OneLiner: FC<{
   right: React.ReactNode
 }> = ({ left, right }) => {
   return (
-    <Box sx={{ typography: 'body1', display: 'flex', width: '100%' }}>
-      <Box
-        sx={{
-          flexGrow: 1,
-          minWidth: 0,
-          position: 'relative',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          maskImage: 'linear-gradient(to left, transparent, black 40px)',
-        }}
-      >
-        {left}
-      </Box>
+    <div className="flex w-full text-base">
+      <TextFade className="grow">{left}</TextFade>
 
-      <Box component="span" sx={{ ml: 1, flexShrink: 0 }}>
-        {right}
-      </Box>
-    </Box>
+      <span className="ml-2 shrink-0">{right}</span>
+    </div>
   )
 }

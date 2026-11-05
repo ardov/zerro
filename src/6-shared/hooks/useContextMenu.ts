@@ -1,8 +1,8 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 const waitBeforeContextMenu = 500
 const cooldownAfterContextMenu = 800
-const moveTreshold = 10
+const moveThreshold = 10
 
 // Styles to prevent selection on touch devices
 const style: React.CSSProperties = {
@@ -13,17 +13,23 @@ const style: React.CSSProperties = {
 
 /**
  * Hook to handle contextmenu event on all devices including iOS.
- * - Note that onClick event shoul also be handled by this hook.
+ * - Note that onClick event should also be handled by this hook.
  * - Note that onContextMenu receives both mouseEvent and touchEvent.
  */
 export function useContextMenu(props: {
   onContextMenu?: (event: React.MouseEvent | React.TouchEvent) => void
   onClick?: (event: React.MouseEvent) => void
-  treshold?: number
+  threshold?: number
 }) {
-  const treshold = props.treshold || waitBeforeContextMenu
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const threshold = props.threshold || waitBeforeContextMenu
   const contextMenuCb = useRef(props.onContextMenu)
   const onClickCb = useRef(props.onClick)
+  useEffect(() => {
+    contextMenuCb.current = props.onContextMenu
+    onClickCb.current = props.onClick
+  })
 
   const propsToPass = useMemo(() => {
     const iOS = isIOS()
@@ -34,19 +40,18 @@ export function useContextMenu(props: {
           event.preventDefault()
           contextMenuCb.current?.(event)
         },
-        onClick: onClickCb.current,
+        onClick: (event: React.MouseEvent) => onClickCb.current?.(event),
         style: touchDevice ? style : undefined,
       }
     }
 
-    let timer: NodeJS.Timeout | undefined
     let clientX = 0
     let clientY = 0
     let lastCalledContext = 0
 
     const clear = () => {
-      clearTimeout(timer)
-      timer = undefined
+      clearTimeout(timer.current)
+      timer.current = undefined
     }
 
     // Handle touch start
@@ -54,17 +59,17 @@ export function useContextMenu(props: {
       clientX = event.touches[0].clientX
       clientY = event.touches[0].clientY
       clear()
-      timer = setTimeout(() => {
+      timer.current = setTimeout(() => {
         lastCalledContext = Date.now()
         contextMenuCb.current?.(event)
-      }, treshold)
+      }, threshold)
     }
 
     // Handle touch move
     const onTouchMove = (event: React.TouchEvent) => {
       const dx = event.touches[0].clientX - clientX
       const dy = event.touches[0].clientY - clientY
-      if (dx * dx + dy * dy > moveTreshold * moveTreshold) clear()
+      if (dx * dx + dy * dy > moveThreshold * moveThreshold) clear()
     }
 
     // Handle touch end
@@ -91,11 +96,12 @@ export function useContextMenu(props: {
       onTouchStart,
       onTouchMove,
       onTouchEnd,
+      onTouchCancel: onTouchEnd,
       onContextMenu,
       onClick,
       style,
     }
-  }, [treshold])
+  }, [threshold])
 
   return propsToPass
 }

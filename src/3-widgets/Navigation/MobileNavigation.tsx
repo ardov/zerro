@@ -1,76 +1,51 @@
-import React, { FC } from 'react'
-import { useLocation, useHistory } from 'react-router'
+import type { FC } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  BottomNavigation,
-  BottomNavigationAction,
-  Paper,
-  Divider,
-} from '@mui/material'
-import {
-  AccountBalanceIcon,
-  BarChartIcon,
-  SettingsIcon,
-  SyncAltIcon,
-} from '6-shared/ui/Icons'
-import { useHomeBar } from '6-shared/hooks/useHomeBar'
-import RefreshButton from '3-widgets/RefreshButton'
-import { SettingsMenu, useSettingsMenu } from './SettingsMenu'
+import RefreshButton from '@/3-widgets/RefreshButton'
+import { NavigationAction } from './NavigationAction'
+import { MenuButton } from './MenuButton'
+import { useDestinations } from './destinations'
 
-const actionSx = { minWidth: 32 }
+import './MobileNavigation.css'
 
+/** The bottom bar of a narrow window: destinations and settings as icons, and
+ * Sync beside them as a separate round button — it is an action, not a
+ * place. About moves into the settings panel. */
 export const MobileNavigation: FC = () => {
   const { t } = useTranslation('navigation')
   const path = useLocation().pathname
-  const history = useHistory()
-  const openSettings = useSettingsMenu()
-
-  const hasHomeBar = useHomeBar()
-  const paddingBottom = hasHomeBar ? '20px' : '0px'
-
-  const routes = [
-    { path: '/budget', label: t('budget'), icon: <AccountBalanceIcon /> },
-    { path: '/transactions', label: t('transactions'), icon: <SyncAltIcon /> },
-    { path: '/stats', label: t('stats'), icon: <BarChartIcon /> },
-  ]
-  const currentRoute = routes.find(route => path.startsWith(route.path))
+  const destinations = useDestinations({
+    mobile: true,
+    accountsPanelFits: false,
+  })
+  const current = destinations.find(d => path.startsWith(d.path))
 
   return (
-    <Paper
-      sx={{
-        position: 'fixed',
-        width: '100%',
-        bottom: '0',
-        paddingBottom: paddingBottom,
-        zIndex: 5,
-      }}
-    >
-      <Divider sx={{ opacity: '0.6' }} />
-      <BottomNavigation
-        value={currentRoute?.path}
-        onChange={(e, newValue) => {
-          if (newValue[0] === '/') history.push(newValue)
-        }}
-      >
-        {routes.map(route => (
-          <BottomNavigationAction
-            label={route.label}
-            value={route.path}
-            icon={route.icon}
-            key={route.path}
-            sx={actionSx}
-          />
-        ))}
-        <BottomNavigationAction
-          label={t('settings')}
-          value="menu"
-          icon={<SettingsIcon />}
-          onClick={openSettings}
-          sx={actionSx}
-        />
-        <RefreshButton isMobile={true} sx={actionSx} />
-      </BottomNavigation>
-      <SettingsMenu showLinks />
-    </Paper>
+    <nav aria-label={t('main')} className="mobile-navigation">
+      <div aria-hidden className="mobile-navigation-blur" />
+      <div aria-hidden className="mobile-navigation-color" />
+      <div className="mobile-navigation-actions">
+        <div className="flex min-w-0 grow self-stretch">
+          {destinations.map(destination => {
+            const selected = current?.path === destination.path
+            return (
+              <NavigationAction
+                key={destination.path}
+                nativeButton={false}
+                role="link"
+                render={<Link to={destination.path} />}
+                label={destination.label}
+                icon={destination.icon}
+                aria-current={selected ? 'page' : undefined}
+              />
+            )
+          })}
+          <MenuButton />
+        </div>
+        <div className="mobile-navigation-sync flex size-12 shrink-0 items-center justify-center">
+          <RefreshButton shape="circle" muted />
+        </div>
+      </div>
+    </nav>
   )
 }

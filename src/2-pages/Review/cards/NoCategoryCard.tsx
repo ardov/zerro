@@ -1,6 +1,6 @@
-import React from 'react'
-import { ButtonBase, Stack, Typography } from '@mui/material'
-import { Card, TCardProps } from '../shared/Card'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
+import type { TCardProps } from '../shared/Card'
+import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 import { useTranslation } from 'react-i18next'
 
@@ -14,32 +14,30 @@ export function NoCategoryCard(props: TCardProps) {
   const count = noTag.length
   return (
     <Card>
-      <Stack spacing={1}>
+      <div className="flex flex-col gap-2">
         {count ? (
           <>
             <ButtonBase
-              sx={{ borderRadius: 1, px: 1 }}
+              className="rounded-lg px-2"
               onClick={() => props.onShowTransactions(noTag)}
             >
-              <Typography variant="h4" align="center">
+              <h2 className="m-0 text-center text-display font-sans">
                 {t('title', { count })}
-              </Typography>
+              </h2>
             </ButtonBase>
-            <Typography variant="body1" align="center">
+            <p className="m-0 text-center text-body">
               {t('withoutCategory', { count })}
-            </Typography>
+            </p>
           </>
         ) : (
           <>
-            <Typography variant="h4" align="center">
-              👍
-            </Typography>
-            <Typography variant="body1" align="center">
+            <p className="m-0 text-center text-display">👍</p>
+            <p className="m-0 text-center text-body">
               {t('allTransactionsHaveCategories')}
-            </Typography>
+            </p>
           </>
         )}
-      </Stack>
+      </div>
     </Card>
   )
 }

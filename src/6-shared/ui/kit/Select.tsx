@@ -1,0 +1,264 @@
+import { useState, type ReactElement, type ReactNode } from 'react'
+import type { PopupController } from '@/6-shared/overlays'
+import type { MultiSelectProps } from './MultiSelect'
+import { SelectCombobox, type SelectSearchOptions } from './SelectCombobox'
+import { Field } from '@base-ui/react/field'
+import { Select as Primitive } from '@base-ui/react/select'
+import { useBottomSheetLayout } from './useBottomSheetLayout'
+import { ListPanel } from './ListPanel'
+import { ListRowHeader, ListRowSeparator } from './ListRow'
+import type { SelectTriggerProps } from './SelectTrigger'
+import {
+  listPanelMargin,
+  useListPanelPositioning,
+} from './useListPanelPositioning'
+
+import {
+  useSelectField,
+  preventMouseUpSelection,
+  selectPanelOutset as panelOutset,
+} from './useSelectField'
+
+export type SelectOption<T extends string = string> = {
+  value: T
+  label: string
+  description?: ReactNode
+  start?: ReactNode
+  end?: ReactNode
+  disabled?: boolean
+  /** Visual nesting in a flat list of selectable options. */
+  indent?: number
+  /** Additional terms used by searchable selects. */
+  keywords?: readonly string[]
+}
+export type SelectItem<T extends string = string> =
+  | SelectOption<T>
+  | {
+      type: 'group'
+      id: string
+      label: string
+      items: readonly SelectOption<T>[]
+    }
+  | {
+      type: 'separator'
+      id: string
+    }
+export type SelectProps<T extends string = string> = Pick<
+  SelectTriggerProps,
+  | 'label'
+  | 'labelMode'
+  | 'size'
+  | 'placeholder'
+  | 'disabled'
+  | 'readOnly'
+  | 'description'
+  | 'error'
+  | 'invalid'
+  | 'clearLabel'
+  | 'className'
+  | 'style'
+  | 'ref'
+> & {
+  value: T | null
+  items: readonly SelectItem<T>[]
+  name?: string
+  id?: string
+  form?: string
+  /** Optional external control from usePopup(); OverlayHost owns visibility. */
+  popup?: PopupController
+  /** Align an existing selection; empty values, touch and tight spaces fall back. */
+  alignSelected?: boolean
+  showValueIcon?: boolean
+  /** Leading icon when no value has been selected. */
+  emptyIcon?: ReactNode
+  /** Popup minimum CSS length (numbers are pixels), capped by available space. */
+  popupMinWidth?: number | string
+  /** Custom button. For rich content, supply its accessible name explicitly. */
+  trigger?: ReactElement
+  renderValue?: (item: SelectOption<T> | undefined) => ReactNode
+  emptyText?: string
+  /** Search inside the popup; selected-row alignment applies only without search. */
+  search?: boolean | SelectSearchOptions<T>
+} & SelectionChange<T>
+
+/** Required fields cannot be cleared. Optional fields are clearable by default. */
+export type SelectRequirement =
+  | { required: true; clearable?: false }
+  | { required?: false; clearable?: boolean }
+
+type SelectionChange<T> =
+  | { required: true; clearable?: false; onChange: (value: T) => void }
+  | { required?: false; clearable: false; onChange: (value: T) => void }
+  | { required?: false; clearable?: true; onChange: (value: T | null) => void }
+
+/** Internal modes share rendering while preserving the public value contracts. */
+export type SelectControlProps<T extends string> =
+  | (SelectProps<T> & { multiple?: false })
+  | (MultiSelectProps<T> & { multiple: true; alignSelected?: never })
+
+/** null represents an initially empty field. Required selections cannot be
+ * cleared. clearable=false also guarantees non-null answers without requiring
+ * a value for form submission. onChange only reports changed values. */
+export function Select<T extends string>(props: SelectProps<T>) {
+  return <SelectControl {...props} />
+}
+
+/** Internal dispatcher used by the single and multiple public controls. */
+export function SelectControl<T extends string>(props: SelectControlProps<T>) {
+  const { search, ...restProps } = props
+  const narrow = useBottomSheetLayout()
+  return search || narrow ? (
+    <SelectCombobox
+      {...restProps}
+      search={search === true ? {} : search || false}
+    />
+  ) : (
+    <PlainSelect {...restProps} />
+  )
+}
+
+function PlainSelect<T extends string>(props: SelectControlProps<T>) {
+  const {
+    value,
+    items,
+    label,
+    name,
+    id,
+    form,
+    alignSelected = false,
+    trigger,
+    disabled,
+    readOnly,
+    required,
+  } = props
+  const {
+    size,
+    options,
+    selected,
+    open,
+    setOpen,
+    changeValue,
+    surface,
+    fieldProps,
+    triggerProps,
+    displayValue,
+    optionRow,
+    emptyNotice,
+    popupStyle,
+  } = useSelectField(props)
+  const positioning = useListPanelPositioning()
+  const canAlign = () => {
+    // Native overlap positioning uses its own edge tolerances. Near viewport
+    // edges (or a reduced visual viewport), use the boundary-aware positioner.
+    // Alignment also needs clearance for the panel's full expansion.
+    const clearance = listPanelMargin + 2 * panelOutset
+    const rect = surface?.getBoundingClientRect()
+    const viewport = positioning.collisionBoundary
+    return Boolean(
+      alignSelected &&
+      selected != null &&
+      !trigger &&
+      rect &&
+      rect.left >= (viewport?.x ?? 0) + clearance &&
+      rect.right <=
+        (viewport
+          ? viewport.x + viewport.width
+          : document.documentElement.clientWidth) -
+          clearance &&
+      (!viewport || viewport.height >= document.documentElement.clientHeight)
+    )
+  }
+  // Decided as the panel opens, not in the change handler: the consumer may
+  // control `open` directly, and then the handler never runs. The decision
+  // survives closing, so the key below never remounts an exiting panel.
+  const [alignment, setAlignment] = useState({ open: false, enabled: false })
+  if (alignment.open !== open) {
+    setAlignment({ open, enabled: open ? canAlign() : alignment.enabled })
+  }
+  const alignmentEnabled = alignment.enabled
+  const renderOption = (item: SelectOption<T>) => (
+    <Primitive.Item
+      onMouseUp={preventMouseUpSelection}
+      key={item.value}
+      value={item.value}
+      label={item.label}
+      disabled={item.disabled}
+      render={optionRow(item)}
+    >
+      <Primitive.ItemText render={<span />}>{item.label}</Primitive.ItemText>
+    </Primitive.Item>
+  )
+
+  return (
+    <Field.Root {...fieldProps}>
+      <Primitive.Root<T, boolean>
+        modal
+        multiple={props.multiple}
+        value={value}
+        onValueChange={changeValue}
+        name={name}
+        id={id}
+        form={form}
+        required={required}
+        disabled={disabled}
+        readOnly={readOnly}
+        open={open}
+        onOpenChange={setOpen}
+      >
+        {trigger ? (
+          <Primitive.Trigger {...triggerProps} />
+        ) : (
+          <Primitive.Trigger {...triggerProps}>
+            <Primitive.Value>{displayValue}</Primitive.Value>
+          </Primitive.Trigger>
+        )}
+        <Primitive.Portal>
+          <Primitive.Backdrop className="fixed inset-0 z-popover" />
+          <Primitive.Positioner
+            // Base UI writes inline geometry in the aligned mode; remounting
+            // the positioner is what clears it when the mode changes.
+            key={alignmentEnabled ? 'aligned' : 'anchored'}
+            {...positioning}
+            anchor={trigger ? undefined : surface}
+            alignOffset={-panelOutset}
+            alignItemWithTrigger={alignmentEnabled}
+            className="z-popover"
+            style={{
+              ...positioning.style,
+              // Aligned mode sizes itself from these margins rather than from
+              // the collision padding, so they have to be the same number.
+              ...(alignmentEnabled && { marginBlock: listPanelMargin }),
+            }}
+          >
+            <Primitive.Popup
+              render={
+                <ListPanel
+                  style={popupStyle}
+                  scrollRender={<Primitive.List aria-label={label} />}
+                  empty={emptyNotice(options.length)}
+                />
+              }
+            >
+              {items.map(item => {
+                if (!('type' in item)) return renderOption(item)
+                if (item.type === 'separator')
+                  return <ListRowSeparator key={item.id} />
+                if (!item.items.length) return null
+                return (
+                  <Primitive.Group key={item.id}>
+                    <Primitive.GroupLabel
+                      render={<ListRowHeader size={size} />}
+                    >
+                      {item.label}
+                    </Primitive.GroupLabel>
+                    {item.items.map(renderOption)}
+                  </Primitive.Group>
+                )
+              })}
+            </Primitive.Popup>
+          </Primitive.Positioner>
+        </Primitive.Portal>
+      </Primitive.Root>
+    </Field.Root>
+  )
+}

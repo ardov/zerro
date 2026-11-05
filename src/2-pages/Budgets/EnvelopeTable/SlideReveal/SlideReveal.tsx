@@ -1,15 +1,11 @@
-import React, {
-  FC,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
+import type { FC, ReactNode } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { Box, ButtonBase, SxProps, Theme, Typography } from '@mui/material'
-import { Amount } from '6-shared/ui/Amount'
-import { DragTypes } from '2-pages/Budgets/DnD'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { Amount } from '@/6-shared/ui/Amount'
+import type { DragTypes } from '@/2-pages/Budgets/DnD'
 
 const REVEAL_CELL_WIDTH = 88
 const AXIS_DECISION_THRESHOLD = 8
@@ -19,6 +15,7 @@ export type RevealItem = {
   key: React.Key
   label: string
   value: number
+  /** Tailwind text color utility. */
   color: string
   onClick?: (e: React.MouseEvent<HTMLElement>) => void
   draggable?: {
@@ -41,6 +38,7 @@ type DragState = {
   axis: 'h' | 'v' | null
   lastX: number
   lastTime: number
+  velocityX: number
 }
 
 function useSlideRevealGesture(revealWidth: number) {
@@ -48,24 +46,32 @@ function useSlideRevealGesture(revealWidth: number) {
   // Keep a ref so pointer handlers always see the current value without
   // needing offsetX in their dependency arrays.
   const offsetXRef = useRef(offsetX)
-  offsetXRef.current = offsetX
+  useEffect(() => {
+    offsetXRef.current = offsetX
+  }, [offsetX])
+
+  const updateOffset = useCallback((next: number) => {
+    offsetXRef.current = next
+    setOffsetX(next)
+  }, [])
 
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef<DragState | null>(null)
 
   // Clamp or close when the panel width changes (column switch, breakpoint).
-  useEffect(() => {
+  const [prevRevealWidth, setPrevRevealWidth] = useState(revealWidth)
+  if (prevRevealWidth !== revealWidth) {
+    setPrevRevealWidth(revealWidth)
     setOffsetX(prev =>
       prev === 0 ? 0 : Math.max(-revealWidth, Math.min(0, prev))
     )
-  }, [revealWidth])
+  }
 
-  const closeReveal = useCallback(() => setOffsetX(0), [])
+  const closeReveal = useCallback(() => updateOffset(0), [updateOffset])
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!revealWidth) return
-      e.currentTarget.setPointerCapture(e.pointerId)
       dragRef.current = {
         x: e.clientX,
         y: e.clientY,
@@ -73,6 +79,7 @@ function useSlideRevealGesture(revealWidth: number) {
         axis: null,
         lastX: e.clientX,
         lastTime: Date.now(),
+        velocityX: 0,
       }
       setIsDragging(true)
     },
@@ -83,6 +90,12 @@ function useSlideRevealGesture(revealWidth: number) {
     (e: React.PointerEvent) => {
       const t = dragRef.current
       if (!t) return
+      // Released outside the row before the swipe captured the pointer.
+      if (e.pointerType === 'mouse' && e.buttons === 0) {
+        dragRef.current = null
+        setIsDragging(false)
+        return
+      }
       const dx = e.clientX - t.x
       const dy = e.clientY - t.y
       if (!t.axis) {
@@ -92,14 +105,20 @@ function useSlideRevealGesture(revealWidth: number) {
         )
           return
         t.axis = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v'
+        // Capture only a swipe: capturing on press would retarget a plain
+        // mouse click to this wrapper, away from the row's buttons.
+        if (t.axis === 'h') e.currentTarget.setPointerCapture(e.pointerId)
       }
       if (t.axis !== 'h') return
+      const now = Date.now()
+      const elapsed = now - t.lastTime
+      if (elapsed > 0) t.velocityX = (e.clientX - t.lastX) / elapsed
       t.lastX = e.clientX
-      t.lastTime = Date.now()
+      t.lastTime = now
       const next = Math.min(0, Math.max(-revealWidth, t.startOffset + dx))
-      setOffsetX(next)
+      updateOffset(next)
     },
-    [revealWidth]
+    [revealWidth, updateOffset]
   )
 
   const handlePointerUp = useCallback(
@@ -112,12 +131,18 @@ function useSlideRevealGesture(revealWidth: number) {
       }
       if (!t || t.axis !== 'h') return
       const elapsed = Date.now() - t.lastTime
-      const velocity = elapsed > 0 ? (e.clientX - t.lastX) / elapsed : 0
+      const releaseVelocity =
+        elapsed > 0 && e.clientX !== t.lastX
+          ? (e.clientX - t.lastX) / elapsed
+          : t.velocityX
+      const velocity = elapsed <= 100 ? releaseVelocity : 0
       const shouldOpen =
-        velocity < -VELOCITY_THRESHOLD || offsetXRef.current < -revealWidth / 2
-      setOffsetX(shouldOpen ? -revealWidth : 0)
+        Math.abs(velocity) > VELOCITY_THRESHOLD
+          ? velocity < 0
+          : offsetXRef.current < -revealWidth / 2
+      updateOffset(shouldOpen ? -revealWidth : 0)
     },
-    [revealWidth]
+    [revealWidth, updateOffset]
   )
 
   return {
@@ -150,16 +175,16 @@ export const SlideReveal: FC<SlideRevealProps> = ({
   const isOpen = offsetX !== 0
 
   return (
-    <Box sx={{ overflow: 'hidden', position: 'relative' }}>
-      <Box
-        sx={{
-          position: 'relative',
+    <div className="relative overflow-hidden">
+      <div
+        className="relative"
+        style={{
           transform: `translateX(${offsetX}px)`,
           transition: isDragging ? 'none' : 'transform 0.2s ease-out',
         }}
       >
-        <Box
-          sx={{ touchAction: 'pan-y', position: 'relative' }}
+        <div
+          className="relative touch-pan-y"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -167,23 +192,14 @@ export const SlideReveal: FC<SlideRevealProps> = ({
         >
           {children}
           {isOpen && (
-            <Box
+            <div
               onClick={closeReveal}
-              sx={{ position: 'absolute', inset: 0, cursor: 'pointer' }}
+              className="absolute inset-0 cursor-pointer"
             />
           )}
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: '100%',
-            display: 'flex',
-            alignItems: 'stretch',
-          }}
-        >
+        <div className="absolute bottom-0 left-full top-0 flex items-stretch">
           {items.map(item => (
             <RevealCell
               key={item.key}
@@ -193,22 +209,14 @@ export const SlideReveal: FC<SlideRevealProps> = ({
               }}
             />
           ))}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }
 
-const revealCellSx: SxProps<Theme> = {
-  width: REVEAL_CELL_WIDTH,
-  px: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  bgcolor: 'action.hover',
-  borderLeft: theme => `1px solid ${theme.palette.divider}`,
-}
+const revealCellClassName =
+  'flex w-[88px] flex-col items-center justify-center border-l border-ui-border bg-ui-highlight px-2'
 
 type CellProps = {
   item: RevealItem
@@ -219,7 +227,7 @@ const RevealCell: FC<CellProps> = ({ item, onClick }) =>
   item.draggable ? (
     <DraggableRevealCell item={item} onClick={onClick} drag={item.draggable} />
   ) : (
-    <ButtonBase onClick={onClick} sx={revealCellSx}>
+    <ButtonBase onClick={onClick} className={revealCellClassName}>
       <RevealCellContent
         label={item.label}
         value={item.value}
@@ -237,25 +245,19 @@ const DraggableRevealCell: FC<
     data: { type: drag.type, id: drag.id },
   })
   return (
-    <Box
+    <div
       ref={setNodeRef}
       onClick={onClick}
       {...attributes}
       {...listeners}
-      sx={{
-        ...revealCellSx,
-        cursor: drag.disabled ? 'pointer' : 'grab',
-        userSelect: 'none',
-        touchAction: 'manipulation',
-        '&:active': { bgcolor: 'action.focus' },
-      }}
+      className={`${revealCellClassName} ${drag.disabled ? 'cursor-pointer' : 'cursor-grab'} select-none touch-manipulation active:bg-ui-pressed`}
     >
       <RevealCellContent
         label={item.label}
         value={item.value}
         color={item.color}
       />
-    </Box>
+    </div>
   )
 }
 
@@ -265,16 +267,14 @@ const RevealCellContent: FC<{
   color: string
 }> = ({ label, value, color }) => (
   <>
-    <Typography
-      variant="caption"
-      color="text.secondary"
-      noWrap
-      sx={{ lineHeight: 1.2 }}
-    >
+    <TextFade className="text-caption font-sans leading-[1.2] text-ui-secondary">
       {label}
-    </Typography>
-    <Typography variant="body2" noWrap sx={{ color }}>
+    </TextFade>
+    <TextFade
+      render={<p />}
+      className={cn('m-0 text-body-sm font-sans', color)}
+    >
       <Amount value={value} decimals="ifOnly" />
-    </Typography>
+    </TextFade>
   </>
 )

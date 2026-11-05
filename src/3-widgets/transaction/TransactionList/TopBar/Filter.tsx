@@ -1,69 +1,177 @@
-import React, { FC } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
+import { AnimatePresence, LayoutGroup } from 'motion/react'
 import { useTranslation } from 'react-i18next'
-import Paper from '@mui/material/Paper'
-import InputBase from '@mui/material/InputBase'
-import { SxProps } from '@mui/system'
-import { Theme } from '@mui/material/styles'
-import IconButton from '@mui/material/IconButton'
-import { FilterListIcon, CloseIcon } from '6-shared/ui/Icons'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { useToggle } from '6-shared/hooks/useToggle'
-import { TrCondition } from '5-entities/transaction'
-import FilterDrawer from './FilterDrawer'
+import { useLocalDay } from '@/6-shared/hooks/useLocalDay'
+import { usePopup } from '@/6-shared/overlays'
+import { Chip } from '@/6-shared/ui/kit/Chip'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import { Menu } from '@/6-shared/ui/kit/Menu'
+import { AnimatedItem } from '@/6-shared/ui/kit/AnimatedItem'
+import { AddFilterIcon } from '@/6-shared/ui/Icons'
+import { core } from '@/zerro-core/redux'
+import { useAppSelector } from '@/store'
+import { TransactionCreateButton } from '../../TransactionCreateButton'
+import { SearchChip } from './SearchChip'
+import { FilterIcon } from './FilterIcon'
+import { FilterChip } from './FilterChip'
+import {
+  filterKinds,
+  getKindLabel,
+  getClauseLabel,
+  isEditableKind,
+  isEmptyClause,
+  makeDefaultClause,
+  upsertFilter,
+  type Clause,
+  type AddableFilterKind,
+} from './filterModel'
 
 type FilterProps = {
-  setCondition: (c: TrCondition) => void
-  conditions?: TrCondition
-  clearFilter: () => void
-  sx?: SxProps<Theme>
+  query: core.transactions.TTransactionQuery
+  onQueryChange: (query: core.transactions.TTransactionQuery) => void
+  search: string
+  onSearchChange: (search: string) => void
 }
-const Filter: FC<FilterProps> = ({
-  setCondition,
-  conditions = {},
-  clearFilter,
-  sx,
-}) => {
-  const { t } = useTranslation('filterDrawer')
-  const [isDrawerVisible, toggleDrawer] = useToggle(false)
-  const isFiltered = Object.values(conditions).filter(Boolean).length > 0
 
+/** Owns ordering and focus; each chip owns its editor and its session draft. */
+export default function Filter({
+  query,
+  onQueryChange,
+  search,
+  onSearchChange,
+}: FilterProps) {
+  const { t, i18n } = useTranslation('filterDrawer')
+  const accounts = core.accounts.usePopulated()
+  const envelopes = useAppSelector(core.envelopes.selectAll)
+  const tags = useAppSelector(core.tags.selectPopulated)
+  const debtors = useAppSelector(core.debtors.selectOptions)
+  const merchants = core.merchants.useAll()
+  const today = useLocalDay()
+  const labels = {
+    today,
+    accounts,
+    envelopes,
+    tags,
+    merchants,
+    debtors,
+    t,
+    language: i18n.language,
+  }
+  const chipRefs = useRef<Partial<Record<Clause['kind'], HTMLElement | null>>>(
+    {}
+  )
+  const addRef = useRef<HTMLElement | null>(null)
+  const focusAfterRemoval = useRef<Clause['kind'] | 'add' | null>(null)
+  const [newKind, setNewKind] = useState<AddableFilterKind | null>(null)
+  const menu = usePopup()
+  const clauses = query.clauses
+  const available = filterKinds.filter(
+    kind => !clauses.some(clause => clause.kind === kind)
+  )
+  const hasApplied =
+    clauses.some(clause => !isEmptyClause(clause)) || Boolean(search.trim())
+  const hasDraft = clauses.some(isEmptyClause)
+
+  useLayoutEffect(() => {
+    const target = focusAfterRemoval.current
+    if (!target) return
+    focusAfterRemoval.current = null
+    const element = target === 'add' ? addRef.current : chipRefs.current[target]
+    ;(element?.isConnected ? element : addRef.current)?.focus()
+  }, [clauses])
+
+  const remove = (clause: Clause) => {
+    const index = clauses.indexOf(clause)
+    const neighbour = clauses[index + 1] ?? clauses[index - 1]
+    focusAfterRemoval.current = isEmptyClause(clause)
+      ? 'add'
+      : (neighbour?.kind ?? 'add')
+    onQueryChange({
+      clauses: clauses.filter(item => item.kind !== clause.kind),
+    })
+  }
+  const add =
+    available.length > 0 && !hasDraft ? (
+      <Menu
+        label={t('addFilter')}
+        popup={menu}
+        trigger={
+          hasApplied ? (
+            <IconButton
+              ref={node => {
+                addRef.current = node
+              }}
+              size="xs"
+              variant="ghost"
+              label={t('addFilter')}
+            >
+              <AddFilterIcon />
+            </IconButton>
+          ) : (
+            <Chip
+              ref={node => {
+                addRef.current = node
+              }}
+              variant="outline-draft"
+              start={<AddFilterIcon />}
+              onClick={() => {}}
+            >
+              {t('addFilter')}
+            </Chip>
+          )
+        }
+        items={available.map(kind => ({
+          id: kind,
+          label: getKindLabel(kind, t),
+          start: <FilterIcon kind={kind} />,
+          onSelect: () => {
+            setNewKind(kind)
+            onQueryChange(upsertFilter(query, makeDefaultClause(kind)))
+          },
+        }))}
+      />
+    ) : null
   return (
-    <Paper
-      elevation={10}
-      sx={{ display: 'flex', alignItems: 'center', px: 2, ...sx }}
-    >
-      <InputBase
-        value={conditions.search || ''}
-        placeholder={t('searchComments')}
-        onChange={e => setCondition({ search: e.target.value })}
-        sx={{ flexGrow: 1 }}
-      />
-
-      {!!conditions.search && (
-        <Tooltip title={t('clearField')}>
-          <IconButton
-            onClick={() => setCondition({ search: '' })}
-            children={<CloseIcon />}
-          />
-        </Tooltip>
-      )}
-
-      <Tooltip title={t('extendedFilters')}>
-        <IconButton
-          edge="end"
-          color={isFiltered ? 'secondary' : 'primary'}
-          onClick={toggleDrawer}
-          children={<FilterListIcon />}
-        />
-      </Tooltip>
-
-      <FilterDrawer
-        onClose={toggleDrawer}
-        open={isDrawerVisible}
-        {...{ conditions, setCondition, clearFilter }}
-      />
-    </Paper>
+    <div className="flex items-start gap-2 p-2 text-ui-primary">
+      <LayoutGroup>
+        <div
+          className="relative flex min-w-0 flex-1 flex-wrap items-center gap-1.5"
+          aria-label={t('filter')}
+        >
+          <AnimatePresence initial={false} mode="popLayout">
+            <AnimatedItem key="search">
+              <SearchChip
+                ref={node => {
+                  chipRefs.current.search = node
+                }}
+                value={search}
+                onChange={onSearchChange}
+              />
+              {!clauses.length && add}
+            </AnimatedItem>
+            {clauses.map((clause, index) => (
+              <AnimatedItem key={clause.kind}>
+                <FilterChip
+                  ref={node => {
+                    chipRefs.current[clause.kind] = node
+                  }}
+                  clause={clause}
+                  label={getClauseLabel(clause, labels)}
+                  autoOpen={
+                    newKind === clause.kind && isEditableKind(clause.kind)
+                  }
+                  onChange={next => onQueryChange(upsertFilter(query, next))}
+                  onRemove={() => remove(clause)}
+                />
+                {index === clauses.length - 1 && add}
+              </AnimatedItem>
+            ))}
+          </AnimatePresence>
+        </div>
+      </LayoutGroup>
+      <div className="shrink-0">
+        <TransactionCreateButton query={query} />
+      </div>
+    </div>
   )
 }
-
-export default Filter

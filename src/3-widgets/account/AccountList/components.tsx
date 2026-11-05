@@ -1,143 +1,77 @@
-import React, { FC, ReactNode, useCallback } from 'react'
-import {
-  ListSubheader,
-  Box,
-  ListItemButtonProps,
-  ListSubheaderProps,
-  Typography,
-  ListItemButton,
-} from '@mui/material'
-import { toISOMonth } from '6-shared/helpers/date'
-import { Amount } from '6-shared/ui/Amount'
-import { TFxAmount } from '6-shared/types'
-import { Tooltip } from '6-shared/ui/Tooltip'
+import type { FC } from 'react'
+import { useCallback } from 'react'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import type { core } from '@/zerro-core/redux'
 
-import { TAccountPopulated } from '5-entities/account'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
-import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
-import { useAccountContextMenu } from '3-widgets/global/AccountContextMenu'
-import { useContextMenu } from '6-shared/hooks/useContextMenu'
-import { getEventPosition } from '3-widgets/global/shared/helpers'
+import type { ComponentPropsWithoutRef } from 'react'
+import { ListRowButton, type ListRowSize } from '@/6-shared/ui/kit/ListRow'
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
+import { Amount } from '@/6-shared/ui/Amount'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+
+import { useTransactionDrawer } from '@/3-widgets/global/TransactionListDrawer'
+import { AccountMenu } from '@/3-widgets/global/AccountContextMenu'
+import { useAsk } from '@/6-shared/overlays'
+import { useContextMenu } from '@/6-shared/hooks/useContextMenu'
+import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
+import { AccountIcon } from '../AccountIcon'
 
 export const Account: FC<
-  { account: TAccountPopulated } & ListItemButtonProps
-> = ({ account, sx, ...rest }) => {
+  { account: core.accounts.TAccountPopulated; size?: ListRowSize } & Omit<
+    ComponentPropsWithoutRef<'button'>,
+    'children'
+  >
+> = ({ account, className, size = 'sm', ...rest }) => {
   const transactionDrawer = useTransactionDrawer()
-  const openContextMenu = useAccountContextMenu()
+  const ask = useAsk()
   const showTransactions = useCallback(
     () =>
-      transactionDrawer.open({
+      transactionDrawer({
         title: account.title,
-        filterConditions: { account: account.id },
+        initialQuery: {
+          clauses: [{ kind: 'account', ids: [account.id] }],
+        },
       }),
     [account.id, account.title, transactionDrawer]
   )
   const propsToPass = useContextMenu({
     onContextMenu: e =>
-      openContextMenu({ id: account.id }, getEventPosition(e)),
+      ask(<AccountMenu id={account.id} anchor={getEventAnchor(e)} />),
     onClick: showTransactions,
   })
   return (
-    <ListItemButton
-      sx={{
-        typography: 'body2',
-        borderRadius: 1,
-        display: 'flex',
-        ...sx,
-      }}
+    <ListRowButton
+      size={size}
+      className={className}
       {...rest}
       {...propsToPass}
+      start={<AccountIcon account={account} />}
+      end={
+        <Tooltip
+          content={
+            <Amount value={account.balance} currency={account.fxCode} noShade />
+          }
+          side="right"
+        >
+          <Amount
+            className={cn(
+              'block whitespace-nowrap',
+              account.balance < 0 ? 'text-ui-error' : 'text-ui-secondary'
+            )}
+            value={account.balance}
+            currency={account.fxCode}
+            decimals="ifOnly"
+            noShade
+          />
+        </Tooltip>
+      }
     >
-      <Box
-        sx={{
-          textDecoration: account.archive ? 'line-through' : 'none',
-          flexGrow: 1,
-          minWidth: 0,
-          position: 'relative',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          maskImage: 'linear-gradient(to left, transparent, black 40px)',
-        }}
+      <TextFade
+        className={cn(account.archive && 'line-through')}
         title={account.title}
       >
         {account.title}
-      </Box>
-
-      <Box
-        component="span"
-        sx={{
-          ml: 1,
-          flexShrink: 0,
-          color: account.balance < 0 ? 'error.main' : 'text.secondary',
-        }}
-      >
-        <Tooltip
-          title={
-            <Amount value={account.balance} currency={account.fxCode} noShade />
-          }
-          disableInteractive
-          placement="right"
-        >
-          <div>
-            <Amount
-              value={account.balance}
-              currency={account.fxCode}
-              decimals="ifOnly"
-              noShade
-            />
-          </div>
-        </Tooltip>
-      </Box>
-    </ListItemButton>
-  )
-}
-
-export const Subheader: FC<
-  {
-    name: ReactNode
-    amount: TFxAmount
-  } & ListSubheaderProps
-> = ({ name, amount, sx, ...rest }) => {
-  const month = toISOMonth(new Date())
-  const toDisplay = displayCurrency.useToDisplay(month)
-  const isNegative = toDisplay(amount) < 0
-  return (
-    <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
-      <Box
-        component="span"
-        sx={{
-          display: 'flex',
-          width: '100%',
-        }}
-      >
-        <Typography
-          component="span"
-          noWrap
-          sx={{ flexGrow: 1, lineHeight: 'inherit' }}
-        >
-          <b>{name}</b>
-        </Typography>
-
-        <Box
-          component="span"
-          sx={{
-            ml: 2,
-            color: isNegative ? 'error.main' : 'text.secondary',
-          }}
-        >
-          <b>
-            <DisplayAmount
-              month={month}
-              value={amount}
-              decimals="ifOnly"
-              noShade
-            />
-          </b>
-        </Box>
-      </Box>
-    </ListSubheader>
+      </TextFade>
+    </ListRowButton>
   )
 }

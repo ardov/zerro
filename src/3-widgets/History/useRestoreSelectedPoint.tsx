@@ -1,0 +1,47 @@
+import { useTranslation } from 'react-i18next'
+import { toast } from '@/6-shared/ui/kit/Toast'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { restoreOutboxPosition } from '@/store/data'
+import {
+  exitHistoryBrowsing,
+  selectHistoryPointData,
+  selectSelectedHistoryPoint,
+} from '@/store/history'
+import { core } from '@/zerro-core/redux'
+
+/**
+ * Restoring the selected point, for whichever surface offers it.
+ *
+ * The panel and the top bar both need this and must not drift: a local point
+ * is undone rather than diffed (nothing was ever sent, so there is nothing to
+ * overwrite), a server point adds an ordinary undoable restore command. Two copies
+ * of that rule would be two chances to get it wrong.
+ */
+export function useRestoreSelectedPoint() {
+  const { t } = useTranslation('history')
+  const dispatch = useAppDispatch()
+  const point = useAppSelector(selectSelectedHistoryPoint)
+  const data = useAppSelector(selectHistoryPointData)
+
+  const restoreServer = () => {
+    if (!data) return
+    const applied = dispatch(core.restore.apply(data))
+    dispatch(exitHistoryBrowsing())
+    toast.add({
+      type: applied ? 'success' : 'info',
+      title: applied ? t('restoreApplied') : t('restoreNoChanges'),
+    })
+  }
+
+  return {
+    /** `data` is the single readiness signal: a local point out of range and a
+     * journal point still loading or missing all leave it undefined. */
+    canRestore: point !== null && data !== undefined,
+    restore: () => {
+      if (point === null) return
+      if (point.kind !== 'local') return restoreServer()
+      dispatch(restoreOutboxPosition(point.index))
+      dispatch(exitHistoryBrowsing())
+    },
+  }
+}

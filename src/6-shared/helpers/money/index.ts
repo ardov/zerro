@@ -6,8 +6,5 @@ export {
   add,
   sub,
   addFxAmount,
-  subFxAmount,
-  isEqualFxAmount,
   isZero,
-  convertFx,
 } from './currencyHelpers'

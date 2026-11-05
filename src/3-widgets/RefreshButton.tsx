@@ -1,79 +1,127 @@
-import React, { FC, useCallback, useEffect, useState } from 'react'
+import { IconButton, type IconButtonProps } from '@/6-shared/ui/kit/Button'
+import type { FC, ReactNode } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BottomNavigationAction, SxProps } from '@mui/material'
-import CircularProgress from '@mui/material/CircularProgress'
-import Badge from '@mui/material/Badge'
-import IconButton from '@mui/material/IconButton'
+import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
+import { SyncIcon, WarningIcon } from '@/6-shared/ui/Icons'
+
+import { getChangedNum } from '@/store/data'
 import {
-  SyncIcon,
-  SyncDisabledIcon,
-  DoneIcon,
-  WarningIcon,
-} from '6-shared/ui/Icons'
-import { Tooltip } from '6-shared/ui/Tooltip'
+  selectIsSyncPending,
+  selectLastSyncResult,
+  selectSyncProgress,
+  syncDetailsOpened,
+} from '@/store/sync'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { syncData } from '@/4-features/sync'
 
-import { getChangedNum } from 'store/data'
-import { getPendingState } from 'store/isPending'
-import { getLastSyncInfo } from 'store/lastSync'
-import { useAppDispatch, useAppSelector } from 'store'
-import { syncData } from '4-features/sync'
-import { useRegularSync } from '3-widgets/RegularSyncHandler'
+type ButtonState = 'idle' | 'pending' | 'stopped' | 'success' | 'fail'
+type RefreshButtonProps = Pick<
+  IconButtonProps,
+  'className' | 'shape' | 'tooltipSide' | 'muted'
+>
 
-type ButtonState = 'idle' | 'pending' | 'success' | 'fail'
-
-const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
-  isMobile,
-  ...rest
-}) => {
-  const { t } = useTranslation('common')
+const RefreshButton: FC<RefreshButtonProps> = props => {
+  const { t } = useTranslation(['common', 'syncProgress'])
   const dispatch = useAppDispatch()
-  const handleClick = useCallback(() => dispatch(syncData()), [dispatch])
+  // Sync only. History used to hang off a right-click here, which made the
+  // feature undiscoverable and gave one button two unrelated meanings; it is
+  // a named item in the settings menu now.
   const changedNum = useAppSelector(getChangedNum)
-  const isPending = useAppSelector(getPendingState)
-  const { isSuccessful, finishedAt } = useAppSelector(getLastSyncInfo)
-  const [regular] = useRegularSync()
+  const isPending = useAppSelector(selectIsSyncPending)
+  const progress = useAppSelector(selectSyncProgress)
+  const hasDetails = !!progress
+  const handleClick = useCallback(() => {
+    if (hasDetails) dispatch(syncDetailsOpened())
+    else dispatch(syncData())
+  }, [dispatch, hasDetails])
+  const lastResult = useAppSelector(selectLastSyncResult)
+  const finishedAt = lastResult?.finishedAt || 0
 
   let buttonState: ButtonState = 'idle'
-  if (isPending) buttonState = 'pending'
+  if (isPending)
+    buttonState = progress?.kind === 'stopped' ? 'stopped' : 'pending'
 
   const [notification, setNotification] = useState<ButtonState | null>(null)
 
-  useEffect(() => {
-    if (!finishedAt) return
-    setNotification(isSuccessful ? 'success' : 'fail')
-    let timer1 = setTimeout(() => setNotification(null), 2500)
-    return () => clearTimeout(timer1)
-  }, [isSuccessful, finishedAt])
-
-  const state: ButtonState = notification || buttonState
-
-  const components = {
-    idle: regular ? <SyncIcon /> : <SyncDisabledIcon />,
-    pending: <CircularProgress size={24} />,
-    success: <DoneIcon color="success" />,
-    fail: <WarningIcon color="error" />,
+  const [prevFinishedAt, setPrevFinishedAt] = useState(finishedAt)
+  if (prevFinishedAt !== finishedAt) {
+    setPrevFinishedAt(finishedAt)
+    if (finishedAt)
+      setNotification(lastResult?.isSuccessful ? 'success' : 'fail')
   }
 
-  return isMobile ? (
-    <BottomNavigationAction
-      label={t('refresh')}
-      value="refresh"
-      icon={
-        <Badge color="info" overlap="rectangular" badgeContent={changedNum}>
-          {components[state]}
-        </Badge>
-      }
-      onClick={handleClick}
-      {...rest}
-    />
-  ) : (
-    <Tooltip title={t('refreshData')}>
-      <Badge color="info" overlap="circular" badgeContent={changedNum}>
-        <IconButton onClick={handleClick} {...rest}>
-          {components[state]}
-        </IconButton>
-      </Badge>
-    </Tooltip>
+  useEffect(() => {
+    if (!notification) return
+    const timer = setTimeout(() => setNotification(null), 2500)
+    return () => clearTimeout(timer)
+  }, [notification])
+
+  const state: ButtonState = isPending
+    ? buttonState
+    : notification || buttonState
+  const progressValue = progressRatio(progress?.rows ?? [])
+
+  const components = {
+    idle: <SyncIcon size={24} />,
+    pending: progress ? (
+      <RadialProgress
+        aria-hidden
+        size={24}
+        value={progressValue}
+        active={progress.kind === 'pushing' && progress.phase === 'sending'}
+      />
+    ) : (
+      <RadialProgress size={24} />
+    ),
+    stopped: <WarningIcon size={24} className="text-ui-error" />,
+    success: <RadialProgress size={24} value={1} />,
+    fail: <WarningIcon size={24} className="text-ui-error" />,
+  }
+  const label = hasDetails
+    ? t('syncProgress:detailsTitle')
+    : t('common:refreshData')
+
+  return (
+    <SyncBadge count={changedNum}>
+      <IconButton
+        onClick={handleClick}
+        label={label}
+        variant={changedNum > 0 ? 'primary' : 'ghost'}
+        size="sm"
+        shape="circle"
+        {...props}
+      >
+        {components[state]}
+      </IconButton>
+    </SyncBadge>
+  )
+}
+
+function progressRatio(
+  rows: NonNullable<ReturnType<typeof selectSyncProgress>>['rows']
+) {
+  let confirmed = 0
+  let total = 0
+  rows.forEach(row => {
+    confirmed += row.confirmed
+    total += row.total
+  })
+  return total ? confirmed / total : 0
+}
+
+type SyncBadgeProps = { count: number; children: ReactNode }
+
+function SyncBadge({ count, children }: SyncBadgeProps) {
+  return (
+    <span className="relative inline-flex">
+      {children}
+      {count > 0 && (
+        <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full bg-ui-info-solid px-0.5 text-[0.625rem]/4 font-medium text-ui-on-info">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </span>
   )
 }
 

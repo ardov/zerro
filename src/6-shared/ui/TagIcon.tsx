@@ -1,147 +1,109 @@
-import { getMostContrast } from '6-shared/helpers/color'
-import { Modify } from '6-shared/types'
-import {
-  Box,
-  BoxProps,
-  Checkbox,
-  CheckboxProps,
-  SxProps,
-  Theme,
-} from '@mui/material'
-import React from 'react'
+import './coloredSurface.css'
+import { CategorySymbol } from './CategoryIcon'
+import type {
+  ComponentPropsWithoutRef,
+  CSSProperties,
+  ReactElement,
+} from 'react'
+import { cn } from './shadcn/utils'
+import { getContrastText } from '@/6-shared/helpers/color'
+import { Checkbox, type CheckboxProps } from './kit/Checkbox'
 
-const emojiSizes = { s: 32, m: 40 }
-const emojiFonts = { s: '1rem', m: '1.5rem' }
-const svgSizes = { s: 20, m: 24 }
-const isSvgUrl = (symbol: string): boolean => {
-  return symbol.startsWith('data:image/svg') || symbol.includes('.svg')
+export type TagIconProps = Omit<
+  ComponentPropsWithoutRef<'div'>,
+  'children' | 'color' | 'onChange'
+> & {
+  symbol: string | ReactElement
+  color?: string | null
+  size?: 's' | 'm'
+  onCheckedChange?: CheckboxProps['onCheckedChange']
+  checked?: boolean
+  showCheckBox?: boolean
+  checkboxProps?: CheckboxProps
+  button?: boolean
 }
-
-export type TagIconProps = Modify<
-  BoxProps,
-  {
-    symbol: string
-    color?: string | null
-    size?: 's' | 'm'
-    onChange?: CheckboxProps['onChange']
-    checked?: CheckboxProps['checked']
-    showCheckBox?: boolean
-    checkboxProps?: CheckboxProps
-    button?: boolean
-  }
->
 
 export function TagIcon(props: TagIconProps) {
   const {
     symbol,
     color,
     size = 's',
-    onChange,
+    onCheckedChange,
     checked,
     showCheckBox,
     checkboxProps,
     button = false,
+    className,
+    style,
     ...rest
   } = props
-  const isInteractive = !!onChange
-  const isSvg = isSvgUrl(symbol)
+  const isInteractive = !!onCheckedChange
+  const contentIsHidden = !!showCheckBox || !!checked
+  const { className: checkboxClassName, ...restCheckboxProps } =
+    checkboxProps ?? {}
 
-  const symbolSx: SxProps<Theme> = {
-    width: emojiSizes[size],
-    height: emojiSizes[size],
-    flexShrink: 0,
-    color: theme =>
-      theme.palette.getContrastText(color || theme.palette.background.paper),
-    cursor: button ? 'pointer' : 'auto',
-    borderRadius: '50%',
-    border: color ? `1px solid ${color}` : 'none',
-    background: color
-      ? 'linear-gradient(-30deg, rgba(255,255,255,0.2), transparent)'
-      : 'none',
-    backgroundColor: theme => (color ? color : theme.palette.action.hover),
-    transition: '.2s ease-in-out',
-
-    '&:hover': {
-      transform: button ? 'scale(1.1)' : 'none',
-    },
-    '&:active': {
-      transform: button ? 'scale(1)' : 'none',
-      transition: '.1s ease-in-out',
-    },
-
-    '& .checkbox': {
-      position: 'absolute',
-    },
-    '&:hover .checkbox': {
-      opacity: isInteractive ? 1 : 0,
-      transition: '.2s',
-    },
-    '&:not(:hover) .checkbox': {
-      opacity: showCheckBox || checked ? 1 : 0,
-      transition: '.2s',
-    },
-
-    '& .emoji': {
-      fontSize: emojiFonts[size],
-    },
-    '&:hover .emoji': {
-      opacity: isInteractive ? 0 : 1,
-      transition: '.2s',
-    },
-    '&:not(:hover) .emoji': {
-      opacity: showCheckBox || checked ? 0 : 1,
-      transition: '.2s',
-    },
-
-    '& .svg-icon': {
-      width: svgSizes[size],
-      height: svgSizes[size],
-      // Make SVG white on dark backgrounds
-      filter: theme => {
-        const bgColor = color || theme.palette.background.paper
-        const shouldInvert = getMostContrast(bgColor) === '#ffffff'
-        return shouldInvert ? 'brightness(0) invert(1)' : 'none'
-      },
-    },
-    '&:hover .svg-icon': {
-      opacity: isInteractive ? 0 : 1,
-      transition: '.2s',
-    },
-    '&:not(:hover) .svg-icon': {
-      opacity: showCheckBox || checked ? 0 : 1,
-      transition: '.2s',
-    },
-  }
+  const foreground = color ? getContrastText(color) : undefined
 
   return (
-    <Box
+    <div
       {...rest}
-      sx={[
-        {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-        },
-        ...(Array.isArray(symbolSx) ? symbolSx : [symbolSx]),
-        rest.sx,
-      ]}
-    >
-      {isSvg ? (
-        <img className="svg-icon" src={symbol} alt="" />
-      ) : (
-        <span className="emoji">{symbol}</span>
+      data-surface-interactive={
+        color && (button || (isInteractive && !checkboxProps?.disabled))
+          ? true
+          : undefined
+      }
+      className={cn(
+        'tag-icon group relative flex shrink-0 items-center justify-center rounded-full',
+        size === 's' ? 'size-8' : 'size-10',
+        color ? 'colored-surface' : '',
+        // Icons without a custom colour use the theme surface and foreground.
+        !color && 'bg-ui-highlight text-ui-primary',
+        button
+          ? 'cursor-pointer hover:scale-110 active:scale-100'
+          : 'cursor-auto',
+        className
       )}
-      {onChange && (
+      style={
+        {
+          // A tag's colour is the user's, so this one has to be computed.
+          ...(color && {
+            color: foreground,
+            '--surface-color': color,
+            '--surface-direction': foreground === '#ffffff' ? -1 : 1,
+          }),
+          ...style,
+        } as CSSProperties
+      }
+    >
+      <span
+        aria-hidden
+        className={cn(
+          'flex items-center justify-center transition-opacity duration-200',
+          contentIsHidden ? 'opacity-0' : 'opacity-100',
+          isInteractive ? 'group-hover:opacity-0' : 'group-hover:opacity-100'
+        )}
+      >
+        {typeof symbol === 'string' ? (
+          <CategorySymbol symbol={symbol} size={size} />
+        ) : (
+          symbol
+        )}
+      </span>
+      {onCheckedChange && (
         <Checkbox
-          className="checkbox"
+          color="currentColor"
+          className={cn(
+            'absolute transition-opacity duration-200 focus-visible:opacity-100',
+            showCheckBox || checked ? 'opacity-100' : 'opacity-0',
+            isInteractive ? 'group-hover:opacity-100' : 'group-hover:opacity-0',
+            checkboxClassName
+          )}
           checked={checked}
           onClick={e => e.stopPropagation()}
-          onChange={onChange}
-          color="primary"
-          {...checkboxProps}
+          onCheckedChange={onCheckedChange}
+          {...restCheckboxProps}
         />
       )}
-    </Box>
+    </div>
   )
 }

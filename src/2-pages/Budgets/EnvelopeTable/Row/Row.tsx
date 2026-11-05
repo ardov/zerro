@@ -1,56 +1,64 @@
-import React, { FC, ReactNode, useCallback } from 'react'
-import { useDroppable } from '@dnd-kit/core'
-import { IconButton, IconButtonProps } from '@mui/material'
-import { useTranslation } from 'react-i18next'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { EmojiFlagsIcon } from '6-shared/ui/Icons'
-import { RadialProgress } from '6-shared/ui/RadialProgress'
-import { TFxCode, TISOMonth } from '6-shared/types'
+import type { IconButtonProps } from '@/6-shared/ui/kit/Button'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import type { FC, ReactNode } from 'react'
+import React, { useCallback } from 'react'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { core } from '@/zerro-core/redux'
 
-import { goalModel, TGoal } from '5-entities/goal'
-import { balances } from '5-entities/envBalances'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { DragTypes } from '2-pages/Budgets/DnD'
+import { useDroppable } from '@dnd-kit/core'
+import { useTranslation } from 'react-i18next'
+import { EmojiFlagsIcon } from '@/6-shared/ui/Icons'
+import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
+import type { TFxCode, TISOMonth } from '@/6-shared/types'
+
+import { useAppSelector } from '@/store'
+
+import { DragTypes } from '@/2-pages/Budgets/DnD'
 import { useBudgetPopover } from '../../BudgetPopover'
 import { useGoalPopover } from '../../GoalPopover'
 
 import { Metric, useColumns } from '../models/useMetric'
 import { TableRow, useIsSmall } from '../shared/shared'
-import { RevealItem, SlideReveal } from '../SlideReveal'
+import type { RevealItem } from '../SlideReveal'
+import { SlideReveal } from '../SlideReveal'
 import { NameCell } from './NameCell'
 import { BudgetCell } from './BudgetCell'
 import { ActivityCell } from './ActivityCell'
-import { AvailableCell, getAvailableColor } from './AvailableCell'
+import {
+  AvailableCell,
+  getAvailableColor,
+  getAvailableColorClass,
+} from './AvailableCell'
 
 type EnvelopeRowProps = {
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   month: TISOMonth
   isSelf?: boolean
+  isSelected?: boolean
   isDefaultVisible: boolean
   isLastVisibleChild?: boolean
   isExpanded?: boolean
   isReordering: boolean
-  openDetails: (id: TEnvelopeId) => void
-  openTransactionsPopover: (id: TEnvelopeId) => void
+  openDetails: (id: core.envelopes.TEnvelopeId) => void
+  openTransactionsPopover: (id: core.envelopes.TEnvelopeId) => void
 }
 
 /** Builds reveal items for metrics not currently shown as columns. */
 function useRevealItems(params: {
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   columns: Metric[]
-  budgeted: number
+  assigned: number
   activity: number
   available: number
   isChild: boolean
   isSelf?: boolean
-  openBudgetPopover: (id: TEnvelopeId, el: Element) => void
-  openTransactionsPopover: (id: TEnvelopeId) => void
+  openBudgetPopover: (id: core.envelopes.TEnvelopeId, el: Element) => void
+  openTransactionsPopover: (id: core.envelopes.TEnvelopeId) => void
 }): RevealItem[] {
   const {
     id,
     columns,
-    budgeted,
+    assigned,
     activity,
     available,
     isChild,
@@ -64,12 +72,12 @@ function useRevealItems(params: {
 
   const allMetrics: MetricConfig[] = [
     {
-      metric: Metric.budgeted,
+      metric: Metric.assigned,
       item: {
-        key: Metric.budgeted,
-        label: t('budget', { ns: 'common' }),
-        value: budgeted,
-        color: isSelf || !budgeted ? 'text.disabled' : 'text.primary',
+        key: Metric.assigned,
+        label: t('assigned', { ns: 'common' }),
+        value: assigned,
+        color: isSelf || !assigned ? 'text-ui-tertiary' : 'text-ui-primary',
         onClick: e => openBudgetPopover(id, e.currentTarget),
       },
     },
@@ -79,7 +87,7 @@ function useRevealItems(params: {
         key: Metric.outcome,
         label: t('activity', { ns: 'common' }),
         value: activity,
-        color: activity ? 'text.primary' : 'text.disabled',
+        color: activity ? 'text-ui-primary' : 'text-ui-tertiary',
         onClick: () => openTransactionsPopover(id),
       },
     },
@@ -89,7 +97,9 @@ function useRevealItems(params: {
         key: Metric.available,
         label: t('available', { ns: 'common' }),
         value: available,
-        color: getAvailableColor(available, isChild, !!budgeted, isSelf),
+        color: getAvailableColorClass(
+          getAvailableColor(available, isChild, !!assigned, isSelf)
+        ),
         draggable: { type: DragTypes.amount, id, disabled: !!isSelf },
       },
     },
@@ -105,6 +115,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
     id,
     month,
     isSelf,
+    isSelected,
     isDefaultVisible,
     isLastVisibleChild,
     isExpanded,
@@ -117,15 +128,17 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const isSmall = useIsSmall()
   const { columns } = useColumns()
 
-  const envelope = envelopeModel.useEnvelopes()[id]
-  const envData = balances.useEnvData()[month][id]
-  const goalInfo = goalModel.useGoals()[month][id]
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const envelope = useAppSelector(s => core.envelopes.selectAll(s)[id])
+  const envData = useAppSelector(
+    s => core.activity.selectEnvelopeMetrics(s)[month][id]
+  )
+  const goalInfo = useAppSelector(s => core.goals.selectAll(s)[month][id])
+  const toDisplay = core.currency.useToDisplay(month)
 
   const isChild = !!envelope.parent || !!isSelf
 
-  const budgeted = toDisplay(
-    isSelf ? envData.selfBudgeted : envData.totalBudgeted
+  const assigned = toDisplay(
+    isSelf ? envData.selfAssigned : envData.totalAssigned
   )
   const activity = toDisplay(
     isSelf ? envData.selfActivity : envData.totalActivity
@@ -154,7 +167,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const revealItems = useRevealItems({
     id,
     columns,
-    budgeted,
+    assigned,
     activity,
     available,
     isChild,
@@ -172,15 +185,18 @@ export const Row: FC<EnvelopeRowProps> = props => {
     >
       <SlideReveal enabled={isSmall} items={revealItems}>
         <TableRow
-          sx={{
-            position: 'relative',
-            cursor: 'pointer',
-            '&:hover': { bgcolor: 'action.hover', transition: '0.1s' },
-            '&:active': { bgcolor: 'action.focus', transition: '0.1s' },
-            '&:hover .addGoal': { opacity: 1, transition: '.3s' },
-            '&:not(:hover) .addGoal': { opacity: 0 },
-            '& > *': { py: isChild ? 0.5 : 1 },
-          }}
+          data-envelope-id={id}
+          data-selected={isSelected || undefined}
+          className={cn(
+            'relative isolate cursor-pointer',
+            'before:pointer-events-none before:absolute before:inset-0 before:-z-10',
+            isSelected
+              ? 'before:bg-ui-selected'
+              : 'before:bg-transparent hover:before:bg-ui-highlight',
+            'hover:[&_.addGoal]:opacity-100 hover:[&_.addGoal]:transition-opacity hover:[&_.addGoal]:duration-300',
+            '[&:not(:hover)_.addGoal]:opacity-0',
+            isChild ? '[&>*]:py-1' : '[&>*]:py-2'
+          )}
           name={
             <NameCell
               onClick={handleNameClick}
@@ -191,17 +207,19 @@ export const Row: FC<EnvelopeRowProps> = props => {
               isReordering={isReordering}
             />
           }
-          budgeted={
+          assigned={
             <BudgetCell
               isSelf={isSelf}
-              value={budgeted}
-              onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
+              value={assigned}
+              onBudgetClick={anchor =>
+                openBudgetPopover(id, anchor, { alignAmount: true })
+              }
             />
           }
           outcome={
             <ActivityCell
               value={activity}
-              onClick={e => openTransactionsPopover(id)}
+              onClick={() => openTransactionsPopover(id)}
             />
           }
           available={
@@ -210,7 +228,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
               id={id}
               available={available}
               isChild={isChild}
-              budgeted={budgeted}
+              assigned={assigned}
               isSelf={isSelf}
             />
           }
@@ -231,7 +249,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
 }
 
 const Droppable: FC<{
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   isChild: boolean
   isLastVisibleChild: boolean
   isExpanded: boolean
@@ -247,7 +265,7 @@ const Droppable: FC<{
 }
 
 type GoalButtonProps = {
-  goal: TGoal | null
+  goal: core.goals.TGoal | null
   currency: TFxCode
   goalProgress?: number | null
   onClick: IconButtonProps['onClick']
@@ -257,25 +275,22 @@ const GoalButton: FC<GoalButtonProps> = props => {
   const { goal, currency, goalProgress, onClick } = props
   const { t } = useTranslation('budgets')
 
-  if (!goal) {
-    return (
-      <span className={'addGoal'}>
-        <Tooltip title={t('addGoal')}>
-          <IconButton size="small" onClick={onClick}>
-            <EmojiFlagsIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
-      </span>
-    )
-  }
-
+  const label = goal ? core.goals.formatGoal(goal, currency) : t('addGoal')
   return (
-    <span>
-      <Tooltip title={goalModel.toWords(goal, currency)}>
-        <IconButton size="small" onClick={onClick}>
-          <RadialProgress value={goalProgress || 0} fontSize="inherit" />
-        </IconButton>
-      </Tooltip>
+    <span className={cn('flex justify-center', !goal && 'addGoal')}>
+      <IconButton
+        label={label}
+        size="xs"
+        variant="ghost"
+        onClick={onClick}
+        shape="circle"
+      >
+        {goal ? (
+          <RadialProgress value={goalProgress || 0} size={16} />
+        ) : (
+          <EmojiFlagsIcon />
+        )}
+      </IconButton>
     </span>
   )
 }

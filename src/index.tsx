@@ -1,13 +1,24 @@
-// import { scan } from 'react-scan' // must be imported before React and React DOM
-import React from 'react'
-import '6-shared/localization'
+import '@/6-shared/localization'
+import './index.css'
+import { useLayoutEffect } from 'react'
 import { createRoot } from 'react-dom/client'
-import { MainApp } from '1-app'
-
-// scan({ enabled: true })
+import { MainApp } from '@/1-app'
 
 const container = document.getElementById('root')
 if (!container) throw new Error('No root container')
 const root = createRoot(container)
 
-root.render(<MainApp />)
+root.render(
+  <>
+    <RemoveStaticHeadFallback />
+    <MainApp />
+  </>
+)
+
+function RemoveStaticHeadFallback() {
+  useLayoutEffect(() => {
+    document.querySelectorAll('[data-static-head]').forEach(tag => tag.remove())
+  }, [])
+
+  return null
+}

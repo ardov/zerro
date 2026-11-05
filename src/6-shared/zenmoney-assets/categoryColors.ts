@@ -1,0 +1,21 @@
+/** Category palette from the Zenmoney app. */
+export const categoryColors = [
+  '#F35239',
+  '#FB8D00',
+  '#FBBB00',
+  '#72D176',
+  '#44A649',
+  '#0C6640',
+  '#358075',
+  '#2CCA94',
+  '#28B6F6',
+  '#179EC8',
+  '#1764BC',
+  '#8066DB',
+  '#614EB2',
+  '#9C26B0',
+  '#CC3077',
+  '#E685B1',
+  '#91929A',
+  '#414141',
+] as const

@@ -1,12 +1,13 @@
-import React, { FC, memo, useCallback } from 'react'
+import type { FC } from 'react'
+import { memo, useCallback } from 'react'
 import { shallowEqual } from 'react-redux'
-import { isEqual } from 'lodash'
-import { Paper } from '@mui/material'
-import { TISOMonth } from '6-shared/types'
-import { useToggle } from '6-shared/hooks/useToggle'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { deepEqual } from '@/6-shared/helpers/deepEqual'
+import type { TISOMonth } from '@/6-shared/types'
+import { useToggle } from '@/6-shared/hooks/useToggle'
 
-import { useAppSelector } from 'store/index'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { useAppSelector } from '@/store/index'
+import { core } from '@/zerro-core/redux'
 
 import { Parent } from './Parent'
 import { Row } from './Row'
@@ -17,14 +18,15 @@ import { useEnvRenderInfo } from './models/envRenderInfo'
 import { Footer } from './Footer'
 import { Group } from './Group'
 import { NewGroup } from './NewGroup'
+import { useSelectedEnvelope } from '../SideContent'
 
 type TagTableProps = {
   month: TISOMonth
   className?: string
-  onOpenDetails: (id: TEnvelopeId) => void
+  onOpenDetails: (id: core.envelopes.TEnvelopeId) => void
   onOpenOverview: () => void
   onShowTransactions: (conditions: {
-    id: TEnvelopeId
+    id: core.envelopes.TEnvelopeId
     isExact?: boolean | undefined
   }) => void
 }
@@ -38,7 +40,8 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     onShowTransactions,
   } = props
 
-  const structure = useAppSelector(envelopeModel.getEnvelopeStructure, isEqual)
+  const selectedEnvelope = useSelectedEnvelope()
+  const structure = useAppSelector(core.envelopes.selectStructure, deepEqual)
   const renderInfo = useEnvRenderInfo(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const { metric } = useMetric()
@@ -46,11 +49,12 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
   const [reorderMode, toggleReorderMode] = useToggle()
 
   const onShowExactTransactions = useCallback(
-    (id: TEnvelopeId) => onShowTransactions({ id, isExact: true }),
+    (id: core.envelopes.TEnvelopeId) =>
+      onShowTransactions({ id, isExact: true }),
     [onShowTransactions]
   )
   const onShowAllTransactions = useCallback(
-    (id: TEnvelopeId) => onShowTransactions({ id }),
+    (id: core.envelopes.TEnvelopeId) => onShowTransactions({ id }),
     [onShowTransactions]
   )
 
@@ -67,6 +71,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
               <Row
                 key={'child' + child.id}
                 id={child.id}
+                isSelected={selectedEnvelope === child.id}
                 month={month}
                 isDefaultVisible={renderInfo[child.id].isDefaultVisible}
                 isLastVisibleChild={idx === arr.length - 1}
@@ -106,6 +111,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
               parent={
                 <Row
                   id={parent.id}
+                  isSelected={selectedEnvelope === parent.id}
                   month={month}
                   isDefaultVisible={isDefaultVisible}
                   isExpanded={isExpanded}
@@ -145,7 +151,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     })
 
   return (
-    <Paper className={className} sx={{ position: 'relative', pb: 1 }}>
+    <div className={cn('relative bg-ui-card text-ui-primary pb-2', className)}>
       <Header
         month={month}
         isAllShown={showAll}
@@ -157,7 +163,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
       <NewGroup visible={reorderMode} />
       {renderGroups}
       <Footer month={month} metric={metric} />
-    </Paper>
+    </div>
   )
 }
 

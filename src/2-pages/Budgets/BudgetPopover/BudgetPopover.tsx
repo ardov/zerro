@@ -1,44 +1,54 @@
-import type { TFxAmount, TISOMonth } from '6-shared/types'
-import type { TEnvelopeId } from '5-entities/envelope'
+import type { TFxAmount, TISOMonth } from '@/6-shared/types'
+import { core } from '@/zerro-core/redux'
 
-import React, { FC, useEffect, useState } from 'react'
+import type { FC } from 'react'
+import { useRef, useState } from 'react'
+import { IconButton } from '@/6-shared/ui/kit/Button'
 import {
-  ListItemText,
-  InputAdornment,
-  IconButton,
-  PopoverProps,
-  MenuList,
-  MenuItem,
-} from '@mui/material'
-import { Box, BoxProps } from '@mui/system'
+  ActionList,
+  ActionListItem,
+  type ActionListHandle,
+} from '@/6-shared/ui/kit/ActionList'
+import { isPlainKey } from '@/6-shared/helpers/keyboard'
+import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
+import { FieldAddon } from '@/6-shared/ui/kit/Field'
 import { useTranslation } from 'react-i18next'
-import { ArrowForwardIcon } from '6-shared/ui/Icons'
-import { AmountInput } from '6-shared/ui/AmountInput'
-import { formatMoney } from '6-shared/helpers/money'
-import { sendEvent } from '6-shared/helpers/tracking'
-import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
+import { ArrowForwardIcon } from '@/6-shared/ui/Icons'
+import { AmountInput } from '@/6-shared/ui/kit/AmountInput'
+import { formatMoney } from '@/6-shared/helpers/money'
+import { track } from '@/6-shared/analytics'
+import { PopoverSurface } from '@/6-shared/ui/kit/Popover'
 
-import { useAppDispatch } from 'store'
-import { balances } from '5-entities/envBalances'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { fxRateModel } from '5-entities/currency/fxRate'
-import { setTotalBudget } from '4-features/budget/setTotalBudget'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { useQuickActions } from './useQuickActions'
+import { useAmountAlignment } from './useAmountAlignment'
 
-export type TBudgetPopoverProps = Omit<PopoverProps, 'onClose'> & {
+export type TBudgetPopoverProps = {
+  open: boolean
+  anchor?: Element | null
+  /** Table amount line box; align the editable value over it on desktop. */
+  alignAmount?: boolean
   onClose: () => void
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   month: TISOMonth
 }
 
 export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
-  const { id, month, onClose, ...rest } = props
+  const { id, month, onClose, open, anchor, alignAmount } = props
   const { t } = useTranslation()
+  const quickAmountsRef = useRef<ActionListHandle>(null)
+  const narrow = useBottomSheetLayout()
+  const { inputRef, positioning, controlClassName } = useAmountAlignment(
+    Boolean(alignAmount && !narrow)
+  )
   const quickActions = useQuickActions(month, id)
-  const [dispCurrency] = displayCurrency.useDisplayCurrency()
+  const [dispCurrency] = core.currency.useDisplayCurrency()
   const dispatch = useAppDispatch()
-  const envelope = balances.useEnvData()[month][id]
-  const convertFx = fxRateModel.useConverter()
+  const envelope = useAppSelector(core.activity.selectEnvelopeMetrics)[month][
+    id
+  ]
+  const envelopeName = useAppSelector(core.envelopes.selectAll)[id]?.name
+  const convertFx = useAppSelector(core.currency.selectConvertFx)
 
   const currency = {
     env: envelope.currency, // Envelope currency
@@ -54,10 +64,10 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
     env: (v: number) => formatMoney(v, currency.env),
     disp: (v: number) => formatMoney(v, currency.disp),
   }
-  /** Current budgeted */
-  const budgeted = {
-    env: convert.toEnv(envelope.totalBudgeted),
-    disp: convert.toDisp(envelope.totalBudgeted),
+  /** Current assigned */
+  const assigned = {
+    env: convert.toEnv(envelope.totalAssigned),
+    disp: convert.toDisp(envelope.totalAssigned),
   }
   /** Current available */
   const available = {
@@ -66,7 +76,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   }
 
   /** Input value sets in envelope currency */
-  const [inputValue, setInputValue] = useState<number>(budgeted.env)
+  const [inputValue, setInputValue] = useState<number>(assigned.env)
 
   /** Input value converted to envelope and display currencies */
   const value = {
@@ -75,20 +85,22 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   }
   /** Amount of money that will be available after changes applied */
   const availableAfter = {
-    env: value.env - budgeted.env + available.env,
-    disp: value.disp - budgeted.disp + available.disp,
+    env: value.env - assigned.env + available.env,
+    disp: value.disp - assigned.disp + available.disp,
   }
 
-  useEffect(() => {
-    setInputValue(budgeted.env)
-  }, [budgeted.env])
+  const [prevAssigned, setPrevAssigned] = useState(assigned.env)
+  if (prevAssigned !== assigned.env) {
+    setPrevAssigned(assigned.env)
+    setInputValue(assigned.env)
+  }
 
   const onChange = (value: number) =>
-    dispatch(setTotalBudget({ month, id, value }))
+    dispatch(core.budgets.setTotalAssigned({ month, id, amount: value }))
 
   const changeAndClose = (value: number) => {
-    onClose?.()
-    if (value !== budgeted.env) onChange(value)
+    if (value !== assigned.env) onChange(value)
+    onClose()
   }
 
   const helperText =
@@ -104,82 +116,78 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
     )
 
   return (
-    <AdaptivePopover
-      onClose={() => changeAndClose(+inputValue)}
-      anchor="top"
-      {...rest}
+    <PopoverSurface
+      controller={{
+        open,
+        setOpen: next => {
+          if (!next) changeAndClose(inputValue)
+        },
+      }}
+      anchor={anchor}
+      {...positioning}
+      label={envelopeName || t('budget')}
+      contentClassName="p-1"
     >
-      <Box sx={{ p: 1 }}>
-        <AmountInput
-          autoFocus
-          value={inputValue}
-          fullWidth
-          onChange={value => setInputValue(+value)}
-          onEnter={value => changeAndClose(+value)}
-          helperText={helperText}
-          signButtons="auto"
-          placeholder="0"
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">{currency.env}</InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    edge="end"
-                    onClick={() => changeAndClose(+inputValue)}
-                  >
-                    <ArrowForwardIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-
-        <MenuList>
-          {quickActions.map(({ text, amount }) => (
-            <MenuItem
-              key={text}
+      <AmountInput
+        ref={inputRef}
+        autoFocus
+        controlClassName={controlClassName}
+        operators={narrow}
+        value={inputValue}
+        onChange={value => setInputValue(+value)}
+        onEnter={value => changeAndClose(+value)}
+        onKeyDown={event => {
+          if (event.key === 'ArrowDown' && isPlainKey(event)) {
+            event.preventDefault()
+            quickAmountsRef.current?.focus()
+          }
+        }}
+        description={helperText}
+        placeholder="0"
+        label={t('assigned')}
+        start={<FieldAddon>{currency.env}</FieldAddon>}
+        end={
+          <FieldAddon kind="action">
+            <IconButton
+              size="sm"
+              tooltip={false}
+              variant="ghost"
+              label={t('apply')}
+              onClick={() => changeAndClose(+inputValue)}
+            >
+              <ArrowForwardIcon />
+            </IconButton>
+          </FieldAddon>
+        }
+      >
+        <ActionList
+          ref={quickAmountsRef}
+          onNavigateBefore={() => inputRef.current?.focus()}
+          aria-label={t('quickAmounts')}
+          className="mt-2"
+        >
+          {quickActions.map(({ kind, text, amount }, index) => (
+            <ActionListItem
               selected={inputValue === amount}
-              sx={{ borderRadius: 1 }}
+              end={format.env(amount)}
+              key={kind}
               onClick={() => {
-                sendEvent('Budgets: quick budget: ' + text)
-                changeAndClose(amount)
+                const result = dispatch(
+                  core.budgets.applyPreset({ month, id, kind })
+                )
+                onClose()
+                if (result.status === 'applied') {
+                  track('budget_quick_amount_selected', {
+                    preset_position: index + 1,
+                  })
+                }
               }}
             >
-              <ListItemText
-                primary={
-                  <NameValueRow name={text} value={format.env(amount)} />
-                }
-              />
-            </MenuItem>
+              {text}
+            </ActionListItem>
           ))}
-        </MenuList>
-      </Box>
-    </AdaptivePopover>
-  )
-}
-
-const NameValueRow: FC<BoxProps & { name: string; value: string }> = ({
-  name,
-  value,
-  ...rest
-}) => {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        width: '100%',
-        gap: 2,
-        '& > :first-of-type': { flexGrow: 1 },
-        '& > :last-child': { color: 'text.secondary' },
-      }}
-      {...rest}
-    >
-      <span>{name}</span>
-      <span>{value}</span>
-    </Box>
+        </ActionList>
+      </AmountInput>
+    </PopoverSurface>
   )
 }

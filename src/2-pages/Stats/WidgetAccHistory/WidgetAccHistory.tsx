@@ -1,28 +1,20 @@
-import React, { FC, useState, useMemo, useCallback, memo } from 'react'
+import { BalanceSubheader } from '@/3-widgets/BalanceSubheader'
+import type { FC } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
+import { core } from '@/zerro-core/redux'
+
 import { useTranslation } from 'react-i18next'
-import {
-  Box,
-  Typography,
-  Paper,
-  List,
-  ListSubheader,
-  Collapse,
-} from '@mui/material'
+import { Collapse } from '@/6-shared/ui/kit/Collapse'
+import { ListRows } from '@/6-shared/ui/ListRow'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
-import { useAppTheme } from '6-shared/ui/theme'
-import { formatDate, toISOMonth } from '6-shared/helpers/date'
-import { TAccountId, TISODate, TFxAmount } from '6-shared/types'
-import { Amount } from '6-shared/ui/Amount'
-import { useToggle } from '6-shared/hooks/useToggle'
-import { addFxAmount } from '6-shared/helpers/money'
-import { accountModel, TAccountPopulated } from '5-entities/account'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
-import { Period } from '../shared/period'
+import { formatDate, toISOMonth } from '@/6-shared/helpers/date'
+import type { TAccountId, TISODate, TFxAmount } from '@/6-shared/types'
+import { Amount } from '@/6-shared/ui/Amount'
+import { useToggle } from '@/6-shared/hooks/useToggle'
+import { addFxAmount } from '@/6-shared/helpers/money'
+import type { Period } from '../shared/period'
 import { useAccountHistory } from './model'
-import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
+import { useTransactionDrawer } from '@/3-widgets/global/TransactionListDrawer'
 
 type WidgetAccHistoryProps = {
   period: Period
@@ -31,19 +23,22 @@ type WidgetAccHistoryProps = {
 export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
   ({ period }) => {
     const { t } = useTranslation('accounts')
-    const toDisplay = displayCurrency.useToDisplay(toISOMonth(new Date()))
+    const toDisplay = core.currency.useToDisplay(toISOMonth(new Date()))
     const trDrawer = useTransactionDrawer()
     const [visible, toggleVisibility] = useToggle()
 
     const onClick = useCallback(
       (id: TAccountId, date: TISODate) => {
-        trDrawer.open({ filterConditions: { account: id }, initialDate: date })
+        trDrawer({
+          initialQuery: { clauses: [{ kind: 'account', ids: [id] }] },
+          initialDate: date,
+        })
       },
       [trDrawer]
     )
 
-    const inBudgetAccounts = accountModel.useInBudgetAccounts()
-    const savingAccounts = accountModel.useSavingAccounts()
+    const inBudgetAccounts = core.accounts.useInBudget()
+    const savingAccounts = core.accounts.useSaving()
 
     const {
       totalInBudget,
@@ -74,8 +69,12 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
 
     return (
       <div>
-        <List dense>
-          <Subheader name={t('inBalance')} amount={totalInBudget} />
+        <ListRows>
+          <BalanceSubheader
+            className="mb-2 cursor-default"
+            name={t('inBalance')}
+            amount={totalInBudget}
+          />
           {inBudgetActive.map(acc => (
             <AccountHistoryWidget
               key={acc.id}
@@ -84,10 +83,14 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
               onClick={onClick}
             />
           ))}
-        </List>
+        </ListRows>
 
-        <List dense>
-          <Subheader name={t('other')} amount={totalSavings} />
+        <ListRows>
+          <BalanceSubheader
+            className="mb-2 cursor-default"
+            name={t('other')}
+            amount={totalSavings}
+          />
           {savingsActive.map(acc => (
             <AccountHistoryWidget
               key={acc.id}
@@ -96,16 +99,17 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
               onClick={onClick}
             />
           ))}
-        </List>
+        </ListRows>
 
-        <List dense>
-          <Subheader
+        <ListRows>
+          <BalanceSubheader
+            className="mb-2 cursor-pointer"
             name={t('archived')}
             amount={totalArchived}
             onClick={toggleVisibility}
           />
-          <Collapse in={visible} unmountOnExit>
-            <List dense disablePadding>
+          <Collapse open={visible}>
+            <ListRows disablePadding>
               {archived.map(acc => (
                 <AccountHistoryWidget
                   key={acc.id}
@@ -114,61 +118,13 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
                   onClick={onClick}
                 />
               ))}
-            </List>
+            </ListRows>
           </Collapse>
-        </List>
+        </ListRows>
       </div>
     )
   }
 )
-
-type SubheaderProps = {
-  name: React.ReactNode
-  amount: TFxAmount
-  onClick?: () => void
-}
-
-const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
-  const month = toISOMonth(new Date())
-  const toDisplay = displayCurrency.useToDisplay(month)
-  const isNegative = toDisplay(amount) < 0
-
-  return (
-    <ListSubheader
-      sx={{
-        borderRadius: 1,
-        marginBottom: 1,
-        cursor: onClick ? 'pointer' : 'default',
-      }}
-      onClick={onClick}
-    >
-      <Box component="span" sx={{ display: 'flex', width: '100%' }}>
-        <Typography
-          component="span"
-          noWrap
-          sx={{ flexGrow: 1, lineHeight: 'inherit' }}
-        >
-          <b>{name}</b>
-        </Typography>
-
-        <Box
-          component="span"
-          sx={{ ml: 2 }}
-          color={isNegative ? 'error.main' : 'text.secondary'}
-        >
-          <b>
-            <DisplayAmount
-              month={month}
-              value={amount}
-              decimals="ifOnly"
-              noShade
-            />
-          </b>
-        </Box>
-      </Box>
-    </ListSubheader>
-  )
-})
 
 type AccTrendProps = {
   period: Period
@@ -178,8 +134,7 @@ type AccTrendProps = {
 
 const AccountHistoryWidget: FC<AccTrendProps> = memo(
   ({ id, period, onClick }) => {
-    const theme = useAppTheme()
-    const acc = accountModel.usePopulatedAccounts()[id]
+    const acc = core.accounts.usePopulated()[id]
     const data = useAccountHistory(id, period)
 
     const { dataMax, dataMin, yAxisMin } = useMemo(() => {
@@ -207,30 +162,20 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
     const colorId = 'gradient' + acc.id.replace(/[^a-zA-Z0-9]/g, '')
 
     return (
-      <Paper
-        style={{ overflow: 'hidden', position: 'relative', marginBottom: 8 }}
-      >
-        <Box
-          sx={{
-            p: 2,
-            minWidth: 160,
-            position: 'relative',
-            zIndex: 1,
-            pointerEvents: 'none',
-          }}
-        >
-          <Typography variant="body2">
+      <div className="layout-panel rounded-smooth relative mb-2 overflow-hidden">
+        <div className="relative z-[1] min-w-40 pointer-events-none p-4">
+          <p className="m-0 text-body-sm">
             <span
               style={{ textDecoration: acc.archive ? 'line-through' : 'none' }}
             >
               {acc.title}
             </span>{' '}
             {isHovering && hoverDate && formatDate(hoverDate)}
-          </Typography>
-          <Typography variant="h6">
+          </p>
+          <p className="m-0 text-title">
             <Amount value={balance} currency={acc.fxCode} decimals="ifAny" />
-          </Typography>
-        </Box>
+          </p>
+        </div>
         <div
           style={{
             width: '100%',
@@ -263,12 +208,12 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
                 <linearGradient id={colorId} x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset={offset}
-                    stopColor={theme.palette.primary.main}
+                    stopColor="var(--primary)"
                     stopOpacity={0.2}
                   />
                   <stop
                     offset={offset}
-                    stopColor={theme.palette.error.main}
+                    stopColor="var(--error)"
                     stopOpacity={0.3}
                   />
                 </linearGradient>
@@ -287,15 +232,15 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </Paper>
+      </div>
     )
   }
 )
 
 const sortAccountsByBalance = (
-  accounts: TAccountPopulated[],
+  accounts: core.accounts.TAccountPopulated[],
   toDisplay: (amount: TFxAmount) => number
-): TAccountPopulated[] => {
+): core.accounts.TAccountPopulated[] => {
   return [...accounts].sort(
     (a, b) =>
       toDisplay({ [b.fxCode]: b.balance }) -
@@ -303,7 +248,7 @@ const sortAccountsByBalance = (
   )
 }
 
-function getTotal(accs: TAccountPopulated[]): TFxAmount {
+function getTotal(accs: core.accounts.TAccountPopulated[]): TFxAmount {
   if (!accs.length) return {}
 
   return accs.reduce(

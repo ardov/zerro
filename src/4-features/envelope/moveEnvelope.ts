@@ -1,5 +1,5 @@
-import { AppThunk } from 'store/index'
-import { envelopeModel, TEnvNode, TGroupNode } from '5-entities/envelope'
+import type { AppThunk } from '@/store/index'
+import { core } from '@/zerro-core/redux'
 
 export function moveEnvelope(
   sourceIdx: number,
@@ -7,10 +7,12 @@ export function moveEnvelope(
   asChild: boolean
 ): AppThunk {
   return (dispatch, getState) => {
-    const structure = envelopeModel.getEnvelopeStructure(getState())
+    const structure = core.envelopes.selectStructure(getState())
 
-    const newStructure = JSON.parse(JSON.stringify(structure)) as TGroupNode[]
-    const flatList = envelopeModel.flattenStructure(newStructure)
+    const newStructure = JSON.parse(
+      JSON.stringify(structure)
+    ) as core.envelopes.TGroupNode[]
+    const flatList = core.envelopes.flattenStructure(newStructure)
     const active = flatList[sourceIdx]
     const over = flatList[targetIdx]
 
@@ -18,13 +20,21 @@ export function moveEnvelope(
 
     cutOutNode(active, newStructure)
     placeNode(active, over, asChild, newStructure)
-    dispatch(envelopeModel.applyStructure(newStructure))
+    dispatch(
+      core.envelopes.applyStructure(
+        core.envelopes.toEnvelopeStructureInput(newStructure)
+      )
+    )
   }
 }
 
-function cutOutNode(node: TEnvNode | TGroupNode, structure: TGroupNode[]) {
+function cutOutNode(
+  node: core.envelopes.TEnvNode | core.envelopes.TGroupNode,
+  structure: core.envelopes.TGroupNode[]
+) {
   if (node.type === 'group') {
-    structure = structure.filter(gr => gr !== node)
+    const groupIndex = structure.indexOf(node)
+    if (groupIndex !== -1) structure.splice(groupIndex, 1)
     return
   }
 
@@ -43,10 +53,10 @@ function cutOutNode(node: TEnvNode | TGroupNode, structure: TGroupNode[]) {
 }
 
 function placeNode(
-  node: TEnvNode | TGroupNode,
-  under: TEnvNode | TGroupNode,
+  node: core.envelopes.TEnvNode | core.envelopes.TGroupNode,
+  under: core.envelopes.TEnvNode | core.envelopes.TGroupNode,
   asChild: boolean,
-  structure: TGroupNode[]
+  structure: core.envelopes.TGroupNode[]
 ) {
   for (let grIdx = 0; grIdx < structure.length; grIdx++) {
     const group = structure[grIdx]

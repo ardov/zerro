@@ -1,12 +1,4 @@
-import type { TISOMonth } from '6-shared/types'
-
-export const cardStyle = {
-  borderRadius: 1,
-  py: 1,
-  px: 2,
-  bgcolor: 'background.default',
-  width: '100%',
-}
+import type { TISOMonth } from '@/6-shared/types'
 
 export function getDateRange(
   dates: TISOMonth[],
@@ -32,10 +24,10 @@ export function trimMonths<T>(
   if (cleanArr.length <= windowSize) return cleanArr
 
   // Calculate the range with the target in the center
-  let padLeft = Math.floor((windowSize - 1) / 2)
-  let padRight = windowSize - 1 - padLeft
-  let rangeStart = targetIdx - padLeft
-  let rangeEnd = targetIdx + padRight
+  const padLeft = Math.floor((windowSize - 1) / 2)
+  const padRight = windowSize - 1 - padLeft
+  const rangeStart = targetIdx - padLeft
+  const rangeEnd = targetIdx + padRight
 
   if (rangeEnd >= cleanArr.length) return cleanArr.slice(-windowSize)
   if (rangeStart <= 0) return cleanArr.slice(0, windowSize)

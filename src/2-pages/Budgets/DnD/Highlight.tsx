@@ -1,27 +1,13 @@
-import type { ById } from '6-shared/types'
+import type { ById } from '@/6-shared/types'
 
-import React, { useCallback, useRef, useState } from 'react'
-import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
-import { Box, SxProps } from '@mui/system'
-import { useAppDispatch } from 'store/index'
-import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import { moveEnvelope } from '4-features/envelope/moveEnvelope'
+import { useCallback, useRef, useState } from 'react'
+import type { DragEndEvent, DragMoveEvent } from '@dnd-kit/core'
+import { useDndMonitor } from '@dnd-kit/core'
+import { useAppDispatch, useAppSelector } from '@/store/index'
+import { core } from '@/zerro-core/redux'
+
+import { moveEnvelope } from '@/4-features/envelope/moveEnvelope'
 import { DragTypes } from './dragTypes'
-
-const style: SxProps = {
-  border: '1px solid red',
-  borderColor: 'primary.main',
-  transition: '0.1s ease-in-out',
-  borderRadius: 1,
-  position: 'fixed',
-  display: 'none',
-  top: 0,
-  left: 0,
-  height: 2,
-  width: 100,
-  zIndex: 100,
-  willChange: 'transform width height',
-}
 
 const OFFSET = 100
 
@@ -29,7 +15,7 @@ export function Highlight() {
   const dispatch = useAppDispatch()
   const [isDragging, setIsDragging] = useState(false)
 
-  const envelopes = envelopeModel.useEnvelopes()
+  const envelopes = useAppSelector(core.envelopes.selectAll)
 
   const boxRef = useRef<HTMLDivElement>(null)
 
@@ -48,9 +34,9 @@ export function Highlight() {
         info.activeType === DragTypes.envelope &&
         info.overType === DragTypes.envelope
       ) {
-        let width = info.overRect.width - (info.isNesting ? OFFSET : 0)
-        let left = info.overRect.left + (info.isNesting ? OFFSET : 0)
-        let top = info.overRect.top + info.overRect.height
+        const width = info.overRect.width - (info.isNesting ? OFFSET : 0)
+        const left = info.overRect.left + (info.isNesting ? OFFSET : 0)
+        const top = info.overRect.top + info.overRect.height
         el.style.display = `block`
         el.style.width = `${width}px`
         el.style.height = `2px`
@@ -107,12 +93,17 @@ export function Highlight() {
     onDragCancel,
   })
 
-  return isDragging ? <Box ref={boxRef} sx={style} /> : null
+  return isDragging ? (
+    <div
+      ref={boxRef}
+      className="fixed left-0 top-0 z-[100] hidden h-[2px] w-[100px] rounded-lg border border-ui-focus transition-[transform,width,height] duration-100 ease-in-out will-change-[transform,width,height]"
+    />
+  ) : null
 }
 
 function whatsHappening(
   e: DragEndEvent | DragMoveEvent,
-  envelopes: ById<TEnvelope>,
+  envelopes: ById<core.envelopes.TPresentedEnvelope>,
   offset: number
 ) {
   const activeData = e.active.data.current
@@ -135,7 +126,7 @@ function whatsHappening(
     return null
   }
 
-  const overEnv = envelopes[overData.id as TEnvelopeId]
+  const overEnv = envelopes[overData.id as core.envelopes.TEnvelopeId]
   const isOverChild = !!overEnv?.parent
   const isLastVisibleChild = !!overData.isLastVisibleChild
   const isExpanded = !!overData.isExpanded
@@ -152,11 +143,11 @@ function whatsHappening(
         isExpanded
       ),
 
-    activeId: activeData.id as TEnvelopeId,
+    activeId: activeData.id as core.envelopes.TEnvelopeId,
     activeType: activeData.type as DragTypes,
     activeRect: activeRect,
 
-    overId: overData.id as TEnvelopeId,
+    overId: overData.id as core.envelopes.TEnvelopeId,
     overType: overData.type as DragTypes,
     overRect: overRect,
   }

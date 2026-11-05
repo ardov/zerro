@@ -1,9 +1,10 @@
-import { GroupBy } from '6-shared/helpers/date'
-import { TAccountId, TISODate } from '6-shared/types'
-import { accBalanceModel } from '5-entities/accBalances'
-import { getStart, Period } from '../shared/period'
-import { accountModel } from '5-entities/account'
-import { useAppSelector } from 'store/index'
+import { GroupBy } from '@/6-shared/helpers/date'
+import type { TAccountId, TISODate } from '@/6-shared/types'
+import { core } from '@/zerro-core/redux'
+
+import type { Period } from '../shared/period'
+import { getStart } from '../shared/period'
+import { useAppSelector } from '@/store/index'
 import { useMemo } from 'react'
 
 export type TPoint = {
@@ -12,9 +13,9 @@ export type TPoint = {
 }
 
 export function useAccountHistory(id: TAccountId, period: Period): TPoint[] {
-  let { fxCode } = accountModel.usePopulatedAccounts()[id]
+  const { fxCode } = core.accounts.usePopulated()[id]
 
-  let allBalances = useAppSelector(accBalanceModel.getBalancesByDate)
+  const allBalances = useAppSelector(core.balances.selectByDate)
 
   return useMemo(() => {
     const firstDate = getStart(period, GroupBy.Day)

@@ -1,9 +1,10 @@
-import React, { ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
-import { logOut } from '4-features/authorization'
-import { captureError, sendEvent } from '6-shared/helpers/tracking'
+import { logOut } from '@/4-features/authorization'
+import { captureError } from '@/6-shared/diagnostics'
 import { ErrorMessage } from './ErrorMessage'
-import { AppDispatch } from 'store'
+import type { AppDispatch } from '@/store'
 
 interface ErrorBoundaryProps {
   logOut: () => void
@@ -17,16 +18,15 @@ class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  state = { hasError: false, message: '' }
+  override state = { hasError: false, message: '' }
   static getDerivedStateFromError = (error: Error) => ({
     hasError: true,
     message: error.message,
   })
-  componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
-    sendEvent(`Error: ${error.message}`)
+  override componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
     captureError(error, errorInfo)
   }
-  render() {
+  override render() {
     return this.state.hasError ? (
       <ErrorMessage message={this.state.message} onLogOut={this.props.logOut} />
     ) : (

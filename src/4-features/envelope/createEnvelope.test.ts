@@ -1,0 +1,80 @@
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { i18n } from '@/6-shared/localization'
+import type { TDataStore } from '@/6-shared/types'
+import type { AppDispatch, AppThunk, RootState } from '@/store'
+import { appendClientCommand } from '@/store/data'
+import { makeDemoStore } from '@/zerro-core/demo'
+import { applyPatch } from '@/zerro-core/internal/domain/zenmoney'
+import { materializeCommand } from '@/zerro-core/internal/operations/materialization'
+import {
+  defaultEnvelopeGroupIds,
+  envId,
+  EnvType,
+  getEnvelopeMeta,
+} from '@/zerro-core/internal/domain/zerro'
+import { core } from '@/zerro-core/redux'
+import { makeTestRootState } from '@/store/testing'
+
+import { createEnvelope } from './createEnvelope'
+
+const NOW = Date.parse('2026-07-10T12:00:00Z')
+const UUID = '00000000-0000-4000-8000-000000000001'
+
+vi.mock('uuid', () => ({ v1: () => UUID }))
+
+afterEach(() => vi.restoreAllMocks())
+
+function makeState(current: TDataStore): RootState {
+  return makeTestRootState(current)
+}
+
+function makeThunkDispatch(initial: RootState) {
+  let state = initial
+  const dispatch = vi.fn((action: unknown) => {
+    if (typeof action === 'function') {
+      return (action as AppThunk)(
+        dispatch as AppDispatch,
+        () => state,
+        undefined
+      )
+    }
+    if ((action as { type?: string }).type === appendClientCommand.type) {
+      state = makeState(
+        applyPatch(
+          state.data.current,
+          materializeCommand(
+            state.data.current,
+            (action as ReturnType<typeof appendClientCommand>).payload
+          )
+        )
+      )
+    }
+    return action
+  })
+
+  return { dispatch: dispatch as unknown as AppDispatch, getState: () => state }
+}
+
+describe('createEnvelope', () => {
+  it('creates an envelope and metadata through one semantic command', () => {
+    vi.spyOn(Date, 'now').mockReturnValue(NOW)
+    const runtime = makeThunkDispatch(makeState(makeDemoStore({ now: NOW })))
+
+    const id = createEnvelope({
+      comment: 'Created through Core',
+      group: i18n.t('defaultTagGroup', { ns: 'common' }),
+      index: 2,
+    })(runtime.dispatch, runtime.getState, undefined)
+
+    expect(id).toBe(envId.get(EnvType.Tag, UUID))
+    expect(core.envelopes.selectAll(runtime.getState())[id!]).toBeDefined()
+    expect(
+      getEnvelopeMeta(runtime.getState().data.current.reminder)[id!]
+    ).toMatchObject({
+      id,
+      comment: 'Created through Core',
+      group: defaultEnvelopeGroupIds.tags,
+      index: 2,
+    })
+  })
+})

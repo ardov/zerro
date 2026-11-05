@@ -1,23 +1,18 @@
 import { createSelector } from '@reduxjs/toolkit'
-import {
-  PopulatedTransaction,
-  populateTransaction,
-} from './populateTransaction'
-import { formatDate } from '6-shared/helpers/date'
-import { ById } from '6-shared/types'
-import { AppThunk } from 'store'
-import { trModel, TrType } from '5-entities/transaction'
-import { instrumentModel } from '5-entities/currency/instrument'
-import { accountModel } from '5-entities/account'
-import { tagModel } from '5-entities/tag'
+import type { PopulatedTransaction } from './populateTransaction'
+import { populateTransaction } from './populateTransaction'
+import { formatDate } from '@/6-shared/helpers/date'
+import type { ById } from '@/6-shared/types'
+import type { AppThunk } from '@/store'
+import { core } from '@/zerro-core/redux'
 
 // Only for CSV
 const getPopulatedTransactions = createSelector(
   [
-    instrumentModel.getInstruments,
-    accountModel.getAccounts,
-    tagModel.getPopulatedTags,
-    trModel.getTransactionsById,
+    core.instruments.selectAll,
+    core.accounts.selectAll,
+    core.tags.selectPopulated,
+    core.transactions.selectAll,
   ],
   (instruments, accounts, tags, transactions) => {
     const result: { [id: string]: PopulatedTransaction } = {}
@@ -37,7 +32,7 @@ export const exportCSV: AppThunk = (_, getState) => {
   const blob = new Blob([csvContent], { type: 'text/csv' })
   const href = window.URL.createObjectURL(blob)
 
-  var link = document.createElement('a')
+  const link = document.createElement('a')
   link.setAttribute('href', href)
   link.setAttribute(
     'download',
@@ -96,11 +91,11 @@ function transactionsToCsvContent(tr: ById<PopulatedTransaction>) {
 }
 
 const types = {
-  [TrType.Income]: 'Доход',
-  [TrType.Outcome]: 'Расход',
-  [TrType.Transfer]: 'Перевод',
-  [TrType.OutcomeDebt]: '',
-  [TrType.IncomeDebt]: '',
+  [core.transactions.TrType.Income]: 'Доход',
+  [core.transactions.TrType.Outcome]: 'Расход',
+  [core.transactions.TrType.Transfer]: 'Перевод',
+  [core.transactions.TrType.OutcomeDebt]: '',
+  [core.transactions.TrType.IncomeDebt]: '',
 }
 
 const csvEscapeString = (term: string): string => {
@@ -124,14 +119,14 @@ const transactionToRowObj = (t: PopulatedTransaction): RowObj =>
   csvEscapeRow({
     Дата: t.date,
     Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
-    Тип: types[t.type as TrType],
+    Тип: types[t.type as core.transactions.TrType],
     Категория: t.tag ? t.tag[0].title : '',
     'Доп категории': '',
     'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',
-    Расход: !!t.outcome ? t.outcome : '',
+    Расход: t.outcome ? t.outcome : '',
     'Валюта -': t.outcomeInstrument ? t.outcomeInstrument.shortTitle : '',
     'На счёт': t.incomeAccount ? t.incomeAccount.title : '',
-    Доход: !!t.income ? t.income : '',
+    Доход: t.income ? t.income : '',
     'Валюта +': t.incomeInstrument ? t.incomeInstrument.shortTitle : '',
     Плательщик: t.payee || '',
     Комментарий: t.comment || '',

@@ -1,0 +1,152 @@
+# Zerro Finance Replica
+
+Zerro maintains a local, undoable view of a user's Zenmoney data while keeping
+the server's accepted state distinct from changes that have not been sent yet.
+
+## Language
+
+### Replica
+
+**Canonical state**:
+The latest state accepted from Zenmoney, before any unsent local commands.
+_Avoid_: Server cache, raw data
+
+**Replica**:
+The canonical state together with the root user's unsent command outbox.
+_Avoid_: Local database, account cache
+
+**Backup**:
+A complete file exported by Zerro from canonical state.
+_Avoid_: Export file, snapshot
+
+**Restore**:
+Setting the replica to the state described by a backup or a retained history
+point through an undoable command.
+_Avoid_: Import, migration
+
+**Foreign backup**:
+A complete backup whose root user differs from the signed-in root user. It is
+importable, but user-owned entities are rebuilt with new identifiers.
+_Avoid_: Foreign import, migration
+
+**Canonical journal**:
+The retained linear history of canonical states, beginning at a checkpoint and
+continuing through server transitions.
+_Avoid_: Branch, event log
+
+**Checkpoint**:
+A complete canonical state from which later journal transitions can be replayed.
+_Avoid_: Branch root, backup
+
+**Transition**:
+A compact change between consecutive canonical states. An empty pull is not a
+transition.
+_Avoid_: Patch response, event
+
+**Outbox**:
+The ordered, durable commands applied locally but not yet accepted by Zenmoney.
+It is also the durable undo stack.
+_Avoid_: Local journal, pending patch
+
+**Push run**:
+A fixed prefix of the Outbox captured when a deliberate synchronization starts.
+It may be delivered through several requests while later commands wait for the
+next run.
+_Avoid_: Upload session, background sync
+
+**Chunk**:
+One size-bounded request inside a Push run. Its successful response is applied
+and persisted before the next Chunk starts.
+_Avoid_: Page, batch command
+
+**Cleanup phase**:
+The deletion-only tail of a multi-Chunk Push run, after all upserts have been
+accepted. Deletions run in reverse dependency order.
+_Avoid_: Garbage collection, rollback
+
+**Redo stack**:
+Commands undone in the current browser session and available to reapply. It is
+never durable.
+
+### Overlays
+
+**Screen**:
+An overlay a person can come back to. Its serializable descriptor and saved
+view live in router history; restoration reads current entity data. Unfinished
+editor input belongs to the mounted editor, not to history.
+_Avoid_: Route overlay, page dialog
+
+**Screen instance**:
+One opening of a repeatable Screen family, with its own identity and position
+in the shared Screen order. Entity identity is a value: opening the same
+transaction through another list does not reuse its earlier editor.
+
+**List/Details pair**:
+A list instance and its owned Details instance. Selecting another row replaces
+Details; opening another list creates another pair. Closing the list closes its
+owned Details, while ordinary Back dismisses the top instance.
+
+**Details**:
+Content owned by a list's secondary area, described separately from its
+presentation. The current content kind is a transaction. The shared surface
+owns geometry, focus and dismissal; transaction Details owns saving and drafts.
+
+**Popup**:
+An overlay Back only dismisses. It lives in memory, dies whenever the page
+changes, and holds a history entry without changing the address.
+_Avoid_: Trifle, transient, menu
+
+**Slot**:
+The history entry a Popup adds. It carries no address of its own and exists to
+absorb one Back press.
+_Avoid_: Blank entry, placeholder
+
+### Layout
+
+**Rail**:
+The narrow, icon-only strip of destinations along the left edge on a wide
+screen. It holds no lists of data.
+_Avoid_: Sidebar, navigation drawer
+
+**Canvas**:
+The background a page's panels sit on.
+_Avoid_: Page background, backdrop
+
+**Panel**:
+One rounded region of the canvas that scrolls on its own and has a minimum
+width for sharing space with other panels. The panel that remains when the
+others give way can shrink to the available width. A panel with no room opens
+as a drawer instead, or is not shown.
+_Avoid_: Card, work area, pane
+
+**Accounts panel**:
+The panel listing accounts and debtors, beside the transaction list.
+_Avoid_: Account sidebar, account drawer
+
+**Month overview**:
+The summary of the budget month: warnings, income, spending, transfers and
+money left to assign. An envelope's detail takes its place while the envelope
+is selected.
+_Avoid_: Side content, month info
+
+### Stories
+
+**Bench**:
+One instance of a component, driven entirely by args, for a person to turn the
+knobs on. The default story of every library component.
+_Avoid_: Playground, default story, sandbox
+
+**Showcase**:
+Every variant of a component rendered at once, for comparison by eye. It is read,
+never operated.
+_Avoid_: Variants, gallery, all states
+
+**Scenario**:
+A slice of the running application on fixtures, addressed by a route and a
+fixture set rather than by props.
+_Avoid_: Integration story, page story
+
+**Check**:
+A story that exists for its assertions rather than for anyone to look at. It is
+kept out of the browsing tree and still runs.
+_Avoid_: Test story, play story

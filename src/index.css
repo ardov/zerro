@@ -1,0 +1,6 @@
+@import './tailwind.css';
+
+@source './';
+@source not './**/*.stories.tsx';
+@source not './**/*.test.ts';
+@source not './**/*.test.tsx';

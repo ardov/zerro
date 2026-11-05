@@ -1,0 +1,261 @@
+import { getDebtorId } from './debtors'
+import { GroupBy, makeDateArray, toISODate } from '../../foundation/date'
+import { entries } from '../../foundation/keys'
+import { isZero, subFxAmount } from '../model/money'
+import type { ById } from '../../foundation/types'
+import type { TAccount, TAccountId } from '../entities/accounts'
+import type { TISODate, TDateDraft } from '../primitives'
+import type { TFxAmount } from '../model/money'
+import type { TFxCode, TInstrumentId } from '../entities/instruments'
+import type { TMerchant } from '../entities/merchants'
+import type {
+  TTransaction,
+  TTransactionId,
+} from '../entities/transactions/types'
+import type { TDebtor } from './debtors'
+import { getTransactionType, TrType } from '../entities/transactions'
+
+export type TBalanceState<Value = TFxAmount> = {
+  accounts: Record<TAccountId, Value>
+  debtors: Record<string, Value>
+}
+
+export type TBalanceNode<Value = TFxAmount> = {
+  date: TISODate
+  balances: TBalanceState<Value>
+}
+
+export type TTransactionEffect = {
+  id: TTransactionId
+  date: TISODate
+  accounts?: Record<TAccountId, TFxAmount>
+  debtors?: Record<string, TFxAmount>
+}
+
+export type TBuildBalancesInput = {
+  transactions: TTransaction[]
+  accounts: ById<TAccount>
+  debtors: ById<TDebtor>
+  merchants: ById<TMerchant>
+  instrumentCodeById: Record<TInstrumentId, TFxCode>
+  debtAccountId?: TAccountId
+}
+
+export type TBalances = {
+  byDay: Record<TISODate, TBalanceState>
+  byTransaction: Record<TTransactionId, TBalanceState>
+  startingBalances: TBalanceState
+}
+
+export function buildBalances(input: TBuildBalancesInput): TBalances {
+  const byDay: Record<TISODate, TBalanceState> = {}
+  const byTransaction: Record<TTransactionId, TBalanceState> = {}
+  const startingBalances = rewindBalances(
+    input,
+    undefined,
+    (change, balances) => {
+      byDay[change.date] ??= balances
+      byTransaction[change.id] = balances
+    }
+  )
+
+  Object.values(startingBalances.debtors).forEach(amount => {
+    console.assert(isZero(amount), 'Starting amount of debtor is not zero')
+  })
+
+  return { byDay, byTransaction, startingBalances }
+}
+
+/** Rewind only the transactions after the requested day's closing balance. */
+export function getBalancesAtDate(input: TBuildBalancesInput, date: TISODate) {
+  return rewindBalances(input, date)
+}
+
+function rewindBalances(
+  input: TBuildBalancesInput,
+  date?: TISODate,
+  visit?: (change: TTransactionEffect, balances: TBalanceState) => void
+) {
+  let lastState = getCurrentBalanceState(
+    input.accounts,
+    input.debtors,
+    input.instrumentCodeById
+  )
+
+  for (let index = input.transactions.length - 1; index >= 0; index--) {
+    const transaction = input.transactions[index]
+    if (date && transaction.date <= date) break
+    const change = buildTransactionEffect(transaction, input)
+    visit?.(change, lastState)
+    lastState = subtractChange(lastState, change)
+  }
+
+  return lastState
+}
+
+export function buildTransactionEffect(
+  transaction: TTransaction,
+  input: {
+    merchants: ById<TMerchant>
+    instrumentCodeById: Record<TInstrumentId, TFxCode>
+    debtAccountId?: TAccountId
+  }
+): TTransactionEffect {
+  const { id, incomeAccount, outcomeAccount, income, outcome, date } =
+    transaction
+  const type = getTransactionType(transaction, input.debtAccountId)
+  const incomeFx = input.instrumentCodeById[transaction.incomeInstrument]
+  const outcomeFx = input.instrumentCodeById[transaction.outcomeInstrument]
+  const effect: TTransactionEffect = { id, date }
+
+  // A soft-deleted row can carry a leg an account deletion nulled. It moves
+  // nothing, so it contributes neither an account nor a debtor change.
+  if (incomeAccount === null || outcomeAccount === null) return effect
+
+  switch (type) {
+    case TrType.Income:
+      effect.accounts = { [incomeAccount]: { [incomeFx]: income } }
+      break
+
+    case TrType.Outcome:
+      effect.accounts = { [outcomeAccount]: { [outcomeFx]: -outcome } }
+      break
+
+    case TrType.Transfer:
+      effect.accounts = {
+        [incomeAccount]: { [incomeFx]: income },
+        [outcomeAccount]: { [outcomeFx]: -outcome },
+      }
+      break
+
+    case TrType.IncomeDebt:
+      effect.accounts = { [incomeAccount]: { [incomeFx]: income } }
+      effect.debtors = {
+        [getDebtorId(transaction, input.merchants)]: { [incomeFx]: -income },
+      }
+      break
+
+    case TrType.OutcomeDebt:
+      effect.accounts = { [outcomeAccount]: { [outcomeFx]: -outcome } }
+      effect.debtors = {
+        [getDebtorId(transaction, input.merchants)]: { [outcomeFx]: outcome },
+      }
+      break
+
+    default:
+      throw new Error('Unknown type ' + type)
+  }
+
+  return effect
+}
+
+export function buildBalancesByDate(input: {
+  balances: TBalances
+  historyStart: TISODate
+  currentDate: Date | TISODate
+}): TBalanceNode[] {
+  const dates = makeDateArray(
+    input.historyStart,
+    input.currentDate,
+    GroupBy.Day
+  )
+  let lastUsedBalance = input.balances.startingBalances
+
+  return dates.map(date => {
+    const balances = input.balances.byDay[date] || lastUsedBalance
+    lastUsedBalance = balances
+    return { date, balances }
+  })
+}
+
+export function convertBalancesToDisplay(
+  list: Array<TBalanceNode<TFxAmount>>,
+  convert: (amount: TFxAmount, date: TDateDraft) => number
+): Array<TBalanceNode<number>> {
+  return list.map(node => {
+    const displayNode: TBalanceNode<number> = {
+      date: node.date,
+      balances: { accounts: {}, debtors: {} },
+    }
+
+    entries(node.balances.accounts).forEach(([id, amount]) => {
+      const value = convert(amount, node.date)
+      console.assert(
+        Number.isFinite(value),
+        'Not converted correctly: ' + JSON.stringify(amount)
+      )
+      displayNode.balances.accounts[id] = value
+    })
+
+    entries(node.balances.debtors).forEach(([id, amount]) => {
+      const value = convert(amount, node.date)
+      console.assert(
+        Number.isFinite(value),
+        'Not converted correctly: ' + JSON.stringify(amount)
+      )
+      displayNode.balances.debtors[id] = value
+    })
+
+    return displayNode
+  })
+}
+
+export function getHistoryStart(
+  transactions: TTransaction[],
+  currentDate: Date | TISODate
+): TISODate {
+  const firstReasonableDate = '2000-01-01' as TISODate
+  const currentISODate = toISODate(currentDate)
+  const firstTransaction = transactions.find(
+    transaction =>
+      transaction.date >= firstReasonableDate &&
+      transaction.date <= currentISODate
+  )
+  if (!firstTransaction) return currentISODate
+  return firstTransaction.date
+}
+
+function subtractChange(
+  state: TBalanceState,
+  change: TTransactionEffect
+): TBalanceState {
+  const nextState: TBalanceState = { ...state }
+
+  if (change.accounts) {
+    nextState.accounts = { ...nextState.accounts }
+    entries(change.accounts).forEach(([id, amount]) => {
+      nextState.accounts[id] = subFxAmount(nextState.accounts[id], amount)
+    })
+  }
+
+  if (change.debtors) {
+    nextState.debtors = { ...nextState.debtors }
+    entries(change.debtors).forEach(([id, amount]) => {
+      nextState.debtors[id] = subFxAmount(nextState.debtors[id], amount)
+    })
+  }
+
+  return nextState
+}
+
+function getCurrentBalanceState(
+  accounts: ById<TAccount>,
+  debtors: ById<TDebtor>,
+  instrumentCodeById: Record<TInstrumentId, TFxCode>
+): TBalanceState {
+  const result: TBalanceState = {
+    accounts: {},
+    debtors: {},
+  }
+
+  Object.values(accounts).forEach(account => {
+    if (account.type === 'debt') return
+    const fxCode = instrumentCodeById[account.instrument]
+    result.accounts[account.id] = { [fxCode]: account.balance }
+  })
+  Object.values(debtors).forEach(debtor => {
+    result.debtors[debtor.id] = debtor.balance
+  })
+
+  return result
+}

@@ -1,6 +1,6 @@
-import React, { FC } from 'react'
-import { Box, Typography, Button } from '@mui/material'
-import { SyncIcon } from '6-shared/ui/Icons'
+import { Button } from '@/6-shared/ui/kit/Button'
+import type { FC } from 'react'
+import { SyncIcon } from '@/6-shared/ui/Icons'
 import { useTranslation } from 'react-i18next'
 
 interface ErrorMessageProps {
@@ -11,53 +11,33 @@ interface ErrorMessageProps {
 export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
   const { t } = useTranslation('errorBoudary')
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 'inherit',
-      }}
-    >
-      <Box
-        sx={{
-          p: 5,
-          mx: 'auto',
-          maxWidth: 500,
-        }}
-      >
-        <Typography variant="h4" sx={{ marginBottom: '16px' }}>
-          {t('title')}
-        </Typography>
+    <div className="flex h-[inherit] items-center justify-center">
+      <div className="mx-auto max-w-[500px] p-10">
+        <h1 className="mt-0 mb-4 text-display">{t('title')}</h1>
 
-        <Typography variant="body1" sx={{ marginBottom: '16px' }}>
-          {t('description')}
-        </Typography>
+        <p className="mt-0 mb-4 text-body">{t('description')}</p>
 
-        <Box sx={{ mt: 3 }}>
+        <div className="mt-6">
           <Button
-            variant="contained"
-            color="primary"
-            startIcon={<SyncIcon />}
+            size="sm"
+            variant="primary"
             onClick={() => window.location.reload()}
           >
+            <SyncIcon data-icon="inline-start" />
             {t('btnRefresh')}
           </Button>
 
-          <Button onClick={onLogOut} sx={{ ml: 2 }}>
+          <Button variant="ghost" size="sm" onClick={onLogOut} className="ml-4">
             {t('btnLogOut')}
           </Button>
 
           {!!message && (
-            <Typography
-              sx={{ mt: 6, color: 'text.secondary', marginBottom: '16px' }}
-              variant="body1"
-            >
+            <p className="mt-12 mb-4 text-body text-ui-secondary">
               {t('errorMsg', { message })}
-            </Typography>
+            </p>
           )}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }

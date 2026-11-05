@@ -1,70 +1,72 @@
-import type { EndpointPreference } from '6-shared/api/zenmoney'
-import type { AppThunk } from 'store'
-import { tokenStorage } from '6-shared/api/tokenStorage'
-import { zenmoney } from '6-shared/api/zenmoney'
-import { setToken } from 'store/token'
-import { applyServerPatch, resetData } from 'store/data'
-import { syncData } from '4-features/sync'
-import { convertZmToLocal, workerMethods } from 'worker'
-import { clearLocalData, saveDataLocally } from './localData'
-import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
-import { getDemoData } from 'demoData'
+import type { EndpointPreference } from '@/6-shared/api/zenmoney'
+import type { AppThunk } from '@/store'
+import { tokenStorage } from '@/6-shared/api/tokenStorage'
+import { zenmoney } from '@/6-shared/api/zenmoney'
+import { setToken } from '@/store/token'
+import { applyServerPatch, resetData } from '@/store/data'
+import { resetViews } from '@/store/view'
+import { refreshData } from '@/4-features/sync'
+import { convertDiff } from '@/6-shared/api/zm-adapter'
+import { clearLocalData } from './localData'
+import { zmPreferenceStorage } from '@/6-shared/api/zmPreferenceStorage'
 
-export const logOut = (): AppThunk => (dispatch, getState) => {
-  workerMethods.clearStorage()
+export const logOut = (): AppThunk<Promise<void>> => async dispatch => {
   dispatch(resetData())
+  dispatch(resetViews())
   dispatch(setToken(null))
-  dispatch(clearLocalData())
   tokenStorage.clear()
+  await dispatch(clearLocalData())
 }
 
 export const logIn =
   (endpoint: EndpointPreference): AppThunk =>
-  async (dispatch, getState) => {
-    // Clear all data before logging in
-    dispatch(logOut())
-
-    // Get token
+  async dispatch => {
+    // Open the popup in the click handler, before any asynchronous storage work.
     const token = await zenmoney.authorize(endpoint)
     if (!token) return
+
+    // Reset the previous replica only after authorization succeeds, and finish
+    // persistence cleanup before installing the new session.
+    await dispatch(logOut())
 
     // Save token and endpoint preference
     zmPreferenceStorage.set(endpoint)
     tokenStorage.set(token)
     dispatch(setToken(token))
 
-    // Sync data
-    dispatch(syncData())
+    // A fresh login has no outbox to push, and keeping the push path to the one
+    // deliberate user action makes that invariant auditable.
+    dispatch(refreshData())
   }
 
 export const loadBackup =
   (file: File): AppThunk<void> =>
-  async (dispatch, getState) => {
+  async dispatch => {
     try {
       const txt = await file.text()
       const data = JSON.parse(txt)
-      const converted = await convertZmToLocal(data)
+      const converted = convertDiff.toClient(data)
       // TODO: maybe later make more elegant solution for local data
       tokenStorage.set(zenmoney.fakeToken)
       dispatch(setToken(zenmoney.fakeToken))
       dispatch(applyServerPatch(converted))
-      dispatch(saveDataLocally())
     } catch (error) {
       console.error(error)
     }
   }
 
-export const loadDemoData =
-  (): AppThunk<void> => async (dispatch, getState) => {
-    try {
-      const diff = getDemoData()
-      console.log(diff)
-      // TODO: maybe later make more elegant solution for local data
-      tokenStorage.set(zenmoney.fakeToken)
-      dispatch(setToken(zenmoney.fakeToken))
-      dispatch(applyServerPatch(diff))
-      dispatch(saveDataLocally())
-    } catch (error) {
-      console.error(error)
-    }
+export const loadDemoData = (): AppThunk<void> => async dispatch => {
+  try {
+    // Demo data is a few hundred kilobytes, so it loads when the demo opens
+    // rather than with the app.
+    const { getDemoData } = await import('@/zerro-core/demo')
+    const diff = getDemoData()
+    console.log(diff)
+    // TODO: maybe later make more elegant solution for local data
+    tokenStorage.set(zenmoney.fakeToken)
+    dispatch(setToken(zenmoney.fakeToken))
+    dispatch(applyServerPatch(diff))
+  } catch (error) {
+    console.error(error)
   }
+}

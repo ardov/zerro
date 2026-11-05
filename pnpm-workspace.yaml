@@ -1,1 +1,5 @@
+allowBuilds:
+  # only reachable via sass, an optional peer of vite that this project never uses
+  '@parcel/watcher': false
+  esbuild: true
 minimumReleaseAge: 4320

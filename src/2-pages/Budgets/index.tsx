@@ -1,19 +1,21 @@
-import React, { FC, ReactElement, useCallback } from 'react'
-import { Helmet } from 'react-helmet'
-import { Box, Theme, useMediaQuery } from '@mui/material'
+import { useCallback } from 'react'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
+
+import { PanelScrollable } from '@/6-shared/ui/layout/Panel'
+import { useColumns } from '@/6-shared/ui/layout/useColumns'
+import { Columns } from '@/6-shared/ui/layout/Columns'
+import { AccountsPanel } from '@/3-widgets/account/AccountsPanel'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
-import { formatDate } from '6-shared/helpers/date'
-import { nextMonth, prevMonth, toISOMonth } from '6-shared/helpers/date'
-import { TEnvelopeId } from '5-entities/envelope'
-import { balances, TrFilterMode } from '5-entities/envBalances'
-import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
+import { formatDate } from '@/6-shared/helpers/date'
+import { nextMonth, prevMonth, toISOMonth } from '@/6-shared/helpers/date'
+
+import { useEnvTransactionsDrawer } from '@/3-widgets/global/EnvTransactionsDrawer'
 
 import { MonthProvider, useMonth } from './MonthProvider'
 import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnD/DnDContext'
-import { SmartBudgetPopover } from './BudgetPopover'
-import { SmartGoalPopover } from './GoalPopover'
 import { SideContent, useSideContent } from './SideContent'
 
 export default function WithMonth() {
@@ -26,6 +28,9 @@ export default function WithMonth() {
 
 function Budgets() {
   useMonthHotkeys()
+  const layout = useColumns()
+  const accountsPanelFits = layout.visible.includes('accounts')
+  const monthOverviewFits = layout.visible.includes('overview')
   const { t } = useTranslation('budgets')
   const [month] = useMonth()
   const openSide = useSideContent()
@@ -33,103 +38,48 @@ function Budgets() {
   const openOverview = useCallback(() => openSide('overview'), [openSide])
 
   const openTransactions = useCallback(
-    (opts: { id: TEnvelopeId; isExact?: boolean }) =>
-      transactionDrawer.open({
+    (opts: { id: core.envelopes.TEnvelopeId; isExact?: boolean }) =>
+      transactionDrawer({
         envelopeConditions: {
           id: opts.id,
           month,
-          mode: TrFilterMode.Envelope,
+          mode: core.transactions.TrFilterMode.Envelope,
           isExact: opts.isExact,
         },
       }),
     [month, transactionDrawer]
   )
 
-  const mainContent = (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'relative',
-        height: 'fit-content',
-        gap: 2,
-        width: '100%',
-        maxWidth: 800,
-        py: 3,
-      }}
-    >
-      <EnvelopeTable
-        month={month}
-        onShowTransactions={openTransactions}
-        onOpenOverview={openOverview}
-        onOpenDetails={openSide}
-      />
-    </Box>
-  )
-
   return (
     <>
-      <Helmet>
-        <title>
-          {t('pageTitle', { month: formatDate(month, 'LLLL yyyy') })} | Zerro
-        </title>
-        <meta name="description" content="" />
-        <link rel="canonical" href="https://zerro.app/budget" />
-      </Helmet>
+      <title>
+        {`${t('pageTitle', { month: formatDate(month, 'LLLL yyyy') })} | Zerro`}
+      </title>
+      <meta name="description" content="" />
+      <link rel="canonical" href="https://zerro.app/budget" />
 
       <DnDContext>
-        <BudgetLayout mainContent={mainContent} />
+        <Columns>
+          {accountsPanelFits && <AccountsPanel />}
+          <PanelScrollable contentClassName="flex justify-center">
+            <div className="relative flex h-fit w-full max-w-[800px] flex-col gap-4 pb-6">
+              <EnvelopeTable
+                month={month}
+                onShowTransactions={openTransactions}
+                onOpenOverview={openOverview}
+                onOpenDetails={openSide}
+              />
+            </div>
+          </PanelScrollable>
+          <SideContent docked={monthOverviewFits} />
+        </Columns>
       </DnDContext>
-
-      <SmartGoalPopover />
-      <SmartBudgetPopover />
     </>
   )
 }
 
-const sideWidth = 360
-const sideSx = {
-  width: sideWidth,
-  flexShrink: 0,
-  overflow: 'auto',
-  bgcolor: 'background.paper',
-}
-
-const BudgetLayout: FC<{
-  mainContent: ReactElement
-}> = props => {
-  const { mainContent } = props
-  const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
-
-  return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexGrow: 1,
-          justifyContent: 'center',
-          height: '100%',
-          overflow: 'auto',
-          px: { xs: 1, md: 3 },
-          pb: 6,
-        }}
-      >
-        {mainContent}
-      </Box>
-
-      {isMD ? (
-        <SideContent width={sideWidth} />
-      ) : (
-        <Box sx={sideSx}>
-          <SideContent width={sideWidth} docked />
-        </Box>
-      )}
-    </Box>
-  )
-}
-
 function useMonthHotkeys() {
-  const monthList = balances.useMonthList()
+  const monthList = useAppSelector(core.months.selectList)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()

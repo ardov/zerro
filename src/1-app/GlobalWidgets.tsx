@@ -1,23 +1,29 @@
-import React from 'react'
-import { SmartConfirm } from '6-shared/ui/SmartConfirm'
-import { SmartTransactionListDrawer } from '3-widgets/global/TransactionListDrawer'
-import { SmartTransactionPreview } from '3-widgets/global/TransactionPreviewDrawer'
-import { TrContextMenu } from '3-widgets/global/TrContextMenu'
-import { AccountContextMenu } from '3-widgets/global/AccountContextMenu'
-import { SmartEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
+import { TransactionListDrawer } from '@/3-widgets/global/TransactionListDrawer'
+import { TransactionPreviewDrawer } from '@/3-widgets/global/TransactionPreviewDrawer'
+import { JournalRecoveryNotice } from '@/3-widgets/JournalRecoveryNotice'
+import { HistoryPanel } from '@/3-widgets/History/HistoryPanel'
+import { PersistenceWarningNotice } from '@/3-widgets/PersistenceWarningNotice'
+import { OutboxRecoveryNotice } from '@/3-widgets/OutboxRecoveryNotice'
+import { SyncProgressDialog } from '@/3-widgets/SyncProgressDialog'
+import { SettingsScreen } from '@/3-widgets/Navigation/SettingsScreen'
 
+/** The screens that can be opened from anywhere, and the notices.
+ *
+ * Popups are not here any more: `ask` builds them at the moment of the
+ * question and the overlay host draws them, so there is nothing left to mount
+ * in advance. */
 export const GlobalWidgets = () => {
   return (
     <>
-      {/* Global confirm */}
-      <SmartConfirm />
+      <JournalRecoveryNotice />
+      <OutboxRecoveryNotice />
+      <PersistenceWarningNotice />
+      <SyncProgressDialog />
 
-      {/* Global widgets */}
-      <SmartTransactionListDrawer />
-      <SmartEnvTransactionsDrawer />
-      <SmartTransactionPreview />
-      <TrContextMenu />
-      <AccountContextMenu />
+      <SettingsScreen />
+      <HistoryPanel />
+      <TransactionPreviewDrawer />
+      <TransactionListDrawer />
     </>
   )
 }

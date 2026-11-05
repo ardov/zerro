@@ -1,6 +1,7 @@
-import React from 'react'
+import { core } from '@/zerro-core/redux'
+
 import { useTranslation } from 'react-i18next'
-import { Paper, Card, Typography, Box, Divider } from '@mui/material'
+import { Divider } from '@/6-shared/ui/kit/Divider'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -10,19 +11,16 @@ import {
   Tooltip as RechartsTooltip,
   CartesianGrid,
 } from 'recharts'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { useAppTheme } from '6-shared/ui/theme'
-import { formatMoney } from '6-shared/helpers/money'
-import { formatDate, parseDate } from '6-shared/helpers/date'
-import { TISODate } from '6-shared/types'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import { formatMoney } from '@/6-shared/helpers/money'
+import { formatDate, parseDate } from '@/6-shared/helpers/date'
+import type { TISODate } from '@/6-shared/types'
 
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
-import { DataLine } from '3-widgets/DataLine'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
+import { DataLine } from '@/3-widgets/DataLine'
 import { summarizeCashflow, useCashFlow } from '../shared/cashflow'
-import { Period, PeriodTitle } from '../shared/period'
+import type { Period } from '../shared/period'
+import { PeriodTitle } from '../shared/period'
 
 type Point = {
   date: TISODate
@@ -45,30 +43,24 @@ function formatSavingsRate(savingsRate: number) {
 export function WidgetCashflow(props: WidgetCashflowProps) {
   const { t } = useTranslation('analytics')
   const { period, onTogglePeriod } = props
-  const theme = useAppTheme()
   const points = useCashFlow(period)
 
   const { income, outcome } = summarizeCashflow(points)
   const netIncome = income - outcome
   const savingsRate = income > 0 ? netIncome / income : 0
 
-  const colorIncome = theme.palette.success.main
-  const colorOutcome = theme.palette.error.main
-  const colorAxisText = theme.palette.text.disabled
+  const colorIncome = 'var(--success)'
+  const colorOutcome = 'var(--error)'
+  const colorAxisText = 'var(--disabled-foreground)'
 
   return (
-    <Paper>
-      <Box
-        sx={{
-          p: 2,
-          minWidth: '100%',
-        }}
-      >
-        <Typography variant="h5">
+    <div className="layout-panel rounded-smooth">
+      <div className="min-w-full p-4">
+        <h2 className="m-0 text-title-lg">
           {t('incomesAndOutcomes')}{' '}
           <span
             style={{
-              color: theme.palette.secondary.main,
+              color: 'var(--interactive)',
               cursor: 'pointer',
               whiteSpace: 'nowrap',
             }}
@@ -77,13 +69,13 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
             <PeriodTitle period={period} />
           </span>{' '}
           <Summary income={income} outcome={outcome} />
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+        </h2>
+        <p className="mt-2 mb-0 text-body text-muted-foreground">
           {t(savingsRate >= 0 ? 'savingsRatePositive' : 'savingsRateNegative', {
             percent: formatSavingsRate(savingsRate),
           })}
-        </Typography>
-      </Box>
+        </p>
+      </div>
       <ResponsiveContainer height={300}>
         <AreaChart data={points}>
           <defs>
@@ -131,7 +123,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
           <CartesianGrid opacity={0.5} vertical={false} />
         </AreaChart>
       </ResponsiveContainer>
-    </Paper>
+    </div>
   )
 }
 
@@ -150,7 +142,7 @@ type TPayload = {
 
 const CustomTooltip = (props: any) => {
   const { t } = useTranslation('analytics')
-  const [currency] = displayCurrency.useDisplayCurrency()
+  const [currency] = core.currency.useDisplayCurrency()
   const payload = props.payload as TPayload[]
   const active = props.active as boolean
   if (!active || !payload?.length) return null
@@ -161,10 +153,10 @@ const CustomTooltip = (props: any) => {
   const savingsRate = income > 0 ? (diff / income) * 100 : 0
 
   return (
-    <Card elevation={10} sx={{ p: 2 }}>
-      <Typography variant="h6">
+    <div className="rounded-lg bg-card text-card-foreground shadow-elevation-10 p-4">
+      <p className="m-0 text-title">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
-      </Typography>
+      </p>
       {payload.map(v => (
         <DataLine
           color={v.color}
@@ -174,7 +166,7 @@ const CustomTooltip = (props: any) => {
           currency={currency}
         />
       ))}
-      <Divider sx={{ my: 1 }} />
+      <Divider className="my-2" />
       <DataLine
         color="transparent"
         name={t(diff < 0 ? 'netOutcome' : 'netIncome')}
@@ -187,7 +179,7 @@ const CustomTooltip = (props: any) => {
         amount={savingsRate}
         currency="%"
       />
-    </Card>
+    </div>
   )
 }
 
@@ -204,25 +196,23 @@ function tickFormatter(date: TISODate) {
 function Summary(props: { income: number; outcome: number }) {
   const { income, outcome } = props
   const { t } = useTranslation('analytics')
-  const theme = useAppTheme()
 
-  const color =
-    income >= outcome ? theme.palette.success.main : theme.palette.error.main
+  const color = income >= outcome ? 'var(--success)' : 'var(--error)'
   const netIncome = income - outcome
 
   const tooltip = (
-    <Box p={1}>
-      <Typography variant="body2" gutterBottom>
+    <div className="p-2">
+      <p className="mt-0 mb-[0.35em] text-body-sm">
         {t('income')}: <DisplayAmount value={income} />
-      </Typography>
-      <Typography variant="body2">
+      </p>
+      <p className="m-0 text-body-sm">
         {t('outcome')}: <DisplayAmount value={outcome} />
-      </Typography>
-    </Box>
+      </p>
+    </div>
   )
 
   return (
-    <Tooltip arrow placement={'bottom'} title={tooltip}>
+    <Tooltip side={'bottom'} content={tooltip}>
       <span>
         <DisplayAmount
           value={netIncome}

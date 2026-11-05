@@ -1,141 +1,61 @@
-import React, { useState, FC, useCallback } from 'react'
-import { TransactionList } from '3-widgets/transaction/TransactionList'
+import { useCallback, useState } from 'react'
+import { TransactionList } from '@/3-widgets/transaction/TransactionList'
 import {
-  Box,
-  Drawer,
-  useMediaQuery,
-  Paper,
-  Theme,
-  DrawerProps,
-} from '@mui/material'
-import {
-  TrEmptyState,
-  TransactionPreview,
-} from '3-widgets/transaction/TransactionPreview'
-import { Helmet } from 'react-helmet'
-import { registerPopover } from '6-shared/historyPopovers'
-import { TTransaction, TTransactionId } from '6-shared/types'
-import { sendEvent } from '6-shared/helpers/tracking'
+  transactionScreen,
+  TransactionScreenPanel,
+} from '@/3-widgets/global/TransactionPreviewDrawer'
+import type { TTransactionId } from '@/6-shared/types'
+import { track } from '@/6-shared/analytics'
 import { useTranslation } from 'react-i18next'
+import { Panel } from '@/6-shared/ui/layout/Panel'
+import { useColumns } from '@/6-shared/ui/layout/useColumns'
+import { Columns } from '@/6-shared/ui/layout/Columns'
+import { AccountsPanel } from '@/3-widgets/account/AccountsPanel'
 
-const sideWidth = 360
-const sideSx = {
-  width: sideWidth,
-  flexShrink: 0,
-  overflow: 'auto',
-  bgcolor: 'background.paper',
-}
+import { useTransactionsPageView } from './useTransactionsPageView'
 
 export default function TransactionsView() {
   const { t } = useTranslation('transactions')
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
+  const layout = useColumns()
+  const docked = layout.visible.includes('detail')
+  const accountsPanelFits = layout.visible.includes('accounts')
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
-  const { open } = trPreview.useMethods()
-  const openedProps = trPreview.useProps()
-  const opened = openedProps.displayProps.open && openedProps.extraProps.id
+  const view = useTransactionsPageView()
+  // One selected editor moves between its column and a modal as space changes.
+  const opened = transactionScreen.useValue()
+  const openPreview = transactionScreen.useOpen()
 
   const handleTrOpen = useCallback(
     (id: TTransactionId) => {
-      sendEvent('Transaction: see details')
-      open({
-        id,
-        onSelectSimilar: changed => setCheckedDate(new Date(changed)),
-      })
+      track('transaction_details_viewed', { source: 'transactions_page' })
+      openPreview(id)
     },
-    [open]
+    [openPreview]
   )
 
   return (
     <>
-      <Helmet>
-        <title>{t('pageTitle')}</title>
-        <meta name="description" content={t('pageDescription')} />
-        <link rel="canonical" href="https://zerro.app/transactions" />
-      </Helmet>
-      <Box
-        sx={{
-          display: 'flex',
-          height: '100vh',
-        }}
-      >
-        <Box
-          sx={{
-            p: { xs: 0, md: 2 },
-            flexGrow: 1,
-            minWidth: 0,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <Paper
-            sx={{
-              flex: '1 1 auto',
-              display: 'flex',
-              overflow: 'hidden',
-              maxWidth: 560,
-              pb: { xs: 7, md: 0 },
-            }}
-          >
-            <TransactionList
-              checkedDate={checkedDate}
-              sx={{ flex: '1 1 auto' }}
-              onTrOpen={handleTrOpen}
-              opened={opened || undefined}
-            />
-          </Paper>
-        </Box>
+      <title>{`${t('pageTitle')} | Zerro`}</title>
+      <meta name="description" content={t('pageDescription')} />
+      <link rel="canonical" href="https://zerro.app/transactions" />
+      <Columns>
+        {accountsPanelFits && <AccountsPanel />}
 
-        {isMobile ? (
-          <SideContent width={sideWidth} />
-        ) : (
-          <Box sx={sideSx}>
-            <SideContent width={sideWidth} docked />
-          </Box>
-        )}
-      </Box>
+        <Panel>
+          <TransactionList
+            checkedDate={checkedDate}
+            view={view}
+            className="grow"
+            onTrOpen={handleTrOpen}
+            opened={opened}
+          />
+        </Panel>
+
+        <TransactionScreenPanel
+          docked={docked}
+          onSelectSimilar={changed => setCheckedDate(new Date(changed))}
+        />
+      </Columns>
     </>
-  )
-}
-
-const trPreview = registerPopover<
-  {
-    id?: TTransactionId
-    onSelectSimilar?: (changed: TTransaction['changed']) => void
-  },
-  DrawerProps
->('transactionPreview', {})
-
-const SideContent: FC<{ docked?: boolean; width: number }> = ({
-  docked,
-  width,
-}) => {
-  const { displayProps, extraProps, open } = trPreview.useProps()
-  const { id, onSelectSimilar } = extraProps
-  const isXS = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
-
-  const openAnother = (id: TTransactionId) => {
-    open({ id, onSelectSimilar })
-  }
-
-  const drawerContent = id ? (
-    <TransactionPreview
-      id={extraProps.id || ''}
-      key={extraProps.id}
-      onClose={displayProps.onClose}
-      onOpenOther={openAnother}
-      onSelectSimilar={onSelectSimilar}
-    />
-  ) : (
-    <TrEmptyState />
-  )
-
-  if (docked) {
-    return displayProps.open ? drawerContent : <TrEmptyState />
-  }
-
-  return (
-    <Drawer {...displayProps} anchor="right">
-      <Box sx={{ width: isXS ? '100vw' : width }}>{drawerContent}</Box>
-    </Drawer>
   )
 }

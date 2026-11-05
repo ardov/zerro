@@ -1,0 +1,47 @@
+@layer components {
+  /* The dashed orbit says that this determinate step is moving right now.
+     Rotation is constant because it represents ongoing work, not travel. */
+  .radial-progress-activity {
+    transform-box: view-box;
+    transform-origin: center;
+    transition: 0.5s ease-out 0.1s;
+    animation: radial-progress-activity 3s linear infinite paused;
+  }
+
+  /* Only a moving indicator spins. A stopped ring stays paused at its angle,
+     so the dashes close up in place, and a paused animation does not repaint;
+     a static ring's outer circle is solid, so the angle is invisible there. */
+  .radial-progress-activity[data-moving] {
+    animation-play-state: running;
+  }
+
+  .radial-progress-activity ~ circle {
+    transition: 0.5s ease-out;
+  }
+
+  .radial-progress-activity ~ path {
+    transition: 0.3s ease-out;
+  }
+
+  .radial-progress-activity ~ path[data-completed] {
+    transition-delay: 0.4s;
+  }
+
+  @keyframes radial-progress-activity {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .radial-progress-activity ~ circle,
+    .radial-progress-activity ~ path,
+    .radial-progress-activity {
+      transition: none;
+    }
+    .radial-progress-activity,
+    .radial-progress-activity[data-moving] {
+      animation: none;
+    }
+  }
+}

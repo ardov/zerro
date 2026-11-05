@@ -1,0 +1,21 @@
+@layer components {
+  /* Always dark in both themes: colours read truest against black. */
+  .color-picker {
+    --color-picker-surface: oklch(0 0 0);
+    --color-picker-field: oklch(0.27 0 0);
+    --color-picker-text: oklch(1 0 0);
+
+    color-scheme: dark;
+  }
+
+  .color-picker-thumb {
+    outline: 1px solid currentcolor;
+  }
+
+  /* Keyboard focus thickens the thumb; the plane itself draws no ring. */
+  :root[data-input-modality='keyboard']
+    .color-picker-plane:focus
+    .color-picker-thumb {
+    outline-width: 2px;
+  }
+}

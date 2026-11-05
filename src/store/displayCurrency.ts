@@ -1,22 +1,24 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AppThunk, RootState } from 'store'
-import { TFxCode } from '6-shared/types'
-import { sendEvent } from '6-shared/helpers/tracking'
+import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
+import type { AppThunk, RootState } from '@/store'
+import type { TFxCode } from '@/6-shared/types'
+import { track } from '@/6-shared/analytics'
+import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 
 const KEY = 'display-currency'
 const savedCurrency = {
   get: () => {
-    const raw = localStorage.getItem(KEY)
+    const raw = safeLocalStorage.getItem(KEY)
     if (!raw) return null
     try {
       return JSON.parse(raw) as TFxCode
-    } catch (error) {
+    } catch {
       return null
     }
   },
   set: (currency: TFxCode | null) => {
-    if (currency) localStorage.setItem(KEY, JSON.stringify(currency))
-    else localStorage.removeItem(KEY)
+    if (currency) safeLocalStorage.setItem(KEY, JSON.stringify(currency))
+    else safeLocalStorage.removeItem(KEY)
   },
 }
 
@@ -41,8 +43,11 @@ export const getSavedCurrency = (state: RootState) => state.displayCurrency
 
 export const setSavedCurrency =
   (currency: TFxCode | null): AppThunk =>
-  (dispatch, getState) => {
+  dispatch => {
     savedCurrency.set(currency)
     dispatch(setCurrency(currency))
-    sendEvent('DisplayCurrency: set')
+    track('setting_changed', {
+      setting: 'display_currency',
+      value: currency ? 'set' : 'changed',
+    })
   }

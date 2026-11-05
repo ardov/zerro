@@ -1,27 +1,39 @@
-import React from 'react'
+import { BalanceSubheader } from '@/3-widgets/BalanceSubheader'
 import { useTranslation } from 'react-i18next'
-import { List } from '@mui/material'
-import { Debtor, Subheader } from './components'
-import { addFxAmount, isZero } from '6-shared/helpers/money'
-import { keys } from '6-shared/helpers/keys'
-import { TFxCode } from '6-shared/types'
-import { debtorModel } from '5-entities/debtors'
+import type { ListRowSize } from '@/6-shared/ui/kit/ListRow'
+import { Debtor } from './components'
+import { addFxAmount, isZero } from '@/6-shared/helpers/money'
+import { keys } from '@/6-shared/helpers/keys'
+import type { TFxCode } from '@/6-shared/types'
+import { core } from '@/zerro-core/redux'
+
+import { useAppSelector } from '@/store'
+import { useTransactionDrawer } from '@/3-widgets/global/TransactionListDrawer'
 
 type TDebtorInfo = {
+  id: string
   name: string
   balance: number
   currency: TFxCode
 }
 
-export function DebtorList({ className = '' }) {
+export function DebtorList({
+  className = '',
+  size = 'sm',
+}: {
+  className?: string
+  size?: ListRowSize
+}) {
   const { t } = useTranslation('common')
-  const debtors = debtorModel.useDebtors()
+  const debtors = useAppSelector(core.debtors.selectAll)
+  const openTransactions = useTransactionDrawer()
   const list = Object.values(debtors)
     .filter(debtor => !isZero(debtor.balance))
     .reduce((acc, debtor) => {
       keys(debtor.balance).forEach(currency => {
         if (!debtor.balance[currency]) return
         acc.push({
+          id: debtor.id,
           name: debtor.name,
           balance: debtor.balance[currency],
           currency,
@@ -43,34 +55,54 @@ export function DebtorList({ className = '' }) {
     {}
   )
 
+  function openDebtorTransactions(d: TDebtorInfo) {
+    openTransactions({
+      title: `${d.name} · ${d.currency}`,
+      initialQuery: {
+        clauses: [
+          { kind: 'debtor', ids: [d.id] },
+          { kind: 'amount', currencies: [d.currency] },
+        ],
+      },
+    })
+  }
+
   return (
     <div className={className}>
       {!!iOweList.length && (
-        <List dense>
-          <Subheader name={t('iOwe')} amount={totalOwe} />
+        <div className="relative flex flex-col py-2">
+          <BalanceSubheader size={size} name={t('iOwe')} amount={totalOwe} />
           {iOweList.map(d => (
             <Debtor
-              key={d.name + d.currency}
+              size={size}
+              key={d.id + d.currency}
               name={d.name}
               currency={d.currency}
               balance={d.balance}
+              onClick={() => openDebtorTransactions(d)}
             />
           ))}
-        </List>
+        </div>
       )}
 
       {!!iLentList.length && (
-        <List dense>
-          <Subheader name={t('iAmOwed')} amount={totalLent} />
+        <div className="relative flex flex-col py-2">
+          <BalanceSubheader
+            size={size}
+            name={t('iAmOwed')}
+            amount={totalLent}
+          />
           {iLentList.map(d => (
             <Debtor
-              key={d.name + d.currency}
+              size={size}
+              key={d.id + d.currency}
               name={d.name}
               currency={d.currency}
               balance={d.balance}
+              onClick={() => openDebtorTransactions(d)}
             />
           ))}
-        </List>
+        </div>
       )}
     </div>
   )

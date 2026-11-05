@@ -1,13 +1,12 @@
-import { useMemo } from 'react'
-import { TISODate } from '6-shared/types'
-import { GroupBy, makeDateArray, toGroup } from '6-shared/helpers/date'
+import { core } from '@/zerro-core/redux'
 
-import { useAppSelector } from 'store/index'
-import { accountModel } from '5-entities/account'
-import { instrumentModel } from '5-entities/currency/instrument'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { trModel } from '5-entities/transaction'
-import { Period, getStart } from './period'
+import type { TISODate } from '@/6-shared/types'
+import { GroupBy, makeDateArray, toGroup } from '@/6-shared/helpers/date'
+
+import { useAppSelector } from '@/store/index'
+
+import type { Period } from './period'
+import { getStart } from './period'
 import { calcCashflow } from './calcCashflow'
 
 export type TCashflowPoint = {
@@ -51,26 +50,23 @@ export function useCashFlow(
   period: Period,
   aggregation: GroupBy = GroupBy.Month
 ): TCashflowPoint[] {
-  const transactionHistory = trModel.useTransactionsHistory()
-  const debtAccId = accountModel.useDebtAccountId()
-  const instCodeMap = instrumentModel.useInstCodeMap()
-  const accounts = accountModel.usePopulatedAccounts()
-  const aggregatedNodes = useMemo(
-    () =>
-      calcCashflow(
-        transactionHistory,
-        debtAccId,
-        instCodeMap,
-        accounts,
-        aggregation
-      ),
-    [aggregation, debtAccId, instCodeMap, transactionHistory]
+  const transactionHistory = useAppSelector(core.transactions.selectHistory)
+  const debtAccId = useAppSelector(core.accounts.selectDebtAccountId)
+  const instCodeMap = core.instruments.useCodeMap()
+  const accounts = core.accounts.usePopulated()
+  const aggregatedNodes = calcCashflow(
+    transactionHistory,
+    debtAccId,
+    instCodeMap,
+    accounts,
+    aggregation
   )
 
-  const toDisplay = displayCurrency.useToDisplay('current')
-  const historyStart = useAppSelector(trModel.getHistoryStart)
+  const toDisplay = core.currency.useToDisplay('current')
+  const historyStart = useAppSelector(core.transactions.selectHistoryStart)
   const firstDate = getStartDate(period, aggregation, historyStart)
 
+  // eslint-disable-next-line react-hooks/purity -- 'today' is intentionally sampled on render
   return makeDateArray(firstDate, Date.now(), aggregation).map(date => {
     const point = aggregatedNodes[date] || {
       date,

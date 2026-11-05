@@ -1,348 +1,100 @@
-import type { TUnixTime, TUnits, TISODate, TMsTime } from './types'
-import tagIcons from '../tagIcons.json'
+import type { TUnixTime } from './types'
+import type {
+  TZmInstrument,
+  TZmCompany,
+  TZmCountry,
+  TZmUser,
+  TZmMerchant,
+  TZmAccount,
+  TZmTag,
+  TZmBudget,
+  TZmReminder,
+  TZmReminderMarker,
+  TZmTransaction,
+  TDataEntityKey,
+} from '@/zerro-core/internal/domain/zenmoney'
 
-type TIconName = keyof typeof tagIcons
+export type {
+  TFxCode,
+  TInstrument,
+  TInstrumentId,
+  TZmInstrument,
+} from '@/zerro-core/internal/domain/zenmoney'
+export type {
+  TCompany,
+  TCompanyId,
+  TZmCompany,
+} from '@/zerro-core/internal/domain/zenmoney'
+export type {
+  TCountry,
+  TCountryId,
+  TZmCountry,
+} from '@/zerro-core/internal/domain/zenmoney'
+export type {
+  TUser,
+  TUserId,
+  TZmUser,
+} from '@/zerro-core/internal/domain/zenmoney/entities/users'
+export type {
+  TMerchant,
+  TMerchantId,
+  TZmMerchant,
+} from '@/zerro-core/internal/domain/zenmoney'
+export type {
+  TAccount,
+  TAccountId,
+  TZmAccount,
+} from '@/zerro-core/internal/domain/zenmoney'
+export type {
+  TTag,
+  TTagId,
+  TZmTag,
+} from '@/zerro-core/internal/domain/zenmoney'
+export type {
+  TBudget,
+  TBudgetId,
+  TZmBudget,
+} from '@/zerro-core/internal/domain/zenmoney'
+export { globalBudgetTagId } from '@/zerro-core/internal/domain/zenmoney'
+export type {
+  TReminder,
+  TReminderId,
+  TZmReminder,
+} from '@/zerro-core/internal/domain/zenmoney'
+export type {
+  TReminderMarker,
+  TReminderMarkerId,
+  TZmReminderMarker,
+} from '@/zerro-core/internal/domain/zenmoney'
+export type {
+  TTransaction,
+  TTransactionId,
+  TTransactionEditablePatch,
+  TBankOperationId,
+  TZmTransaction,
+} from '@/zerro-core/internal/domain/zenmoney'
+export type { TOpenEnum } from '@/zerro-core/internal/domain/foundation/types'
+export { AccountType } from '@/zerro-core/internal/domain/zenmoney'
+export {
+  accountOffsetIntervals,
+  accountPayoffIntervals,
+  accountTypes,
+  balanceCorrectionTypes,
+  reminderIntervals,
+  reminderMarkerStates,
+} from '@/zerro-core/internal/domain/zenmoney'
 
 // export type TToken = TAccessToken['access_token']
 
-export enum DataEntity {
-  Instrument = 'instrument',
-  Country = 'country',
-  Company = 'company',
-  User = 'user',
-  Account = 'account',
-  Merchant = 'merchant',
-  Tag = 'tag',
-  Budget = 'budget',
-  Reminder = 'reminder',
-  ReminderMarker = 'reminderMarker',
-  Transaction = 'transaction',
-}
-
 // ---------------------------------------------------------------------
-// INSTRUMENT
+// DELETION — owned by Zerro Core
 // ---------------------------------------------------------------------
 
-export type TInstrumentId = number
-
-export type TFxCode = string
-
-export type TZmInstrument = {
-  id: TInstrumentId
-  changed: TUnixTime
-  title: string
-  shortTitle: TFxCode
-  symbol: string
-  rate: number
-}
-
-export type TInstrument = TZmInstrument & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// COUNTRY
-// ---------------------------------------------------------------------
-
-export type TCountryId = number
-
-export type TZmCountry = {
-  id: TCountryId
-  title: string
-  currency: TInstrumentId
-  domain: string | null
-}
-
-export type TCountry = TZmCountry
-
-// ---------------------------------------------------------------------
-// COMPANY
-// ---------------------------------------------------------------------
-
-export type TCompanyId = number
-
-export type TZmCompany = {
-  id: TCompanyId
-  changed: TUnixTime
-  title: string
-  fullTitle: string | null
-  www: string | null
-  country: TCountryId | null
-  countryCode: string | null
-  deleted: boolean
-}
-
-export type TCompany = TZmCompany & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// USER
-// ---------------------------------------------------------------------
-
-export type TUserId = number
-
-export type TZmUser = {
-  id: TUserId
-  changed: TUnixTime
-  currency: TInstrumentId
-  parent: TUserId | null
-  country: TCountryId
-  countryCode: string
-  email: string | null
-  login: string | null
-  monthStartDay: 1
-  isForecastEnabled: boolean
-  planBalanceMode: string // 'balance'
-  planSettings: string
-  paidTill: TUnixTime
-  subscription: '10yearssubscription' | '1MonthSubscription' | string
-  subscriptionRenewalDate: any | null
-}
-
-export type TUser = TZmUser & {
-  changed: TMsTime
-  paidTill: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// ACCOUNT
-// ---------------------------------------------------------------------
-
-export type TAccountId = string
-
-export enum AccountType {
-  Cash = 'cash',
-  Ccard = 'ccard',
-  Checking = 'checking',
-  Loan = 'loan',
-  Deposit = 'deposit',
-  Emoney = 'emoney',
-  Debt = 'debt',
-}
-
-export type TZmAccount = {
-  id: TAccountId
-  changed: TUnixTime
-  user: TUserId
-  instrument: TInstrumentId
-  title: string
-  role: number | null
-  company: TCompanyId | null
-  type: AccountType
-  syncID: string[] | null
-  balance: TUnits
-  // Для deposit и loan поле startBalance имеет смысл начального взноса/тела кредита
-  startBalance: TUnits
-  creditLimit: TUnits
-  inBalance: boolean
-  savings: boolean
-  enableCorrection: boolean
-  enableSMS: boolean
-  archive: boolean
-  private: boolean
-  // Для счетов с типом отличных от 'loan' и 'deposit' в  этих полях можно ставить null
-  capitalization: boolean | null
-  percent: number | null
-  startDate: TISODate | null
-  endDateOffset: number | null
-  endDateOffsetInterval: 'day' | 'week' | 'month' | 'year' | null
-  payoffStep: number | null
-  payoffInterval: 'month' | 'year' | null
-}
-
-export type TAccount = TZmAccount & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// MERCHANT
-// ---------------------------------------------------------------------
-
-export type TMerchantId = string
-
-export type TZmMerchant = {
-  id: TMerchantId
-  changed: TUnixTime
-  user: TUserId
-  title: string
-}
-
-export type TMerchant = TZmMerchant & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// TAG
-// ---------------------------------------------------------------------
-
-export type TTagId = string
-
-export type TZmTag = {
-  id: TTagId
-  changed: TUnixTime
-  user: TUserId
-  title: string
-  parent: TTagId | null
-  icon: TIconName | null
-  staticId: string | null
-  picture: string | null
-  color: number | null
-  showIncome: boolean
-  showOutcome: boolean
-  budgetIncome: boolean
-  budgetOutcome: boolean
-  required: boolean | null
-}
-
-export type TTag = TZmTag & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// BUDGET
-// ---------------------------------------------------------------------
-
-export type TBudgetId = `${TISODate}#${TTagId}`
-
-export const globalBudgetTagId = '00000000-0000-0000-0000-000000000000'
-
-export type TZmBudget = {
-  changed: TUnixTime
-  user: TUserId
-  tag: TTagId | '00000000-0000-0000-0000-000000000000' | null
-  date: TISODate
-  income: TUnits
-  incomeLock: boolean
-  outcome: TUnits
-  outcomeLock: boolean
-}
-
-export type TBudget = TZmBudget & {
-  changed: TMsTime
-  id: TBudgetId // new
-}
-
-// ---------------------------------------------------------------------
-// REMINDER
-// ---------------------------------------------------------------------
-
-export type TReminderId = string
-
-export type TZmReminder = {
-  id: TReminderId
-  changed: TUnixTime
-  user: TUserId
-  incomeInstrument: TInstrumentId
-  incomeAccount: string
-  income: TUnits
-  outcomeInstrument: TInstrumentId
-  outcomeAccount: string
-  outcome: TUnits
-  tag: string[] | null
-  merchant: TMerchantId | null
-  payee: string | null
-  comment: string | null
-  interval: 'day' | 'week' | 'month' | 'year' | null
-  step: number | null
-  points: number[] | null
-  startDate: TISODate
-  endDate: TISODate
-  notify: boolean
-}
-
-export type TReminder = TZmReminder & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// REMINDER_MARKER
-// ---------------------------------------------------------------------
-
-export type TReminderMarkerId = string
-
-export type TZmReminderMarker = {
-  id: TReminderMarkerId // UUID
-  changed: TUnixTime
-  user: TUserId
-  incomeInstrument: TInstrumentId
-  incomeAccount: TAccountId
-  income: TUnits
-  outcomeInstrument: TInstrumentId
-  outcomeAccount: TAccountId
-  outcome: TUnits
-  tag: TTagId[] | null
-  merchant: TMerchantId | null
-  payee: string | null
-  comment: string | null
-  date: TISODate
-  reminder: TReminderId
-  state: 'planned' | 'processed' | 'deleted'
-  notify: boolean
-}
-
-export type TReminderMarker = TZmReminderMarker & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// TRANSACTION
-// ---------------------------------------------------------------------
-
-export type TTransactionId = string
-
-export type TZmTransaction = {
-  id: TTransactionId
-  changed: TUnixTime
-  created: TUnixTime
-  user: TUserId
-  deleted: boolean
-  hold: boolean | null
-  viewed?: boolean
-  qrCode: string | null
-  incomeBankID: TCompanyId | null
-  incomeInstrument: TInstrumentId
-  incomeAccount: TAccountId
-  income: TUnits
-  outcomeBankID: TCompanyId | null
-  outcomeInstrument: TInstrumentId
-  outcomeAccount: TAccountId
-  outcome: TUnits
-  tag: TTagId[] | null
-  merchant: TMerchantId | null
-  payee: string | null
-  originalPayee: string | null
-  comment: string | null
-  date: TISODate
-  mcc: number | null
-  reminderMarker: TReminderMarkerId | null
-  opIncome: TUnits | null
-  opIncomeInstrument: TInstrumentId | null
-  opOutcome: TUnits | null
-  opOutcomeInstrument: TInstrumentId | null
-  latitude: number | null
-  longitude: number | null
-}
-
-export type TTransaction = TZmTransaction & {
-  changed: TMsTime
-  created: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// DELETION
-// ---------------------------------------------------------------------
-
-export type TZmDeletionObject = {
-  id: string | number
-  object: DataEntity
-  stamp: TUnixTime
-  user: TUserId
-}
-
-export type TDeletionObject = TZmDeletionObject & {
-  stamp: TMsTime
-}
+export type {
+  TZmDeletionObject,
+  TDeletionObject,
+} from '@/zerro-core/internal/domain/zenmoney'
+import type { TZmDeletionObject } from '@/zerro-core/internal/domain/zenmoney'
 
 // ---------------------------------------------------------------------
 // DIFF
@@ -364,23 +116,13 @@ export type TZmDiff = {
   transaction?: TZmTransaction[]
 }
 
-export type TDiff = {
-  serverTimestamp?: TMsTime
-  deletion?: TDeletionObject[]
-  instrument?: TInstrument[]
-  country?: TCountry[]
-  company?: TCompany[]
-  user?: TUser[]
-  account?: TAccount[]
-  merchant?: TMerchant[]
-  tag?: TTag[]
-  budget?: TBudget[]
-  reminder?: TReminder[]
-  reminderMarker?: TReminderMarker[]
-  transaction?: TTransaction[]
-}
+// The normalized diff/patch shape is owned by Zerro Core.
+export type {
+  TDataEntityKey,
+  TNormalizedPatch,
+} from '@/zerro-core/internal/domain/zenmoney'
 
 export type TZmRequest = TZmDiff & {
   currentClientTimestamp: TUnixTime
-  forceFetch?: DataEntity[]
+  forceFetch?: TDataEntityKey[]
 }

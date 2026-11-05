@@ -1,1 +1,0 @@
-export { userModel } from './model'

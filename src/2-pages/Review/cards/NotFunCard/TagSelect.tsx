@@ -1,16 +1,7 @@
-import React from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Checkbox,
-  FormControl,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  OutlinedInput,
-  Select,
-} from '@mui/material'
-import { formatMoney } from '6-shared/helpers/money'
-import { TTagId } from '6-shared/types'
+import { formatMoney } from '@/6-shared/helpers/money'
+import type { TTagId } from '@/6-shared/types'
+import { MultiSelect } from '@/6-shared/ui/kit/MultiSelect'
 
 type TagSelectProps = {
   options: { id: TTagId; name: string; amount: number }[]
@@ -21,39 +12,29 @@ type TagSelectProps = {
 
 export function TagSelect(props: TagSelectProps) {
   const { t } = useTranslation('common')
-  let { options, onChange, selected, label } = props
-  let renderText = (selected: TagSelectProps['selected']) => {
+  const { options, onChange, selected, label } = props
+  const renderText = (selected: TagSelectProps['selected']) => {
     if (selected.length === 1) {
-      let opt = options.find(opt => opt.id === selected[0])
+      const opt = options.find(opt => opt.id === selected[0])
       if (opt?.name) return opt.name
     }
     return t('tagSelected', { count: selected.length })
   }
 
   return (
-    <FormControl sx={{ width: 300 }}>
-      <InputLabel>{label}</InputLabel>
-      <Select
-        multiple
-        value={selected}
-        onChange={e => {
-          let v = e.target.value
-          onChange(typeof v === 'string' ? v.split(',') : v)
-        }}
-        input={<OutlinedInput label={label} />}
-        renderValue={renderText}
-      >
-        {options
-          .filter(t => t.amount)
-          .map(tag => (
-            <MenuItem key={tag.id} value={tag.id}>
-              <Checkbox checked={selected.includes(tag.id)} />
-              <ListItemText
-                primary={`${tag.name} (${formatMoney(tag.amount)})`}
-              />
-            </MenuItem>
-          ))}
-      </Select>
-    </FormControl>
+    <MultiSelect
+      className="w-[300px]"
+      label={label}
+      value={selected}
+      onChange={onChange}
+      placeholder={t('tagSelected', { count: 0 })}
+      renderValue={() => renderText(selected)}
+      items={options
+        .filter(tag => tag.amount)
+        .map(tag => ({
+          value: tag.id,
+          label: `${tag.name} (${formatMoney(tag.amount)})`,
+        }))}
+    />
   )
 }

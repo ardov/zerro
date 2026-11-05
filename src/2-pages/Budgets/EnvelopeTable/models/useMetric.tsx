@@ -1,13 +1,14 @@
-import { Theme, useMediaQuery } from '@mui/material'
-import React, { FC, ReactNode, useContext, useState } from 'react'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
+import type { FC, ReactNode } from 'react'
+import React, { useContext, useState } from 'react'
 
 export enum Metric {
-  budgeted = 'budgeted',
+  assigned = 'assigned',
   outcome = 'outcome',
   available = 'available',
 }
 
-const allColumns: Metric[] = [Metric.available, Metric.budgeted, Metric.outcome]
+const allColumns: Metric[] = [Metric.available, Metric.assigned, Metric.outcome]
 
 export function useMetric() {
   const [metric, setMetric] = useState<Metric>(allColumns[0])
@@ -24,7 +25,7 @@ const RenderColumnContext = React.createContext<
 >([[], () => {}])
 
 export const RenderColumnsProvider: FC<{ children: ReactNode }> = props => {
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const isMobile = useBreakpointDown('sm')
   const [mobColumns, setMobColumns] = useState<Metric[]>([Metric.available])
   const renderColumns = isMobile ? mobColumns : allColumns
   return (

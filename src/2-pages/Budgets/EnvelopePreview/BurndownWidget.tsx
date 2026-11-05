@@ -1,43 +1,43 @@
-import React, { FC } from 'react'
-import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
-import { Stack, Box, BoxProps } from '@mui/material'
-import { useTranslation } from 'react-i18next'
-import { formatDate, getMonthLength, toISODate } from '6-shared/helpers/date'
-import { useAppTheme } from '6-shared/ui/theme'
-import { prevMonth, toISOMonth } from '6-shared/helpers/date'
-import { TFxAmount, TISODate, TISOMonth } from '6-shared/types'
-import { addFxAmount, round } from '6-shared/helpers/money'
+import type { FC } from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { core } from '@/zerro-core/redux'
 
-import { balances } from '5-entities/envBalances'
-import { TEnvelopeId } from '5-entities/envelope'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { DataLine } from '3-widgets/DataLine'
+import { useAppSelector } from '@/store'
+
+import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
+import { useTranslation } from 'react-i18next'
+import { formatDate, getMonthLength, toISODate } from '@/6-shared/helpers/date'
+import { prevMonth, toISOMonth } from '@/6-shared/helpers/date'
+import type { TFxAmount, TISODate, TISOMonth } from '@/6-shared/types'
+import { addFxAmount, round } from '@/6-shared/helpers/money'
+
+import { DataLine } from '@/3-widgets/DataLine'
 
 import { useMonth } from '../MonthProvider'
 
-type BurndownWidgetProps = BoxProps & { id: TEnvelopeId }
+type BurndownWidgetProps = Omit<ComponentPropsWithoutRef<'div'>, 'id'> & {
+  id: core.envelopes.TEnvelopeId
+}
 
 export const BurndownWidget: FC<BurndownWidgetProps> = ({
   id,
-  ...boxProps
+  className,
+  style,
+  ...rest
 }) => {
   const { t } = useTranslation('budgets')
   const [month] = useMonth()
-  const envData = balances.useEnvData()
+  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)
   const { currency } = envData[month][id]
 
   return (
-    <Box
-      {...boxProps}
-      sx={[
-        {
-          borderRadius: 1,
-          bgcolor: 'background.default',
-        },
-        ...(Array.isArray(boxProps.sx) ? boxProps.sx : [boxProps.sx]),
-      ]}
+    <div
+      {...rest}
+      className={cn('rounded-lg bg-background', className)}
+      style={style}
     >
-      <Stack spacing={0.5} sx={{ pt: 2, px: 2 }}>
+      <div className="flex flex-col gap-1 px-4 pt-4">
         <DataLine
           name={`${t('balanceFor')} ${formatDate(month, 'LLL')}`}
           // color={activityColor}
@@ -46,23 +46,22 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
           currency={currency}
           tooltip={t('balanceChartTooltip')}
         />
-      </Stack>
-      <Box sx={{ width: '100%', height: '160px' }}>
+      </div>
+      <div className="h-40 w-full">
         <ChangesChart month={month} id={id} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 
 type ChartProps = {
   month: TISOMonth
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
 }
 
 export function ChangesChart(props: ChartProps) {
   const { id, month } = props
   const trend = useDoubleTrend(month, id)
-  const theme = useAppTheme()
 
   return (
     <ResponsiveContainer>
@@ -74,7 +73,7 @@ export function ChangesChart(props: ChartProps) {
           type="monotone"
           dataKey="balance"
           dot={false}
-          stroke={theme.palette.primary.main}
+          stroke="var(--primary)"
           strokeWidth={2}
           isAnimationActive={false}
         />
@@ -82,7 +81,7 @@ export function ChangesChart(props: ChartProps) {
           type="monotone"
           dataKey="prevBalance"
           dot={false}
-          stroke={theme.palette.primary.main}
+          stroke="var(--primary)"
           strokeWidth={0.5}
           strokeDasharray="2 3"
           isAnimationActive={false}
@@ -92,7 +91,7 @@ export function ChangesChart(props: ChartProps) {
           type="monotone"
           dataKey="burndown"
           dot={false}
-          fill={theme.palette.primary.main}
+          fill="var(--primary)"
           fillOpacity={0.1}
           strokeWidth={0}
           isAnimationActive={false}
@@ -103,7 +102,7 @@ export function ChangesChart(props: ChartProps) {
   )
 }
 
-function useDoubleTrend(month: TISOMonth, id: TEnvelopeId) {
+function useDoubleTrend(month: TISOMonth, id: core.envelopes.TEnvelopeId) {
   const monthPrev = toISOMonth(prevMonth(month))
   const currTrend = useDataTrend(month, id)
   const prevTrend = useDataTrend(monthPrev, id)
@@ -129,14 +128,19 @@ type TTrendNode = {
   balance: number | null
 }
 
-function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
-  const toDisplay = displayCurrency.useToDisplay(month)
-  const envData = balances.useEnvData()?.[month]?.[id]
+function useDataTrend(
+  month: TISOMonth,
+  id: core.envelopes.TEnvelopeId
+): TTrendNode[] {
+  const toDisplay = core.currency.useToDisplay(month)
+  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)?.[
+    month
+  ]?.[id]
   const activityTrend = useActivityTrend(month, id)
 
   const startBalance = addFxAmount(
     envData?.totalLeftover || {},
-    envData?.totalBudgeted || {}
+    envData?.totalAssigned || {}
   )
 
   const startNode = {
@@ -145,17 +149,16 @@ function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
     balance: startBalance,
   }
 
-  let prevBalance = startNode.balance
-  const eodBalances = activityTrend.map((activity, i) => {
+  const eodBalances: (typeof startNode)[] = []
+  for (let i = 0; i < activityTrend.length; i++) {
     const day = i + 1
-    const node = {
+    const prevBalance = eodBalances[i - 1]?.balance ?? startNode.balance
+    eodBalances.push({
       day,
       date: getDate(month, day),
-      balance: addFxAmount(prevBalance, activity),
-    }
-    prevBalance = node.balance
-    return node
-  })
+      balance: addFxAmount(prevBalance, activityTrend[i]),
+    })
+  }
 
   const array = [startNode, ...eodBalances]
 
@@ -174,11 +177,17 @@ function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
  * @param id
  * @returns
  */
-function useActivityTrend(month: TISOMonth, id: TEnvelopeId): TFxAmount[] {
-  const activity = balances.useActivity()?.[month]?.envActivity?.byEnv
-  const envData = balances.useEnvData()?.[month]?.[id]
+function useActivityTrend(
+  month: TISOMonth,
+  id: core.envelopes.TEnvelopeId
+): TFxAmount[] {
+  const activity = useAppSelector(core.activity.selectAll)?.[month]?.envActivity
+    ?.byEnv
+  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)?.[
+    month
+  ]?.[id]
 
-  let trend = new Array(31).fill({})
+  const trend = new Array(31).fill({})
   if (!envData) return trend
 
   const activityTrends = [

@@ -1,140 +1,109 @@
-import React, { FC } from 'react'
-import { useAppDispatch } from 'store'
-import { isZero } from '6-shared/helpers/money'
-import { formatDate } from '6-shared/helpers/date'
-import { startFresh } from '4-features/bulkActions/startFresh'
-import {
-  Box,
-  Typography,
-  Button,
-  IconButton,
-  useMediaQuery,
-  Theme,
-  BoxProps,
-  Stack,
-} from '@mui/material'
-import { CloseIcon } from '6-shared/ui/Icons'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { TDateDraft, TISOMonth } from '6-shared/types'
+import { track } from '@/6-shared/analytics'
+import { prevMonth, toISOMonth } from '@/6-shared/helpers/date'
+import { toast } from '@/6-shared/ui/kit/Toast'
+import { Button } from '@/6-shared/ui/kit/Button'
+import type { FC, HTMLAttributes } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { isZero } from '@/6-shared/helpers/money'
+import type { TISOMonth } from '@/6-shared/types'
 
-import { balances } from '5-entities/envBalances'
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
-import {
-  overspendModel,
-  OverspendNotice,
-} from '4-features/bulkActions/fixOverspend'
-import { copyPreviousBudget } from '4-features/bulkActions/copyPrevMonth'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
+import { OverspendNotice } from '@/4-features/bulkActions/fixOverspend'
 import { useMonth } from '../MonthProvider'
 import { BalanceWidget } from '../BalanceWidget'
 import { FxRates } from './FxRates'
 import { ActivityStats } from './ActivityStats'
-import { goalModel } from '5-entities/goal'
-import { totalGoalsModel } from '4-features/bulkActions/fillGoals'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { core } from '@/zerro-core/redux'
+
+import { useAsk } from '@/6-shared/overlays'
+import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useTranslation } from 'react-i18next'
 
-type MonthInfoProps = BoxProps & { onClose: () => void }
-
-export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
+/** The month's overview. It has no header of its own: docked beside the table
+ * it is part of the page, and the drawer that shows it modally supplies one. */
+export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
+  className,
+  ...rest
+}) => {
   const { t } = useTranslation('budgets', { keyPrefix: 'actions' })
   const [month] = useMonth()
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
-  const { overspend } = balances.useTotals()[month]
+  const { overspend } = useAppSelector(core.months.selectTotals)[month]
 
   const dispatch = useAppDispatch()
 
-  const copyAllBudgets = useConfirm({
-    onOk: () => dispatch(copyPreviousBudget(month)),
-    title: t('copyAllBudgets.title'),
-    description: t('copyAllBudgets.description'),
-    okText: t('copyAllBudgets.okText'),
-    cancelText: t('copyAllBudgets.cancelText'),
-  })
+  const ask = useAsk()
 
-  const fixOverspends = useConfirm({
-    onOk: () => dispatch(overspendModel.fixAll(month)),
-    title: t('fixOverspends.title'),
-    okText: t('fixOverspends.okText'),
-    cancelText: t('fixOverspends.cancelText'),
-  })
+  const copyAllBudgets = () => {
+    const result = dispatch(
+      core.budgets.copyAssignments({
+        from: toISOMonth(prevMonth(month)),
+        to: month,
+      })
+    )
+    if (result.status !== 'applied') return
+    track('budget_automation_applied', { automation: 'copy_previous' })
+    toast.add({ type: 'success', title: t('copyAllBudgets.done') })
+  }
 
-  const startAgain = useConfirm({
-    onOk: () => dispatch(startFresh(month)),
-    title: t('startAgain.title'),
-    description: t('startAgain.description'),
-    okText: t('startAgain.okText'),
-    cancelText: t('startAgain.cancelText'),
-  })
+  const fixOverspends = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('fixOverspends.title')}
+        okText={t('fixOverspends.okText')}
+        cancelText={t('fixOverspends.cancelText')}
+      />
+    )
+    if (!confirmed) return
+    if (dispatch(core.budgets.coverOverspending(month)).status === 'applied') {
+      track('budget_automation_applied', { automation: 'fix_overspends' })
+    }
+  }
+
+  const startAgain = async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('startAgain.title')}
+        description={t('startAgain.description')}
+        okText={t('startAgain.okText')}
+        cancelText={t('startAgain.cancelText')}
+      />
+    )
+    if (!confirmed) return
+    if (dispatch(core.budgets.restart(month)).status === 'applied') {
+      track('budget_automation_applied', { automation: 'start_fresh' })
+    }
+  }
 
   return (
-    <Box
-      {...rest}
-      sx={[
-        {
-          minHeight: '100vh',
-        },
-        ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx]),
-      ]}
-    >
-      {isMobile && (
-        <Box
-          sx={{
-            py: 1,
-            px: 3,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <Box
-            sx={{
-              flexGrow: 1,
-            }}
-          >
-            <Typography variant="h6" noWrap>
-              {getMonthName(month)}
-            </Typography>
-          </Box>
-
-          <Tooltip title={t('close')}>
-            <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
-          </Tooltip>
-        </Box>
-      )}
-      <Stack
-        sx={{
-          gap: 2,
-          p: 3,
-        }}
-      >
+    <div {...rest} className={className}>
+      <div className="flex flex-col gap-4 p-6">
         <OverspendNotice month={month} />
 
         <BalanceWidget month={month} />
         <ActivityStats month={month} />
         <FxRates month={month} />
 
-        <Box
-          sx={{
-            p: 2,
-            bgcolor: 'background.default',
-            borderRadius: 1,
-          }}
-        >
-          <Box
-            sx={{
-              mb: 1,
-            }}
-          >
-            <Typography variant="body1" align="center">
-              {t('actions')}
-            </Typography>
-          </Box>
+        <div className="rounded-lg bg-ui-base p-4">
+          <div className="mb-2">
+            <p className="m-0 text-center text-body">{t('actions')}</p>
+          </div>
 
-          <Button fullWidth color="secondary" onClick={copyAllBudgets}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto min-h-10 w-full whitespace-normal py-2"
+            onClick={copyAllBudgets}
+          >
             {t('copyAllBudgets.trigger')}
           </Button>
 
           {!isZero(overspend) && (
-            <Button fullWidth color="secondary" onClick={fixOverspends}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto min-h-10 w-full whitespace-normal py-2"
+              onClick={fixOverspends}
+            >
               <span>
                 {t('fixOverspends.trigger')} (
                 <DisplayAmount value={overspend} month={month} />)
@@ -144,39 +113,49 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
 
           <GoalAction month={month} />
 
-          <Button fullWidth color="secondary" onClick={startAgain}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto min-h-10 w-full whitespace-normal py-2"
+            onClick={startAgain}
+          >
             {t('startAgain.trigger')}
           </Button>
-        </Box>
-      </Stack>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }
-
-const getMonthName = (date: TDateDraft) =>
-  formatDate(new Date(date), 'LLLL').toUpperCase()
 
 function GoalAction(props: { month: TISOMonth }) {
   const { t } = useTranslation('budgets', {
     keyPrefix: 'actions.completeAllGoals',
   })
-  const dispatch = useAppDispatch()
   const { month } = props
-  const { progress, goalsCount } = goalModel.useTotals()[month]
+  const { progress, goalsCount } = useAppSelector(core.goals.selectTotals)[
+    month
+  ]
   const canComplete = progress < 1 && goalsCount > 0
 
-  const completeAll = useConfirm({
-    onOk: () => dispatch(totalGoalsModel.fillAll(month)),
-    title: t('title'),
-    description: t('description'),
-    okText: t('okText'),
-    cancelText: t('cancelText'),
-  })
+  const dispatch = useAppDispatch()
+  const completeAll = () => {
+    if (dispatch(core.budgets.fundGoals(month)).status !== 'applied') return
+    track('budget_automation_applied', { automation: 'fill_goals' })
+    toast.add({
+      type: 'success',
+      title: t('goals:completeAll.done', { keyPrefix: '' }),
+    })
+  }
 
   if (!canComplete) return null
 
   return (
-    <Button fullWidth color="secondary" onClick={completeAll}>
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-auto min-h-10 w-full whitespace-normal py-2"
+      onClick={completeAll}
+    >
       {t('trigger')}
     </Button>
   )

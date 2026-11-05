@@ -1,36 +1,34 @@
-import React from 'react'
-import { Dialog, IconButton, Link, Stack, Typography } from '@mui/material'
-import Balancer from 'react-wrap-balancer'
-import pluralize from '6-shared/helpers/pluralize'
-import { TFxAmount } from '6-shared/types'
-import { HelpOutlineIcon } from '6-shared/ui/Icons'
-import { useToggle } from '6-shared/hooks/useToggle'
-import { Amount } from '6-shared/ui/Amount'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import { core } from '@/zerro-core/redux'
 
-import { displayCurrency } from '5-entities/currency/displayCurrency'
+import { Link } from '@/6-shared/ui/kit/Link'
+import { Dialog } from '@/6-shared/ui/kit/Dialog'
+import pluralize from '@/6-shared/helpers/pluralize'
+import type { TFxAmount } from '@/6-shared/types'
+import { HelpOutlineIcon } from '@/6-shared/ui/Icons'
+import { Amount } from '@/6-shared/ui/Amount'
 
 /** Median salary in Russia 2024. Source: https://sberindex.ru/ru/dashboards/median-wages */
 const MEDIAN_WAGE_RUB = 62_632
 const MEDIAN_WAGE_SOURCE = 'https://sberindex.ru/ru/dashboards/median-wages'
 
 export function NotFunFact({ income }: { income: TFxAmount }) {
-  const [isOpenInfo, toggleInfo] = useToggle(false)
-  const toDisplay = displayCurrency.useToDisplay('current')
+  const toDisplay = core.currency.useToDisplay('current')
   const rubIncome = income.RUB || 0
   const monthlyIncome = toDisplay(income) / 12
   const displayMedianWage = toDisplay({ RUB: MEDIAN_WAGE_RUB })
   const rate = Math.round(monthlyIncome / displayMedianWage)
 
-  // Shown when income in rubbles is greater than median wage and total monthly incom is greater than median wage
+  // Shown when income in rubles is greater than median wage and total monthly income is greater than median wage
   if (rubIncome < MEDIAN_WAGE_RUB || rate < 1) return null
 
   return (
     <>
-      <Stack direction="column" spacing={1} sx={{ p: 3 }}>
-        <Typography variant="h5" align="center">
-          <Balancer>{getPeopleArray(rate).join(' ')}</Balancer>
-        </Typography>
-        <Typography variant="body1" align="center">
+      <div className="flex flex-col gap-2 p-6">
+        <h2 className="m-0 text-center text-title-lg text-balance">
+          {getPeopleArray(rate).join(' ')}
+        </h2>
+        <p className="m-0 text-center text-body">
           {`Это ${rate} ${pluralize(rate, [
             'средний россиянин',
             'средних россиянина',
@@ -38,24 +36,24 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
           ])}.`}
           <br />
           Если сложить их зарплаты — получится ваша.{' '}
-          <IconButton size="small" onClick={toggleInfo}>
-            <HelpOutlineIcon fontSize="small" />
-          </IconButton>
-        </Typography>
-      </Stack>
-
-      <Dialog open={isOpenInfo} onClose={toggleInfo}>
-        <Stack direction="column" spacing={3} sx={{ p: 3, maxWidth: 360 }}>
-          <Balancer>
-            <Typography variant="body1">
+          <Dialog
+            label="Медианная зарплата"
+            className="max-w-90"
+            trigger={
+              <IconButton label="Откуда цифра" variant="ghost" size="xs">
+                <HelpOutlineIcon />
+              </IconButton>
+            }
+          >
+            <p className="m-0 text-body text-balance">
               Медианная зарплата в 2024 году в России{' '}
               <Amount value={MEDIAN_WAGE_RUB} currency="RUB" decimals="ifAny" />{' '}
               по данным <Link href={MEDIAN_WAGE_SOURCE}>Сбериндекса</Link>. Это
               значит, что половина россиян получают меньше этой суммы.
-            </Typography>
-          </Balancer>
-        </Stack>
-      </Dialog>
+            </p>
+          </Dialog>
+        </p>
+      </div>
     </>
   )
 }
@@ -77,7 +75,7 @@ function getPeopleArray(length: number) {
     '👨🏼‍🦳',
     '👩‍🦳',
   ]
-  let arr = []
+  const arr = []
   for (let i = 0; i < length; i++) {
     arr.push(people[i % (people.length - 1)])
   }

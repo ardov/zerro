@@ -1,19 +1,22 @@
-import { envelopeModel, TEnvelopeDraft } from '5-entities/envelope'
-import { AppThunk } from 'store/index'
+import { core } from '@/zerro-core/redux'
+
+import type { AppThunk } from '@/store/index'
 
 export function renameGroup(prevName: string, nextName: string): AppThunk {
   return (dispatch, getState) => {
-    let trimmedNext = nextName.trim()
+    const trimmedNext = nextName.trim()
     if (prevName === nextName || prevName === trimmedNext) return
     if (!prevName || !trimmedNext) return
-    const envelopes = envelopeModel.getEnvelopes(getState())
-    const patches: TEnvelopeDraft[] = []
 
-    Object.values(envelopes).forEach(e => {
-      if (e.group !== prevName) return
-      patches.push({ id: e.id, group: trimmedNext })
-    })
+    const structure = core.envelopes.selectStructure(getState())
+    if (!structure.some(group => group.id === prevName)) return
 
-    if (patches.length) dispatch(envelopeModel.patchEnvelope(patches))
+    const input = core.envelopes
+      .toEnvelopeStructureInput(structure)
+      .map(group =>
+        group.group === prevName ? { ...group, group: trimmedNext } : group
+      )
+
+    dispatch(core.envelopes.applyStructure(input))
   }
 }

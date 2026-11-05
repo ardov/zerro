@@ -1,21 +1,26 @@
-import React, { FC, memo, ReactNode, useCallback, useRef } from 'react'
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import type { FC, ReactNode } from 'react'
+import { memo, useRef } from 'react'
+import { core } from '@/zerro-core/redux'
+
 import { useDraggable } from '@dnd-kit/core'
-import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
+import { Chip } from '@/6-shared/ui/kit/Chip'
 import { useTranslation } from 'react-i18next'
 
-import { TagIcon } from '6-shared/ui/TagIcon'
-import { DragIndicatorIcon } from '6-shared/ui/Icons'
-import { TFxCode } from '6-shared/types'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { getCurrencySymbol } from '6-shared/helpers/money'
-import { useFloatingInput } from '6-shared/ui/FloatingInput'
-import { useAppDispatch } from 'store/index'
-import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { DragTypes } from '2-pages/Budgets/DnD'
+import { TagIcon } from '@/6-shared/ui/TagIcon'
+import { DragIndicatorIcon } from '@/6-shared/ui/Icons'
+import type { TFxCode } from '@/6-shared/types'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import { getCurrencySymbol } from '@/6-shared/helpers/money'
+import { useAppDispatch } from '@/store/index'
+import { useAsk } from '@/6-shared/overlays'
+import { RenamePopover } from '../RenamePopover'
+
+import { DragTypes } from '@/2-pages/Budgets/DnD'
 
 export const NameCell: FC<{
-  envelope: TEnvelope
+  envelope: core.envelopes.TPresentedEnvelope
   isChild?: boolean
   isSelf?: boolean
   isReordering: boolean
@@ -25,101 +30,77 @@ export const NameCell: FC<{
   const { id, symbol, colorHex, name, currency, comment, originalName } =
     props.envelope
   const { isReordering, isDefaultVisible, isChild, isSelf, onClick } = props
-  const [displCurrency] = displayCurrency.useDisplayCurrency()
+  const [displCurrency] = core.currency.useDisplayCurrency()
   const { t } = useTranslation('budgets')
 
   const dispatch = useAppDispatch()
-  const ref = useRef<any>()
-  const updateName = useCallback(
-    (v: string) => {
-      dispatch(envelopeModel.patchEnvelope({ id, originalName: v }))
-    },
-    [dispatch, id]
-  )
-  const floating = useFloatingInput(ref, updateName)
+  const ref = useRef<HTMLSpanElement>(null)
+  const ask = useAsk()
+  const rename = async () => {
+    const next = await ask<string>(
+      <RenamePopover value={originalName} anchor={ref.current} />
+    )
+    if (next !== undefined) dispatch(core.envelopes.rename(id, next))
+  }
 
   return (
-    <Box
+    <div
       onClick={onClick}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        minWidth: 0,
-        pl: isChild ? 5 : 0,
-      }}
+      className={`flex min-w-0 items-center gap-2 ${isChild ? 'pl-10' : ''}`}
     >
-      {/* <Collapse orientation="horizontal" in={isReordering} unmountOnExit>
-        <EnvDraggable id={id} />
-      </Collapse> */}
       {isReordering && (
         <EnvDraggable id={id}>
-          <IconButton size="small" sx={envDraggableSx}>
+          <IconButton
+            size="xs"
+            variant="ghost"
+            label={t('reorderCategory', { name })}
+            tooltip={false}
+            className="-my-2"
+          >
             <DragIndicatorIcon />
           </IconButton>
         </EnvDraggable>
       )}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexShrink: 1,
-          minWidth: 0,
-          opacity: isDefaultVisible ? 1 : 0.5,
-        }}
+      <div
+        className={`flex min-w-0 shrink items-center justify-center ${comment ? 'max-w-[80%]' : ''} ${isDefaultVisible ? 'opacity-100' : 'opacity-50'}`}
       >
         <TagIcon
           symbol={isSelf ? '–' : symbol}
           color={isSelf ? null : colorHex}
-          mr={1.5}
+          className="mr-3"
         />
-        <Typography
-          component="span"
-          variant="body1"
+        <TextFade
+          className="text-body"
           title={name}
-          noWrap
           ref={ref}
           onClick={e => {
             if (e.altKey) {
               e.preventDefault()
               e.stopPropagation()
-              floating.open(originalName)
+              void rename()
             }
           }}
         >
           {isSelf ? `${name} ${t('isSelf')}` : name}
-        </Typography>
-      </Box>
+        </TextFade>
+      </div>
       {displCurrency !== currency && <CurrencyTag currency={currency} />}
       {!!comment && (
-        <Typography
-          component="span"
-          variant="body1"
+        <TextFade
           title={comment}
-          noWrap
-          sx={{
-            color: 'text.disabled',
-            flexShrink: 1000000,
-            fontStyle: 'italic',
-          }}
+          className="flex-1 text-body italic text-ui-tertiary"
         >
           {comment}
-        </Typography>
+        </TextFade>
       )}
-      {floating.render()}
-    </Box>
+    </div>
   )
 })
 
-const envDraggableSx = {
-  my: -1,
-  display: 'grid',
-  placeItems: 'center',
-}
-
-const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = props => {
+const EnvDraggable: FC<{
+  id: core.envelopes.TEnvelopeId
+  children: ReactNode
+}> = props => {
   const { id, children } = props
   const { setNodeRef, attributes, listeners } = useDraggable({
     id: 'envelope' + id,
@@ -145,8 +126,8 @@ const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
   const { t } = useTranslation('budgets')
   if (!currency) return null
   return (
-    <Tooltip title={t('envelopeCurrencyTooltip', { currency })}>
-      <Chip label={getCurrencySymbol(currency)} size="small" />
+    <Tooltip content={t('envelopeCurrencyTooltip', { currency })}>
+      <Chip size="sm">{getCurrencySymbol(currency)}</Chip>
     </Tooltip>
   )
 }

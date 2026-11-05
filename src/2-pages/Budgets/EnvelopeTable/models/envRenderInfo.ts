@@ -1,20 +1,15 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { isZero } from '6-shared/helpers/money'
-import { ById, ByMonth, TISOMonth } from '6-shared/types'
+import { isZero } from '@/6-shared/helpers/money'
+import type { ById, ByMonth, TISOMonth } from '@/6-shared/types'
 
-import { TSelector, useAppSelector } from 'store'
-import {
-  envelopeModel,
-  envelopeVisibility,
-  TEnvelope,
-  TEnvelopeId,
-} from '5-entities/envelope'
-import { balances } from '5-entities/envBalances'
-import { goalModel } from '5-entities/goal'
-import { isEqual } from 'lodash'
+import type { TSelector } from '@/store'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
+
+import { deepEqual } from '@/6-shared/helpers/deepEqual'
 
 export type TRenderInfo = {
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   showSelf: boolean
   isDefaultVisible: boolean
   isDefaultExpanded: boolean
@@ -25,10 +20,10 @@ export type TRenderInfo = {
 export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
   createSelector(
     [
-      envelopeModel.getEnvelopes,
-      balances.monthList,
-      balances.envData,
-      goalModel.get,
+      core.envelopes.selectAll,
+      core.months.selectList,
+      core.activity.selectEnvelopeMetrics,
+      core.goals.selectAll,
     ],
     (envelopes, monthList, envData, goals) => {
       const result: ByMonth<ById<TRenderInfo>> = {}
@@ -42,7 +37,7 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
       function getEnvelopesInfo(month: TISOMonth) {
         const metrics = envData[month]
         const goalInfo = goals[month]
-        let result: ById<TRenderInfo> = {}
+        const result: ById<TRenderInfo> = {}
 
         Object.values(envelopes)
           .filter(e => e.parent)
@@ -51,22 +46,22 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
           .filter(e => !e.parent)
           .forEach(addInfo)
 
-        function addInfo(e: TEnvelope) {
+        function addInfo(e: core.envelopes.TPresentedEnvelope) {
           const visibility = e.visibility
           const hasChildren = !!e.children.length
           const hasGoal = !!goalInfo[e.id]?.goal
-          const hasBudget = !isZero(metrics[e.id].selfBudgeted)
+          const hasAssigned = !isZero(metrics[e.id].selfAssigned)
           const hasActivity = !isZero(metrics[e.id].selfActivity)
           const hasAvailable = !isZero(metrics[e.id].selfAvailable)
           const hasVisibleChildren = e.children.some(
             id => result[id].isDefaultVisible
           )
           const isDefaultVisible =
-            visibility === envelopeVisibility.hidden
+            visibility === core.envelopes.envelopeVisibility.hidden
               ? false
-              : visibility === envelopeVisibility.visible ||
+              : visibility === core.envelopes.envelopeVisibility.visible ||
                 hasGoal ||
-                hasBudget ||
+                hasAssigned ||
                 hasActivity ||
                 hasAvailable ||
                 hasVisibleChildren
@@ -74,7 +69,7 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
           const isDefaultExpanded =
             hasChildren &&
             (!isZero(metrics[e.id].childrenLeftover) ||
-              !isZero(metrics[e.id].childrenBudgeted) ||
+              !isZero(metrics[e.id].childrenAssigned) ||
               !isZero(metrics[e.id].childrenSurplus))
 
           result[e.id] = {
@@ -93,5 +88,5 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
   )
 
 export function useEnvRenderInfo(month: TISOMonth): ById<TRenderInfo> {
-  return useAppSelector(s => getEnvRenderInfo(s)[month], isEqual)
+  return useAppSelector(s => getEnvRenderInfo(s)[month], deepEqual)
 }

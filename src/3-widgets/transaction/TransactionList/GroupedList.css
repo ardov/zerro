@@ -1,0 +1,52 @@
+@layer components {
+  .transaction-date-chip {
+    isolation: isolate;
+    visibility: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      border: 1px solid var(--color-ui-border);
+      background: var(--color-ui-card);
+      opacity: 0;
+      transition: opacity 160ms ease-out;
+    }
+
+    &[data-pinned]::before {
+      opacity: 1;
+    }
+
+    &:hover::before {
+      background: color-mix(
+        in srgb,
+        var(--color-ui-card),
+        var(--color-ui-highlight)
+      );
+    }
+
+    &:active::before {
+      background: color-mix(
+        in srgb,
+        var(--color-ui-card),
+        var(--color-ui-pressed)
+      );
+    }
+
+    &[data-pinned],
+    &:focus-within {
+      visibility: visible;
+    }
+  }
+
+  .transaction-list-width {
+    max-width: 576px;
+    margin-inline: auto;
+  }
+
+  .transaction-date-heading[data-pinned]:not(:focus-within) {
+    visibility: hidden;
+  }
+}

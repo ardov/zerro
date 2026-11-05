@@ -1,4 +1,9 @@
-import React, { FC, useEffect, useState } from 'react'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import type { ButtonBaseProps } from '@/6-shared/ui/kit/ButtonBase'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
+import type { FC } from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
+import { useState } from 'react'
 import {
   BarChart,
   Bar,
@@ -6,38 +11,30 @@ import {
   ResponsiveContainer,
   ReferenceDot,
 } from 'recharts'
-import {
-  Stack,
-  Box,
-  BoxProps,
-  Typography,
-  ButtonBase,
-  ButtonBaseProps,
-  SxProps,
-} from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { useAppTheme } from '6-shared/ui/theme'
-import { TFxCode, TISOMonth } from '6-shared/types'
-import { formatDate, toISOMonth } from '6-shared/helpers/date'
-import { getAverage } from '6-shared/helpers/money/currencyHelpers'
+import type { TFxCode, TISOMonth } from '@/6-shared/types'
+import { formatDate, toISOMonth } from '@/6-shared/helpers/date'
+import { getAverage } from '@/6-shared/helpers/money/currencyHelpers'
 
-import { balances } from '5-entities/envBalances'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
-import { fxRateModel } from '5-entities/currency/fxRate'
-import { DataLine } from '3-widgets/DataLine'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
+
+import { DataLine } from '@/3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { trimMonths } from './shared'
 
-type StatisticWidgetProps = BoxProps & { id: TEnvelopeId }
+type StatisticWidgetProps = Omit<ComponentPropsWithoutRef<'div'>, 'id'> & {
+  id: core.envelopes.TEnvelopeId
+}
 
 const WINDOW = 12 // Number of months to show in the chart
 
 enum statisticsValue {
-  avgBudgeted = 'avgBudgeted',
+  avgAssigned = 'avgAssigned',
   avgExpenses = 'avgExpenses',
 }
 const nextMetric = (current: statisticsValue): statisticsValue => {
-  const list = [statisticsValue.avgBudgeted, statisticsValue.avgExpenses]
+  const list = [statisticsValue.avgAssigned, statisticsValue.avgExpenses]
   const idx = list.indexOf(current)
   return list[(idx + 1) % list.length]
 }
@@ -67,23 +64,23 @@ const getPeriodLength = (period: aggregatePeriod): number => {
   }
 }
 
-/** Calculate average budgeted and expenses for the given envelope */
+/** Calculate average assigned and expenses for the given envelope */
 function useAggregatedStats(
-  id: TEnvelopeId,
+  id: core.envelopes.TEnvelopeId,
   currency: TFxCode,
   aggregationPeriod: number
 ) {
-  const dates = balances.useMonthList()
-  const envData = balances.useEnvData()
-  const convertFx = fxRateModel.useConverter()
+  const dates = useAppSelector(core.months.selectList)
+  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)
+  const convertFx = useAppSelector(core.currency.selectConvertFx)
   const result = dates.map((month, idx) => {
     const aggregatedMonths = dates.slice(
       Math.max(0, idx - aggregationPeriod + 1), // start index
       idx + 1 // end index
     )
-    const avgBudgeted = getAverage(
+    const avgAssigned = getAverage(
       aggregatedMonths.map(date =>
-        convertFx(envData[date][id].totalBudgeted, currency, date)
+        convertFx(envData[date][id].totalAssigned, currency, date)
       )
     )
     const currentMonth = toISOMonth(new Date())
@@ -98,20 +95,21 @@ function useAggregatedStats(
       // Negative activity is expenses
       if (avgActivity < 0) avgExpenses = -avgActivity
     }
-    return { month, avgBudgeted, avgExpenses }
+    return { month, avgAssigned, avgExpenses }
   })
   return result
 }
 
 export const StatisticWidget: FC<StatisticWidgetProps> = ({
   id,
-  ...boxProps
+  className,
+  style,
+  ...rest
 }) => {
   const { t } = useTranslation('budgets', { keyPrefix: 'statisticWidget' })
   const [month, setMonth] = useMonth()
-  const theme = useAppTheme()
-  const positiveColor = theme.palette.info.main
-  const negativeColor = theme.palette.error.main
+  const positiveColor = 'var(--info)'
+  const negativeColor = 'var(--error)'
 
   const [metric, setMetric] = useState<statisticsValue>(
     statisticsValue.avgExpenses
@@ -120,7 +118,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   const [period, setPeriod] = useState<aggregatePeriod>(aggregatePeriod.months6)
   const switchPeriod = () => setPeriod(nextPeriod)
 
-  const currency = envelopeModel.useEnvelopes()[id].currency
+  const currency = useAppSelector(core.envelopes.selectAll)[id].currency
 
   const aggregatedData = useAggregatedStats(
     id,
@@ -138,31 +136,28 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   const [selectedMonth, setSelectedMonth] = useState(month)
   const selectedData = trimmedData.find(node => node.month === selectedMonth)
 
-  useEffect(() => {
+  const [prevMonth, setPrevMonth] = useState(month)
+  if (prevMonth !== month) {
+    setPrevMonth(month)
     setSelectedMonth(month)
-  }, [month])
+  }
 
   return (
-    <Box
-      {...boxProps}
-      sx={[
-        {
-          borderRadius: 1,
-          bgcolor: 'background.default',
-        },
-        ...(Array.isArray(boxProps.sx) ? boxProps.sx : [boxProps.sx]),
-      ]}
+    <div
+      {...rest}
+      className={cn('rounded-lg bg-background', className)}
+      style={style}
     >
-      <Box sx={{ px: 2, pt: 2 }}>
-        <Typography variant="body1" sx={{ color: 'text.primary' }}>
+      <div className="px-4 pt-4">
+        <p className="m-0 text-body text-foreground">
           <span>{t('average')} </span>
           <InlineButton onClick={switchMetric}>{t(metric)}</InlineButton>
           <span> {t('over')} </span>
           <InlineButton onClick={switchPeriod}>{t(period)}</InlineButton>
-        </Typography>
-      </Box>
+        </p>
+      </div>
       {selectedData && (
-        <Stack spacing={0.5} sx={{ pt: 2, px: 2 }}>
+        <div className="flex flex-col gap-1 px-4 pt-4">
           <DataLine
             name={t('avgForDate', {
               date: formatDate(selectedData.month, 'LLL'),
@@ -171,9 +166,9 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
             amount={selectedData.value}
             currency={currency}
           />
-        </Stack>
+        </div>
       )}
-      <Box sx={{ width: '100%', height: '160px' }}>
+      <div className="h-40 w-full">
         <ResponsiveContainer>
           <BarChart
             data={trimmedData}
@@ -208,31 +203,22 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
                 shape={({ cx, cy }) => {
                   const offset = selectedData.value >= 0 ? 5 : -5
                   const fill = selectedData.fill
-                  return <circle cx={cx} cy={(cy ?? 0) + offset} r={2} fill={fill} />
+                  return (
+                    <circle cx={cx} cy={(cy ?? 0) + offset} r={2} fill={fill} />
+                  )
                 }}
               />
             )}
           </BarChart>
         </ResponsiveContainer>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 
-const inlineButtonSx: SxProps = {
-  cursor: 'pointer',
-  fontSize: 'inherit',
-  lineHeight: 'inherit',
-  display: 'inline',
-  px: 1,
-  mx: -1,
-  borderRadius: 1,
-  verticalAlign: 'baseline',
-  color: 'info.main',
-}
+const inlineButtonClass =
+  '-mx-2 inline cursor-pointer rounded-lg px-2 align-baseline text-[length:inherit] leading-[inherit] text-info'
 
-const InlineButton: FC<ButtonBaseProps> = props => {
-  const { sx, ...delegated } = props
-  const buttonSx = sx ? { ...inlineButtonSx, ...sx } : inlineButtonSx
-  return <ButtonBase sx={buttonSx} {...delegated} />
-}
+const InlineButton: FC<ButtonBaseProps> = ({ className, ...delegated }) => (
+  <ButtonBase className={cn(inlineButtonClass, className)} {...delegated} />
+)

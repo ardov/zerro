@@ -1,12 +1,5 @@
 import { ExampleBox, Muted } from '../Components'
 import wholeImg from './whole-screenshot.png'
-import { Box } from '@mui/material'
-import { Head } from '../Head'
-
-<Head
-  title="What is Zerro?"
-  description="Zerro helps you manage personal and family budget."
-/>
 
 # 👋 Hello!
 
@@ -19,16 +12,10 @@ Zerro is an unofficial app for [Zenmoney](https://zenmoney.app/), it helps to pl
   <Muted>Be sure to write what you liked</Muted>
 </ExampleBox>
 
-<Box
-  component="img"
+<img
   src={wholeImg}
   alt="This is roughly what the interface looks like"
-  sx={{
-    maxWidth: '100%',
-    borderRadius: 1,
-    border: '1px solid rgba(128,128,128,0.2)',
-    boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-  }}
+  className="max-w-full rounded-lg border border-solid border-[rgba(128,128,128,0.2)] [box-shadow:0_8px_32px_0_rgba(0,0,0,0.2)]"
 />
 
 ## What's inside?
@@ -37,8 +24,8 @@ Zerro is an unofficial app for [Zenmoney](https://zenmoney.app/), it helps to pl
 
 The main advantage of Zerro is envelope-type budgets. If you've used YNAB, you know how cool this is. Read about the budgeting approach to get a better understanding.
 
-- [Budgeting Approach in Zerro](/about/method)
-- [Getting Started](/about/quick-start)
+- [Budgeting Approach in Zerro](/en/about/method)
+- [Getting Started](/en/about/quick-start)
 
 ### Fixing Corrections
 
@@ -70,7 +57,8 @@ Zerro is a web application. It's as cool as regular apps (can even work offline)
   in your app and does not transmit through API, third-party services simply do not have
   access to them.
 
-  [API Documentation](https://github.com/zenmoney/ZenPlugins/wiki/ZenMoney-API)
+[API Documentation](https://github.com/zenmoney/ZenPlugins/wiki/Zenmoney-API)
+
 </ExampleBox>
 
 - Zerro does not store anything on its own. Data is stored locally on your computer and in Zenmoney.
@@ -80,13 +68,13 @@ Zerro is a web application. It's as cool as regular apps (can even work offline)
 ## Useful links
 
 <ExampleBox symbol="💵">
-  [Approach to Budgets in Zerro](/about/method) →
+  [Approach to Budgets in Zerro](/en/about/method) →
 
   <Muted>How to use budgets</Muted>
 </ExampleBox>
 
 <ExampleBox symbol="🚀">
-  [Getting Started with Zerro](/about/quick-start) →
+  [Getting Started with Zerro](/en/about/quick-start) →
 
   <Muted>This guide will help you tackle initial problems</Muted>
 </ExampleBox>

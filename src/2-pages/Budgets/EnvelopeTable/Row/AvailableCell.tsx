@@ -1,38 +1,39 @@
-import React, { FC } from 'react'
+import type { FC } from 'react'
+import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { Typography, Box } from '@mui/material'
+import { cn } from '@/6-shared/ui/shadcn/utils'
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { formatMoney } from '6-shared/helpers/money'
-import { WarningIcon } from '6-shared/ui/Icons'
-import { Amount } from '6-shared/ui/Amount'
-import { DragTypes } from '2-pages/Budgets/DnD'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import { formatMoney } from '@/6-shared/helpers/money'
+import { WarningIcon } from '@/6-shared/ui/Icons'
+import { Amount } from '@/6-shared/ui/Amount'
+import { DragTypes } from '@/2-pages/Budgets/DnD'
 
 type AvailableCellProps = {
   id: string
   hiddenOverspend?: number
   available: number
-  budgeted: number
+  assigned: number
   isChild?: boolean
   isSelf?: boolean
 }
 
 export const AvailableCell: FC<AvailableCellProps> = props => {
-  const { hiddenOverspend, id, available, isChild, budgeted, isSelf } = props
+  const { hiddenOverspend, id, available, isChild, assigned, isSelf } = props
   const { t } = useTranslation('budgets')
   const availableColor = getAvailableColor(
     available,
     isChild,
-    !!budgeted,
+    !!assigned,
     isSelf
   )
 
   return (
-    <Box>
-      <Typography variant="body1" align="right">
+    <div>
+      <p className="m-0 flex items-center justify-end gap-1.5 text-right text-body">
         {!!hiddenOverspend && (
           <Tooltip
-            title={
+            content={
               <span>
                 {t('parentOverspend', {
                   amount: formatMoney(-hiddenOverspend),
@@ -40,33 +41,23 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
               </span>
             }
           >
-            <WarningIcon
-              fontSize="small"
-              color="warning"
-              sx={{ transform: 'translate(-6px, 4px)' }}
-            />
+            <WarningIcon className="text-ui-warning" />
           </Tooltip>
         )}
 
         <DraggableAmount id={id} type={DragTypes.amount} disabled={isSelf}>
-          <Box
-            component="span"
-            sx={{
-              borderRadius: 1,
-              px: 2,
-              mx: -2,
-              py: 0.5,
-              my: -0.5,
-              component: 'span',
-              display: 'inline-block',
-              color: availableColor,
-            }}
+          <span
+            className={cn(
+              '-my-1 -mx-4 inline-block rounded-lg px-4 py-1',
+              !!hiddenOverspend && 'ml-0 pl-0',
+              getAvailableColorClass(availableColor)
+            )}
           >
             <Amount value={available} decimals="ifOnly" />
-          </Box>
+          </span>
         </DraggableAmount>
-      </Typography>
-    </Box>
+      </p>
+    </div>
   )
 }
 
@@ -101,7 +92,7 @@ const DraggableAmount: FC<{
 export function getAvailableColor(
   available: number,
   isChild?: boolean,
-  hasBudget?: boolean,
+  hasAssigned?: boolean,
   isSelf?: boolean
 ) {
   const positive = 'success.main'
@@ -115,7 +106,18 @@ export function getAvailableColor(
 
   // available < 0
   // main tag or child with budget
-  if (!isChild || hasBudget) return negative
+  if (!isChild || hasAssigned) return negative
   // child tag without budget
   else return neutral
+}
+
+export function getAvailableColorClass(color: string) {
+  switch (color) {
+    case 'success.main':
+      return 'text-ui-success'
+    case 'error.main':
+      return 'text-ui-error'
+    default:
+      return 'text-ui-tertiary'
+  }
 }

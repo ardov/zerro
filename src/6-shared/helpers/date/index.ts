@@ -1,3 +1,13 @@
 export * from './utils'
-export { GroupBy, toGroup, nextGroup, makeDateArray } from './makeDateArray'
-export { formatDate } from './formatDate'
+export { GroupBy, toGroup, makeDateArray } from './makeDateArray'
+export {
+  formatDate,
+  formatTimeAgo,
+  formatTransactionTimestamp,
+  getDateLocale,
+} from './formatDate'
+export {
+  formatDateInput,
+  dateInputPlaceholder,
+  parseDateInput,
+} from './dateInput'

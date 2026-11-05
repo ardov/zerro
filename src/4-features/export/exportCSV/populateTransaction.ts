@@ -1,6 +1,5 @@
-import { TrType } from '5-entities/transaction'
-import { getType } from '5-entities/transaction/helpers'
-import {
+import { core } from '@/zerro-core/redux'
+import type {
   ByIdOld,
   Modify,
   TAccount,
@@ -8,7 +7,7 @@ import {
   TTag,
   TTagId,
   TTransaction,
-} from '6-shared/types'
+} from '@/6-shared/types'
 
 interface DataSources {
   instruments: { [id: number]: TInstrument }
@@ -20,13 +19,13 @@ export type PopulatedTransaction = Modify<
   TTransaction,
   {
     incomeInstrument: TInstrument
-    incomeAccount: TAccount
+    incomeAccount: TAccount | undefined
     opIncomeInstrument: TInstrument
     outcomeInstrument: TInstrument
-    outcomeAccount: TAccount
+    outcomeAccount: TAccount | undefined
     opOutcomeInstrument: TInstrument
     tag: TTag[] | null
-    type: TrType
+    type: core.transactions.TrType
   }
 >
 
@@ -36,14 +35,14 @@ export const populateTransaction = (
 ) => ({
   ...raw,
   incomeInstrument: instruments[raw.incomeInstrument],
-  incomeAccount: accounts[raw.incomeAccount],
+  incomeAccount: raw.incomeAccount ? accounts[raw.incomeAccount] : undefined,
   opIncomeInstrument: instruments[Number(raw.opIncomeInstrument)],
   outcomeInstrument: instruments[raw.outcomeInstrument],
-  outcomeAccount: accounts[raw.outcomeAccount],
+  outcomeAccount: raw.outcomeAccount ? accounts[raw.outcomeAccount] : undefined,
   opOutcomeInstrument: instruments[Number(raw.opOutcomeInstrument)],
   tag: mapTags(raw.tag, tags),
   //COMPUTED PROPERTIES
-  type: getType(raw),
+  type: core.transactions.getType(raw),
 })
 
 function mapTags(ids: TTagId[] | null, tags: ByIdOld<TTag>) {

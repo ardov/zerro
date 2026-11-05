@@ -2,21 +2,21 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import ru from './translations/ru.json'
 import { en } from './translations/en'
-import { isProduction } from '6-shared/config'
+import { isProduction } from '@/6-shared/config'
+import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 
 const LOCAL_STORAGE_KEY = 'language'
 export const resources = { ru, en }
 export const defaultNS = 'common'
-export const languges = Object.keys(resources) as (keyof typeof resources)[]
+const languges = Object.keys(resources) as (keyof typeof resources)[]
 
 function detectBestLanguage(languges: string[]) {
   const getLangOnly = (lang: string) => lang.split(/-|_/)[0]
 
   // Try with cached language
-  let cachedLanguage = ''
-  try {
-    cachedLanguage = getLangOnly(localStorage.getItem(LOCAL_STORAGE_KEY) || '')
-  } catch {}
+  const cachedLanguage = getLangOnly(
+    safeLocalStorage.getItem(LOCAL_STORAGE_KEY) || ''
+  )
   if (languges.includes(cachedLanguage)) return cachedLanguage
 
   // Try with browser language list
@@ -38,6 +38,7 @@ i18n.use(initReactI18next).init({
   defaultNS,
   // lng: 'dev',
   lng: detectBestLanguage(languges),
+  initAsync: false,
   debug: isProduction,
   fallbackLng: ['en', 'ru', 'dev'],
   interpolation: {
@@ -52,11 +53,11 @@ try {
 
 // Cache language on change
 i18n.on('languageChanged', function (lng) {
-  localStorage.setItem(LOCAL_STORAGE_KEY, i18n.resolvedLanguage || lng)
+  safeLocalStorage.setItem(LOCAL_STORAGE_KEY, i18n.resolvedLanguage || lng)
   document.documentElement.lang = i18n.resolvedLanguage || lng
 })
 
-i18n.on('missingKey', function (lngs, namespace, key, res) {
+i18n.on('missingKey', function (lngs, namespace, key) {
   console.warn(`Missing translation: ${lngs[0]}, ${namespace}, ${key}`)
 })
 

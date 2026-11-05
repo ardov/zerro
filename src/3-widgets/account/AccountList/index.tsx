@@ -1,31 +1,37 @@
-import React, { FC } from 'react'
+import { BalanceSubheader } from '@/3-widgets/BalanceSubheader'
+import type { FC } from 'react'
+import { core } from '@/zerro-core/redux'
+
 import { useTranslation } from 'react-i18next'
-import { Collapse, List, ListItemButton } from '@mui/material'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { useToggle } from '6-shared/hooks/useToggle'
-import { TFxAmount } from '6-shared/types'
-import { addFxAmount } from '6-shared/helpers/money'
-import { toISOMonth } from '6-shared/helpers/date'
+import { Collapse } from '@/6-shared/ui/kit/Collapse'
+import { ListRowButton, type ListRowSize } from '@/6-shared/ui/kit/ListRow'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import { useToggle } from '@/6-shared/hooks/useToggle'
+import type { TFxAmount } from '@/6-shared/types'
+import { addFxAmount } from '@/6-shared/helpers/money'
+import { toISOMonth } from '@/6-shared/helpers/date'
 
-import { accountModel, TAccountPopulated } from '5-entities/account'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
-import { Account, Subheader } from './components'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
+import { Account } from './components'
 
-export default function AccountList({ className = '' }) {
+export default function AccountList({
+  className = '',
+  size = 'sm',
+}: {
+  className?: string
+  size?: ListRowSize
+}) {
   const { t } = useTranslation('accounts')
-  const toDisplay = displayCurrency.useToDisplay(toISOMonth(new Date()))
-  const inBudget = accountModel
-    .useInBudgetAccounts()
+  const toDisplay = core.currency.useToDisplay(toISOMonth(new Date()))
+  const inBudget = core.accounts
+    .useInBudget()
     .sort(
       (a, b) =>
         toDisplay({ [b.fxCode]: b.balance }) -
         toDisplay({ [a.fxCode]: a.balance })
     )
-  const savings = accountModel
-    .useSavingAccounts()
+  const savings = core.accounts
+    .useSaving()
     .sort(
       (a, b) =>
         toDisplay({ [b.fxCode]: b.balance }) -
@@ -40,44 +46,49 @@ export default function AccountList({ className = '' }) {
 
   return (
     <div className={className}>
-      <List dense>
-        <Subheader
+      <div className="relative flex flex-col py-2">
+        <BalanceSubheader
+          size={size}
           name={
-            <Tooltip title={t('inBalanceDescription')}>
+            <Tooltip content={t('inBalanceDescription')}>
               <span>{t('inBalance')}</span>
             </Tooltip>
           }
           amount={getTotal(inBudget)}
         />
         {inBudgetActive.map(acc => (
-          <Account key={acc.id} account={acc} />
+          <Account key={acc.id} account={acc} size={size} />
         ))}
-        <ArchivedList accs={inBudgetArchived} />
-      </List>
+        <ArchivedList accs={inBudgetArchived} size={size} />
+      </div>
 
-      <List dense>
-        <Subheader
+      <div className="relative flex flex-col py-2">
+        <BalanceSubheader
+          size={size}
           name={
-            <Tooltip title={t('otherDescription')}>
+            <Tooltip content={t('otherDescription')}>
               <span>{t('other')}</span>
             </Tooltip>
           }
           amount={getTotal(savings)}
         />
         {savingsActive.map(acc => (
-          <Account key={acc.id} account={acc} />
+          <Account key={acc.id} account={acc} size={size} />
         ))}
-        <ArchivedList accs={savingsArchived} />
-      </List>
+        <ArchivedList accs={savingsArchived} size={size} />
+      </div>
     </div>
   )
 }
 
-const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
+const ArchivedList: FC<{
+  accs: core.accounts.TAccountPopulated[]
+  size: ListRowSize
+}> = props => {
   const { t } = useTranslation('accounts')
-  const { accs } = props
+  const { accs, size } = props
   const month = toISOMonth(new Date())
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = core.currency.useToDisplay(month)
   const [visible, toggleVisibility] = useToggle()
   if (!accs.length) return null
 
@@ -86,21 +97,23 @@ const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
 
   return (
     <>
-      <Collapse in={visible} unmountOnExit>
-        <List dense>
+      <Collapse open={visible}>
+        <div className="relative flex flex-col py-2">
           {accs.map(acc => (
-            <Account key={acc.id} account={acc} />
+            <Account key={acc.id} account={acc} size={size} />
           ))}
-        </List>
+        </div>
       </Collapse>
-      <ListItemButton
-        sx={{ typography: 'body2', borderRadius: 1, color: 'info.main' }}
+      <ListRowButton
+        size={size}
+        className="text-ui-link"
+        aria-expanded={visible}
         onClick={toggleVisibility}
       >
         {visible ? (
-          <span>{t('hideArchived')}</span>
+          t('hideArchived')
         ) : (
-          <span>
+          <>
             {t('archivedAccounts', { count: accs.length })}{' '}
             {hasArchivedMoney && (
               <DisplayAmount
@@ -110,14 +123,14 @@ const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
                 noShade
               />
             )}
-          </span>
+          </>
         )}
-      </ListItemButton>
+      </ListRowButton>
     </>
   )
 }
 
-function getTotal(accs: TAccountPopulated[]): TFxAmount {
+function getTotal(accs: core.accounts.TAccountPopulated[]): TFxAmount {
   return accs.reduce(
     (sum, a) => addFxAmount(sum, { [a.fxCode]: a.balance }),
     {}

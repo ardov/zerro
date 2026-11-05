@@ -1,26 +1,26 @@
-import React, { FC } from 'react'
+import {
+  NavigationAction,
+  type NavigationActionProps,
+} from './NavigationAction'
+import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { IconButton, IconButtonProps } from '@mui/material'
-import { SettingsIcon } from '6-shared/ui/Icons'
-import { Tooltip } from '6-shared/ui/Tooltip'
+import { SettingsIcon } from '@/6-shared/ui/Icons'
+import { useBackupProblem } from '@/4-features/export/useBackupFolder'
+import { settingsScreen } from './SettingsScreen'
 
-import { SettingsMenu, useSettingsMenu } from './SettingsMenu'
+type MenuButtonProps = Omit<NavigationActionProps, 'label' | 'icon'>
 
-interface MenuButtonProps extends IconButtonProps {
-  showLinks?: boolean
-}
-
-export const MenuButton: FC<MenuButtonProps> = ({ showLinks, ...rest }) => {
+export const MenuButton: FC<MenuButtonProps> = props => {
   const { t } = useTranslation('navigation')
-  const openSettings = useSettingsMenu()
+  const openSettings = settingsScreen.useOpen()
+  const backupProblem = useBackupProblem()
   return (
-    <>
-      <Tooltip title={t('settings')}>
-        <IconButton onClick={openSettings} {...rest}>
-          <SettingsIcon />
-        </IconButton>
-      </Tooltip>
-      <SettingsMenu showLinks={showLinks} />
-    </>
+    <NavigationAction
+      {...props}
+      icon={SettingsIcon}
+      label={t('settings')}
+      notice={backupProblem}
+      onClick={() => openSettings(true)}
+    />
   )
 }

@@ -1,31 +1,21 @@
-import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
+import type { TDateDraft, TFxAmount, TISOMonth } from '@/6-shared/types'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 
-import React from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Box,
-  Stack,
-  Divider,
-  List,
-  ListItem,
-  ListItemButton,
-  useTheme,
-} from '@mui/material'
-import { Total } from '6-shared/ui/Total'
-import { Amount } from '6-shared/ui/Amount'
+import { ListRows, listItemDenseClass } from '@/6-shared/ui/ListRow'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { Total } from '@/6-shared/ui/Total'
+import { Amount } from '@/6-shared/ui/Amount'
 import {
   formatDate,
   parseDate,
   prevMonth,
   toISOMonth,
-} from '6-shared/helpers/date'
+} from '@/6-shared/helpers/date'
 
-import { TEnvelopeId } from '5-entities/envelope'
-import { balances, TrFilterMode } from '5-entities/envBalances'
-import { fxRateModel } from '5-entities/currency/fxRate'
-import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
-import { OneLiner } from '3-widgets/DataLine'
-import { cardStyle } from './shared'
+import { useEnvTransactionsDrawer } from '@/3-widgets/global/EnvTransactionsDrawer'
+import { OneLiner } from '@/3-widgets/DataLine'
 import { useBudgetPopover } from '../BudgetPopover'
 
 type MonthContext = `${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`
@@ -35,21 +25,25 @@ const getMonthNum = (month: TISOMonth | TDateDraft) =>
 const getMonthContext = (month: TISOMonth | TDateDraft): MonthContext =>
   String(getMonthNum(month)) as MonthContext
 
-export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
+export function EnvelopeInfo(props: {
+  month: TISOMonth
+  id: core.envelopes.TEnvelopeId
+}) {
   const { month, id } = props
   const { t } = useTranslation('budgets')
-  const theme = useTheme()
   const transactionDrawer = useEnvTransactionsDrawer()
   const openBudgetPopover = useBudgetPopover()
-  const convertFx = fxRateModel.useConverter()
-  const envMetrics = balances.useEnvData()[month][id]
+  const convertFx = useAppSelector(core.currency.selectConvertFx)
+  const envMetrics = useAppSelector(core.activity.selectEnvelopeMetrics)[month][
+    id
+  ]
 
   if (!envMetrics) return null
 
   const { currency } = envMetrics
   const toEnvelope = (a: TFxAmount) => convertFx(a, currency, month)
   const totalLeftover = toEnvelope(envMetrics.totalLeftover)
-  const totalBudgeted = toEnvelope(envMetrics.totalBudgeted)
+  const totalAssigned = toEnvelope(envMetrics.totalAssigned)
   const totalActivity = toEnvelope(envMetrics.totalActivity)
   const totalAvailable = toEnvelope(envMetrics.totalAvailable)
 
@@ -63,8 +57,8 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
         : t('availableTitlePast', { context: getMonthContext(month) })
 
   return (
-    <Box sx={{ ...cardStyle, '--color': theme.palette.text.secondary }}>
-      <Stack spacing={1.5} sx={{ py: 1 }}>
+    <div className="w-full rounded-lg bg-ui-base px-4 py-2">
+      <div className="flex flex-col gap-3 py-2">
         <Total
           title={blockTitle}
           value={totalAvailable}
@@ -73,16 +67,23 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
           noShade
           amountColor={
             totalAvailable < 0
-              ? 'error.main'
+              ? 'error'
               : totalAvailable > 0
-                ? 'success.main'
+                ? 'success'
                 : undefined
           }
         />
-        <Divider sx={{ opacity: '0.6' }} />
-      </Stack>
-      <List dense sx={{ mx: -2, color: 'text.secondary' }}>
-        <ListItem>
+        <hr className="m-0 w-full border-0 border-t border-ui-border opacity-60" />
+      </div>
+      <ListRows className="-mx-4 text-ui-secondary">
+        {/* Not a button: it reports a number and has no action. `text-inherit`
+            keeps the list's muted color without adding an affordance. */}
+        <div
+          className={cn(
+            listItemDenseClass,
+            'cursor-default text-inherit hover:bg-transparent'
+          )}
+        >
           <OneLiner
             left={t('leftoverFrom', {
               month: formatDate(prevMonth(month), 'MMM'),
@@ -95,35 +96,41 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
               />
             }
           />
-        </ListItem>
+        </div>
 
-        <ListItemButton
-          sx={{
-            '&:hover': { color: 'text.primary' },
-            transition: '.2s ease-in-out',
-          }}
+        <button
+          type="button"
+          className={cn(
+            listItemDenseClass,
+            'text-inherit transition-colors duration-200 hover:text-ui-primary'
+          )}
           onClick={e => openBudgetPopover(id, e.currentTarget)}
         >
           <OneLiner
-            left={t('budget', { ns: 'common' })}
+            left={t('assigned', { ns: 'common' })}
             right={
               <Amount
-                value={totalBudgeted}
+                value={totalAssigned}
                 currency={currency}
                 decimals="ifAny"
               />
             }
           />
-        </ListItemButton>
+        </button>
 
-        <ListItemButton
-          sx={{
-            '&:hover': { color: 'text.primary' },
-            transition: '.2s ease-in-out',
-          }}
+        <button
+          type="button"
+          className={cn(
+            listItemDenseClass,
+            'text-inherit transition-colors duration-200 hover:text-ui-primary'
+          )}
           onClick={() => {
-            transactionDrawer.open({
-              envelopeConditions: { id, month, mode: TrFilterMode.Envelope },
+            transactionDrawer({
+              envelopeConditions: {
+                id,
+                month,
+                mode: core.transactions.TrFilterMode.Envelope,
+              },
             })
           }}
         >
@@ -131,9 +138,9 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
             left={
               <span>
                 <span>{t('transactions', { ns: 'common' })}</span>
-                {Boolean(envMetrics.totalTransactions.length) && (
+                {Boolean(envMetrics.totalTransactionCount) && (
                   <span style={{ opacity: 0.5 }}>
-                    {' ' + envMetrics.totalTransactions.length}
+                    {' ' + envMetrics.totalTransactionCount}
                   </span>
                 )}
               </span>
@@ -146,8 +153,8 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
               />
             }
           />
-        </ListItemButton>
-      </List>
-    </Box>
+        </button>
+      </ListRows>
+    </div>
   )
 }

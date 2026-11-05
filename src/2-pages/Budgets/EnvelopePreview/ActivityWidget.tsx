@@ -1,28 +1,31 @@
-import React, { FC, useEffect, useState } from 'react'
-import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
-import { Stack, Box, BoxProps } from '@mui/material'
-import { useTranslation } from 'react-i18next'
-import { useAppTheme } from '6-shared/ui/theme'
-import { TFxAmount, TISOMonth } from '6-shared/types'
-import { formatDate } from '6-shared/helpers/date'
+import type { FC } from 'react'
+import type { ComponentPropsWithoutRef } from 'react'
+import { useState } from 'react'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 
-import { balances } from '5-entities/envBalances'
-import { TEnvelopeId } from '5-entities/envelope'
-import { fxRateModel } from '5-entities/currency/fxRate'
-import { DataLine } from '3-widgets/DataLine'
+import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
+import { useTranslation } from 'react-i18next'
+import type { TFxAmount, TISOMonth } from '@/6-shared/types'
+import { formatDate } from '@/6-shared/helpers/date'
+
+import { DataLine } from '@/3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { getDateRange } from './shared'
 
-type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
+type ActivityWidgetProps = Omit<ComponentPropsWithoutRef<'div'>, 'id'> & {
+  id: core.envelopes.TEnvelopeId
+}
 
 export const ActivityWidget: FC<ActivityWidgetProps> = props => {
-  const { id, ...boxProps } = props
+  const { id, className, style, ...rest } = props
   const { t } = useTranslation('budgets')
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
-  const convertFx = fxRateModel.useConverter()
-  const envData = balances.useEnvData()
-  const dates = balances.useMonthList()
+  const convertFx = useAppSelector(core.currency.selectConvertFx)
+  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)
+  const dates = useAppSelector(core.months.selectList)
   const { currency } = envData[month][id]
   const dateRange = getDateRange(dates, 12, month)
 
@@ -30,10 +33,10 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
     const envelope = envData[month][id]
     const toEnvelope = (a: TFxAmount) => convertFx(a, currency, month)
     let activity = toEnvelope(envelope.totalActivity)
-    let leftover = toEnvelope(envelope.totalLeftover)
-    let budgeted = toEnvelope(envelope.totalBudgeted)
-    let available = toEnvelope(envelope.totalAvailable)
-    let startingAmount = leftover + budgeted
+    const leftover = toEnvelope(envelope.totalLeftover)
+    const assigned = toEnvelope(envelope.totalAssigned)
+    const available = toEnvelope(envelope.totalAvailable)
+    let startingAmount = leftover + assigned
     if (activity > 0) {
       // Handle positive outcome. It's possible with income transfers
       activity = 0
@@ -47,34 +50,30 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
       date: month,
       activity: -activity,
       leftover,
-      budgeted,
+      assigned,
       available,
       startingAmount,
     }
   })
 
   const selectedData = data.find(node => node.date === highlighted)
-  useEffect(() => {
+  const [prevMonth, setPrevMonth] = useState(month)
+  if (prevMonth !== month) {
+    setPrevMonth(month)
     setHighlighted(month)
-  }, [month])
+  }
 
-  const theme = useAppTheme()
-  const activityColor = theme.palette.info.main
-  const budgetLineColor = theme.palette.background.default
-  const startingAmountColor = theme.palette.primary.main
+  const activityColor = 'var(--info)'
+  const budgetLineColor = 'var(--background)'
+  const startingAmountColor = 'var(--primary)'
 
   return (
-    <Box
-      {...boxProps}
-      sx={[
-        {
-          borderRadius: 1,
-          bgcolor: 'background.default',
-        },
-        ...(Array.isArray(boxProps.sx) ? boxProps.sx : [boxProps.sx]),
-      ]}
+    <div
+      {...rest}
+      className={cn('rounded-lg bg-background', className)}
+      style={style}
     >
-      <Stack spacing={0.5} sx={{ pt: 2, px: 2 }}>
+      <div className="flex flex-col gap-1 px-4 pt-4">
         <DataLine
           name={t('outcome', { ns: 'common' })}
           color={activityColor}
@@ -88,10 +87,10 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
           amount={selectedData?.startingAmount}
           currency={currency}
           tooltip={
-            <Stack spacing={0.5}>
+            <div className="flex flex-col gap-1">
               <DataLine
-                name={t('budgetedThisMonth')}
-                amount={selectedData?.budgeted}
+                name={t('assignedThisMonth')}
+                amount={selectedData?.assigned}
                 currency={currency}
               />
               <DataLine
@@ -99,11 +98,11 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
                 amount={selectedData?.leftover}
                 currency={currency}
               />
-            </Stack>
+            </div>
           }
         />
-      </Stack>
-      <Box sx={{ width: '100%', height: '160px' }}>
+      </div>
+      <div className="h-40 w-full">
         <ResponsiveContainer>
           <BarChart
             data={data}
@@ -122,19 +121,19 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
             <Bar
               dataKey="startingAmount"
               fill={startingAmountColor}
-              // @ts-ignore
+              // @ts-expect-error recharts shape prop typing
               shape={<BudgetBar />}
             />
             <Bar
               dataKey="activity"
               fill={activityColor}
-              // @ts-ignore
+              // @ts-expect-error recharts shape prop typing
               shape={<ActivityBar current={highlighted} />}
             />
             <Bar
               dataKey="startingAmount"
               fill={budgetLineColor}
-              // @ts-ignore
+              // @ts-expect-error recharts shape prop typing
               shape={<BudgetLine />}
             />
             <XAxis
@@ -146,8 +145,8 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
             />
           </BarChart>
         </ResponsiveContainer>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 
@@ -216,7 +215,5 @@ type BudgetLineProps = BarProps & {
 const BudgetLine: FC<BudgetLineProps> = props => {
   const { fill, x, y, width, activity, startingAmount } = props
   if (startingAmount >= activity || !activity) return null
-  return (
-    <rect x={x - width * 2} y={y} width={width * 3} height={1} fill={fill} />
-  )
+  return <rect x={x} y={y} width={width * 3} height={1} fill={fill} />
 }

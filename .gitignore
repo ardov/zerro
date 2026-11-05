@@ -1,12 +1,15 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
+/.pnpm-store
 /.pnp
 .pnp.js
 
 # testing
 /coverage
+/private-fixtures
+/fixtures/private
 
 # production
 /build
@@ -15,6 +18,7 @@
 # misc
 .idea
 .vscode
+.claude
 .DS_Store
 .env.local
 .env.development.local
@@ -34,3 +38,10 @@ yarn-error.log*
 /.yarn
 
 *storybook.log
+storybook-static/
+experiments/
+.scratch/
+.codex-attachments/
+
+# private notes (separate repository, never published)
+/private/

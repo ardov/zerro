@@ -1,26 +1,32 @@
-import { toISOMonth } from '6-shared/helpers/date'
-import { ById, TBudget, globalBudgetTagId } from '6-shared/types'
-import { getTagBudgets, setEnvBudget, TBudgetUpdate } from '5-entities/budget'
-import { envelopeModel, EnvType } from '5-entities/envelope'
-import { AppThunk } from 'store'
+import { toISOMonth } from '@/6-shared/helpers/date'
+import type { ById, TBudget } from '@/6-shared/types'
+import { globalBudgetTagId } from '@/6-shared/types'
+import { core } from '@/zerro-core/redux'
 
-export function convertZmBudgetsToZerro(): AppThunk<TBudgetUpdate[]> {
+import type { AppThunk } from '@/store'
+
+export function convertZmBudgetsToZerro(): AppThunk<
+  core.budgets.TBudgetUpdate[]
+> {
   return (dispatch, getState) => {
-    const tagBudgets = getTagBudgets(getState())
+    const tagBudgets = core.budgets.selectRaw(getState())
     const updates = convertTagBudgetsToUpdates(tagBudgets)
-    dispatch(setEnvBudget(updates))
+    dispatch(core.budgets.setOwnAssigned(updates))
     return updates
   }
 }
 
 function convertTagBudgetsToUpdates(tagBudgets: ById<TBudget>) {
-  let updates = [] as TBudgetUpdate[]
+  const updates = [] as core.budgets.TBudgetUpdate[]
 
   Object.values(tagBudgets).forEach(budget => {
     if (!budget.outcome) return
     if (budget.tag === globalBudgetTagId) return
     updates.push({
-      id: envelopeModel.makeId(EnvType.Tag, String(budget.tag)),
+      id: core.envelopes.envId.get(
+        core.envelopes.EnvType.Tag,
+        String(budget.tag)
+      ),
       month: toISOMonth(budget.date),
       value: budget.outcome,
     })

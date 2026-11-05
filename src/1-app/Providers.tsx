@@ -1,24 +1,22 @@
 import React from 'react'
 import { Provider } from 'react-redux'
-import { StyledEngineProvider } from '@mui/material/styles'
-import { store } from 'store'
-import { AppThemeProvider } from '6-shared/ui/theme'
-import { SnackbarProvider } from '6-shared/ui/SnackbarProvider'
-import { LocalizationProvider } from '6-shared/localization'
+import { store } from '@/store'
+import { AppThemeProvider } from '@/6-shared/ui/theme'
+import { Toaster } from '@/6-shared/ui/kit/Toast'
+import { TooltipProvider } from '@/6-shared/ui/kit/Tooltip'
+import type { AppThemeProviderProps } from '@/6-shared/ui/theme'
 
 export function Providers(props: {
   children: React.ReactNode
   store?: typeof store
+  theme?: Pick<AppThemeProviderProps, 'defaultMode'>
 }) {
   return (
-    <StyledEngineProvider injectFirst>
-      <Provider store={props.store || store}>
-        <LocalizationProvider>
-          <AppThemeProvider>
-            <SnackbarProvider>{props.children}</SnackbarProvider>
-          </AppThemeProvider>
-        </LocalizationProvider>
-      </Provider>
-    </StyledEngineProvider>
+    <Provider store={props.store || store}>
+      <AppThemeProvider {...props.theme}>
+        <TooltipProvider>{props.children}</TooltipProvider>
+        <Toaster />
+      </AppThemeProvider>
+    </Provider>
   )
 }

@@ -1,27 +1,36 @@
 {
   "compilerOptions": {
+    "types": ["mdx"],
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": "src",
+    "noUnusedLocals": true,
+    "noImplicitOverride": true,
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "stories/*": ["./stories/*"]
+    },
     "target": "esnext",
-    "lib": ["dom", "dom.iterable", "es2021"],
-    "allowJs": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.cache/tsconfig.tsbuildinfo",
     "noEmit": true,
     "jsx": "react-jsx"
   },
   "include": [
     "src",
-    "typings/theme.d.ts",
+    "stories",
+    ".storybook",
+    "typings/react-redux.d.ts",
     "typings/vite-env.d.ts",
     "typings/i18n.d.ts"
-  ],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  ]
 }

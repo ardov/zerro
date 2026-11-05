@@ -1,39 +1,33 @@
-import React, { FC } from 'react'
-import { MenuItem, SelectProps, ListItemText } from '@mui/material'
-import { instrumentModel } from '5-entities/currency/instrument'
-import { accountModel } from '5-entities/account'
-import { TFxCode, TInstrument } from '6-shared/types'
-import { getCurrencySymbol } from '6-shared/helpers/money'
-import { userModel } from '5-entities/user'
-import { SmartSelect } from '6-shared/ui/SmartSelect'
+import type { FC } from 'react'
+import { core } from '@/zerro-core/redux'
 
-export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
-  const instrumentsByCode = instrumentModel.useInstrumentsByCode()
-  const userCurrency = userModel.useUserCurrency()
-  const accs = accountModel.useInBudgetAccounts()
-  const value = props.value
+import type { TFxCode } from '@/6-shared/types'
+import { CurrencyCodeSelect as CurrencySelect } from '@/3-widgets/currency/CurrencyCodeSelect'
+
+type CurrencyCodeSelectProps = {
+  value: TFxCode
+  onChange: (value: TFxCode) => void
+  label: string
+  className?: string
+}
+
+export const CurrencyCodeSelect: FC<CurrencyCodeSelectProps> = props => {
+  const { value, onChange, ...rest } = props
+  const userCurrency = core.users.useCurrency()
+  const accs = core.accounts.useInBudget()
 
   const fxSet = new Set(accs.map(a => a.fxCode))
   fxSet.add(userCurrency)
   if (value) fxSet.add(value)
-  const instruments = [...fxSet].map(code => instrumentsByCode[code])
 
   return (
-    <SmartSelect {...props} renderValue={v => v} elKey="CurrencyCodeSelect">
-      {instruments.map(instr => (
-        <MenuItem key={instr.shortTitle} value={instr.shortTitle}>
-          <ListItemText
-            primary={instr.shortTitle}
-            secondary={describe(instr)}
-          />
-        </MenuItem>
-      ))}
-    </SmartSelect>
+    <CurrencySelect
+      {...rest}
+      required
+      value={value}
+      labelMode="floating"
+      onChange={onChange}
+      currencies={[...fxSet]}
+    />
   )
-}
-
-function describe(i: TInstrument) {
-  const symbol = getCurrencySymbol(i.shortTitle)
-  if (symbol !== i.shortTitle) return `${i.title} (${symbol})`
-  return i.title
 }

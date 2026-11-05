@@ -1,43 +1,33 @@
-import { Theme, useMediaQuery } from '@mui/material'
-import { Box, BoxProps, SxProps } from '@mui/system'
-import { FC, ReactNode } from 'react'
+import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import type { FC, HTMLAttributes, ReactNode } from 'react'
 import { Metric, useColumns } from '../models/useMetric'
 
 export function useIsSmall() {
-  return useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  return useBreakpointDown('sm')
 }
 
-const rowStyle: SxProps = {
-  display: 'grid',
-  gridTemplateColumns: {
-    xs: 'auto 90px 16px',
-    sm: 'auto 90px 90px 90px 16px',
-  },
-  width: '100%',
-  px: 2,
-  alignItems: 'center',
-  justifyContent: 'initial',
-  gridColumnGap: '12px',
-}
+const rowClassName =
+  'grid w-full grid-cols-[minmax(0,1fr)_90px_16px] items-center gap-x-3 px-4 sm:grid-cols-[minmax(0,1fr)_90px_90px_90px_16px]'
 
 export const TableRow: FC<
-  BoxProps & {
+  HTMLAttributes<HTMLDivElement> & {
     name: ReactNode
     available: ReactNode
-    budgeted: ReactNode
+    assigned: ReactNode
     outcome: ReactNode
     goal: ReactNode
   }
 > = props => {
-  const { name, available, budgeted, outcome, goal, sx, ...rest } = props
+  const { name, available, assigned, outcome, goal, className, ...rest } = props
   const { columns } = useColumns()
   return (
-    <Box sx={sx ? { ...rowStyle, ...sx } : rowStyle} {...rest}>
+    <div className={cn(rowClassName, className)} {...rest}>
       {name}
-      {columns.includes(Metric.budgeted) && budgeted}
+      {columns.includes(Metric.assigned) && assigned}
       {columns.includes(Metric.outcome) && outcome}
       {columns.includes(Metric.available) && available}
       {goal}
-    </Box>
+    </div>
   )
 }

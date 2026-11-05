@@ -1,0 +1,494 @@
+import { testOperations } from '@/zerro-core/support/testing/commandTestData'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { configureImmer } from '../immer'
+
+import {
+  makeAccount,
+  makeInstrument,
+  makeStore,
+  makeTransaction,
+  makeUser,
+} from '@/zerro-core/support/testing/zenmoneyTestData'
+import { acceptPushChunk, beginPush, type TCommand } from '@/zerro-core/replica'
+import { AccountType, type TNormalizedPatch } from '@/6-shared/types'
+import { getChangedNum, getPendingSyncDiff } from './selectors'
+import reducer, {
+  acceptClientPushChunk,
+  appendClientCommand,
+  hydrateReplica,
+  hydrateRecoveryOutbox,
+  prepareClientSync,
+  applyServerPatch as serverPatchApplied,
+  redoClientCommand,
+  restoreOutboxPosition,
+  resetData,
+  undoClientCommand,
+} from './slice'
+
+function applyServerPatch(
+  state: ReturnType<typeof reducer> | undefined,
+  patch: Parameters<typeof serverPatchApplied>[0]
+) {
+  return reducer(state, serverPatchApplied(patch))
+}
+
+function getRootState(state: ReturnType<typeof reducer>) {
+  return { data: state } as any
+}
+
+function getPendingDiff(state: ReturnType<typeof reducer>) {
+  return getPendingSyncDiff(getRootState(state))
+}
+
+/**
+ * Runs the real push acknowledgement: capture the outbox, accept one Chunk.
+ * `atAccept` is the replica as it stands when the response lands, which is how
+ * a command appended while the request was in flight is modelled.
+ */
+function acknowledgePush(
+  captured: ReturnType<typeof reducer>,
+  canonicalPatch: TNormalizedPatch,
+  atAccept: ReturnType<typeof reducer> = captured
+) {
+  const prepared = beginPush(captured, 100)
+  if (!prepared) throw new Error('Expected a prepared push')
+  const accepted = acceptPushChunk(atAccept, prepared, canonicalPatch)
+  const { next: _next, progress: _progress, ...replica } = accepted
+  return { state: reducer(atAccept, acceptClientPushChunk(replica)), prepared }
+}
+
+function makeAccountEntry(title: string, issuedAt: number): TCommand {
+  return {
+    operations: testOperations({
+      account: [makeAccount({ id: 'cash', title })],
+    }),
+    issuedAt,
+  }
+}
+
+describe.each([false, true])('outbox (production: %s)', production => {
+  beforeEach(() => configureImmer(production))
+  afterEach(() => configureImmer(false))
+
+  it('keeps pending transactions readable and syncable after a canonical pull', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      transaction: [makeTransaction({ id: 'edited', comment: 'Before' })],
+    })
+    const pending = reducer(
+      base,
+      appendClientCommand({
+        issuedAt: 200,
+        operations: testOperations({
+          transaction: [{ id: 'edited', comment: 'After' }],
+        }),
+      })
+    )
+    const pulled = applyServerPatch(pending, {
+      serverTimestamp: 300,
+      transaction: [makeTransaction({ id: 'remote', comment: 'Remote' })],
+    })
+
+    expect(pulled.current.transaction.edited.comment).toBe('After')
+    expect(pulled.base.transaction.edited.comment).toBe('Before')
+    expect(beginPush(pulled, 400)).toBeDefined()
+  })
+
+  it('keeps transaction history navigable and syncable through undo and redo', () => {
+    const base = applyServerPatch(undefined, {
+      transaction: [
+        makeTransaction({ id: 'first' }),
+        makeTransaction({ id: 'second' }),
+      ],
+    })
+    const first = reducer(
+      base,
+      appendClientCommand({
+        issuedAt: 100,
+        operations: testOperations({
+          transaction: [{ id: 'first', comment: 'First edit' }],
+        }),
+      })
+    )
+    const second = reducer(
+      first,
+      appendClientCommand({
+        issuedAt: 200,
+        operations: testOperations({
+          transaction: [{ id: 'second', comment: 'Second edit' }],
+        }),
+      })
+    )
+    const undone = reducer(second, undoClientCommand())
+    expect(undone.current.transaction.first.comment).toBe('First edit')
+    expect(undone.current.transaction.second.comment).toBeNull()
+    expect(beginPush(undone, 300)).toBeDefined()
+    const redone = reducer(undone, redoClientCommand())
+    expect(redone.current.transaction.second.comment).toBe('Second edit')
+    expect(beginPush(redone, 300)).toBeDefined()
+    const restored = reducer(redone, restoreOutboxPosition(0))
+    expect(restored.current.transaction.first.comment).toBe('First edit')
+    expect(restored.current.transaction.second.comment).toBeNull()
+    expect(beginPush(restored, 300)).toBeDefined()
+  })
+
+  it('hydrates base and current from one reconstructed replica', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    }).base
+    const outbox = [makeAccountEntry('Wallet', 10)]
+
+    const hydrated = reducer(
+      undefined,
+      hydrateReplica({ rootUserId: 7, base, outbox })
+    )
+
+    expect(hydrated.rootUserId).toBe(7)
+    expect(hydrated.base).toBe(base)
+    expect(hydrated.current.account.cash.title).toBe('Wallet')
+    expect(hydrated.outbox).toEqual(outbox)
+  })
+
+  it('clears recovery after the cursor-zero canonical snapshot is accepted', () => {
+    const recovering = reducer(
+      undefined,
+      hydrateRecoveryOutbox({
+        rootUserId: 7,
+        outbox: [makeAccountEntry('Wallet', 10)],
+        reason: 'broken checkpoint',
+      })
+    )
+
+    const recovered = applyServerPatch(recovering, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+
+    expect(recovered.journalRecoveryRequired).toBe(false)
+    expect(recovered.journalRecoveryReason).toBeNull()
+    expect(recovered.current.account.cash.title).toBe('Wallet')
+  })
+
+  it('quarantines a recovered outbox that is invalid over the full snapshot', () => {
+    const recovering = reducer(
+      undefined,
+      hydrateRecoveryOutbox({
+        rootUserId: 7,
+        outbox: [
+          {
+            issuedAt: 10,
+            operations: testOperations({
+              account: [{ id: 'cash', instrument: 999 }],
+            }),
+          },
+        ],
+        reason: 'broken checkpoint',
+      })
+    )
+
+    const recovered = applyServerPatch(recovering, {
+      fullReload: true,
+      serverTimestamp: 100,
+      instrument: [makeInstrument({ id: 1 })],
+      country: [{ id: 1, title: 'United States', currency: 1, domain: null }],
+      user: [makeUser({ id: 7, parent: null, currency: 1 })],
+      account: [
+        makeAccount({ id: 'cash', user: 7, instrument: 1 }),
+        makeAccount({
+          id: 'debt',
+          user: 7,
+          instrument: 1,
+          type: AccountType.Debt,
+        }),
+      ],
+    })
+
+    expect(recovered.outbox).toEqual([])
+    expect(recovered.current).toBe(recovered.base)
+    expect(recovered.outboxRecoveryReason).toContain(
+      'account[0].instrument references a missing entity'
+    )
+    expect(recovered.journalRecoveryRequired).toBe(true)
+  })
+
+  it('applies canonical server patches with no pending commands', () => {
+    const initial = reducer(undefined, { type: 'test/init' })
+    const next = reducer(initial, serverPatchApplied({ serverTimestamp: 300 }))
+    expect(next.current.serverTimestamp).toBe(300)
+    expect(next.outbox).toEqual([])
+  })
+
+  it('keeps unrelated entity maps reference-stable across an append', () => {
+    const base = applyServerPatch(undefined, {
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+      transaction: [makeTransaction({ id: 't1' })],
+    })
+    const beforeTransactions = base.current.transaction
+    const beforeAccount = base.current.account
+
+    const appended = reducer(
+      base,
+      appendClientCommand(makeAccountEntry('Wallet', 10))
+    )
+
+    expect(appended.current.account).not.toBe(beforeAccount)
+    expect(appended.current.account.cash.title).toBe('Wallet')
+    expect(appended.current.transaction).toBe(beforeTransactions)
+  })
+
+  it('moves commands between the durable outbox and session redo stack', () => {
+    const base = applyServerPatch(undefined, {
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+    const first = makeAccountEntry('Wallet', 10)
+    const second = makeAccountEntry('Vault', 20)
+    const appended = reducer(
+      reducer(base, appendClientCommand(first)),
+      appendClientCommand(second)
+    )
+
+    expect(appended.current.account.cash.title).toBe('Vault')
+    expect(getPendingDiff(appended)?.account?.[0].title).toBe('Vault')
+    // Two commands touched the same account, so the count is the number of
+    // undoable commands (2), not the one entity they collapse to in the diff.
+    expect(getChangedNum(getRootState(appended))).toBe(2)
+
+    const undone = reducer(appended, undoClientCommand())
+    expect(undone.current.account.cash.title).toBe('Wallet')
+    expect(getPendingDiff(undone)?.account?.[0].title).toBe('Wallet')
+    expect(undone.outbox).toEqual([first])
+    expect(undone.redo).toEqual([second])
+
+    const branched = reducer(
+      undone,
+      appendClientCommand(makeAccountEntry('Pocket', 30))
+    )
+    expect(branched.outbox.map(entry => entry.issuedAt)).toEqual([10, 30])
+    expect(branched.redo).toEqual([])
+
+    const reset = reducer(undone, undoClientCommand())
+    expect(reset.current.account.cash.title).toBe('Cash')
+    expect(getPendingDiff(reset)).toBeUndefined()
+
+    const redone = reducer(reset, redoClientCommand())
+    expect(redone.current.account.cash.title).toBe('Wallet')
+    expect(redone.outbox).toEqual([first])
+  })
+
+  it('rebases sparse transaction fields over a remote entity change', () => {
+    const baseTransaction = makeTransaction({
+      id: 'tr-1',
+      income: 7,
+      viewed: true,
+      changed: 100,
+    })
+    const base = applyServerPatch(undefined, {
+      transaction: [baseTransaction],
+    })
+    const entry: TCommand = {
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', viewed: false }],
+      }),
+      issuedAt: 200,
+    }
+    const pending = reducer(base, appendClientCommand(entry))
+
+    const rebased = applyServerPatch(pending, {
+      transaction: [
+        makeTransaction({
+          id: 'tr-1',
+          income: 11,
+          viewed: true,
+          changed: 300,
+        }),
+      ],
+    })
+
+    expect(rebased.base.transaction['tr-1'].income).toBe(11)
+    expect(rebased.current.transaction['tr-1']).toMatchObject({
+      income: 11,
+      viewed: false,
+    })
+    expect(rebased.outbox).toEqual([entry])
+  })
+
+  it('acknowledges the sent prefix after a successful response', () => {
+    const base = applyServerPatch(undefined, {
+      transaction: [makeTransaction({ id: 'tr-1', viewed: false })],
+    })
+    const entry: TCommand = {
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', viewed: true }],
+      }),
+      issuedAt: 10,
+    }
+    const pending = reducer(base, appendClientCommand(entry))
+
+    const { state: accepted } = acknowledgePush(pending, {
+      transaction: [makeTransaction({ id: 'tr-1', viewed: false })],
+    })
+    expect(accepted.outbox).toEqual([])
+    expect(accepted.current.transaction['tr-1'].viewed).toBe(false)
+  })
+
+  it('acknowledges an empty comment canonicalized by Zenmoney to null', () => {
+    const base = applyServerPatch(undefined, {
+      transaction: [makeTransaction({ id: 'tr-1', comment: 'Before' })],
+    })
+    const entry: TCommand = {
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', comment: '' }],
+      }),
+      issuedAt: 10,
+    }
+    const pending = reducer(base, appendClientCommand(entry))
+
+    const { state: accepted } = acknowledgePush(pending, {
+      transaction: [makeTransaction({ id: 'tr-1', comment: null })],
+    })
+
+    expect(accepted.outbox).toEqual([])
+    expect(accepted.current.transaction['tr-1'].comment).toBeNull()
+  })
+
+  it('acknowledges two sent commands even when only the last value is visible', () => {
+    const base = applyServerPatch(undefined, {
+      transaction: [makeTransaction({ id: 'tr-1', comment: null })],
+    })
+    const first: TCommand = {
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', comment: 'First' }],
+      }),
+      issuedAt: 10,
+    }
+    const second: TCommand = {
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', comment: 'Second' }],
+      }),
+      issuedAt: 20,
+    }
+    const pending = reducer(
+      reducer(base, appendClientCommand(first)),
+      appendClientCommand(second)
+    )
+
+    const { state: accepted } = acknowledgePush(pending, {
+      transaction: [makeTransaction({ id: 'tr-1', comment: 'Second' })],
+    })
+
+    expect(accepted.outbox).toEqual([])
+    expect(accepted.current.transaction['tr-1'].comment).toBe('Second')
+  })
+
+  it('uses a fresh strict entity version for request transport', () => {
+    const base = applyServerPatch(undefined, {
+      transaction: [
+        makeTransaction({ id: 'tr-1', changed: 5000, viewed: false }),
+      ],
+    })
+    const entry: TCommand = {
+      operations: testOperations({
+        transaction: [{ id: 'tr-1', viewed: true }],
+      }),
+      issuedAt: 10,
+    }
+    const pending = reducer(base, appendClientCommand(entry))
+
+    const prepared = beginPush(pending, 100)
+    expect(prepared?.request.transaction?.[0]).toMatchObject({
+      changed: 6000,
+      viewed: true,
+    })
+  })
+
+  it('keeps commands created during sync and drops the committed redo tail', () => {
+    const base = applyServerPatch(undefined, {
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+    const sent = makeAccountEntry('Wallet', 10)
+    const during = makeAccountEntry('Vault', 20)
+    const sentOnly = reducer(base, appendClientCommand(sent))
+    const { state: rebased } = acknowledgePush(
+      sentOnly,
+      { account: [makeAccount({ id: 'cash', title: 'Server Wallet' })] },
+      reducer(sentOnly, appendClientCommand(during))
+    )
+
+    expect(rebased.outbox).toEqual([during])
+    expect(rebased.current.account.cash.title).toBe('Vault')
+
+    const withRedo = reducer(
+      reducer(
+        reducer(base, appendClientCommand(sent)),
+        appendClientCommand(during)
+      ),
+      undoClientCommand()
+    )
+    const prepared = reducer(withRedo, prepareClientSync())
+    expect(prepared.outbox).toEqual([sent])
+    expect(prepared.redo).toEqual([])
+  })
+
+  it('keeps the outbox over a full server reload', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+    const pending = reducer(
+      base,
+      appendClientCommand(makeAccountEntry('Wallet', 10))
+    )
+
+    const reloaded = applyServerPatch(pending, {
+      fullReload: true,
+      serverTimestamp: 200,
+      account: [makeAccount({ id: 'cash', title: 'Server Cash' })],
+    })
+
+    expect(reloaded.base.account.cash.title).toBe('Server Cash')
+    expect(reloaded.current.account.cash.title).toBe('Wallet')
+    expect(reloaded.outbox).toHaveLength(1)
+  })
+
+  it('drops the previous account outbox when a full reload changes root user', () => {
+    const base = makeStore({
+      serverTimestamp: 100,
+      user: { 7: makeUser({ id: 7, parent: null, currency: 1 }) },
+      account: {
+        cash: makeAccount({ id: 'cash', title: 'Cash', user: 7 }),
+      },
+    })
+    const pending = reducer(
+      reducer(undefined, hydrateReplica({ rootUserId: 7, base, outbox: [] })),
+      appendClientCommand(makeAccountEntry('Wallet', 10))
+    )
+
+    const reloaded = applyServerPatch(pending, {
+      fullReload: true,
+      serverTimestamp: 200,
+      user: [makeUser({ id: 8, parent: null, currency: 1 })],
+      account: [makeAccount({ id: 'cash', title: 'Other Cash', user: 8 })],
+    })
+
+    expect(reloaded.rootUserId).toBe(8)
+    expect(reloaded.outbox).toEqual([])
+    expect(reloaded.redo).toEqual([])
+    expect(reloaded.current.account.cash.title).toBe('Other Cash')
+  })
+
+  it('clears both history stacks when data resets on logout', () => {
+    const base = applyServerPatch(undefined, {
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+    const withRedo = reducer(
+      reducer(base, appendClientCommand(makeAccountEntry('Wallet', 10))),
+      undoClientCommand()
+    )
+
+    const reset = reducer(withRedo, resetData())
+    expect(reset.outbox).toEqual([])
+    expect(reset.redo).toEqual([])
+    expect(reset.current.serverTimestamp).toBe(0)
+  })
+})

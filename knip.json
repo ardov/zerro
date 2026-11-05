@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "stories/**/*.{ts,tsx}",
+    ".storybook/**/*.{ts,tsx}",
+    "vitest*.config.ts"
+  ],
+  "ignoreDependencies": ["tailwindcss"]
+}

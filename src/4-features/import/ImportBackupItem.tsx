@@ -1,0 +1,228 @@
+import { Button } from '@/6-shared/ui/kit/Button'
+import type { ChangeEvent } from 'react'
+import { useCallback, useId, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
+import { ListRow } from '@/6-shared/ui/kit/ListRow'
+import { UploadIcon } from '@/6-shared/ui/Icons'
+import {
+  byLabelKey,
+  entityLabelKeys,
+} from '@/6-shared/localization/entityLabels'
+import { toast } from '@/6-shared/ui/kit/Toast'
+import { track } from '@/6-shared/analytics'
+import { parseFullBackup } from '@/6-shared/api/zm-adapter'
+import type { TFullBackupWarning } from '@/6-shared/api/zm-adapter'
+import type { TDataStore } from '@/6-shared/types'
+import { useAppDispatch } from '@/store'
+import { resetData } from '@/store/data'
+import type { core } from '@/zerro-core/redux'
+import { clearLocalData } from '@/4-features/localData'
+import { useAsk, useAsked } from '@/6-shared/overlays'
+import { Confirm } from '@/6-shared/ui/kit/Confirm'
+
+import {
+  checkBackupCompatibility,
+  importBackup,
+  previewBackup,
+} from './importBackup'
+
+type TPending = {
+  store: TDataStore
+  summary: core.restore.TStoreDiffSummary
+  foreign: boolean
+  warnings: TFullBackupWarning[]
+}
+
+/**
+ * Restores the state a backup file describes. The confirmation is not
+ * decoration: an import overwrites whatever changed since the backup, so the
+ * user sees the size of that before anything is written.
+ */
+export function ImportBackupItem() {
+  const { t } = useTranslation('settings')
+  const dispatch = useAppDispatch()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const reloadData = useCallback(async () => {
+    track('local_data_reload_requested', {})
+    dispatch(resetData())
+    await dispatch(clearLocalData())
+    window.location.reload()
+  }, [dispatch])
+  const ask = useAsk()
+  const confirmReload = useCallback(async () => {
+    const confirmed = await ask(
+      <Confirm
+        title={t('invalidCurrentStateTitle')}
+        description={t('invalidCurrentStateDescription')}
+        okText={t('invalidCurrentStateConfirm')}
+      />
+    )
+    if (!confirmed) return
+    reloadData()
+  }, [ask, reloadData, t])
+
+  const handleFile = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0]
+      // Reset first, so picking the same file again still fires a change.
+      event.target.value = ''
+      if (!file) return
+
+      let text: string
+      try {
+        text = await file.text()
+      } catch {
+        toast.add({ type: 'error', title: t('importError_unreadable') })
+        return
+      }
+
+      const parsed = parseFullBackup(text)
+      if (!parsed.ok) {
+        toast.add({ type: 'error', title: t(`importError_${parsed.reason}`) })
+        return
+      }
+
+      const compatibility = dispatch(checkBackupCompatibility(parsed.store))
+      if (!compatibility.ok) {
+        if (compatibility.reason === 'invalidCurrentState') {
+          confirmReload()
+          return
+        }
+        toast.add({
+          type: 'error',
+          title: t(`importError_${compatibility.reason}`),
+        })
+        return
+      }
+
+      const summary = dispatch(previewBackup(parsed.store))
+      if (!Object.keys(summary).length && !parsed.warnings.length) {
+        toast.add({ type: 'info', title: t('importNoChanges') })
+        return
+      }
+      const pending: TPending = {
+        store: parsed.store,
+        summary,
+        foreign: compatibility.foreign,
+        warnings: parsed.warnings,
+      }
+      const confirmed = await ask<boolean>(
+        <BackupImportDialog pending={pending} />
+      )
+      if (!confirmed) return
+
+      const result = dispatch(importBackup(pending.store))
+      if (!result.ok) {
+        if (result.reason === 'invalidCurrentState') {
+          confirmReload()
+          return
+        }
+        toast.add({ type: 'error', title: t(`importError_${result.reason}`) })
+      } else {
+        toast.add({
+          type: result.applied ? 'success' : 'info',
+          title: t(result.applied ? 'importDone' : 'importNoChanges'),
+        })
+      }
+    },
+    [ask, confirmReload, dispatch, t]
+  )
+
+  return (
+    <>
+      <ListRow
+        render={
+          <button type="button" onClick={() => inputRef.current?.click()} />
+        }
+        start={<UploadIcon />}
+        className="cursor-pointer focusable hover:after:opacity-100"
+      >
+        {t('restoreFromBackup')}
+      </ListRow>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="application/json,.json"
+        hidden
+        onChange={handleFile}
+      />
+    </>
+  )
+}
+
+function BackupImportDialog({ pending }: { pending: TPending }) {
+  const { t } = useTranslation('settings')
+  const { controller, answer } = useAsked<boolean>()
+  const confirm = useRef<HTMLButtonElement>(null)
+  const descriptionId = useId()
+  return (
+    <DialogSurface
+      controller={controller}
+      title={t('importTitle')}
+      closeButton={false}
+      initialFocus={confirm}
+      aria-describedby={descriptionId}
+    >
+      {pending.foreign && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-error-border bg-error-surface p-3"
+        >
+          <p className="m-0 text-body-sm">{t('importForeignWarning')}</p>
+        </div>
+      )}
+      {!!pending.warnings.length && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-warning-border bg-warning-surface p-3"
+        >
+          <p className="m-0 text-body-sm">{t('importCompatibilityWarning')}</p>
+          <ul className="mb-0 mt-2 pl-5 text-body-sm">
+            {pending.warnings.map(warning => (
+              <li key={`${warning.reason}:${warning.path}`}>
+                {t('importCompatibilityWarningItem', {
+                  path: warning.path,
+                  count: warning.count,
+                })}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <p id={descriptionId} className="m-0 text-ui-secondary">
+        {t('importWarning')}
+      </p>
+      <div className="mt-4 flex flex-col gap-1">
+        {entityLabelKeys.map(([key, labelKey]) => {
+          const counts = byLabelKey(pending.summary)[key]
+          if (!counts) return null
+          return (
+            <div key={key} className="flex justify-between gap-4">
+              <span className="text-body-sm">{t(labelKey)}</span>
+              <span className="text-body-sm text-ui-secondary">
+                {[
+                  counts.created && t('importCreated', { n: counts.created }),
+                  counts.updated && t('importUpdated', { n: counts.updated }),
+                  counts.removed && t('importRemoved', { n: counts.removed }),
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+      <div className="mt-6 flex flex-wrap justify-end gap-2">
+        <Button variant="secondary" onClick={() => answer()}>
+          {t('importCancel')}
+        </Button>
+        <Button ref={confirm} variant="primary" onClick={() => answer(true)}>
+          {t(pending.warnings.length ? 'importConfirmAnyway' : 'importConfirm')}
+        </Button>
+      </div>
+    </DialogSurface>
+  )
+}

@@ -1,49 +1,39 @@
-import React, { FC } from 'react'
-import { Typography, ButtonBase, ButtonBaseProps } from '@mui/material'
-import { TISOMonth } from '6-shared/types'
-import { formatMoney } from '6-shared/helpers/money'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { RadialProgress } from '6-shared/ui/RadialProgress'
-import { useAppDispatch, useAppSelector } from 'store'
+import type { ButtonBaseProps } from '@/6-shared/ui/kit/ButtonBase'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
+import type { FC } from 'react'
+import { core } from '@/zerro-core/redux'
 
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { goalModel } from '5-entities/goal'
-import { totalGoalsModel } from '../model'
-import { useConfirm } from '6-shared/ui/SmartConfirm'
+import type { TISOMonth } from '@/6-shared/types'
+import { formatMoney } from '@/6-shared/helpers/money'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
+import { useAppDispatch, useAppSelector } from '@/store'
+
+import { track } from '@/6-shared/analytics'
+import { toast } from '@/6-shared/ui/kit/Toast'
 import { useTranslation } from 'react-i18next'
 
 type TGoalsProgressProps = ButtonBaseProps & {
   month: TISOMonth
 }
 
-const baseStyles = {
-  bgcolor: 'background.paper',
-  borderRadius: 1,
-  py: 1,
-  px: 2,
-  display: 'flex',
-  gap: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  minHeight: '40px',
-}
+const baseStyles =
+  'flex min-h-10 items-center justify-center gap-2 rounded-lg bg-ui-card px-4 py-2'
 
 export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { t } = useTranslation('goals')
   const { month, ...btnProps } = props
-  const dispatch = useAppDispatch()
-  const [currency] = displayCurrency.useDisplayCurrency()
-  const toDisplay = displayCurrency.useToDisplay(month)
-  const totalProgress = useAppSelector(goalModel.getTotals)[month]
+  const [currency] = core.currency.useDisplayCurrency()
+  const toDisplay = core.currency.useToDisplay(month)
+  const totalProgress = useAppSelector(core.goals.selectTotals)[month]
   const formatSum = (sum: number) => formatMoney(sum, currency)
 
-  const completeAll = useConfirm({
-    onOk: () => dispatch(totalGoalsModel.fillAll(month)),
-    title: t('completeAll.title'),
-    description: t('completeAll.description'),
-    okText: t('completeAll.okText'),
-    cancelText: t('completeAll.cancelText'),
-  })
+  const dispatch = useAppDispatch()
+  const completeAll = () => {
+    if (dispatch(core.budgets.fundGoals(month)).status !== 'applied') return
+    track('budget_automation_applied', { automation: 'fill_goals' })
+    toast.add({ type: 'success', title: t('completeAll.done') })
+  }
 
   // No goals
   if (!totalProgress || totalProgress.goalsCount === 0) return null
@@ -55,17 +45,16 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
 
   return (
     <Tooltip
-      arrow
-      title={t('progressOnTagret', {
-        budgeted: formatSum(targetValue - needValue),
+      content={t('progressOnTagret', {
+        assigned: formatSum(targetValue - needValue),
         target: formatSum(targetValue),
       })}
     >
-      <ButtonBase sx={baseStyles} {...btnProps} onClick={completeAll}>
+      <ButtonBase className={baseStyles} {...btnProps} onClick={completeAll}>
         <RadialProgress value={progress} />
-        <Typography variant="body1">
+        <span className="text-body font-sans">
           {t('goalsProgress', { percent: Math.floor(progress * 100) })}
-        </Typography>
+        </span>
       </ButtonBase>
     </Tooltip>
   )

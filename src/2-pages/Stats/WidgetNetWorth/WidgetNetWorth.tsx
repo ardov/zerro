@@ -1,13 +1,8 @@
 import { useState } from 'react'
+import { core } from '@/zerro-core/redux'
+
 import { useTranslation } from 'react-i18next'
-import {
-  Box,
-  Typography,
-  Paper,
-  Checkbox,
-  FormControlLabel,
-  Card,
-} from '@mui/material'
+import { CheckboxField } from '@/6-shared/ui/kit/Checkbox'
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -17,22 +12,31 @@ import {
   Line,
   ReferenceLine,
 } from 'recharts'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { useAppTheme } from '6-shared/ui/theme'
-import { round } from '6-shared/helpers/money'
-import { formatDate, GroupBy } from '6-shared/helpers/date'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import { round } from '@/6-shared/helpers/money'
+import { formatDate, GroupBy } from '@/6-shared/helpers/date'
 
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
-import { DataLine } from '3-widgets/DataLine'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
+import { DataLine } from '@/3-widgets/DataLine'
 import { Period, PeriodTitle } from '../shared/period'
-import { TNetWorthPoint, useNetWorth } from './useNetWorth'
+import type { TNetWorthPoint } from './useNetWorth'
+import { useNetWorth } from './useNetWorth'
 import { useAverageExpenses } from './useAverageExpenses'
 
 type Point = TNetWorthPoint & { total: number }
 type TDataKey = keyof Omit<Point, 'date'>
+
+/** The series colours, as tokens rather than palette values: a chart repaints
+ * with the colour scheme through the cascade, without re-rendering. The paired
+ * shades are what separates two series that share a meaning. */
+const colors: Record<TDataKey, string> = {
+  lented: 'var(--data-success)',
+  debts: 'var(--data-error)',
+  accountDebts: 'var(--data-error-alt)',
+  fundsInBudget: 'var(--data-primary)',
+  fundsSaving: 'var(--data-primary-alt)',
+  total: 'var(--info)',
+}
 
 type WidgetNetWorthProps = {
   period: Period
@@ -42,7 +46,6 @@ type WidgetNetWorthProps = {
 export function WidgetNetWorth(props: WidgetNetWorthProps) {
   const { period, onTogglePeriod } = props
   const { t } = useTranslation('analytics')
-  const theme = useAppTheme()
   const balances = useNetWorth(period, GroupBy.Month)
 
   const [visibleParts, setVisibleParts] = useState<Array<TDataKey>>([
@@ -59,7 +62,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
     )
 
   const points: Point[] = balances.map(b => {
-    let total = round(
+    const total = round(
       (isVisible('lented') ? b.lented : 0) +
         (isVisible('debts') ? b.debts : 0) +
         (isVisible('accountDebts') ? b.accountDebts : 0) +
@@ -68,15 +71,6 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
     )
     return { ...b, total }
   })
-
-  const colors = {
-    lented: theme.palette.success.light,
-    debts: theme.palette.error.light,
-    accountDebts: theme.palette.error.dark,
-    fundsInBudget: theme.palette.primary.dark,
-    fundsSaving: theme.palette.primary.light,
-    total: theme.palette.info.main,
-  }
 
   const names = {
     lented: t('netWorth.lented'),
@@ -101,38 +95,35 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
   }
 
   const makeCheck = (key: TDataKey) => (
-    <FormControlLabel
+    <CheckboxField
       label={names[key]}
-      control={
-        <Checkbox
-          sx={{ color: colors[key], '&.Mui-checked': { color: colors[key] } }}
-          checked={isVisible(key)}
-          onChange={() => toggle(key)}
-        />
-      }
+      color={colors[key]}
+      className="inline-flex mr-4"
+      checked={isVisible(key)}
+      onCheckedChange={() => toggle(key)}
     />
   )
 
   return (
-    <Paper>
-      <Box sx={{ p: 2, minWidth: '100%' }}>
+    <div className="layout-panel rounded-smooth">
+      <div className="min-w-full p-4">
         {/* Header */}
-        <Typography variant="h5">
+        <h2 className="m-0 text-title-lg">
           {t('netWorth.title')}{' '}
           <span
-            style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
+            style={{ color: 'var(--interactive)', cursor: 'pointer' }}
             onClick={onTogglePeriod}
           >
             <PeriodTitle period={period} />
           </span>
-        </Typography>
+        </h2>
 
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+        <p className="mt-2 mb-0 text-body text-muted-foreground">
           <SurviveFact />
-        </Typography>
-      </Box>
+        </p>
+      </div>
       {/* Chart */}
-      <Box sx={{ p: 2, minWidth: '100%', height: 300 }}>
+      <div className="h-[300px] min-w-full p-4">
         <ResponsiveContainer>
           <ComposedChart
             data={points}
@@ -142,7 +133,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
             <YAxis type="number" domain={['dataMin', 'dataMax']} hide />
             <RechartsTooltip content={<CustomTooltip />} />
             {visibleParts.length > 0 && (
-              <ReferenceLine y={0} stroke={theme.palette.divider} />
+              <ReferenceLine y={0} stroke="var(--border)" />
             )}
 
             {makeBar('debts')}
@@ -164,17 +155,17 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
             )}
           </ComposedChart>
         </ResponsiveContainer>
-      </Box>
+      </div>
       {/* Legend */}
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         {makeCheck('fundsInBudget')}
         {makeCheck('fundsSaving')}
         {makeCheck('accountDebts')}
         {makeCheck('debts')}
         {makeCheck('lented')}
         {makeCheck('total')}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }
 
@@ -192,17 +183,17 @@ type TPayload = {
 }
 
 const CustomTooltip = (props: any) => {
-  const [currency] = displayCurrency.useDisplayCurrency()
+  const [currency] = core.currency.useDisplayCurrency()
   const payload = props.payload as TPayload[]
   const active = props.active as boolean
   if (!active || !payload?.length) return null
   const date = payload[0]?.payload?.date
   const values = payload.filter(v => v.value)
   return (
-    <Card elevation={10} sx={{ p: 2 }}>
-      <Typography variant="h6">
+    <div className="rounded-lg bg-card text-card-foreground shadow-elevation-10 p-4">
+      <p className="m-0 text-title">
         {capitalize(formatDate(date, 'LLLL yyyy'))}
-      </Typography>
+      </p>
       {values.map(v => (
         <DataLine
           color={v.color}
@@ -212,7 +203,7 @@ const CustomTooltip = (props: any) => {
           currency={currency}
         />
       ))}
-    </Card>
+    </div>
   )
 }
 
@@ -232,21 +223,21 @@ function SurviveFact() {
   if (fundedMonths <= 0) return null
 
   const tooltipContent = (
-    <Box p={1}>
-      <Typography variant="body2" gutterBottom>
+    <div className="p-2">
+      <p className="mt-0 mb-[0.35em] text-body-sm">
         {t('netWorth.tooltipCurrentBalance')}:{' '}
         <DisplayAmount value={currentBalance} />
-      </Typography>
-      <Typography variant="body2">
+      </p>
+      <p className="m-0 text-body-sm">
         {t('netWorth.tooltipAvgExpenses')}:{' '}
         <DisplayAmount value={averageExpenses} />
-      </Typography>
-    </Box>
+      </p>
+    </div>
   )
 
   return (
     <span>
-      <Tooltip title={tooltipContent}>
+      <Tooltip content={tooltipContent}>
         <span
           style={{
             borderBottom: '1px dashed rgb(from currentColor r g b / .5)',

@@ -1,6 +1,6 @@
-import { FC } from 'react'
-import { Box, BoxProps } from '@mui/material'
-import { Tooltip } from '6-shared/ui/Tooltip'
+import type { ComponentPropsWithoutRef, FC } from 'react'
+import { cn } from '../shadcn/utils'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { useTranslation } from 'react-i18next'
 
 export interface PercentBarItem {
@@ -10,7 +10,10 @@ export interface PercentBarItem {
   name: string
 }
 
-export interface PercentBarProps extends BoxProps {
+export interface PercentBarProps extends Omit<
+  ComponentPropsWithoutRef<'div'>,
+  'children'
+> {
   data: PercentBarItem[]
   visibleData?: PercentBarItem[]
   height?: string
@@ -20,6 +23,8 @@ export const PercentBar: FC<PercentBarProps> = ({
   data,
   visibleData,
   height = '8px',
+  className,
+  style,
   ...rest
 }) => {
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
@@ -35,37 +40,36 @@ export const PercentBar: FC<PercentBarProps> = ({
   if (totalSum === 0) return null
 
   return (
-    <Box
-      display="flex"
-      width="100%"
-      height={height}
-      borderRadius="6px"
-      overflow="hidden"
+    <div
       {...rest}
+      className={cn('flex w-full overflow-hidden rounded-full', className)}
+      style={{ height, ...style }}
     >
       {displayData.map((bar, i) => (
-        <Tooltip title={bar.name} key={bar.id}>
-          <Box
-            flexBasis={(Math.abs(bar.amount) * 100) / totalSum + '%'}
-            minWidth={'2px'}
-            pl={i === 0 ? 0 : '1px'}
+        <Tooltip content={bar.name} key={bar.id}>
+          <div
+            className="min-w-[2px]"
+            style={{
+              flexBasis: `${(Math.abs(bar.amount) * 100) / totalSum}%`,
+              paddingLeft: i === 0 ? 0 : 1,
+            }}
           >
-            <Box bgcolor={bar.color} height="100%" />
-          </Box>
+            <div className="h-full" style={{ backgroundColor: bar.color }} />
+          </div>
         </Tooltip>
       ))}
-
       {!showAll && hiddenSum > 0 && (
-        <Tooltip title={t('otherCategories')}>
-          <Box
-            flexBasis={(hiddenSum * 100) / totalSum + '%'}
-            minWidth={'2px'}
-            pl={'1px'}
+        <Tooltip content={t('otherCategories')}>
+          <div
+            className="min-w-[2px] pl-px"
+            style={{
+              flexBasis: `${(hiddenSum * 100) / totalSum}%`,
+            }}
           >
-            <Box bgcolor={'#333333'} height="100%" />
-          </Box>
+            <div className="h-full bg-[#333333]" />
+          </div>
         </Tooltip>
       )}
-    </Box>
+    </div>
   )
 }

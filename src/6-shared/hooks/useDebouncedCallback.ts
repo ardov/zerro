@@ -1,10 +1,12 @@
 // From https://github.com/react-hookz/web/blob/master/src/useDebouncedCallback/useDebouncedCallback.ts
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { DependencyList, useMemo, useRef } from 'react'
+import type { DependencyList } from 'react'
+import { useMemo, useRef } from 'react'
 
 export interface DebouncedFunction<Fn extends (...args: any[]) => any> {
   (this: ThisParameterType<Fn>, ...args: Parameters<Fn>): void
+  /** Runs a pending call now, if there is one. */
+  flush(): void
 }
 
 /**
@@ -22,12 +24,17 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
   delay: number,
   maxWait = 0
 ): DebouncedFunction<Fn> {
-  const timeout = useRef<ReturnType<typeof setTimeout>>()
-  const waitTimeout = useRef<ReturnType<typeof setTimeout>>()
-  const lastCall = useRef<{
-    args: Parameters<Fn>
-    this: ThisParameterType<Fn>
-  }>()
+  const timeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const waitTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  )
+  const lastCall = useRef<
+    | {
+        args: Parameters<Fn>
+        this: ThisParameterType<Fn>
+      }
+    | undefined
+  >(undefined)
 
   const clear = () => {
     if (timeout.current) {
@@ -56,7 +63,6 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
         clear()
       }
 
-      // eslint-disable-next-line func-names
       const wrapped = function (this, ...args) {
         if (timeout.current) {
           clearTimeout(timeout.current)
@@ -76,11 +82,12 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
       Object.defineProperties(wrapped, {
         length: { value: callback.length },
         name: { value: `${callback.name || 'anonymous'}__debounced__${delay}` },
+        flush: { value: execute },
       })
 
       return wrapped
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps,@typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [delay, maxWait, ...deps]
   )
 }

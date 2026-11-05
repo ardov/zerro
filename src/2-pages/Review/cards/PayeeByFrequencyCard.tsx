@@ -1,21 +1,23 @@
-import React, { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
+import { useState } from 'react'
+import { core } from '@/zerro-core/redux'
 
-import { Card, TCardProps } from '../shared/Card'
+import { useTranslation } from 'react-i18next'
+
+import type { TCardProps } from '../shared/Card'
+import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
-import { entries } from '6-shared/helpers/keys'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
-import { ArrowForwardIcon, ArrowBackIcon } from '6-shared/ui/Icons'
+import { entries } from '@/6-shared/helpers/keys'
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
+import { ArrowForwardIcon, ArrowBackIcon } from '@/6-shared/ui/Icons'
 
 export function PayeeByFrequencyCard(props: TCardProps) {
+  const { t: uiT } = useTranslation('common')
   const { t } = useTranslation('yearReview', { keyPrefix: 'payeeByFrequency' })
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
-  const toDisplay = displayCurrency.useToDisplay('current')
+  const toDisplay = core.currency.useToDisplay('current')
 
   const topPayees = entries(yearStats.byPayee)
     .map(([payee, info]) => {
@@ -40,21 +42,21 @@ export function PayeeByFrequencyCard(props: TCardProps) {
 
   return (
     <Card>
-      <Stack spacing={1} direction="column" sx={{ alignItems: 'center' }}>
-        <Typography variant="body1" align="center">
+      <div className="flex flex-col items-center gap-2">
+        <p className="m-0 text-center text-body">
           {t('favouritePlace', { number: i + 1 })}
-        </Typography>
+        </p>
 
         <ButtonBase
-          sx={{ borderRadius: 1, px: 1 }}
+          className="rounded-lg px-2"
           onClick={() => props.onShowTransactions(transactions)}
         >
-          <Stack spacing={1} direction="column" sx={{ alignItems: 'center' }}>
-            <Typography variant="h4" align="center" className="info-gradient">
+          <div className="flex flex-col items-center gap-2">
+            <h2 className="info-gradient m-0 text-center text-display font-sans">
               {payee}
-            </Typography>
+            </h2>
 
-            <Typography variant="body1" align="center">
+            <p className="m-0 text-center text-body font-sans">
               {t('purchase', { count })}
               <DisplayAmount
                 value={outcome / count}
@@ -64,29 +66,30 @@ export function PayeeByFrequencyCard(props: TCardProps) {
               <br />
               {t('andTotalSpend')}
               <DisplayAmount value={outcome} noShade decimals="ifAny" />
-            </Typography>
-          </Stack>
+            </p>
+          </div>
         </ButtonBase>
 
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            alignItems: 'center',
-            opacity: 0.3,
-            transition: '200ms',
-            '&:hover': { opacity: 1 },
-          }}
-        >
-          <IconButton size="small" onClick={prev}>
+        <div className="flex flex-row items-center gap-2 opacity-30 transition-opacity duration-200 hover:opacity-100">
+          <IconButton
+            label={uiT('previousItem')}
+            variant="ghost"
+            size="sm"
+            onClick={prev}
+          >
             <ArrowBackIcon />
           </IconButton>
 
-          <IconButton size="small" onClick={next}>
+          <IconButton
+            label={uiT('nextItem')}
+            variant="ghost"
+            size="sm"
+            onClick={next}
+          >
             <ArrowForwardIcon />
           </IconButton>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     </Card>
   )
 }

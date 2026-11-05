@@ -2,12 +2,43 @@ import reducer from './slice'
 export default reducer
 
 // ACTIONS
-export { applyServerPatch, applyClientPatch, resetData } from './slice'
+export {
+  appendClientCommand,
+  editClientCommand,
+  applyServerPatch,
+  hydrateReplica,
+  hydrateCorruptOutbox,
+  hydrateCorruptReplica,
+  hydrateRecoveryOutbox,
+  corruptOutboxDiscarded,
+  recoveryCheckpointPersisted,
+  prepareClientSync,
+  undoClientCommand,
+  redoClientCommand,
+  restoreOutboxPosition,
+  resetData,
+  canReplaceTail,
+} from './slice'
+export { applyPushChunk } from './applyServerPatch'
+export {
+  clearPersistedLocalData,
+  compactPersistedReplica,
+  discardPersistedOutbox,
+  persistRecoveryCheckpoint,
+  waitForPersistedReplica,
+} from './replicaPersistence'
 
 // SELECTORS
 export {
-  getDiff,
+  getPendingSyncDiff,
+  getCanUndoClientCommand,
+  getCanRedoClientCommand,
+  getJournalRecoveryReason,
+  getOutboxRecoveryReason,
+  getPersistenceWarning,
+  getJournalRecoveryRequired,
+  getReplicaWriteBlocked,
   getChangedNum,
-  getLastChangeTime,
   getLastSyncTime,
+  getSyncCursor,
 } from './selectors'

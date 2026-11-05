@@ -1,175 +1,189 @@
-import React, { useState, FC } from 'react'
-import {
-  Box,
-  Popover,
-  TextField,
-  MenuItem,
-  Button,
-  IconButton,
-  OutlinedTextFieldProps,
-  PopoverProps,
-} from '@mui/material'
+import { Button, IconButton } from '@/6-shared/ui/kit/Button'
+import type { FC } from 'react'
+import { useRef, useState } from 'react'
+import { PopoverSurface } from '@/6-shared/ui/kit/Popover'
+import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
+import { Select } from '@/6-shared/ui/kit/Select'
 import { useTranslation } from 'react-i18next'
-import { AmountInput } from '6-shared/ui/AmountInput'
-import { CloseIcon } from '6-shared/ui/Icons'
-import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
-import { toISODate, formatDate } from '6-shared/helpers/date'
-import { Modify, TDateDraft, TISOMonth } from '6-shared/types'
+import { AmountInput } from '@/6-shared/ui/kit/AmountInput'
+import { CloseIcon } from '@/6-shared/ui/Icons'
+import MonthSelectPopover from '@/6-shared/ui/MonthSelectPopover'
+import { toISODate, formatDate } from '@/6-shared/helpers/date'
+import { track } from '@/6-shared/analytics'
+import type { TDateDraft, TISOMonth } from '@/6-shared/types'
 
-import { useAppDispatch } from 'store'
-import { goalModel, goalType, TGoal } from '5-entities/goal'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
+import { usePopup } from '@/6-shared/overlays'
 
-export type TGoalPopoverProps = Modify<
-  PopoverProps,
-  { onClose: () => void }
-> & {
-  id: TEnvelopeId
+export type TGoalPopoverProps = {
+  open: boolean
+  anchorEl?: Element | null
+  onClose: () => void
+  id: core.envelopes.TEnvelopeId
   month: TISOMonth
 }
 
 export const GoalPopover: FC<TGoalPopoverProps> = props => {
-  const { id, month, onClose, ...rest } = props
+  const { id, month, onClose, open, anchorEl } = props
+  const narrow = useBottomSheetLayout()
+  const contentRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation('goals')
   const dispatch = useAppDispatch()
-  const envelope = envelopeModel.useEnvelopes()[id]
-  const goalInfo = goalModel.useGoals()[month][id] || {}
+  const envelope = useAppSelector(core.envelopes.selectAll)[id]
+  const goalInfo = useAppSelector(core.goals.selectAll)[month][id] || {}
   const { goal } = goalInfo
 
-  const [type, setType] = useState(goal?.type || goalType.MONTHLY_SPEND)
-  const isInPercents = type === goalType.INCOME_PERCENT
+  const [type, setType] = useState(
+    goal?.type || core.goals.goalType.MONTHLY_SPEND
+  )
+  const isInPercents = type === core.goals.goalType.INCOME_PERCENT
   const [rawValue, setRawValue] = useState(getInput(goal?.amount))
-  const [endDate, setEndDate] = useState<TGoal['end']>(goal?.end)
+  const [endDate, setEndDate] = useState<core.goals.TGoal['end']>(goal?.end)
 
+  // On the overlay stack, so Back closes the month list rather than the goal
+  // popover underneath it.
+  const { open: monthOpen, setOpen: setMonthOpen } = usePopup()
   const [monthPopoverAnchor, setMonthPopoverAnchor] =
-    useState<(typeof props)['anchorEl']>(null)
+    useState<HTMLButtonElement | null>(null)
   if (!id || !month) return null
 
-  const handleTypeChange: OutlinedTextFieldProps['onChange'] = e =>
-    setType(e.target.value as goalType)
-  const openMonthPopover = () => setMonthPopoverAnchor(props.anchorEl)
-  const closeMonthPopover = () => setMonthPopoverAnchor(null)
+  const closeMonthPopover = () => setMonthOpen(false)
   const handleDateChange = (date?: TDateDraft) => {
     closeMonthPopover()
     setEndDate(date ? toISODate(date) : undefined)
   }
   const removeDate = () => handleDateChange(undefined)
 
-  const save = () => {
-    const amount = getAmount(rawValue)
+  const save = (value = rawValue) => {
+    const amount = getAmount(value)
     const hasChanges =
       amount !== goal?.amount || type !== goal?.type || endDate !== goal?.end
 
     if (hasChanges) {
-      const goal: TGoal = { type, amount }
-      if (type === goalType.TARGET_BALANCE && endDate) {
+      const goal: core.goals.TGoal = { type, amount }
+      if (type === core.goals.goalType.TARGET_BALANCE && endDate) {
         goal.end = endDate
       }
-      dispatch(goalModel.set(month, id, goal))
+      dispatch(core.goals.set(month, id, goal))
+      track('budget_goal_changed', {
+        operation: 'set',
+        goal_type: goal.type,
+      })
     }
     onClose?.()
   }
   const removeGoal = () => {
-    dispatch(goalModel.set(month, id, null))
+    dispatch(core.goals.set(month, id, null))
+    track('budget_goal_changed', { operation: 'delete' })
     onClose?.()
   }
 
-  const showDateBlock = type === goalType.TARGET_BALANCE
+  const showDateBlock = type === core.goals.goalType.TARGET_BALANCE
 
   const amountLabels = {
-    [goalType.MONTHLY]: t('inputLabels.monthly'),
-    [goalType.MONTHLY_SPEND]: t('inputLabels.monthlySpend'),
-    [goalType.TARGET_BALANCE]: t('inputLabels.targetBalance'),
-    [goalType.INCOME_PERCENT]: t('inputLabels.incomePercent'),
+    [core.goals.goalType.MONTHLY]: t('inputLabels.monthly'),
+    [core.goals.goalType.MONTHLY_SPEND]: t('inputLabels.monthlySpend'),
+    [core.goals.goalType.TARGET_BALANCE]: t('inputLabels.targetBalance'),
+    [core.goals.goalType.INCOME_PERCENT]: t('inputLabels.incomePercent'),
   }
 
   return (
-    <>
-      <Popover disableRestoreFocus onClose={onClose} {...rest}>
-        <Box
-          sx={{
-            display: 'grid',
-            rowGap: 2,
-            p: 2,
-            minWidth: 320,
-          }}
-        >
-          <TextField
-            select
-            variant="outlined"
-            value={type}
-            onChange={handleTypeChange}
-            label={t('goalType')}
-            fullWidth
-          >
-            <MenuItem value={goalType.MONTHLY}>{t('names.monthly')}</MenuItem>
-            <MenuItem value={goalType.MONTHLY_SPEND}>
-              {t('names.monthlySpend')}
-            </MenuItem>
-            <MenuItem value={goalType.TARGET_BALANCE}>
-              {t('names.targetBalance')}
-            </MenuItem>
-            <MenuItem value={goalType.INCOME_PERCENT}>
-              {t('names.incomePercent')}
-            </MenuItem>
-          </TextField>
+    <PopoverSurface
+      label={t('goal', { ns: 'budgets' })}
+      initialFocus={narrow ? contentRef : undefined}
+      controller={{
+        open,
+        setOpen: next => {
+          if (!next) onClose()
+        },
+      }}
+      anchor={anchorEl}
+    >
+      <div ref={contentRef} tabIndex={-1} className="grid gap-4 outline-none">
+        <Select
+          label={t('goalType')}
+          labelMode="floating"
+          value={type}
+          onChange={setType}
+          required
+          items={[
+            { value: core.goals.goalType.MONTHLY, label: t('names.monthly') },
+            {
+              value: core.goals.goalType.MONTHLY_SPEND,
+              label: t('names.monthlySpend'),
+            },
+            {
+              value: core.goals.goalType.TARGET_BALANCE,
+              label: t('names.targetBalance'),
+            },
+            {
+              value: core.goals.goalType.INCOME_PERCENT,
+              label: t('names.incomePercent'),
+            },
+          ]}
+        />
 
-          <AmountInput
-            autoFocus
-            onFocus={e => e.target.select()}
-            selectOnFocus
-            value={rawValue}
-            label={amountLabels[type]}
-            fullWidth
-            onChange={value => setRawValue(+value)}
-            onEnter={value => {
-              setRawValue(+value)
-              save()
-            }}
-            currency={isInPercents ? '%' : envelope.currency}
-            placeholder="0"
-          />
+        <AmountInput
+          autoFocus={!narrow}
+          selectOnFocus
+          value={rawValue}
+          label={amountLabels[type]}
+          prefix={isInPercents ? undefined : envelope.currency}
+          suffix={isInPercents ? '%' : undefined}
+          labelMode="floating"
+          onChange={value => setRawValue(+value)}
+          onEnter={save}
+          placeholder="0"
+        />
 
-          {showDateBlock && (
-            <Box
-              sx={{
-                display: 'flex',
-              }}
+        {showDateBlock && (
+          <div className="flex">
+            <Button
+              ref={setMonthPopoverAnchor}
+              variant="secondary"
+              // The calendar hangs off this button, not off whatever opened
+              // the goal: it is a nested surface, and it lands over its own
+              // control rather than over the form it belongs to.
+              onClick={() => setMonthOpen(true)}
+              className="min-w-0 flex-1"
             >
-              <Button
-                size="large"
-                onClick={openMonthPopover}
-                fullWidth={!endDate}
-              >
-                {endDate
-                  ? formatDate(endDate, 'LLLL yyyy').toUpperCase()
-                  : t('tillDate')}
-              </Button>
-              {endDate && (
-                <IconButton onClick={removeDate} children={<CloseIcon />} />
-              )}
-            </Box>
-          )}
-
-          <Button onClick={save} variant="contained" color="primary">
-            {t('save')}
-          </Button>
-          {!!goal?.amount && (
-            <Button onClick={removeGoal} variant="outlined" color="error">
-              {t('remove')}
+              {endDate
+                ? formatDate(endDate, 'LLLL yyyy').toUpperCase()
+                : t('tillDate')}
             </Button>
-          )}
-        </Box>
-      </Popover>
+            {endDate && (
+              <IconButton
+                tooltip={false}
+                variant="ghost"
+                label={t('removeValue', {
+                  ns: 'common',
+                  label: formatDate(endDate, 'LLLL yyyy'),
+                })}
+                onClick={removeDate}
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
+          </div>
+        )}
+
+        <Button onClick={() => save()}>{t('save')}</Button>
+        {!!goal?.amount && (
+          <Button onClick={removeGoal} variant="destructive">
+            {t('remove')}
+          </Button>
+        )}
+      </div>
       <MonthSelectPopover
-        open={!!monthPopoverAnchor}
+        open={monthOpen}
         anchorEl={monthPopoverAnchor}
         onClose={closeMonthPopover}
         onChange={handleDateChange}
         value={endDate}
         disablePast
       />
-    </>
+    </PopoverSurface>
   )
 
   function getAmount(input: string | number) {

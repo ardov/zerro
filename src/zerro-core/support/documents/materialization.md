@@ -1,0 +1,266 @@
+# Materializer rules and cascades
+
+- Status: contract for local predicted effects
+- Updated: 2026-08-02
+
+## Purpose
+
+[architecture.md](./architecture.md#materialization) defines the pipeline; this
+document defines its content: for every write, what Core predicts locally, what
+Zenmoney does on its own, and where the two deliberately differ.
+
+Three layers must stay distinct:
+
+| Layer            | Owner            | Sent to server | Notes                                    |
+| ---------------- | ---------------- | -------------- | ---------------------------------------- |
+| Primary intent   | command compiler | yes            | the persisted ordered operations         |
+| Predicted effect | materializer     | **no**         | local-only, so the UI is correct at once |
+| Canonical effect | Zenmoney         | n/a            | arrives in the diff, bypasses this layer |
+
+Predicting an effect is a UI-latency decision, never a correctness one: the
+server recomputes everything it owns. So the rule for adding a prediction is
+"would the user see a wrong number until the next sync?", and the rule for
+skipping one is "would predicting it be expensive, ambiguous, or produce client
+intent the server will overwrite anyway?".
+
+Evidence for every server behavior below is in
+[sync-api.md](../../internal/domain/zenmoney/sync-api.md), which is the durable
+record of what live probing established.
+
+## Rule status
+
+| #   | Operation                            | Predicted locally     | Server also does                                |
+| --- | ------------------------------------ | --------------------- | ----------------------------------------------- |
+| 1   | patch on a `deleted` transaction     | implemented (ignore)  | ignores it too (one-way ratchet)                |
+| 2   | write that zeroes both amounts       | implemented (purge)   | hard-purges the row, emits a real tombstone     |
+| 3   | transaction or `startBalance` change | implemented (delta)   | recomputes affected `account.balance`           |
+| 4   | account deletion                     | implemented (purge)   | hard-purges contained transactions              |
+| 5   | transfer touching a deleted account  | implemented (rewrite) | converts to one-sided on the survivor           |
+| 6   | tag deletion                         | implemented (rewrite) | nulls `transaction.tag`, drops its budget rows  |
+| 7   | merchant deletion                    | implemented (rewrite) | clears merchant + payee on linked ordinary rows |
+| 8   | merchant rename                      | **deliberately not**  | rewrites `payee` + `changed` on linked rows     |
+
+Rules 4–7 are reachable through restore: an ordinary missing account, tag, or
+merchant emits primary `deletion`, while the protected debt singleton remains
+untouched because the server ignores its deletion. A merchant referenced by an
+active debt transaction also remains: the server silently rejects that removal.
+
+## 1. Deleted transactions are a ratchet
+
+`deleted: true` is irreversible on the server: no later write, however fresh its
+`changed`, resurrects the transaction. A direct `deletion` entry for a
+transaction is converted into the same soft delete and produces no tombstone —
+so a `deletion` entry is the wrong tool for removing a transaction outright;
+rule 2 is the one that actually purges.
+
+Core therefore soft-deletes transactions and the entity registry skips patches
+against an already-deleted transaction (`skipExisting`). Nothing else may
+recreate one under the same id — a hard-deleted id is a permanent tombstone
+server-side, so ids are never reused.
+
+## 2. Zeroed amounts purge the row
+
+Zenmoney stores transaction amounts with four decimals, and a row whose `income`
+and `outcome` both land on zero is purged: the write response carries a real
+`{ object: 'transaction', id, stamp, user }` tombstone and a follow-up
+`forceFetch` pull shows the transaction absent — not `deleted: true`, gone. The
+trigger is the stored amounts. It applies to creation and updates, with one or
+two accounts, including debt operations.
+
+`materializeCommand` therefore drops the entity from the patch and emits the
+deletion instead. Three properties make this safe:
+
+- **transport is unaffected.** `materializePrimaryCommand` still sends the
+  amount upsert, because that write is what triggers the purge. Sending a
+  `deletion` entry instead would only soft-delete the row (see rule 1), so the
+  predicted effect must never leak into the request.
+- **undo needs no special case.** Undo drops the last command and replays the
+  rest over `base`, which still holds the original full entity, so the predicted
+  removal reverses itself.
+- **it fires only where rounding is unambiguous.** The prediction reads "stored
+  as zero" as an amount below `0.00005`, because `0.00004` was observed storing
+  as `0` while `0.00005` stored as `0` on one side and `0.0001` on the other
+  within a single write. Amounts from `0.00005` up keep the row and wait for the
+  canonical diff.
+
+Both amounts at exactly `0` is the one zeroed shape that is not a purge: the
+server rejects `income == outcome == 0` with a 400 on the submitted numbers,
+before rounding applies, so that write lands nothing at all and the row is left
+alone.
+
+Without this rule a purged row survives in `current` until the next sync. The
+read models already hide zeroed rows through their own historical threshold, but
+"show deleted transactions" deliberately reveals them and would surface the row
+as a nonsense transfer. That threshold (`hasDeletableAmounts`, `< 0.0001`) is
+now strictly wider than anything canonical data can contain: with four stored
+decimals, both amounts under `0.0001` means both are `0`, and such a row is
+purged rather than stored. It stays because it still matches rows this server
+behavior cannot produce — data predating it, and local state that has not been
+through a write. It also settles a latent disagreement: Core decides "active
+transaction" as `!deleted` in some places and as `isDeletedTransaction` in
+others, and on canonical data the two cannot differ.
+
+## 3. Balances follow transactions and the account base
+
+`account.balance` submitted by a client is ignored; the server recomputes it and
+creates no correction transaction. Every account type follows one formula:
+
+```txt
+balance = getAccStartBalance(account) + sum(income) - sum(outcome)
+```
+
+Only the base term is type-dependent, and it is already implemented:
+`getAccStartBalance` reads 0 for deposit and loan, whose `startBalance` holds an
+initial deposit or loan principal rather than a balance. `emoney` behaves
+exactly like `cash`. Debt accounts recompute like any other; their balance
+simply feeds no read model.
+
+Details that the prediction must honor:
+
+- future-dated transactions count immediately;
+- `hold` does not affect the balance;
+- `opIncome`/`opOutcome` and their instruments are stored but excluded;
+- `creditLimit` neither participates nor caps the balance;
+- moving a transaction between accounts recalculates both sides;
+- soft-deleting a transaction returns its contribution atomically;
+- a row purged by rule 2 contributes nothing, so source transactions through the
+  same non-deleted filter the read models use. Summing raw entity maps would
+  briefly count amounts the server has already removed.
+
+`predictBalances.ts` implements this as a **delta**, not a recount: it
+differences both terms of the formula before and after the patch — each touched
+transaction's contribution, and the account's own base. A created account is
+differenced against 0, which is correct because `balance` is not writable, so no
+creation intent can carry one and the factory always starts at 0. Three
+properties follow, and all are load-bearing:
+
+- materialization stays proportional to the patch rather than to the store,
+  which matters because every undo, redo, and canonical rebase replays the whole
+  outbox;
+- rebase is free. Each replay recomputes the delta against the snapshot it is
+  replayed over, so a canonical balance landing in `base` is never
+  double-counted by a command that is still pending;
+- no account type needs excluding. The whole type difference sits inside
+  `getAccStartBalance`, so reading the base through it is what keeps
+  `predictBalances.ts` free of a type filter. Do not grow one.
+
+No FX enters this rule, and none can. Each side of a transaction is already
+denominated in its own account's currency: a cross-currency transfer stores
+`outcome: 100` on the ruble account and `income: 50` on the dollar account as
+two independent numbers, so the rate — and any fee folded into it — is expressed
+by that pair rather than applied to it. A foreign original amount, when there is
+one, lives in `opIncome`/`opOutcome`, which this rule excludes. A transaction
+instrument mismatching its account is coerced by the server without converting,
+so even that malformed shape needs no handling.
+
+Results are deliberately not rounded: the server keeps decimals unrounded, and
+snapping to two places would corrupt instruments with finer precision. Float
+dust cannot accumulate, because replay always recomputes from `base`.
+
+Writes to `startBalance` and account creation are covered even though no
+producer emits them yet, because they are the same formula rather than a second
+rule: a `startBalance` write shifts the balance by the same amount, and moves
+nothing on deposit and loan, where the base reads 0.
+
+## 4–5. Account deletion purges and rewrites
+
+Deleting an account is another true purge path: transactions contained in it
+are hard-deleted (even one created in the same request) and real `deletion[]`
+tombstones are published. A transaction that also references a surviving
+account is not purged: the server copies the
+survivor id into both account fields, zeroes the removed side's amount, and
+leaves the survivor balance unchanged. The transfer becomes one-sided income or
+outcome without a dangling account reference. Transfer materialization clears
+category references before this cascade.
+
+A local prediction must reproduce both branches, otherwise the UI shows
+transactions belonging to an account that no longer exists. The implementation
+keeps the primary account deletion as the only transport effect, adds cascade
+tombstones and rewritten transfers only to `current`, and prevents balance
+prediction from reintroducing the removed account. An already soft-deleted
+transaction is deliberately left alone because that cascade shape is untested
+and already invisible in local read models.
+
+## 6. Tag deletion has two effects
+
+Deleting a tag nulls `transaction.tag` on referencing transactions **and**
+removes the budget rows keyed to that tag. Single-tag income and outcome rows
+survive with `tag: null`, keeping their account balances unchanged. The matching
+budget row is removed rather than zeroed. Zenmoney budgets are
+identified by `(user, tag, date)` and have no id, so their removal is invisible
+in the deletion array.
+
+Note also that budgets have no real delete of their own — a `deletion` entry
+no-ops and zeroing is the only removal.
+
+The local prediction removes a deleted tag from transaction, reminder, marker,
+and child-tag references, reducing an empty category array to `null`. It adds a
+local-only budget tombstone so `current` drops the keyed row immediately; only
+the primary tag deletion is transported.
+
+## 7–8. Merchant: rename is soft, unlink is not
+
+This is the case where Core intentionally diverges from the server.
+
+**Rename** (`merchant.title`). Core changes the merchant row and nothing else.
+The server, however, rewrites `payee` and bumps `changed` on every linked
+transaction; `originalPayee` is left alone. Consequences to keep in mind:
+
+- do **not** predict that rewrite locally — it would turn one rename into
+  hundreds of transaction intents, and every one of them would be client
+  intent the server is going to write anyway;
+- read paths must resolve the display name through the merchant id, so the new
+  title appears immediately without touching transaction rows. Core's
+  debtor/balance read models prefer merchant title over
+  `transaction.payee`;
+- the next pull will therefore carry a large canonical diff of transactions
+  whose only change is `payee` and `changed`. That is expected, not a conflict;
+- because those rows arrive with a fresh server `changed`, a pending local edit
+  on the same transaction is rebased over them under the usual
+  last-write-wins-in-command-order policy.
+
+**Delete.** An ordinary transaction,
+reminder, and reminder marker survive with `merchant: null` and `payee: null`.
+For the transaction, `originalPayee` remains unchanged. A cash transfer stores
+neither merchant nor payee before deletion, so it needs no cascade rewrite.
+An active debt transaction is the explicit exception: the server silently
+keeps both it and its merchant. Core therefore neither plans that restore
+removal nor optimistically removes it from `current`.
+
+If that debt transaction is already soft-deleted, the blocker is gone: a later
+merchant deletion succeeds and the server hard-purges the deleted debt row.
+Core predicts that exact purge through a local-only transaction tombstone;
+transport still carries only the primary merchant deletion. This keeps raw
+`current` canonical without generalizing the rule to active debt rows or other
+soft-deleted transaction shapes.
+
+`originalPayee` is not a copy of the current name: the server fills it from
+`payee` at creation time and never updates it on rename.
+
+## What Core deliberately does not predict
+
+- Server canonicalizations that only normalize a value we already sent:
+  negative `outcome` becoming absolute, an instrument mismatch coerced to the
+  account's instrument without FX, an amount snapped to the four decimals the
+  server stores. These belong in pre-flight validation and in the wire types,
+  not in predicted state. Rule 2 predicts the one consequence of that snapping
+  that is not cosmetic: a row that lands on zero on both sides stops existing.
+- Anything Zenmoney refuses outright (`income == outcome == 0`, dictionary
+  writes, a second debt account). Rejection is a validation concern. The first
+  of those is the boundary of rule 2: the 400 is decided on the submitted
+  numbers, before the rounding that rule 2 predicts.
+- Reminder markers for created reminders: the diff endpoint generates none.
+- Field-level silent drops (dangling `tag` → null, tag self-parent, debt
+  `instrument`, marker `state: 'deleted'`). Predicting them would hide a bug
+  in the command that produced them.
+
+## Verification requirements
+
+Each rule lands as its own commit and must:
+
+1. assert the materialized patch **and** the resulting state;
+2. cover batches, upsert creation, deletion, and repeated writes on one field;
+3. keep the predicted effect out of `buildOutboxTransport` output;
+4. leave `applyPatch` dumb and canonical diffs unmaterialized;
+5. compare against a real Zenmoney response where one exists — recording which
+   response became the fixture.

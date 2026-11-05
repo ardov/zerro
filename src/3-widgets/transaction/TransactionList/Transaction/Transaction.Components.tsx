@@ -1,30 +1,34 @@
-import type { TTransaction } from '6-shared/types'
-import React, { FC } from 'react'
+import type { TTransaction } from '@/6-shared/types'
+import type { FC, ReactNode } from 'react'
+import React, { Children, Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
-import styled from '@emotion/styled'
-import { Typography } from '@mui/material'
-import { TagIcon } from '6-shared/ui/TagIcon'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { useAppSelector } from 'store'
-import { accountModel } from '5-entities/account'
-import { TrType, trModel } from '5-entities/transaction'
-import { TTagPopulated, tagModel } from '5-entities/tag'
-import { merchantModel } from '5-entities/merchant'
-import { SmartAmount } from '3-widgets/Amount'
+import { cn } from '@/6-shared/ui/shadcn/utils'
+import {
+  ArrowForwardIcon,
+  IncomeDebtIcon,
+  OutcomeDebtIcon,
+  TransferIcon,
+} from '@/6-shared/ui/Icons'
+import { TagIcon } from '@/6-shared/ui/TagIcon'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
+
+import { SmartAmount } from '@/3-widgets/Amount'
 
 type HTMLDivProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
   HTMLDivElement
 >
-type TrElementProps = HTMLDivProps & {
+type TrElementProps = Omit<HTMLDivProps, 'onToggle'> & {
   tr: TTransaction
-  trType: TrType
+  trType: core.transactions.TrType
 }
 
 type SymbolProps = TrElementProps & {
   isChecked: boolean
   isInSelectionMode: boolean
-  onToggle?: (id: string) => void
+  onToggle?: (id: string, extendRange?: boolean) => void
 }
 
 export const Symbol: FC<SymbolProps> = ({
@@ -33,9 +37,8 @@ export const Symbol: FC<SymbolProps> = ({
   isChecked,
   isInSelectionMode,
   onToggle,
-  ...rest
 }) => {
-  const tags = tagModel.usePopulatedTags()
+  const tags = useAppSelector(core.tags.selectPopulated)
   const mainTagId = tr.tag?.length ? tr.tag[0] : 'null'
   const tag = tags[mainTagId]
   const { symbol, color } = getSymAndColor(trType, tag)
@@ -45,26 +48,31 @@ export const Symbol: FC<SymbolProps> = ({
         symbol={symbol}
         showCheckBox={isInSelectionMode}
         checked={isChecked}
-        onChange={() => onToggle?.(tr.id)}
+        onCheckedChange={(_, { event }) =>
+          onToggle?.(tr.id, 'shiftKey' in event && event.shiftKey === true)
+        }
         color={color}
         size="m"
       />
-      <NewIndicator viewed={trModel.isViewed(tr)} />
-      {tr.qrCode && <Reciept>🧾</Reciept>}
+      <NewIndicator viewed={core.transactions.isViewed(tr)} />
+      {tr.qrCode && <Receipt>🧾</Receipt>}
     </SymbolWrapper>
   )
 
-  function getSymAndColor(type: TrType, tag: TTagPopulated) {
+  function getSymAndColor(
+    type: core.transactions.TrType,
+    tag: core.tags.TTagPopulated
+  ) {
     switch (type) {
-      case TrType.Income:
-      case TrType.Outcome:
+      case core.transactions.TrType.Income:
+      case core.transactions.TrType.Outcome:
         return { symbol: tag.symbol, color: tag.colorHEX }
-      case TrType.Transfer:
-        return { symbol: '↔️' }
-      case TrType.OutcomeDebt:
-        return { symbol: '⬅️' }
-      case TrType.IncomeDebt:
-        return { symbol: '➡️' }
+      case core.transactions.TrType.Transfer:
+        return { symbol: <TransferIcon size={24} /> }
+      case core.transactions.TrType.OutcomeDebt:
+        return { symbol: <OutcomeDebtIcon size={24} /> }
+      case core.transactions.TrType.IncomeDebt:
+        return { symbol: <IncomeDebtIcon size={24} /> }
       default:
         return { symbol: '' }
     }
@@ -73,7 +81,7 @@ export const Symbol: FC<SymbolProps> = ({
 
 export const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
   const { t } = useTranslation()
-  const tags = tagModel.usePopulatedTags()
+  const tags = useAppSelector(core.tags.selectPopulated)
   switch (trType) {
     case 'income':
     case 'outcome':
@@ -109,7 +117,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
         <AmountsWrapper type="outcome" {...rest}>
           {!!tr.opOutcome && !!tr.opOutcomeInstrument && (
             <Tooltip
-              title={
+              content={
                 <ExchangeRate
                   sum1={tr.opOutcome}
                   inst1={tr.opOutcomeInstrument}
@@ -117,22 +125,15 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                   inst2={tr.outcomeInstrument}
                 />
               }
-              placement="top"
-              PopperProps={{ disablePortal: true }}
+              side="top"
             >
-              <Typography
-                variant="body2"
-                component="span"
-                sx={{
-                  color: 'text.secondary',
-                }}
-              >
+              <span className="text-body-sm text-ui-secondary">
                 <SmartAmount
                   value={tr.opOutcome}
                   instrument={tr.opOutcomeInstrument}
                   decimals="ifAny"
                 />
-              </Typography>
+              </span>
             </Tooltip>
           )}
           <SmartAmount value={tr.outcome} instrument={tr.outcomeInstrument} />
@@ -144,7 +145,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
         <AmountsWrapper type="income" {...rest}>
           {!!tr.opIncome && !!tr.opIncomeInstrument && (
             <Tooltip
-              title={
+              content={
                 <ExchangeRate
                   sum1={tr.opIncome}
                   inst1={tr.opIncomeInstrument}
@@ -152,21 +153,16 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                   inst2={tr.incomeInstrument}
                 />
               }
-              placement="top"
-              PopperProps={{ disablePortal: true }}
+              side="top"
             >
-              <Typography
-                variant="body2"
-                color="textSecondary"
-                component="span"
-              >
+              <span className="text-body-sm text-ui-secondary">
                 <SmartAmount
                   value={tr.opIncome}
                   instrument={tr.opIncomeInstrument}
                   decimals="ifAny"
                   sign
                 />
-              </Typography>
+              </span>
             </Tooltip>
           )}
           <SmartAmount
@@ -176,7 +172,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
           />
         </AmountsWrapper>
       )
-    case 'transfer':
+    case 'transfer': {
       const isEqual =
         tr.income === tr.outcome && tr.incomeInstrument === tr.outcomeInstrument
       return (
@@ -187,27 +183,19 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
           <SmartAmount value={tr.income} instrument={tr.incomeInstrument} />
         </AmountsWrapper>
       )
+    }
     default:
       return null
   }
 }
 
-type InfoProps = TrElementProps & { onFilterByPayee?: (payee: string) => void }
+type InfoProps = TrElementProps & { onPayeeClick?: () => void }
 
-export const Info: FC<InfoProps> = ({
-  tr,
-  trType,
-  onFilterByPayee,
-  ...rest
-}) => {
+export const Info: FC<InfoProps> = ({ tr, trType, onPayeeClick }) => {
   return (
     <InfoWrapper>
       {trType !== 'incomeDebt' && trType !== 'outcomeDebt' && (
-        <Payee
-          payee={tr.payee}
-          merchant={tr.merchant}
-          onClick={onFilterByPayee}
-        />
+        <Payee payee={tr.payee} merchant={tr.merchant} onClick={onPayeeClick} />
       )}
       {!!tr.comment && <span title={tr.comment}>{tr.comment}</span>}
     </InfoWrapper>
@@ -217,7 +205,7 @@ export const Info: FC<InfoProps> = ({
 export const Accounts: FC<InfoProps> = ({
   tr,
   trType,
-  onFilterByPayee,
+  onPayeeClick,
   ...rest
 }) => {
   switch (trType) {
@@ -247,7 +235,7 @@ export const Accounts: FC<InfoProps> = ({
           <Payee
             payee={tr.payee}
             merchant={tr.merchant}
-            onClick={onFilterByPayee}
+            onClick={onPayeeClick}
           />
         </AmountsWrapper>
       )
@@ -257,7 +245,7 @@ export const Accounts: FC<InfoProps> = ({
           <Payee
             payee={tr.payee}
             merchant={tr.merchant}
-            onClick={onFilterByPayee}
+            onClick={onPayeeClick}
           />
           <Account id={tr.incomeAccount} />
         </AmountsWrapper>
@@ -267,122 +255,110 @@ export const Accounts: FC<InfoProps> = ({
   }
 }
 
-const Account: FC<{ id: string }> = ({ id, ...rest }) => {
-  const account = accountModel.usePopulatedAccounts()[id]
+const Account: FC<{ id: string | null }> = ({ id, ...rest }) => {
+  const accounts = core.accounts.usePopulated()
+  // The leg is null when an account deletion nulled it on a soft-deleted row,
+  // and such a row is only on screen because deleted rows are being shown.
+  const account = id === null ? undefined : accounts[id]
+  if (!account) return null
   return <span {...rest}>{account.title}</span>
 }
 
 const Payee: FC<{
   payee: string | null
   merchant: string | null
-  onClick?: (payee: string) => void
-}> = ({ payee, merchant, onClick, ...rest }) => {
-  const merchants = merchantModel.useMerchants()
+  onClick?: () => void
+}> = ({ payee, merchant, onClick }) => {
+  const merchants = core.merchants.useAll()
   if (!payee && !merchant) return null
-  let name = merchant ? merchants[merchant]?.title : payee
+  const name = (merchant && merchants[merchant]?.title) || payee
+  if (!onClick) return <span>{name}</span>
   return (
-    <PayeeWrapper
-      onClick={e => {
-        if (onClick) {
-          e.preventDefault()
-          e.stopPropagation()
-          onClick(payee || '')
-        }
+    <button
+      type="button"
+      className="relative cursor-pointer border-0 bg-transparent p-0 text-inherit hover:text-ui-primary focusable after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-current after:opacity-20"
+      onClick={event => {
+        event.stopPropagation()
+        onClick()
       }}
-      {...rest}
     >
       {name}
-    </PayeeWrapper>
+    </button>
   )
 }
 
 /** Styles */
 
-const SymbolWrapper = styled.div`
-  flex-shrink: 0;
-  position: relative;
-  align-self: center;
-`
-const NewIndicator = styled.div<{ viewed?: boolean }>`
-  position: absolute;
-  left: -2px;
-  top: -1px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: ${p => p.theme.palette.error.main};
-  border: solid 2px ${p => p.theme.palette.background.paper};
-  transform: scale(${p => (p.viewed ? 0 : 1)});
-  opacity: ${p => (p.viewed ? 0 : 1)};
-  transition: 200ms;
-`
-const Reciept = styled.div`
-  font-size: ${16 / 16}rem;
-  text-shadow: 0 0 2px ${p => p.theme.palette.background.paper};
-  color: black;
-  position: absolute;
-  right: -6px;
-  bottom: -3px;
-`
+const SymbolWrapper: FC<HTMLDivProps> = props => (
+  <div {...props} className="relative shrink-0 self-center" />
+)
 
-const TagsWrapper = styled.div`
-  > :not(:first-of-type) {
-    margin-left: 8px;
-    color: ${p => p.theme.palette.text.disabled};
-  }
-`
-const NoCategory = styled.span`
-  color: ${p => p.theme.palette.error.main};
-`
+/** The dot on a transaction nobody has looked at yet. It is scaled away
+ * rather than unmounted, so that viewing one is animated. */
+const NewIndicator: FC<{ viewed?: boolean }> = ({ viewed }) => (
+  <div
+    className={cn(
+      'absolute -top-px -left-0.5 h-3 w-3 scale-100 rounded-full border-2 border-solid border-ui-card bg-ui-error opacity-100 transition-all duration-200',
+      viewed && 'scale-0 opacity-0'
+    )}
+  />
+)
 
-const AmountsWrapper = styled.div<{
-  type: 'income' | 'outcome' | 'transfer'
-}>`
-  color: ${p =>
-    p.type === 'income'
-      ? p.theme.palette.success.main
-      : p.type === 'transfer'
-        ? p.theme.palette.text.secondary
-        : p.theme.palette.text.primary};
+/* `text-[1rem]`, not `text-base`: the named size carries a line height with
+   it, and this only ever set the size. */
+const Receipt: FC<{ children: ReactNode }> = ({ children }) => (
+  <div className="absolute -right-1.5 -bottom-[3px] text-[1rem] text-black [text-shadow:0_0_2px_var(--color-ui-card)]">
+    {children}
+  </div>
+)
 
-  [color='textSecondary'] &[type='transfer'] {
-    max-width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
+const TagsWrapper: FC<HTMLDivProps> = ({ className, ...props }) => (
+  <div
+    {...props}
+    className={cn(
+      '[&>:not(:first-of-type)]:ml-2 [&>:not(:first-of-type)]:text-ui-tertiary',
+      className
+    )}
+  />
+)
 
-  > :not(:first-of-type):before {
-    content: '${p => (p.type === 'transfer' ? '→' : '')}';
-    margin: 0 4px;
-  }
-`
+const NoCategory: FC<{ children: ReactNode }> = ({ children }) => (
+  <span className="text-ui-error">{children}</span>
+)
 
-const InfoWrapper = styled.div`
-  > :not(:first-of-type) {
-    margin-left: 8px;
-  }
-`
+const amountColors = {
+  income: 'text-ui-success',
+  transfer: 'text-ui-secondary',
+  outcome: 'text-ui-primary',
+}
 
-const PayeeWrapper = styled.span`
-  position: relative;
+/** Keep separators independent of whether a neighbour is text or a button. */
+const AmountsWrapper: FC<
+  HTMLDivProps & { type: 'income' | 'outcome' | 'transfer' }
+> = ({ type, className, children, ...props }) => (
+  <div
+    {...props}
+    className={cn(
+      'transaction-amounts inline-flex items-center gap-2',
+      amountColors[type],
+      className
+    )}
+  >
+    {Children.toArray(children).map((child, index) => (
+      <Fragment key={React.isValidElement(child) ? child.key : index}>
+        {type === 'transfer' && index > 0 && (
+          <ArrowForwardIcon size={16} className="transaction-direction -mx-1" />
+        )}
+        {child}
+      </Fragment>
+    ))}
+  </div>
+)
 
-  :hover {
-    color: ${p => p.theme.palette.text.primary};
-  }
-  ::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background-color: currentColor;
-    opacity: 0.2;
-    z-index: 2;
-    transition: 0.16s;
-  }
-`
+const InfoWrapper: FC<HTMLDivProps> = props => (
+  <div {...props} className="[&>:not(:first-child)]:ml-2" />
+)
+
 type ExchangeRateProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
   HTMLDivElement

@@ -1,20 +1,25 @@
-import { FC, useCallback, useMemo, useState } from 'react'
-import { Box, Button, Stack } from '@mui/material'
-import { useTranslation } from 'react-i18next'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { TDateDraft, TFxAmount, TTransaction } from '6-shared/types'
-import { PercentBar, PercentBarItem } from '6-shared/ui/PercentBar'
+import { Button } from '@/6-shared/ui/kit/Button'
+import type { FC } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { core } from '@/zerro-core/redux'
 
-import { envelopeModel, EnvType, TEnvelopeId } from '5-entities/envelope'
-import { envId } from '5-entities/envelope/shared/envelopeId'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { DataLine } from '3-widgets/DataLine'
-import { Card, TCardProps } from '../shared/Card'
-import { TStats, useStats } from '../shared/getFacts'
+import { useTranslation } from 'react-i18next'
+import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import type { TDateDraft, TFxAmount, TTransaction } from '@/6-shared/types'
+import type { PercentBarItem } from '@/6-shared/ui/PercentBar'
+import { PercentBar } from '@/6-shared/ui/PercentBar'
+
+import { useAppSelector } from '@/store'
+
+import { DataLine } from '@/3-widgets/DataLine'
+import type { TCardProps } from '../shared/Card'
+import { Card } from '../shared/Card'
+import type { TStats } from '../shared/getFacts'
+import { useStats } from '../shared/getFacts'
 
 type TDataNode = {
   parent: string | null
-  envelopeId: TEnvelopeId | null
+  envelopeId: core.envelopes.TEnvelopeId | null
   childIds: string[]
 } & PercentBarItem
 
@@ -26,8 +31,8 @@ export const MAX_VISIBLE_NODES = 10
 export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
   const yearStats = useStats(year)
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const [currency] = displayCurrency.useDisplayCurrency()
-  const toDisplay = displayCurrency.useToDisplay('current')
+  const [currency] = core.currency.useDisplayCurrency()
+  const toDisplay = core.currency.useToDisplay('current')
   const [showAll, setShowAll] = useState(false)
   const [showParentOnly, setShowParentOnly] = useState(true)
 
@@ -71,7 +76,7 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
 
   return (
     <Card>
-      <Stack gap={1} mt={1} width="80%">
+      <div className="mt-2 flex w-4/5 flex-col gap-2">
         <DataLine
           name={t('yearlyExpenses')}
           amount={totalAmount}
@@ -82,7 +87,11 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
         />
 
         {!!totalAmount && (
-          <PercentBar data={nodes} visibleData={visibleNodes} mt={1} />
+          <PercentBar
+            data={nodes}
+            visibleData={visibleNodes}
+            className="mt-2"
+          />
         )}
 
         <CategoryList
@@ -91,13 +100,12 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
           onShowTransactions={handleShowTransactions}
         />
 
-        <Box display="flex" justifyContent="center" gap={2} mt={1}>
-          <Tooltip title={t('combineIntoParentCategories')}>
+        <div className="mt-2 flex flex-wrap justify-center gap-4">
+          <Tooltip content={t('combineIntoParentCategories')}>
             <Button
               onClick={() => setShowParentOnly(!showParentOnly)}
-              size="small"
-              color="primary"
-              variant={showParentOnly ? 'contained' : 'outlined'}
+              size="sm"
+              variant={showParentOnly ? 'primary' : 'outline'}
             >
               {t('parentCategories')}
             </Button>
@@ -106,15 +114,14 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
           {hasMoreNodes && (
             <Button
               onClick={() => setShowAll(!showAll)}
-              size="small"
-              color="primary"
-              variant="outlined"
+              size="sm"
+              variant="outline"
             >
               {showAll ? t('showLess') : t('showAll', { count: nodes.length })}
             </Button>
           )}
-        </Box>
-      </Stack>
+        </div>
+      </div>
     </Card>
   )
 }
@@ -124,13 +131,18 @@ function useCreateNodeFromTag(
   toDisplay: (amount: TFxAmount, date?: 'current' | TDateDraft) => number
 ) {
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const envelopes = envelopeModel.useEnvelopes()
+  const envelopes = useAppSelector(core.envelopes.selectAll)
 
   return useCallback(
     (id: string): TDataNode => {
       const nodeData = yearStats.byTag[id] || {}
       const envelopeId =
-        id !== 'null' ? (envId.get(EnvType.Tag, id) as TEnvelopeId) : null
+        id !== 'null'
+          ? (core.envelopes.envId.get(
+              core.envelopes.EnvType.Tag,
+              id
+            ) as core.envelopes.TEnvelopeId)
+          : null
       const envelope = envelopeId ? envelopes[envelopeId] : null
       const parentId = envelope?.parent
         ? envelopes[envelope.parent]?.entityId
@@ -250,7 +262,7 @@ const CategoryList: FC<CategoryListProps> = ({
   onShowTransactions,
 }) => {
   return (
-    <Stack gap={1.5} mt={2}>
+    <div className="mt-4 flex flex-col gap-3">
       {visibleNodes.map(point => (
         <DataLine
           key={point.id}
@@ -261,6 +273,6 @@ const CategoryList: FC<CategoryListProps> = ({
           onClick={() => onShowTransactions(point)}
         />
       ))}
-    </Stack>
+    </div>
   )
 }

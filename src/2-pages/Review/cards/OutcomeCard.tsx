@@ -1,20 +1,24 @@
-import React, { useState } from 'react'
-import { Box, IconButton, Stack, Typography } from '@mui/material'
-import { formatDate } from '6-shared/helpers/date'
-import { tagModel } from '5-entities/tag'
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
-import { Card, TCardProps } from '../shared/Card'
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import { useState } from 'react'
+import { formatDate } from '@/6-shared/helpers/date'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
+
+import { DisplayAmount } from '@/3-widgets/DisplayAmount'
+import type { TCardProps } from '../shared/Card'
+import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 import { useTrToDisplay } from '../shared/useTrToDisplay'
-import { ArrowBackIcon, ArrowForwardIcon } from '6-shared/ui/Icons'
+import { ArrowBackIcon, ArrowForwardIcon } from '@/6-shared/ui/Icons'
 import { useTranslation } from 'react-i18next'
 
 export function OutcomeCard(props: TCardProps) {
+  const { t: uiT } = useTranslation('common')
   const { t } = useTranslation('yearReview', { keyPrefix: 'outcomeCard' })
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
   const toVal = useTrToDisplay()
-  const tags = tagModel.usePopulatedTags()
+  const tags = useAppSelector(core.tags.selectPopulated)
 
   const topTransactions = yearStats.total.outcomeTransactions
     .map(tr => ({ tr, val: toVal(tr).outcome }))
@@ -30,75 +34,49 @@ export function OutcomeCard(props: TCardProps) {
   const { date, comment, payee, tag } = tr
 
   const tagTitle = tags[tag?.[0] || 'null'].title
-  let additionalInfo = [formatDate(date)]
+  const additionalInfo = [formatDate(date)]
   if (tagTitle) additionalInfo.push(tagTitle)
   if (payee) additionalInfo.push(payee)
   return (
     <Card>
-      <Stack
-        spacing={1}
-        sx={{
-          my: 1,
-          alignItems: 'center',
-        }}
-      >
-        <Typography variant="body1" align="center">
+      <div className="my-2 flex flex-col items-center gap-2">
+        <p className="m-0 text-center text-body">
           {t('purchaseOfTheYear', { number: i + 1 })}
-        </Typography>
-        <Typography variant="h4" align="center" className="red-gradient">
+        </p>
+        <h2 className="red-gradient m-0 text-center text-display">
           <DisplayAmount value={val} noShade decimals="ifAny" />
-        </Typography>
-        <Typography
-          variant="body1"
-          align="center"
-          sx={{
-            color: 'text.secondary',
-          }}
-        >
+        </h2>
+        <p className="m-0 text-center text-body text-ui-secondary">
           {additionalInfo.join('  •  ')}
-        </Typography>
+        </p>
         {comment && (
-          <Box
-            sx={{
-              py: 0.5,
-              px: 2,
-              mt: 1,
-              alignSelf: 'center',
-              bgcolor: 'background.default',
-              borderRadius: 1,
-            }}
-          >
-            <Typography
-              variant="body1"
-              align="center"
-              sx={{
-                color: 'text.secondary',
-              }}
-            >
+          <div className="self-center rounded-lg bg-ui-base px-4 py-1">
+            <p className="m-0 text-center text-body text-ui-secondary">
               {comment}
-            </Typography>
-          </Box>
+            </p>
+          </div>
         )}
 
-        <Stack
-          spacing={1}
-          direction="row"
-          sx={{
-            alignItems: 'center',
-            opacity: 0.3,
-            transition: '200ms',
-            '&:hover': { opacity: 1 },
-          }}
-        >
-          <IconButton size="small" onClick={prev}>
+        <div className="flex flex-row items-center gap-2 opacity-30 transition-opacity duration-200 hover:opacity-100">
+          <IconButton
+            label={uiT('previousItem')}
+            variant="ghost"
+            size="sm"
+            onClick={prev}
+          >
             <ArrowBackIcon />
           </IconButton>
 
-          <IconButton size="small" onClick={next}>
+          <IconButton
+            label={uiT('nextItem')}
+            variant="ghost"
+            size="sm"
+            onClick={next}
+          >
             <ArrowForwardIcon />
           </IconButton>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     </Card>
   )
 }

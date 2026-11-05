@@ -1,15 +1,17 @@
-import React, { FC } from 'react'
-import { Typography, Box, Button } from '@mui/material'
+import '@/6-shared/ui/kit/HeaderSurface.css'
+import { TextFade } from '@/6-shared/ui/kit/TextFade'
+import { Button } from '@/6-shared/ui/kit/Button'
+import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDownIcon } from '6-shared/ui/Icons'
-import { TISOMonth } from '6-shared/types'
+import { ChevronDownIcon } from '@/6-shared/ui/Icons'
+import type { TISOMonth } from '@/6-shared/types'
 
-import { GoalsProgress } from '4-features/bulkActions/fillGoals'
+import { GoalsProgress } from '@/4-features/bulkActions/fillGoals'
 import { TableRow, useIsSmall } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
-import { ToBeBudgeted } from './ToBeBudgeted'
+import { ToBeAssigned } from './ToBeAssigned'
 import { useColumns } from '../models/useMetric'
-import { useTableMenu, TableMenu } from './TableMenu'
+import { Menu } from '@/6-shared/ui/kit/Menu'
 
 type HeaderProps = {
   month: TISOMonth
@@ -19,6 +21,15 @@ type HeaderProps = {
   onReorderModeToggle: () => void
   onOpenOverview: () => void
 }
+
+const ColumnTitle: FC<{ name: string; onClick?: () => void }> = props => (
+  <TextFade
+    onClick={props.onClick}
+    className="text-right text-overline uppercase text-ui-secondary"
+  >
+    {props.name}
+  </TextFade>
+)
 
 export const Header: FC<HeaderProps> = props => {
   const {
@@ -31,93 +42,63 @@ export const Header: FC<HeaderProps> = props => {
   } = props
   const { t } = useTranslation('common')
   const isSmall = useIsSmall()
-  const openOnClick = useTableMenu({
-    isAllShown,
-    isReordering,
-    onShowAllToggle,
-    onReorderModeToggle,
-  })
 
   const { nextColumn } = useColumns()
-  const ColumnTitle: FC<{ name: string }> = props => (
-    <Typography
-      variant="overline"
-      align="right"
-      onClick={nextColumn}
-      noWrap
-      sx={{
-        color: 'text.secondary',
-      }}
-    >
-      {props.name}
-    </Typography>
-  )
 
   return (
     <>
-      <Box
-        sx={{
-          borderTopLeftRadius: 8,
-          borderTopRightRadius: 8,
-          position: 'sticky',
-          top: 0,
-          borderBottom: `1px solid black`,
-          borderColor: 'divider',
-          bgcolor: 'background.paper',
-          zIndex: 99,
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            p: 1,
-            gap: 2,
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            position: 'sticky',
-            top: 0,
-            zIndex: 9,
-          }}
-        >
+      <div className="kit-header-surface sticky top-0 z-[99]">
+        <div className="sticky top-0 z-[9] flex flex-wrap justify-between gap-4 p-2">
           <MonthSelect />
 
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <div className="flex gap-4">
             {!isSmall && <GoalsProgress month={month} />}
-            <ToBeBudgeted onClick={onOpenOverview} />
-          </Box>
-        </Box>
+            <ToBeAssigned onClick={onOpenOverview} />
+          </div>
+        </div>
 
         <TableRow
           name={
             <div>
-              <Button
-                size="small"
-                onClick={openOnClick}
-                sx={{ ml: -1, px: 1, py: 0 }}
-              >
-                <Typography
-                  variant="overline"
-                  noWrap
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('categories', {
-                    ns: 'budgets',
-                    context: isAllShown ? 'all' : '',
-                  })}
-                </Typography>
-                <ChevronDownIcon />
-              </Button>
+              <Menu
+                label={t('actions')}
+                trigger={
+                  <Button variant="ghost" size="xs" className="-ml-2 px-2 py-0">
+                    <TextFade className="text-overline uppercase text-ui-secondary">
+                      {t('categories', {
+                        ns: 'budgets',
+                        context: isAllShown ? 'all' : '',
+                      })}
+                    </TextFade>
+                    <ChevronDownIcon />
+                  </Button>
+                }
+                items={[
+                  {
+                    id: 'showAll',
+                    label: t(
+                      isAllShown ? 'showPrtiallyEnvelopes' : 'showAllEnvelopes',
+                      { ns: 'envelopeTableMenu' }
+                    ),
+                    onSelect: onShowAllToggle,
+                  },
+                  {
+                    id: 'reorder',
+                    label: t(isReordering ? 'leaveEditMode' : 'goToEditMode', {
+                      ns: 'envelopeTableMenu',
+                    }),
+                    onSelect: onReorderModeToggle,
+                  },
+                ]}
+              />
             </div>
           }
-          budgeted={<ColumnTitle name={t('budget')} />}
-          outcome={<ColumnTitle name={t('activity')} />}
-          available={<ColumnTitle name={t('available')} />}
+          assigned={<ColumnTitle name={t('assigned')} onClick={nextColumn} />}
+          outcome={<ColumnTitle name={t('activity')} onClick={nextColumn} />}
+          available={<ColumnTitle name={t('available')} onClick={nextColumn} />}
           goal={null}
         />
-      </Box>
-      <TableMenu />
+      </div>
     </>
   )
 }

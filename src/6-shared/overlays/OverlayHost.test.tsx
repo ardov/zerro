@@ -1,0 +1,944 @@
+import { StrictMode, useEffect, useState, type ReactNode } from 'react'
+import { useOwnedPopup } from '../ui/kit/useOwnedPopup'
+import { act, fireEvent, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import {
+  MemoryRouter,
+  NavigationType,
+  Router,
+  useNavigate,
+  type Location,
+  type Navigator,
+  type To,
+} from 'react-router-dom'
+import { describe, expect, it, vi } from 'vitest'
+import { OverlayHost } from './OverlayHost'
+import { defineScreen } from './defineScreen'
+import { defineScreenInstances } from './defineScreenInstances'
+import { useAsk, useAsked } from './useAsk'
+import { usePopup } from './usePopup'
+import { useOverlayBack } from './useOverlayBack'
+
+function App({ children }: { children: ReactNode }) {
+  return (
+    <MemoryRouter initialEntries={['/budget']}>
+      <OverlayHost>
+        <Back />
+        {children}
+      </OverlayHost>
+    </MemoryRouter>
+  )
+}
+
+/** The browser's Back button. */
+function Back() {
+  const navigate = useNavigate()
+  return <button onClick={() => navigate(-1)}>back</button>
+}
+
+describe('usePopup', () => {
+  function Menu() {
+    const { open, setOpen } = usePopup()
+    return (
+      <>
+        <button onClick={() => setOpen(true)}>open menu</button>
+        {open && <div>menu body</div>}
+        {open && <button onClick={() => setOpen(false)}>dismiss</button>}
+      </>
+    )
+  }
+
+  it('opens, and Back closes it', async () => {
+    const user = userEvent.setup()
+    render(
+      <App>
+        <Menu />
+      </App>
+    )
+
+    await user.click(screen.getByText('open menu'))
+    expect(screen.getByText('menu body')).toBeTruthy()
+
+    await user.click(screen.getByText('back'))
+    expect(screen.queryByText('menu body')).toBeNull()
+  })
+
+  it('closes itself without leaving the page', async () => {
+    const user = userEvent.setup()
+    render(
+      <App>
+        <Menu />
+      </App>
+    )
+
+    await user.click(screen.getByText('open menu'))
+    await user.click(screen.getByText('dismiss'))
+    expect(screen.queryByText('menu body')).toBeNull()
+    // Still here: the page itself was never left.
+    expect(screen.getByText('open menu')).toBeTruthy()
+  })
+})
+
+describe('one popup handing over to another', () => {
+  /** The filter bar: a menu picks a filter, and the editor for it opens as
+   * the menu goes. The second one opens before the step that closes the first
+   * has landed. */
+  function Handover() {
+    const { open: menuOpen, setOpen: setMenuOpen } = usePopup()
+    const { open: editorOpen, setOpen: setEditorOpen } = usePopup()
+    return (
+      <>
+        <button onClick={() => setMenuOpen(true)}>open menu</button>
+        {menuOpen && (
+          <button
+            onClick={() => {
+              setMenuOpen(false)
+              setEditorOpen(true)
+            }}
+          >
+            pick a filter
+          </button>
+        )}
+        {editorOpen && <div>editor</div>}
+      </>
+    )
+  }
+
+  it('leaves the second one open', async () => {
+    const user = userEvent.setup()
+    render(
+      <App>
+        <Handover />
+      </App>
+    )
+
+    await user.click(screen.getByText('open menu'))
+    await user.click(screen.getByText('pick a filter'))
+    expect(screen.getByText('editor')).toBeTruthy()
+  })
+
+  it('gives it a slot of its own, so Back closes it', async () => {
+    const user = userEvent.setup()
+    render(
+      <App>
+        <Handover />
+      </App>
+    )
+
+    await user.click(screen.getByText('open menu'))
+    await user.click(screen.getByText('pick a filter'))
+    expect(screen.getByText('editor')).toBeTruthy()
+
+    await user.click(screen.getByText('back'))
+    expect(screen.queryByText('editor')).toBeNull()
+    // Still here: the page itself was never left.
+    expect(screen.getByText('open menu')).toBeTruthy()
+  })
+})
+
+describe('useAsk', () => {
+  function Confirm() {
+    const { open, answer } = useAsked<boolean>()
+    if (!open) return null
+    return (
+      <>
+        <div>really?</div>
+        <button onClick={() => answer(true)}>yes</button>
+        <button onClick={() => answer(false)}>no</button>
+      </>
+    )
+  }
+
+  function Asker({ onAnswer }: { onAnswer: (v: boolean | undefined) => void }) {
+    const ask = useAsk()
+    return (
+      <button onClick={async () => onAnswer(await ask<boolean>(<Confirm />))}>
+        ask
+      </button>
+    )
+  }
+
+  it('hands back the answer', async () => {
+    const user = userEvent.setup()
+    const answers: unknown[] = []
+    render(
+      <App>
+        <Asker onAnswer={v => answers.push(v)} />
+      </App>
+    )
+
+    await user.click(screen.getByText('ask'))
+    expect(screen.getByText('really?')).toBeTruthy()
+
+    await user.click(screen.getByText('yes'))
+    await act(async () => {})
+    expect(answers).toEqual([true])
+  })
+
+  it('answers "no answer" when Back dismisses the question', async () => {
+    const user = userEvent.setup()
+    const answers: unknown[] = []
+    render(
+      <App>
+        <Asker onAnswer={v => answers.push(v)} />
+      </App>
+    )
+
+    await user.click(screen.getByText('ask'))
+    await user.click(screen.getByText('back'))
+    await act(async () => {})
+    expect(answers).toEqual([undefined])
+  })
+})
+
+describe('a screen opened from a popup takes its place', () => {
+  const panel = defineScreen<true>('panel')
+
+  function Menu() {
+    const { open, answer } = useAsked<void>()
+    const openPanel = panel.useOpen()
+    if (!open) return null
+    return (
+      <>
+        <div>menu body</div>
+        <button onClick={() => openPanel(true)}>open panel</button>
+        <button onClick={() => answer()}>dismiss</button>
+      </>
+    )
+  }
+
+  function Page() {
+    const ask = useAsk()
+    const [opened] = panel.use()
+    return (
+      <>
+        <button onClick={() => ask(<Menu />)}>open menu</button>
+        {opened && <div>panel body</div>}
+      </>
+    )
+  }
+
+  it('leads Back to the page rather than back into the menu', async () => {
+    const user = userEvent.setup()
+    render(
+      <App>
+        <Page />
+      </App>
+    )
+
+    await user.click(screen.getByText('open menu'))
+    await user.click(screen.getByText('open panel'))
+    expect(screen.getByText('panel body')).toBeTruthy()
+    expect(screen.queryByText('menu body')).toBeNull()
+
+    await user.click(screen.getByText('back'))
+    expect(screen.queryByText('panel body')).toBeNull()
+    expect(screen.queryByText('menu body')).toBeNull()
+    // Still on the page: one Back, one visible change, and no step wasted on
+    // the slot the menu left behind.
+    expect(screen.getByText('open menu')).toBeTruthy()
+  })
+})
+
+describe('defineScreen', () => {
+  const trPreview = defineScreen<string>('tr')
+
+  function Screens() {
+    const [id, setId] = trPreview.use()
+    return (
+      <>
+        <button onClick={() => setId('a')}>open a</button>
+        <button onClick={() => setId('b')}>open b</button>
+        {id && <div>preview {id}</div>}
+        {id && <button onClick={() => setId(null)}>close</button>}
+      </>
+    )
+  }
+
+  it('holds its value and closes with Back', async () => {
+    const user = userEvent.setup()
+    render(
+      <App>
+        <Screens />
+      </App>
+    )
+
+    await user.click(screen.getByText('open a'))
+    expect(screen.getByText('preview a')).toBeTruthy()
+
+    await user.click(screen.getByText('back'))
+    expect(screen.queryByText('preview a')).toBeNull()
+  })
+
+  it('hands over to the next value in one history step', async () => {
+    const user = userEvent.setup()
+    render(
+      <App>
+        <Screens />
+      </App>
+    )
+
+    await user.click(screen.getByText('open a'))
+    await user.click(screen.getByText('open b'))
+    expect(screen.getByText('preview b')).toBeTruthy()
+
+    await user.click(screen.getByText('back'))
+    expect(screen.queryByText(/preview/)).toBeNull()
+  })
+
+  it('adds one history step for two opens in the same tick', async () => {
+    const user = userEvent.setup()
+
+    function DoubleTap() {
+      const open = trPreview.useOpen()
+      const [id] = trPreview.use()
+      return (
+        <>
+          <button
+            onClick={() => {
+              open('a')
+              open('b')
+            }}
+          >
+            tap twice
+          </button>
+          {id && <div>preview {id}</div>}
+        </>
+      )
+    }
+
+    render(
+      <App>
+        <DoubleTap />
+      </App>
+    )
+
+    await user.click(screen.getByText('tap twice'))
+    expect(screen.getByText('preview b')).toBeTruthy()
+
+    // One press, one visible change: the second open replaced the first
+    // rather than stacking on a state it had not seen yet.
+    await user.click(screen.getByText('back'))
+    expect(screen.queryByText(/preview/)).toBeNull()
+  })
+
+  it('closes on its own the same way Back does', async () => {
+    const user = userEvent.setup()
+    render(
+      <App>
+        <Screens />
+      </App>
+    )
+
+    await user.click(screen.getByText('open a'))
+    await user.click(screen.getByText('close'))
+    expect(screen.queryByText('preview a')).toBeNull()
+    expect(screen.getByText('open a')).toBeTruthy()
+  })
+})
+
+describe('a screen closing through a slow history step', () => {
+  const sheet = defineScreen<string>('sheet')
+
+  it('dismisses a popup when Back cancels its uncommitted push', () => {
+    function Owner() {
+      const [value, setValue] = sheet.use()
+      const popup = usePopup()
+      const navigate = useNavigate()
+      return (
+        <>
+          <button onClick={() => setValue('owner')}>open stable owner</button>
+          <button
+            onClick={() => {
+              popup.setOpen(true)
+              navigate(-1)
+            }}
+          >
+            open popup then immediately Back
+          </button>
+          {value && <div>stable owner</div>}
+          {popup.open && <div>cancelled popup</div>}
+        </>
+      )
+    }
+    render(
+      <App>
+        <Owner />
+      </App>
+    )
+    fireEvent.click(screen.getByText('open stable owner'))
+    fireEvent.click(screen.getByText('open popup then immediately Back'))
+    expect(screen.getByText('stable owner')).toBeTruthy()
+    expect(screen.queryByText('cancelled popup')).toBeNull()
+  })
+
+  function Sheet() {
+    const [id, setId] = sheet.use()
+    return (
+      <>
+        <button onClick={() => setId('a')}>open</button>
+        {id && <div>sheet {id}</div>}
+        {id && <button onClick={() => setId(null)}>close</button>}
+      </>
+    )
+  }
+
+  it('reads as closed before the step lands', async () => {
+    const user = userEvent.setup()
+    const history = renderWithSlowHistory(<Sheet />)
+
+    await user.click(screen.getByText('open'))
+    await user.click(screen.getByText('close'))
+    // A swiped drawer must not be told to come back while the browser works.
+    expect(screen.queryByText('sheet a')).toBeNull()
+
+    history.land()
+    expect(screen.queryByText('sheet a')).toBeNull()
+    expect(screen.getByText('open')).toBeTruthy()
+  })
+
+  it('shows it again when the step never lands', async () => {
+    const user = userEvent.setup()
+    renderWithSlowHistory(<Sheet />)
+    await user.click(screen.getByText('open'))
+
+    vi.useFakeTimers()
+    try {
+      fireEvent.click(screen.getByText('close'))
+      expect(screen.queryByText('sheet a')).toBeNull()
+      act(() => vi.advanceTimersByTime(1000))
+      expect(screen.getByText('sheet a')).toBeTruthy()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it.each(['Back', 'reload'])(
+    'keeps the owner when sync removes the top Details after %s',
+    source => {
+      const layers = defineScreenInstances<string>('sync-removal')
+      function Pair() {
+        const { instances, remove } = layers.use()
+        const open = layers.useOpen()
+        const navigate = useNavigate()
+        return (
+          <>
+            {['owner', 'details', 'child'].map(value => (
+              <button key={value} onClick={() => open(value)}>
+                open {value}
+              </button>
+            ))}
+            <button onClick={() => navigate(-1)}>browser back</button>
+            <button onClick={() => remove(instances.at(-1)!.id)}>
+              sync removes details
+            </button>
+            {instances.map(({ id, value }) => (
+              <div key={id}>{value} body</div>
+            ))}
+          </>
+        )
+      }
+      const owner = { 'screen:sync-removal:owner': 'owner' }
+      const history = renderWithSlowHistory(
+        <Pair />,
+        source === 'reload'
+          ? [
+              null,
+              { overlays: { screens: owner, ours: true } },
+              {
+                overlays: {
+                  screens: {
+                    ...owner,
+                    'screen:sync-removal:details': 'details',
+                  },
+                  ours: true,
+                },
+              },
+            ]
+          : undefined
+      )
+      if (source === 'Back') {
+        fireEvent.click(screen.getByText('open owner'))
+        fireEvent.click(screen.getByText('open details'))
+        fireEvent.click(screen.getByText('open child'))
+        fireEvent.click(screen.getByText('browser back'))
+        history.land()
+      }
+      expect(screen.getByText('details body')).toBeTruthy()
+
+      fireEvent.click(screen.getByText('sync removes details'))
+      // Let every requested browser step land, including an accidental second
+      // Back: the observable contract is that the owner remains open.
+      for (let remaining = 3; history.pendingSteps() && remaining; remaining--)
+        history.land()
+      expect(screen.queryByText('details body')).toBeNull()
+      expect(screen.getByText('owner body')).toBeTruthy()
+      expect(history.pendingSteps()).toBe(0)
+    }
+  )
+})
+
+/** A history whose steps land only when the test says so, as a browser's do
+ * a few frames after they are asked for. Pushes and replaces land at once. */
+function renderWithSlowHistory(
+  children: ReactNode,
+  initialStates: unknown[] = [null]
+) {
+  let keys = 0
+  // Steps asked for and not landed yet, each landing when called.
+  const steps: Array<() => void> = []
+  const toLocation = (to: To, state: unknown): Location => ({
+    pathname: '/budget',
+    search: '',
+    hash: '',
+    ...(typeof to === 'string' ? { pathname: to } : to),
+    state: state ?? null,
+    key: `entry-${++keys}`,
+  })
+  type Stack = { entries: Location[]; index: number; type: NavigationType }
+
+  function SlowRouter() {
+    const [stack, set] = useState<Stack>({
+      entries: initialStates.map(state => toLocation('/budget', state)),
+      index: initialStates.length - 1,
+      type: NavigationType.Pop,
+    })
+    const navigator = useState<Navigator>(() => ({
+      createHref: to => (typeof to === 'string' ? to : (to.pathname ?? '')),
+      go: delta =>
+        steps.push(() =>
+          set(({ entries, index }) => ({
+            entries,
+            index: index + delta,
+            type: NavigationType.Pop,
+          }))
+        ),
+      push: (to, state) =>
+        set(({ entries, index }) => ({
+          entries: [...entries.slice(0, index + 1), toLocation(to, state)],
+          index: index + 1,
+          type: NavigationType.Push,
+        })),
+      replace: (to, state) =>
+        set(({ entries, index }) => ({
+          entries: entries.with(index, toLocation(to, state)),
+          index,
+          type: NavigationType.Replace,
+        })),
+    }))[0]
+    return (
+      <Router
+        location={stack.entries[stack.index]}
+        navigationType={stack.type}
+        navigator={navigator}
+      >
+        <OverlayHost>{children}</OverlayHost>
+      </Router>
+    )
+  }
+
+  render(<SlowRouter />)
+  return {
+    pendingSteps: () => steps.length,
+    land: () =>
+      act(() => {
+        const step = steps.shift()
+        if (!step) throw new Error('No step is in flight')
+        step()
+      }),
+  }
+}
+
+describe('owner close notifications', () => {
+  it('finishes the latest singleton input when Back unmounts its owner', () => {
+    const singleton = defineScreen<string>('pending-singleton')
+    const finished = vi.fn()
+    function Editor() {
+      const [draft, setDraft] = useState('initial')
+      singleton.use(() => finished(draft))
+      return (
+        <input
+          aria-label="singleton draft"
+          value={draft}
+          onChange={event => setDraft(event.target.value)}
+        />
+      )
+    }
+    function Owner() {
+      const value = singleton.useValue()
+      const open = singleton.useOpen()
+      const navigate = useNavigate()
+      return (
+        <>
+          <button onClick={() => open('A')}>open singleton editor</button>
+          <button onClick={() => navigate(-1)}>leave singleton editor</button>
+          {value && <Editor />}
+        </>
+      )
+    }
+    render(
+      <App>
+        <Owner />
+      </App>
+    )
+    fireEvent.click(screen.getByText('open singleton editor'))
+    fireEvent.change(screen.getByLabelText('singleton draft'), {
+      target: { value: 'latest' },
+    })
+    fireEvent.click(screen.getByText('leave singleton editor'))
+    expect(screen.queryByLabelText('singleton draft')).toBeNull()
+    expect(finished).toHaveBeenCalledExactlyOnceWith('latest')
+  })
+
+  function Editor({ onClose }: { onClose: (value: string) => void }) {
+    const [draft, setDraft] = useState('initial')
+    const popup = usePopup(() => onClose(draft))
+    const { open, setOpen } = useOwnedPopup({ popup })
+    const [branch, setBranch] = useState(false)
+    return (
+      <>
+        <button onClick={() => setOpen(true)}>edit</button>
+        {open && (
+          <div key={String(branch)}>
+            <input
+              aria-label="draft"
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+            />
+            <button onClick={() => setBranch(!branch)}>adapt</button>
+            <button onClick={() => setOpen(false)}>close editor</button>
+          </div>
+        )}
+      </>
+    )
+  }
+
+  it('delivers the latest draft once for Back and programmatic close, never for adaptation', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(
+      <StrictMode>
+        <App>
+          <Editor onClose={onClose} />
+        </App>
+      </StrictMode>
+    )
+    await user.click(screen.getByText('edit'))
+    await user.clear(screen.getByLabelText('draft'))
+    await user.type(screen.getByLabelText('draft'), 'changed')
+    await user.click(screen.getByText('adapt'))
+    expect(onClose).not.toHaveBeenCalled()
+    await user.click(screen.getByText('back'))
+    expect(onClose.mock.calls).toEqual([['changed']])
+    await user.click(screen.getByText('edit'))
+    await user.click(screen.getByText('close editor'))
+    expect(onClose.mock.calls).toEqual([['changed'], ['changed']])
+  })
+
+  it('releases an unmounted owner without saving a draft', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    function Owner() {
+      const [mounted, setMounted] = useState(true)
+      return (
+        <>
+          <button onClick={() => setMounted(false)}>remove owner</button>
+          {mounted && <Editor onClose={onClose} />}
+        </>
+      )
+    }
+    render(
+      <App>
+        <Owner />
+      </App>
+    )
+    await user.click(screen.getByText('edit'))
+    await user.click(screen.getByText('remove owner'))
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('notifies the asked owner on Back with its latest draft', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    function AskedEditor() {
+      const [draft, setDraft] = useState('initial')
+      const { open } = useAsked(() => onClose(draft))
+      return (
+        open && (
+          <input
+            aria-label="asked draft"
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+          />
+        )
+      )
+    }
+    function Launcher() {
+      const ask = useAsk()
+      return (
+        <button onClick={() => void ask(<AskedEditor />)}>ask editor</button>
+      )
+    }
+    render(
+      <App>
+        <Launcher />
+      </App>
+    )
+    await user.click(screen.getByText('ask editor'))
+    await user.clear(await screen.findByLabelText('asked draft'))
+    await user.type(screen.getByLabelText('asked draft'), 'latest')
+    await user.click(screen.getByText('back'))
+    expect(onClose.mock.calls).toEqual([['latest']])
+  })
+
+  it('notifies the stable screen owner after conditional content unmounts', async () => {
+    const editor = defineScreen<string>('close-test')
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    function ScreenOwner() {
+      const [draft, setDraft] = useState('initial')
+      const [value, setValue] = editor.use(() => onClose(draft))
+      return (
+        <>
+          <button onClick={() => setValue('open')}>open screen</button>
+          {value && (
+            <div>
+              <input
+                aria-label="screen draft"
+                value={draft}
+                onChange={e => setDraft(e.target.value)}
+              />
+              <button onClick={() => setValue(null)}>close screen</button>
+            </div>
+          )}
+        </>
+      )
+    }
+    render(
+      <StrictMode>
+        <App>
+          <ScreenOwner />
+        </App>
+      </StrictMode>
+    )
+    await user.click(screen.getByText('open screen'))
+    await user.clear(screen.getByLabelText('screen draft'))
+    await user.type(screen.getByLabelText('screen draft'), 'latest')
+    await user.click(screen.getByText('back'))
+    expect(screen.queryByLabelText('screen draft')).toBeNull()
+    expect(onClose.mock.calls).toEqual([['latest']])
+    await user.click(screen.getByText('open screen'))
+    await user.click(screen.getByText('close screen'))
+    expect(onClose.mock.calls).toEqual([['latest'], ['latest']])
+  })
+
+  it('keeps lifecycle independent from a wrapped change callback', async () => {
+    const user = userEvent.setup()
+    const closed = vi.fn()
+    const changed = vi.fn()
+    function Owner() {
+      const controller = usePopup(closed)
+      const setOpen = (open: boolean) => {
+        changed(open)
+        controller.setOpen(open)
+      }
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>open wrapped</button>
+          {controller.open && (
+            <button onClick={() => setOpen(false)}>close wrapped</button>
+          )}
+        </>
+      )
+    }
+    render(
+      <App>
+        <Owner />
+      </App>
+    )
+    await user.click(screen.getByText('open wrapped'))
+    await user.click(screen.getByText('close wrapped'))
+    expect(closed).toHaveBeenCalledTimes(1)
+    await user.click(screen.getByText('open wrapped'))
+    await user.click(screen.getByText('back'))
+    expect(closed).toHaveBeenCalledTimes(2)
+    expect(changed.mock.calls).toEqual([[true], [false], [true]])
+  })
+
+  it('unsubscribes an owner immediately when it is removed', async () => {
+    const user = userEvent.setup()
+    const closed = vi.fn()
+    const popupRef: { current?: ReturnType<typeof usePopup> } = {}
+    function Owner() {
+      const popup = usePopup(closed)
+      useEffect(() => {
+        popupRef.current = popup
+      }, [popup])
+      return <button onClick={() => popup.setOpen(true)}>open owner</button>
+    }
+    const view = render(
+      <App>
+        <Owner />
+      </App>
+    )
+    await user.click(screen.getByText('open owner'))
+    view.rerender(<App>{null}</App>)
+    act(() => popupRef.current!.setOpen(false))
+    expect(closed).not.toHaveBeenCalled()
+  })
+
+  it('keeps a nested popup subscription independent from its asked parent', async () => {
+    const user = userEvent.setup()
+    const childClosed = vi.fn()
+    const parentClosed = vi.fn()
+    function AskedParent() {
+      const { open } = useAsked(parentClosed)
+      const child = useOwnedPopup({ onClose: childClosed })
+      return (
+        open && (
+          <>
+            <button onClick={() => child.setOpen(true)}>open child</button>
+            {child.open && (
+              <button onClick={() => child.setOpen(false)}>close child</button>
+            )}
+          </>
+        )
+      )
+    }
+    function Launcher() {
+      const ask = useAsk()
+      return (
+        <button onClick={() => void ask(<AskedParent />)}>ask parent</button>
+      )
+    }
+    render(
+      <App>
+        <Launcher />
+      </App>
+    )
+    await user.click(screen.getByText('ask parent'))
+    await user.click(await screen.findByText('open child'))
+    await user.click(screen.getByText('close child'))
+    expect(childClosed).toHaveBeenCalledTimes(1)
+    expect(parentClosed).not.toHaveBeenCalled()
+    await user.click(screen.getByText('back'))
+    expect(childClosed).toHaveBeenCalledTimes(1)
+    expect(parentClosed).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('asked close answers', () => {
+  it.each(['back', 'surface', 'explicit', 'unanswered'] as const)(
+    'keeps the first answer when closed through %s',
+    async mode => {
+      const user = userEvent.setup()
+      const result = vi.fn()
+      const notified = vi.fn()
+      function Editor() {
+        const [draft, setDraft] = useState('initial')
+        const { open, controller, answer } = useAsked<string>(answer => {
+          notified()
+          answer(draft)
+        })
+        return (
+          open && (
+            <>
+              <input
+                aria-label="draft"
+                value={draft}
+                onChange={event => setDraft(event.target.value)}
+              />
+              <button onClick={() => controller.setOpen(false)}>surface</button>
+              <button onClick={() => answer('explicit')}>explicit</button>
+              <button onClick={() => answer()}>unanswered</button>
+            </>
+          )
+        )
+      }
+      function Launcher() {
+        const ask = useAsk()
+        return (
+          <button onClick={async () => result(await ask(<Editor />))}>
+            launch
+          </button>
+        )
+      }
+      render(
+        <App>
+          <Launcher />
+        </App>
+      )
+      await user.click(screen.getByText('launch'))
+      const input = await screen.findByLabelText('draft')
+      await user.clear(input)
+      await user.type(input, 'latest')
+      await user.click(screen.getByText(mode))
+      expect(result).toHaveBeenCalledExactlyOnceWith(
+        mode === 'explicit'
+          ? 'explicit'
+          : mode === 'unanswered'
+            ? undefined
+            : 'latest'
+      )
+      expect(notified).toHaveBeenCalledTimes(1)
+    }
+  )
+})
+
+describe('system Back', () => {
+  const parent = defineScreen<string>('system-back-parent')
+  function Stack({ onClose }: { onClose: () => void }) {
+    const [id, setId] = parent.use()
+    const popup = usePopup(onClose)
+    const back = useOverlayBack()
+    return (
+      <>
+        <button onClick={() => setId('parent')}>open parent</button>
+        {id && <div>parent body</div>}
+        <button onClick={() => popup.setOpen(true)}>open child</button>
+        {popup.open && <div>child body</div>}
+        <button
+          onClick={() => {
+            back()
+            back()
+          }}
+        >
+          system back
+        </button>
+      </>
+    )
+  }
+
+  it('deduplicates one native dispatch but queues the next Back during a pending history step', async () => {
+    const user = userEvent.setup()
+    const closed = vi.fn()
+    const history = renderWithSlowHistory(<Stack onClose={closed} />)
+    await user.click(screen.getByText('open parent'))
+    await user.click(screen.getByText('open child'))
+    await user.click(screen.getByText('system back'))
+    expect(screen.queryByText('child body')).toBeNull()
+    expect(screen.getByText('parent body')).toBeTruthy()
+    expect(closed).toHaveBeenCalledTimes(1)
+    await user.click(screen.getByText('system back'))
+    expect(screen.queryByText('parent body')).toBeNull()
+    history.land()
+    history.land()
+    expect(screen.queryByText('parent body')).toBeNull()
+    expect(() => history.land()).toThrow('No step is in flight')
+  })
+
+  it('leaves a page without overlays alone', async () => {
+    const handled = vi.fn()
+    function Page() {
+      const back = useOverlayBack()
+      return <button onClick={() => handled(back())}>system back</button>
+    }
+    render(
+      <App>
+        <Page />
+      </App>
+    )
+    await userEvent.click(screen.getByText('system back'))
+    expect(handled).toHaveBeenCalledExactlyOnceWith(false)
+  })
+})

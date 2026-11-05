@@ -1,242 +1,186 @@
-import React, { FC } from 'react'
-import { shallowEqual } from 'react-redux'
-import { v1 as uuidv1 } from 'uuid'
-import { useFormik } from 'formik'
-import {
-  Button,
-  ButtonBase,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogProps,
-  DialogTitle,
-  FormControlLabel,
-  FormGroup,
-  InputAdornment,
-  Stack,
-  TextField,
-} from '@mui/material'
-import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
-import { useAppDispatch } from 'store'
-import {
-  envelopeModel,
-  envelopeVisibility,
-  EnvType,
-  TEnvelope,
-} from '5-entities/envelope'
-// import { TagSelect } from '@components/TagSelect'
+import { FieldAddon } from '@/6-shared/ui/kit/Field'
+import type { FC } from 'react'
+import { Select } from '@/6-shared/ui/kit/Select'
+import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
+import { useBottomSheetLayout } from '@/6-shared/ui/kit/useBottomSheetLayout'
+import { Input } from '@/6-shared/ui/kit/Input'
+import { AppearancePicker } from '@/3-widgets/AppearancePicker'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
+
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
-import { VisibilitySelect } from './VisidilitySelect'
-import { userModel } from '5-entities/user'
-import { registerPopover } from '6-shared/historyPopovers'
+import { VisibilitySelect } from './VisibilitySelect'
+import { defineScreen } from '@/6-shared/overlays'
+import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-const editDialog = registerPopover<
-  { envelope?: Partial<TEnvelope> },
-  DialogProps
->('envelopeEditDialog', {})
+/** A screen: the envelope it edits is an id, and the envelope itself is looked
+ * up from it — so the dialog comes back from Back, Forward and a reload. */
+const envelopeEditScreen =
+  defineScreen<core.envelopes.TEnvelopeId>('envelopeEdit')
 
-export const useEditDialog = () => {
-  const { open } = editDialog.useMethods()
-  return open
-}
+export const useEditDialog = () => envelopeEditScreen.useOpen()
 
 export const EnvelopeEditDialog: FC = () => {
-  const { displayProps, extraProps } = editDialog.useProps()
-  const { envelope } = extraProps
   const dispatch = useAppDispatch()
-  const { t } = useTranslation('envelopeEditDialog')
-  const isNew = !envelope?.id
-  const id = envelope?.id || envelopeModel.makeId(EnvType.Tag, uuidv1())
-  const defaultCurrency = userModel.useUserCurrency()
-  const {
-    values,
-    initialValues,
-    handleSubmit,
-    errors,
-    handleChange,
-    setFieldValue,
-  } = useFormik({
-    initialValues: {
-      originalName: envelope?.originalName || '',
-      parentTagId: envelope?.parent
-        ? envelopeModel.parseId(envelope.parent).id
-        : null,
-      visibility: envelope?.visibility || envelopeVisibility.auto,
-      carryNegatives: envelope?.carryNegatives || false,
-      keepIncome: envelope?.keepIncome || false,
-      colorHex: envelope?.colorHex || null,
-      group: envelope?.group || '',
-      comment: envelope?.comment || '',
-      currency: envelope?.currency || defaultCurrency,
-    },
-    validate: values => {
-      if (!values.originalName.trim()) {
-        return { originalName: t('nameError') }
-      }
-    },
-    onSubmit: (values, helpers) => {
-      displayProps.onClose()
-      const { parentTagId, ...envData } = values
-      const parent = parentTagId
-        ? envelopeModel.makeId(EnvType.Tag, parentTagId)
-        : null
-      const patch = { id, parent, ...envData }
-      dispatch(envelopeModel.patchEnvelope(patch))
-    },
-    enableReinitialize: true,
-  })
+  const envelopes = useAppSelector(core.envelopes.selectAll)
+  const [retainedId, setRetainedId] = useState<core.envelopes.TEnvelopeId>()
+  // The name draft lives with the screen owner so Back can still save it.
+  const [nameDraft, setNameDraft] = useState<string | null>(null)
+  const [invalidName, setInvalidName] = useState(false)
+  const saveName = () => {
+    const envelope = retainedId ? envelopes[retainedId] : undefined
+    if (nameDraft === null || !envelope) return
+    const name = nameDraft.trim()
+    if (!name) {
+      setInvalidName(true)
+      return
+    }
+    if (name !== envelope.originalName)
+      dispatch(core.envelopes.rename(envelope.id, name))
+    setNameDraft(null)
+  }
+  const [id, setId] = envelopeEditScreen.use(saveName)
+  // Keep the draft until the surface finishes its closing transition.
+  if (id !== undefined && id !== retainedId) {
+    setRetainedId(id)
+    setNameDraft(null)
+    setInvalidName(false)
+  }
+  const close = useCallback(() => setId(null), [setId])
+  const renderedId = id ?? retainedId
+  const envelope = renderedId ? envelopes[renderedId] : undefined
+  if (!envelope) return null
 
   return (
-    <Dialog
-      {...displayProps}
-      onClose={() => {
-        // TODO: with back button it closes anyway, maybe we can prevent it somehow
-        if (shallowEqual(values, initialValues)) displayProps.onClose()
+    <EnvelopeEditDialogForm
+      key={envelope.id}
+      envelope={envelope}
+      open={id !== undefined}
+      nameDraft={nameDraft}
+      invalidName={invalidName}
+      onNameChange={value => {
+        setNameDraft(value)
+        setInvalidName(false)
       }}
-    >
-      <DialogTitle>{t(isNew ? 'titleNew' : 'titleEdit')}</DialogTitle>
-      <DialogContent>
-        <Stack
-          component="form"
-          onSubmit={handleSubmit}
-          spacing={2}
-          sx={{
-            maxWidth: 360,
-            mt: 1,
-          }}
-        >
-          <TextField
-            label={t('nameLabel')}
-            error={!!errors.originalName}
-            helperText={errors.originalName}
-            autoFocus
-            name="originalName"
-            value={values.originalName}
-            onChange={handleChange}
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Color
-                      value={values.colorHex}
-                      onChange={v => setFieldValue('colorHex', v)}
-                    />
-                  </InputAdornment>
-                ),
-              },
-
-              htmlInput: { autoComplete: 'off' },
-            }}
-          />
-
-          {/* Can use dnd */}
-          {/* <TagSelect
-            label="Родительская категория"
-            tagFilters={{ topLevel: true, exclude: id ? [id] : undefined }}
-            value={values.parentTagId}
-            onChange={v => setFieldValue('parentTagId', v || null)}
-          /> */}
-
-          {/* Can use dnd */}
-          {/* <TextField
-            label="Группа"
-            name="group"
-            inputProps={{ autoComplete: 'off' }}
-            value={values.group}
-            onChange={handleChange}
-          /> */}
-
-          {/* <TextField
-            label="Комментарий"
-            name="comment"
-            multiline
-            inputProps={{ autoComplete: 'off' }}
-            value={values.comment}
-            onChange={handleChange}
-          /> */}
-          <CurrencyCodeSelect
-            name="currency"
-            label={t('currencyLabel')}
-            value={values.currency}
-            onChange={handleChange}
-          />
-          <VisibilitySelect
-            name="visibility"
-            label={t('visibilityLabel')}
-            value={values.visibility}
-            onChange={handleChange}
-          />
-          <FormGroup>
-            {/* <FormControlLabel
-              name="showIncome"
-              checked={values.showIncome}
-              onChange={handleChange}
-              control={<Checkbox />}
-              label="Доходная"
-            /> */}
-            <FormControlLabel
-              name="keepIncome"
-              label={t('keepIncomeLabel')}
-              checked={values.keepIncome}
-              onChange={handleChange}
-              control={<Checkbox />}
-            />
-            {/* <FormControlLabel
-              name="carryNegatives"
-              checked={values.carryNegatives}
-              onChange={handleChange}
-              control={<Checkbox />}
-              label="Переносить минусы"
-            /> */}
-            {/* <FormControlLabel
-              name="showInBudget"
-              checked={values.showInBudget}
-              onChange={handleChange}
-              control={<Checkbox />}
-              label="Расходная"
-            /> */}
-            {/* <FormControlLabel
-              name="budgetOutcome"
-              checked={values.budgetOutcome}
-              onChange={handleChange}
-              control={<Checkbox />}
-              label="Показывать в бюджете"
-            /> */}
-          </FormGroup>
-
-          <Button type="submit" size="large" variant="contained">
-            {t(id ? 'btnSave' : 'btnCreate')}
-          </Button>
-          <Button onClick={displayProps.onClose} size="large">
-            {t('btnCancel')}
-          </Button>
-        </Stack>
-      </DialogContent>
-    </Dialog>
+      onNameCommit={saveName}
+      onClose={close}
+      onOpenChangeComplete={open => {
+        if (!open) setRetainedId(undefined)
+      }}
+    />
   )
 }
 
-type ColorProps = {
-  value: string | null
-  onChange: (v: string | null) => void
-}
+const EnvelopeEditDialogForm: FC<{
+  envelope: core.envelopes.TPresentedEnvelope
+  open: boolean
+  nameDraft: string | null
+  invalidName: boolean
+  onNameChange: (value: string) => void
+  onNameCommit: () => void
+  onClose: () => void
+  onOpenChangeComplete: (open: boolean) => void
+}> = props => {
+  const {
+    envelope,
+    open,
+    nameDraft,
+    invalidName,
+    onNameChange,
+    onNameCommit,
+    onClose,
+    onOpenChangeComplete,
+  } = props
+  const narrow = useBottomSheetLayout()
+  const formRef = useRef<HTMLFormElement>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const dispatch = useAppDispatch()
+  const { t } = useTranslation('envelopeEditDialog')
+  const id = envelope.id
+  const canRename =
+    envelope.type !== core.envelopes.EnvType.Payee &&
+    id !== core.envelopes.envId.get(core.envelopes.EnvType.Tag, null)
 
-const Color: FC<ColorProps> = ({ value, onChange }) => {
-  const open = useColorPicker(value, onChange)
   return (
-    <>
-      <ButtonBase
-        onClick={open}
-        sx={{
-          width: 24,
-          height: 24,
-          borderRadius: '50%',
-          backgroundColor: value,
-          boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.1)',
+    <DialogSurface
+      title={t('titleEdit')}
+      mobile="drawer"
+      initialFocus={narrow ? formRef : nameRef}
+      className="max-w-100"
+      onOpenChangeComplete={onOpenChangeComplete}
+      controller={{
+        open,
+        setOpen: open => {
+          if (!open) onClose()
+        },
+      }}
+    >
+      <form
+        ref={formRef}
+        inert={!open}
+        tabIndex={-1}
+        onSubmit={event => {
+          event.preventDefault()
+          nameRef.current?.blur()
         }}
-      />
-      <ColorPicker />
-    </>
+        className="flex flex-col gap-4 outline-none"
+      >
+        <Input
+          label={t('nameLabel')}
+          placeholder={t('nameLabel')}
+          error={invalidName ? t('nameError') : undefined}
+          readOnly={!canRename}
+          ref={nameRef}
+          name="originalName"
+          value={nameDraft ?? envelope.originalName}
+          onValueChange={onNameChange}
+          onBlur={onNameCommit}
+          autoComplete="off"
+          start={
+            <FieldAddon kind="action" className="w-12">
+              <AppearancePicker envelope={envelope} />
+            </FieldAddon>
+          }
+        />
+
+        <CurrencyCodeSelect
+          label={t('currencyLabel')}
+          value={envelope.currency}
+          onChange={currency =>
+            dispatch(
+              core.envelopes.patchMeta({ envelopeId: id, set: { currency } })
+            )
+          }
+        />
+        <VisibilitySelect
+          label={t('visibilityLabel')}
+          value={envelope.visibility}
+          onChange={visibility =>
+            dispatch(
+              core.envelopes.patchMeta({ envelopeId: id, set: { visibility } })
+            )
+          }
+        />
+        <Select
+          label={t('incomeLabel')}
+          labelMode="floating"
+          required
+          value={envelope.keepIncome ? 'category' : 'outside'}
+          onChange={value =>
+            dispatch(
+              core.envelopes.patchMeta({
+                envelopeId: id,
+                set: { keepIncome: value === 'category' },
+              })
+            )
+          }
+          items={[
+            { value: 'category', label: t('keepIncomeLabel') },
+            { value: 'outside', label: t('excludeIncomeLabel') },
+          ]}
+        />
+      </form>
+    </DialogSurface>
   )
 }

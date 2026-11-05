@@ -1,0 +1,185 @@
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TMerchantId } from '@/6-shared/types'
+import { AddIcon, PersonIcon, PlaceIcon } from '@/6-shared/ui/Icons'
+import {
+  Select,
+  type SelectOption,
+  type SelectProps,
+} from '@/6-shared/ui/kit/Select'
+import { core } from '@/zerro-core/redux'
+import type { TDraftMerchant, TNamedMerchant } from './draft'
+import { Favicon } from '@/6-shared/ui/kit/Favicon'
+import {
+  initialMerchantSearch,
+  merchantMatchPriority,
+  merchantSearchQueries,
+} from '../../merchant/merchantSearch'
+
+export type MerchantFieldProps = Pick<
+  SelectProps,
+  'invalid' | 'error' | 'disabled' | 'readOnly' | 'required'
+> & {
+  merchant: TDraftMerchant
+  /** Legacy text is preserved until the user explicitly chooses or clears. */
+  payee: string | null
+  originalPayee: string | null
+  debt: boolean
+  onChange: (named: TNamedMerchant | null) => void
+  placeholder: string
+  className?: string
+}
+
+const { normalizePayee } = core.merchants
+// Prefix every persisted ID too, so transient choices cannot collide with one.
+const merchantKey = (id: string) => `merchant:${id}`
+const createKey = (title: string) => `create:${title}`
+
+/** The kit owns selection mechanics; merchant history and draft intent stay here. */
+export function MerchantField(props: MerchantFieldProps) {
+  const {
+    merchant,
+    payee,
+    originalPayee,
+    debt,
+    onChange,
+    required,
+    placeholder,
+    ...restProps
+  } = props
+  const { t } = useTranslation('transaction')
+  const merchants = core.merchants.useAll()
+  const usage = core.merchants.useUsage()
+  const all = useMemo(
+    () =>
+      Object.values(merchants).sort((a, b) => a.title.localeCompare(b.title)),
+    [merchants]
+  )
+  const chosen = merchant && 'id' in merchant ? merchant.id : undefined
+  const pending = merchant && 'title' in merchant ? merchant.title : undefined
+  const shown = pending ?? (chosen && merchants[chosen]?.title) ?? payee ?? ''
+  const unlinked = !merchant && !!payee
+  const glyph = (id?: TMerchantId) =>
+    (id ? usage[id]?.regular : !debt) ? <PlaceIcon /> : <PersonIcon />
+  const toOption = (option: (typeof all)[number]): SelectOption => ({
+    value: merchantKey(option.id),
+    label: option.title,
+    start: (
+      <Favicon
+        domain={usage[option.id]?.website?.domain}
+        fallback={glyph(option.id)}
+      />
+    ),
+  })
+  const options = all.map(toOption)
+  const value = chosen
+    ? merchantKey(chosen)
+    : pending
+      ? createKey(pending)
+      : shown
+        ? 'unlinked'
+        : null
+  // A draft or bare payee needs a closed-field representation, not a search result.
+  const items =
+    chosen || !value
+      ? options
+      : [
+          ...options,
+          {
+            value,
+            label: shown,
+            start: (
+              <Favicon
+                domain={
+                  unlinked
+                    ? core.merchants.findWebsiteDomain(payee, originalPayee)
+                    : undefined
+                }
+                fallback={glyph()}
+              />
+            ),
+          },
+        ]
+
+  const select = (next: string | null) => {
+    if (next === null) onChange(null)
+    else if (next.startsWith('create:'))
+      onChange({ title: next.slice('create:'.length) })
+    else if (next.startsWith('merchant:')) {
+      const selected = merchants[next.slice('merchant:'.length)]
+      if (selected) onChange({ id: selected.id, title: selected.title })
+    }
+  }
+  const selection = required
+    ? { required: true as const, onChange: select }
+    : { required: false as const, onChange: select }
+
+  return (
+    <Select
+      {...restProps}
+      {...selection}
+      label={placeholder}
+      placeholder={placeholder}
+      clearLabel={t('clearMerchant')}
+      emptyIcon={glyph()}
+      value={value}
+      items={items}
+      renderValue={() =>
+        shown ? (
+          <span className={unlinked ? 'italic' : undefined}>{shown}</span>
+        ) : null
+      }
+
+      emptyText={t('noMerchants')}
+      search={{
+        label: t('findMerchant'),
+        placeholder: t('findMerchant'),
+        initialQuery: initialMerchantSearch(Boolean(merchant), payee),
+        autoHighlight: true,
+        showMoreLabel: t('showAllMerchants'),
+        filter: (_items, search, { expanded }) => {
+          const query = normalizePayee(search)
+          const queries = merchantSearchQueries(search)
+          if (queries.length) {
+            const matches = all
+              .map(option => ({
+                option,
+                priority: merchantMatchPriority(
+                  normalizePayee(option.title),
+                  usage[option.id],
+                  queries
+                ),
+              }))
+              .filter(match => Number.isFinite(match.priority))
+              .sort(
+                (a, b) =>
+                  a.priority - b.priority ||
+                  a.option.title.localeCompare(b.option.title)
+              )
+              .map(match => toOption(match.option))
+            if (
+              query &&
+              !all.some(option => normalizePayee(option.title) === query)
+            ) {
+              matches.push({
+                value: createKey(search.trim()),
+                label: t('createMerchant', { title: search.trim() }),
+                start: <AddIcon />,
+              })
+            }
+            return { items: matches }
+          }
+          const fits = all.filter(option =>
+            debt ? usage[option.id]?.debt : usage[option.id]?.regular
+          )
+          const narrowed =
+            !expanded && fits.length > 0 && fits.length < all.length
+          return {
+            items: (narrowed ? fits : all).map(toOption),
+            hasMore: narrowed,
+          }
+        },
+      }}
+    />
+  )
+}

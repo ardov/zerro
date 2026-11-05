@@ -1,20 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { trModel, TrType } from '5-entities/transaction'
-import {
-  TFxAmount,
-  TFxCode,
-  TInstrumentId,
-  TTagId,
-  TTransaction,
-} from '6-shared/types'
-import { parseDate } from '6-shared/helpers/date'
+import { core } from '@/zerro-core/redux'
 
-import { fxRateModel } from '5-entities/currency/fxRate'
-import { instrumentModel } from '5-entities/currency/instrument'
-import { addFxAmount, convertFx } from '6-shared/helpers/money'
-import { accountModel } from '5-entities/account'
-import { merchantModel } from '5-entities/merchant'
-import { TSelector, useAppSelector } from 'store/index'
+import type { TFxAmount, TFxCode, TTagId, TTransaction } from '@/6-shared/types'
+import { parseDate } from '@/6-shared/helpers/date'
+
+import { addFxAmount } from '@/6-shared/helpers/money'
+import type { TSelector } from '@/store/index'
+import { useAppSelector } from '@/store/index'
 
 type TInfoNode = {
   income: TFxAmount
@@ -35,13 +27,12 @@ export type TStats = {
 
 export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
   [
-    trModel.getTransactionsHistory,
-    fxRateModel.getter,
-    instrumentModel.getInstCodeMap,
-    accountModel.getDebtAccountId,
-    merchantModel.getMerchants,
+    core.transactions.selectHistory,
+    core.instruments.selectCodeMap,
+    core.accounts.selectDebtAccountId,
+    core.merchants.selectAll,
   ],
-  (transactions, convert, codeMap, debtAcc, merchants) => {
+  (transactions, codeMap, debtAcc, merchants) => {
     // const rates = convert('current').rates
     // const toValue = (n: number, instr: TInstrumentId) => {
     //   return convertFx({ [codeMap[instr]]: n }, 'USD', rates)
@@ -55,7 +46,7 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
 
     function processTransaction(tr: TTransaction) {
       const year = tr.date.slice(0, 4)
-      let stats = (result[year] ??= makeStatsNode())
+      const stats = (result[year] ??= makeStatsNode())
       addToNode(stats.total, tr)
 
       addToGroup(
@@ -64,11 +55,11 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
         tr
       )
 
-      const type = trModel.getType(tr, debtAcc)
-      if (type === TrType.Income) {
+      const type = core.transactions.getType(tr, debtAcc)
+      if (type === core.transactions.TrType.Income) {
         addToGroup(stats.byCurrency, codeMap[tr.incomeInstrument], tr)
       }
-      if (type === TrType.Outcome) {
+      if (type === core.transactions.TrType.Outcome) {
         addToGroup(stats.byCurrency, codeMap[tr.outcomeInstrument], tr)
       }
 
@@ -87,19 +78,19 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
     }
 
     function addToNode(node: TInfoNode, tr: TTransaction) {
-      switch (trModel.getType(tr, debtAcc)) {
-        case TrType.Transfer:
+      switch (core.transactions.getType(tr, debtAcc)) {
+        case core.transactions.TrType.Transfer:
           node.transferTransactions.push(tr)
           return
 
-        case TrType.Income:
+        case core.transactions.TrType.Income:
           node.incomeTransactions.push(tr)
           node.income = addFxAmount(node.income, {
             [codeMap[tr.incomeInstrument]]: tr.income,
           })
           return
 
-        case TrType.Outcome:
+        case core.transactions.TrType.Outcome:
           node.outcomeTransactions.push(tr)
           node.outcome = addFxAmount(node.outcome, {
             [codeMap[tr.outcomeInstrument]]: tr.outcome,
@@ -147,22 +138,5 @@ function makeStatsNode(): TStats {
     byTag: {},
     byMonth: {},
     byWeekday: {},
-  }
-}
-
-/** Returns a function to sort transactions ascending by amount */
-function compareByAmount(
-  toValue: (amount: number, id: TInstrumentId) => number
-) {
-  return function (tr1: TTransaction, tr2: TTransaction) {
-    const amount1 = Math.max(
-      toValue(tr1.income, tr1.incomeInstrument),
-      toValue(tr1.outcome, tr1.outcomeInstrument)
-    )
-    const amount2 = Math.max(
-      toValue(tr2.income, tr2.incomeInstrument),
-      toValue(tr2.outcome, tr2.outcomeInstrument)
-    )
-    return amount2 - amount1
   }
 }

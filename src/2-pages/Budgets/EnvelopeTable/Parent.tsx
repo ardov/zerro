@@ -1,14 +1,16 @@
+import { IconButton } from '@/6-shared/ui/kit/Button'
+import type { core } from '@/zerro-core/redux'
 import React from 'react'
-import { Collapse, Box, IconButton } from '@mui/material'
-import { ChevronRightIcon } from '6-shared/ui/Icons'
-import { TEnvelopeId } from '5-entities/envelope'
+import { useTranslation } from 'react-i18next'
+import { Collapse } from '@/6-shared/ui/kit/Collapse'
+import { ChevronRightIcon } from '@/6-shared/ui/Icons'
 
 type ParentProps = {
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   isExpanded: boolean
   parent: React.ReactNode
   children?: React.ReactNode[]
-  onExpandToggle: (id: TEnvelopeId) => void
+  onExpandToggle: (id: core.envelopes.TEnvelopeId) => void
   onExpandAll: () => void
   onCollapseAll: () => void
 }
@@ -26,6 +28,7 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
       ...rest
     } = props
 
+    const { t } = useTranslation('budgets')
     const hasChildren = !!children && children.length > 0
 
     const handleExpand = (
@@ -36,46 +39,34 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
     }
 
     return (
-      <Box
-        sx={{
-          position: 'relative',
-          background: 'background.paper',
-          borderBottom: `0.5px solid black`,
-          borderColor: 'divider',
-          '&:last-child': { border: 0 },
-        }}
+      <div
+        className="relative last:border-0 border-b-[0.5px] border-ui-border bg-ui-card"
         ref={ref}
         {...rest}
       >
         {hasChildren && (
           <IconButton
-            size="small"
-            sx={{
-              position: 'absolute',
-              left: -6,
-              top: 10,
-              transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: '.3s',
-              zIndex: 1,
-            }}
+            size="xs"
+            shape="circle"
+            variant="ghost"
+            label={t(isExpanded ? 'collapseCategory' : 'expandCategory')}
+            aria-expanded={isExpanded}
+            className="absolute -left-[7px] top-[9px] z-[1] [&:not(:hover)]:before:opacity-0"
             onClick={handleExpand}
           >
-            <ChevronRightIcon fontSize="inherit" />
+            <ChevronRightIcon
+              size={16}
+              className={`transition-transform duration-300 motion-reduce:transition-none ${isExpanded ? 'rotate-90' : 'rotate-0'}`}
+            />
           </IconButton>
         )}
         {parent}
         {hasChildren && (
-          <Collapse in={isExpanded} unmountOnExit>
-            <Box
-              sx={{
-                pb: 1,
-              }}
-            >
-              {children}
-            </Box>
+          <Collapse open={isExpanded}>
+            <div className="pb-2">{children}</div>
           </Collapse>
         )}
-      </Box>
+      </div>
     )
   }
 )

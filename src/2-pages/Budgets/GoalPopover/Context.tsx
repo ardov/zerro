@@ -1,31 +1,37 @@
-import React, { FC, useCallback } from 'react'
+import type { core } from '@/zerro-core/redux'
+import type { FC } from 'react'
+import { useCallback } from 'react'
 import { useMonth } from '../MonthProvider'
 
-import { TEnvelopeId } from '5-entities/envelope'
 import { GoalPopover } from './GoalPopover'
-import { registerPopover } from '6-shared/historyPopovers'
-import { TISOMonth } from '6-shared/types'
-import { PopoverProps } from '@mui/material'
+import { useAsk, useAsked } from '@/6-shared/overlays'
+import type { TISOMonth } from '@/6-shared/types'
 
-const goalPopover = registerPopover<
-  { id?: TEnvelopeId; month?: TISOMonth },
-  PopoverProps
->('goalPopover', {})
-
+/** A popup, not a screen: this is small editing, like a select. Back closes
+ * it, and there is nothing to come back to. */
 export const useGoalPopover = () => {
   const [month] = useMonth()
-  const { open } = goalPopover.useMethods()
-  const openPopover = useCallback(
-    (id: TEnvelopeId, anchorEl?: Element) =>
-      open({ id, month }, { anchorEl, key: Date.now() }),
-    [month, open]
+  const ask = useAsk()
+  return useCallback(
+    (id: core.envelopes.TEnvelopeId, anchorEl?: Element) =>
+      ask(<AskedGoalPopover id={id} month={month} anchorEl={anchorEl} />),
+    [ask, month]
   )
-  return openPopover
 }
 
-export const SmartGoalPopover: FC = () => {
-  const popover = goalPopover.useProps()
-  const { month, id } = popover.extraProps
-  if (!month || !id) return null
-  return <GoalPopover {...popover.displayProps} {...{ month, id }} />
+const AskedGoalPopover: FC<{
+  id: core.envelopes.TEnvelopeId
+  month: TISOMonth
+  anchorEl?: Element | null
+}> = ({ id, month, anchorEl }) => {
+  const { open, answer } = useAsked<void>()
+  return (
+    <GoalPopover
+      open={open}
+      onClose={() => answer()}
+      anchorEl={anchorEl}
+      month={month}
+      id={id}
+    />
+  )
 }

@@ -1,12 +1,12 @@
+import type { core } from '@/zerro-core/redux'
 import { useState } from 'react'
-import { toISOMonth } from '6-shared/helpers/date'
-import { TISOMonth } from '6-shared/types'
+import { toISOMonth } from '@/6-shared/helpers/date'
+import type { TISOMonth } from '@/6-shared/types'
 import { useEnvRenderInfo } from './envRenderInfo'
-import { TEnvelopeId } from '5-entities/envelope'
 
 export function useExpandEnvelopes(month: TISOMonth = toISOMonth(new Date())): {
-  expanded: TEnvelopeId[]
-  toggle: (id: TEnvelopeId) => void
+  expanded: core.envelopes.TEnvelopeId[]
+  toggle: (id: core.envelopes.TEnvelopeId) => void
   expandAll: () => void
   collapseAll: () => void
 } {
@@ -18,13 +18,13 @@ export function useExpandEnvelopes(month: TISOMonth = toISOMonth(new Date())): {
   const [expanded, setExpanded] = useState(defaultExpanded)
   return {
     expanded,
-    toggle: (id: TEnvelopeId) => {
+    toggle: (id: core.envelopes.TEnvelopeId) => {
       expanded.includes(id)
         ? setExpanded(expanded => expanded.filter(e => e !== id))
         : setExpanded([...expanded, id])
     },
     expandAll: () => {
-      let expandedList = Object.values(renderInfo)
+      const expandedList = Object.values(renderInfo)
         .filter(e => e.hasChildren)
         .map(e => e.id)
       setExpanded(expandedList)

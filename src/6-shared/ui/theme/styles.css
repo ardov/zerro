@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+
+@layer base {
+  html {
+    font-family: 'IBM Plex Sans', Arial, sans-serif;
+    /* Both font-smoothing controls: WebKit thins the type, Gecko turns
+       off subpixel rendering, and only together do the two engines agree. */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* What `enableColorScheme` set from the palette mode. It follows the same
+       class the Tailwind `dark` variant does, so the two cannot disagree about
+       which scheme the page is in. */
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  *:not(dialog) {
+    margin: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      interpolate-size: allow-keywords;
+    }
+  }
+
+  strong,
+  b {
+    font-weight: 700;
+  }
+
+  body {
+    background-color: var(--color-ui-base);
+    color: var(--color-ui-primary);
+    /* The theme family inherited by application components. */
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  /* Navigation and card links inherit their surrounding surface by default.
+     The shared `Link` component and article styles opt into their own colour. */
+  a {
+    color: inherit;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: break-word;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
+  #root,
+  #__next {
+    isolation: isolate;
+  }
+
+  /* A top-layer element's backdrop is painted against the page rather than
+     against the element it covers, so it needs the page's colour spelled out. */
+  body::backdrop {
+    background-color: var(--color-ui-base);
+  }
+
+  @media print {
+    body {
+      background-color: #fff;
+    }
+  }
+}
+
+@layer base {
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: var(--color-ui-base);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-ui-scrollbar);
+    border-radius: 6px;
+    border: 2px solid var(--color-ui-base);
+  }
+
+  @media (max-width: 880px) {
+    * {
+      scrollbar-width: none;
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+@layer components {
+  :root[data-input-modality='pointer'] .recharts-wrapper :focus {
+    outline: none;
+  }
+
+  .hidden-scroll {
+    scrollbar-width: none;
+  }
+
+  .hidden-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}

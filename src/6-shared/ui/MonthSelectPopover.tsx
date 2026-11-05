@@ -1,97 +1,63 @@
-import React, { useState } from 'react'
-import {
-  Box,
-  IconButton,
-  Popover,
-  List,
-  ListItemText,
-  PopoverProps,
-  ListItemButton,
-} from '@mui/material'
-import { ChevronRightIcon, ChevronLeftIcon } from '6-shared/ui/Icons'
-import { formatDate, toISOMonth } from '6-shared/helpers/date'
-import { Modify, TDateDraft, TISOMonth } from '6-shared/types'
+import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import { toISOMonth } from '@/6-shared/helpers/date'
+import type { TDateDraft, TISOMonth } from '@/6-shared/types'
+import { PopoverSurface } from './kit/Popover'
+import { MonthPicker, type MonthPickerHandle } from './kit/MonthPicker'
 
-type MonthSelectPopoverProps = Modify<
-  PopoverProps,
-  {
-    // Rewrite onChange
-    onChange: (month: TISOMonth) => void
-    // Add other props
-    value?: TDateDraft
-    minMonth?: TDateDraft
-    maxMonth?: TDateDraft
-    disablePast?: boolean
-  }
->
+type MonthSelectPopoverProps = {
+  open: boolean
+  anchorEl?: Element | null
+  onClose: () => void
+  onChange: (month: TISOMonth) => void
+  value?: TDateDraft
+  minMonth?: TDateDraft
+  maxMonth?: TDateDraft
+  disablePast?: boolean
+}
 
+/** Shared surface adapter; MonthPicker owns the calendar interaction. */
 export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
-  const { onChange, disablePast, minMonth, maxMonth, ...rest } = props
-  const value = props.value ? toISOMonth(props.value) : null
-  const start = minMonth ? toISOMonth(minMonth) : null
-  const end = maxMonth ? toISOMonth(maxMonth) : null
-  const [year, setYear] = useState(new Date(value || Date.now()).getFullYear())
-  const months: TISOMonth[] = []
-  for (let month = 0; month < 12; month++) {
-    months.push(toISOMonth(new Date(year, month)))
-  }
-  const curMonth = toISOMonth(new Date())
-  const isMonthDisabled = (month: TISOMonth) => {
-    if (disablePast && month < curMonth) return true
-    if (start && month < start) return true
-    if (end && month > end) return true
-    return false
-  }
-  const isNextYearDisabled = !!end && months[months.length - 1] >= end
-  const isPrevYearDisabled = !!start && months[0] <= start
+  const {
+    open,
+    anchorEl,
+    onClose,
+    onChange,
+    value,
+    minMonth,
+    maxMonth,
+    disablePast,
+  } = props
+  const { t } = useTranslation()
+  const picker = useRef<MonthPickerHandle>(null)
+  const today = toISOMonth(new Date())
+  const min = minMonth ? toISOMonth(minMonth) : undefined
   return (
-    <Popover {...rest}>
-      <Box sx={{ pt: 1, px: 1 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <IconButton
-            children={<ChevronLeftIcon />}
-            onClick={() => setYear(year => --year)}
-            disabled={isPrevYearDisabled}
-          />
-          <Box
-            children={year}
-            sx={{ textAlign: 'center', fontSize: 'h5.fontSize' }}
-          />
-          <IconButton
-            children={<ChevronRightIcon />}
-            onClick={() => setYear(year => ++year)}
-            disabled={isNextYearDisabled}
-          />
-        </Box>
-
-        <List sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
-          {months.map(month => (
-            <ListItemButton
-              key={month}
-              sx={{
-                borderRadius: 1,
-                border: theme =>
-                  month === curMonth
-                    ? `1px solid ${theme.palette.primary.main}`
-                    : 'none',
-              }}
-              disabled={isMonthDisabled(month)}
-              selected={month === value}
-              onClick={() => onChange(month)}
-            >
-              <ListItemText sx={{ textAlign: 'center' }}>
-                {formatDate(month, 'LLL').toUpperCase()}
-              </ListItemText>
-            </ListItemButton>
-          ))}
-        </List>
-      </Box>
-    </Popover>
+    <PopoverSurface
+      label={t('selectMonth')}
+      controller={{
+        open,
+        setOpen: next => {
+          if (!next) onClose()
+        },
+      }}
+      anchor={anchorEl}
+      finalFocus={() => (anchorEl instanceof HTMLElement ? anchorEl : true)}
+      mobile="popover"
+      className="w-max"
+      contentClassName="p-0"
+      initialFocus={() => {
+        picker.current?.focus()
+        return false
+      }}
+    >
+      <MonthPicker
+        ref={picker}
+        value={value ? toISOMonth(value) : null}
+        onChange={onChange}
+        minMonth={disablePast && (!min || min < today) ? today : min}
+        maxMonth={maxMonth ? toISOMonth(maxMonth) : undefined}
+      />
+    </PopoverSurface>
   )
 }

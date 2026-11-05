@@ -1,74 +1,46 @@
-import type { TAccountId } from '6-shared/types'
-import React, { FC, useCallback } from 'react'
-import { Menu, MenuItem, MenuProps } from '@mui/material'
-import { useAppDispatch } from 'store'
-import { registerPopover } from '6-shared/historyPopovers'
+import type { TAccountId } from '@/6-shared/types'
+import type { FC } from 'react'
+import { MenuSurface, type MenuSurfaceProps } from '@/6-shared/ui/kit/Menu'
+import { useAppDispatch } from '@/store'
+import { useAsked } from '@/6-shared/overlays'
+import { track } from '@/6-shared/analytics'
 import { useTranslation } from 'react-i18next'
-import { accountModel } from '5-entities/account'
-import { getMenuPosition } from './shared/helpers'
+import { core } from '@/zerro-core/redux'
 
-type AccountMenuProps = { id: TAccountId }
-
-const accContext = registerPopover<AccountMenuProps, MenuProps>(
-  'accountContextMenu',
-  { id: '' }
-)
-
-export const useAccountContextMenu = () => {
-  const { open } = accContext.useMethods()
-  const openMenu = useCallback(
-    (
-      props: AccountMenuProps,
-      anchorPosition?: { left: number; top: number }
-    ) => {
-      open(props, getMenuPosition(anchorPosition))
-    },
-    [open]
-  )
-  return openMenu
+export type AccountMenuProps = {
+  id: TAccountId
+  anchor: MenuSurfaceProps['anchor']
 }
 
-export const AccountContextMenu: FC = () => {
+/** The account's context menu, asked from a context gesture. */
+export const AccountMenu: FC<AccountMenuProps> = ({ id, anchor }) => {
   const { t } = useTranslation('accountContextMenu')
-  const { displayProps, extraProps } = accContext.useProps()
-  const { id } = extraProps
+  const { controller } = useAsked<void>()
   const dispatch = useAppDispatch()
-  const account = accountModel.useAccounts()[id]
+  const account = core.accounts.useAll()[id]
 
-  if (!account) return null
-
-  const options = [
-    {
-      label: t('moveFromBalance'),
-      condition: account.inBalance,
-      action: () => {
-        dispatch(accountModel.setInBudget(id, false))
-      },
-    },
-    {
-      label: t('moveInBalance'),
-      condition: !account.inBalance,
-      action: () => {
-        dispatch(accountModel.setInBudget(id, true))
-      },
-    },
-  ]
+  const items = account
+    ? [
+        {
+          id: 'inBalance',
+          label: t(account.inBalance ? 'moveFromBalance' : 'moveInBalance'),
+          onSelect: () => {
+            dispatch(core.accounts.setInBalance(id, !account.inBalance))
+            track('account_budget_membership_changed', {
+              in_budget: !account.inBalance,
+              source: 'context_menu',
+            })
+          },
+        },
+      ]
+    : []
 
   return (
-    <Menu {...displayProps}>
-      {options
-        .filter(({ condition }) => condition)
-        .map(({ label, action }) => (
-          <MenuItem
-            key={label}
-            onClick={() => {
-              displayProps.onClose()
-              action()
-            }}
-          >
-            {label}
-          </MenuItem>
-        ))}
-    </Menu>
+    <MenuSurface
+      label={t('common:actions')}
+      controller={controller}
+      anchor={anchor}
+      items={items}
+    />
   )
 }

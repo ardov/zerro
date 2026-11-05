@@ -1,40 +1,47 @@
-import {
-  useColorScheme as useMuiColorScheme,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material'
-import { useCallback } from 'react'
+import { createContext, useContext, useSyncExternalStore } from 'react'
+import type { ColorScheme } from './colors'
 
-export const THEME_KEY = 'theme'
+type ThemeManager = {
+  getTheme: () => ColorScheme
+  toggle: () => void
+  subscribe: (listener: () => void) => () => void
+}
 
-export const useAppTheme = () => useTheme()
-
-export function useColorScheme() {
-  const { mode, setMode } = useMuiColorScheme()
-  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
-  const systemTheme = prefersDark ? 'dark' : 'light'
-
-  const toggle = useCallback(() => {
-    if (!mode || mode === 'system') {
-      setMode(systemTheme === 'dark' ? 'light' : 'dark')
-      return
-    }
-    const nextTheme = mode === 'light' ? 'dark' : 'light'
-    setMode(nextTheme === systemTheme ? 'system' : nextTheme)
-  }, [mode, setMode, systemTheme])
-
-  return {
-    mode: !mode || mode === 'system' ? systemTheme : mode,
-    toggle,
+declare global {
+  interface Window {
+    /** Attached by public/theme-init.js, loaded before the application. */
+    themeManager?: ThemeManager
   }
 }
 
-export function fixOldTheme() {
-  const theme = localStorage.getItem(THEME_KEY)
-  if (theme === '"dark"') {
-    localStorage.setItem(THEME_KEY, 'dark')
+const getThemeManager = () => {
+  const manager = window.themeManager
+  if (!manager) {
+    throw new Error('No theme manager. Check if /theme-init.js is loaded.')
   }
-  if (theme === '"light"') {
-    localStorage.setItem(THEME_KEY, 'light')
+  return manager
+}
+
+const subscribe = (listener: () => void) =>
+  getThemeManager().subscribe(listener)
+const getSnapshot = () => getThemeManager().getTheme()
+const getServerSnapshot = (): ColorScheme => 'light'
+const toggleTheme = () => getThemeManager().toggle()
+const ignoreToggle = () => {}
+
+/** A local override for isolated renderers such as Storybook. It never changes
+ * the application preference kept by the page-level theme manager. */
+export const ColorSchemeOverrideContext = createContext<ColorScheme | null>(
+  null
+)
+
+/** The resolved scheme on screen and its reversible two-state toggle. */
+export function useColorScheme() {
+  const override = useContext(ColorSchemeOverrideContext)
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+
+  return {
+    mode: override ?? theme,
+    toggle: override ? ignoreToggle : toggleTheme,
   }
 }

@@ -1,0 +1,54 @@
+import { useAboutPath } from '@/6-shared/localization/useAboutPath'
+import type { ComponentType } from 'react'
+import type { TIconProps } from '@/6-shared/ui/lucide/createIcon'
+import { useTranslation } from 'react-i18next'
+import {
+  BudgetIcon,
+  AccountBalanceWalletIcon,
+  BarChartIcon,
+  HowToUseIcon,
+  SyncAltIcon,
+} from '@/6-shared/ui/Icons'
+
+export type TDestination = {
+  path: string
+  label: string
+  icon: ComponentType<TIconProps>
+}
+
+/** The places the rail and the bottom bar lead to, in order.
+ *
+ * Accounts is one of them only while the window has no room for the accounts
+ * panel: past that width the accounts live beside the transaction list
+ * instead. About is one only in the rail; the bottom bar leaves it to the
+ * settings panel. */
+export function useDestinations(props: {
+  mobile: boolean
+  accountsPanelFits: boolean
+}) {
+  const { mobile, accountsPanelFits } = props
+  const { t } = useTranslation('navigation')
+  const aboutPath = useAboutPath()
+  const destinations: TDestination[] = [
+    { path: '/transactions', label: t('transactions'), icon: SyncAltIcon },
+    { path: '/budget', label: t('budget'), icon: BudgetIcon },
+  ]
+  if (!accountsPanelFits)
+    destinations.push({
+      path: '/accounts',
+      label: t('accounts'),
+      icon: AccountBalanceWalletIcon,
+    })
+  destinations.push({
+    path: '/stats',
+    label: t('stats'),
+    icon: BarChartIcon,
+  })
+  if (!mobile)
+    destinations.push({
+      path: aboutPath,
+      label: t('about'),
+      icon: HowToUseIcon,
+    })
+  return destinations
+}

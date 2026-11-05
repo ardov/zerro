@@ -1,0 +1,91 @@
+import '@testing-library/jest-dom'
+import { configureStore } from '@reduxjs/toolkit'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { Provider } from 'react-redux'
+import { describe, expect, it, vi } from 'vitest'
+import dataReducer from '@/store/data'
+
+const { askMock } = vi.hoisted(() => ({
+  askMock: vi.fn(async () => undefined),
+}))
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}))
+
+vi.mock('@/6-shared/overlays', () => ({
+  useAsk: () => askMock,
+  useAsked: () => ({ open: false, answer: () => {} }),
+}))
+
+vi.mock('@/6-shared/ui/kit/Confirm', () => ({ Confirm: () => null }))
+
+vi.mock('@/4-features/sync', () => ({
+  reloadData: () => ({ type: 'journal/reload' }),
+}))
+
+import { JournalRecoveryNotice } from './JournalRecoveryNotice'
+
+function createStore(
+  recoveryRequired: boolean,
+  outboxRecoveryReason: string | null = null
+) {
+  const data = dataReducer(undefined, { type: 'test/init' })
+  return configureStore({
+    reducer: { data: dataReducer },
+    preloadedState: {
+      data: {
+        ...data,
+        journalRecoveryRequired: recoveryRequired,
+        journalRecoveryReason: recoveryRequired ? 'broken graph' : null,
+        outboxRecoveryReason,
+      },
+    },
+  })
+}
+
+describe('JournalRecoveryNotice', () => {
+  it('stays hidden when the accepted branch is valid', () => {
+    const store = createStore(false)
+
+    render(
+      <Provider store={store}>
+        <JournalRecoveryNotice />
+      </Provider>
+    )
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('immediately requests a full reload when recovery is required', async () => {
+    const store = createStore(true)
+    const dispatch = vi.spyOn(store, 'dispatch')
+
+    render(
+      <Provider store={store}>
+        <JournalRecoveryNotice />
+      </Provider>
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent('journalRecoveryTitle')
+    expect(screen.getByRole('alert')).toHaveTextContent('broken graph')
+    await userEvent.click(
+      screen.getByRole('button', { name: 'journalRecoveryConfirm' })
+    )
+    expect(dispatch).toHaveBeenCalledWith({ type: 'journal/reload' })
+    expect(askMock).not.toHaveBeenCalled()
+  })
+
+  it('waits for corrupt outbox recovery before offering a full reload', () => {
+    const store = createStore(true, 'outbox[0] is invalid')
+
+    render(
+      <Provider store={store}>
+        <JournalRecoveryNotice />
+      </Provider>
+    )
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})

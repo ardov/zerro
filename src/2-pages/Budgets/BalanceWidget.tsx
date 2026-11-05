@@ -1,21 +1,19 @@
-import { Divider, Paper, Typography } from '@mui/material'
-import Balancer from 'react-wrap-balancer'
-import { useTranslation } from 'react-i18next'
-import { keys } from '6-shared/helpers/keys'
-import { TISOMonth } from '6-shared/types'
-import { Total } from '6-shared/ui/Total'
-import { DataLine } from '3-widgets/DataLine'
+import { core } from '@/zerro-core/redux'
 
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { balances } from '5-entities/envBalances'
+import { useAppSelector } from '@/store'
+
+import { useTranslation } from 'react-i18next'
+import { keys } from '@/6-shared/helpers/keys'
+import type { TISOMonth } from '@/6-shared/types'
+import { Total } from '@/6-shared/ui/Total'
+import { DataLine } from '@/3-widgets/DataLine'
 
 export function BalanceWidget(props: { month: TISOMonth }) {
   const { t } = useTranslation('budgets')
-  const totals = balances.useTotals()[props.month]
-  const [currency, setDisplayCurrency] = displayCurrency.useDisplayCurrency()
-  const toDisplay = displayCurrency.useToDisplay(props.month)
+  const totals = useAppSelector(core.months.selectTotals)[props.month]
+  const [currency, setDisplayCurrency] = core.currency.useDisplayCurrency()
+  const toDisplay = core.currency.useToDisplay(props.month)
   const currencies = keys(totals.fundsEnd)
-  const currCount = currencies.length
 
   const cycleForward = () => {
     const idx = currencies.findIndex(c => c === currency)
@@ -23,90 +21,67 @@ export function BalanceWidget(props: { month: TISOMonth }) {
     if (currencies[newIdx]) setDisplayCurrency(currencies[newIdx])
   }
 
-  const currString =
-    currCount > 1
-      ? ` | ${t('currency', { ns: 'common', count: currCount })}`
-      : ''
   const fundsEnd = toDisplay(totals.fundsEnd)
-  const fundsChange = toDisplay(totals.fundsChange)
   const available = toDisplay(totals.available)
-  const budgetedInFuture = toDisplay(totals.budgetedInFuture)
-  const toBeBudgeted = toDisplay(totals.toBeBudgeted)
+  const assignedInFuture = toDisplay(totals.assignedInFuture)
+  const toBeAssigned = toDisplay(totals.toBeAssigned)
   const overspend = toDisplay(totals.overspend)
 
-  const smartBudgetedInFuture = toBeBudgeted < 0 ? 0 : budgetedInFuture
+  const smartAssignedInFuture = toBeAssigned < 0 ? 0 : assignedInFuture
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        bgcolor: 'background.default',
-        p: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1.5,
-      }}
-    >
+    <div className="flex flex-col gap-3 rounded-lg bg-ui-base p-4">
       <Total
         title={t('inBalance')}
         value={fundsEnd}
         currency={currency}
         onClick={cycleForward}
       />
-      {/* <div>
-        <Chip label={currString.trim()} />
-        <Chip label={'5 счетов'} />
-        <Chip label={formatMoney(fundsChange, displayCurrency)} />
-      </div> */}
-      <Divider />
+      <hr className="m-0 w-full border-0 border-t border-ui-border" />
       <DataLine
         name={t('inEnvelopes')}
         tooltip={t('inEnvelopesTooltip')}
         amount={available}
         currency={currency}
       />
-      {!!smartBudgetedInFuture && (
+      {!!smartAssignedInFuture && (
         <DataLine
-          name={t('budgetedInFuture')}
-          tooltip={t('budgetedInFutureTooltip')}
-          amount={smartBudgetedInFuture}
+          name={t('assignedInFuture')}
+          tooltip={t('assignedInFutureTooltip')}
+          amount={smartAssignedInFuture}
           currency={currency}
         />
       )}
       <DataLine
-        name={t('toBeBudgeted')}
-        tooltip={t('toBeBudgetedTooltip')}
-        amount={toBeBudgeted}
+        name={t('toBeAssigned')}
+        tooltip={t('toBeAssignedTooltip')}
+        amount={toBeAssigned}
         currency={currency}
       />
-      <Divider />
-      <Typography
-        variant="body2"
-        align="center"
-        sx={{ color: 'text.secondary' }}
-      >
-        <Balancer>{getExplaining(fundsEnd, toBeBudgeted, overspend)}</Balancer>
-      </Typography>
-    </Paper>
+      <hr className="m-0 w-full border-0 border-t border-ui-border" />
+      <p className="m-0 text-center text-body-sm text-ui-secondary text-balance">
+        {getExplaining(fundsEnd, toBeAssigned, overspend)}
+      </p>
+    </div>
   )
 
   function getExplaining(
     balance: number,
-    toBeBudgeted: number,
+    toBeAssigned: number,
     overspend: number
   ) {
-    if (!!overspend) {
+    if (overspend) {
       return t('explainer.overspend')
     }
-    if (toBeBudgeted > 0) {
+    if (toBeAssigned > 0) {
       return t('explainer.hasFreeMoney')
     }
     if (balance < 0) {
       return t('explainer.negativeBalance')
     }
-    if (toBeBudgeted === 0) {
-      return t('explainer.zeroToBeBudgeted')
+    if (toBeAssigned === 0) {
+      return t('explainer.zeroToBeAssigned')
     }
-    return t('explainer.budgetedMoreThanHave')
+    return t('explainer.assignedMoreThanHave')
   }
 }

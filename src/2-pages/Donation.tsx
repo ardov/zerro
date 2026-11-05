@@ -1,41 +1,23 @@
-import React, { FC } from 'react'
-import { Box, Link, Typography } from '@mui/material'
-import { Stack } from '@mui/system'
-import { Helmet } from 'react-helmet'
+import type { FC, ReactElement } from 'react'
+import { Link } from '@/6-shared/ui/kit/Link'
 import { useTranslation } from 'react-i18next'
-import { useAppTheme } from '6-shared/ui/theme'
 
 export default function Donation() {
   const { t } = useTranslation('donation')
   return (
     <>
-      <Helmet>
-        <title>{t('pageTitle')} | Zerro</title>
-        <meta name="description" content={t('pageDescription')} />
-        <link rel="canonical" href="https://zerro.app/donation" />
-      </Helmet>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-        }}
-      >
-        <Box sx={{ p: 3, pb: 8, mx: 'auto', maxWidth: 480 }}>
-          <Typography variant="h5" align="center" sx={{ marginBottom: '16px' }}>
+      <title>{`${t('pageTitle')} | Zerro`}</title>
+      <meta name="description" content={t('pageDescription')} />
+      <link rel="canonical" href="https://zerro.app/donation" />
+      <div className="flex h-full items-center justify-center">
+        <div className="mx-auto max-w-[480px] p-6">
+          <h1 className="mt-0 mb-4 text-center text-title-lg">
             {t('heading')}
-          </Typography>
+          </h1>
 
-          <Typography
-            variant="body1"
-            align="center"
-            sx={{ marginBottom: '16px' }}
-          >
-            {t('subtitle')}
-          </Typography>
+          <p className="mt-0 mb-4 text-center text-body">{t('subtitle')}</p>
 
-          <Stack spacing={2} sx={{ py: 2 }}>
+          <div className="flex flex-col gap-4 py-4">
             <LinkCard
               icon={<PatreonLogo />}
               primary={t('patreonTitle')}
@@ -48,26 +30,21 @@ export default function Donation() {
               secondary={t('cardDescription')}
               href="https://www.tinkoff.ru/sl/3zbRWFqgcT1"
             />
-          </Stack>
+          </div>
 
-          <Typography
-            variant="body1"
-            color="textSecondary"
-            align="center"
-            sx={{ marginBottom: '16px' }}
-          >
+          <p className="mt-0 mb-4 text-center text-body text-ui-secondary">
             {t('afterword')}
-          </Typography>
-        </Box>
-      </Box>
+          </p>
+        </div>
+      </div>
     </>
   )
 }
 
 interface LinkCardProps {
-  icon: JSX.Element
-  primary: JSX.Element | string
-  secondary: JSX.Element | string
+  icon: ReactElement
+  primary: ReactElement | string
+  secondary: ReactElement | string
   href: string
 }
 const LinkCard: FC<LinkCardProps> = props => {
@@ -78,30 +55,18 @@ const LinkCard: FC<LinkCardProps> = props => {
       target="_blank"
       rel="noopener noreferrer"
       underline="none"
-      sx={{
-        p: 3,
-        borderRadius: 1,
-        bgcolor: 'background.paper',
-        display: 'flex',
-        boxShadow: 2,
-      }}
+      className="flex rounded-lg bg-ui-card p-6 shadow-elevation-2"
     >
-      <Box sx={{ maxWidth: 48 }}>{icon}</Box>
-      <Box sx={{ ml: 2 }}>
-        <Typography variant="h6" color="textPrimary">
-          {primary}
-        </Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {secondary}
-        </Typography>
-      </Box>
+      <div className="max-w-12">{icon}</div>
+      <div className="ml-4">
+        <h2 className="m-0 text-title">{primary}</h2>
+        <p className="m-0 text-body-sm text-ui-secondary">{secondary}</p>
+      </div>
     </Link>
   )
 }
 
 function PatreonLogo() {
-  const theme = useAppTheme()
-  const isDark = theme.palette.mode === 'dark'
   return (
     <svg
       width="48"
@@ -115,7 +80,7 @@ function PatreonLogo() {
         y="7"
         width="6"
         height="34"
-        fill={isDark ? '#ffffff' : '#052A49'}
+        className="fill-[#052A49] dark:fill-white"
       />
       <circle cx="29" cy="20" r="13" fill="#F96753" />
     </svg>
@@ -123,9 +88,6 @@ function PatreonLogo() {
 }
 
 function CardLogo() {
-  const theme = useAppTheme()
-  const mainColor = theme.palette.primary.main
-  const secondaryColor = theme.palette.warning.main
   return (
     <svg
       width="48"
@@ -137,19 +99,18 @@ function CardLogo() {
     >
       <path
         d="M6 19H42V33C42 35.2091 40.2091 37 38 37H10C7.79086 37 6 35.2091 6 33V19Z"
-        fill={mainColor}
+        className="fill-ui-primary"
       />
       <path
         d="M6 15C6 12.7909 7.79086 11 10 11H38C40.2091 11 42 12.7909 42 15V19H6V15Z"
-        fill={secondaryColor}
+        className="fill-ui-warning"
       />
-      <circle cx="35.5" cy="30.5" r="3.5" fill={secondaryColor} />
+      <circle cx="35.5" cy="30.5" r="3.5" className="fill-ui-warning" />
       <circle
         cx="29.5"
         cy="30.5"
         r="4"
-        fill={secondaryColor}
-        stroke={mainColor}
+        className="fill-ui-warning stroke-ui-primary"
       />
     </svg>
   )

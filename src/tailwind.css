@@ -1,0 +1,136 @@
+@layer theme, base, components, utilities;
+
+@import './6-shared/ui/kit/theme.css';
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --spacing: 0.25rem;
+
+  /* Stacking levels. A tooltip sits above every overlay, including the modal
+     ones it can be opened from inside; the docked navigation panel is fixed
+     and so has to sit above the page it reserves room in, but under every
+     overlay. */
+  --z-index-drawer: 1200;
+  --z-index-modal: 1300;
+  --z-index-tooltip: 1500;
+
+  /* Corner radii, in pixels: the scale descends from `shape.borderRadius`,
+     which is 8px, and a corner has no reason to follow the root font size.
+     Cleared first so the registered steps are exactly the ones below. */
+  /* --radius-*: initial; */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+
+  /* Mirrors `breakpoints` in src/6-shared/ui/theme/breakpoints.ts, which is
+     the single source these values are derived from. Keep them in step.
+     Pixels, not rem: `useBreakpointDown` queries pixels, and a rem
+     mirror would drift from them whenever the root font size is not 16px. */
+  --breakpoint-sm: 600px;
+  --breakpoint-md: 900px;
+  --breakpoint-lg: 1200px;
+  --breakpoint-xl: 1536px;
+  /* Tailwind ships a `2xl` at 96rem, which is this scale's `xl` under another
+     name and in another unit. Clear it so the registered breakpoints are
+     exactly the ones `breakpoints.ts` defines. */
+  --breakpoint-2xl: initial;
+}
+
+@theme inline {
+  /* The application font family. */
+  --font-sans: 'IBM Plex Sans', sans-serif;
+
+  /* Typography */
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-body--font-weight: 400;
+
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.43;
+  --text-body-sm--font-weight: 400;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.66;
+  --text-caption--font-weight: 400;
+
+  --text-overline: 0.75rem;
+  --text-overline--line-height: 2.66;
+  --text-overline--font-weight: 400;
+
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.6;
+  --text-title--font-weight: 500;
+
+  --text-display: 2.125rem;
+  --text-display--line-height: 1.235;
+  --text-display--font-weight: 500;
+
+  --text-title-lg: 1.5rem;
+  --text-title-lg--line-height: 1.334;
+  --text-title-lg--font-weight: 400;
+
+  /* Elevation shadows */
+  --shadow-elevation-1:
+    0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-2:
+    0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-4:
+    0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-6:
+    0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 18px 0px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-8:
+    0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-10:
+    0px 6px 6px -3px rgba(0, 0, 0, 0.2), 0px 10px 14px 1px rgba(0, 0, 0, 0.14),
+    0px 4px 18px 3px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-16:
+    0px 8px 10px -5px rgba(0, 0, 0, 0.2), 0px 16px 24px 2px rgba(0, 0, 0, 0.14),
+    0px 6px 30px 5px rgba(0, 0, 0, 0.12);
+  --shadow-elevation-24:
+    0px 11px 15px -7px rgba(0, 0, 0, 0.2),
+    0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-error-border: var(--error-border);
+  --color-error-surface: var(--error-surface);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-tooltip: var(--tooltip);
+  --color-tooltip-foreground: var(--tooltip-foreground);
+  --color-border: var(--border);
+  --color-interactive: var(--interactive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-surface: var(--warning-surface);
+  --color-warning-border: var(--warning-border);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-disabled-foreground: var(--disabled-foreground);
+  --color-data-primary: var(--data-primary);
+  --color-data-primary-alt: var(--data-primary-alt);
+  --color-data-success: var(--data-success);
+  --color-data-error: var(--data-error);
+  --color-data-error-alt: var(--data-error-alt);
+
+  /* Legacy aliases are retained for charts, warning panels and snackbars. */
+}

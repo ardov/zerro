@@ -22,12 +22,12 @@ import type {
   TZmUser,
   TUser,
   TZmDiff,
-  TDiff,
+  TNormalizedPatch,
   TZmDeletionObject,
   TDeletionObject,
   TUnixTime,
   TMsTime,
-} from '6-shared/types'
+} from '@/6-shared/types'
 import { toBudgetId } from './toBudgetId'
 
 type TZmAdapter<ZmType, ClientType> = {
@@ -81,10 +81,9 @@ const convertDeletion: TZmAdapter<TZmDeletionObject, TDeletionObject> = {
 }
 
 /** Main diff converter */
-export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
+export const convertDiff: TZmAdapter<TZmDiff, TNormalizedPatch> = {
   toClient: d => {
-    const t0 = performance.now()
-    let r: TDiff = { serverTimestamp: 0 }
+    const r: TNormalizedPatch = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = unixToMs(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toClient)
     if (d.instrument)
@@ -101,14 +100,11 @@ export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
       r.reminderMarker = d.reminderMarker.map(convertReminderMarker.toClient)
     if (d.transaction)
       r.transaction = d.transaction.map(convertTransaction.toClient)
-    const t1 = performance.now()
-    console.log('convertDiff.toClient', t1 - t0)
     return r
   },
 
   toServer: d => {
-    const t0 = performance.now()
-    let r: TZmDiff = { serverTimestamp: 0 }
+    const r: TZmDiff = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = msToUnix(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toServer)
     if (d.instrument)
@@ -125,8 +121,6 @@ export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
       r.reminderMarker = d.reminderMarker.map(convertReminderMarker.toServer)
     if (d.transaction)
       r.transaction = d.transaction.map(convertTransaction.toServer)
-    const t1 = performance.now()
-    console.log('convertDiff.toServer', t1 - t0)
     return r
   },
 }

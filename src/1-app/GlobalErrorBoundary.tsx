@@ -1,48 +1,58 @@
 import React from 'react'
-import { captureError, sendEvent } from '6-shared/helpers/tracking'
-import { clearStorage } from 'worker'
-import { tokenStorage } from '6-shared/api/tokenStorage'
+import { captureError } from '@/6-shared/diagnostics'
+import { tokenStorage } from '@/6-shared/api/tokenStorage'
+import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 import { useTranslation } from 'react-i18next'
+import { clearPersistedLocalData } from '@/store/data'
 
 export default class GlobalErrorBoundary extends React.Component<{
   children: React.ReactNode
 }> {
-  state = { hasError: false }
+  override state = { hasError: false }
 
-  static getDerivedStateFromError = (error: any) => ({ hasError: true })
+  static getDerivedStateFromError = (_error: any) => ({ hasError: true })
 
-  componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
+  override componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
     // Automatically reload the page if a chunk fails to load
     // This usually happens after a new deployment
     if (
       error.message.includes('Loading chunk') ||
       error.message.includes('dynamically imported module')
     ) {
-      const isReloaded = sessionStorage.getItem('global_error_retry')
-      if (!isReloaded) {
-        sessionStorage.setItem('global_error_retry', 'true')
-        window.location.reload()
-        return
+      try {
+        const isReloaded = sessionStorage.getItem('global_error_retry')
+        if (!isReloaded) {
+          sessionStorage.setItem('global_error_retry', 'true')
+          window.location.reload()
+          return
+        }
+        sessionStorage.removeItem('global_error_retry')
+      } catch {
+        // Without a durable retry marker, show the fallback instead of
+        // risking a reload loop or throwing from the error boundary itself.
       }
-      sessionStorage.removeItem('global_error_retry')
     }
 
-    sendEvent(`GlobalError: ${error.message}`)
     captureError(error, errorInfo)
   }
 
-  render() {
+  override render() {
     return this.state.hasError ? <ErrorFallback /> : this.props.children
   }
 }
 
 function ErrorFallback() {
   const { t } = useTranslation('errorGlobal')
-  const fullRefresh = () => {
-    clearStorage()
-    localStorage.clear()
-    tokenStorage.clear()
-    window.location.reload()
+  const fullRefresh = async () => {
+    try {
+      await clearPersistedLocalData()
+    } catch (error) {
+      console.error('Failed to clear local replica before reload', error)
+    } finally {
+      safeLocalStorage.clear()
+      tokenStorage.clear()
+      window.location.reload()
+    }
   }
 
   return (
@@ -50,7 +60,7 @@ function ErrorFallback() {
       <h3>{t('message')}</h3>
       <button
         style={{ border: '1px solid #ccc', padding: 16 }}
-        onClick={fullRefresh}
+        onClick={() => void fullRefresh()}
       >
         {t('btnFix')}
       </button>
