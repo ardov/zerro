@@ -5,6 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within, waitFor } from 'storybook/test'
 import { Drawer, DrawerSurface } from './Drawer'
 import { Button } from './Button'
+import { ScrollArea } from './ScrollArea'
 
 const meta = {
   tags: ['autodocs'],
@@ -89,6 +90,38 @@ export const Right: Story = {
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(trigger).toHaveFocus())
   },
+}
+
+export const ScrollToEdge: Story = {
+  tags: ['check'],
+  globals: { viewport: { value: 'zerro500' } },
+  args: {
+    title: 'Scrollable drawer',
+    label: undefined,
+    children: Array.from({ length: 80 }, (_, i) => <p key={i}>Row {i}</p>),
+  },
+  play: async ({ canvasElement }) => {
+    const sheet = await openSettled(canvasElement, 'Scrollable drawer')
+    const scroller = sheet.querySelector<HTMLElement>('.kit-scroll-viewport')!
+    await waitFor(() => {
+      expect(scroller.scrollHeight).toBeGreaterThan(scroller.clientHeight)
+      expect(scroller.getBoundingClientRect().bottom).toBeCloseTo(
+        sheet.getBoundingClientRect().bottom,
+        0
+      )
+    })
+    scroller.scrollTop = scroller.scrollHeight
+    await waitFor(() => {
+      const last = within(sheet).getByText('Row 79').getBoundingClientRect()
+      expect(last.bottom).toBeLessThan(scroller.getBoundingClientRect().bottom)
+      expect(last.top).toBeGreaterThan(scroller.getBoundingClientRect().top)
+    })
+  },
+}
+
+export const BottomScrollToEdge: Story = {
+  ...ScrollToEdge,
+  globals: { viewport: { value: 'zerro499' } },
 }
 
 export const RightPage: Story = {
@@ -438,11 +471,11 @@ export const BottomOwnScroller: Story = {
     label: undefined,
     contentScrolls: true,
     children: (
-      <div aria-label="Own scroller" className="min-h-0 grow overflow-y-auto">
+      <ScrollArea className="grow" contentClassName="px-4">
         {Array.from({ length: 80 }, (_, i) => (
           <p key={i}>Row {i}</p>
         ))}
-      </div>
+      </ScrollArea>
     ),
   },
   play: async ({ canvasElement }) => {
@@ -452,8 +485,26 @@ export const BottomOwnScroller: Story = {
       window.innerHeight - 32,
       0
     )
-    const scroller = within(sheet).getByLabelText('Own scroller')
+    const scroller = sheet.querySelector<HTMLElement>('.kit-scroll-viewport')!
     expect(scroller.scrollHeight).toBeGreaterThan(scroller.clientHeight)
+    expect(scroller.getBoundingClientRect().bottom).toBeCloseTo(
+      sheet.getBoundingClientRect().bottom,
+      0
+    )
+    // Emulate a larger bottom safe area: it must scroll with the last row.
+    scroller.parentElement!.style.setProperty(
+      '--kit-scroll-bottom-inset',
+      '32px'
+    )
+    scroller.scrollTop = scroller.scrollHeight
+    await waitFor(() => {
+      const bottom = scroller.getBoundingClientRect().bottom
+      expect(bottom).toBeCloseTo(sheet.getBoundingClientRect().bottom, 0)
+      expect(
+        bottom -
+          within(sheet).getByText('Row 79').getBoundingClientRect().bottom
+      ).toBeCloseTo(32, 0)
+    })
     await userEvent.keyboard('{Escape}')
   },
 }

@@ -42,7 +42,8 @@ export type DrawerProps = SurfaceName & {
    * the drawer's body instead of scrolling in it. The body then has no
    * padding of its own; `contentClassName` styles it. A bottom sheet then
    * takes its full height rather than its content's, so the scroller has a
-   * definite height to fill. */
+   * definite height to fill. The scroller consumes `--kit-scroll-bottom-inset`
+   * inside its content (ScrollArea does this automatically). */
   contentScrolls?: boolean
   children: ReactNode
   onClose?: () => void
@@ -70,9 +71,6 @@ type DrawerSurfaceProps = Omit<DrawerProps, 'popup' | 'onClose'> & {
   controller: SurfaceController
   /** Covered surfaces retain content without creating another modal boundary. */
   active?: boolean
-  /** Content ownership puts safe area in --kit-scroll-bottom-inset for the
-   * child scrollport, so it scrolls with the last row instead of clipping it. */
-  bottomInsetOwner?: 'drawer' | 'content'
   id?: string
   finalFocus?: Primitive.Popup.Props['finalFocus']
   initialFocus?: Primitive.Popup.Props['initialFocus']
@@ -90,7 +88,10 @@ export function BottomSheetSurface(props: Omit<DrawerSurfaceProps, 'side'>) {
     <DrawerFrame
       {...props}
       side="bottom"
-      contentClassName={cn('p-4', props.contentClassName)}
+      contentClassName={cn(
+        !props.contentScrolls && 'p-4',
+        props.contentClassName
+      )}
     />
   )
 }
@@ -115,7 +116,6 @@ function DrawerFrame(props: DrawerSurfaceProps) {
     style,
     contentClassName,
     contentScrolls,
-    bottomInsetOwner = 'drawer',
   } = props
   const { open, setOpen: onOpenChange } = controller
   const back = useOverlayBack()
@@ -234,12 +234,9 @@ function DrawerFrame(props: DrawerSurfaceProps) {
               </div>
             )}
             <Primitive.Content
-              className={cn(
-                'flex min-h-0 flex-1 flex-col overflow-hidden',
-                bottomInsetOwner === 'drawer'
-                  ? 'pb-[max(8px,env(safe-area-inset-bottom))] [--kit-scroll-bottom-inset:0px]'
-                  : '[--kit-scroll-bottom-inset:env(safe-area-inset-bottom)]'
-              )}
+              // The scrollport reaches the edge; its last content reserves
+              // the bottom spacing and safe area inside the scroll.
+              className="flex min-h-0 flex-1 flex-col overflow-hidden [--kit-scroll-bottom-inset:max(8px,env(safe-area-inset-bottom))]"
             >
               <SurfaceContent
                 disableBodySwipe={side !== 'bottom'}

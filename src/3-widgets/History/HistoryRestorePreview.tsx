@@ -57,13 +57,17 @@ export function HistoryRestorePreview() {
   })
 
   return (
-    <div className="shrink-0 border-t border-ui-border bg-ui-highlight px-4 py-3">
-      <p className="m-0 text-overline uppercase text-ui-secondary">
+    <div className="shrink-0 border-t border-ui-border bg-ui-highlight pt-3 pb-[calc(var(--spacing)*3+var(--kit-scroll-bottom-inset,0px))]">
+      <p className="m-0 px-4 text-overline uppercase text-ui-secondary">
         {tHistory('restoreWouldChange')}
       </p>
       {/* Its own scroll: with every entity type present the list would
           otherwise push the button it belongs to off the panel. */}
-      <ScrollArea className="max-h-40">
+      <ScrollArea
+        className="max-h-40"
+        contentClassName="px-4"
+        insetBottom="0px"
+      >
         {missing ? (
           <p className="m-0 text-body-sm text-ui-secondary">
             {tHistory('pointUnavailable')}
@@ -89,15 +93,17 @@ export function HistoryRestorePreview() {
           </div>
         )}
       </ScrollArea>
-      <Button
-        size="sm"
-        variant="primary"
-        disabled={!canRestore}
-        onClick={restore}
-        className="w-full mt-3"
-      >
-        {tHistory('restorePoint')}
-      </Button>
+      <div className="px-4">
+        <Button
+          size="sm"
+          variant="primary"
+          disabled={!canRestore}
+          onClick={restore}
+          className="w-full mt-3"
+        >
+          {tHistory('restorePoint')}
+        </Button>
+      </div>
     </div>
   )
 }

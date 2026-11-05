@@ -14,6 +14,7 @@ import {
   selectHistoryHeadPoint,
   selectHighlightedHistoryPoint,
   selectHistoryPoint,
+  selectSelectedHistoryPoint,
   type THistoryPointRef,
 } from '@/store/history'
 import { HistoryControls } from './HistoryControls'
@@ -60,6 +61,7 @@ function HistoryPanelContent() {
   // list without a "you are here".
   const selected = useAppSelector(selectHighlightedHistoryPoint)
   const head = useAppSelector(selectHistoryHeadPoint)
+  const restorePoint = useAppSelector(selectSelectedHistoryPoint)
 
   useEffect(() => {
     if (pageStatus === 'idle') {
@@ -79,7 +81,10 @@ function HistoryPanelContent() {
       {rows.length === 0 ? (
         <EmptyHistory loading={pageStatus === 'loading'} />
       ) : (
-        <ScrollArea className="grow">
+        <ScrollArea
+          className="grow"
+          insetBottom={restorePoint ? '0px' : undefined}
+        >
           <HistoryRowList
             rows={rows}
             selected={selected}

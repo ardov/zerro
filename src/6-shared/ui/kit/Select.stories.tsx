@@ -701,8 +701,11 @@ export const MobileLongList: Story = {
     await waitFor(() => {
       const bounds = scrollport!.getBoundingClientRect()
       expect(Math.abs(bounds.bottom - window.innerHeight)).toBeLessThan(2)
-      expect(bounds.left).toBe(8)
-      expect(bounds.right).toBe(window.innerWidth - 8)
+      expect(bounds.left).toBe(0)
+      expect(bounds.right).toBe(window.innerWidth)
+      const option = body.getByRole('option', { name: 'Account 1' })
+      expect(option.getBoundingClientRect().left).toBe(8)
+      expect(option.getBoundingClientRect().right).toBe(window.innerWidth - 8)
     })
     await userEvent.keyboard('{End}')
     const last = body.getByRole('option', { name: 'Account 100' })

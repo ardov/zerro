@@ -18,6 +18,10 @@ story files relevant to the task, in both light and dark themes. Include direct
 consumers when changing a shared component. A passing story in one theme does
 not substitute for the other.
 
+Browser setup requests Chromium garbage collection before each isolated story
+file to release detached iframe resources. Keep file isolation enabled; the
+cleanup runs between files, outside the stories' interaction steps.
+
 Run the full browser suite (`pnpm test:storybook` without file filters,
 `pnpm verify:ui`, or `pnpm verify:all`) only when the user explicitly requests it
 or changes are genuinely global: for example, app-wide theme/token changes,

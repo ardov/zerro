@@ -207,6 +207,12 @@ A scrolling surface follows four rules. Each one prevents a specific artifact:
   top overlay, `insetTop` reserves native scroll padding and shortens the track;
   the content supplies its own leading space.
 
+Drawers provide their bottom spacing and safe area through
+`--kit-scroll-bottom-inset`, consumed inside `ScrollArea` or a custom scroller's
+content. A pinned footer consumes the inset itself and clears it for the
+scrollers above or inside it. Mobile selection lists keep side padding on their
+content and fixed header, so their scrollport reaches both sides of the sheet.
+
 Every flex ancestor between `h-dvh` and a scroller needs `min-h-0` (or
 `min-w-0` across). Without it the item grows to its content, and the window
 scrolls instead of the panel.

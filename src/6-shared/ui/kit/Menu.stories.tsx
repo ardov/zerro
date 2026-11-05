@@ -121,15 +121,18 @@ export const Desktop: Story = {
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(menu).not.toBeVisible())
     await userEvent.click(canvas.getByRole('button', { name: 'Actions' }))
-    await userEvent.click(await body.findByRole('menuitem', { name: 'Edit' }))
+    const reopened = await body.findByRole('menu')
+    await userEvent.click(
+      within(reopened).getByRole('menuitem', { name: 'Edit' })
+    )
     const editor = await body.findByRole('dialog', { name: 'Editor' })
     // Check after exit transitions too: the old menu must not steal editor focus.
-    await new Promise(resolve => setTimeout(resolve, 350))
-    await expect(
-      editor.contains(canvasElement.ownerDocument.activeElement)
-    ).toBe(true)
+    await waitFor(() => expect(reopened).not.toBeInTheDocument())
+    await expect(editor).toContainElement(
+      canvasElement.ownerDocument.activeElement as HTMLElement
+    )
     await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
-    await waitFor(() => expect(editor).not.toBeVisible())
+    await waitFor(() => expect(editor).not.toBeInTheDocument())
     await expect(body.queryByRole('menu')).not.toBeInTheDocument()
     await waitFor(() =>
       expect(canvas.getByRole('button', { name: 'Actions' })).toHaveFocus()
@@ -154,15 +157,24 @@ export const Mobile: Story = {
     await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
     await waitFor(() => expect(sheet).not.toBeVisible())
     await userEvent.click(trigger)
-    await userEvent.click(await body.findByRole('button', { name: 'Edit' }))
+    const reopened = await body.findByRole('dialog', { name: 'Actions' })
+    await waitFor(() =>
+      expect(reopened).not.toHaveAttribute('data-starting-style')
+    )
+    await Promise.all(
+      reopened.getAnimations().map(animation => animation.finished)
+    )
+    await userEvent.click(
+      within(reopened).getByRole('button', { name: 'Edit' })
+    )
     const editor = await body.findByRole('dialog', { name: 'Editor' })
     // Check after exit transitions too: the old menu must not steal editor focus.
-    await new Promise(resolve => setTimeout(resolve, 350))
-    await expect(
-      editor.contains(canvasElement.ownerDocument.activeElement)
-    ).toBe(true)
+    await waitFor(() => expect(reopened).not.toBeInTheDocument())
+    await expect(editor).toContainElement(
+      canvasElement.ownerDocument.activeElement as HTMLElement
+    )
     await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
-    await waitFor(() => expect(editor).not.toBeVisible())
+    await waitFor(() => expect(editor).not.toBeInTheDocument())
     await expect(body.queryByRole('dialog')).not.toBeInTheDocument()
     await waitFor(() => expect(trigger).toHaveFocus())
   },

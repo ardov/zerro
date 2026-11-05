@@ -166,14 +166,18 @@ export function SelectCombobox<T extends string>(
             <Combobox.Input
               ref={input}
               onKeyDown={event => {
+                // IME owns these keys, including Enter used to confirm a
+                // composition. Base UI must not select or close the list.
+                if (event.nativeEvent.isComposing || event.keyCode === 229) {
+                  event.preventBaseUIHandler()
+                  return
+                }
                 // Base UI highlights while typing, not for a query
                 // supplied on opening. Enter can still take its sole match.
                 if (
                   search.autoHighlight &&
                   !props.multiple &&
                   event.key === 'Enter' &&
-                  !event.nativeEvent.isComposing &&
-                  event.keyCode !== 229 &&
                   !event.defaultPrevented &&
                   !event.currentTarget.getAttribute('aria-activedescendant') &&
                   shownOptions.length === 1 &&
@@ -298,8 +302,6 @@ export function SelectCombobox<T extends string>(
             initialFocus={autoFocus ? input : searchConfig ? popup : listRef}
             contentScrolls
             className="h-auto max-h-[calc(100%-32px)]"
-            contentClassName="px-2"
-            bottomInsetOwner="content"
           >
             {panel}
           </DrawerSurface>

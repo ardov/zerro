@@ -132,7 +132,7 @@ export function ListPanel(props: ListPanelProps) {
             surface === 'popover'
               ? 'p-1'
               : cn(
-                  'pb-[var(--kit-scroll-bottom-inset,0px)]',
+                  'px-2 pb-[var(--kit-scroll-bottom-inset,0px)]',
                   hasHeader && 'pt-1'
                 )
           )}
@@ -168,12 +168,15 @@ export function ListPanel(props: ListPanelProps) {
             className={cn(
               'shrink-0',
               hasHeader && 'pt-1',
-              hasHeader && surface === 'popover' && 'px-1'
+              hasHeader && (surface === 'popover' ? 'px-1' : 'px-2')
             )}
           >
             {header}
           </div>
-          <div ref={notice} className="shrink-0">
+          <div
+            ref={notice}
+            className={cn('shrink-0', surface === 'embedded' && 'px-2')}
+          >
             {empty}
           </div>
           {scrollport}

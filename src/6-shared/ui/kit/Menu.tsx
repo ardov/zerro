@@ -99,7 +99,7 @@ function AdaptiveMenu(props: MenuProps & { context?: boolean }) {
       disabled={disabled}
       controller={controller}
       trigger={!context ? trigger : undefined}
-      finalFocus={finalFocus}
+      finalFocus={context ? finalFocus : undefined}
     >
       {content}
     </DrawerSurface>

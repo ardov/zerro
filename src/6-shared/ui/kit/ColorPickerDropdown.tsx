@@ -39,16 +39,35 @@ function wrapHue(h: number) {
   return ((h % 360) + 360) % 360
 }
 
-function dragHandlers(update: (event: PointerEvent<HTMLDivElement>) => void) {
+function useDragHandlers(
+  update: (event: PointerEvent<HTMLDivElement>, commit: boolean) => void,
+  restore: () => void
+) {
+  const drag = useRef<{ pointerId: number; restore: () => void } | null>(null)
+  function cancel(event: PointerEvent<HTMLDivElement>) {
+    const start = drag.current
+    if (start?.pointerId !== event.pointerId) return
+    drag.current = null
+    start.restore()
+  }
   return {
     onPointerDown(event: PointerEvent<HTMLDivElement>) {
-      if (!event.isPrimary || event.button !== 0) return
+      if (!event.isPrimary || event.button !== 0 || drag.current) return
       event.currentTarget.setPointerCapture(event.pointerId)
-      update(event)
+      drag.current = { pointerId: event.pointerId, restore }
+      update(event, false)
     },
     onPointerMove(event: PointerEvent<HTMLDivElement>) {
-      if (event.currentTarget.hasPointerCapture(event.pointerId)) update(event)
+      if (drag.current?.pointerId === event.pointerId) update(event, false)
     },
+    onPointerUp(event: PointerEvent<HTMLDivElement>) {
+      if (drag.current?.pointerId !== event.pointerId) return
+      drag.current = null
+      update(event, true)
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    },
+    onPointerCancel: cancel,
+    onLostPointerCapture: cancel,
   }
 }
 
@@ -170,20 +189,38 @@ function PickerControls(props: PickerProps) {
     setLastHex(next)
     if (!isSameColor(next, value)) onChange(next)
   }
-  function select(next: Coordinates) {
+  function select(next: Coordinates, commit = true) {
     setColor(next)
     const result = hex(next)
     setDraft(result)
-    emit(result)
+    if (commit) emit(result)
   }
-  function point(event: PointerEvent<HTMLDivElement>) {
+  function point(event: PointerEvent<HTMLDivElement>): Coordinates {
     const box = event.currentTarget.getBoundingClientRect()
-    select({
+    return {
       h,
       s: axisValue(event.clientX - box.left, box.width, planeInset),
       v: 1 - axisValue(event.clientY - box.top, box.height, planeInset),
-    })
+    }
   }
+  function restore() {
+    setColor(color)
+    setDraft(draft)
+  }
+  const planeDrag = useDragHandlers(
+    (event, commit) => select(point(event), commit),
+    restore
+  )
+  const hueDrag = useDragHandlers((event, commit) => {
+    const box = event.currentTarget.getBoundingClientRect()
+    const offset = event.clientX - box.left
+    // Hue is circular: dragging past either end keeps turning it.
+    const hue =
+      offset >= 0 && offset <= box.width
+        ? 360 * axisValue(offset, box.width, hueInset)
+        : wrapHue((360 * offset) / box.width)
+    select({ ...color, h: hue }, commit)
+  }, restore)
   return (
     <div className="rounded-ui-popover rounded-smooth">
       <div
@@ -207,7 +244,7 @@ function PickerControls(props: PickerProps) {
             v: clamp(v + move.v * step),
           })
         }}
-        {...dragHandlers(point)}
+        {...planeDrag}
       >
         <canvas
           aria-hidden
@@ -239,16 +276,7 @@ function PickerControls(props: PickerProps) {
           aria-valuenow={Math.round(h)}
           className="relative h-10 rounded-[calc(var(--radius-ui-popover)-0.5rem)] rounded-smooth focusable touch-none cursor-pointer"
           style={{ backgroundImage: spectrum }}
-          {...dragHandlers(event => {
-            const box = event.currentTarget.getBoundingClientRect()
-            const offset = event.clientX - box.left
-            // Hue is circular: dragging past either end keeps turning it.
-            const hue =
-              offset >= 0 && offset <= box.width
-                ? 360 * axisValue(offset, box.width, hueInset)
-                : wrapHue((360 * offset) / box.width)
-            select({ ...color, h: hue })
-          })}
+          {...hueDrag}
           onKeyDown={event => {
             if (event.altKey || event.ctrlKey || event.metaKey) return
             const step = event.shiftKey ? 10 : 1

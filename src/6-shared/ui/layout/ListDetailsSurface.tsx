@@ -130,7 +130,6 @@ export function ListDetailsSurface({
         } as CSSProperties
       }
       contentScrolls
-      bottomInsetOwner="content"
       contentClassName="p-0"
     >
       <div
