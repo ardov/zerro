@@ -378,7 +378,7 @@ function withPurgedTransactions(
  */
 const storedAsZeroBelow = 0.00005
 
-function isPurgedByAmounts(entity: {
+export function isPurgedByAmounts(entity: {
   income: number
   outcome: number
 }): boolean {

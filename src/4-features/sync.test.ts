@@ -6,6 +6,7 @@ import {
 import { configureStore } from '@reduxjs/toolkit'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { configureImmer } from '@/store/immer'
+import type { TNormalizedPatch } from '@/6-shared/types'
 import * as replica from '@/zerro-core/replica'
 import { captureError } from '@/6-shared/diagnostics'
 
@@ -24,6 +25,8 @@ vi.mock('@/6-shared/diagnostics', () => ({
 import {
   makeAccount,
   makeReminder,
+  makeTag,
+  makeTransaction,
   makeUser,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
 import { core } from '@/zerro-core/runtime/redux'
@@ -33,6 +36,7 @@ import {
   applyServerPatch,
   hydrateCorruptOutbox,
   hydrateRecoveryOutbox,
+  hydrateReplica,
   redoClientCommand,
   undoClientCommand,
 } from '@/store/data'
@@ -66,11 +70,151 @@ function makeSyncedStore() {
 describe('syncData', () => {
   afterEach(() => {
     configureImmer(false)
+    syncMock.mockReset()
     vi.restoreAllMocks()
   })
   beforeEach(() => {
     syncMock.mockClear()
     vi.mocked(captureError).mockClear()
+  })
+
+  it('syncs interleaved time edits after reload, undo/redo and a background pull', async () => {
+    configureImmer(true)
+    let store = makeSyncedStore()
+    const created = Date.parse('2026-11-01T12:00:00Z')
+    store.dispatch(
+      applyServerPatch({
+        user: [makeUser({ id: 1, parent: null, currency: 1 })],
+        tag: [makeTag({ id: 'food', title: 'Food' })],
+        transaction: [
+          makeTransaction({
+            id: 'first',
+            created,
+            outcome: 25,
+            incomeAccount: 'cash',
+            outcomeAccount: 'cash',
+          }),
+          makeTransaction({
+            id: 'second',
+            created,
+            outcome: 40,
+            incomeAccount: 'cash',
+            outcomeAccount: 'cash',
+            tag: ['food'],
+            source: 'plugin',
+            payee: 'Test shop',
+            originalPayee: 'Test shop',
+            outcomeBankID: '[fixture][CUR]-second',
+            opIncome: null,
+            opOutcome: null,
+          }),
+        ],
+      })
+    )
+    const firstEdit = store.dispatch(
+      core.transactions.recreate({
+        id: 'first',
+        created: created + 60_000,
+        income: 0,
+        outcome: 25,
+      })
+    )
+    const secondEdit = store.dispatch(
+      core.transactions.recreate({
+        id: 'second',
+        created: created + 120_000,
+        income: 0,
+        outcome: 40,
+      })
+    )
+    const finalFirst = store.dispatch(
+      core.transactions.recreate({
+        id: firstEdit,
+        created,
+        income: 0,
+        outcome: 25,
+      })
+    )
+    const finalSecond = store.dispatch(
+      core.transactions.recreate({
+        id: secondEdit,
+        created,
+        income: 0,
+        outcome: 40,
+      })
+    )
+    const { base, outbox } = JSON.parse(JSON.stringify(store.getState().data))
+    store = configureStore({ reducer: rootReducer })
+    store.dispatch(hydrateReplica({ rootUserId: 1, base, outbox }))
+    store.dispatch(undoClientCommand())
+    expect(store.getState().data.current.transaction[secondEdit].created).toBe(
+      created + 120_000
+    )
+    expect(
+      store.getState().data.current.transaction[finalSecond]
+    ).toBeUndefined()
+    store.dispatch(redoClientCommand())
+    store.dispatch(
+      applyServerPatch({
+        serverTimestamp: 200_000,
+        account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+      })
+    )
+    syncMock.mockImplementation(
+      async (_token, _endpoint, patch: TNormalizedPatch) => {
+        // The live reproduction fails when the request includes an unknown
+        // intermediate replacement that is already marked for a hard purge.
+        if (patch.transaction?.some(row => row.id === secondEdit))
+          return { error: 'serverError', status: 500 }
+        return {
+          data: {
+            serverTimestamp: 300_000,
+            transaction: patch.transaction?.filter(
+              row => row.id === finalFirst || row.id === finalSecond
+            ),
+            deletion: ['first', 'second'].map(id => ({
+              id,
+              object: 'transaction',
+              stamp: 300_000,
+              user: 1,
+            })),
+          },
+        }
+      }
+    )
+
+    await store.dispatch(syncData({ sleep: async () => undefined }))
+
+    expect(store.getState().sync.lastResult?.isSuccessful).toBe(true)
+    expect(syncMock).toHaveBeenCalledOnce()
+    const sent: TNormalizedPatch = syncMock.mock.calls[0][2]
+    expect(sent.transaction?.map(row => row.id).sort()).toEqual(
+      ['first', 'second', finalFirst, finalSecond].sort()
+    )
+    for (const id of ['first', 'second'])
+      expect(sent.transaction?.find(row => row.id === id)).toMatchObject({
+        income: 0.00001,
+        outcome: 0.00001,
+      })
+    expect(store.getState().data.outbox).toEqual([])
+    expect(
+      Object.keys(store.getState().data.current.transaction).sort()
+    ).toEqual([finalFirst, finalSecond].sort())
+    expect(store.getState().data.current.transaction[finalFirst]).toMatchObject(
+      {
+        created,
+        outcome: 25,
+      }
+    )
+    expect(
+      store.getState().data.current.transaction[finalSecond]
+    ).toMatchObject({
+      created,
+      outcome: 40,
+      tag: ['food'],
+      payee: 'Test shop',
+      outcomeBankID: '[fixture][CUR]-second',
+    })
   })
 
   it('pushes a pending budget after a background pull in production', async () => {

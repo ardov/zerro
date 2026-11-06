@@ -14,6 +14,7 @@ import { parseZerroOperation } from '../../domain/zerro/operations/types'
  * replay or history-stack rules beside this file.
  */
 import {
+  isPurgedByAmounts,
   materializeCommand,
   materializePrimaryCommand,
   type TCommand,
@@ -188,12 +189,10 @@ export function getMaterializedOutboxPatches(
  * Replays the sent command prefix independently from UI `current` and returns
  * the final full primary entities plus surviving deletions for transport.
  *
- * An entity born and buried inside the same prefix never reaches the server:
- * the replay starts from `base`, so an id missing there is one the server has
- * never seen, and sending its final state would ask Zenmoney to store a row
- * whose only purpose is to be dead. Both shapes of burial are dropped — the
- * soft delete of transactions, which is `deleted: true` on the entity itself,
- * and the real deletion of reminders, which is a `deletion` object.
+ * Treat `base` as the authoritative server state. Omit entities absent from
+ * it that are deleted by the end of this prefix: soft-deleted transactions,
+ * transactions purged by their final amounts, and real deletion objects.
+ * The local commands stay intact for undo and replay.
  */
 export function buildOutboxTransport(
   base: TDataStore,
@@ -208,7 +207,7 @@ export function buildOutboxTransport(
     TDataEntityKey,
     Map<string | number, TDeletionObject>
   >()
-  const isUnknownToServer = (key: TDataEntityKey, id: string | number) =>
+  const isAbsentFromBase = (key: TDataEntityKey, id: string | number) =>
     (base[key] as Record<string | number, unknown>)[id] === undefined
 
   outbox.forEach(command => {
@@ -243,7 +242,12 @@ export function buildOutboxTransport(
     const entities = [...ids].flatMap(id => {
       const entity = currentById[id]
       if (!entity) return []
-      if (entity.deleted && isUnknownToServer(key, id)) return []
+      if (
+        isAbsentFromBase(key, id) &&
+        (entity.deleted ||
+          (key === 'transaction' && isPurgedByAmounts(current.transaction[id])))
+      )
+        return []
       return [entity]
     })
     if (entities.length) transport[key] = entities as never
@@ -251,7 +255,7 @@ export function buildOutboxTransport(
 
   const deletions = [...deleted.values()]
     .flatMap(byId => [...byId.values()])
-    .filter(item => !isUnknownToServer(item.object, item.id))
+    .filter(item => !isAbsentFromBase(item.object, item.id))
   if (deletions.length) transport.deletion = deletions
 
   return Object.keys(transport).length ? transport : undefined

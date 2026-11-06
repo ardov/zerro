@@ -308,6 +308,29 @@ describe('outbox operations', () => {
     })
   })
 
+  it('omits a locally created transaction that is purged before sync', () => {
+    const base = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+    })
+    const commands: TCommand[] = [
+      {
+        issuedAt: 10,
+        operations: [
+          {
+            type: 'transaction.create',
+            value: makeTransaction({ id: 'new', outcome: 25 }),
+          },
+        ],
+      },
+      makeCommand(20, {
+        transaction: [{ id: 'new', income: 0.00001, outcome: 0.00001 }],
+      }),
+    ]
+
+    expect(replayOutbox(base, commands).transaction).toEqual({})
+    expect(buildOutboxTransport(base, commands, 100)).toBeUndefined()
+  })
+
   it('drops a locally created transaction that leaves nothing to send', () => {
     const base = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
