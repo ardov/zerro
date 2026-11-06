@@ -119,7 +119,7 @@
     "eslint-plugin-storybook": "10.6.2",
     "fake-indexeddb": "^6.2.6",
     "globals": "^17.13.0",
-    "happy-dom": "^21.0.3",
+    "happy-dom": "^21.0.4",
     "knip": "^6.41.0",
     "playwright": "^1.62.1",
     "prettier": "^3.9.10",
