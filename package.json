@@ -12,6 +12,7 @@
     "tsc": "tsc --watch",
     "test": "vitest run --reporter=agent --silent=passed-only",
     "test:watch": "vitest",
+    "test:pwa": "pnpm build:app && node tools/test-pwa.mjs",
     "test:changed": "pnpm test --changed --passWithNoTests",
     "test:related": "vitest related --run --reporter=agent --silent=passed-only",
     "lint:css": "stylelint \"src/**/*.css\" --max-warnings 0",

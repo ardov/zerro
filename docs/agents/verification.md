@@ -76,6 +76,12 @@ STORYBOOK_REDUCED_MOTION=1 pnpm test:storybook src/3-widgets/transaction/Transac
 
 This uses real `prefers-reduced-motion` media queries in both themes.
 
+For service-worker or offline asset changes, run `pnpm test:pwa`. It builds the
+production app, installs it in two fresh Chromium contexts (light and dark),
+then disables the network and HTTP cache. It checks every shipped runtime file
+against its build output, decodes images and fonts, and opens previously unvisited
+pages and a PWA shortcut offline.
+
 ## Handoff routing
 
 | Changed surface                          | Final verification                                                              |

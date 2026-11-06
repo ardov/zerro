@@ -22,10 +22,9 @@ export default defineConfig({
       injectManifest: {
         rollupFormat: 'iife',
         globIgnores: ['404.html'],
-        // Account marks are separate assets but must work with offline accounts.
+        // Install the complete app, including assets on screens not visited yet.
         globPatterns: [
-          '**/*.{js,wasm,css,html}',
-          'assets/ic_bank_*.svg',
+          '**/*.{js,wasm,css,html,svg,png,jpg,jpeg,webp,avif,gif,ico,woff,woff2,ttf,otf}',
           'manifest.json',
         ],
         maximumFileSizeToCacheInBytes: 3_000_000,

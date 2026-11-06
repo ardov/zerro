@@ -244,7 +244,11 @@ function createUpdater(register: typeof registerSW) {
   function foreground() {
     if (document.visibilityState !== 'visible') return
     if (pendingReload) scheduleReload(RELOAD_DELAY)
-    else if (Date.now() - lastCheck >= FOREGROUND_INTERVAL) void check()
+    else if (
+      !registration?.active ||
+      Date.now() - lastCheck >= FOREGROUND_INTERVAL
+    )
+      void check()
   }
 
   container.addEventListener('controllerchange', controllerChanged)
@@ -257,6 +261,18 @@ function createUpdater(register: typeof registerSW) {
   }, CHECK_INTERVAL)
 
   function ensureRegistration(): Promise<ServiceWorkerRegistration> {
+    // A failed first install can leave a registration with no workers. Register
+    // again: update() on that discarded registration cannot complete the install.
+    if (
+      registration &&
+      !registration.active &&
+      !registration.installing &&
+      !registration.waiting
+    ) {
+      registration.removeEventListener('updatefound', updateFound)
+      registration = undefined
+      registrationPromise = undefined
+    }
     if (registrationPromise) return registrationPromise
     const attempt = ++registrationAttempt
     registrationPromise = new Promise((resolve, reject) => {

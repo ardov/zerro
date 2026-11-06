@@ -354,6 +354,43 @@ describe('application updates', () => {
     expect(registration.update).toHaveBeenCalledOnce()
   })
 
+  it('retries an incomplete first offline installation as soon as connectivity returns', async () => {
+    registration.active = null
+    container.controller = null
+    container.dispatchEvent(new Event('controllerchange'))
+    const discarded = registration
+    discarded.update.mockRejectedValue(new Error('Registration discarded'))
+    register.mockImplementationOnce((options: RegisterSWOptions) => {
+      registration = new Registration()
+      registration.active = null
+      registration.installing = new Worker()
+      options.onRegisteredSW?.(
+        '/service-worker.js',
+        registration as unknown as ServiceWorkerRegistration
+      )
+    })
+    window.dispatchEvent(new Event('online'))
+    await vi.advanceTimersByTimeAsync(0)
+    expect(register).toHaveBeenCalledTimes(2)
+    expect(discarded.update).not.toHaveBeenCalled()
+    expect(registration.update).toHaveBeenCalledOnce()
+    expect(notify).not.toHaveBeenCalled()
+  })
+
+  it('retries a failed first registration on reconnect without waiting for the update cooldown', async () => {
+    stop?.()
+    const updates = await import('./appUpdates')
+    register.mockImplementationOnce((options: RegisterSWOptions) => {
+      options.onRegisterError?.(new Error('Offline at startup'))
+    })
+    stop = updates.startAppUpdates(register)
+    await vi.advanceTimersByTimeAsync(0)
+    window.dispatchEvent(new Event('online'))
+    await vi.advanceTimersByTimeAsync(0)
+    expect(registration.update).toHaveBeenCalledOnce()
+    expect(notify).not.toHaveBeenCalled()
+  })
+
   it('waits until the page returns if it becomes hidden while saving', async () => {
     let finish!: () => void
     persist.mockImplementationOnce(

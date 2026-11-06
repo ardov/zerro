@@ -20,7 +20,7 @@ retain their original colours and are rendered by the shared account
 `AccountIcon` in account lists and selectors. Their 20px image is rendered
 without an added background or corner clipping. Missing bank IDs and failed
 images fall back to the theme-aware account glyph.
-Bank SVGs are emitted as separate files rather than inlined into application
+Category and bank SVGs are emitted as separate files rather than inlined into application
 JavaScript and included in the service worker's precache for offline use.
 Lookup needs no network request to the company directory and no name matching.
 

@@ -35,6 +35,13 @@ Route and component rules should not recreate document-wide resets. Component
 CSS must be placed in `@layer components` so utilities can override it
 predictably.
 
+IBM Plex Sans is served locally from `src/6-shared/ui/theme/fonts/`, with the
+same weights and Unicode subsets in the app and Storybook. The service worker
+precaches fonts, category and bank icons, and other bundled images at installation,
+including resources on pages that have not been opened. A completed installation
+is needed before these resources are available offline. External merchant
+favicons use their separate runtime cache after a successful image load.
+
 ## Theme boot and persistence
 
 `public/theme-init.js` owns preference persistence and applies the color scheme
