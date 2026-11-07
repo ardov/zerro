@@ -40,6 +40,28 @@ function NavigationExample() {
   )
 }
 
+export const ModalMerchantSelection: Story = {
+  ...PageSurface,
+  tags: ['check'],
+  parameters: {
+    ...PageSurface.parameters,
+    app: { scenario: 'transaction-filters', route: '/transactions' },
+  },
+  globals: { viewport: { value: 'zerro900' } },
+  play: async () => {
+    if (!('__vitest_browser_runner__' in window)) return
+    const { page } = await import('vitest/browser')
+    await page.getByText('Lunch groceries').click()
+    const editor = page.getByRole('dialog', { name: 'Transaction' })
+    const place = editor.getByRole('combobox', { name: /^Place/ })
+    // Release after the picker opens on mousedown, as with a physical click.
+    await place.click({ delay: 150 })
+    await page.getByRole('combobox', { name: 'Find or create' }).fill('Other')
+    await page.getByRole('option', { name: 'Other shop' }).click()
+    await expect(place.element()).toHaveTextContent('Other shop')
+  },
+}
+
 export const PreservesPageOnReturn: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: {

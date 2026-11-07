@@ -257,6 +257,11 @@ export function SelectCombobox<T extends string>(
       {displayValue}
     </Combobox.Trigger>
   )
+  // Adaptive panels move their fields into a drawer without remounting them.
+  // Nest the picker in the field's current portal so releasing the opening
+  // press over the picker is still an interaction inside that drawer.
+  const portalContainer =
+    surface?.closest<HTMLElement>('[data-base-ui-portal]') ?? undefined
   return (
     <Field.Root {...fieldProps}>
       <Combobox.Root<T, boolean>
@@ -308,7 +313,7 @@ export function SelectCombobox<T extends string>(
         ) : (
           <>
             {triggerElement}
-            <Combobox.Portal>
+            <Combobox.Portal container={portalContainer}>
               <Combobox.Backdrop className="fixed inset-0 z-popover" />
               <Combobox.Positioner
                 {...positioning}

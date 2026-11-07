@@ -123,6 +123,7 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
     changeValue,
     surface,
     fieldProps: {
+      ref: props.trigger ? setSurface : undefined,
       className: props.trigger ? 'min-w-0 max-w-full' : undefined,
       invalid: props.invalid ?? (props.error ? true : undefined),
       disabled: props.disabled,
