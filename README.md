@@ -33,6 +33,25 @@ If you want to contribute, let's discuss the idea first here in issues or in [ch
 4. `pnpm run dev` to run the development server on [http://localhost:3000](http://localhost:3000/)
 5. You are great
 
+### Production version
+
+For a Vercel production build from `master`, the nearest `vMAJOR.MINOR.0` tag
+on the commit's first-parent history sets the major and minor version. Each
+subsequent commit on that line adds one to the patch, including a merge commit.
+For example, merging `beta` with a merge commit immediately after `v2.1.0`
+produces `2.1.1`.
+
+To start a series, tag the intended commit on `master` and push the branch and
+tag together.
+
+```sh
+git tag -a v2.1.0 -m v2.1.0
+git push --atomic origin master refs/tags/v2.1.0
+```
+
+The production build fetches the history and tags from GitHub for the commit
+Vercel is deploying. Local and preview builds read the version from `package.json`.
+
 ### Run locally in docker
 
 ```bash

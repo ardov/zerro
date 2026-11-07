@@ -18,6 +18,7 @@
     "vite.storybook.config.ts",
     "vitest.config.ts",
     "vitest.storybook.config.ts",
+    "tools/**/*.test.ts",
     ".storybook/main.ts",
     ".storybook/manager.ts"
   ]
