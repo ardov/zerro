@@ -22,6 +22,12 @@ const files = (
     resolve(entry.parentPath, entry.name).slice(directory.length + 1)
   )
   .filter(file => !file.endsWith('.map') && !excluded.has(file))
+for (const catalog of ['bank-icons', 'category-icons']) {
+  const bundles = files.filter(
+    file => file.startsWith(`assets/${catalog}-`) && file.endsWith('.js')
+  )
+  assert.equal(bundles.length, 1, `One offline bundle for ${catalog}`)
+}
 const expected = Object.fromEntries(
   await Promise.all(
     files.map(async file => [

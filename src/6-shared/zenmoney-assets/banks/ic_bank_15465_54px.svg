@@ -1,16 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
-  <defs>
-    <clipPath id="clip-id1">
-      <path d="M0,0h54v54h-54z"/>
-    </clipPath>
-    <clipPath id="clip-id2">
-      <path d="M27,0L27,0A27,27 0,0 1,54 27L54,27A27,27 0,0 1,27 54L27,54A27,27 0,0 1,0 27L0,27A27,27 0,0 1,27 0z"/>
-    </clipPath>
-  </defs>
-  <g clip-path="url(#clip-id1)">
-    <path d="M27,0L27,0A27,27 0,0 1,54 27L54,27A27,27 0,0 1,27 54L27,54A27,27 0,0 1,0 27L0,27A27,27 0,0 1,27 0z" fill="#7744D8"/>
-    <g clip-path="url(#clip-id2)"/>
-    <path d="M21.633,46V19.224H11V10H42.388V19.224H31.883V46H21.633Z" fill="#ffffff"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 54 54"><defs><clipPath id="a"><path d="M0 0h54v54H0z"/></clipPath><clipPath id="b"><path d="M27 0a27 27 0 0 1 27 27 27 27 0 0 1-27 27A27 27 0 0 1 0 27 27 27 0 0 1 27 0"/></clipPath></defs><g clip-path="url(#a)"><path fill="#7744d8" d="M27 0a27 27 0 0 1 27 27 27 27 0 0 1-27 27A27 27 0 0 1 0 27 27 27 0 0 1 27 0"/><path fill="#fff" d="M21.63 46V19.22H11V10h31.39v9.22h-10.5V46z"/></g></svg>

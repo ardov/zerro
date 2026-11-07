@@ -10,11 +10,13 @@ import { checkAppUpdates } from '@/4-features/appUpdates'
 /** Press to check for updates; hold to show and copy the build for a bug report. */
 export function SettingsVersion() {
   const { t } = useTranslation('settings')
-  const date = new Date(buildDate)
-  const label = t('version', {
-    version: appVersion,
-    date: formatDate(date, isThisYear(date) ? 'dd.MM' : 'dd.MM.yyyy'),
-  })
+  const date = buildDate && new Date(buildDate)
+  const label = date
+    ? t('version', {
+        version: appVersion,
+        date: formatDate(date, isThisYear(date) ? 'dd.MM' : 'dd.MM.yyyy'),
+      })
+    : appVersion
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const held = useRef(false)
   const cancel = () => clearTimeout(timer.current)

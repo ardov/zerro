@@ -2,7 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
-import { buildDefines } from './buildDefines'
+import { buildMetadata } from './tools/buildMetadata'
 
 const root = path.dirname(fileURLToPath(import.meta.url))
 
@@ -14,7 +14,7 @@ const root = path.dirname(fileURLToPath(import.meta.url))
  * so `tsconfigPaths` alone cannot resolve their layer imports.
  */
 export default defineConfig({
-  plugins: [tailwindcss()],
+  plugins: [tailwindcss(), buildMetadata()],
   optimizeDeps: {
     include: [
       'clsx',
@@ -47,5 +47,4 @@ export default defineConfig({
       stories: path.resolve(root, 'stories'),
     },
   },
-  define: buildDefines(),
 })

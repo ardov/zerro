@@ -1,8 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <defs/>
-  <path d="M0.5,0.961h30.078V31.039H0.5z" fill="#fffffe"/>
-  <path d="M1.538,15.999h28.003V1.998H1.538z" fill="#e60029" fill-rule="evenodd"/>
-  <path d="M1.538,30.001h28.003V16H1.538z" fill="#000" fill-rule="evenodd"/>
-  <path d="M6.411,16.854h18.256v-1.708H6.411z" fill="#fffffe" fill-rule="evenodd"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="#fffffe" d="M.5.96h30.08v30.08H.5z"/><path fill="#e60029" fill-rule="evenodd" d="M1.54 16h28V2h-28z"/><path fill-rule="evenodd" d="M1.54 30h28V16h-28z"/><path fill="#fffffe" fill-rule="evenodd" d="M6.41 16.85h18.26v-1.7H6.4z"/></svg>

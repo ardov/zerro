@@ -6,11 +6,11 @@ import { AccountIcon } from './AccountIcon'
 
 afterEach(cleanup)
 
-it('uses the account company ID without requiring a company directory', () => {
-  const { container } = render(
+it('uses the account company ID without requiring a company directory', async () => {
+  const { findByAltText } = render(
     <AccountIcon account={{ company: 12574, type: 'ccard' }} />
   )
-  const image = container.querySelector('img')!
+  const image = await findByAltText('')
   expect(image).toHaveAttribute('src', bankIconById[12574])
   expect(image).toHaveAttribute('alt', '')
   expect(image).toHaveAttribute('aria-hidden', 'true')
@@ -24,11 +24,11 @@ it.each([null, -1])('falls back for an unmapped company %s', company => {
   expect(container.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
 })
 
-it('falls back after an image failure and tries a different company', () => {
-  const { container, rerender } = render(
+it('falls back after an image failure and tries a different company', async () => {
+  const { container, findByAltText, rerender } = render(
     <AccountIcon account={{ company: 12574, type: 'ccard' }} />
   )
-  fireEvent.error(container.querySelector('img')!)
+  fireEvent.error(await findByAltText(''))
   expect(container.querySelector('img')).toBeNull()
   expect(container.querySelector('svg')).not.toBeNull()
   rerender(<AccountIcon account={{ company: 4417, type: 'ccard' }} />)

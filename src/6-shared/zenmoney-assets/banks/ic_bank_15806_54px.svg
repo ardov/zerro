@@ -1,17 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
-  <defs>
-    <radialGradient gradientUnits="userSpaceOnUse" id="gradient-id1" cx="33.888" cy="19.561" r="8.761">
-      <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#00A1B6"/>
-    </radialGradient>
-    <radialGradient gradientUnits="userSpaceOnUse" id="gradient-id2" cx="22.867" cy="28.929" r="8.761">
-      <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#00A1B6"/>
-    </radialGradient>
-  </defs>
-  <path d="M27,27m-27,0a27,27 0,1 1,54 0a27,27 0,1 1,-54 0" fill="#ffffff"/>
-  <path d="M38.296,22.316C38.296,25.664 35.644,28.378 32.372,28.378C29.101,28.378 26.449,25.664 26.449,22.316C26.449,18.969 29.101,16.255 32.372,16.255C35.644,16.255 38.296,18.969 38.296,22.316Z" fill="url(#gradient-id1)"/>
-  <path d="M27.275,31.684C27.275,35.031 24.624,37.745 21.352,37.745C18.081,37.745 15.429,35.031 15.429,31.684C15.429,28.336 18.081,25.622 21.352,25.622C24.624,25.622 27.275,28.336 27.275,31.684Z" fill="url(#gradient-id2)"/>
-  <path d="M27,45.184C37.043,45.184 45.184,37.043 45.184,27C45.184,16.957 37.043,8.816 27,8.816C16.957,8.816 8.816,16.957 8.816,27C8.816,37.043 16.957,45.184 27,45.184ZM27,54C41.912,54 54,41.912 54,27C54,12.088 41.912,0 27,0C12.088,0 0,12.088 0,27C0,41.912 12.088,54 27,54Z" fill="#284365" fill-rule="evenodd"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 54 54"><defs><radialGradient id="a" cx="33.89" cy="19.56" r="8.76" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#00a1b6"/></radialGradient><radialGradient id="b" cx="22.87" cy="28.93" r="8.76" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#00a1b6"/></radialGradient></defs><path fill="#fff" d="M0 27a27 27 0 1 1 54 0 27 27 0 1 1-54 0"/><path fill="url(#a)" d="M38.3 22.32c0 3.34-2.66 6.06-5.93 6.06s-5.92-2.72-5.92-6.06c0-3.35 2.65-6.07 5.92-6.07s5.93 2.72 5.93 6.07"/><path fill="url(#b)" d="M27.28 31.68c0 3.35-2.66 6.06-5.93 6.06s-5.92-2.7-5.92-6.06c0-3.34 2.65-6.06 5.92-6.06s5.92 2.72 5.92 6.06"/><path fill="#284365" fill-rule="evenodd" d="M27 45.18c10.04 0 18.18-8.14 18.18-18.18S37.04 8.82 27 8.82 8.82 16.96 8.82 27 16.96 45.18 27 45.18M27 54c14.91 0 27-12.09 27-27S41.91 0 27 0 0 12.09 0 27s12.09 27 27 27"/></svg>

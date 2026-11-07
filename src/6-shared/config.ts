@@ -10,11 +10,15 @@ export const sentryDSN = import.meta.env.REACT_APP_SENTRY_DSN as string
 export const ymid = import.meta.env.REACT_APP_YMID as string
 export const gaid = import.meta.env.REACT_APP_GAID as string
 
-// Info about the app
-export const appVersion = APP_VERSION
-export const buildDate = APP_BUILD_DATE
-/** One deploy among those sharing a version, as Sentry tells releases apart. */
-export const appRelease = `${APP_VERSION}+${APP_BUILD_COMMIT}`
+function readBuildMeta(name: string) {
+  return globalThis.document?.head.querySelector<HTMLMetaElement>(
+    `meta[name="${name}"]`
+  )?.content
+}
+
+export const appVersion = readBuildMeta('zerro-version') ?? 'unknown'
+export const buildDate = readBuildMeta('zerro-build-date')
+export const appRelease = readBuildMeta('zerro-release') ?? 'unknown'
 export const isProduction = import.meta.env.PROD
 
 // Database parameters

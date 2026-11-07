@@ -14,7 +14,6 @@
     "tsBuildInfoFile": "./.cache/tsconfig.node.tsbuildinfo"
   },
   "include": [
-    "buildDefines.ts",
     "vite.config.ts",
     "vite.storybook.config.ts",
     "vitest.config.ts",

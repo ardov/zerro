@@ -1,8 +1,7 @@
 const bankModules = import.meta.glob<string>('./banks/ic_bank_*_54px.svg', {
   eager: true,
   import: 'default',
-  // Keep the catalog as URLs instead of inlining every bank's SVG in app JS.
-  query: '?url&no-inline',
+  query: '?inline',
 })
 
 const unknownBankModules = import.meta.glob<string>(
@@ -10,7 +9,7 @@ const unknownBankModules = import.meta.glob<string>(
   {
     eager: true,
     import: 'default',
-    query: '?url',
+    query: '?inline',
   }
 )
 

@@ -147,9 +147,9 @@ export const Multiple: Story = {
     await expect(
       await body.findByRole('option', { name: /^Old bank/ })
     ).toHaveAttribute('aria-selected', 'true')
-    const image = body
-      .getByRole('option', { name: /^Old bank/ })
-      .querySelector('img')!
+    const image = await within(
+      body.getByRole('option', { name: /^Old bank/ })
+    ).findByAltText<HTMLImageElement>('')
     await waitFor(() => expect(image.naturalWidth).toBeGreaterThan(0))
     await userEvent.click(body.getByRole('option', { name: /^Cash/ }))
     await expect(canvas.getByLabelText('Selection')).toHaveTextContent(
@@ -176,11 +176,11 @@ export const BankMarks: Story = {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
     const trigger = canvas.getByRole('combobox', { name: 'Account Bank' })
-    const selectedImage = canvasElement.querySelector('img')!
+    const selectedImage = await canvas.findByAltText<HTMLImageElement>('')
     await waitFor(() => expect(selectedImage.naturalWidth).toBeGreaterThan(0))
     await userEvent.click(trigger)
     const bank = await body.findByRole('option', { name: /^Bank/ })
-    const image = bank.querySelector('img')!
+    const image = await within(bank).findByAltText<HTMLImageElement>('')
     expect(image).toHaveAttribute('src', bankIconById[12574])
     expect(image).toHaveAttribute('alt', '')
     await waitFor(() => expect(image.naturalWidth).toBeGreaterThan(0))

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   AccountIcon as AccountGlyph,
   CashAccountIcon,
@@ -9,7 +9,9 @@ import {
   DebtAccountIcon,
 } from '@/6-shared/ui/Icons'
 import { AccountType, type TAccount } from '@/6-shared/types'
-import { bankIconById } from '@/6-shared/zenmoney-assets/bankIcons'
+import type { bankIconById } from '@/6-shared/zenmoney-assets/bankIcons'
+
+let loadedBankIcons: typeof bankIconById | undefined
 
 const iconByType = {
   [AccountType.Cash]: CashAccountIcon,
@@ -27,9 +29,22 @@ export function AccountIcon({
 }: {
   account?: Pick<TAccount, 'company' | 'type'>
 }) {
+  const company = account?.company
+  const [icons, setIcons] = useState(loadedBankIcons)
   const [failedUrl, setFailedUrl] = useState<string>()
-  const url =
-    account?.company == null ? undefined : bankIconById[account.company]
+  useEffect(() => {
+    if (company == null || icons) return
+    import('@/6-shared/zenmoney-assets/bankIcons').then(
+      module => {
+        loadedBankIcons = module.bankIconById
+        setIcons(module.bankIconById)
+      },
+      () => {
+        /* Keep the account glyph if the catalog is unavailable. */
+      }
+    )
+  }, [company, icons])
+  const url = company == null ? undefined : icons?.[company]
   if (url && url !== failedUrl)
     return (
       <img

@@ -1,12 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
-  <defs>
-    <clipPath id="clip-id1">
-      <path d="M0,0h54v54h-54z"/>
-    </clipPath>
-  </defs>
-  <g clip-path="url(#clip-id1)">
-    <path d="M27,0L27,0A27,27 0,0 1,54 27L54,27A27,27 0,0 1,27 54L27,54A27,27 0,0 1,0 27L0,27A27,27 0,0 1,27 0z" fill="#204F33"/>
-    <path d="M10.398,43.929L18.554,8H35.339L43.507,43.929H32.53L30.878,34.827H23.024L21.372,43.929H10.398ZM26.659,13.072L23.589,29.755H30.298L27.236,13.072H26.659Z" fill="#ffffff" fill-rule="evenodd"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 54 54"><defs><clipPath id="a"><path d="M0 0h54v54H0z"/></clipPath></defs><g clip-path="url(#a)"><path fill="#204f33" d="M27 0a27 27 0 0 1 27 27 27 27 0 0 1-27 27A27 27 0 0 1 0 27 27 27 0 0 1 27 0"/><path fill="#fff" fill-rule="evenodd" d="M10.4 43.93 18.55 8h16.79l8.17 35.93H32.53l-1.65-9.1h-7.86l-1.65 9.1zm16.26-30.86-3.07 16.68h6.7l-3.05-16.68z"/></g></svg>

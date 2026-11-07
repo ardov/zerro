@@ -20,8 +20,10 @@ retain their original colours and are rendered by the shared account
 `AccountIcon` in account lists and selectors. Their 20px image is rendered
 without an added background or corner clipping. Missing bank IDs and failed
 images fall back to the theme-aware account glyph.
-Category and bank SVGs are emitted as separate files rather than inlined into application
-JavaScript and included in the service worker's precache for offline use.
+Vite bundles the SVGs as data URLs in two separately cached JavaScript files,
+one for categories and one for banks. The account icon loads the bank catalog
+when an account has a company ID. The service worker precaches both bundles for
+offline use.
 Lookup needs no network request to the company directory and no name matching.
 
 ## Rights and provenance

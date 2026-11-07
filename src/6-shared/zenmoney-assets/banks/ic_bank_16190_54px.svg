@@ -1,13 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
-  <defs>
-    <clipPath id="clip-id1">
-      <path d="M14,12h26.674v31h-26.674z"/>
-    </clipPath>
-  </defs>
-  <path d="M27,0L27,0A27,27 0,0 1,54 27L54,27A27,27 0,0 1,27 54L27,54A27,27 0,0 1,0 27L0,27A27,27 0,0 1,27 0z" fill="#15182A"/>
-  <g clip-path="url(#clip-id1)">
-    <path d="M14.163,35.885V12.174H18.931V35.885H14.163Z" fill="#F6A500"/>
-    <path d="M34.29,23.345V42.928H29.529V23.345H23.146V19.217H40.673V23.345H34.29Z" fill="#ffffff"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 54 54"><defs><clipPath id="a"><path d="M14 12h26.67v31H14z"/></clipPath></defs><path fill="#15182a" d="M27 0a27 27 0 0 1 27 27 27 27 0 0 1-27 27A27 27 0 0 1 0 27 27 27 0 0 1 27 0"/><g clip-path="url(#a)"><path fill="#f6a500" d="M14.16 35.89V12.17h4.77v23.71z"/><path fill="#fff" d="M34.29 23.35v19.58h-4.76V23.35h-6.38v-4.13h17.52v4.13z"/></g></svg>

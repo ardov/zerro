@@ -1,9 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
-  <defs/>
-  <path d="M40.475,14H13.492L0,27.492L13.492,40.983H40.475L54,27.492L40.475,14Z" fill="#ffffff"/>
-  <path d="M54,27.492L40.475,14V40.983L54,27.492Z" fill="#EE3224"/>
-  <path d="M26.983,27.492L40.475,14H13.492L26.983,27.492Z" fill="#EE3224"/>
-  <path d="M0,27.492L13.492,40.983V14L0,27.492Z" fill="#EE3224"/>
-  <path d="M26.983,27.492L13.492,40.983H40.475L26.983,27.492Z" fill="#EE3224"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 54 54"><path fill="#fff" d="M40.48 14H13.49L0 27.5l13.5 13.48h26.98L54 27.5z"/><path fill="#ee3224" d="M54 27.5 40.48 14v26.98z"/><path fill="#ee3224" d="M26.98 27.5 40.48 14H13.49z"/><path fill="#ee3224" d="m0 27.5 13.5 13.48V14z"/><path fill="#ee3224" d="M26.98 27.5 13.5 40.97h26.99z"/></svg>

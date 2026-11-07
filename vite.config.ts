@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import mdx from '@mdx-js/rollup'
 import { VitePWA } from 'vite-plugin-pwa'
 import { pageDocuments } from './tools/pageDocuments'
-import { buildDefines } from './buildDefines'
+import { buildMetadata } from './tools/buildMetadata'
 
 export default defineConfig({
   appType: 'mpa',
@@ -12,6 +12,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     mdx(),
+    buildMetadata(),
     pageDocuments(),
     VitePWA({
       manifest: false,
@@ -36,9 +37,18 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    rolldownOptions: { input: ['index.html', '404.html'] },
+    rolldownOptions: {
+      input: ['index.html', '404.html'],
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'bank-icons', test: '/zenmoney-assets/bankIcons.ts' },
+            { name: 'category-icons', test: '/zenmoney-assets/index.ts' },
+          ],
+        },
+      },
+    },
     sourcemap: true,
   },
   envPrefix: 'REACT_APP_',
-  define: buildDefines(),
 })

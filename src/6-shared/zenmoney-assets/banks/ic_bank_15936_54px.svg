@@ -1,9 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
-  <defs/>
-  <path d="M26.577,19.966L10,27.505L26.577,37.299L43.148,27.505L26.577,19.966Z" fill="#010101" fill-opacity="0.6" stroke-opacity="0.6"/>
-  <path d="M10,27.505L26.577,37.299V0L10,27.505Z" fill="#010101" fill-opacity="0.45" stroke-opacity="0.45"/>
-  <path d="M26.577,0V37.299L43.148,27.505L26.577,0Z" fill="#010101" fill-opacity="0.8" stroke-opacity="0.8"/>
-  <path d="M10,30.646L26.577,54V40.439L10,30.646Z" fill="#010101" fill-opacity="0.45" stroke-opacity="0.45"/>
-  <path d="M26.577,40.439V54L43.161,30.646L26.577,40.439Z" fill="#010101" fill-opacity="0.8" stroke-opacity="0.8"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 54 54"><path fill="#010101" fill-opacity=".6" d="M26.58 19.97 10 27.5l16.58 9.79 16.57-9.8z"/><path fill="#010101" fill-opacity=".45" d="m10 27.5 16.58 9.8V0z"/><path fill="#010101" fill-opacity=".8" d="M26.58 0v37.3l16.57-9.8z"/><path fill="#010101" fill-opacity=".45" d="M10 30.65 26.58 54V40.44z"/><path fill="#010101" fill-opacity=".8" d="M26.58 40.44V54l16.58-23.35z"/></svg>
