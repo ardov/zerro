@@ -39,8 +39,9 @@ export const calcGoals = {
   ): GoalProgress => {
     const { assigned, leftover } = context
     const { amount } = goal
-    const needStart = Math.max(round(amount - leftover), 0)
-    const needNow = Math.max(round(amount - leftover - assigned), 0)
+    const remainingAfterCarryover = round(amount - leftover)
+    const needStart = Math.max(remainingAfterCarryover, 0)
+    const needNow = Math.max(round(remainingAfterCarryover - assigned), 0)
 
     return {
       needStart,

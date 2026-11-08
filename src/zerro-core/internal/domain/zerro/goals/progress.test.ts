@@ -41,6 +41,19 @@ describe('calcGoals', () => {
     expect(calc({ ...context, leftover: -100, assigned: 200 })).toBe(1)
   })
 
+  it('completes a monthly spend goal when the assignment covers the exact shortfall', () => {
+    const goal = { type: goalType.MONTHLY_SPEND, amount: 100 }
+    const calculate = (assigned: number) =>
+      calcGoals[goalType.MONTHLY_SPEND](goal, {
+        ...context,
+        leftover: 90.1,
+        assigned,
+      })
+
+    expect(calculate(9.9)).toMatchObject({ needNow: 0, progress: 1 })
+    expect(calculate(9.89)).toMatchObject({ needNow: 0.01, progress: 0.99 })
+  })
+
   it('calculates income percent progress', () => {
     const calc = getProgress({ type: goalType.INCOME_PERCENT, amount: 0.5 })
 
