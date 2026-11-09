@@ -1,5 +1,4 @@
 import { IconButton } from '@/6-shared/ui/kit/Button'
-import type { TTransaction } from '@/6-shared/types'
 import { core } from '@/zerro-core/redux'
 
 import type { FC } from 'react'
@@ -16,7 +15,6 @@ import {
   MergeTypeIcon,
   DeleteIcon,
 } from '@/6-shared/ui/Icons'
-import { addFxAmount, createFxAmount } from '@/6-shared/helpers/money'
 import { track } from '@/6-shared/analytics'
 import { usePopup } from '@/6-shared/overlays'
 import { toast } from '@/6-shared/ui/kit/Toast'
@@ -49,7 +47,15 @@ const Actions: FC<ActionsProps> = ({
       (transaction): transaction is NonNullable<typeof transaction> =>
         !!transaction
     )
-  const actions = getAvailableActions(transactions)
+  const instruments = useAppSelector(core.instruments.selectAll)
+  const combination = core.transactions.getCombination(
+    transactions,
+    instruments
+  )
+  const canMarkViewed = transactions.some(tr => !core.transactions.isViewed(tr))
+  const canSetTag =
+    transactions.length > 0 &&
+    transactions.every(tr => core.transactions.getType(tr) !== 'transfer')
   // Both are on the overlay stack, so Back closes the dialog or the menu
   // instead of leaving the page — which is what it used to do here.
   const menuPopup = usePopup()
@@ -83,10 +89,10 @@ const Actions: FC<ActionsProps> = ({
   }
 
   const handleDelete = () => {
-    dispatch(core.transactions.remove(checkedIds))
+    dispatch(core.transactions.remove(ids))
     toast.add({
       type: 'success',
-      title: t('deleted', { count: checkedIds.length }),
+      title: t('deleted', { count: ids.length }),
     })
     track('transaction_deleted', { mode: 'bulk', source: 'bulk_toolbar' })
     closeMenu()
@@ -110,7 +116,7 @@ const Actions: FC<ActionsProps> = ({
   }
 
   const items: MenuItem[] = []
-  if (actions.markViewed)
+  if (canMarkViewed)
     items.push({
       id: 'viewed',
       label: t('markViewed'),
@@ -123,7 +129,7 @@ const Actions: FC<ActionsProps> = ({
     start: <EditIcon />,
     onSelect: () => editPopup.setOpen(true),
   })
-  if (actions.combineToOutcome)
+  if (combination === 'outcome')
     items.push({
       id: 'outcome',
       label: t('combineToOutcome'),
@@ -138,7 +144,7 @@ const Actions: FC<ActionsProps> = ({
         onUncheckAll()
       },
     })
-  if (actions.combineToIncome)
+  if (combination === 'income')
     items.push({
       id: 'income',
       label: t('combineToIncome'),
@@ -153,7 +159,7 @@ const Actions: FC<ActionsProps> = ({
         onUncheckAll()
       },
     })
-  if (actions.collapseTransactionsEasy)
+  if (combination === 'collapse')
     items.push({
       id: 'collapse',
       label: t('mergeTransactions'),
@@ -161,7 +167,7 @@ const Actions: FC<ActionsProps> = ({
       start: <MergeTypeIcon />,
       onSelect: handleDelete,
     })
-  if (actions.canMergeAsTransfer)
+  if (combination === 'transfer')
     items.push({
       id: 'transfer',
       label: t('mergeAsTransfer'),
@@ -221,7 +227,7 @@ const Actions: FC<ActionsProps> = ({
           >
             <DeleteIcon />
           </IconButton>
-          {actions.setMainTag && (
+          {canSetTag && (
             <CategorySelect
               onSelect={handleSetTag}
               trigger={
@@ -251,120 +257,6 @@ const Actions: FC<ActionsProps> = ({
       </div>
     </>
   )
-}
-
-function getAvailableActions(transactions: TTransaction[]) {
-  const { incomes, outcomes, transfers } = groupByType(transactions)
-  const instCodeMap = core.instruments.useCodeMap()
-  const toDisplay = core.currency.useToDisplay('current')
-
-  const totalOutcome = toDisplay(
-    addFxAmount(
-      ...outcomes.map(tr =>
-        createFxAmount(instCodeMap[tr.outcomeInstrument], tr.outcome)
-      )
-    )
-  )
-  const totalIncome = toDisplay(
-    addFxAmount(
-      ...incomes.map(tr =>
-        createFxAmount(instCodeMap[tr.incomeInstrument], tr.income)
-      )
-    )
-  )
-  const sameInstruments = hasSameInOutInstruments()
-  const sameAccounts = hasSameInOutAccounts()
-
-  return {
-    delete: true,
-    setMainTag: !transfers.length && (incomes.length || outcomes.length),
-    bulkEdit: true,
-    markViewed: transactions.some(tr => !core.transactions.isViewed(tr)),
-    combineToOutcome: canCombineToOutcome(),
-    combineToIncome: canCombineToIncome(),
-    collapseTransactionsEasy: canCollapseTransactionsEasy(),
-    canMergeAsTransfer: canMergeAsTransfer(),
-  }
-
-  function hasSameInOutInstruments() {
-    const instruments = new Set<number>()
-    outcomes.forEach(tr => instruments.add(tr.outcomeInstrument))
-    incomes.forEach(tr => instruments.add(tr.incomeInstrument))
-    return instruments.size === 1
-  }
-  function hasSameInOutAccounts() {
-    const accounts = new Set<string | null>()
-    outcomes.forEach(tr => accounts.add(tr.outcomeAccount))
-    incomes.forEach(tr => accounts.add(tr.incomeAccount))
-    return accounts.size === 1
-  }
-
-  function canMergeAsTransfer(): boolean {
-    // One outcome and one income from different accounts
-    const canBeTransfer =
-      transfers.length === 0 &&
-      outcomes.length === 1 &&
-      incomes.length === 1 &&
-      !sameAccounts
-    if (!canBeTransfer) return false
-    // Strict equality for same instruments
-    if (sameInstruments) return totalOutcome === totalIncome
-    // Approximately equal for different instruments (15% tolerance)
-    return areApproximatelyEqual(totalIncome, totalOutcome, 0.15)
-  }
-  function canCollapseTransactionsEasy(): boolean {
-    return (
-      transfers.length === 0 &&
-      outcomes.length > 0 &&
-      incomes.length > 0 &&
-      sameInstruments &&
-      sameAccounts &&
-      totalOutcome === totalIncome
-    )
-  }
-  function canCombineToOutcome(): boolean {
-    return (
-      transfers.length === 0 &&
-      outcomes.length === 1 &&
-      incomes.length > 0 &&
-      sameInstruments &&
-      totalOutcome > totalIncome
-    )
-  }
-  function canCombineToIncome(): boolean {
-    return (
-      transfers.length === 0 &&
-      outcomes.length > 0 &&
-      incomes.length === 1 &&
-      sameInstruments &&
-      totalOutcome < totalIncome
-    )
-  }
-}
-
-function areApproximatelyEqual(
-  a: number,
-  b: number,
-  tolerance: number = 0.1
-): boolean {
-  const difference = Math.abs(a - b)
-  const maxAllowedDifference = Math.max(Math.abs(a), Math.abs(b)) * tolerance
-  return difference <= maxAllowedDifference
-}
-
-function groupByType(list: TTransaction[] = []) {
-  const incomes: TTransaction[] = []
-  const outcomes: TTransaction[] = []
-  const transfers: TTransaction[] = []
-
-  list?.forEach(tr => {
-    const trType = core.transactions.getType(tr)
-    if (trType === 'income') incomes.push(tr)
-    if (trType === 'outcome') outcomes.push(tr)
-    if (trType === 'transfer') transfers.push(tr)
-  })
-
-  return { incomes, outcomes, transfers }
 }
 
 export default Actions

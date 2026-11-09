@@ -1,4 +1,8 @@
-import { addFxAmount, subFxAmount } from '../../zenmoney/model/money'
+import {
+  addFxAmount,
+  addTransactionAmounts,
+  subFxAmount,
+} from '../../zenmoney/model/money'
 import type { ById, ByMonth } from '../../foundation/types'
 import type { TFxAmount } from '../../zenmoney/model/money'
 import type { TISOMonth } from '../../zenmoney/primitives'
@@ -63,7 +67,7 @@ export function buildMonthTotals(
     console.assert(
       isSameFxAmount(
         fundsChange,
-        addFxAmount(transferFees, generalIncome, envActivity)
+        addTransactionAmounts(transferFees, generalIncome, envActivity)
       ),
       'Total change is not equal to sum of transfers + income + env activity'
     )
@@ -84,7 +88,7 @@ export function buildMonthTotals(
         positiveAssigned = addFxAmount(positiveAssigned, totalAssigned)
       }
 
-      if (toValue(selfAvailable) < 0) {
+      if (selfAvailable[metrics.currency] < 0) {
         overspend = addFxAmount(overspend, selfAvailable)
       }
     })

@@ -1,5 +1,5 @@
 import { keys } from '../../foundation/keys'
-import { addFxAmount } from '../../zenmoney/model/money'
+import { addTransactionAmounts } from '../../zenmoney/model/money'
 import type { ByMonth } from '../../foundation/types'
 import type { TFxAmount } from '../../zenmoney/model/money'
 import type { TEnvelopeId } from '../envelope-id'
@@ -33,15 +33,15 @@ export function buildActivity(
     const node = makeEmptyNode()
     const { internal, income, outcome } = input.rawActivity[month]
 
-    node.total = addFxAmount(node.total, internal.total)
+    node.total = addTransactionAmounts(node.total, internal.total)
     node.transferFees = internal
 
     keys(income).forEach(envelopeId => {
       const activity = income[envelopeId]
-      node.total = addFxAmount(node.total, activity.total)
+      node.total = addTransactionAmounts(node.total, activity.total)
 
       if (input.keepingEnvelopeIds.has(envelopeId)) {
-        node.envActivity.total = addFxAmount(
+        node.envActivity.total = addTransactionAmounts(
           node.envActivity.total,
           activity.total
         )
@@ -49,7 +49,7 @@ export function buildActivity(
         return
       }
 
-      node.generalIncome.total = addFxAmount(
+      node.generalIncome.total = addTransactionAmounts(
         node.generalIncome.total,
         activity.total
       )
@@ -58,8 +58,8 @@ export function buildActivity(
 
     keys(outcome).forEach(envelopeId => {
       const activity = outcome[envelopeId]
-      node.total = addFxAmount(node.total, activity.total)
-      node.envActivity.total = addFxAmount(
+      node.total = addTransactionAmounts(node.total, activity.total)
+      node.envActivity.total = addTransactionAmounts(
         node.envActivity.total,
         activity.total
       )

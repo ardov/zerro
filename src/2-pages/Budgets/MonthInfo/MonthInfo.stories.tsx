@@ -197,3 +197,41 @@ export const MessageInsideMobileDrawer: Story = {
   ...MessageInsideDrawer,
   globals: { viewport: { value: 'zerro499' } },
 }
+
+function SmallCurrencyOverview() {
+  const [month, setMonth] = useMonth()
+  return (
+    <>
+      <button onClick={() => setMonth('2026-01')}>January</button>
+      <MonthInfo />
+      <GoalsProgress month={month} />
+    </>
+  )
+}
+
+export const SmallCurrencyAmounts: Story = {
+  parameters: { app: { scenario: 'small-currency-amounts' } },
+  render: () => (
+    <MonthProvider>
+      <SmallCurrencyOverview />
+    </MonthProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'January' }))
+    await expect(
+      canvas.getByRole('button', { name: 'Goals 50%' })
+    ).toBeVisible()
+    await expect(
+      canvas.getByText(/^Overspending/i, { selector: 'p' }).textContent
+    ).toContain('0,0000004')
+    await userEvent.click(
+      canvas.getByRole('button', { name: /Income.*0,0000008/i })
+    )
+    await expect(canvas.getByText('Refunds')).toBeVisible()
+    await userEvent.click(
+      canvas.getByRole('button', { name: /Transfer.*0,0000004/i })
+    )
+    await expect(canvas.getByText('Exchange Rate Difference')).toBeVisible()
+  },
+}

@@ -229,6 +229,57 @@ describe('zenmoney transaction commands', () => {
     })
   })
 
+  it.each([
+    {
+      income: 0.02,
+      outcome: 0.0201,
+      field: 'outcome',
+      combine: compileCombineToOutcome,
+    },
+    {
+      income: 0.0201,
+      outcome: 0.02,
+      field: 'income',
+      combine: compileCombineToIncome,
+    },
+  ])(
+    'preserves a four-decimal $field when combining same-instrument postings',
+    ({ income, outcome, field, combine }) => {
+      const transactions = {
+        income: makeTransaction({
+          id: 'income',
+          income,
+          incomeAccount: 'card',
+        }),
+        outcome: makeTransaction({
+          id: 'outcome',
+          outcome,
+          outcomeAccount: 'card',
+        }),
+      }
+      const result = combine(transactions, ['income', 'outcome'])
+      expect(result.transaction).toContainEqual({ id: field, [field]: 0.0001 })
+    }
+  )
+
+  it('rejects a combination when the selected income and expense use different instruments', () => {
+    const transactions = {
+      income: makeTransaction({
+        id: 'income',
+        income: 0.01,
+        incomeInstrument: 1,
+      }),
+      outcome: makeTransaction({
+        id: 'outcome',
+        outcome: 0.02,
+        outcomeInstrument: 2,
+      }),
+    }
+    expect(() =>
+      compileCombineToOutcome(transactions, ['income', 'outcome'])
+    ).toThrow(/single instrument/)
+  })
+
   it('combines incomes into the outcome, deleting or transferring each', () => {
     const data = makeStore({
       transaction: {

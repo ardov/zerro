@@ -185,3 +185,41 @@ export const MobileDeleteImmediately: Story = {
   ...DeleteImmediately,
   globals: { viewport: { value: 'zerro499' } },
 }
+
+export const PreserveSmallRemainder: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { app: { scenario: 'small-currency-amounts' } },
+  render: function Render() {
+    const remaining = useAppSelector(
+      s => core.transactions.selectAll(s).purchase.outcome
+    )
+    const [selected, setSelected] = useState(['purchase', 'refund'])
+    return (
+      <div className="relative min-h-80 w-140">
+        <Actions
+          visible={!!selected.length}
+          checkedIds={selected}
+          onCheckAll={() => setSelected(['purchase', 'refund'])}
+          onUncheckAll={() => setSelected([])}
+        />
+        <output aria-label="Remaining expense">{remaining}</output>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Actions' }))
+    await expect(
+      body.queryByText('Merge Transactions', { exact: true })
+    ).toBeNull()
+    await userEvent.click(
+      await body.findByText('Combine into Expense', { exact: true })
+    )
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Remaining expense')).toHaveTextContent(
+        /^0\.0001$/
+      )
+    )
+  },
+}

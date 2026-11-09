@@ -1,5 +1,5 @@
 import { keys } from '../../foundation/keys'
-import { addFxAmount } from '../../zenmoney/model/money'
+import { addFxAmount, addTransactionAmounts } from '../../zenmoney/model/money'
 import type { ById, ByMonth } from '../../foundation/types'
 import type { TFxAmount } from '../../zenmoney/model/money'
 import type { TFxCode } from '../../zenmoney/entities/instruments'
@@ -121,7 +121,10 @@ function calcEnv(
     const child = metrics[id]
     childrenLeftover = addFxAmount(childrenLeftover, child.selfLeftover)
     childrenAssigned = addFxAmount(childrenAssigned, child.selfAssigned)
-    childrenActivity = addFxAmount(childrenActivity, child.selfActivity)
+    childrenActivity = addTransactionAmounts(
+      childrenActivity,
+      child.selfActivity
+    )
     if (child.selfAvailable[child.currency] > 0) {
       childrenSurplus = addFxAmount(childrenSurplus, child.selfAvailable)
     } else {
@@ -138,7 +141,7 @@ function calcEnv(
   const selfAssigned = { [currency]: input.budgets?.[month]?.[id] || 0 }
   const envActivity = input.activity?.[month]?.envActivity?.byEnv?.[id]
   const selfActivity = envActivity?.total || {}
-  const selfAvailableRaw = addFxAmount(
+  const selfAvailableRaw = addTransactionAmounts(
     selfLeftover,
     selfAssigned,
     selfActivity,
@@ -174,7 +177,7 @@ function calcEnv(
     totalTransactionCount: selfTransactionCount + childrenTransactionCount,
     totalLeftover: addFxAmount(selfLeftover, childrenLeftover),
     totalAssigned: addFxAmount(selfAssigned, childrenAssigned),
-    totalActivity: addFxAmount(selfActivity, childrenActivity),
+    totalActivity: addTransactionAmounts(selfActivity, childrenActivity),
     totalAvailable: addFxAmount(selfAvailable, childrenSurplus),
   }
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   makeEnvActivity,
+  makeFxConverter,
   makeRawActivityNode,
 } from '../../../../support/testing/zerroTestData'
 import { EnvType, envId } from '../envelope-id'
@@ -56,6 +57,36 @@ describe('buildSortedActivity', () => {
     expect(result['2026-01'].incomes).toHaveLength(1)
     expect(result['2026-01'].outcomes).toHaveLength(0)
     expect(result['2026-01'].incomes[0].total.total).toEqual({ USD: 60 })
+  })
+
+  it('keeps tiny retained income and transfer fees in their own groups', () => {
+    const id = envId.get(EnvType.Tag, 'project')
+    const result = buildSortedActivity({
+      rawActivity: {
+        '2026-01': makeRawActivityNode({
+          income: { [id]: makeEnvActivity({ DASH: 0.01 }) },
+          internal: makeEnvActivity({ DASH: -0.02 }),
+        }),
+      },
+      keepingEnvelopeIds: new Set([id]),
+      convertFx: makeFxConverter({ USD: 1, DASH: 0.00004 }),
+    })['2026-01']
+    expect(result.incomesTotal.total).toEqual({ DASH: 0.01 })
+    expect(result.outcomes).toHaveLength(0)
+    expect(result.transfersTotal.total).toEqual({ DASH: -0.02 })
+  })
+
+  it('omits the fee of a transfer whose two currency legs cancel at the monthly rate', () => {
+    const result = buildSortedActivity({
+      rawActivity: {
+        '2026-01': makeRawActivityNode({
+          internal: makeEnvActivity({ EUR: 100, USD: -110 }),
+        }),
+      },
+      keepingEnvelopeIds: new Set(),
+      convertFx: makeFxConverter({ USD: 1, EUR: 1.1 }),
+    })['2026-01']
+    expect(result.transfers).toHaveLength(0)
   })
 
   it('routes transfers, debts, and transfer fees into separate groups', () => {

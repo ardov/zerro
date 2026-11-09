@@ -19,9 +19,10 @@ export const selectDisplayConverter = createSelector(
   (convert, currency) =>
     (
       amount: Parameters<typeof convert>[0],
-      date: Parameters<typeof convert>[2]
+      date: Parameters<typeof convert>[2],
+      precision?: Parameters<typeof convert>[3]
     ) =>
-      convert(amount, currency, date)
+      convert(amount, currency, date, precision)
 )
 export const useDisplayCurrency = () => {
   const currency = useAppSelector(selectDisplayCurrency)
@@ -32,11 +33,14 @@ export const useDisplayCurrency = () => {
   )
   return [currency, setCurrency] as const
 }
-export function useToDisplay(defaultDate: TDateDraft | 'current') {
+export function useToDisplay(
+  defaultDate: TDateDraft | 'current',
+  precision: 'money' | 'unrounded' = 'money'
+) {
   const convert = useAppSelector(selectDisplayConverter)
   return useCallback(
     (amount: TFxAmount, date: TDateDraft | 'current' = defaultDate) =>
-      convert(amount, date),
-    [convert, defaultDate]
+      convert(amount, date, precision),
+    [convert, defaultDate, precision]
   )
 }

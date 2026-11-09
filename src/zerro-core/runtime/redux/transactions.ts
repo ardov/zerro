@@ -56,3 +56,5 @@ export {
   type TTransactionQuery,
   type TTransactionQueryContext,
 } from '../../internal/domain/zerro'
+
+export { getTransactionCombination as getCombination } from '../../internal/domain/zenmoney/entities/transactions/combination'

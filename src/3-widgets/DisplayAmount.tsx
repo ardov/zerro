@@ -16,7 +16,10 @@ type TDisplayAmountProps = Modify<
 export const DisplayAmount = (props: TDisplayAmountProps) => {
   const { value, month, noCurrency, ...delegated } = props
   const [currency] = core.currency.useDisplayCurrency()
-  const convert = core.currency.useToDisplay(month || 'current')
+  const convert = core.currency.useToDisplay(
+    month || 'current',
+    props.showSubcent ? 'unrounded' : 'money'
+  )
   const amount = typeof value === 'number' ? value : convert(value)
   return (
     <Amount

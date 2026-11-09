@@ -1,4 +1,5 @@
 import {
+  buildFxConverter,
   EnvActivity,
   EnvType,
   envelopeVisibility,
@@ -111,4 +112,13 @@ export function makeGoalInfo(
     targetBudget: 0,
     ...rest,
   }
+}
+
+export function makeFxConverter(rates: Record<string, number>) {
+  return buildFxConverter(() => ({
+    date: '2026-01',
+    type: 'saved',
+    changed: 0,
+    rates,
+  }))
 }

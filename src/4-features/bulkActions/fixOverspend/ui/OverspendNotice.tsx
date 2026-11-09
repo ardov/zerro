@@ -47,6 +47,7 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
             noShade
             sign={false}
             decimals="ifAny"
+            showSubcent
           />
           .
         </p>

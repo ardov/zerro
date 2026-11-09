@@ -1,4 +1,4 @@
-import { addFxAmount } from '../../zenmoney/model/money'
+import { addTransactionAmounts } from '../../zenmoney/model/money'
 import type { ById, ByMonth } from '../../foundation/types'
 import type { TFxAmount } from '../../zenmoney/model/money'
 import type { TInstrument } from '../../zenmoney/entities/instruments'
@@ -77,9 +77,9 @@ export class EnvActivity {
     if (!activityB) return activityA
 
     return {
-      total: addFxAmount(activityA.total, activityB.total),
+      total: addTransactionAmounts(activityA.total, activityB.total),
       trend: activityA.trend.map((value, index) =>
-        addFxAmount(value, activityB.trend[index])
+        addTransactionAmounts(value, activityB.trend[index])
       ),
       transactionCount: activityA.transactionCount + activityB.transactionCount,
     }
@@ -92,7 +92,7 @@ function addInternalTransaction(
   result: ByMonth<TRawActivityNode>,
   instruments: ById<TInstrument>
 ) {
-  const change = addFxAmount(
+  const change = addTransactionAmounts(
     {
       [instruments[transaction.incomeInstrument].shortTitle]:
         transaction.income,
@@ -146,8 +146,11 @@ function addToActivity(
 ) {
   const dayIndex = getISODateDayIndex(transaction.date)
   activity.transactionCount += 1
-  activity.total = addFxAmount(activity.total, change)
-  activity.trend[dayIndex] = addFxAmount(activity.trend[dayIndex], change)
+  activity.total = addTransactionAmounts(activity.total, change)
+  activity.trend[dayIndex] = addTransactionAmounts(
+    activity.trend[dayIndex],
+    change
+  )
 }
 
 function getISODateDayIndex(date: string): number {

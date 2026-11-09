@@ -4,7 +4,7 @@ import type { FC } from 'react'
 import { core } from '@/zerro-core/redux'
 
 import type { TISOMonth } from '@/6-shared/types'
-import { formatMoney } from '@/6-shared/helpers/money'
+import { formatValuation } from '@/6-shared/helpers/money/format'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { RadialProgress } from '@/6-shared/ui/kit/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -24,9 +24,9 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { t } = useTranslation('goals')
   const { month, ...btnProps } = props
   const [currency] = core.currency.useDisplayCurrency()
-  const toDisplay = core.currency.useToDisplay(month)
+  const toDisplay = core.currency.useToDisplay(month, 'unrounded')
   const totalProgress = useAppSelector(core.goals.selectTotals)[month]
-  const formatSum = (sum: number) => formatMoney(sum, currency)
+  const formatSum = (sum: number) => formatValuation(sum, currency)
 
   const dispatch = useAppDispatch()
   const completeAll = () => {

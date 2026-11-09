@@ -23,7 +23,8 @@ export function buildGoalTotals(
   const result: ByMonth<TGoalTotals> = {}
 
   keys(goals).forEach(month => {
-    const toValue = (amount: TFxAmount) => convertFx(amount, 'USD', month)
+    const toValue = (amount: TFxAmount) =>
+      convertFx(amount, 'USD', month, 'unrounded')
     result[month] = calcGoalTotals(goals[month], toValue)
   })
 

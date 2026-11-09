@@ -1,6 +1,9 @@
 import { keys } from '../../foundation/keys'
 import type { ByMonth } from '../../foundation/types'
-import { addFxAmount, type TFxAmount } from '../../zenmoney/model/money'
+import {
+  addTransactionAmounts,
+  type TFxAmount,
+} from '../../zenmoney/model/money'
 import type { TEnvelopeId } from '../envelope-id'
 import { EnvType, envId } from '../envelope-id'
 import type { TFxConverter } from '../fx-rates'
@@ -51,7 +54,14 @@ export function buildSortedActivity(
 
   keys(activityByType).forEach(month => {
     const { tags, transfers, debts, internal } = activityByType[month]
-    const toValue = (amount: TFxAmount) => input.convertFx(amount, 'USD', month)
+    const valuations = new Map<TFxAmount, number>()
+    const toValue = (amount: TFxAmount) => {
+      const cached = valuations.get(amount)
+      if (cached !== undefined) return cached
+      const value = input.convertFx(amount, 'USD', month, 'unrounded')
+      valuations.set(amount, value)
+      return value
+    }
     const node = makeSortedActivity()
 
     keys(tags).forEach(id => {
@@ -200,7 +210,10 @@ function mergeActivitySummary(
   activityB: TActivitySummary | undefined
 ): TActivitySummary {
   return {
-    total: addFxAmount(activityA?.total || {}, activityB?.total || {}),
+    total: addTransactionAmounts(
+      activityA?.total || {},
+      activityB?.total || {}
+    ),
     transactionCount:
       (activityA?.transactionCount || 0) + (activityB?.transactionCount || 0),
   }

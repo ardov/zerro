@@ -1,8 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { makeCoreNextDemoRootState } from '@/zerro-core/support/testing/demoState'
 import { createEmptyDataStore } from '@/zerro-core/replica'
+import { makeTestRootState } from '@/store/testing'
 import { rootReducer } from '@/store/rootReducer'
 import {
+  makeAccount,
+  makeStore,
+  makeTag,
+  makeUser,
+  makeReminder,
   makeMerchant,
   makeInstrument,
   makeTransaction,
@@ -15,6 +21,7 @@ export type StoryScenario =
   | 'receipt-and-map'
   | 'demo'
   | 'off-budget-transfers'
+  | 'small-currency-amounts'
   | 'empty'
   | 'recovery'
   | 'persistence-warning'
@@ -178,6 +185,85 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
             'N26 EUR': { ...current.account['N26 EUR'], inBalance: false },
           },
         })
+      }
+      case 'small-currency-amounts': {
+        const wallet = {
+          incomeAccount: 'wallet',
+          outcomeAccount: 'wallet',
+          incomeInstrument: 2,
+          outcomeInstrument: 2,
+        }
+        const month = '2026-01'
+        return makeTestRootState(
+          makeStore({
+            user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+            instrument: {
+              1: makeInstrument({ id: 1, shortTitle: 'USD', rate: 1 }),
+              2: makeInstrument({
+                id: 2,
+                shortTitle: 'DASH',
+                symbol: 'μDASH',
+                rate: 0.00004,
+              }),
+            },
+            account: {
+              wallet: makeAccount({
+                id: 'wallet',
+                instrument: 2,
+                inBalance: true,
+              }),
+              savings: makeAccount({
+                id: 'savings',
+                instrument: 2,
+                inBalance: true,
+              }),
+            },
+            tag: {
+              purchases: makeTag({ id: 'purchases', title: 'Purchases' }),
+              refunds: makeTag({ id: 'refunds', title: 'Refunds' }),
+            },
+            transaction: {
+              purchase: makeTransaction({
+                ...wallet,
+                id: 'purchase',
+                outcome: 0.0201,
+                tag: ['purchases'],
+              }),
+              refund: makeTransaction({
+                ...wallet,
+                id: 'refund',
+                income: 0.02,
+                tag: ['refunds'],
+              }),
+              transfer: makeTransaction({
+                ...wallet,
+                id: 'transfer',
+                incomeAccount: 'savings',
+                income: 1,
+                outcome: 1.01,
+              }),
+            },
+            reminder: {
+              meta: makeReminder('meta', {
+                type: 'EnvelopeMeta',
+                payload: {
+                  'tag#purchases': { currency: 'DASH' },
+                  'tag#refunds': { currency: 'DASH', keepIncome: true },
+                },
+              }),
+              budget: makeReminder('budget', {
+                type: 'budgets',
+                month,
+                payload: { 'tag#purchases': 0.01 },
+              }),
+              goal: makeReminder('goal', {
+                type: 'goals',
+                month,
+                payload: { 'tag#purchases': { type: 'monthly', amount: 0.02 } },
+              }),
+            },
+          })
+        )
       }
       case 'empty':
         return {

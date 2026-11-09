@@ -106,7 +106,7 @@ export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
             >
               <span>
                 {t('fixOverspends.trigger')} (
-                <DisplayAmount value={overspend} month={month} />)
+                <DisplayAmount value={overspend} month={month} showSubcent />)
               </span>
             </Button>
           )}

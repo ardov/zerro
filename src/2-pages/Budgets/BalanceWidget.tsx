@@ -3,6 +3,7 @@ import { core } from '@/zerro-core/redux'
 import { useAppSelector } from '@/store'
 
 import { useTranslation } from 'react-i18next'
+import { isZero } from '@/6-shared/helpers/money'
 import { keys } from '@/6-shared/helpers/keys'
 import type { TISOMonth } from '@/6-shared/types'
 import { Total } from '@/6-shared/ui/Total'
@@ -25,7 +26,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
   const available = toDisplay(totals.available)
   const assignedInFuture = toDisplay(totals.assignedInFuture)
   const toBeAssigned = toDisplay(totals.toBeAssigned)
-  const overspend = toDisplay(totals.overspend)
+  const hasOverspend = !isZero(totals.overspend)
 
   const smartAssignedInFuture = toBeAssigned < 0 ? 0 : assignedInFuture
 
@@ -60,7 +61,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
       />
       <hr className="m-0 w-full border-0 border-t border-ui-border" />
       <p className="m-0 text-center text-body-sm text-ui-secondary text-balance">
-        {getExplaining(fundsEnd, toBeAssigned, overspend)}
+        {getExplaining(fundsEnd, toBeAssigned, hasOverspend)}
       </p>
     </div>
   )
@@ -68,9 +69,9 @@ export function BalanceWidget(props: { month: TISOMonth }) {
   function getExplaining(
     balance: number,
     toBeAssigned: number,
-    overspend: number
+    hasOverspend: boolean
   ) {
-    if (overspend) {
+    if (hasOverspend) {
       return t('explainer.overspend')
     }
     if (toBeAssigned > 0) {

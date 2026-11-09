@@ -4,6 +4,8 @@ import {
   usdInstruments,
 } from '../../../../support/testing/zenmoneyTestData'
 import { EnvType, envId } from '../envelope-id'
+import { buildSortedActivity } from './sortedActivity'
+import { makeFxConverter } from '../../../../support/testing/zerroTestData'
 import { buildRawActivity, EnvActivity } from './rawActivity'
 import { buildActivityRoutingContext } from './transactionRouting'
 
@@ -65,6 +67,31 @@ describe('buildRawActivity', () => {
 
     expect(result['2026-01'].internal.total).toEqual({ USD: -1 })
     expect(result['2026-01'].internal.transactionCount).toBe(1)
+  })
+
+  it('keeps a four-decimal native transfer fee through the monthly summary', () => {
+    const rawActivity = buildRawActivity({
+      transactions: [
+        makeTransaction({
+          income: 1,
+          outcome: 1.0001,
+          incomeAccount: 'cash',
+          outcomeAccount: 'card',
+        }),
+      ],
+      routing: buildActivityRoutingContext({
+        inBudgetAccountIds: ['cash', 'card'],
+        debtAccountId: undefined,
+        debtors: {},
+      }),
+      instruments: usdInstruments,
+    })
+    const summary = buildSortedActivity({
+      rawActivity,
+      keepingEnvelopeIds: new Set(),
+      convertFx: makeFxConverter({ USD: 1 }),
+    })['2026-01']
+    expect(summary.transfersTotal.total).toEqual({ USD: -0.0001 })
   })
 
   it('routes debt transactions through debtor envelopes', () => {

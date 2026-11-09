@@ -83,7 +83,7 @@ function StatWidget(props: {
   const { month, total, items, name, showBar, action } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
   const [currency] = core.currency.useDisplayCurrency()
-  const toDisplay = core.currency.useToDisplay(month)
+  const toDisplay = core.currency.useToDisplay(month, 'unrounded')
   const envelopes = useAppSelector(core.envelopes.selectAll)
   const [opened, toggleOpened] = useToggle(false)
 
@@ -125,7 +125,12 @@ function StatWidget(props: {
         onClick={toggleOpened}
         className="flex flex-col items-stretch rounded-lg bg-ui-base p-4"
       >
-        <DataLine name={name} amount={totalAmount} currency={currency} />
+        <DataLine
+          name={name}
+          amount={totalAmount}
+          currency={currency}
+          showSubcent
+        />
 
         {showBar && !!totalAmount && (
           <PercentBar data={nodes} className="mt-3" />
@@ -138,6 +143,7 @@ function StatWidget(props: {
                 key={point.id}
                 name={point.name}
                 amount={point.amount}
+                showSubcent
                 color={point.color}
                 currency={currency}
                 onClick={e => {

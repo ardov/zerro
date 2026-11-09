@@ -1,6 +1,10 @@
 import type { FC } from 'react'
 import React from 'react'
-import { formatMoney } from '@/6-shared/helpers/money'
+import {
+  formatMoney,
+  formatValuation,
+  type MoneyDecimals,
+} from '@/6-shared/helpers/money/format'
 import type { TFxCode } from '@/6-shared/types'
 
 export type AmountProps = React.DetailedHTMLProps<
@@ -11,7 +15,8 @@ export type AmountProps = React.DetailedHTMLProps<
   currency?: TFxCode
   sign?: boolean
   noShade?: boolean
-  decimals?: number | 'ifOnly' | 'ifAny'
+  showSubcent?: boolean
+  decimals?: MoneyDecimals
   intProps?: React.HTMLProps<HTMLSpanElement>
   decProps?: React.HTMLProps<HTMLSpanElement>
 }
@@ -24,17 +29,16 @@ export const Amount: FC<AmountProps> = props => {
     currency,
     sign,
     noShade = false,
+    showSubcent = false,
     decimals = 2,
     intProps,
     decProps,
     ...rest
   } = props
-  let str = ''
-  if (value === 0) str = formatMoney(0, currency, decimals)
-  if (value < 0)
-    str = (sign === false ? '' : '−') + formatMoney(-value, currency, decimals)
-  if (value > 0)
-    str = (sign ? '+' : '') + formatMoney(value, currency, decimals)
+  const format = showSubcent ? formatValuation : formatMoney
+  let str = Number.isNaN(value) ? '' : format(value, currency, decimals)
+  if (value < 0) str = str.replace(/^-/, sign === false ? '' : '−')
+  if (value > 0 && sign) str = '+' + str
   const arr = str.split(',')
   if (arr.length === 2) {
     return (

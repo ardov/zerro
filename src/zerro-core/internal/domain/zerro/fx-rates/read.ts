@@ -1,6 +1,6 @@
 import { toISOMonth } from '../../foundation/date'
 import { keys } from '../../foundation/keys'
-import { convertFx } from '../../zenmoney/model/money'
+import { convertFx, convertFxUnrounded } from '../../zenmoney/model/money'
 import type { ById, ByMonth } from '../../foundation/types'
 import type { TDateDraft, TISOMonth, TMsTime } from '../../zenmoney/primitives'
 import type { TFxAmount } from '../../zenmoney/model/money'
@@ -28,7 +28,8 @@ export type TFxRatesGetter = (date: TDateDraft | 'current') => TFxRateData
 export type TFxConverter = (
   amount: TFxAmount,
   target: TFxCode,
-  date: TDateDraft | 'current'
+  date: TDateDraft | 'current',
+  precision?: 'money' | 'unrounded'
 ) => number
 
 export function getStoredFxRates(
@@ -99,7 +100,12 @@ export function buildFxRatesGetter(input: {
 }
 
 export function buildFxConverter(getter: TFxRatesGetter): TFxConverter {
-  return (amount, target, date) => convertFx(amount, target, getter(date).rates)
+  return (amount, target, date, precision = 'money') => {
+    const { rates } = getter(date)
+    return precision === 'unrounded'
+      ? convertFxUnrounded(amount, target, rates)
+      : convertFx(amount, target, rates)
+  }
 }
 
 function mergeRates(

@@ -8,7 +8,7 @@ import { useAppSelector } from '@/store'
 
 import { useTranslation } from 'react-i18next'
 import { Divider } from '@/6-shared/ui/kit/Divider'
-import { sub } from '@/6-shared/helpers/money'
+import { isZero, sub } from '@/6-shared/helpers/money'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { Amount } from '@/6-shared/ui/Amount'
 import { DataLine } from '@/3-widgets/DataLine'
@@ -83,8 +83,8 @@ function useTotalsModel() {
   const lastTotals = useAppSelector(core.months.selectTotals)[lastMonth]
 
   const toBeAssigned = toDisplay(totals.toBeAssigned)
-  const overspend = toDisplay(totals.overspend)
-  const hasFutureOverspend = toDisplay(lastTotals.overspend)
+  const hasOverspend = !isZero(totals.overspend)
+  const hasFutureOverspend = !isZero(lastTotals.overspend)
   const fundsEnd = toDisplay(totals.fundsEnd)
   const allocated = toDisplay(totals.available)
   const assignedInFuture = toDisplay(totals.assignedInFuture)
@@ -98,7 +98,7 @@ function useTotalsModel() {
         : assignedInFuture
 
   const msgType: TMsgType =
-    toBeAssigned < 0 ? 'error' : overspend ? 'warning' : 'success'
+    toBeAssigned < 0 ? 'error' : hasOverspend ? 'warning' : 'success'
 
   const messages = {
     success: toBeAssigned
@@ -139,7 +139,6 @@ function useTotalsModel() {
   return {
     currency,
     toBeAssigned,
-    overspend,
     hasFutureOverspend,
     month,
     msgType,

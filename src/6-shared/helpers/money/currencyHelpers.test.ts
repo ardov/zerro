@@ -44,9 +44,15 @@ describe('round', () => {
     expect(Object.is(round(-0.004), 0)).toBe(true)
   })
 
-  it('leaves amounts printed with an exponent as they are', () => {
-    expect(round(1e-7)).toBe(1e-7)
-    expect(round(-3e-9)).toBe(-3e-9)
+  it('rounds sub-cent FX remainders to unsigned zero', () => {
+    const remainder = 110 - 100 * 1.1
+    expect(round(remainder)).toBe(0)
+    expect(round(-remainder)).toBe(0)
+  })
+
+  it('rounds positive and negative half cents towards positive infinity', () => {
+    expect(round(0.005)).toBe(0.01)
+    expect(round(-0.005)).toBe(0)
   })
 
   it('follows the printed-form rule on everyday amounts and near-ties', () => {
@@ -60,6 +66,7 @@ describe('round', () => {
  * number's shortest printed form, round, and shift it back. */
 function printedFormRound(amount: number): number {
   if (!Number.isFinite(amount)) return amount
+  if (Math.abs(amount) < 0.005) return 0
   const shifted = Number(`${amount}e2`)
   if (!Number.isFinite(shifted)) return amount
   const rounded = Number(`${Math.round(shifted)}e-2`)

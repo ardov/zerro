@@ -13,6 +13,7 @@ type DataLineProps = HTMLAttributes<HTMLDivElement> & {
   name: ReactNode
   amount?: AmountProps['value']
   currency?: AmountProps['currency']
+  showSubcent?: boolean
   instrument?: TSmartAmountProps['instrument']
   sign?: AmountProps['sign']
   color?: string
@@ -25,6 +26,7 @@ export const DataLine: FC<DataLineProps> = ({
   name,
   amount,
   currency,
+  showSubcent,
   instrument,
   sign,
   color,
@@ -58,6 +60,7 @@ export const DataLine: FC<DataLineProps> = ({
             currency={currency}
             instrument={instrument}
             sign={sign}
+            showSubcent={showSubcent}
           />
         </span>
       )}

@@ -10,7 +10,7 @@ import {
 } from '../merchants'
 import type { TTag, TTagId } from '../tags'
 import { getRootUser, type TUser } from '../users'
-import { round } from '../../../foundation/numbers'
+import { getPostingNet } from './combination'
 import { getTransaction, getTransactionType, TrType } from './read'
 import { makeTransaction } from './factory'
 import {
@@ -349,10 +349,17 @@ export function compileCombineToOutcome(
   if (!outcome) throw new Error('No outcome transaction to combine into')
 
   const { outcomeInstrument, outcomeAccount } = outcome
-  let outcomeSum = outcome.outcome
+  const remaining = getPostingNet(incomes, outcomes).negated()
+  if (
+    outcomes.length !== 1 ||
+    !remaining.isPositive() ||
+    remaining.decimalPlaces() > 4
+  )
+    throw new Error(
+      'The remaining expense must be a positive transaction amount'
+    )
 
   const transaction: TTransactionPatch[] = incomes.map(tr => {
-    outcomeSum = round(outcomeSum - tr.income)
     if (tr.incomeAccount === outcomeAccount) {
       return { id: tr.id, deleted: true }
     }
@@ -363,7 +370,7 @@ export function compileCombineToOutcome(
       outcomeInstrument,
     }
   })
-  transaction.push({ id: outcome.id, outcome: outcomeSum })
+  transaction.push({ id: outcome.id, outcome: remaining.toNumber() })
 
   return { transaction }
 }
@@ -381,10 +388,17 @@ export function compileCombineToIncome(
   if (!income) throw new Error('No income transaction to combine into')
 
   const { incomeInstrument, incomeAccount } = income
-  let incomeSum = income.income
+  const remaining = getPostingNet(incomes, outcomes)
+  if (
+    incomes.length !== 1 ||
+    !remaining.isPositive() ||
+    remaining.decimalPlaces() > 4
+  )
+    throw new Error(
+      'The remaining income must be a positive transaction amount'
+    )
 
   const transaction: TTransactionPatch[] = outcomes.map(tr => {
-    incomeSum = round(incomeSum - tr.outcome)
     if (tr.outcomeAccount === incomeAccount) {
       return { id: tr.id, deleted: true }
     }
@@ -395,7 +409,7 @@ export function compileCombineToIncome(
       incomeInstrument,
     }
   })
-  transaction.push({ id: income.id, income: incomeSum })
+  transaction.push({ id: income.id, income: remaining.toNumber() })
 
   return { transaction }
 }

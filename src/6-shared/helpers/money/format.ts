@@ -1,4 +1,5 @@
 import type { TFxCode } from '@/6-shared/types'
+import { round } from './currencyHelpers'
 import currencySymbols from './currencySymbols.json'
 
 const currencyInfo = currencySymbols as Record<
@@ -6,6 +7,11 @@ const currencyInfo = currencySymbols as Record<
   { name: string; symbol?: string }
 >
 
+export type MoneyDecimals = number | 'ifOnly' | 'ifAny'
+const subcentFormat = new Intl.NumberFormat('ru-RU', {
+  useGrouping: false,
+  maximumSignificantDigits: 2,
+})
 const moneySeparator = '\u00a0'
 export const moneyDecimalSeparator = ','
 
@@ -32,7 +38,7 @@ function formatNumber(number: number, decimals: number): string {
 export function formatMoney(
   number: number,
   currency?: TFxCode | null,
-  decimals: number | undefined | 'ifOnly' | 'ifAny' = 2
+  decimals: MoneyDecimals = 2
 ): string {
   if (decimals === 'ifOnly') {
     decimals = number !== 0 && number < 1 && number > -1 ? 2 : 0
@@ -45,6 +51,20 @@ export function formatMoney(
     return value + moneySeparator + getCurrencySymbol(currency)
   }
   return value
+}
+
+/** Keep the first significant digits when a real FX value would display as zero. */
+export function formatValuation(
+  value: number,
+  currency?: TFxCode | null,
+  decimals: MoneyDecimals = 2
+): string {
+  const rounded = round(value)
+  if (value !== 0 && rounded === 0) {
+    const text = subcentFormat.format(value)
+    return currency ? text + moneySeparator + getCurrencySymbol(currency) : text
+  }
+  return formatMoney(rounded, currency, decimals)
 }
 
 export function rateToWords(

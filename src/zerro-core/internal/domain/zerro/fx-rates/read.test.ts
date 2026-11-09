@@ -53,5 +53,8 @@ describe('fx rates', () => {
     expect(convert({ EUR: 8 }, 'USD', '2026-01')).toBe(32)
     expect(convert({ EUR: 8 }, 'USD', '2026-02')).toBe(32)
     expect(convert({ EUR: 8 }, 'USD', 'current')).toBe(16)
+    expect(convert({ EUR: 0.0001 }, 'USD', '2026-01')).toBe(0)
+    expect(convert({ EUR: 0.0001 }, 'USD', '2026-01', 'unrounded')).toBe(0.0004)
+    expect(convert({ EUR: 0.0001 }, 'USD', 'current', 'unrounded')).toBe(0.0002)
   })
 })
