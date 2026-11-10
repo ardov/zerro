@@ -286,7 +286,7 @@ export const TransactionPairs: Story = {
     await expect(editor).toBeVisible()
     await userEvent.click(within(editor).getByRole('button', { name: 'More' }))
     await userEvent.click(
-      await body.findByRole('button', { name: 'Merchant transactions' })
+      await body.findByRole('button', { name: /^With the same place/ })
     )
     const child = await body.findByRole('dialog', { name: 'Lidl' })
     await userEvent.click(await within(child).findByText('Dinner groceries'))

@@ -340,6 +340,17 @@ describe('last-modified transaction filter', () => {
       compileTransactionQuery({ clauses: [{ kind: 'changed' }] })(transaction)
     ).toBe(true)
   })
+  it('matches one exact update time, whatever the period says', () => {
+    const at = midnight(10) + 1234
+    const transaction = makeTransaction({ changed: at, outcome: 1 })
+    const matches = compileTransactionQuery(
+      { clauses: [{ kind: 'changed', at, period: 'today' }] },
+      undefined,
+      now
+    )
+    expect(matches(transaction)).toBe(true)
+    expect(matches({ ...transaction, changed: at + 1 })).toBe(false)
+  })
 })
 
 describe('debtor and currency filters', () => {

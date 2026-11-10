@@ -138,7 +138,8 @@ export function FilterChip({
           value={clause.period ?? null}
           clearable={false}
           onChange={period => {
-            onChange({ ...clause, period })
+            // Choosing a period replaces an exact update time.
+            onChange({ kind: 'changed', period })
             popup.setOpen(false)
           }}
           popup={popup}

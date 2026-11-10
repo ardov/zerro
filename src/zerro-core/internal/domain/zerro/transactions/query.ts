@@ -60,7 +60,9 @@ export type TTransactionFilterClause =
   | { kind: 'type'; values: TrFilterType[] }
   | { kind: 'amount'; gte?: number; lte?: number; currencies?: string[] }
   | { kind: 'date'; from?: TISODate; to?: TISODate }
-  | { kind: 'changed'; period?: TChangedPeriod }
+  /** `at` is one exact update time, named by a transaction that carries it.
+   * It wins over `period`. */
+  | { kind: 'changed'; period?: TChangedPeriod; at?: number }
   | { kind: 'viewed'; value: boolean }
   | { kind: 'deleted'; mode: 'hide' | 'include' | 'only' }
   | {
@@ -194,6 +196,8 @@ function compileClause(
       }
     }
     case 'changed': {
+      const { at } = clause
+      if (at !== undefined) return transaction => transaction.changed === at
       if (!clause.period) return () => true
       const now = new Date(referenceTime)
       // Calendar boundaries in the user's timezone, including DST changes.

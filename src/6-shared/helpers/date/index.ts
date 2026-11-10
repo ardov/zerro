@@ -4,6 +4,7 @@ export {
   formatDate,
   formatTimeAgo,
   formatTransactionTimestamp,
+  formatAbsoluteTimestamp,
   getDateLocale,
 } from './formatDate'
 export {

@@ -1,4 +1,5 @@
 import type { useTranslation } from 'react-i18next'
+import { formatAbsoluteTimestamp } from '@/6-shared/helpers/date'
 import { getDateFilterLabel } from './dateFilterLabel'
 import { core } from '@/zerro-core/redux'
 
@@ -93,7 +94,8 @@ export function isEmptyClause(clause: Clause): boolean {
       !clause.currencies?.length
     )
   }
-  if (clause.kind === 'changed') return !clause.period
+  if (clause.kind === 'changed')
+    return !clause.period && clause.at === undefined
   if (clause.kind === 'date') return !clause.from && !clause.to
   return false
 }
@@ -144,6 +146,8 @@ export function getClauseLabel(
     case 'amount':
       return getAmountLabel(clause, t, language)
     case 'changed':
+      if (clause.at !== undefined)
+        return t('modifiedAt', { date: formatAbsoluteTimestamp(clause.at) })
       return clause.period
         ? getChangedPeriodLabel(clause.period, t, true)
         : t('lastChanged')

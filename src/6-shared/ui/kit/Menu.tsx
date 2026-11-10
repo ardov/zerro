@@ -26,6 +26,8 @@ type ItemContent = {
   label: string
   description?: string
   start?: ReactNode
+  /** Trailing value, such as a count. A checkbox shows its switch instead. */
+  end?: ReactNode
   disabled?: boolean
 }
 export type MenuItem =
@@ -443,7 +445,9 @@ function MenuRow(
               )}
             />
           </span>
-        ) : undefined
+        ) : (
+          item.end
+        )
       }
     />
   )

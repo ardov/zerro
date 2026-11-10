@@ -239,7 +239,7 @@ export const RecursivePairs: Story = {
         within(editor).getByRole('button', { name: 'More' })
       )
       await userEvent.click(
-        await body.findByRole('menuitem', { name: 'Merchant transactions' })
+        await body.findByRole('menuitem', { name: /^With the same place/ })
       )
     }
     await openCounterparty(pageEditor)
@@ -291,6 +291,68 @@ export const RecursivePairs: Story = {
   },
 }
 
+/** The editor's menu leads to lists by category and by exact update time. */
+export const RelatedLists: Story = {
+  tags: ['check'],
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    // Stamps Lunch alone with a new update time.
+    fireEvent.click(canvas.getByTestId('change-lunch-merchant'))
+    await userEvent.click(canvas.getByText('Lunch groceries'))
+    const editor = await canvas.findByRole('region', { name: 'Transaction' })
+    const openFromMenu = async (name: RegExp) => {
+      await userEvent.click(
+        within(editor).getByRole('button', { name: 'More' })
+      )
+      await userEvent.click(await body.findByRole('menuitem', { name }))
+    }
+
+    // Each list names how many transactions it holds.
+    await openFromMenu(/^From the same sync\s*1$/)
+    const updated = await body.findByRole('dialog', { name: /^Updated / })
+    await within(updated).findByText('Lunch groceries')
+    expect(within(updated).queryByText('Dinner groceries')).toBeNull()
+    await waitFor(() =>
+      expect(within(updated).getByText(/^Modified /)).toBeVisible()
+    )
+    fireEvent.click(canvas.getByTestId('back'))
+    await waitFor(() => expect(updated).not.toBeInTheDocument())
+
+    await openFromMenu(/^With the same category\s*4$/)
+    const category = await body.findByRole('dialog', { name: /Food/ })
+    await within(category).findByText('Dinner groceries')
+    await within(category).findByText('Lunch groceries')
+  },
+}
+
+/** A debt leads to its debtor, whichever of merchant or payee names them. */
+export const DebtorList: Story = {
+  tags: ['check'],
+  parameters: {
+    app: {
+      scenario: 'debtor-navigation',
+      globalWidgets: true,
+      route: '/transactions',
+    },
+  },
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByText('Alex dollar loan'))
+    const editor = await canvas.findByRole('region', { name: 'Transaction' })
+    await userEvent.click(within(editor).getByRole('button', { name: 'More' }))
+    await userEvent.click(
+      await body.findByRole('menuitem', { name: /^With the same debtor\s*3$/ })
+    )
+    const list = await body.findByRole('dialog', { name: 'Alex' })
+    await within(list).findByText('Alex euro loan')
+    expect(within(list).queryByText('Bob loan')).toBeNull()
+  },
+}
+
 export const RecreationBeforeChild: Story = {
   tags: ['check'],
   render: () => <Harness />,
@@ -312,7 +374,7 @@ export const RecreationBeforeChild: Story = {
     fireEvent.change(time, { target: { value: '13:37' } })
     await userEvent.click(within(details).getByRole('button', { name: 'More' }))
     await userEvent.click(
-      await body.findByRole('menuitem', { name: 'Merchant transactions' })
+      await body.findByRole('menuitem', { name: /^With the same place/ })
     )
     const childList = await body.findByRole('dialog', { name: 'Lidl' })
     await within(childList).findByText('Lunch groceries')
@@ -617,7 +679,7 @@ export const CoveredTransactionDisappears: Story = {
     const editor = await canvas.findByRole('region', { name: 'Transaction' })
     await userEvent.click(within(editor).getByRole('button', { name: 'More' }))
     await userEvent.click(
-      await body.findByRole('menuitem', { name: 'Merchant transactions' })
+      await body.findByRole('menuitem', { name: /^With the same place/ })
     )
     const list = await body.findByRole('dialog', { name: 'Lidl' })
     await within(list).findByText('Lunch groceries')
@@ -721,7 +783,7 @@ export const RestoredLegacyModalEntry: Story = {
     await expectPointerTarget(more)
     await userEvent.click(more)
     const action = await body.findByRole('menuitem', {
-      name: 'Merchant transactions',
+      name: /^With the same place/,
     })
     await expectPointerTarget(action)
     await userEvent.click(action)
@@ -828,7 +890,7 @@ export const ExplicitListCloseRestoresOpener: Story = {
     const opener = within(editor).getByRole('button', { name: 'More' })
     await userEvent.click(opener)
     await userEvent.click(
-      await body.findByRole('menuitem', { name: 'Merchant transactions' })
+      await body.findByRole('menuitem', { name: /^With the same place/ })
     )
     const list = await body.findByRole('dialog', { name: 'Lidl' })
     await userEvent.click(

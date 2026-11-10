@@ -148,7 +148,7 @@ function TransactionDetails({ id }: { id: string }) {
   const { remove } = transactionDetails.use()
   const removeSelf = useCallback(() => remove(id), [id, remove])
   const shownId = useTransactionHandover(value?.content.id, removeSelf)
-  const openCounterparty = useOpenCounterpartyTransactions()
+  const openList = useOpenRelatedTransactions()
   if (!shownId) return null
   return (
     <TransactionPreview
@@ -161,12 +161,12 @@ function TransactionDetails({ id }: { id: string }) {
         }))
       }
       onPendingEdit={pending.register}
-      onOpenCounterparty={openCounterparty}
+      onOpenList={openList}
     />
   )
 }
 
-export function useOpenCounterpartyTransactions() {
+export function useOpenRelatedTransactions() {
   const openList = useTransactionDrawer()
   return useCallback(
     (query: core.transactions.TTransactionQuery, title: string) => {

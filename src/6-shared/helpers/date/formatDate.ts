@@ -46,8 +46,15 @@ export function formatTransactionTimestamp(date: TDateDraft): string {
   const time = formatDate(d, 'HH:mm')
   if (isToday(d)) return `${t('common:today')}, ${time}`
   if (isYesterday(d)) return `${t('common:yesterday')}, ${time}`
+  return formatAbsoluteTimestamp(d)
+}
+
+/** The day and the minute, never relative: for a label that outlives the
+ * moment it was written in, such as a filter by one exact time. */
+export function formatAbsoluteTimestamp(date: TDateDraft): string {
+  const d = parseDate(date)
   const day = formatDate(d, isThisYear(d) ? 'd MMM' : 'd MMM yyyy')
-  return `${day.replace(/\./g, '')}, ${time}`
+  return `${day.replace(/\./g, '')}, ${formatDate(d, 'HH:mm')}`
 }
 
 /** The `date-fns` locale the interface is currently in. Read at call time

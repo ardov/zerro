@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { TransactionList } from '@/3-widgets/transaction/TransactionList'
 import {
   transactionScreen,
@@ -19,7 +19,6 @@ export default function TransactionsView() {
   const layout = useColumns()
   const docked = layout.visible.includes('detail')
   const accountsPanelFits = layout.visible.includes('accounts')
-  const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const view = useTransactionsPageView()
   // One selected editor moves between its column and a modal as space changes.
   const opened = transactionScreen.useValue()
@@ -43,7 +42,6 @@ export default function TransactionsView() {
 
         <Panel>
           <TransactionList
-            checkedDate={checkedDate}
             view={view}
             className="grow"
             onTrOpen={handleTrOpen}
@@ -51,10 +49,7 @@ export default function TransactionsView() {
           />
         </Panel>
 
-        <TransactionScreenPanel
-          docked={docked}
-          onSelectSimilar={changed => setCheckedDate(new Date(changed))}
-        />
+        <TransactionScreenPanel docked={docked} />
       </Columns>
     </>
   )

@@ -32,7 +32,6 @@ export type TTransactionListProps = {
   transactionIds?: TTransactionId[]
   initialQuery?: core.transactions.TTransactionQuery
   hideFilter?: boolean
-  checkedDate?: Date | null
   initialDate?: TDateDraft
   view?: TTransactionListView
   className?: string
@@ -57,7 +56,6 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     transactionIds,
     initialQuery,
     hideFilter = false,
-    checkedDate,
     initialDate,
     view,
     className,
@@ -179,13 +177,6 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   )
 
   const ask = useAsk()
-
-  const prevCheckedDate = useRef(checkedDate)
-  useEffect(() => {
-    if (prevCheckedDate.current === checkedDate) return
-    prevCheckedDate.current = checkedDate
-    if (checkedDate) onSelectSimilar(checkedDate)
-  }, [checkedDate, onSelectSimilar])
 
   // Groups carry only ids and depend on the list alone, so opening or checking
   // a transaction never rebuilds them. The heavy `<Transaction>` elements are

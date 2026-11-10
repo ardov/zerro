@@ -11,7 +11,7 @@ import {
 } from '../transaction/TransactionPreview'
 import { useTransactionHandover } from '../transaction/TransactionPreview/useTransactionHandover'
 import { usePendingEdit } from '../transaction/TransactionPreview/usePendingEdit'
-import { useOpenCounterpartyTransactions } from './TransactionListDrawer'
+import { useOpenRelatedTransactions } from './TransactionListDrawer'
 
 /** A screen: one transaction, described by its id alone, so Back, Forward and
  * a reload all bring it back.
@@ -42,19 +42,12 @@ export const TransactionPreviewDrawer = () => {
   )
 }
 
-export function TransactionScreenPanel({
-  docked,
-  onSelectSimilar,
-}: {
-  docked: boolean
-  onSelectSimilar?: (date: number) => void
-}) {
+export function TransactionScreenPanel({ docked }: { docked: boolean }) {
   return (
     <TransactionScreenDrawer
       screen={transactionScreen}
       docked={docked}
       adaptive
-      onSelectSimilar={onSelectSimilar}
     />
   )
 }
@@ -63,17 +56,15 @@ function TransactionScreenDrawer({
   screen,
   docked = false,
   adaptive = false,
-  onSelectSimilar,
 }: {
   screen: typeof transactionScreen
   docked?: boolean
   adaptive?: boolean
-  onSelectSimilar?: (date: number) => void
 }) {
   const { t } = useTranslation('common')
   const active = useIsTopScreen(screen.name)
   const pending = usePendingEdit()
-  const openCounterparty = useOpenCounterpartyTransactions()
+  const openList = useOpenRelatedTransactions()
   const [id, setId] = screen.use(pending.finish)
   const openOther = screen.useOpen()
   const remove = screen.useRemove()
@@ -93,8 +84,7 @@ function TransactionScreenDrawer({
       onClose={onClose}
       onPendingEdit={pending.register}
       onOpenOther={openOther}
-      onSelectSimilar={onSelectSimilar}
-      onOpenCounterparty={openCounterparty}
+      onOpenList={openList}
     />
   ) : (
     <TrEmptyState />

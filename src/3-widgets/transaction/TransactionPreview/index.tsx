@@ -70,7 +70,7 @@ import {
   toPatch,
 } from './draft'
 import { createDefaultsFromQuery } from './createDefaults'
-import { counterpartyList } from './counterparty'
+import { relatedLists } from './relatedLists'
 import {
   loadLastTransactionAccount,
   saveLastTransactionAccount,
@@ -92,9 +92,9 @@ export type TransactionPreviewProps = {
   id: string
   onClose: () => void
   onOpenOther: (id: TTransactionId) => void
-  onSelectSimilar?: (date: number) => void
   onPendingEdit?: TPendingEdit
-  onOpenCounterparty?: (
+  /** Opens a list of related transactions over this surface. */
+  onOpenList?: (
     query: core.transactions.TTransactionQuery,
     title: string
   ) => void
@@ -179,9 +179,8 @@ const TransactionEditor = ({
   tr,
   onClose,
   onOpenOther,
-  onSelectSimilar,
   onPendingEdit,
-  onOpenCounterparty,
+  onOpenList,
   createQuery,
   createFrom,
   createPopup,
@@ -190,9 +189,8 @@ const TransactionEditor = ({
   tr?: TTransaction
   onClose: () => void
   onOpenOther: (id: TTransactionId) => void
-  onSelectSimilar?: (date: number) => void
   onPendingEdit?: TPendingEdit
-  onOpenCounterparty?: TransactionPreviewProps['onOpenCounterparty']
+  onOpenList?: TransactionPreviewProps['onOpenList']
   createQuery?: core.transactions.TTransactionQuery
   createFrom?: TTransaction
   createPopup?: SurfaceController
@@ -215,6 +213,8 @@ const TransactionEditor = ({
   const accounts = core.accounts.usePopulated()
   const allAccounts = core.accounts.useAll()
   const tags = useAppSelector(core.tags.selectAll)
+  const tagNames = useAppSelector(core.tags.selectPopulated)
+  const debtorNames = useAppSelector(core.debtors.selectOptions)
   const merchants = core.merchants.useAll()
   const instruments = core.instruments.useAll()
   const debtAccountId = useAppSelector(core.accounts.selectDebtAccountId)
@@ -411,13 +411,19 @@ const TransactionEditor = ({
       : instruments[instrument]?.shortTitle
   }
 
-  const counterparty =
-    tr &&
-    counterpartyList(
-      tr.merchant ? merchants[tr.merchant] : undefined,
-      tr.payee,
-      t
-    )
+  const lists = useMemo(
+    () =>
+      tr && onOpenList
+        ? relatedLists(tr, {
+            merchants,
+            tagNames,
+            debtorNames,
+            debtAccountId,
+            t,
+          })
+        : [],
+    [tr, onOpenList, merchants, tagNames, debtorNames, debtAccountId, t]
+  )
 
   const content = (
     // `min-h-full` fills a column it is laid out in; `grow` fills a drawer's
@@ -441,18 +447,12 @@ const TransactionEditor = ({
             deleted={tr.deleted}
             viewed={core.transactions.isViewed(tr)}
             onCopy={() => ask(<TransactionCopy transaction={tr} />)}
-            counterparty={
-              onOpenCounterparty && counterparty
-                ? {
-                    label: counterparty.label,
-                    onOpen: () => {
-                      // A time edit must name its recreated id before this is covered.
-                      save(draft)
-                      onOpenCounterparty(counterparty.query, counterparty.title)
-                    },
-                  }
-                : undefined
-            }
+            lists={lists}
+            onOpenList={list => {
+              // A time edit must name its recreated id before this is covered.
+              save(draft)
+              onOpenList?.(list.query, list.title)
+            }}
             onDelete={() => {
               remove([id])
               track('transaction_deleted', {
@@ -477,9 +477,6 @@ const TransactionEditor = ({
                 source: 'preview',
               })
             }}
-            onSelectSimilar={
-              onSelectSimilar ? () => onSelectSimilar(tr.changed) : undefined
-            }
           />
         )}
         <IconButton

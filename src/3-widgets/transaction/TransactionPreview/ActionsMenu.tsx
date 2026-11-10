@@ -1,4 +1,10 @@
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
+import { useLocalDay } from '@/6-shared/hooks/useLocalDay'
+import { usePopup } from '@/6-shared/overlays'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import { Menu, type MenuItem } from '@/6-shared/ui/kit/Menu'
 import {
@@ -6,18 +12,19 @@ import {
   DeleteIcon,
   MoreVertIcon,
   RestoreFromTrashIcon,
-  SyncIcon,
+  SearchIcon,
   VisibilityIcon,
 } from '@/6-shared/ui/Icons'
+import type { TRelatedList } from './relatedLists'
 
 export type TransactionActions = {
   onCopy: () => void
   onDelete: () => void
   onRestore: () => void
   onSetViewed: (viewed: boolean) => void
-  /** Only offered where the surface has somewhere to show the result. */
-  onSelectSimilar?: () => void
-  counterparty?: { label: string; onOpen: () => void }
+  /** Lists this transaction leads to. Offered where one can be opened. */
+  lists: readonly TRelatedList[]
+  onOpenList: (list: TRelatedList) => void
 }
 
 export function ActionsMenu(
@@ -30,10 +37,13 @@ export function ActionsMenu(
     onDelete,
     onRestore,
     onSetViewed,
-    onSelectSimilar,
-    counterparty,
+    lists,
+    onOpenList,
   } = props
-  const { t } = useTranslation(['transaction', 'transactionContextMenu'])
+  const { t, i18n } = useTranslation(['transaction', 'transactionContextMenu'])
+  const popup = usePopup()
+  const counts = useListCounts(lists, popup.open)
+  // What changes this transaction comes first; where it leads comes after.
   const items: MenuItem[] = [
     {
       id: 'copy',
@@ -42,19 +52,6 @@ export function ActionsMenu(
       onSelect: onCopy,
     },
   ]
-  if (counterparty)
-    items.push({
-      id: 'counterparty',
-      label: counterparty.label,
-      onSelect: counterparty.onOpen,
-    })
-  if (onSelectSimilar)
-    items.push({
-      id: 'similar',
-      start: <SyncIcon />,
-      label: t('btnOtherFromSync'),
-      onSelect: onSelectSimilar,
-    })
   if (!deleted)
     items.push({
       id: 'viewed',
@@ -82,9 +79,22 @@ export function ActionsMenu(
           onSelect: onDelete,
         }
   )
+  if (lists.length) {
+    items.push({ id: 'lists', type: 'separator' })
+    lists.forEach((list, index) => {
+      items.push({
+        id: list.id,
+        start: <SearchIcon />,
+        label: list.label,
+        end: counts?.[index].toLocaleString(i18n.language),
+        onSelect: () => onOpenList(list),
+      })
+    })
+  }
   return (
     <Menu
       label={t('btnActions')}
+      popup={popup}
       items={items}
       trigger={
         <IconButton variant="ghost" size="sm" label={t('btnActions')}>
@@ -93,4 +103,26 @@ export function ActionsMenu(
       }
     />
   )
+}
+
+/** How many transactions each list would show. Counted only for an open menu,
+ * and kept while it closes so the numbers do not vanish mid-exit. */
+function useListCounts(lists: readonly TRelatedList[], open: boolean) {
+  const transactions = useAppSelector(core.transactions.selectAll)
+  const context = useAppSelector(core.transactions.selectQueryContext)
+  const today = useLocalDay()
+  const counts = useMemo(() => {
+    if (!open) return undefined
+    const checks = lists.map(list =>
+      core.transactions.compileQuery(list.query, context, today)
+    )
+    const counts = checks.map(() => 0)
+    Object.values(transactions).forEach(transaction =>
+      checks.forEach((check, index) => {
+        if (check(transaction)) counts[index]++
+      })
+    )
+    return counts
+  }, [open, lists, transactions, context, today])
+  return useCachedValue(counts, open)
 }
