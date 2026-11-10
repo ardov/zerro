@@ -1,60 +1,33 @@
-# [Zerro](https://zerro.app/)
+# Zerro
 
-**An independent Zenmoney web app with envelope budgeting**
+See what you can spend now and what you have set aside. Zerro is an independent web app that turns Zenmoney categories into budget envelopes. Try the demo from the sign-in screen or connect your Zenmoney account.
 
-Zerro syncs with your Zenmoney account and lets you plan every koruna, euro or dollar using YNAB-style envelope budgets.
+- Plan across currencies, move money between envelopes and save toward goals.
+- Review income and spending, edit transactions in bulk and undo changes before syncing.
+- Work offline after the app has loaded. Backups export the last confirmed server state. Restore previews changes before you apply them.
 
-[Channel with updates](https://t.me/zerroapp) | [User chat](https://t.me/zerrochat)
+[Open Zerro](https://zerro.app/) · [Getting started](https://zerro.app/en/about/quick-start) · [Updates](https://t.me/zerroapp) · [User chat](https://t.me/zerrochat)
 
-## Main features
+## Development
 
-- 💰 **Envelope budgeting** across multiple currencies
-- 🎯 **Savings goals** for big purchases or rainy‑day funds
-- 💹 **Analytics** of income, expenses and net worth
-- ⚡️ **Bulk actions**: merge, change categories, delete, and restore deleted operations
-- 💾 **Full backup** export and guarded restoration
-- 📱 **Mobile-friendly** progressive web app (PWA) and works even offline
+Use Node.js 24 (see `.nvmrc`) and the pnpm version pinned in `package.json`. From the checkout run:
 
-## Links
+```sh
+pnpm install
+pnpm dev
+```
 
-- [Zerro](https://zerro.app/) / [updates](https://t.me/zerroapp) / [chat](https://t.me/zerrochat)
-- [Zenmoney](https://zenmoney.app/) + [API documentation](https://github.com/zenmoney/ZenPlugins/wiki/Zenmoney-API)
-- [YNAB](https://www.youneedabudget.com/) — they are good at explaining the concept of envelope budgeting
+Open [localhost:3000](http://localhost:3000/). Discuss larger contributions in an issue or the user chat before implementation.
 
-## Contributing
+[Verification](docs/agents/verification.md) · [Core architecture](src/zerro-core/support/documents/README.md) · [UI conventions](docs/ui-styling.md)
 
-If you want to contribute, let's discuss the idea first here in issues or in [chat](https://t.me/zerrochat)/[dm](https://t.me/ardov). I'm open to suggestions and ideas but I don't want to waste your time on things that don't fit the product 🖤
+## Build version
 
-### Run locally
-
-1. Install [pnpm](https://pnpm.io/) and [Node.js](https://nodejs.org/)
-2. Clone the repository
-3. `pnpm install` to install dependencies
-4. `pnpm run dev` to run the development server on [http://localhost:3000](http://localhost:3000/)
-5. You are great
-
-### Production version
-
-For a Vercel production build from `master`, the nearest `vMAJOR.MINOR.0` tag
-on the commit's first-parent history sets the major and minor version. Each
-subsequent commit on that line adds one to the patch, including a merge commit.
-For example, merging `beta` with a merge commit immediately after `v2.1.0`
-produces `2.1.1`.
-
-To start a series, tag the intended commit on `master` and push the branch and
-tag together.
+Vercel production builds from `master` count first-parent commits after the nearest `vMAJOR.MINOR.0` tag. A merge counts as one commit. To start a series, tag its first commit and push the tag with the branch:
 
 ```sh
 git tag -a v2.1.0 -m v2.1.0
 git push --atomic origin master refs/tags/v2.1.0
 ```
 
-The production build fetches the history and tags from GitHub for the commit
-Vercel is deploying. Local and preview builds read the version from `package.json`.
-
-### Run locally in docker
-
-```bash
-docker build -t zerro:dev .
-docker run -it -d --rm -v ${PWD}:/app -v /app/node_modules -p 3000:3000 -e CHOKIDAR_USEPOLLING=true zerro:dev
-```
+Local and preview builds use the package version.

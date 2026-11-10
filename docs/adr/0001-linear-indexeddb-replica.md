@@ -1,16 +1,5 @@
-# Store the browser replica as one linear IndexedDB journal
+# Keep one linear IndexedDB journal
 
-The browser stores one replica per root user as a linear sequence of checkpoints
-and compact canonical transitions, with the outbox in the replica manifest.
-Full synchronization appends a checkpoint rather than creating a branch, and a
-schema upgrade destructively removes the old per-domain cache. This favors a
-single replay and retention model that one maintainer can reason about; old
-formats and concurrent-tab coordination are deliberately unsupported.
+The browser keeps one active root-user replica. Its manifest contains the Outbox and cursor. A sequence of checkpoints and compact canonical transitions reconstructs the accepted state. Full reload appends a checkpoint. Changing the root user clears the previous replica.
 
-## Consequences
-
-Startup replays only from the latest checkpoint, history loads pages and one
-selected snapshot lazily, and retention compacts bounded oldest prefixes under
-the stricter of the age and byte limits. A future multi-account UI can keep the
-same database and partition both stores by root user, but today's runtime keeps
-exactly one replica and clears it when the root user changes.
+A linear history lets startup replay only the latest suffix and lets history load individual points on demand. Retention folds bounded oldest prefixes into checkpoints under the stricter of 90 days of server time and 100 MiB of logical journal data. The minimum current state can exceed the limit. Compaction preserves sequence numbers. Writes are ordered per tab. Concurrent tabs have no coordination. [Storage implementation](../../src/6-shared/api/replicaStorage.ts)

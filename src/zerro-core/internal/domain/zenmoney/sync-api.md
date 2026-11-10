@@ -1,7 +1,6 @@
 # Zenmoney sync contract
 
-This reference describes the synchronization rules used by Zerro and the
-wire fields handled by its adapter.
+These are observed `/v8/diff/` behaviors and the rules the Zerro adapter applies. Field defaults and cascades below refer to the tested entity shapes.
 
 ## Cursor and entity versions
 
@@ -17,8 +16,7 @@ The server may return a client-time correction.
 
 The read boundary is exclusive: an entity at time T appears from cursor T−1,
 not T. The response cursor follows server time even without data changes.
-Zerro overlaps incremental pulls by one second (`getSyncCursor` in
-`src/store/data/selectors.ts`) to cover writes within the same second and
+Zerro [overlaps incremental pulls](../../operations/replication/cursor.ts) by one second to cover writes within the same second and
 reapplies that overlap idempotently.
 
 Zerro omits the optional timezone offset.
@@ -90,7 +88,7 @@ An amount upsert can instead hard-purge a row when both amounts round to zero
 at four decimals. This applies to creation and updates, ordinary transactions,
 transfers, and debt operations. Literal zero/zero fails validation before
 rounding. Core predicts purge only when both amounts are below `0.00005`;
-transport still sends the amount upsert, not the predicted deletion.
+transport sends the amount upsert for a canonical row. A locally created row absent from the canonical base and purged before push is omitted.
 
 ### Account cascades
 
@@ -189,7 +187,7 @@ Complete snapshots also contain:
 - string or number bank-operation ids, unrelated to company ids;
 - account `balanceCorrectionType` values `request`, `createCorrection`, and
   `disabled`, and nullable `savings`;
-- nullable reminder `endDate`, merchant `mcc`, and user `subscription`;
+- nullable reminder `endDate`, merchant `mcc`, and user `country` and `subscription`;
 - budget forecast flags and marker `isForecast`.
 
 A budget can survive its tag, and a marker can survive its reminder. Zerro
@@ -211,7 +209,4 @@ Money changes returned recalculated accounts; viewed/comment-only changes did
 not. Zerro predicts selected effects locally, then accepts the canonical server
 output. See [materialization rules](../../../support/documents/materialization.md).
 
-Before pushing pending intent, Zerro pulls canonical changes, replays sparse
-intent over the updated base, and sends full primary entities with fresh
-versions. Rebase preserves unrelated canonical fields while applying pending local
-changes. Chunk receipts govern acknowledgement, as described above.
+A push expands pending operations against the last accepted base and sends full primary entities with fresh versions. Pulling new canonical data rebases pending edits. There is no mandatory preliminary pull for every push.

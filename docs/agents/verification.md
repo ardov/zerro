@@ -1,116 +1,35 @@
 # Verification
 
-The repository exposes one verification interface for maintainers, agents, and
-CI. Commands are deterministic and fail on the first unsuccessful gate.
+Run focused checks while editing. Use the final gate for the changed surface once before handoff.
 
-## Command tiers
+| Change                                  | Final gate                                                                                                |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Documentation only                      | Prettier on touched files and `pnpm verify:whitespace`                                                    |
+| App, Core, store or local tool          | Focused contract tests and `pnpm verify`                                                                  |
+| UI, styles, stories or UI configuration | `pnpm verify` and task-relevant stories in both themes                                                    |
+| Cross-cutting or dependency changes     | `pnpm verify`, `pnpm knip` and relevant stories                                                           |
+| Replica persistence or sync             | `pnpm verify` and the [Core manual smoke](../../src/zerro-core/support/documents/testing.md#manual-smoke) |
 
-| Command           | Contract                                                                |
-| ----------------- | ----------------------------------------------------------------------- |
-| `pnpm test`       | Run the complete unit suite once with compact output.                   |
-| `pnpm test:watch` | Run the unit suite interactively.                                       |
-| `pnpm verify`     | Check whitespace, formatting, JS, CSS, TypeScript, and the unit suite.  |
-| `pnpm verify:ui`  | Build the app and Storybook, then test eligible stories in both themes. |
-| `pnpm verify:all` | Run both verification tiers and the Knip dependency check.              |
-
-Browser tests use at most two workers. For ordinary local work, run only the
-story files relevant to the task, in both light and dark themes. Include direct
-consumers when changing a shared component. A passing story in one theme does
-not substitute for the other.
-
-Browser setup requests Chromium garbage collection before each isolated story
-file to release detached iframe resources. Keep file isolation enabled; the
-cleanup runs between files, outside the stories' interaction steps.
-
-Run the full browser suite (`pnpm test:storybook` without file filters,
-`pnpm verify:ui`, or `pnpm verify:all`) only when the user explicitly requests it
-or changes are genuinely global: for example, app-wide theme/token changes,
-shared overlay infrastructure, or a framework upgrade affecting the whole UI.
-A local component cleanup, a single shared control, or any dependency change
-by itself is not a reason for a full run. State the global impact before
-starting one. Keep full runs available locally; this policy does not move them
-to CI or change CI configuration.
+`pnpm verify` checks whitespace, tracked-file formatting, CSS, JS, TypeScript and the complete unit suite. `pnpm test:related` and `pnpm test:changed` use the dependency graph and can miss required regressions. `pnpm verify:ui` builds the app and Storybook and runs the full browser suite. `pnpm verify:all` runs both tiers plus Knip.
 
 ## Test design
 
-Test the current observable behavior. When code or a feature is intentionally
-removed or replaced, delete its obsolete assertions; do not add tests whose
-purpose is to keep that old implementation or feature from returning. This
-includes checks for absent source text, imports, props, styles or controls.
-Test the replacement behavior only when it merits coverage. An absence that is
-itself a current interaction outcome (such as a dialog closing) is different
-from guarding a historical removal.
+Assert current observable behavior. Remove assertions for intentionally retired features. Avoid tests for the absence of historical source text, styles, props or controls. A dialog disappearing after Back is a current interaction outcome. For changes to Core, see the [contract matrix](../../src/zerro-core/support/documents/testing.md).
 
-## Implementation loop
+## Browser checks
 
-Run the narrow test that observes the changed contract while implementing:
+Keep file isolation and the configured two-worker limit. Run the relevant story files in light and dark themes, including direct consumers of shared components. An unfiltered browser run requires an explicit user request or a genuinely global change, such as app-wide theme tokens or shared overlay infrastructure. Explain that scope first.
 
 ```sh
-pnpm exec vitest run path/to/test.ts --reporter=agent --silent=passed-only
-pnpm test:related path/to/source.ts
-pnpm test:changed
 pnpm test:storybook src/6-shared/ui/kit/InlineField.stories.tsx
-```
-
-`test:related` and `test:changed` use Vitest's dependency graph. They save time,
-but neither command claims to select every policy-required regression or manual
-smoke. Do not repeat a successful broad gate while its inputs are unchanged.
-
-Android system Back has an additional targeted check using Chromium with an
-Android user agent and real `CloseWatcher` events, in both themes:
-
-```sh
 STORYBOOK_ANDROID=1 pnpm test:storybook src/6-shared/ui/kit/DrawerBack.stories.tsx
-```
-
-This exercises the Android-only library handler; it is not a physical-device
-or Android system-gesture test. The default `verify:ui`, `verify:all` and CI
-runs use a desktop user agent and do not exercise this handler; run the command
-above separately when changing system Back behavior.
-
-Motion-sensitive stories can also run with the browser's reduced-motion preference:
-
-```sh
 STORYBOOK_REDUCED_MOTION=1 pnpm test:storybook src/3-widgets/transaction/TransactionList/TopBar/Filter.stories.tsx
 ```
 
-This uses real `prefers-reduced-motion` media queries in both themes.
+Run the Android command for system Back changes. It exercises Chromium's native `CloseWatcher` with an Android user agent. A physical system gesture requires a device check. Use the reduced-motion setting for motion-sensitive stories.
 
-For service-worker or offline asset changes, run `pnpm test:pwa`. It builds the
-production app, installs it in two fresh Chromium contexts (light and dark),
-then disables the network and HTTP cache. It checks every shipped runtime file
-against its build output, decodes images and fonts, and opens previously unvisited
-pages and a PWA shortcut offline.
-
-## Handoff routing
-
-| Changed surface                          | Final verification                                                              |
-| ---------------------------------------- | ------------------------------------------------------------------------------- |
-| Documentation only                       | Touched-file Prettier plus `pnpm verify:whitespace`                             |
-| Application, Core, store, or local tool  | Focused contract tests, then `pnpm verify`                                      |
-| UI, styles, stories, or UI configuration | `pnpm verify` plus task-relevant stories in both themes                         |
-| Cross-cutting or dependency change       | `pnpm verify`, `pnpm knip`, relevant stories; full UI only under the rule above |
-| Replica persistence or sync              | `pnpm verify` plus the policy-required manual smoke                             |
-
-The formatting commands enumerate tracked public files. Generated files and
-lockfiles listed in `.prettierignore` are outside that formatting surface, and
-untracked working files cannot make the shared gate fail.
-
-Area-specific policies can require more evidence, never less:
-
-- `src/zerro-core/support/documents/testing.md` — Core contracts and broad-test
-  triggers;
-- `docs/ui-styling.md` — UI and Storybook behavior.
+For service-worker or offline asset changes, run `pnpm test:pwa`. It builds and installs the production app in fresh light and dark contexts, disables network and HTTP cache, checks bundled resources and opens previously unvisited pages and a shortcut.
 
 ## CI
 
-Pull requests and direct pushes to `master` and `beta` run the baseline
-verification job. A dependent UI job runs only when application/UI sources,
-stories, public assets, relevant build/test configuration, dependencies, or its
-workflow change. Core remains UI-relevant because fixture-backed App Scenarios
-consume Core behavior.
-
-Local port-binding and browser-transport failures are environment failures until
-the same command is rerun in an environment that permits a local browser server.
-Do not report either a product regression or a passing UI suite from an
-interrupted run.
+Pull requests and pushes to `master` or `beta` run the baseline. A dependent UI job runs for UI-relevant paths, including Core consumed by fixture-backed stories. See the [workflow](../../.github/workflows/verify.yml) for exact path filters. Rerun browser server or transport failures in a working environment before classifying the result.

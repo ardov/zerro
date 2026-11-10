@@ -1,31 +1,7 @@
-# Keep list/Details instances in the shared Screen history
+# Give each list and its Details their own Screen instances
 
-Transaction lists and their Details use independent Screen instances in the
-existing ordered Screen map. An instance identifies an opening; its value
-identifies current financial data. The first Details opening pushes history,
-selecting another row updates that instance, and a child list adds another
-instance. Explicit list close dismisses its pair; Back dismisses the top
-instance. This preserves the existing router and Popup queue as the only
-navigation owner.
+Opening a transaction list creates a Screen instance. Opening its first Details pushes a history entry. Selecting another row replaces that Details value. Opening a child list creates a new pair, even for a transaction open elsewhere. Back closes the top instance, and explicitly closing a list closes its pair.
 
-A list saves its query, search, checked identifiers and exact scroll position
-in its serializable value. The host retains current per-instance values across
-Back and writes them into the active entry for reload. Entities stay live:
-missing selection is pruned, a filtered-out transaction can finish editing,
-and an unavailable editor removes itself without removing child lists.
+The list saves query, search, checked IDs and scroll position. Restoration reads live entities and prunes missing selections. Unsaved editor input stays in the mounted editor. Switching between columns and a drawer keeps the editor and scrollport alive.
 
-List ownership and the Details content kind are separate from presentation.
-The current kind is `transaction`. `ListDetailsSurface` owns geometry, focus
-and dismissal; transaction Details owns saving, validation, recreated-id
-handover and drafts. A stable `AdaptivePanel` content host preserves pending
-input and native scroll across the wide/narrow layout change. Unfinished
-input, DOM references, focus targets and callbacks do not enter history.
-
-## Consequences
-
-A wide pair has one modal interaction region containing both panes; a narrow
-pair activates Details above the mounted list. Covered surfaces stay mounted
-without competing focus boundaries. Presentation derives the active owner
-from Screen order, including on initial restoration: simultaneously mounted
-independent modal roots otherwise hide each other. Closing returns focus to a
-live opener or the newly active surface.
+List and Details share one modal focus region when wide. On narrow screens only the top surface traps focus. Screen order identifies the active owner even when several surfaces mount together on reload. Closing returns focus to a live opener or the newly active surface. [Shared presentation](../../src/6-shared/ui/layout/ListDetailsSurface.tsx)
