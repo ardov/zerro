@@ -363,8 +363,11 @@ export const PageSummary: Story = {
     const summary = await canvas.findByRole('region', { name: 'Summary' })
     await within(summary).findByText(/^4 transactions/)
     await userEvent.click(within(summary).getByText('Lidl'))
-    // With a filter the summary is what the panel rests on.
+    // With a filter the summary is what the panel rests on. Narrowing left
+    // one category on one day, and both cards are still there to say so.
     await within(summary).findByText(/^2 transactions/)
+    expect(within(summary).getByText('Expenses by category')).toBeVisible()
+    expect(within(summary).getByText('Expenses by day')).toBeVisible()
     await userEvent.click(canvas.getByText('Lunch groceries'))
     const editor = await canvas.findByRole('region', { name: 'Transaction' })
     await userEvent.click(within(editor).getByRole('button', { name: 'Close' }))

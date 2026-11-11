@@ -250,8 +250,8 @@ function nextBucket(start: TISODate, step: TStep): TISODate {
   return toISODate(addDays(date, step === 'week' ? 7 : 1))
 }
 
-/** Every period from the first of `span` to its last, empty ones included,
- * holding what `entries` put there. One side is drawn over the span of both,
+/** Every period from the first day of `span` to its last, empty ones
+ * included, holding what `entries` put there. One side is drawn over the span of both,
  * so switching sides keeps every period where it was. */
 export function getTimeline(
   entries: readonly TEntry[],
@@ -279,9 +279,12 @@ export function getTimeline(
   while (start <= end && buckets.length <= MAX_BUCKETS) {
     const next = nextBucket(start, step)
     const total = totals.get(start)
+    const until = toISODate(addDays(parseDate(next), -1))
     buckets.push({
-      from: start,
-      to: toISODate(addDays(parseDate(next), -1)),
+      // Cut to the days the span covers: choosing a period only ever narrows
+      // a list, even when a week or a month reaches past its dates.
+      from: start < first ? first : start,
+      to: until > last ? last : until,
       value: Math.abs(round(total?.value ?? 0)),
       count: total?.count ?? 0,
     })
@@ -290,20 +293,33 @@ export function getTimeline(
   return buckets
 }
 
-/** Steps that give a readable chart, and the one to open with. */
-export function getSteps(entries: readonly TEntry[]): {
+/** Steps that give a readable chart, and the one to open with. Entries that
+ * all fall on one day still get that day: there is always a step to draw. */
+export function getSteps(span: readonly TEntry[]): {
   available: TStep[]
   initial: TStep
-} | null {
-  const sizes = steps.map(step => getTimeline(entries, step).length)
+} {
+  const sizes = steps.map(step => getTimeline(span, step).length)
   const available = steps.filter(
     (_, index) => sizes[index] >= 2 && sizes[index] <= MAX_BUCKETS
   )
-  if (!available.length) return null
+  if (!available.length) return { available: ['day'], initial: 'day' }
   const initial =
     available.find(step => sizes[steps.indexOf(step)] <= COMFORTABLE_BUCKETS) ??
     available.at(-1)!
   return { available, initial }
+}
+
+/** Fewer periods with anything in them say nothing a short list does not. */
+const MIN_FILLED = 3
+
+/** Whether a timeline has something to say about these entries. Judged on
+ * the finest step on offer, never on the one being looked at: a coarser step
+ * only ever merges periods, and choosing one must not take the chart away. */
+export function isSpreadOverTime(span: readonly TEntry[]): boolean {
+  const finest = getSteps(span).available[0]
+  const filled = getTimeline(span, finest).filter(bucket => bucket.count)
+  return filled.length >= MIN_FILLED
 }
 
 function sum(entries: readonly TEntry[]) {

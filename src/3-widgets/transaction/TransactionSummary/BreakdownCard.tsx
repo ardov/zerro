@@ -21,7 +21,8 @@ type TNode = PercentBarItem & { clause?: Clause }
 const TOP = 5
 const REST_COLOR = '#808080'
 
-/** What one side is made of, along whichever dimension splits it. */
+/** What one side is made of, along whichever dimension splits it. Whether to
+ * show the card is its owner's call; it draws a single group just as well. */
 export function BreakdownCard(props: {
   entries: readonly TEntry[]
   /** Dimensions on offer. They are the same for either side. */
@@ -38,8 +39,10 @@ export function BreakdownCard(props: {
   const [expanded, setExpanded] = useState(false)
   const describe = useGroupDescriptions()
   // A filter can take the chosen dimension off the offer; fall back quietly.
-  const dimension = available.includes(chosen) ? chosen : available[0]
-  if (!dimension) return null
+  // With nothing on offer there is still one group to name, by category.
+  const dimension = available.includes(chosen)
+    ? chosen
+    : (available[0] ?? 'category')
 
   const nodes: TNode[] = getBreakdown(entries, dimension).map(group => ({
     id: group.key,

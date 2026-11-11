@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { makeTransaction } from '@/zerro-core/support/testing/zenmoneyTestData'
-import type { TFxCode } from '@/6-shared/types'
+import type { TFxCode, TISODate } from '@/6-shared/types'
 import {
   getBreakdown,
   getDimensions,
   getSteps,
+  isSpreadOverTime,
   getTimeline,
   summarize,
   type TSummaryContext,
@@ -102,18 +103,19 @@ describe('breakdown and timeline', () => {
 
   it('fills empty periods and opens with the finest readable step', () => {
     expect(getTimeline(entries, 'month')).toEqual([
-      { from: '2026-01-01', to: '2026-01-31', value: 50, count: 2 },
+      // The outer months are cut to the days the entries cover.
+      { from: '2026-01-10', to: '2026-01-31', value: 50, count: 2 },
       { from: '2026-02-01', to: '2026-02-28', value: 0, count: 0 },
-      { from: '2026-03-01', to: '2026-03-31', value: 10, count: 1 },
+      { from: '2026-03-01', to: '2026-03-20', value: 10, count: 1 },
     ])
     // Seventy days are too many bars; eleven weeks are not.
     expect(getSteps(entries)).toEqual({
       available: ['week', 'month'],
       initial: 'week',
     })
-    expect(getTimeline(entries, 'week')[0]).toMatchObject({
-      from: '2026-01-05',
-      to: '2026-01-11',
+    expect(getTimeline(entries, 'week')[1]).toMatchObject({
+      from: '2026-01-12',
+      to: '2026-01-18',
     })
   })
 
@@ -130,5 +132,24 @@ describe('breakdown and timeline', () => {
         bucket => bucket.value
       )
     ).toEqual([0, 100, 0])
+  })
+
+  it('judges a timeline on its finest step, and always has one to draw', () => {
+    const days = (...dates: TISODate[]) =>
+      summarize(
+        dates.map((date, index) => spend({ id: `day-${index}`, date })),
+        'USD',
+        ctx
+      ).entries
+    // Three days in two weeks: worth a chart, whichever step is chosen.
+    const spread = days('2026-03-02', '2026-03-03', '2026-03-09')
+    expect(getSteps(spread).available).toEqual(['day', 'week'])
+    expect(isSpreadOverTime(spread)).toBe(true)
+    expect(isSpreadOverTime(days('2026-03-02', '2026-03-09'))).toBe(false)
+    // One day cannot be split, yet it is still a period to draw.
+    expect(getSteps(days('2026-03-02', '2026-03-02'))).toEqual({
+      available: ['day'],
+      initial: 'day',
+    })
   })
 })

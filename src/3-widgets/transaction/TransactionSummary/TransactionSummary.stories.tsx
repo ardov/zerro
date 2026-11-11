@@ -68,5 +68,8 @@ export const LoneIncome: Story = {
     expect(
       await canvas.findAllByRole('button', { name: 'Expenses' })
     ).toHaveLength(2)
+    // Neither does another step take the chart away.
+    await userEvent.click(canvas.getByRole('button', { name: 'year' }))
+    await canvas.findByRole('button', { name: 'month' })
   },
 }

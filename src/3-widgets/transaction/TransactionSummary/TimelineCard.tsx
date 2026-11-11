@@ -15,11 +15,10 @@ import {
 } from './model'
 
 const BAR_COLOR = 'var(--info)'
-/** Fewer periods with anything in them say nothing the list does not. */
-const MIN_FILLED = 3
 
 /** One side over time. The line above the chart reads the period under the
- * pointer, or the average while nothing is pointed at. */
+ * pointer, or the average while nothing is pointed at. Whether to show the
+ * card is its owner's call; once shown, no step or side takes it away. */
 export function TimelineCard(props: {
   entries: readonly TEntry[]
   /** Both sides together: they set the periods, so a side keeps its axis. */
@@ -34,12 +33,15 @@ export function TimelineCard(props: {
   const steps = getSteps(span)
   const [chosen, setChosen] = useState<TStep | null>(null)
   const [pointed, setPointed] = useState<TISODate | null>(null)
-  if (!steps) return null
   const step =
     chosen && steps.available.includes(chosen) ? chosen : steps.initial
-  const filled = getTimeline(span, step).filter(bucket => bucket.count)
-  if (filled.length < MIN_FILLED) return null
   const buckets = getTimeline(entries, step, span)
+  // A period with nothing on either side would narrow the list to nothing.
+  const occupied = new Set(
+    getTimeline(span, step)
+      .filter(bucket => bucket.count)
+      .map(bucket => bucket.from)
+  )
 
   const years = new Set(buckets.map(bucket => bucket.from.slice(0, 4))).size
   const label = (bucket: TBucket) => formatBucket(bucket, step, years > 1)
@@ -83,10 +85,11 @@ export function TimelineCard(props: {
               const bucket = buckets.find(
                 bucket => bucket.from === event?.activeLabel
               )
-              if (bucket) onPeriod?.(bucket.from, bucket.to)
+              if (bucket && occupied.has(bucket.from))
+                onPeriod?.(bucket.from, bucket.to)
             }}
           >
-            <Bar dataKey="value" fill={BAR_COLOR} radius={4} />
+            <Bar dataKey="value" fill={BAR_COLOR} radius={4} maxBarSize={48} />
             <XAxis
               dataKey="from"
               axisLine={false}

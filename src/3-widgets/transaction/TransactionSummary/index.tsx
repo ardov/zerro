@@ -14,6 +14,7 @@ import { TotalsCard } from './TotalsCard'
 import { InlineButton, cycle } from './shared'
 import {
   getDimensions,
+  isSpreadOverTime,
   summarize,
   type TSide,
   type TSummaryContext,
@@ -22,8 +23,8 @@ import {
 type Query = core.transactions.TTransactionQuery
 type Clause = core.transactions.TTransactionFilterClause
 
-/** Fewer transactions are already read at a glance in the list itself. */
-const MIN_FOR_DETAILS = 3
+/** Fewer checked rows are already read at a glance in the list itself. */
+const MIN_CHECKED_FOR_DETAILS = 3
 
 export type TransactionSummaryProps = {
   /** The list's own scope, as `TransactionList` takes it. */
@@ -38,8 +39,12 @@ export type TransactionSummaryProps = {
 }
 
 /** What a list adds up to: its checked rows when there are any, otherwise
- * everything its filter shows. Each card appears only when the transactions
- * give it something to say. */
+ * everything its filter shows.
+ *
+ * A filtered list always has all three cards. They are how the list is
+ * narrowed, so narrowing it, or switching anything inside a card, must never
+ * take a card away. A few checked rows are only there to be added up: for
+ * them a card appears once the rows give it something to say. */
 export function TransactionSummary(props: TransactionSummaryProps) {
   const { transactionIds, query, search, checked, onQueryChange, onClose } =
     props
@@ -84,6 +89,10 @@ export function TransactionSummary(props: TransactionSummaryProps) {
   )
   const entries = sided[summary.sides.indexOf(side)] ?? []
   const span = useMemo(() => sided.flat(), [sided])
+  const dimensions = getDimensions(...sided)
+  const details = selection ? span.length >= MIN_CHECKED_FOR_DETAILS : true
+  const showBreakdown = !selection || dimensions.length > 0
+  const showTimeline = !selection || isSpreadOverTime(span)
   const sideLabel =
     summary.sides.length > 1 ? (
       <InlineButton onClick={() => setChosenSide(cycle(summary.sides, side))}>
@@ -145,27 +154,27 @@ export function TransactionSummary(props: TransactionSummaryProps) {
                 : undefined
             }
           />
-          {side && span.length >= MIN_FOR_DETAILS && (
-            <>
-              <BreakdownCard
-                entries={entries}
-                dimensions={getDimensions(...sided)}
-                currency={summary.currency}
-                side={sideLabel}
-                onFilter={narrow}
-              />
-              <TimelineCard
-                entries={entries}
-                span={span}
-                currency={summary.currency}
-                side={sideLabel}
-                onPeriod={
-                  narrow &&
-                  ((from: TISODate, to: TISODate) =>
-                    narrow({ kind: 'date', from, to }))
-                }
-              />
-            </>
+          {side && details && showBreakdown && (
+            <BreakdownCard
+              entries={entries}
+              dimensions={dimensions}
+              currency={summary.currency}
+              side={sideLabel}
+              onFilter={narrow}
+            />
+          )}
+          {side && details && showTimeline && (
+            <TimelineCard
+              entries={entries}
+              span={span}
+              currency={summary.currency}
+              side={sideLabel}
+              onPeriod={
+                narrow &&
+                ((from: TISODate, to: TISODate) =>
+                  narrow({ kind: 'date', from, to }))
+              }
+            />
           )}
         </div>
       )}
