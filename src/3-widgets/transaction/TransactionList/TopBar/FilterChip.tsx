@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type Ref } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePopup } from '@/6-shared/overlays'
 import { Chip } from '@/6-shared/ui/kit/Chip'
@@ -52,7 +52,9 @@ export function FilterChip({
     if (closed && isEmptyClause(clause)) onRemove()
   }, [popup.open, clause, onRemove])
   const started = useRef(false)
-  useLayoutEffect(() => {
+  // Open after OverlayHost has synchronized the arriving history entry.
+  // A child layout effect opens too early and the host can dismiss its popup.
+  useEffect(() => {
     if (autoOpen && !started.current) {
       started.current = true
       popup.setOpen(true)
