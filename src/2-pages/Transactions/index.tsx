@@ -2,8 +2,11 @@ import { useCallback } from 'react'
 import { TransactionList } from '@/3-widgets/transaction/TransactionList'
 import {
   transactionScreen,
+  transactionSummaryScreen,
   TransactionScreenPanel,
 } from '@/3-widgets/global/TransactionPreviewDrawer'
+import { TransactionSummary } from '@/3-widgets/transaction/TransactionSummary'
+import { isEmptyClause } from '@/3-widgets/transaction/TransactionList/TopBar/filterModel'
 import type { TTransactionId } from '@/6-shared/types'
 import { track } from '@/6-shared/analytics'
 import { useTranslation } from 'react-i18next'
@@ -23,6 +26,21 @@ export default function TransactionsView() {
   // One selected editor moves between its column and a modal as space changes.
   const opened = transactionScreen.useValue()
   const openPreview = transactionScreen.useOpen()
+
+  // The summary follows the list: with a filter, a search or checked rows it
+  // is what the docked panel rests on, and the button opens it anywhere else.
+  const [summaryOpen, setSummaryOpen] = transactionSummaryScreen.use()
+  const openSummary = transactionSummaryScreen.useOpenInstead()
+  const summaryByDefault =
+    view.query.clauses.some(clause => !isEmptyClause(clause)) ||
+    !!view.search.trim() ||
+    view.checked.length > 0
+  const summaryShown =
+    !opened && (!!summaryOpen || (docked && summaryByDefault))
+  const toggleSummary = useCallback(() => {
+    if (!summaryShown) openSummary(true)
+    else if (summaryOpen) setSummaryOpen(null)
+  }, [summaryShown, summaryOpen, openSummary, setSummaryOpen])
 
   const handleTrOpen = useCallback(
     (id: TTransactionId) => {
@@ -46,10 +64,23 @@ export default function TransactionsView() {
             className="grow"
             onTrOpen={handleTrOpen}
             opened={opened}
+            summary={{ shown: summaryShown, onToggle: toggleSummary }}
           />
         </Panel>
 
-        <TransactionScreenPanel docked={docked} />
+        <TransactionScreenPanel
+          docked={docked}
+          summaryByDefault={summaryByDefault}
+          summary={onClose => (
+            <TransactionSummary
+              query={view.query}
+              search={view.search}
+              checked={view.checked}
+              onQueryChange={view.onQueryChange}
+              onClose={onClose}
+            />
+          )}
+        />
       </Columns>
     </>
   )

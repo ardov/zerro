@@ -14,6 +14,7 @@ import { TransactionCreateButton } from '../../TransactionCreateButton'
 import { SearchChip } from './SearchChip'
 import { FilterIcon } from './FilterIcon'
 import { FilterChip } from './FilterChip'
+import { SummaryButton, type SummaryToggle } from './SummaryButton'
 import {
   filterKinds,
   getKindLabel,
@@ -31,6 +32,7 @@ type FilterProps = {
   onQueryChange: (query: core.transactions.TTransactionQuery) => void
   search: string
   onSearchChange: (search: string) => void
+  summary?: SummaryToggle
 }
 
 /** Owns ordering and focus; each chip owns its editor and its session draft. */
@@ -39,6 +41,7 @@ export default function Filter({
   onQueryChange,
   search,
   onSearchChange,
+  summary,
 }: FilterProps) {
   const { t, i18n } = useTranslation('filterDrawer')
   const accounts = core.accounts.usePopulated()
@@ -169,7 +172,8 @@ export default function Filter({
           </AnimatePresence>
         </div>
       </LayoutGroup>
-      <div className="shrink-0">
+      <div className="flex shrink-0">
+        {summary && <SummaryButton {...summary} />}
         <TransactionCreateButton query={query} />
       </div>
     </div>

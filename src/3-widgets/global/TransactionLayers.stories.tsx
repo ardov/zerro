@@ -353,6 +353,56 @@ export const DebtorList: Story = {
   },
 }
 
+/** The page panel shows what the list adds up to, and a group narrows it. */
+export const PageSummary: Story = {
+  tags: ['check'],
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Summary' }))
+    const summary = await canvas.findByRole('region', { name: 'Summary' })
+    await within(summary).findByText(/^4 transactions/)
+    await userEvent.click(within(summary).getByText('Lidl'))
+    // With a filter the summary is what the panel rests on.
+    await within(summary).findByText(/^2 transactions/)
+    await userEvent.click(canvas.getByText('Lunch groceries'))
+    const editor = await canvas.findByRole('region', { name: 'Transaction' })
+    await userEvent.click(within(editor).getByRole('button', { name: 'Close' }))
+    await within(
+      await canvas.findByRole('region', { name: 'Summary' })
+    ).findByText(/^2 transactions/)
+  },
+}
+
+/** A list opened over the page shows its summary in its Details place. */
+export const ListSummary: Story = {
+  tags: ['check'],
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Open filtered list' })
+    )
+    const list = await body.findByRole('dialog', {
+      name: 'Filtered transactions',
+    })
+    await userEvent.click(within(list).getByRole('button', { name: 'Summary' }))
+    const summary = await within(list).findByRole('region', {
+      name: 'Summary',
+    })
+    await within(summary).findByText(/^2 transactions/)
+    await userEvent.click(within(list).getByText('Lunch groceries'))
+    await within(list).findByRole('region', { name: 'Transaction' })
+    fireEvent.click(canvas.getByTestId('back'))
+    await waitFor(() =>
+      expect(
+        within(list).queryByRole('region', { name: 'Transaction' })
+      ).toBeNull()
+    )
+  },
+}
+
 export const RecreationBeforeChild: Story = {
   tags: ['check'],
   render: () => <Harness />,

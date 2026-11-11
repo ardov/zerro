@@ -23,7 +23,8 @@
 | Screen            | Restorable overlay. History stores its descriptor and view. Entity data stays live and unfinished input belongs to the mounted editor.         |
 | Screen instance   | One opening of a repeatable Screen. The same entity can appear in independent instances.                                                       |
 | List/Details pair | A list and its owned Details. Selecting another row replaces Details. Explicit list close dismisses the pair. Back dismisses the top instance. |
-| Details           | Content owned by a list's secondary area, currently a transaction editor.                                                                      |
+| Details           | Content owned by a list's secondary area: a transaction editor or the list summary.                                                            |
+| List summary      | What a transaction list adds up to: its checked rows when there are any, otherwise everything its filter shows.                                |
 | Popup             | Temporary overlay dismissed by Back or page navigation.                                                                                        |
 | Slot              | Address-preserving history entry that absorbs Back for a Popup.                                                                                |
 | Rail              | Narrow desktop navigation strip.                                                                                                               |

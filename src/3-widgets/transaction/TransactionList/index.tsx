@@ -12,13 +12,13 @@ import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { track } from '@/6-shared/analytics'
 import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
-import { useLocalDay } from '@/6-shared/hooks/useLocalDay'
-import { useDebounce } from '@/6-shared/hooks/useDebounce'
 
 import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
 
 import { GroupedList } from './GroupedList'
+import { useListTransactions } from './useListTransactions'
 import Filter from './TopBar/Filter'
+import type { SummaryToggle } from './TopBar/SummaryButton'
 import { upsertFilter } from './TopBar/filterModel'
 import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
@@ -34,6 +34,8 @@ export type TTransactionListProps = {
   hideFilter?: boolean
   initialDate?: TDateDraft
   view?: TTransactionListView
+  /** Adds the entry to this list's summary; its owner decides where it opens. */
+  summary?: SummaryToggle
   className?: string
 }
 
@@ -58,6 +60,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     hideFilter = false,
     initialDate,
     view,
+    summary,
     className,
   } = props
 
@@ -77,18 +80,6 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   const search = view?.search ?? localSearch
   const onQueryChange = view?.onQueryChange ?? setLocalQuery
   const onSearchChange = view?.onSearchChange ?? setLocalSearch
-  const debouncedSearch = useDebounce(search, 300)
-  const appliedQuery = useMemo<core.transactions.TTransactionQuery>(
-    () => ({
-      clauses: [
-        ...query.clauses,
-        ...(debouncedSearch
-          ? [{ kind: 'search' as const, value: debouncedSearch }]
-          : []),
-      ],
-    }),
-    [debouncedSearch, query]
-  )
   const onFilterByMerchant = useCallback(
     (merchant: string) => {
       onQueryChange(upsertFilter(query, { kind: 'merchant', ids: [merchant] }))
@@ -96,7 +87,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     [onQueryChange, query]
   )
 
-  const trList = useFilteredTransactions(transactionIds, appliedQuery)
+  const trList = useListTransactions(transactionIds, query, search)
 
   const [localChecked, setLocalChecked] = useState<TTransactionId[]>([])
   const checkedIds = view?.checked ?? localChecked
@@ -254,6 +245,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
         onQueryChange={onQueryChange}
         search={search}
         onSearchChange={onSearchChange}
+        summary={summary}
       />
     </div>
   ) : undefined
@@ -280,32 +272,6 @@ export const TransactionList: FC<TTransactionListProps> = props => {
       </div>
     </div>
   )
-}
-
-function useFilteredTransactions(
-  trIds?: TTransactionId[],
-  query: core.transactions.TTransactionQuery = { clauses: [] }
-) {
-  const transactionsById = useAppSelector(core.transactions.selectAll)
-  const allTransactionIds = useAppSelector(core.transactions.selectIds)
-  const context = useAppSelector(core.transactions.selectQueryContext)
-  const today = useLocalDay()
-  // Ordering depends on the data, not on each search or filter change.
-  const ordered = useMemo(
-    () =>
-      (trIds || allTransactionIds)
-        .map(id => transactionsById[id])
-        .filter(
-          (transaction): transaction is NonNullable<typeof transaction> =>
-            !!transaction
-        )
-        .sort(core.transactions.compareTransactionDates),
-    [trIds, allTransactionIds, transactionsById]
-  )
-  return useMemo(() => {
-    const checker = core.transactions.compileQuery(query, context, today)
-    return ordered.filter(checker)
-  }, [ordered, context, query, today])
 }
 
 const EmptyState = () => {
