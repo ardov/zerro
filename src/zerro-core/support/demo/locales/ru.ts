@@ -2,26 +2,27 @@ import { AccountType } from '../../../internal/domain/zenmoney/entities/accounts
 import type { TDemoProfile } from './en'
 
 // Illustrative household amounts in RUB, not currency-converted euro prices.
+// Merchants and banks are global brands so the data does not point to a country.
 export const russianProfile: TDemoProfile = {
   currency: 2,
   country: 1,
   countryCode: 'RU',
   merchants: {
-    supermarket: { title: 'Пятёрочка', domain: '5ka.ru' },
-    localStore: { title: 'ВкусВилл', domain: 'vkusvill.ru' },
-    pizzaPlace: { title: 'Додо Пицца', domain: 'dodopizza.ru' },
-    cafe: { title: 'Шоколадница', domain: 'shoko.ru' },
-    fastFood: { title: 'Вкусно — и точка', domain: 'vkusnoitochka.ru' },
-    deliveryApp: { title: 'Яндекс Еда', domain: 'eda.yandex.ru' },
-    pizzaDelivery: { title: 'Папа Джонс', domain: 'papajohns.ru' },
-    taxiService: { title: 'Яндекс Go', domain: 'go.yandex.ru' },
-    gasStation: { title: 'Лукойл', domain: 'lukoil.ru' },
-    electronics: { title: 'М.Видео', domain: 'mvideo.ru' },
-    clothing: { title: 'Ламода', domain: 'lamoda.ru' },
-    electricCompany: { title: 'Мосэнергосбыт', domain: 'mosenergosbyt.ru' },
-    internetProvider: { title: 'МТС', domain: 'mts.ru' },
-    pharmacy: { title: 'Аптека Горздрав', domain: 'gorzdrav.org' },
-    clinic: { title: 'Инвитро', domain: 'invitro.ru' },
+    supermarket: { title: 'Carrefour', domain: 'carrefour.com' },
+    localStore: { title: '7-Eleven', domain: '7-eleven.com' },
+    pizzaPlace: { title: 'Pizza Hut', domain: 'pizzahut.com' },
+    cafe: { title: 'Starbucks', domain: 'starbucks.com' },
+    fastFood: { title: 'McDonald’s', domain: 'mcdonalds.com' },
+    deliveryApp: { title: 'Uber Eats', domain: 'ubereats.com' },
+    pizzaDelivery: { title: 'Domino’s', domain: 'dominos.com' },
+    taxiService: { title: 'Uber', domain: 'uber.com' },
+    gasStation: { title: 'Shell', domain: 'shell.com' },
+    electronics: { title: 'Samsung', domain: 'samsung.com' },
+    clothing: { title: 'H&M', domain: 'hm.com' },
+    electricCompany: { title: 'Engie', domain: 'engie.com' },
+    internetProvider: { title: 'Vodafone', domain: 'vodafone.com' },
+    pharmacy: { title: 'Watsons', domain: 'watsons.com' },
+    clinic: { title: 'Synlab', domain: 'synlab.com' },
     friend: { title: 'Саша' },
     mother: { title: 'Мама' },
     wife: { title: 'Жена' },
@@ -29,24 +30,24 @@ export const russianProfile: TDemoProfile = {
   accounts: {
     debt: { title: 'Долги', instrument: 2, type: AccountType.Debt },
     travel: {
-      title: 'Т-Банк · На отпуск',
+      title: 'Wise · На отпуск',
       instrument: 2,
       type: AccountType.Checking,
-      company: 4902,
+      company: 15804,
       balance: 80000,
     },
     daily: {
-      title: 'Сбер · На каждый день',
+      title: 'Revolut · На каждый день',
       instrument: 2,
       type: AccountType.Checking,
-      company: 4624,
+      company: 15693,
       balance: 25000,
     },
     savings: {
-      title: 'ВТБ · Подушка безопасности',
+      title: 'Wise · Подушка безопасности',
       instrument: 2,
       type: AccountType.Checking,
-      company: 4637,
+      company: 15804,
       balance: 320000,
     },
     cashReserve: {
@@ -56,24 +57,24 @@ export const russianProfile: TDemoProfile = {
       balance: 15000,
     },
     main: {
-      title: 'Т-Банк · Зарплатный',
+      title: 'Revolut · Зарплатный',
       instrument: 2,
       type: AccountType.Checking,
-      company: 4902,
+      company: 15693,
       balance: 85000,
     },
     shopping: {
-      title: 'Альфа-Банк · Покупки',
+      title: 'PayPal · Покупки',
       instrument: 2,
       type: AccountType.Checking,
-      company: 3,
+      company: 15692,
       balance: 45000,
     },
     bills: {
-      title: 'Сбер · Обязательные платежи',
+      title: 'Revolut · Обязательные платежи',
       instrument: 2,
       type: AccountType.Checking,
-      company: 4624,
+      company: 15693,
       balance: 65000,
     },
     cash: {
@@ -112,8 +113,7 @@ export const russianProfile: TDemoProfile = {
       income: [5000, 7000, 10000, 15000],
       comment: 'Подарок на день рождения',
     },
-    // Moscow's Troika wallet fare: https://transport.mos.ru/mostrans/oplata_proezda/calc
-    'public-transport': { outcome: 75, comment: 'Проезд по «Тройке»' },
+    'public-transport': { outcome: 75, comment: 'Проезд в метро' },
     'groceries-supermarket': {
       outcome: [1249.9, 2386.5, 1764.3, 4328.7, 689.9, 2156.4, 849, 3270, 1895],
       comment: 'Продукты домой',
@@ -145,7 +145,7 @@ export const russianProfile: TDemoProfile = {
     taxi: { outcome: [450, 690, 850, 1190, 590], comment: 'Поездка на такси' },
     gas: {
       outcome: [2400, 2800, 3200, 3500],
-      comment: 'Заправка АИ-95',
+      comment: 'Полный бак',
     },
     electronics: {
       outcome: [6990, 14990, 3490, 24990, 8990],
@@ -183,7 +183,7 @@ export const russianProfile: TDemoProfile = {
     'daily-account-transfer': {
       income: 25000,
       outcome: 25000,
-      comment: 'Перевод в Сбер на повседневные расходы',
+      comment: 'Перевод на повседневные расходы',
     },
   },
   transfers: [
@@ -199,7 +199,7 @@ export const russianProfile: TDemoProfile = {
       amount: 12000,
       from: 'main',
       to: 'shopping',
-      comment: 'На покупки в Альфа-Банке',
+      comment: 'На онлайн-покупки',
     },
     {
       id: 'savings-account-transfer',
@@ -209,8 +209,4 @@ export const russianProfile: TDemoProfile = {
       comment: 'Пополнение подушки безопасности',
     },
   ],
-  companies: {
-    4902: { title: 'Т-Банк', www: 'tbank.ru', fullTitle: 'АО «ТБанк»' },
-    4624: { title: 'Сбербанк', www: 'sberbank.ru', fullTitle: 'ПАО Сбербанк' },
-  },
 }

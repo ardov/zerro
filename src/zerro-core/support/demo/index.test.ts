@@ -54,7 +54,7 @@ describe('demo data', () => {
     )
   })
 
-  it('builds a connected Russian household with ruble prices and local merchants', () => {
+  it('builds a connected Russian household with ruble prices and global brands', () => {
     const store = makeDemoStore({
       locale: 'ru',
       now: '2026-11-05T12:00:00Z',
@@ -62,14 +62,14 @@ describe('demo data', () => {
     })
     expect(validateDataStore(store)).toEqual({ ok: true })
     expect(store.user[23880]).toMatchObject({ currency: 2, countryCode: 'RU' })
-    expect(store.company[4902].title).toBe('Т-Банк')
+    expect(store.company[15693].title).toBe('Revolut')
     expect(store.tag['Продукты'].parent).toBe('Еда')
 
     for (const account of Object.values(store.account)) {
       expect(account.instrument).toBe(2)
       expect(account.balance).toBeGreaterThanOrEqual(0)
       if (account.company) {
-        expect(store.company[account.company].countryCode).toBe('RU')
+        expect(store.company[account.company].countryCode).toBeNull()
       }
     }
 
@@ -85,11 +85,11 @@ describe('demo data', () => {
     expect(
       transactions.find(t => t.id.startsWith('groceries-supermarket:'))
     ).toMatchObject({
-      merchant: 'Пятёрочка',
-      originalPayee: '5ka.ru',
+      merchant: 'Carrefour',
+      originalPayee: 'carrefour.com',
       tag: ['Продукты'],
       outcome: 1249.9,
-      outcomeAccount: 'Т-Банк · Зарплатный',
+      outcomeAccount: 'Revolut · Зарплатный',
     })
     expect(transactions.find(t => t.id.startsWith('rent:'))?.outcome).toBe(
       45000

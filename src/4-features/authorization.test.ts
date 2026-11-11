@@ -118,8 +118,8 @@ describe('loadDemoData', () => {
   })
 
   it.each([
-    ['ru', 2, 'Т-Банк · Зарплатный'],
-    ['ru-RU', 2, 'Т-Банк · Зарплатный'],
+    ['ru', 2, 'Revolut · Зарплатный'],
+    ['ru-RU', 2, 'Revolut · Зарплатный'],
     ['en', 3, 'Revolut EUR'],
     ['en-US', 3, 'Revolut EUR'],
   ])(
@@ -173,7 +173,7 @@ describe('loadDemoData', () => {
 
     const current = store.getState().data.current
     expect(current.user[23880].currency).toBe(2)
-    expect(current.account['Т-Банк · Зарплатный']).toBeDefined()
+    expect(current.account['Revolut · Зарплатный']).toBeDefined()
     expect(Object.values(current.account)).toHaveLength(9)
     expect(Object.values(current.tag)).toHaveLength(20)
     expect(Object.values(current.merchant)).toHaveLength(18)
