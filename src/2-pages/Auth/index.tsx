@@ -8,6 +8,7 @@ import { zenmoney } from '@/6-shared/api/zenmoney'
 import { Logo } from '@/6-shared/ui/Logo'
 import { NightsStayIcon, WbSunnyIcon } from '@/6-shared/ui/Icons'
 import { useColorScheme } from '@/6-shared/ui/theme'
+import { toast } from '@/6-shared/ui/kit/Toast'
 
 import { useAppDispatch } from '@/store'
 import { loadBackup, loadDemoData, logIn } from '@/4-features/authorization'
@@ -61,7 +62,11 @@ export default function Auth() {
         parseFiles(e?.dataTransfer?.files)
       }}
     >
-      <CurrencyBackground />
+      <CurrencyBackground
+        onCollapse={() =>
+          toast.add({ type: 'success', title: t('systemFell') })
+        }
+      />
       <div className="absolute top-4 right-4 z-20 flex items-center gap-1">
         <Button
           aria-label={russian ? 'Switch to English' : 'Переключить на русский'}

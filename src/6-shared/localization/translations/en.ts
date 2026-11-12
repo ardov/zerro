@@ -6,6 +6,7 @@ export const en: typeof ru = {
     pageNotFound: 'Page not found.',
     returnToApp: 'Return to the app',
     btnLogin: 'Sign in with Zenmoney',
+    systemFell: 'The financial system has fallen',
     authHeading: 'An independent Zenmoney web app with envelope budgeting',
     btnAbout: 'What is envelope budgeting?',
     btnDemoMode: 'Demo',

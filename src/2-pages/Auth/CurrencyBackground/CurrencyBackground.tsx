@@ -11,17 +11,26 @@ export type CurrencyBackgroundHandle = { collapse(): void; reset(): void }
 export function CurrencyBackground({
   settings,
   ref,
+  onCollapse,
 }: {
   settings?: Partial<CurrencySettings>
   ref?: Ref<CurrencyBackgroundHandle>
+  onCollapse?: () => void
 }) {
   const { mode } = useColorScheme()
   const canvas = useRef<HTMLCanvasElement>(null)
   const renderer = useRef<ReturnType<typeof startCurrencyBackground>>(undefined)
+  const onCollapseRef = useRef(onCollapse)
+
+  useEffect(() => {
+    onCollapseRef.current = onCollapse
+  }, [onCollapse])
 
   useEffect(() => {
     if (!canvas.current) return
-    const controller = startCurrencyBackground(canvas.current, mode)
+    const controller = startCurrencyBackground(canvas.current, mode, () =>
+      onCollapseRef.current?.()
+    )
     renderer.current = controller
     return () => {
       controller?.dispose()

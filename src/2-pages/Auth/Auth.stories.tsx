@@ -141,6 +141,11 @@ export const BackgroundGestures: Story = {
       press
     )
     await waitFor(() => expect(art.dataset.currencyState).not.toBe('flowing'))
+    const notification = await within(document.body).findByRole('status', {
+      name: i18n.t('systemFell'),
+    })
+    await waitFor(() => expect(notification).toBeVisible())
+    await expect(notification).toHaveAttribute('data-type', 'success')
     await waitFor(
       () => expect(art).toHaveAttribute('data-currency-state', 'settled'),
       { timeout: 20000 }

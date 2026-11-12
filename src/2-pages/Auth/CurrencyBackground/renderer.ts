@@ -75,7 +75,8 @@ type Nudge = SpringState & { row: Row; rowIndex: number; index: number }
 /** Caches full row strips: each frame composites rows, only glitches repaint glyphs. */
 export function startCurrencyBackground(
   canvas: HTMLCanvasElement,
-  mode: ColorScheme
+  mode: ColorScheme,
+  onCollapse?: () => void
 ) {
   const context = canvas.getContext('2d')
   if (!context) return
@@ -526,6 +527,7 @@ export function startCurrencyBackground(
       pile = createGlyphPile(seeds, width, height, settings)
       releaseRows()
       setPhase('falling')
+      onCollapse?.()
       syncMotion()
     } catch {
       // A failed optional chunk must not interrupt sign-in or the artwork.
