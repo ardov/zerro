@@ -252,6 +252,64 @@ describe('Redux semantic commands', () => {
     }
   )
 
+  it.each([
+    undefined,
+    null,
+    { id: 'shop', title: 'Shop' },
+    { title: 'New shop' },
+  ])('applies bulk merchant intent %j as one undoable command', merchant => {
+    const first = makeTransaction({
+      id: 'first',
+      payee: 'Legacy',
+      originalPayee: 'Bank text',
+    })
+    const second = makeTransaction({
+      id: 'second',
+      merchant: 'old',
+      payee: 'Old',
+    })
+    const store = configureStore({
+      reducer: rootReducer,
+      preloadedState: makeTestRootState(
+        makeStore({
+          user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+          merchant: { shop: makeMerchant({ id: 'shop', title: 'Shop' }) },
+          transaction: { first, second },
+        })
+      ),
+      middleware: getDefaultMiddleware =>
+        getDefaultMiddleware({
+          immutableCheck: false,
+          serializableCheck: false,
+        }),
+    })
+    store.dispatch(
+      bulkEditTransactions(['first', 'second'], { merchant, comment: 'Shared' })
+    )
+    const data = store.getState().data.current
+    for (const original of [first, second]) {
+      expect(data.transaction[original.id]).toMatchObject({
+        merchant:
+          merchant === undefined
+            ? original.merchant
+            : (merchant?.id ?? (merchant ? UUID : null)),
+        payee:
+          merchant === undefined ? original.payee : (merchant?.title ?? null),
+        originalPayee: original.originalPayee,
+        comment: 'Shared',
+      })
+    }
+    if (merchant && !merchant.id)
+      expect(data.merchant[UUID].title).toBe('New shop')
+    expect(store.getState().data.outbox).toHaveLength(1)
+    store.dispatch(undoClientCommand())
+    expect(store.getState().data.current.transaction.first).toMatchObject(first)
+    expect(store.getState().data.current.transaction.second).toMatchObject(
+      second
+    )
+    expect(store.getState().data.current.merchant[UUID]).toBeUndefined()
+  })
+
   it('saves individual category drafts as one undoable bulk command', () => {
     const current = makeStore({
       transaction: {

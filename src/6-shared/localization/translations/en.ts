@@ -784,6 +784,7 @@ export const en: typeof ru = {
   },
 
   transactionsBulkEdit: {
+    mixedMerchants: 'Different places',
     editTransactions: 'Edit Transactions',
     categories: 'Categories',
     comment: 'Comment',

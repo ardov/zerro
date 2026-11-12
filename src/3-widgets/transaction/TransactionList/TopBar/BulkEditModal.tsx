@@ -13,6 +13,9 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { track } from '@/6-shared/analytics'
 import { core } from '@/zerro-core/redux'
 
+import { MerchantField } from '../../TransactionPreview/MerchantField'
+import type { TNamedMerchant } from '../../TransactionPreview/draft'
+
 import { CategoryRow } from '../../../category/CategoryRow'
 import { applyCategoryAction, commonCategories } from '../../../category/model'
 
@@ -30,9 +33,16 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   const { open, setOpen } = controller
   const onClose = () => setOpen(false)
   const { t } = useTranslation('transactionsBulkEdit')
+  const { t: transactionText } = useTranslation('transaction')
   const dispatch = useAppDispatch()
   const allTransactions = useAppSelector(core.transactions.selectAll)
   const transactions = ids.map(id => allTransactions[id]).filter(Boolean)
+  const getType = core.transactions.useType()
+  const hasTransfer = transactions.some(tr => getType(tr) === 'transfer')
+  const hasDebt = transactions.some(tr => {
+    const type = getType(tr)
+    return type === 'incomeDebt' || type === 'outcomeDebt'
+  })
   const sameComments = isSameComments(transactions)
   const types = getTypes(transactions)
   const preferredType = types.income
@@ -45,6 +55,28 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   )
   const initialComment = sameComments ? transactions[0]?.comment || '' : ''
 
+  const first = transactions[0]
+  const sameMerchant = transactions.every(
+    tr =>
+      (tr.merchant ?? null) === (first?.merchant ?? null) &&
+      (tr.merchant || (tr.payee || '') === (first?.payee || ''))
+  )
+  const [merchant, setMerchant] = useState<TNamedMerchant | null | undefined>(
+    undefined
+  )
+  const shownMerchant =
+    merchant === undefined
+      ? sameMerchant && first?.merchant
+        ? { id: first.merchant }
+        : null
+      : merchant
+  const shownPayee =
+    merchant === undefined
+      ? sameMerchant
+        ? (first?.payee ?? null)
+        : null
+      : (merchant?.title ?? null)
+
   const [tags, setTags] = useState(initialTags)
   const [originalTags, setOriginalTags] = useState(initialTags)
   const categories = commonCategories(Object.values(tags))
@@ -55,6 +87,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   if (prevState.ids !== ids || prevState.open !== open) {
     setPrevState({ ids, open })
     if (open) {
+      setMerchant(undefined)
       setTags(initialTags)
       setOriginalTags(initialTags)
       setComment(initialComment)
@@ -68,12 +101,21 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
         ([id, value]) => !equalArrays(originalTags[id] ?? [], value)
       )
     )
-    const opts = { tagsById, comment: commentChanged ? comment : undefined }
-    if (Object.keys(tagsById).length || commentChanged) {
-      track('transaction_tags_changed', {
-        mode: 'bulk',
-        source: 'bulk_modal',
-      })
+    const opts = {
+      merchant,
+      tagsById,
+      comment: commentChanged ? comment : undefined,
+    }
+    if (
+      Object.keys(tagsById).length ||
+      commentChanged ||
+      merchant !== undefined
+    ) {
+      if (Object.keys(tagsById).length)
+        track('transaction_tags_changed', {
+          mode: 'bulk',
+          source: 'bulk_modal',
+        })
       dispatch(core.transactions.bulkEdit(ids, opts))
     }
     onApply()
@@ -114,6 +156,23 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
               className="min-w-0 flex-1 py-2"
             />
           </FieldSurface>
+        )}
+
+        {!hasTransfer && (
+          <MerchantField
+            required={hasDebt}
+            mixedLabel={
+              !sameMerchant && merchant === undefined
+                ? t('mixedMerchants')
+                : undefined
+            }
+            merchant={shownMerchant}
+            payee={shownPayee}
+            originalPayee={null}
+            debt={false}
+            onChange={setMerchant}
+            placeholder={transactionText('payee')}
+          />
         )}
 
         <Textarea

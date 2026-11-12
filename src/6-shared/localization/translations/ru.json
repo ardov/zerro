@@ -752,6 +752,7 @@
   },
 
   "transactionsBulkEdit": {
+    "mixedMerchants": "Разные места",
     "editTransactions": "Редактирование операций",
     "categories": "Категории",
     "comment": "Комментарий",

@@ -543,25 +543,42 @@ export function deleteReminder(id: TReminderId): AppThunk {
 
 export function bulkEditTransactions(
   ids: TTransactionId[],
-  opts: TBulkEditTransactionsInput
+  opts: TBulkEditTransactionsInput & {
+    merchant?: { id?: string; title: string } | null
+  }
 ): AppThunk {
   const label: TCommandLabel = { verb: 'transactions-bulk-edited' }
-  if (!opts.tagsById && !opts.comment?.includes('$&')) {
+  if (
+    opts.merchant === undefined &&
+    !opts.tagsById &&
+    !opts.comment?.includes('$&')
+  ) {
     const set: TTransactionEditablePatch = {}
     if (opts.tags) set.tag = normalizeTransactionTags(opts.tags)
     if (opts.comment !== undefined) set.comment = opts.comment
     return patchTransactions(ids, set, label)
   }
 
-  return executeCommand(
-    state => ({
-      operations: entityOperations(
-        selectData(state),
-        compileBulkEditTransactions(selectData(state).transaction, ids, opts)
-      ),
-    }),
-    label
-  )
+  return executeCommand((state, ctx) => {
+    const data = selectData(state)
+    const merchant =
+      opts.merchant && !opts.merchant.id
+        ? compileCreateMerchant(data.merchant, opts.merchant.title, ctx)
+        : null
+    const patch = compileBulkEditTransactions(data.transaction, ids, opts)
+    return {
+      operations: entityOperations(data, {
+        ...merchant?.patch,
+        transaction: patch.transaction.map(transaction => ({
+          ...transaction,
+          ...(opts.merchant !== undefined && {
+            merchant: merchant?.receipt.merchantId ?? opts.merchant?.id ?? null,
+            payee: opts.merchant?.title ?? null,
+          }),
+        })),
+      }),
+    }
+  }, label)
 }
 
 export function combineTransactionsToOutcome(ids: TTransactionId[]): AppThunk {

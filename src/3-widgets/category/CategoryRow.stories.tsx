@@ -10,6 +10,9 @@ import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import {
   makeStore,
+  makeAccount,
+  makeInstrument,
+  makeUser,
   makeTag,
   makeTransaction,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
@@ -34,13 +37,26 @@ export default meta
 type Story = StoryObj
 
 const ids = ['first', 'second']
-function Fixtures(props: { children: ReactNode }) {
-  const { children } = props
+function Fixtures(props: {
+  children: ReactNode
+  debt?: 'only' | 'mixed'
+  mixedPlaces?: boolean
+  transfer?: boolean
+}) {
+  const { children, debt, mixedPlaces, transfer } = props
   const [store] = useState(() =>
     configureStore({
       reducer: rootReducer,
       preloadedState: makeTestRootState(
         makeStore({
+          user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+          account: debt
+            ? {
+                cash: makeAccount({ id: 'cash' }),
+                debt: makeAccount({ id: 'debt', type: 'debt' }),
+              }
+            : {},
+          instrument: { 1: makeInstrument({ id: 1, shortTitle: 'USD' }) },
           tag: Object.fromEntries(
             [
               makeTag({
@@ -82,15 +98,28 @@ function Fixtures(props: { children: ReactNode }) {
             first: makeTransaction({
               id: 'first',
               comment: 'Lunch',
+              ...(mixedPlaces && { payee: 'Cafe' }),
+              ...(debt && {
+                incomeAccount: 'debt',
+                outcomeAccount: 'cash',
+                income: 10,
+                payee: 'Alex',
+              }),
               tag: ['food', 'trip'],
-              income: 0,
+              income: debt || transfer ? 10 : 0,
               outcome: 10,
             }),
             second: makeTransaction({
               id: 'second',
               comment: 'Dinner',
+              ...(mixedPlaces && { payee: 'Shop' }),
+              ...(debt && {
+                incomeAccount: 'cash',
+                outcomeAccount: debt === 'only' ? 'debt' : 'cash',
+                payee: debt === 'only' ? 'Alex' : 'Shop',
+              }),
               tag: ['food', 'work'],
-              income: 0,
+              income: debt === 'only' ? 20 : 0,
               outcome: 20,
             }),
           },
@@ -279,6 +308,7 @@ function BulkDemo() {
   const popup = usePopup()
   const { setOpen } = popup
   const transactions = useAppSelector(core.transactions.selectAll)
+  const debtors = useAppSelector(core.debtors.selectAll)
   return (
     <>
       <button onClick={() => setOpen(true)}>Edit selection</button>
@@ -287,6 +317,12 @@ function BulkDemo() {
         controller={popup}
         onApply={() => setOpen(false)}
       />
+      <output aria-label="Debt balances">
+        {JSON.stringify(Object.values(debtors).map(debtor => debtor.balance))}
+      </output>
+      <output aria-label="Saved places">
+        {JSON.stringify(ids.map(id => transactions[id].payee))}
+      </output>
       <output aria-label="Saved comments">
         {JSON.stringify(ids.map(id => transactions[id].comment))}
       </output>
@@ -315,19 +351,144 @@ export const BulkSaveAndCancel: Story = {
       await expect(canvas.getByLabelText('Saved categories')).toHaveTextContent(
         '[["food","trip"],["food","work"]]'
       )
+      await userEvent.click(body.getByRole('combobox', { name: 'Place' }))
+      await userEvent.type(
+        await body.findByRole('combobox', { name: 'Find or create' }),
+        'Bulk test shop'
+      )
+      await userEvent.click(
+        await body.findByRole('option', { name: /Create.*Bulk test shop/ })
+      )
+      await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
       await userEvent.click(
         body.getByRole('button', {
           name: save ? 'Apply Changes' : 'Cancel',
         })
       )
       await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+      if (!save)
+        expect(canvas.getByLabelText('Saved places')).not.toHaveTextContent(
+          'Bulk test shop'
+        )
       expect(canvas.getByLabelText('Saved comments')).toHaveTextContent(
         '["Lunch","Dinner"]'
       )
     }
+    await expect(canvas.getByLabelText('Saved places')).toHaveTextContent(
+      '["Bulk test shop","Bulk test shop"]'
+    )
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Edit selection' })
+    )
+    await userEvent.click(
+      await body.findByRole('button', { name: 'Leave empty' })
+    )
+    await userEvent.click(body.getByRole('button', { name: 'Apply Changes' }))
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+    await expect(canvas.getByLabelText('Saved places')).toHaveTextContent(
+      '[null,null]'
+    )
+
     await expect(canvas.getByLabelText('Saved categories')).toHaveTextContent(
       '[["cafe","trip"],["cafe","work"]]'
     )
+  },
+}
+
+export const MobileBulkSaveAndCancel: Story = {
+  ...BulkSaveAndCancel,
+  globals: { viewport: { value: 'mobile1' } },
+}
+
+export const BulkDebtKeepsCounterparty: Story = {
+  render: () => (
+    <Fixtures debt="only">
+      <BulkDemo />
+    </Fixtures>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const originalPlaces = canvas.getByLabelText('Saved places').textContent
+    const originalBalances = canvas.getByLabelText('Debt balances').textContent
+    expect(originalBalances).not.toBe('[]')
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Edit selection' })
+    )
+    await body.findByRole('dialog')
+    expect(body.getByRole('combobox', { name: /^Place/ })).toHaveTextContent(
+      originalPlaces?.includes('Shop') ? 'Different places' : 'Alex'
+    )
+    expect(body.queryByRole('button', { name: 'Leave empty' })).toBeNull()
+    await userEvent.type(
+      body.getByRole('textbox', { name: 'Comment' }),
+      'Updated'
+    )
+    await userEvent.click(body.getByRole('button', { name: 'Apply Changes' }))
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+    expect(canvas.getByLabelText('Saved places').textContent).toBe(
+      originalPlaces
+    )
+    expect(canvas.getByLabelText('Debt balances').textContent).toBe(
+      originalBalances
+    )
+    expect(canvas.getByLabelText('Saved comments')).toHaveTextContent(
+      '["Updated","Updated"]'
+    )
+  },
+}
+
+export const BulkMixedDebtKeepsCounterparty: Story = {
+  ...BulkDebtKeepsCounterparty,
+  render: () => (
+    <Fixtures debt="mixed">
+      <BulkDemo />
+    </Fixtures>
+  ),
+}
+
+export const BulkMixedPlaces: Story = {
+  render: () => (
+    <Fixtures mixedPlaces>
+      <BulkDemo />
+    </Fixtures>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Edit selection' })
+    )
+    const field = await body.findByRole('combobox', { name: /^Place/ })
+    expect(field).toHaveTextContent('Different places')
+    await userEvent.click(body.getByRole('button', { name: 'Leave empty' }))
+    expect(field).not.toHaveTextContent('Different places')
+    await userEvent.click(body.getByRole('button', { name: 'Apply Changes' }))
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Saved places')).toHaveTextContent(
+        '[null,null]'
+      )
+    )
+  },
+}
+
+export const BulkWithTransfer: Story = {
+  render: () => (
+    <Fixtures transfer>
+      <BulkDemo />
+    </Fixtures>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Edit selection' })
+    )
+    await body.findByRole('dialog')
+    expect(body.queryByRole('combobox', { name: /^Place/ })).toBeNull()
+    await userEvent.click(body.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(body.queryByRole('dialog')).toBeNull())
   },
 }
 

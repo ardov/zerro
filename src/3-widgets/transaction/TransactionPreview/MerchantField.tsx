@@ -20,6 +20,7 @@ export type MerchantFieldProps = Pick<
   SelectProps,
   'invalid' | 'error' | 'disabled' | 'readOnly' | 'required'
 > & {
+  mixedLabel?: string
   merchant: TDraftMerchant
   /** Legacy text is preserved until the user explicitly chooses or clears. */
   payee: string | null
@@ -39,6 +40,7 @@ const createKey = (title: string) => `create:${title}`
 export function MerchantField(props: MerchantFieldProps) {
   const {
     merchant,
+    mixedLabel,
     payee,
     originalPayee,
     debt,
@@ -57,8 +59,9 @@ export function MerchantField(props: MerchantFieldProps) {
   )
   const chosen = merchant && 'id' in merchant ? merchant.id : undefined
   const pending = merchant && 'title' in merchant ? merchant.title : undefined
-  const shown = pending ?? (chosen && merchants[chosen]?.title) ?? payee ?? ''
-  const unlinked = !merchant && !!payee
+  const shown =
+    mixedLabel ?? pending ?? (chosen && merchants[chosen]?.title) ?? payee ?? ''
+  const unlinked = !mixedLabel && !merchant && !!payee
   const glyph = (id?: TMerchantId) =>
     (id ? usage[id]?.regular : !debt) ? <PlaceIcon /> : <PersonIcon />
   const toOption = (option: (typeof all)[number]): SelectOption => ({
@@ -72,16 +75,18 @@ export function MerchantField(props: MerchantFieldProps) {
     ),
   })
   const options = all.map(toOption)
-  const value = chosen
-    ? merchantKey(chosen)
-    : pending
-      ? createKey(pending)
-      : shown
-        ? 'unlinked'
-        : null
+  const value = mixedLabel
+    ? 'mixed'
+    : chosen
+      ? merchantKey(chosen)
+      : pending
+        ? createKey(pending)
+        : shown
+          ? 'unlinked'
+          : null
   // A draft or bare payee needs a closed-field representation, not a search result.
   const items =
-    chosen || !value
+    (chosen && !mixedLabel) || !value
       ? options
       : [
           ...options,
@@ -134,7 +139,9 @@ export function MerchantField(props: MerchantFieldProps) {
       search={{
         label: t('findMerchant'),
         placeholder: t('findMerchant'),
-        initialQuery: initialMerchantSearch(Boolean(merchant), payee),
+        initialQuery: mixedLabel
+          ? ''
+          : initialMerchantSearch(Boolean(merchant), payee),
         autoHighlight: true,
         showMoreLabel: t('showAllMerchants'),
         filter: (_items, search, { expanded }) => {

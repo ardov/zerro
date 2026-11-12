@@ -248,3 +248,18 @@ export const EmptyDebtor: Story = {
     ).toBeTruthy()
   },
 }
+
+export const MixedPlaces: Story = {
+  args: { ...BarePayee.args, payee: null, mixedLabel: 'Different places' },
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body)
+    const field = within(canvasElement).getByRole('combobox', {
+      name: /^Place/,
+    })
+    expect(field).toHaveTextContent('Different places')
+    await userEvent.click(field)
+    expect(
+      await body.findByRole('combobox', { name: 'Find or create' })
+    ).toHaveValue('')
+  },
+}
