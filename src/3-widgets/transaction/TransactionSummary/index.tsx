@@ -11,7 +11,8 @@ import { getDateFilterLabel } from '../TransactionList/TopBar/dateFilterLabel'
 import { BreakdownCard } from './BreakdownCard'
 import { TimelineCard } from './TimelineCard'
 import { TotalsCard } from './TotalsCard'
-import { InlineButton, cycle } from './shared'
+import { InlineButton } from '@/6-shared/ui/kit/InlineButton'
+import { cycle } from './cycle'
 import {
   getDimensions,
   isSpreadOverTime,
@@ -95,9 +96,10 @@ export function TransactionSummary(props: TransactionSummaryProps) {
   const showTimeline = !selection || isSpreadOverTime(span)
   const sideLabel =
     summary.sides.length > 1 ? (
-      <InlineButton onClick={() => setChosenSide(cycle(summary.sides, side))}>
-        {t(`flow_${side}`)}
-      </InlineButton>
+      <InlineButton
+        value={t(`flow_${side}`)}
+        onClick={() => setChosenSide(cycle(summary.sides, side))}
+      />
     ) : (
       side && t(`flow_${side}`)
     )

@@ -5,7 +5,8 @@ import type { TFxCode, TISODate } from '@/6-shared/types'
 import { formatDate } from '@/6-shared/helpers/date'
 import { round } from '@/6-shared/helpers/money/currencyHelpers'
 import { DataLine } from '@/3-widgets/DataLine'
-import { InlineButton, cycle } from './shared'
+import { InlineButton } from '@/6-shared/ui/kit/InlineButton'
+import { cycle } from './cycle'
 import {
   getSteps,
   getTimeline,
@@ -57,10 +58,9 @@ export function TimelineCard(props: {
           {side} {t('by')}{' '}
           {steps.available.length > 1 ? (
             <InlineButton
+              value={t(`step_${step}`)}
               onClick={() => setChosen(cycle(steps.available, step))}
-            >
-              {t(`step_${step}`)}
-            </InlineButton>
+            />
           ) : (
             t(`step_${step}`)
           )}

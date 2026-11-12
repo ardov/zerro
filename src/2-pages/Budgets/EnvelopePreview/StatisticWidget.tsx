@@ -1,6 +1,5 @@
 import { cn } from '@/6-shared/ui/shadcn/utils'
-import type { ButtonBaseProps } from '@/6-shared/ui/kit/ButtonBase'
-import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
+import { InlineButton } from '@/6-shared/ui/kit/InlineButton'
 import type { FC } from 'react'
 import type { ComponentPropsWithoutRef } from 'react'
 import { useState } from 'react'
@@ -151,9 +150,9 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
       <div className="px-4 pt-4">
         <p className="m-0 text-body text-foreground">
           <span>{t('average')} </span>
-          <InlineButton onClick={switchMetric}>{t(metric)}</InlineButton>
+          <InlineButton value={t(metric)} onClick={switchMetric} />
           <span> {t('over')} </span>
-          <InlineButton onClick={switchPeriod}>{t(period)}</InlineButton>
+          <InlineButton value={t(period)} onClick={switchPeriod} />
         </p>
       </div>
       {selectedData && (
@@ -215,10 +214,3 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
     </div>
   )
 }
-
-const inlineButtonClass =
-  '-mx-2 inline cursor-pointer rounded-lg px-2 align-baseline text-[length:inherit] leading-[inherit] text-info'
-
-const InlineButton: FC<ButtonBaseProps> = ({ className, ...delegated }) => (
-  <ButtonBase className={cn(inlineButtonClass, className)} {...delegated} />
-)

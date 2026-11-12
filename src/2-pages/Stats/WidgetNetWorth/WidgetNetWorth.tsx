@@ -1,3 +1,4 @@
+import { InlineButton } from '@/6-shared/ui/kit/InlineButton'
 import { useState } from 'react'
 import { core } from '@/zerro-core/redux'
 
@@ -18,7 +19,7 @@ import { formatDate, GroupBy } from '@/6-shared/helpers/date'
 
 import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import { DataLine } from '@/3-widgets/DataLine'
-import { Period, PeriodTitle } from '../shared/period'
+import { Period, usePeriodTitle } from '../shared/period'
 import type { TNetWorthPoint } from './useNetWorth'
 import { useNetWorth } from './useNetWorth'
 import { useAverageExpenses } from './useAverageExpenses'
@@ -46,6 +47,7 @@ type WidgetNetWorthProps = {
 export function WidgetNetWorth(props: WidgetNetWorthProps) {
   const { period, onTogglePeriod } = props
   const { t } = useTranslation('analytics')
+  const periodTitle = usePeriodTitle(period)
   const balances = useNetWorth(period, GroupBy.Month)
 
   const [visibleParts, setVisibleParts] = useState<Array<TDataKey>>([
@@ -110,12 +112,11 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
         {/* Header */}
         <h2 className="m-0 text-title-lg">
           {t('netWorth.title')}{' '}
-          <span
-            style={{ color: 'var(--interactive)', cursor: 'pointer' }}
+          <InlineButton
+            value={periodTitle}
+            className="text-interactive"
             onClick={onTogglePeriod}
-          >
-            <PeriodTitle period={period} />
-          </span>
+          />
         </h2>
 
         <p className="mt-2 mb-0 text-body text-muted-foreground">

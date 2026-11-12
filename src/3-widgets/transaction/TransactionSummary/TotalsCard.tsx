@@ -2,7 +2,9 @@ import { useTranslation } from 'react-i18next'
 import type { TFxCode } from '@/6-shared/types'
 import { Amount } from '@/6-shared/ui/Amount'
 import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
+import { TextSwap } from '@/6-shared/ui/kit/TextSwap'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import { formatMoney } from '@/6-shared/helpers/money'
 import { DataLine } from '@/3-widgets/DataLine'
 import type { TFlowTotal, TSummary } from './model'
 
@@ -33,35 +35,34 @@ export function TotalsCard(props: {
             sign: false,
           }
   const single = summary.net === null ? (money[0] ?? transfers) : undefined
-  const amount = (
-    <span className="text-title-lg">
-      {converted && '≈ '}
-      <Amount
-        value={headline.value}
-        currency={currency}
-        sign={headline.sign}
-        decimals="ifAny"
-        noShade
-      />
-    </span>
-  )
-
+  const estimate = `≈ ${formatSigned(headline.value, currency, headline.sign)}`
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-ui-base p-4">
       <div className="text-center">
         <p className="m-0 text-body-sm text-ui-secondary">{headline.label}</p>
         {converted ? (
           <Tooltip content={t('convertedHint')}>
+            {/* The estimate is the button's name; its text swaps in place
+                when another currency is chosen. */}
             <ButtonBase
+              aria-label={estimate}
               className="-mx-2 rounded-lg px-2"
               disabled={!onCycleCurrency}
               onClick={onCycleCurrency}
             >
-              {amount}
+              <TextSwap value={estimate} className="text-title-lg" />
             </ButtonBase>
           </Tooltip>
         ) : (
-          amount
+          <span className="text-title-lg">
+            <Amount
+              value={headline.value}
+              currency={currency}
+              sign={headline.sign}
+              decimals="ifAny"
+              noShade
+            />
+          </span>
         )}
       </div>
 
@@ -141,4 +142,10 @@ function FlowLine(props: {
         )}
     </div>
   )
+}
+
+/** As `Amount` prints it, in one string. */
+function formatSigned(value: number, currency: TFxCode, sign: boolean) {
+  const text = formatMoney(value, currency, 'ifAny').replace(/^-/, '−')
+  return value > 0 && sign ? `+${text}` : text
 }

@@ -1,14 +1,18 @@
 @layer components {
   .text-swap {
     --text-swap-distance: 4px;
+    --text-swap-blur: 3px;
+    --text-swap-duration: 200ms;
+    --text-swap-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     &[data-direction='backward'] {
       --text-swap-distance: -4px;
     }
 
     &[data-changing] > span {
-      animation-duration: 160ms;
-      animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      animation-duration: var(--text-swap-duration);
+      animation-timing-function: var(--text-swap-easing);
+      animation-fill-mode: both;
     }
 
     &[data-changing] > .text-swap-outgoing {
@@ -20,25 +24,33 @@
     }
   }
 
-  @keyframes text-swap-enter {
+  /* The old text is gone before the new one is halfway in. Crossfading them
+     in place would leave the words they share standing still in between. */
+  @keyframes text-swap-exit {
     from {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+    60%,
+    to {
       opacity: 0;
+      filter: blur(var(--text-swap-blur));
+      transform: translateY(calc(-1 * var(--text-swap-distance)));
+    }
+  }
+
+  @keyframes text-swap-enter {
+    from,
+    30% {
+      opacity: 0;
+      filter: blur(var(--text-swap-blur));
       transform: translateY(var(--text-swap-distance));
     }
     to {
       opacity: 1;
+      filter: blur(0);
       transform: translateY(0);
-    }
-  }
-
-  @keyframes text-swap-exit {
-    from {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateY(calc(-1 * var(--text-swap-distance)));
     }
   }
 

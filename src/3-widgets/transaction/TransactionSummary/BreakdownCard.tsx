@@ -6,7 +6,8 @@ import { PercentBar, type PercentBarItem } from '@/6-shared/ui/PercentBar'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import { DataLine } from '@/3-widgets/DataLine'
-import { InlineButton, cycle } from './shared'
+import { InlineButton } from '@/6-shared/ui/kit/InlineButton'
+import { cycle } from './cycle'
 import {
   getBreakdown,
   type TDimension,
@@ -80,13 +81,12 @@ export function BreakdownCard(props: {
         {side} {t('by')}{' '}
         {available.length > 1 ? (
           <InlineButton
+            value={t(`dimension_${dimension}`)}
             onClick={() => {
               setChosen(cycle(available, dimension))
               setExpanded(false)
             }}
-          >
-            {t(`dimension_${dimension}`)}
-          </InlineButton>
+          />
         ) : (
           t(`dimension_${dimension}`)
         )}

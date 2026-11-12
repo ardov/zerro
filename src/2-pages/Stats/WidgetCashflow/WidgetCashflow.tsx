@@ -12,6 +12,7 @@ import {
   CartesianGrid,
 } from 'recharts'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
+import { InlineButton } from '@/6-shared/ui/kit/InlineButton'
 import { formatMoney } from '@/6-shared/helpers/money'
 import { formatDate, parseDate } from '@/6-shared/helpers/date'
 import type { TISODate } from '@/6-shared/types'
@@ -20,7 +21,7 @@ import { DisplayAmount } from '@/3-widgets/DisplayAmount'
 import { DataLine } from '@/3-widgets/DataLine'
 import { summarizeCashflow, useCashFlow } from '../shared/cashflow'
 import type { Period } from '../shared/period'
-import { PeriodTitle } from '../shared/period'
+import { usePeriodTitle } from '../shared/period'
 
 type Point = {
   date: TISODate
@@ -43,6 +44,7 @@ function formatSavingsRate(savingsRate: number) {
 export function WidgetCashflow(props: WidgetCashflowProps) {
   const { t } = useTranslation('analytics')
   const { period, onTogglePeriod } = props
+  const periodTitle = usePeriodTitle(period)
   const points = useCashFlow(period)
 
   const { income, outcome } = summarizeCashflow(points)
@@ -58,16 +60,11 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
       <div className="min-w-full p-4">
         <h2 className="m-0 text-title-lg">
           {t('incomesAndOutcomes')}{' '}
-          <span
-            style={{
-              color: 'var(--interactive)',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-            }}
+          <InlineButton
+            value={periodTitle}
+            className="text-interactive whitespace-nowrap"
             onClick={onTogglePeriod}
-          >
-            <PeriodTitle period={period} />
-          </span>{' '}
+          />{' '}
           <Summary income={income} outcome={outcome} />
         </h2>
         <p className="mt-2 mb-0 text-body text-muted-foreground">

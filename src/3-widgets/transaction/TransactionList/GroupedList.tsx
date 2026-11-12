@@ -315,6 +315,8 @@ function PinnedDateChip({
         getDirection={(next, previous) =>
           next > previous ? 'backward' : 'forward'
         }
+        // The date follows the scroll position; its width must not lag.
+        instantWidth
         className="text-start"
       />
     </ButtonBase>

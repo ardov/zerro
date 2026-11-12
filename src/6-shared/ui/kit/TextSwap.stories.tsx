@@ -59,3 +59,45 @@ export const RapidChanges: Story = {
     expect(button.querySelector('.text-swap-outgoing')).not.toBeVisible()
   },
 }
+
+function BusyPageButton() {
+  const [period, setPeriod] = useState('for the year')
+  return (
+    <Button
+      aria-label={period}
+      onClick={() => {
+        // A frame is already due, as a pressed state makes it, and the rest
+        // of a heavy page then renders in the same update.
+        requestAnimationFrame(() => {})
+        const until = performance.now() + 200
+        while (performance.now() < until);
+        setPeriod(value =>
+          value === 'for the year' ? 'for three years' : 'for the year'
+        )
+      }}
+    >
+      <TextSwap value={period} />
+    </Button>
+  )
+}
+
+/** A long render in the same update must not play the swap out unseen. */
+export const AfterLongRender: Story = {
+  tags: ['!dev', '!autodocs'],
+  render: () => <BusyPageButton />,
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button')
+    const frame = () => new Promise(resolve => requestAnimationFrame(resolve))
+    await userEvent.click(button)
+    await frame()
+    await frame()
+    await frame()
+    const animations = button.getAnimations({ subtree: true })
+    // Both layers and, outside reduced motion, the width.
+    expect(animations.length).toBeGreaterThanOrEqual(2)
+    for (const animation of animations) {
+      expect(animation.playState).toBe('running')
+      expect(Number(animation.currentTime)).toBeLessThan(100)
+    }
+  },
+}

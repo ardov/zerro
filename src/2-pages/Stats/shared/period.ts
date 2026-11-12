@@ -36,15 +36,10 @@ export const nextPeriod = (current: Period) => {
   return order[nextIdx]
 }
 
-/**
- * Returns the localized title of the period
- */
-export const PeriodTitle = (props: { period: Period }) => {
+/** The localized title of the period. */
+export function usePeriodTitle(period: Period): string {
   const { t } = useTranslation('analytics')
-  const { period } = props
-  if (period === Period.All) return t('period_all')
   if (period === Period.LastYear) return t('period_year')
   if (period === Period.ThreeYears) return t('period_3years')
-  console.error(`Unknown period: ${period}`)
-  return null
+  return t('period_all')
 }
