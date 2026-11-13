@@ -21,7 +21,7 @@ export function InlineButton(props: InlineButtonProps) {
       aria-label={value}
       className={cn(
         // Sits on the text line and takes its type
-        'inline align-baseline text-[length:inherit] leading-[inherit]',
+        'inline align-baseline text-[length:inherit] leading-[inherit] [text-align:inherit]',
         // Room for hover and focus that does not push the words apart
         '-mx-2 rounded-lg px-2 text-info',
         className

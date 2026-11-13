@@ -14,9 +14,8 @@ type TextSwapProps<T extends string> = {
 
 /** Decorative text for a control that provides its current accessible name.
  * Two bounded layers replace each other without queuing rapid changes: the
- * old text blurs away before the new one comes into focus, so words they
- * share never stand still between them, and the width eases from one to the
- * other. The text stays on one line. */
+ * old text blurs away while the new one comes into focus, and the width
+ * eases from one to the other. The text stays on one line. */
 export function TextSwap<T extends string>({
   value,
   formatValue,
