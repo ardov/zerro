@@ -8,6 +8,7 @@ const initialView: TTransactionsPageView = {
   topDate: null,
   scrollOffset: null,
   checked: [],
+  summary: {},
 }
 
 describe('view reducer', () => {

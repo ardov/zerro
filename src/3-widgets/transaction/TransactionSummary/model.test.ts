@@ -104,9 +104,27 @@ describe('breakdown and timeline', () => {
   it('fills empty periods and opens with the finest readable step', () => {
     expect(getTimeline(entries, 'month')).toEqual([
       // The outer months are cut to the days the entries cover.
-      { from: '2026-01-10', to: '2026-01-31', value: 50, count: 2 },
-      { from: '2026-02-01', to: '2026-02-28', value: 0, count: 0 },
-      { from: '2026-03-01', to: '2026-03-20', value: 10, count: 1 },
+      {
+        from: '2026-01-10',
+        to: '2026-01-31',
+        value: 50,
+        count: 2,
+        ongoing: false,
+      },
+      {
+        from: '2026-02-01',
+        to: '2026-02-28',
+        value: 0,
+        count: 0,
+        ongoing: false,
+      },
+      {
+        from: '2026-03-01',
+        to: '2026-03-20',
+        value: 10,
+        count: 1,
+        ongoing: false,
+      },
     ])
     // Seventy days are too many bars; eleven weeks are not.
     expect(getSteps(entries)).toEqual({
@@ -151,5 +169,15 @@ describe('breakdown and timeline', () => {
       available: ['day'],
       initial: 'day',
     })
+  })
+
+  it('marks the period that is still running', () => {
+    const marks = getTimeline(entries, 'month', entries, '2026-03-05').map(
+      bucket => bucket.ongoing
+    )
+    expect(marks).toEqual([false, false, true])
+    expect(getTimeline(entries, 'month').every(bucket => !bucket.ongoing)).toBe(
+      true
+    )
   })
 })

@@ -377,6 +377,55 @@ export const PageSummary: Story = {
   },
 }
 
+/** What the summary was switched to outlives the transaction opened over it. */
+export const SummaryKeepsChoices: Story = {
+  tags: ['check'],
+  parameters: {
+    app: { scenario: 'demo', globalWidgets: true, route: '/transactions' },
+  },
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Summary' }))
+    const summary = await canvas.findByRole('region', { name: 'Summary' })
+    await userEvent.click(
+      await within(summary).findByRole('button', { name: 'category' })
+    )
+    await within(summary).findByRole('button', { name: 'place' })
+    const step = within(summary).getByRole('button', { name: 'year' })
+    await userEvent.click(step)
+    await within(summary).findByRole('button', { name: 'month' })
+
+    await userEvent.click(canvas.getAllByText('Groceries')[0])
+    const editor = await canvas.findByRole('region', { name: 'Transaction' })
+    await userEvent.click(within(editor).getByRole('button', { name: 'Close' }))
+    const back = await canvas.findByRole('region', { name: 'Summary' })
+    await within(back).findByRole('button', { name: 'place' })
+    expect(within(back).getByRole('button', { name: 'month' })).toBeVisible()
+  },
+}
+
+/** Lying over the list on a phone, the summary shows the filter it narrows,
+ * so a narrowing can be undone without leaving it. */
+export const SummaryFilterOnPhone: Story = {
+  tags: ['check'],
+  globals: { viewport: { value: 'iphone13' } },
+  render: () => <Harness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Summary' }))
+    const summary = await body.findByRole('dialog', { name: 'Summary' })
+    await within(summary).findByText('4 transactions')
+    await userEvent.click(within(summary).getByText('Lidl'))
+    await within(summary).findByText('2 transactions')
+    await userEvent.click(
+      within(summary).getByRole('button', { name: /^Remove\s+Lidl$/ })
+    )
+    await within(summary).findByText('4 transactions')
+  },
+}
+
 /** A list opened over the page shows its summary in its Details place. */
 export const ListSummary: Story = {
   tags: ['check'],

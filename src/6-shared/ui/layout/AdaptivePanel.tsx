@@ -1,5 +1,7 @@
 import {
+  createContext,
   useCallback,
+  useContext,
   useLayoutEffect,
   useRef,
   useState,
@@ -13,6 +15,14 @@ import type { SurfaceName } from '@/6-shared/ui/kit/SurfaceContent'
 import type { SurfaceController } from '@/6-shared/overlays'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import './layout.css'
+
+const DockedContext = createContext<boolean | undefined>(undefined)
+
+/** Whether the content is docked beside the page or lies over it in a
+ * drawer. Undefined outside an adaptive panel. */
+export function usePanelDocked() {
+  return useContext(DockedContext)
+}
 
 /** One editor and one scrollport, with two possible homes. Moving their stable
  * host preserves React state and native input/scroll state across a resize.
@@ -156,7 +166,7 @@ export function AdaptivePanel({
                 scrollTop.current = viewport.current.scrollTop
             }}
           >
-            {children}
+            <DockedContext value={docked}>{children}</DockedContext>
           </ScrollArea>,
           host
         )}

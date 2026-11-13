@@ -10,6 +10,8 @@ export type TTransactionsPageView = {
   topDate: TISODate | null
   scrollOffset: number | null
   checked: TTransactionId[]
+  /** What the list's summary was last switched to; see its `TSummaryChoices`. */
+  summary: Partial<Record<'side' | 'dimension' | 'step' | 'currency', string>>
 }
 
 export type TViewState = {
@@ -27,6 +29,7 @@ function createInitialState(generation = 0): TViewState {
       topDate: null,
       scrollOffset: null,
       checked: [],
+      summary: {},
     },
   }
 }

@@ -58,6 +58,7 @@ describe('logOut', () => {
       topDate: null,
       scrollOffset: null,
       checked: [],
+      summary: {},
     })
     expect(clearLocalDataMock).toHaveBeenCalledOnce()
   })

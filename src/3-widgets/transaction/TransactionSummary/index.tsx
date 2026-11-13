@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { TFxCode, TISODate, TTransactionId } from '@/6-shared/types'
+import type { TISODate, TTransactionId } from '@/6-shared/types'
 import { IconButton } from '@/6-shared/ui/kit/Button'
 import { CloseIcon } from '@/6-shared/ui/Icons'
+import { usePanelDocked } from '@/6-shared/ui/layout/AdaptivePanel'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import { useListTransactions } from '../TransactionList/useListTransactions'
+import Filter from '../TransactionList/TopBar/Filter'
 import { upsertFilter } from '../TransactionList/TopBar/filterModel'
 import { getDateFilterLabel } from '../TransactionList/TopBar/dateFilterLabel'
 import { BreakdownCard } from './BreakdownCard'
@@ -18,6 +20,7 @@ import {
   isSpreadOverTime,
   summarize,
   type TSide,
+  type TSummaryChoices,
   type TSummaryContext,
 } from './model'
 
@@ -36,6 +39,11 @@ export type TransactionSummaryProps = {
   checked: TTransactionId[]
   /** Lets a group or a period narrow the list. */
   onQueryChange?: (query: Query) => void
+  onSearchChange?: (search: string) => void
+  /** Kept with the list's view. Without them the summary remembers only
+   * while it is on screen. */
+  choices?: TSummaryChoices
+  onChoicesChange?: (choices: TSummaryChoices) => void
   onClose?: () => void
 }
 
@@ -47,8 +55,15 @@ export type TransactionSummaryProps = {
  * take a card away. A few checked rows are only there to be added up: for
  * them a card appears once the rows give it something to say. */
 export function TransactionSummary(props: TransactionSummaryProps) {
-  const { transactionIds, query, search, checked, onQueryChange, onClose } =
-    props
+  const { transactionIds, query, search, checked, onClose } = props
+  const { onQueryChange, onSearchChange } = props
+  // Lying over its list, the summary hides the list's own filter. It shows
+  // the filter itself, so narrowing can be undone without leaving.
+  const covering = usePanelDocked() === false
+  const [ownChoices, setOwnChoices] = useState<TSummaryChoices>({})
+  const choices = props.choices ?? ownChoices
+  const choose = (choice: TSummaryChoices) =>
+    (props.onChoicesChange ?? setOwnChoices)({ ...choices, ...choice })
   const { t, i18n } = useTranslation('transactionSummary')
   const listed = useListTransactions(transactionIds, query, search)
   const all = useAppSelector(core.transactions.selectAll)
@@ -67,18 +82,16 @@ export function TransactionSummary(props: TransactionSummaryProps) {
 
   const ctx = useSummaryContext()
   const displayCurrency = useAppSelector(core.currency.selectDisplayCurrency)
-  const [chosenCurrency, setChosenCurrency] = useState<TFxCode | null>(null)
-  const [chosenSide, setChosenSide] = useState<TSide | null>(null)
+  const codes = useAppSelector(core.instruments.selectCodeMap)
+  const kept = Object.values(codes).find(code => code === choices.currency)
   const summary = useMemo(
-    () => summarize(transactions, chosenCurrency ?? displayCurrency, ctx),
-    [transactions, chosenCurrency, displayCurrency, ctx]
+    () => summarize(transactions, kept ?? displayCurrency, ctx),
+    [transactions, kept, displayCurrency, ctx]
   )
   const currencies = [...new Set([displayCurrency, ...summary.currencies])]
 
-  const side =
-    chosenSide && summary.sides.includes(chosenSide)
-      ? chosenSide
-      : summary.sides[0]
+  const side: TSide | undefined =
+    summary.sides.find(side => side === choices.side) ?? summary.sides[0]
   // Cards are decided by both sides together and only filled by the one in
   // view, so switching sides never takes a card, or the switch, away.
   const sided = useMemo(
@@ -98,7 +111,7 @@ export function TransactionSummary(props: TransactionSummaryProps) {
     summary.sides.length > 1 ? (
       <InlineButton
         value={t(`flow_${side}`)}
-        onClick={() => setChosenSide(cycle(summary.sides, side))}
+        onClick={() => choose({ side: cycle(summary.sides, side) })}
       />
     ) : (
       side && t(`flow_${side}`)
@@ -123,16 +136,18 @@ export function TransactionSummary(props: TransactionSummaryProps) {
     <div className="flex min-h-full min-w-0 grow flex-col bg-ui-card text-ui-primary">
       <header className="flex items-start gap-1 px-6 pt-4">
         <div className="min-w-0 grow">
-          <h2 className="m-0 text-title">{t('title')}</h2>
-          <p className="m-0 text-body-sm text-ui-secondary">
+          <h2 className="m-0 text-title">
             {t(selection ? 'selected' : 'listed', { count: summary.count })}
-            {summary.range &&
-              ` · ${getDateFilterLabel(
+          </h2>
+          {summary.range && (
+            <p className="m-0 text-body-sm text-ui-secondary">
+              {getDateFilterLabel(
                 { kind: 'date', ...summary.range },
                 t,
                 i18n.language
-              )}`}
-          </p>
+              )}
+            </p>
+          )}
         </div>
         {onClose && (
           <IconButton
@@ -146,13 +161,26 @@ export function TransactionSummary(props: TransactionSummaryProps) {
         )}
       </header>
 
+      {covering && onQueryChange && onSearchChange && (
+        <div className="px-4">
+          <Filter
+            bare
+            query={query}
+            onQueryChange={onQueryChange}
+            search={search}
+            onSearchChange={onSearchChange}
+          />
+        </div>
+      )}
+
       {summary.count > 0 && (
         <div className="flex flex-col gap-4 p-6">
           <TotalsCard
             summary={summary}
             onCycleCurrency={
               currencies.length > 1
-                ? () => setChosenCurrency(cycle(currencies, summary.currency))
+                ? () =>
+                    choose({ currency: cycle(currencies, summary.currency) })
                 : undefined
             }
           />
@@ -162,6 +190,8 @@ export function TransactionSummary(props: TransactionSummaryProps) {
               dimensions={dimensions}
               currency={summary.currency}
               side={sideLabel}
+              chosen={choices.dimension}
+              onChoose={dimension => choose({ dimension })}
               onFilter={narrow}
             />
           )}
@@ -171,6 +201,8 @@ export function TransactionSummary(props: TransactionSummaryProps) {
               span={span}
               currency={summary.currency}
               side={sideLabel}
+              chosen={choices.step}
+              onChoose={step => choose({ step })}
               onPeriod={
                 narrow &&
                 ((from: TISODate, to: TISODate) =>

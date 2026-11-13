@@ -99,7 +99,10 @@ function TransactionListInstance({
       setValue(previous => update(normalizeListValue(previous))),
     [setValue]
   )
-  const { view, flushScroll } = useTransactionListView(shown, setViewValue)
+  const { view, summary, flushScroll } = useTransactionListView(
+    shown,
+    setViewValue
+  )
   const closeList = () => {
     flushScroll()
     close(id, { through: true })
@@ -144,6 +147,9 @@ function TransactionListInstance({
                 search={view.search}
                 checked={view.checked}
                 onQueryChange={view.onQueryChange}
+                onSearchChange={view.onSearchChange}
+                choices={summary.choices}
+                onChoicesChange={summary.onChange}
                 onClose={onClose}
               />
             )}

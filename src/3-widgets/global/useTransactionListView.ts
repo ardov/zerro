@@ -4,6 +4,7 @@ import type { TTransactionListView } from '../transaction/TransactionList'
 import { useDebouncedCallback } from '@/6-shared/hooks/useDebouncedCallback'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
+import type { TSummaryChoices } from '../transaction/TransactionSummary/model'
 
 export type TransactionListViewState = {
   query: core.transactions.TTransactionQuery
@@ -11,6 +12,8 @@ export type TransactionListViewState = {
   checked: TTransactionId[]
   topDate: TISODate | null
   scrollOffset: number | null
+  /** Absent in values saved before the list had a summary. */
+  summary?: TSummaryChoices
 }
 
 type ListValue = {
@@ -89,5 +92,12 @@ export function useTransactionListView<T extends ListValue>(
     }),
     [state, patch, saveScroll]
   )
-  return { view, flushScroll: saveScroll.flush }
+  const summary = useMemo(
+    () => ({
+      choices: state.summary ?? {},
+      onChange: (summary: TSummaryChoices) => patch({ summary }),
+    }),
+    [state.summary, patch]
+  )
+  return { view, summary, flushScroll: saveScroll.flush }
 }

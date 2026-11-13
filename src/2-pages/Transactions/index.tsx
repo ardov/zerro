@@ -15,6 +15,9 @@ import { useColumns } from '@/6-shared/ui/layout/useColumns'
 import { Columns } from '@/6-shared/ui/layout/Columns'
 import { AccountsPanel } from '@/3-widgets/account/AccountsPanel'
 
+import { useAppDispatch, useAppSelector } from '@/store'
+import { patchTransactionsPage, selectTransactionsPageView } from '@/store/view'
+import type { TSummaryChoices } from '@/3-widgets/transaction/TransactionSummary/model'
 import { useTransactionsPageView } from './useTransactionsPageView'
 
 export default function TransactionsView() {
@@ -23,6 +26,12 @@ export default function TransactionsView() {
   const docked = layout.visible.includes('detail')
   const accountsPanelFits = layout.visible.includes('accounts')
   const view = useTransactionsPageView()
+  const dispatch = useAppDispatch()
+  const summaryChoices = useAppSelector(selectTransactionsPageView).summary
+  const setSummaryChoices = useCallback(
+    (summary: TSummaryChoices) => dispatch(patchTransactionsPage({ summary })),
+    [dispatch]
+  )
   // One selected editor moves between its column and a modal as space changes.
   const opened = transactionScreen.useValue()
   const openPreview = transactionScreen.useOpen()
@@ -77,6 +86,9 @@ export default function TransactionsView() {
               search={view.search}
               checked={view.checked}
               onQueryChange={view.onQueryChange}
+              onSearchChange={view.onSearchChange}
+              choices={summaryChoices}
+              onChoicesChange={setSummaryChoices}
               onClose={onClose}
             />
           )}

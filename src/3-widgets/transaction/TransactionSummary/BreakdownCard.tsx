@@ -31,19 +31,23 @@ export function BreakdownCard(props: {
   currency: TFxCode
   /** The side's name, or the control that switches it. */
   side: ReactNode
+  /** The dimension last chosen. Ignored once it is off the offer. */
+  chosen?: string
+  onChoose: (dimension: TDimension) => void
   /** Narrows the list to one group. Absent where there is no filter to narrow. */
   onFilter?: (clause: Clause) => void
 }) {
   const { entries, dimensions: available, currency, side, onFilter } = props
+  const { chosen, onChoose } = props
   const { t } = useTranslation('transactionSummary')
-  const [chosen, setChosen] = useState<TDimension>('category')
   const [expanded, setExpanded] = useState(false)
   const describe = useGroupDescriptions()
   // A filter can take the chosen dimension off the offer; fall back quietly.
   // With nothing on offer there is still one group to name, by category.
-  const dimension = available.includes(chosen)
-    ? chosen
-    : (available[0] ?? 'category')
+  const dimension =
+    available.find(dimension => dimension === chosen) ??
+    available[0] ??
+    'category'
 
   const nodes: TNode[] = getBreakdown(entries, dimension).map(group => ({
     id: group.key,
@@ -83,7 +87,7 @@ export function BreakdownCard(props: {
           <InlineButton
             value={t(`dimension_${dimension}`)}
             onClick={() => {
-              setChosen(cycle(available, dimension))
+              onChoose(cycle(available, dimension))
               setExpanded(false)
             }}
           />

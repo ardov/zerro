@@ -6,6 +6,8 @@ import { TextSwap } from '@/6-shared/ui/kit/TextSwap'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
 import { formatMoney } from '@/6-shared/helpers/money'
 import { DataLine } from '@/3-widgets/DataLine'
+import { useAppSelector } from '@/store'
+import { core } from '@/zerro-core/redux'
 import type { TFlowTotal, TSummary } from './model'
 
 /** One headline number, then what it is made of. A single flow is its own
@@ -17,6 +19,13 @@ export function TotalsCard(props: {
 }) {
   const { summary, onCycleCurrency } = props
   const { t } = useTranslation('transactionSummary')
+  // Rates saved for a month in the budget apply from that month on. Without
+  // any, every transaction is converted at today's rates.
+  const historical = useAppSelector(state =>
+    Object.values(core.fxRates.selectRates(state)).some(
+      rates => rates.type === 'saved'
+    )
+  )
   const { currency, converted } = summary
   const transfers = summary.flows.find(total => total.flow === 'transfer')
   const money = summary.flows.filter(total => total.flow !== 'transfer')
@@ -41,7 +50,9 @@ export function TotalsCard(props: {
       <div className="text-center">
         <p className="m-0 text-body-sm text-ui-secondary">{headline.label}</p>
         {converted ? (
-          <Tooltip content={t('convertedHint')}>
+          <Tooltip
+            content={t(historical ? 'convertedSaved' : 'convertedCurrent')}
+          >
             {/* The estimate is the button's name; its text swaps in place
                 when another currency is chosen. */}
             <ButtonBase

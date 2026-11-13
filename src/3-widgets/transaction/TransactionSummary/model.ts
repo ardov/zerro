@@ -16,6 +16,13 @@ export type TSide = 'income' | 'outcome'
 export type TDimension = 'category' | 'place' | 'account' | 'currency'
 export type TStep = 'day' | 'week' | 'month' | 'year'
 
+/** What the summary was last switched to. It is kept with the list's view,
+ * so it comes back from history and outlives the transactions it was chosen
+ * for: every value is checked against what the summary can offer now. */
+export type TSummaryChoices = Partial<
+  Record<'side' | 'dimension' | 'step' | 'currency', string>
+>
+
 export type TSummaryContext = {
   debtAccountId: TAccountId | undefined
   currencyOf: (instrument: number) => TFxCode
@@ -226,6 +233,8 @@ export type TBucket = {
   value: number
   /** How many entries fell into the period. */
   count: number
+  /** The period is not over yet, so it holds less than it will. */
+  ongoing: boolean
 }
 
 const steps: TStep[] = ['day', 'week', 'month', 'year']
@@ -256,7 +265,8 @@ function nextBucket(start: TISODate, step: TStep): TISODate {
 export function getTimeline(
   entries: readonly TEntry[],
   step: TStep,
-  span: readonly TEntry[] = entries
+  span: readonly TEntry[] = entries,
+  today?: TISODate
 ): TBucket[] {
   if (!span.length) return []
   const totals = new Map<TISODate, { value: number; count: number }>()
@@ -287,6 +297,7 @@ export function getTimeline(
       to: until > last ? last : until,
       value: Math.abs(round(total?.value ?? 0)),
       count: total?.count ?? 0,
+      ongoing: today !== undefined && start <= today && today < until,
     })
     start = next
   }
