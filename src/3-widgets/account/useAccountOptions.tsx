@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { core } from '@/zerro-core/redux'
+import { Amount } from '@/6-shared/ui/Amount'
 import { AccountIcon } from './AccountIcon'
 import { accountChoices, type AccountChoicesOptions } from './model'
 import type { SelectItem, SelectOption } from '@/6-shared/ui/kit/Select'
@@ -23,7 +24,12 @@ export function useAccountOptions(
       value: account.id,
       label: account.title,
       start: <AccountIcon account={account} />,
-      end: account.fxCode,
+      end: (
+        <span className="whitespace-nowrap tabular-nums">
+          <Amount value={account.balance} decimals="ifAny" noShade />{' '}
+          {account.fxCode}
+        </span>
+      ),
     }))
     const byId = new Map(items.map(item => [item.value, item]))
     return { accounts, items, byId }
@@ -55,6 +61,6 @@ export function useAccountOptions(
     items,
     search,
     emptyText: t('noAccountsFound'),
-    popupMinWidth: 280,
+    popupMinWidth: 320,
   }
 }

@@ -22,7 +22,7 @@ export function RadialProgress(props: RadialProgressProps) {
       : 0
   const completed = !indeterminate && ratio >= 1
   const colorSuccess = 'var(--color-ui-success)'
-  const colorMain = 'var(--color-ui-secondary)'
+  const colorMain = restProps.color ?? 'var(--color-ui-secondary)'
 
   const r = 12
   const length = 2 * Math.PI * r

@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, within, waitFor } from 'storybook/test'
+import { wcagContrast } from 'culori'
 import { useAppDispatch } from '@/store'
+import { core } from '@/zerro-core/redux'
 import { syncStatusChanged, syncFinished } from '@/store/sync'
 import RefreshButton from './RefreshButton'
 
@@ -11,6 +13,11 @@ function StateHarness() {
       <div data-testid="refresh">
         <RefreshButton />
       </div>
+      <button
+        onClick={() => dispatch(core.accounts.setInBalance('HSBC USD', false))}
+      >
+        Edit
+      </button>
       <button
         onClick={() =>
           dispatch(syncStatusChanged({ status: { kind: 'pulling' } }))
@@ -97,6 +104,29 @@ export const Completion: Story = {
       expect(button.querySelector('svg')).toBe(indicator)
       expect(button.querySelector('path')).toBe(checkmark)
       expect(checkmark).toHaveAttribute('data-completed')
+    }
+  },
+}
+
+export const PendingChangesContrast: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Edit' }))
+    const refresh = canvas.getByTestId('refresh')
+    await expect(within(refresh).getByText('1')).toBeVisible()
+    const button = within(refresh).getByRole('button')
+    for (const action of ['Load', 'Push']) {
+      await userEvent.click(canvas.getByRole('button', { name: action }))
+      const orbit = button.querySelector('circle')!
+      await waitFor(() =>
+        expect(
+          wcagContrast(
+            getComputedStyle(orbit).stroke,
+            getComputedStyle(button).backgroundColor
+          ),
+          `${action}: progress must remain visible on the pending-changes button`
+        ).toBeGreaterThanOrEqual(3)
+      )
     }
   },
 }

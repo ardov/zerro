@@ -8,6 +8,7 @@ import { makeTestRootState } from '@/store/testing'
 import {
   makeStore,
   makeAccount,
+  makeInstrument,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
 import { ZERRO_DATA_ACCOUNT_NAME } from '@/zerro-core/constants'
 import { Button } from '@/6-shared/ui/kit/Button'
@@ -26,14 +27,25 @@ function Fixtures({ children }: { children: ReactNode }) {
       reducer: rootReducer,
       preloadedState: makeTestRootState(
         makeStore({
+          instrument: {
+            1: makeInstrument({ id: 1, shortTitle: 'USD' }),
+            2: makeInstrument({ id: 2, shortTitle: 'EUR' }),
+          },
           account: {
-            cash: makeAccount({ id: 'cash', title: 'Cash', archive: false }),
+            cash: makeAccount({
+              id: 'cash',
+              title: 'Cash',
+              archive: false,
+              balance: 1234.56,
+            }),
             bank: makeAccount({
               id: 'bank',
               title: 'Bank',
               archive: false,
               company: 12574,
               type: 'ccard',
+              balance: -42.5,
+              instrument: 2,
             }),
             service: makeAccount({
               id: 'service',
@@ -189,11 +201,39 @@ export const BankMarks: Story = {
       expect(image.getBoundingClientRect().height).toBe(20)
     })
     const cash = body.getByRole('option', { name: /^Cash/ })
+    expect(cash).toHaveTextContent('1 234,56 USD')
+    expect(bank).toHaveTextContent('−42,50 EUR')
     expect(cash.querySelector('img')).toBeNull()
     await userEvent.click(cash)
     await waitFor(() => expect(trigger).toHaveTextContent('Cash'))
     expect(canvasElement.querySelector('img')).toBeNull()
   },
+}
+
+export const Balances: Story = {
+  render: () => <BankMarksDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('combobox', { name: 'Account Bank' })
+    )
+    await expect(
+      await body.findByRole('option', { name: /^Cash/ })
+    ).toHaveTextContent('1 234,56 USD')
+    await expect(body.getByRole('option', { name: /^Bank/ })).toHaveTextContent(
+      '−42,50 EUR'
+    )
+    await userEvent.click(body.getByRole('button', { name: 'Show archived' }))
+    await expect(
+      await body.findByRole('option', { name: /^Old bank/ })
+    ).toHaveTextContent('0 USD')
+  },
+}
+
+export const MobileBalances: Story = {
+  ...Balances,
+  globals: { viewport: { value: 'zerro499' } },
 }
 
 export const MobileBankMarks: Story = {

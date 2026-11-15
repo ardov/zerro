@@ -68,11 +68,12 @@ const RefreshButton: FC<RefreshButtonProps> = props => {
       <RadialProgress
         aria-hidden
         size={24}
+        color="currentColor"
         value={progressValue}
         active={progress.kind === 'pushing' && progress.phase === 'sending'}
       />
     ) : (
-      <RadialProgress size={24} />
+      <RadialProgress size={24} color="currentColor" />
     ),
     stopped: <WarningIcon size={24} className="text-ui-error" />,
     success: <RadialProgress size={24} value={1} />,
