@@ -1,6 +1,14 @@
 import type ru from './ru.json'
 
 export const en: typeof ru = {
+  dataAccount: {
+    title: 'Zerro created a service account',
+    previewLabel: '{{account}} has been added to your accounts',
+    description:
+      'This account stores Zerro budgets, goals and settings. It will appear in Zenmoney after syncing. It holds no money and does not affect your balance.',
+    keep: 'Please do not delete or rename it.',
+    understood: 'Got it',
+  },
   common: {
     commandWriteBlocked: 'Editing is currently unavailable.',
     pageNotFound: 'Page not found.',

@@ -1,0 +1,80 @@
+.zerro-data-account-illustration {
+  overflow: hidden;
+  padding: 0 32px 20px;
+  background: linear-gradient(var(--color-ui-base), var(--color-ui-card));
+  mask-image: linear-gradient(to bottom, transparent, #000 64px);
+}
+
+.zerro-data-account-list {
+  display: grid;
+  gap: 8px;
+  max-width: 352px;
+  margin-inline: auto;
+}
+
+.zerro-data-account-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  height: 52px;
+  padding-inline: 12px;
+  border-radius: 14px;
+}
+
+.zerro-data-account-existing {
+  opacity: 0.4;
+}
+
+.zerro-data-account-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  place-items: center;
+}
+
+.zerro-data-account-placeholder {
+  width: 40%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-ui-tertiary);
+}
+
+.zerro-data-account-new {
+  background: var(--color-ui-card);
+  box-shadow:
+    0 0 0 1px var(--color-ui-border),
+    0 6px 16px oklch(0 0 0 / 6%);
+  animation: zerro-account-added 760ms cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
+}
+
+@keyframes zerro-account-added {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.025);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zerro-data-account-new {
+    animation: zerro-account-fade 160ms ease 120ms both;
+  }
+}
+
+@keyframes zerro-account-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
