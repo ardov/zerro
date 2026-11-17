@@ -115,6 +115,72 @@ describe('ordered category editing', () => {
 })
 
 describe('category choices', () => {
+  it.each([
+    ['income', ['both', 'income']],
+    ['outcome', ['both', 'outcome']],
+    [undefined, ['both', 'income', 'outcome']],
+  ] as const)(
+    'applies visibility flags and archive status for %s choices',
+    (preferredType, expected) => {
+      const categories: Category[] = [
+        { id: 'hidden', showIncome: false, showOutcome: false },
+        { id: 'income', showIncome: true, showOutcome: false },
+        { id: 'outcome', showIncome: false, showOutcome: true },
+        { id: 'both', showIncome: true, showOutcome: true },
+      ].flatMap(category =>
+        [false, true].map(archive => ({
+          ...category,
+          id: archive ? `archived-${category.id}` : category.id,
+          name: category.id,
+          title: `Category ${category.id}`,
+          archive,
+        }))
+      )
+      const result = categoryChoices(categories, { preferredType })
+      expect(result.choices.map(({ category }) => category.id)).toEqual(
+        expected
+      )
+      expect(result.hasMore).toBe(true)
+      for (const options of [{ showAll: true }, { query: 'Category' }]) {
+        const expanded = categoryChoices(categories, {
+          preferredType,
+          ...options,
+        })
+        expect(expanded.choices).toHaveLength(categories.length)
+        expect(expanded.hasMore).toBe(false)
+      }
+    }
+  )
+
+  it.each([{ archive: true, showOutcome: true }, { showOutcome: false }])(
+    'keeps inactive parents as context for visible children: %j',
+    visibility => {
+      const categories: Category[] = [
+        { id: 'parent', name: 'Parent', title: 'Parent', ...visibility },
+        {
+          id: 'child',
+          name: 'Child',
+          title: 'Child',
+          parent: 'parent',
+          showOutcome: true,
+        },
+      ]
+      const options = { value: 'parent', preferredType: 'outcome' as const }
+      expect(categoryChoices(categories.slice(0, 1), options)).toEqual({
+        choices: [],
+        hasMore: true,
+      })
+      const result = categoryChoices(categories, options)
+      expect(
+        result.choices.map(({ category, indent }) => [category.id, indent])
+      ).toEqual([
+        ['parent', 0],
+        ['child', 1],
+      ])
+      expect(result.hasMore).toBe(false)
+    }
+  )
+
   const categories: Category[] = [
     { id: 'food', name: 'Food', title: 'Food', showOutcome: true },
     {

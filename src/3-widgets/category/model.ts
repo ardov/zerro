@@ -56,10 +56,15 @@ export type Category = {
   parent?: TTagId | null
   showIncome?: boolean
   showOutcome?: boolean
+  archive?: boolean | null
 }
 export type PreferredCategoryType = 'income' | 'outcome'
 
 const UNCATEGORIZED_ID = 'null'
+
+function isActiveCategory(category: Category) {
+  return !category.archive && (category.showIncome || category.showOutcome)
+}
 
 export type CategoryChoicesOptions = {
   value?: TTagId
@@ -100,11 +105,12 @@ export function categoryChoices<T extends Category>(
         )
       : (includeUncategorized && category.id === UNCATEGORIZED_ID) ||
         showAll ||
-        !preferredType ||
-        category.id === value ||
-        (preferredType === 'income'
-          ? category.showIncome
-          : category.showOutcome)
+        (isActiveCategory(category) &&
+          (!preferredType ||
+            category.id === value ||
+            (preferredType === 'income'
+              ? category.showIncome
+              : category.showOutcome)))
     if (!excluded) {
       eligible.add(category.id)
       if (matches) visible.add(category.id)

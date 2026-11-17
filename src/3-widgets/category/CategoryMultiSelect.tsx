@@ -14,7 +14,6 @@ export type CategoryMultiSelectProps = {
 export function CategoryMultiSelect(props: CategoryMultiSelectProps) {
   const { value, onChange, trigger, popup } = props
   const options = useCategoryOptions({
-    showAll: true,
     includeUncategorized: true,
   })
   return (

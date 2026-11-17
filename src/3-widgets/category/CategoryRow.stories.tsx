@@ -17,6 +17,7 @@ import {
   makeTransaction,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
 import { BulkEditModal } from '../transaction/TransactionList/TopBar/BulkEditModal'
+import Filter from '../transaction/TransactionList/TopBar/Filter'
 import { CategoryRow } from './CategoryRow'
 import { applyCategoryAction, commonCategories } from './model'
 
@@ -80,6 +81,22 @@ function Fixtures(props: {
               makeTag({ id: 'trip', title: 'Trip', showOutcome: true }),
               makeTag({ id: 'work', title: 'Work', showOutcome: true }),
               makeTag({ id: 'income', title: 'Income', showIncome: true }),
+              makeTag({ id: 'hidden', title: 'Hidden category' }),
+              makeTag({
+                id: 'archived',
+                title: 'Archived category',
+                archive: true,
+                showIncome: true,
+                showOutcome: true,
+              }),
+              makeTag({ id: 'hidden-parent', title: 'Hidden parent' }),
+              makeTag({
+                id: 'active-child',
+                title: 'Active child',
+                parent: 'hidden-parent',
+                showIncome: true,
+                showOutcome: true,
+              }),
               makeTag({
                 id: 'gift',
                 title: 'Gift',
@@ -175,6 +192,118 @@ export const Showcase: Story = {
       </div>
     </Fixtures>
   ),
+}
+
+async function revealAndSelectArchivedCategory(canvasElement: HTMLElement) {
+  const body = within(canvasElement.ownerDocument.body)
+  const search = await body.findByRole('combobox', { name: 'Select category' })
+  await expect(
+    body.getByRole('option', { name: 'Hidden parent' })
+  ).toBeVisible()
+  await expect(body.getByRole('option', { name: 'Active child' })).toBeVisible()
+  for (const name of ['Hidden category', 'Archived category']) {
+    await expect(body.queryByRole('option', { name })).toBeNull()
+    await userEvent.type(search, name)
+    await expect(body.getByRole('option', { name })).toBeVisible()
+    await userEvent.clear(search)
+    await expect(body.queryByRole('option', { name })).toBeNull()
+  }
+  await userEvent.click(
+    body.getByRole('button', { name: 'Show all categories' })
+  )
+  for (const name of [
+    'Hidden category',
+    'Archived category',
+    'Food',
+    'Income',
+  ]) {
+    await expect(body.getByRole('option', { name })).toBeVisible()
+  }
+  await userEvent.click(body.getByRole('option', { name: 'Archived category' }))
+}
+
+export const OutcomeVisibility: Story = {
+  render: () => (
+    <Fixtures>
+      <RowDemo initial={[[]]} />
+    </Fixtures>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(
+      canvas.getByRole('combobox', { name: 'Add category' })
+    )
+    const body = within(canvasElement.ownerDocument.body)
+    await expect(
+      await body.findByRole('option', { name: 'Food' })
+    ).toBeVisible()
+    await expect(body.queryByRole('option', { name: 'Income' })).toBeNull()
+    await revealAndSelectArchivedCategory(canvasElement)
+    await expect(canvas.getByLabelText('Category drafts')).toHaveTextContent(
+      '[["archived"]]'
+    )
+  },
+}
+
+function CategoryFilterDemo() {
+  const [query, setQuery] = useState<core.transactions.TTransactionQuery>({
+    clauses: [],
+  })
+  const [search, setSearch] = useState('')
+  return (
+    <>
+      <Filter
+        query={query}
+        onQueryChange={setQuery}
+        search={search}
+        onSearchChange={setSearch}
+      />
+      <output aria-label="Filter query">{JSON.stringify(query)}</output>
+    </>
+  )
+}
+
+export const FilterVisibility: Story = {
+  render: () => (
+    <Fixtures>
+      <CategoryFilterDemo />
+    </Fixtures>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
+    await userEvent.click(
+      await body.findByRole('menuitem', { name: 'Category' })
+    )
+    await expect(
+      await body.findByRole('option', { name: 'No Category' })
+    ).toBeVisible()
+    await expect(body.getByRole('option', { name: 'Food' })).toBeVisible()
+    await expect(body.getByRole('option', { name: 'Income' })).toBeVisible()
+    await revealAndSelectArchivedCategory(canvasElement)
+    await expect(canvas.getByLabelText('Filter query')).toHaveTextContent(
+      '"ids":["archived"]'
+    )
+    await userEvent.keyboard('{Escape}')
+    await userEvent.click(
+      await canvas.findByRole('combobox', { name: 'Archived category' })
+    )
+    const search = await body.findByRole('combobox', {
+      name: 'Select category',
+    })
+    await expect(
+      body.queryByRole('option', { name: 'Archived category' })
+    ).toBeNull()
+    await userEvent.type(search, 'Archived category')
+    const archived = body.getByRole('option', { name: 'Archived category' })
+    await expect(archived).toHaveAttribute('aria-selected', 'true')
+    await userEvent.click(archived)
+    await userEvent.keyboard('{Escape}')
+    await expect(canvas.getByLabelText('Filter query')).toHaveTextContent(
+      '"clauses":[]'
+    )
+  },
 }
 
 export const Editing: Story = {
