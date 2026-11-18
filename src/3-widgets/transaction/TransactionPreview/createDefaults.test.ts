@@ -44,7 +44,7 @@ describe('createDefaultsFromQuery', () => {
     })
   })
 
-  it('takes category, direction, and month from an envelope activity filter', () => {
+  it('takes category and direction from the envelope and the month from the visible period', () => {
     expect(
       createDefaultsFromQuery(
         {
@@ -56,8 +56,8 @@ describe('createDefaultsFromQuery', () => {
               ],
               scope: 'self',
               mode: core.transactions.TrFilterMode.Envelope,
-              month: '2026-02',
             },
+            { kind: 'date', from: '2026-02-01', to: '2026-02-28' },
           ],
         },
         +new Date(2026, 0, 31)
@@ -68,6 +68,31 @@ describe('createDefaultsFromQuery', () => {
       date: '2026-02-28',
     })
   })
+
+  it.each([
+    { bounds: { from: '2026-12-20', to: '2027-01-05' }, date: '2027-01-05' },
+    { bounds: { from: '2027-02-10' }, date: '2027-02-10' },
+    { bounds: { to: '2026-12-31' }, date: '2026-12-31' },
+  ] as const)(
+    'keeps the draft inside the edited range $bounds',
+    ({ bounds, date }) => {
+      const draft = createDefaultsFromQuery(
+        {
+          clauses: [
+            {
+              kind: 'activity',
+              envelopeIds: ['tag#food'],
+              scope: 'self',
+              mode: core.transactions.TrFilterMode.Envelope,
+            },
+            { kind: 'date', ...bounds },
+          ],
+        },
+        +new Date(2027, 0, 15)
+      )
+      expect(draft.date).toBe(date)
+    }
+  )
 })
 
 it('does not prefill a currency-qualified amount into an unspecified account currency', () => {

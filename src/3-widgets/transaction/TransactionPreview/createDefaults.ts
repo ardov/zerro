@@ -1,4 +1,10 @@
 import { core } from '@/zerro-core/redux'
+import {
+  getMonthLength,
+  parseDate,
+  toISODate,
+  toISOMonth,
+} from '@/6-shared/helpers/date'
 import type { TCreateDraftDefaults, TDraftType } from './draft'
 
 export function createDefaultsFromQuery(
@@ -46,19 +52,31 @@ export function createDefaultsFromQuery(
       amount.gte === amount.lte
         ? amount.gte
         : undefined,
-    date:
-      date?.from !== undefined && date.from === date.to
-        ? date.from
-        : activity?.month
-          ? dateInMonth(activity.month, now)
-          : undefined,
+    date: creationDate(date, Boolean(activity), now),
   }
 }
 
-function dateInMonth(month: string, now: number) {
-  const current = new Date(now)
-  const [year, monthIndex] = month.split('-').map(Number)
-  const lastDay = new Date(year, monthIndex, 0).getDate()
-  const day = String(Math.min(current.getDate(), lastDay)).padStart(2, '0')
-  return `${month}-${day}` as TCreateDraftDefaults['date']
+function creationDate(
+  date:
+    | Extract<core.transactions.TTransactionFilterClause, { kind: 'date' }>
+    | undefined,
+  budgetActivity: boolean,
+  now: number
+) {
+  if (!date) return undefined
+  const { from, to } = core.transactions.normalizeDateFilter(date)
+  if (from && from === to) return from
+  if (!budgetActivity) return undefined
+
+  // A budget month starts a draft on today's day of that month. An edited
+  // range must also contain the draft date, including across month boundaries.
+  let day = toISODate(now)
+  if (from && to && toISOMonth(from) === toISOMonth(to)) {
+    const candidate = parseDate(from)
+    candidate.setDate(Math.min(new Date(now).getDate(), getMonthLength(from)))
+    day = toISODate(candidate)
+  }
+  if (from && day < from) return from
+  if (to && day > to) return to
+  return day
 }

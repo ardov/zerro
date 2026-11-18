@@ -10,6 +10,7 @@ import {
 } from '@/6-shared/overlays'
 import { ListDetailsSurface } from '@/6-shared/ui/layout/ListDetailsSurface'
 import { core } from '@/zerro-core/redux'
+import { budgetDateFilter } from './budgetDateFilter'
 import type { TTransactionListProps } from '../transaction/TransactionList'
 import { TransactionList } from '../transaction/TransactionList'
 import { TransactionPreview } from '../transaction/TransactionPreview'
@@ -261,8 +262,8 @@ export function envelopeTransactionsValue({
             id === 'transferFees'
               ? core.transactions.TrFilterMode.TransferFees
               : mode,
-          month,
         },
+        budgetDateFilter(month),
       ],
     },
   }

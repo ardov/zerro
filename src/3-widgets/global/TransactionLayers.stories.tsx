@@ -214,6 +214,75 @@ export const EnvelopeList: Story = {
   render: () => <Harness />,
   play: checkLayer(true),
 }
+
+export const EnvelopePeriod: Story = {
+  tags: ['check'],
+  render: function TwoMonths() {
+    const dispatch = useAppDispatch()
+    const open = useEnvTransactionsDrawer()
+    return (
+      <Button
+        onClick={() => {
+          dispatch(
+            core.transactions.update({ id: 'dinner', date: '2026-09-30' })
+          )
+          dispatch(
+            core.transactions.update({
+              id: 'other',
+              tag: null,
+              date: '2026-09-01',
+            })
+          )
+          open({
+            title: 'Food activity',
+            envelopeConditions: { id: 'tag#Food', month: '2026-10' },
+          })
+        }}
+      >
+        Open Food
+      </Button>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body)
+    const open = async () => {
+      await userEvent.click(
+        within(canvasElement).getByRole('button', { name: 'Open Food' })
+      )
+      return within(await body.findByRole('dialog', { name: 'Food activity' }))
+    }
+    const list = await open()
+    await list.findByText('Lunch groceries')
+    expect(list.queryByText('Dinner groceries')).toBeNull()
+    await userEvent.click(list.getByRole('button', { name: /^Oct( 2026)?$/ }))
+    fireEvent.change(await body.findByLabelText('Date From'), {
+      target: { value: '2026-09-01' },
+    })
+    fireEvent.change(body.getByLabelText('Date To'), {
+      target: { value: '2026-09-30' },
+    })
+    await userEvent.keyboard('{Escape}')
+    await list.findByText('Dinner groceries')
+    expect(list.queryByText('Lunch groceries')).toBeNull()
+    expect(list.queryByText('Lunch elsewhere')).toBeNull()
+    await userEvent.click(
+      list.getByRole('button', { name: 'Remove Envelope Food' })
+    )
+    await list.findByText('Lunch elsewhere')
+    expect(list.queryByText('Lunch groceries')).toBeNull()
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(body.queryByRole('dialog', { name: 'Food activity' })).toBeNull()
+    )
+    const reopened = await open()
+    await userEvent.click(
+      reopened.getByRole('button', { name: /^Remove Oct( 2026)?$/ })
+    )
+    await reopened.findByText('Dinner groceries')
+    expect(reopened.getByText('Lunch groceries')).toBeVisible()
+    expect(reopened.queryByText('Lunch elsewhere')).toBeNull()
+  },
+}
 export const Mobile: Story = {
   ...FilteredList,
   globals: { viewport: { value: 'iphone13' } },
@@ -839,7 +908,12 @@ export const RestoredEnvelopeEntry: Story = {
     await waitFor(() =>
       expect(checkbox).toHaveAttribute('aria-checked', 'true')
     )
-    expect(within(list).getByRole('button', { name: 'Food' })).toBeVisible()
+    expect(
+      within(list).getByRole('button', { name: 'Envelope Food' })
+    ).toBeVisible()
+    expect(
+      within(list).getByRole('button', { name: /^Oct( 2026)?$/ })
+    ).toBeVisible()
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(list).not.toBeInTheDocument())
   },

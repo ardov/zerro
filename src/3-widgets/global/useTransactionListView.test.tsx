@@ -41,6 +41,73 @@ function setup(initial: ListValue = {}) {
 afterEach(() => vi.useRealTimers())
 
 describe('transaction list instance view', () => {
+  it.each([
+    { name: 'no date filter', clauses: [] },
+    { name: 'an empty date filter', clauses: [{ kind: 'date' } as const] },
+  ])(
+    'restores the saved budget month when history has $name',
+    ({ clauses }) => {
+      const { result } = setup({
+        initialQuery: {
+          clauses: [
+            {
+              kind: 'activity',
+              envelopeIds: ['tag#Food'],
+              mode: core.transactions.TrFilterMode.Envelope,
+              scope: 'tree',
+              month: '2024-02',
+            },
+            ...clauses,
+          ],
+        },
+      })
+      expect(result.current.view.query.clauses).toEqual([
+        {
+          kind: 'activity',
+          envelopeIds: ['tag#Food'],
+          mode: 'envelope',
+          scope: 'tree',
+        },
+        { kind: 'date', from: '2024-02-01', to: '2024-02-29' },
+      ])
+    }
+  )
+
+  it('restores an edited period from history without applying the old envelope month again', () => {
+    const { result } = setup({
+      view: {
+        query: {
+          clauses: [
+            {
+              kind: 'activity',
+              envelopeIds: ['tag#Food'],
+              mode: core.transactions.TrFilterMode.Envelope,
+              scope: 'tree',
+              month: '2026-10',
+            },
+            { kind: 'date', from: '2026-09-01', to: '2026-09-30' },
+          ],
+        },
+        checked: ['lunch'],
+        search: 'food',
+        topDate: null,
+        scrollOffset: null,
+      },
+    })
+    expect(result.current.view).toMatchObject({
+      search: 'food',
+      checked: ['lunch'],
+    })
+    expect(result.current.view.query.clauses).toEqual([
+      {
+        kind: 'activity',
+        envelopeIds: ['tag#Food'],
+        mode: 'envelope',
+        scope: 'tree',
+      },
+      { kind: 'date', from: '2026-09-01', to: '2026-09-30' },
+    ])
+  })
   it('restores an independent query, search, selection and exact scroll from its serialized value', () => {
     const first = setup({
       initialQuery: {

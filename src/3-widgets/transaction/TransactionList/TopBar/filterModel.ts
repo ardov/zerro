@@ -130,11 +130,36 @@ export function getClauseLabel(
             id === null ? t('noMerchant') : merchants[id]?.title || id
           )
         : t('merchant')
-    case 'activity':
-      if (clause.mode === core.transactions.TrFilterMode.TransferFees) {
-        return t('transferFees')
+    case 'activity': {
+      const { TrFilterMode } = core.transactions
+      const name = joinLabels(
+        clause.envelopeIds,
+        id => envelopes[id]?.name || id
+      )
+      switch (clause.mode) {
+        case TrFilterMode.TransferFees:
+          return t('budgets:activityStats.fxDifference')
+        case TrFilterMode.GeneralIncome:
+        case TrFilterMode.Income:
+          return t('activityIncome', { name })
+        case TrFilterMode.Outcome:
+          return t('activityExpenses', { name })
+        case TrFilterMode.All: {
+          if (clause.envelopeIds.length !== 1) return name
+          const [id] = clause.envelopeIds
+          const { type } = core.envelopes.envId.parse(id)
+          if (type === core.envelopes.EnvType.Account)
+            return t('activityTransfers', { name })
+          if (
+            type === core.envelopes.EnvType.Merchant ||
+            type === core.envelopes.EnvType.Payee
+          )
+            return t('activityDebts', { name })
+          break
+        }
       }
-      return joinLabels(clause.envelopeIds, id => envelopes[id]?.name || id)
+      return name
+    }
     case 'tag':
       return clause.ids.length
         ? joinLabels(clause.ids, id => tags[id]?.name || id)

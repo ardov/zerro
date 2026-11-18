@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePopup } from '@/6-shared/overlays'
 import { Chip } from '@/6-shared/ui/kit/Chip'
+import { EnvelopeIcon, TransferIcon } from '@/6-shared/ui/Icons'
 import { Popover } from '@/6-shared/ui/kit/Popover'
 import { Select } from '@/6-shared/ui/kit/Select'
 import { FilterIcon } from './FilterIcon'
@@ -60,16 +61,26 @@ export function FilterChip({
       popup.setOpen(true)
     }
   }, [autoOpen, popup])
+  const isEnvelope =
+    clause.kind === 'activity' &&
+    clause.mode === core.transactions.TrFilterMode.Envelope
+  const isTransferDifference =
+    clause.kind === 'activity' &&
+    clause.mode === core.transactions.TrFilterMode.TransferFees
   const chip = (
     <Chip
       className="min-w-0 shrink"
       ref={ref}
       variant={isEmptyClause(clause) ? 'outline-draft' : 'filled'}
       start={
-        clause.kind === 'date' ||
-        clause.kind === 'merchant' ||
-        clause.kind === 'debtor' ||
-        clause.kind === 'changed' ? (
+        isEnvelope ? (
+          <EnvelopeIcon />
+        ) : isTransferDifference ? (
+          <TransferIcon />
+        ) : clause.kind === 'date' ||
+          clause.kind === 'merchant' ||
+          clause.kind === 'debtor' ||
+          clause.kind === 'changed' ? (
           <FilterIcon kind={clause.kind} />
         ) : undefined
       }
@@ -79,7 +90,14 @@ export function FilterChip({
       }}
       onRemove={onRemove}
     >
-      {label}
+      {isEnvelope ? (
+        <>
+          <span className="sr-only">{t('envelope')} </span>
+          {label}
+        </>
+      ) : (
+        label
+      )}
     </Chip>
   )
   switch (clause.kind) {

@@ -5,6 +5,7 @@ import { useDebouncedCallback } from '@/6-shared/hooks/useDebouncedCallback'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import type { TSummaryChoices } from '../transaction/TransactionSummary/model'
+import { restoreBudgetDate } from './budgetDateFilter'
 
 export type TransactionListViewState = {
   query: core.transactions.TTransactionQuery
@@ -22,22 +23,24 @@ type ListValue = {
 }
 
 function initialView(value: ListValue): TransactionListViewState {
-  return (
-    value.view ?? {
-      query: {
-        clauses:
-          value.initialQuery?.clauses.filter(
-            clause => clause.kind !== 'search'
-          ) ?? [],
-      },
-      search:
-        value.initialQuery?.clauses.find(clause => clause.kind === 'search')
-          ?.value ?? '',
-      checked: [],
-      topDate: null,
-      scrollOffset: null,
-    }
-  )
+  if (value.view) {
+    const query = restoreBudgetDate(value.view.query)
+    return query === value.view.query ? value.view : { ...value.view, query }
+  }
+  return {
+    query: restoreBudgetDate({
+      clauses:
+        value.initialQuery?.clauses.filter(
+          clause => clause.kind !== 'search'
+        ) ?? [],
+    }),
+    search:
+      value.initialQuery?.clauses.find(clause => clause.kind === 'search')
+        ?.value ?? '',
+    checked: [],
+    topDate: null,
+    scrollOffset: null,
+  }
 }
 
 /** One serializable view belongs to one list opening. Scrolling only replaces

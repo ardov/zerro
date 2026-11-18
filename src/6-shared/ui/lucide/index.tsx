@@ -56,6 +56,7 @@ import {
   Landmark,
   LogIn,
   LogOut,
+  Mail,
   Merge,
   MessageSquare,
   Moon,
@@ -141,6 +142,7 @@ export const OutcomeDebtIcon = createIcon(ArrowLeftFromLine, 'OutcomeDebtIcon')
 
 // Money and its parts
 export const BudgetIcon = createIcon(PiggyBank, 'BudgetIcon')
+export const EnvelopeIcon = createIcon(Mail, 'EnvelopeIcon')
 export const AccountBalanceWalletIcon = createIcon(
   CreditCard,
   'AccountBalanceWalletIcon'
