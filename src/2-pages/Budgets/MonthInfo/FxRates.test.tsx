@@ -11,6 +11,7 @@ import {
   makeInstrument,
   makeReminder,
   makeStore,
+  makeTag,
   makeTransaction,
   makeUser,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
@@ -110,4 +111,66 @@ it('edits a whole SOL held outside the budget at the end of the selected month',
   expect(
     screen.queryByRole('textbox', { name: 'SOL / USD' })
   ).not.toBeInTheDocument()
+})
+
+it('pins live rates for a USD envelope over an inherited table', () => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date('2025-10-15T12:00:00Z'))
+  const data = makeStore({
+    user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+    instrument: {
+      1: makeInstrument({ id: 1, shortTitle: 'RUB', rate: 1 }),
+      2: makeInstrument({ id: 2, shortTitle: 'USD', rate: 90 }),
+    },
+    account: {
+      cash: makeAccount({ id: 'cash', instrument: 1, inBalance: true }),
+    },
+    tag: { food: makeTag({ id: 'food' }) },
+    transaction: {
+      lunch: makeTransaction({
+        id: 'lunch',
+        date: '2025-10-05',
+        tag: ['food'],
+        outcome: 900,
+        outcomeAccount: 'cash',
+        outcomeInstrument: 1,
+        incomeAccount: 'cash',
+        incomeInstrument: 1,
+      }),
+    },
+    reminder: {
+      rates: makeReminder('rates', {
+        type: 'fxRates',
+        month: '2025-07',
+        payload: { date: '2025-07', changed: 1, rates: { RUB: 1, USD: 80 } },
+      }),
+      meta: makeReminder('meta', {
+        type: 'EnvelopeMeta',
+        payload: { 'tag#food': { id: 'tag#food', currency: 'USD' } },
+      }),
+    },
+  })
+  const store = configureStore({
+    reducer: rootReducer,
+    preloadedState: makeTestRootState(data),
+  })
+  render(
+    <Provider store={store}>
+      <FxRates month="2025-10" />
+    </Provider>
+  )
+  const field = screen.getByRole('textbox', { name: 'USD / RUB' })
+  expect(field).toHaveValue('80')
+
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Pin current exchange rates' })
+  )
+
+  expect(core.fxRates.selectGetter(store.getState())('2025-10')).toMatchObject({
+    type: 'saved',
+    date: '2025-10',
+    rates: { RUB: 1, USD: 90 },
+  })
+  expect(field).toHaveValue('90')
+  expect(screen.getByRole('button', { name: 'Reset' })).toBeVisible()
 })
