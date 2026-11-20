@@ -72,7 +72,7 @@ export function buildSortedActivity(
         const envInfo: TSortedActivityNode = {
           id,
           trMode: TrFilterMode.Envelope,
-          total: mergeActivitySummary(income, outcome),
+          total: mergeEnvelopeActivity(income, outcome),
         }
         const value = toValue(envInfo.total.total)
         if (value > 0) node.incomes.push(envInfo)
@@ -90,7 +90,7 @@ export function buildSortedActivity(
       if (outcome) {
         node.outcomes.push({
           id,
-          total: summarizeActivity(outcome),
+          total: summarizeEnvelopeActivity(outcome),
           trMode: TrFilterMode.Envelope,
         })
       }
@@ -108,7 +108,7 @@ export function buildSortedActivity(
       const { income, outcome } = transfers[id]
       node.transfers.push({
         id,
-        total: mergeActivitySummary(income, outcome),
+        total: mergeEnvelopeActivity(income, outcome),
         trMode: TrFilterMode.All,
       })
     })
@@ -117,7 +117,7 @@ export function buildSortedActivity(
       const { income, outcome } = debts[id]
       node.debts.push({
         id,
-        total: mergeActivitySummary(income, outcome),
+        total: mergeEnvelopeActivity(income, outcome),
         trMode: TrFilterMode.All,
       })
     })
@@ -198,11 +198,28 @@ function sumActivity(nodes: TSortedActivityNode[]): TActivitySummary {
   )
 }
 
-function summarizeActivity(activity: EnvActivity): TActivitySummary {
+function summarizeActivity(
+  activity: EnvActivity,
+  total = activity.total
+): TActivitySummary {
   return {
-    total: activity.total,
+    total,
     transactionCount: activity.transactionCount,
   }
+}
+
+function summarizeEnvelopeActivity(activity: EnvActivity): TActivitySummary {
+  return summarizeActivity(activity, (activity.envelope ?? activity).total)
+}
+
+function mergeEnvelopeActivity(
+  income: EnvActivity | undefined,
+  outcome: EnvActivity | undefined
+): TActivitySummary {
+  return mergeActivitySummary(
+    income && summarizeEnvelopeActivity(income),
+    outcome && summarizeEnvelopeActivity(outcome)
+  )
 }
 
 function mergeActivitySummary(

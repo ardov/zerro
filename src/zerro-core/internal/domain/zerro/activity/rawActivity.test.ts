@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  makeInstrument,
   makeTransaction,
   usdInstruments,
 } from '../../../../support/testing/zenmoneyTestData'
@@ -33,6 +34,7 @@ describe('buildRawActivity', () => {
         debtors: {},
       }),
       instruments: usdInstruments,
+      envelopeCurrencies: {},
     })
 
     expect(result['2026-01'].outcome[foodId].total).toEqual({ USD: -20 })
@@ -63,6 +65,7 @@ describe('buildRawActivity', () => {
         debtors: {},
       }),
       instruments: usdInstruments,
+      envelopeCurrencies: {},
     })
 
     expect(result['2026-01'].internal.total).toEqual({ USD: -1 })
@@ -85,6 +88,7 @@ describe('buildRawActivity', () => {
         debtors: {},
       }),
       instruments: usdInstruments,
+      envelopeCurrencies: {},
     })
     const summary = buildSortedActivity({
       rawActivity,
@@ -113,9 +117,74 @@ describe('buildRawActivity', () => {
         debtors: { alex: { id: 'alex', merchantId: undefined } },
       }),
       instruments: usdInstruments,
+      envelopeCurrencies: {},
     })
 
     expect(result['2026-01'].outcome[debtorId].total).toEqual({ USD: -50 })
+  })
+
+  it.each([
+    { opOutcome: 0, opOutcomeInstrument: 2 },
+    { opOutcome: -80, opOutcomeInstrument: 2 },
+    { opOutcome: NaN, opOutcomeInstrument: 2 },
+    { opOutcome: Infinity, opOutcomeInstrument: 2 },
+    { opOutcome: 80, opOutcomeInstrument: 99 },
+    { opIncome: 80, opIncomeInstrument: 2 },
+  ])(
+    'uses the native posting when no valid original outcome matches: %j',
+    original => {
+      const foodId = envId.get(EnvType.Tag, 'food')
+      const rawActivity = buildRawActivity({
+        transactions: [
+          makeTransaction({ outcome: 20, tag: ['food'], ...original }),
+        ],
+        routing: buildActivityRoutingContext({
+          inBudgetAccountIds: ['card'],
+          debtAccountId: undefined,
+          debtors: {},
+        }),
+        instruments: {
+          ...usdInstruments,
+          2: makeInstrument({ id: 2, shortTitle: 'EUR' }),
+        },
+        envelopeCurrencies: { [foodId]: 'EUR' },
+      })
+      const sorted = buildSortedActivity({
+        rawActivity,
+        keepingEnvelopeIds: new Set(),
+        convertFx: makeFxConverter({ USD: 1, EUR: 1.2 }),
+      })
+
+      expect(sorted['2026-01'].outcomesTotal.total).toEqual({ USD: -20 })
+    }
+  )
+
+  it('prefers the native posting when the envelope already uses its currency', () => {
+    const cashId = envId.get(EnvType.Account, 'cash')
+    const rawActivity = buildRawActivity({
+      transactions: [
+        makeTransaction({
+          outcome: 20,
+          income: 18,
+          opOutcome: 22,
+          opOutcomeInstrument: 1,
+        }),
+      ],
+      routing: buildActivityRoutingContext({
+        inBudgetAccountIds: ['card'],
+        debtAccountId: undefined,
+        debtors: {},
+      }),
+      instruments: usdInstruments,
+      envelopeCurrencies: { [cashId]: 'USD' },
+    })
+    const sorted = buildSortedActivity({
+      rawActivity,
+      keepingEnvelopeIds: new Set(),
+      convertFx: makeFxConverter({ USD: 1 }),
+    })
+
+    expect(sorted['2026-01'].transfersTotal.total).toEqual({ USD: -20 })
   })
 
   it('merges activity nodes', () => {

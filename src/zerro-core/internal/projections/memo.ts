@@ -95,3 +95,16 @@ export function sameSet<T>(
   for (const item of next) if (!previous.has(item)) return false
   return true
 }
+
+export function sameRecord<T>(
+  previous: Readonly<Record<string, T>>,
+  next: Readonly<Record<string, T>>
+): boolean {
+  const keys = Object.keys(next)
+  return (
+    keys.length === Object.keys(previous).length &&
+    keys.every(
+      key => Object.hasOwn(previous, key) && previous[key] === next[key]
+    )
+  )
+}
