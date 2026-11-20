@@ -190,10 +190,12 @@ function useActivityTrend(
   const trend = new Array(31).fill({})
   if (!envData) return trend
 
-  const activityTrends = [
-    activity?.[id]?.trend,
-    ...envData.children.map(id => activity?.[id]?.trend),
-  ].filter(Boolean)
+  const activityTrends = [id, ...envData.children]
+    .map(id => {
+      const row = activity?.[id]
+      return (row?.envelope ?? row)?.trend
+    })
+    .filter(Boolean)
 
   return trend.map((_, i) => {
     const dailyActivity = activityTrends.map(trend => trend[i] || {})

@@ -140,7 +140,7 @@ function calcEnv(
   )
   const selfAssigned = { [currency]: input.budgets?.[month]?.[id] || 0 }
   const envActivity = input.activity?.[month]?.envActivity?.byEnv?.[id]
-  const selfActivity = envActivity?.total || {}
+  const selfActivity = (envActivity?.envelope ?? envActivity)?.total || {}
   const selfAvailableRaw = addTransactionAmounts(
     selfLeftover,
     selfAssigned,
