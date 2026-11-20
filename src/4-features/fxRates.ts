@@ -11,6 +11,10 @@ export const canFetchFxRates = (month: TISOMonth) => {
   return isPastMonth && getRequestDate(month) >= firstPossibleDate
 }
 
+/** The current month can save today's rates instead of inheriting older ones. */
+export const canPinFxRates = (month: TISOMonth) =>
+  month === toISOMonth(new Date())
+
 export const loadFxRates =
   (month: TISOMonth): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
