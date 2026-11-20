@@ -1,3 +1,5 @@
+import { isEmbeddedDemo } from '@/6-shared/embeddedDemo'
+import { LandingDemo } from './LandingDemo'
 import { useAboutPath } from '@/6-shared/localization/useAboutPath'
 import { Button, IconButton } from '@/6-shared/ui/kit/Button'
 import type { CSSProperties } from 'react'
@@ -22,7 +24,7 @@ const reveal = (ms: number) =>
 
 zenmoney.processAuthCode()
 
-export default function Auth() {
+export default function Auth({ demoSrc }: { demoSrc?: string } = {}) {
   const dispatch = useAppDispatch()
   const { t, i18n } = useTranslation()
   const aboutPath = useAboutPath()
@@ -89,7 +91,8 @@ export default function Auth() {
         </IconButton>
       </div>
       <div className="auth-layout relative z-10 mx-auto grid w-full flex-1">
-        <section className="flex flex-col items-start self-center py-12">
+        {!isEmbeddedDemo && <LandingDemo previewSrc={demoSrc} />}
+        <section className="flex flex-col items-start self-center">
           <Logo
             width="160"
             fill="var(--color-ui-primary)"

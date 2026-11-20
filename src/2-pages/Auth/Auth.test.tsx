@@ -45,7 +45,7 @@ function renderLanding() {
     <Provider store={configureStore({ reducer: rootReducer })}>
       <MemoryRouter>
         <TooltipProvider>
-          <Auth />
+          <Auth demoSrc="about:blank" />
         </TooltipProvider>
       </MemoryRouter>
     </Provider>

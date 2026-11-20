@@ -1,8 +1,11 @@
+import { isEmbeddedDemo } from '@/6-shared/embeddedDemo'
+import { loadDemoData } from '@/4-features/authorization'
+import { i18n } from '@/6-shared/localization'
 import { initSentry } from '@/6-shared/diagnostics'
 import { safeLocalStorage } from '@/6-shared/api/browserStorage'
 import { store } from '@/store'
 import { resetData } from '@/store/data'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { startDailyBackups } from '@/4-features/export/dailyBackup'
 import { startAppUpdates } from '@/4-features/appUpdates'
 import { registerSW } from 'virtual:pwa-register'
@@ -10,12 +13,63 @@ import { registerSW } from 'virtual:pwa-register'
 import GlobalErrorBoundary from './GlobalErrorBoundary'
 import App from './App'
 import { Providers } from './Providers'
-initSentry()
+if (!isEmbeddedDemo) initSentry()
 createZerroInstance(store)
 
 export const MainApp = () => {
-  useEffect(() => startDailyBackups(store), [])
-  useEffect(() => startAppUpdates(registerSW), [])
+  const [demoReady, setDemoReady] = useState(!isEmbeddedDemo)
+  useEffect(() => {
+    if (!isEmbeddedDemo) return
+    const language = new URLSearchParams(location.search).get('lang')
+    void (async () => {
+      if (language === 'ru' || language === 'en')
+        await i18n.changeLanguage(language)
+      await store.dispatch(loadDemoData())
+      setDemoReady(true)
+    })()
+  }, [])
+  useEffect(() => {
+    if (!isEmbeddedDemo) return
+    const updateAppearance = (event: MessageEvent) => {
+      if (
+        event.source !== window.parent ||
+        event.origin !== window.location.origin ||
+        event.data?.type !== 'zerro-demo-appearance'
+      )
+        return
+      const { language, theme } = event.data
+      if (language === 'ru' || language === 'en')
+        void i18n.changeLanguage(language)
+      if (
+        (theme === 'light' || theme === 'dark') &&
+        window.themeManager?.getTheme() !== theme
+      )
+        window.themeManager?.toggle()
+    }
+    window.addEventListener('message', updateAppearance)
+    window.parent.postMessage(
+      { type: 'zerro-demo-ready' },
+      window.location.origin
+    )
+    return () => window.removeEventListener('message', updateAppearance)
+  }, [])
+  useEffect(() => {
+    if (!isEmbeddedDemo || !demoReady) return
+    const frame = requestAnimationFrame(() => {
+      window.parent.postMessage(
+        { type: 'zerro-demo-loaded' },
+        window.location.origin
+      )
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [demoReady])
+  useEffect(() => {
+    if (!isEmbeddedDemo) return startDailyBackups(store)
+  }, [])
+  useEffect(() => {
+    if (!isEmbeddedDemo) return startAppUpdates(registerSW)
+  }, [])
+  if (!demoReady) return null
   return (
     <GlobalErrorBoundary>
       <Providers store={store}>

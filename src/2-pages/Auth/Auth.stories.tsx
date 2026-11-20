@@ -7,6 +7,7 @@ import { defaultCurrencySettings } from './CurrencyBackground/interaction'
 const meta = {
   title: 'App/Auth',
   component: Auth,
+  args: { demoSrc: 'about:blank' },
   parameters: { layout: 'fullscreen', app: { scenario: 'empty' } },
 } satisfies Meta<typeof Auth>
 
@@ -151,5 +152,132 @@ export const BackgroundGestures: Story = {
       { timeout: 20000 }
     )
     await expect(ink()).toBe(true)
+  },
+}
+
+export const InterfacePreview: Story = {
+  play: async ({ canvasElement }) => {
+    const frame = canvasElement.querySelector('iframe')!
+    const plate =
+      canvasElement.querySelector<HTMLElement>('.auth-demo-surface')!
+    await waitFor(() => expect(frame.contentDocument?.body).toBeTruthy())
+    fireEvent.load(frame)
+    const button = frame.contentDocument!.createElement('button')
+    button.textContent = 'Interactive demo content'
+    frame.contentDocument!.body.append(button)
+    const resting = getComputedStyle(plate).transform
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const base = new DOMMatrix(resting)
+    const press = {
+      pointerId: 7,
+      isPrimary: true,
+      button: 0,
+      pointerType: 'mouse',
+    }
+    const points = [
+      { x: 0.1, y: 0.9, cancel: false },
+      { x: 0.9, y: 0.1, cancel: true },
+    ]
+    try {
+      for (const { x, y, cancel } of points) {
+        fireEvent.pointerDown(button, {
+          ...press,
+          clientX: frame.clientWidth * x,
+          clientY: frame.clientHeight * y,
+        })
+        if (reduced) {
+          await new Promise<void>(resolve =>
+            requestAnimationFrame(() => resolve())
+          )
+          await expect(getComputedStyle(plate).transform).toBe(resting)
+        } else {
+          const point = new DOMPoint(
+            (x - 0.5) * plate.offsetWidth,
+            (y - 0.5) * plate.offsetHeight
+          )
+          await waitFor(() => {
+            const tilted = new DOMMatrix(getComputedStyle(plate).transform)
+            const depth =
+              tilted.transformPoint(point).z - base.transformPoint(point).z
+            // The pressed corner moves away; the center stays anchored.
+            expect(depth).toBeLessThan(-0.1)
+            expect(depth).toBeGreaterThan(-20)
+            expect(tilted.m41).toBe(0)
+            expect(tilted.m42).toBe(0)
+            expect(tilted.m43).toBe(0)
+          })
+        }
+        if (cancel) fireEvent.pointerCancel(button, press)
+        else fireEvent.pointerUp(canvasElement, press)
+        await waitFor(() =>
+          expect(getComputedStyle(plate).transform).toBe(resting)
+        )
+      }
+      // Even a click released in one frame gets an interruptible response.
+      fireEvent.pointerDown(button, { ...press, clientX: 80, clientY: 700 })
+      fireEvent.pointerUp(canvasElement, press)
+      if (!reduced)
+        await waitFor(() =>
+          expect(getComputedStyle(plate).transform).not.toBe(resting)
+        )
+      await waitFor(() =>
+        expect(getComputedStyle(plate).transform).toBe(resting)
+      )
+    } finally {
+      button.remove()
+    }
+  },
+}
+
+export const InterfaceHover: Story = {
+  play: async ({ canvasElement }) => {
+    const frame = canvasElement.querySelector('iframe')!
+    const plate =
+      canvasElement.querySelector<HTMLElement>('.auth-demo-surface')!
+    await waitFor(() => expect(frame.contentDocument?.body).toBeTruthy())
+    fireEvent.load(frame)
+    const target = frame.contentDocument!.body
+    const resting = getComputedStyle(plate).transform
+    const base = new DOMMatrix(resting)
+    const point = new DOMPoint(
+      -0.4 * plate.offsetWidth,
+      0.4 * plate.offsetHeight
+    )
+    const depth = () =>
+      new DOMMatrix(getComputedStyle(plate).transform).transformPoint(point).z -
+      base.transformPoint(point).z
+    const pointer = {
+      pointerId: 9,
+      isPrimary: true,
+      pointerType: 'mouse',
+      button: 0,
+      clientX: frame.clientWidth * 0.1,
+      clientY: frame.clientHeight * 0.9,
+    }
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const hovers = matchMedia('(hover: hover) and (pointer: fine)').matches
+    // Touch movement must never create a hover response.
+    fireEvent.pointerMove(target, { ...pointer, pointerType: 'touch' })
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+    await expect(getComputedStyle(plate).transform).toBe(resting)
+
+    fireEvent.pointerMove(target, pointer)
+    if (!reduced && hovers) {
+      await waitFor(() => expect(depth()).toBeGreaterThan(0.1))
+      expect(depth()).toBeLessThan(8)
+    }
+    fireEvent.pointerDown(target, pointer)
+    if (!reduced) await waitFor(() => expect(depth()).toBeLessThan(-0.1))
+    fireEvent.pointerUp(target, pointer)
+    if (!reduced && hovers)
+      await waitFor(() => expect(depth()).toBeGreaterThan(0.1))
+    else
+      await waitFor(() =>
+        expect(getComputedStyle(plate).transform).toBe(resting)
+      )
+
+    // Leaving the embedded document restores its original, centered pose.
+    fireEvent.pointerOut(target, { ...pointer, relatedTarget: null })
+    await waitFor(() => expect(getComputedStyle(plate).transform).toBe(resting))
   },
 }

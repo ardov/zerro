@@ -1,3 +1,5 @@
+import { isEmbeddedDemo } from '@/6-shared/embeddedDemo'
+
 // Remember successful reads/writes for later read failures. Only unsaved
 // changes override readable browser storage, so cross-tab changes stay visible.
 // Null values preserve removals even when browser persistence is unavailable.
@@ -8,7 +10,8 @@ let cleared = false
 /** Best-effort persistence with a fallback lasting only for this page. */
 export const safeLocalStorage = {
   getItem(key: string): string | null {
-    if (unsaved.has(key) || cleared) return lastKnown.get(key) ?? null
+    if (isEmbeddedDemo || unsaved.has(key) || cleared)
+      return lastKnown.get(key) ?? null
     try {
       const value = localStorage.getItem(key)
       lastKnown.set(key, value)
@@ -20,6 +23,7 @@ export const safeLocalStorage = {
   setItem(key: string, value: string): void {
     lastKnown.set(key, value)
     unsaved.add(key)
+    if (isEmbeddedDemo) return
     try {
       localStorage.setItem(key, value)
       unsaved.delete(key)
@@ -30,6 +34,7 @@ export const safeLocalStorage = {
   removeItem(key: string): void {
     lastKnown.set(key, null)
     unsaved.add(key)
+    if (isEmbeddedDemo) return
     try {
       localStorage.removeItem(key)
       unsaved.delete(key)
@@ -41,6 +46,7 @@ export const safeLocalStorage = {
     lastKnown.clear()
     unsaved.clear()
     cleared = true
+    if (isEmbeddedDemo) return
     try {
       localStorage.clear()
       cleared = false

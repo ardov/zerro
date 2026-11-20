@@ -1,3 +1,4 @@
+import { isEmbeddedDemo } from '@/6-shared/embeddedDemo'
 import type { EndpointPreference } from '@/6-shared/api/zenmoney'
 import type { AppThunk } from '@/store'
 import { tokenStorage } from '@/6-shared/api/tokenStorage'
@@ -24,6 +25,10 @@ export const logOut = (): AppThunk<Promise<void>> => async dispatch => {
 export const logIn =
   (endpoint: EndpointPreference): AppThunk =>
   async dispatch => {
+    if (isEmbeddedDemo) {
+      window.open('/', '_blank', 'noopener')
+      return
+    }
     // Open the popup in the click handler, before any asynchronous storage work.
     const token = await zenmoney.authorize(endpoint)
     if (!token) return

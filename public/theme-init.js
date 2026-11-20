@@ -8,11 +8,15 @@
 
 ;(() => {
   const STORAGE_KEY = 'theme'
-  let preference = null
+  const embeddedDemo =
+    new URLSearchParams(window.location.search).get('demo') === 'embedded'
+  let preference = embeddedDemo
+    ? new URLSearchParams(window.location.search).get('theme')
+    : null
   let unsaved = false
 
   const readPreference = () => {
-    if (!unsaved) {
+    if (!unsaved && !embeddedDemo) {
       try {
         preference = localStorage.getItem(STORAGE_KEY)
       } catch {}
@@ -23,6 +27,7 @@
   const writePreference = value => {
     preference = value
     unsaved = true
+    if (embeddedDemo) return
     try {
       if (value === null) localStorage.removeItem(STORAGE_KEY)
       else localStorage.setItem(STORAGE_KEY, value)

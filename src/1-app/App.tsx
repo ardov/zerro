@@ -1,3 +1,4 @@
+import { isEmbeddedDemo } from '@/6-shared/embeddedDemo'
 import React, {
   lazy,
   Suspense,
@@ -8,6 +9,7 @@ import React, {
 } from 'react'
 import {
   BrowserRouter,
+  MemoryRouter,
   Link,
   Navigate,
   Route,
@@ -33,6 +35,8 @@ import { PanelScrollable } from '@/6-shared/ui/layout/Panel'
 import { CanvasPage } from '@/6-shared/ui/layout/CanvasPage'
 import ErrorBoundary from '@/3-widgets/ErrorBoundary'
 import Transactions from '@/2-pages/Transactions'
+import { useListTransactions } from '@/3-widgets/transaction/TransactionList/useListTransactions'
+import { transactionScreen } from '@/3-widgets/global/TransactionPreviewDrawer'
 import Auth from '@/2-pages/Auth'
 import { NotFound } from '@/2-pages/NotFound'
 import Budgets from '@/2-pages/Budgets'
@@ -77,10 +81,36 @@ function StartPageRedirect() {
 }
 
 export default function App() {
+  if (isEmbeddedDemo) return <EmbeddedDemo />
   return (
     <BrowserRouter>
       <Application />
     </BrowserRouter>
+  )
+}
+
+const demoQuery = { clauses: [] }
+
+/** MainApp mounts this after the demo data is ready. Seed the history once,
+ * so closing the preview or navigating never reselects the first row. */
+function EmbeddedDemo() {
+  const transactions = useListTransactions(undefined, demoQuery, '')
+  const [initialEntries] = useState(() => [
+    {
+      pathname: '/transactions',
+      state: {
+        overlays: {
+          screens: transactions[0]
+            ? { [transactionScreen.name]: transactions[0].id }
+            : {},
+        },
+      },
+    },
+  ])
+  return (
+    <MemoryRouter initialEntries={initialEntries}>
+      <Application />
+    </MemoryRouter>
   )
 }
 
@@ -90,7 +120,7 @@ function Application() {
   const navigation = isLoggedIn && hasData
   const userId = core.users.useRootId()
   useEffect(() => {
-    setAnalyticsUser(userId || null)
+    if (!isEmbeddedDemo) setAnalyticsUser(userId || null)
   }, [userId])
 
   const auth = (
@@ -102,9 +132,9 @@ function Application() {
   return (
     <>
       <PageMetadata signedIn={isLoggedIn} />
-      <AnalyticsNavigation />
+      {!isEmbeddedDemo && <AnalyticsNavigation />}
       <OverlayHost>
-        <RegularSyncHandler />
+        {!isEmbeddedDemo && <RegularSyncHandler />}
         {navigation && <HistoryShortcuts />}
         <RouteLayout
           navigation={navigation}

@@ -1,3 +1,4 @@
+import { isEmbeddedDemo } from '@/6-shared/embeddedDemo'
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 import type { TDataStore } from '@/6-shared/types'
 import { idbBaseName } from '@/6-shared/config'
@@ -416,7 +417,32 @@ export function createReplicaStorage(
   }
 }
 
-export const replicaStorage = createReplicaStorage(idbBaseName)
+// Embedded demos keep edits in Redux. They never open the account database.
+const ephemeralStorage: ReplicaStorage = {
+  async loadCurrent() {
+    return null
+  },
+  async loadOutboxForRecovery() {
+    return null
+  },
+  async commitCanonical() {},
+  async saveOutbox() {},
+  async discardOutbox() {},
+  async listHistory() {
+    return { entries: [] }
+  },
+  async loadHistoricalState() {
+    throw new Error('No saved history in embedded demo')
+  },
+  async compactOneBatch() {
+    return { entriesDeleted: 0, bytesBefore: 0, bytesAfter: 0 }
+  },
+  async clear() {},
+}
+
+export const replicaStorage = isEmbeddedDemo
+  ? ephemeralStorage
+  : createReplicaStorage(idbBaseName)
 
 /**
  * A single checkpoint plus the outbox is the minimum durable replica, so a

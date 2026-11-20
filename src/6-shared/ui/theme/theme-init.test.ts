@@ -20,6 +20,7 @@ function runThemeManager(options?: {
   stored?: Record<string, string>
   storageThrows?: boolean
   storageWritesThrow?: boolean
+  search?: string
 }) {
   const values = new Map(Object.entries(options?.stored ?? {}))
   const page = entry.cloneNode(true) as Document
@@ -47,9 +48,12 @@ function runThemeManager(options?: {
       values.delete(key)
     },
   }
-  const window: Pick<Window, 'themeManager'> = {}
+  const window: Pick<Window, 'themeManager'> & {
+    location: { search: string }
+  } = { location: { search: options?.search ?? '' } }
 
   runInNewContext(source, {
+    URLSearchParams,
     Map,
     Set,
     JSON,
@@ -191,4 +195,17 @@ describe('theme-init', () => {
 
     expect(page.manager.getTheme()).toBe('dark')
   })
+})
+
+it('keeps embedded theme preferences separate from the account', () => {
+  const page = runThemeManager({
+    search: '?demo=embedded&theme=light',
+    stored: { theme: 'dark' },
+  })
+  expect(page.manager.getTheme()).toBe('light')
+  page.manager.toggle()
+  expect(page.manager.getTheme()).toBe('dark')
+  page.manager.toggle()
+  expect(page.manager.getTheme()).toBe('light')
+  expect(page.values.get('theme')).toBe('dark')
 })
