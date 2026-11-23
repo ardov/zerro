@@ -44,10 +44,7 @@ export const replicaPersistenceMiddleware: Middleware =
     const result = next(action)
     const after = api.getState() as TReplicaStateSource
 
-    // Narrower than `getReplicaWriteBlocked`, and read across the action so a
-    // state that is entered or left by this very action still counts: a
-    // quarantined outbox must never be overwritten, while journal recovery
-    // stands down only for the canonical rebase that resolves it.
+    // Read recovery before and after the action. Never overwrite a quarantined outbox; journal recovery permits its resolving rebase.
     const outboxQuarantined =
       before.data.outboxRecoveryReason !== null ||
       after.data.outboxRecoveryReason !== null
@@ -133,11 +130,7 @@ export const replicaPersistenceMiddleware: Middleware =
     return result
   }
 
-/**
- * Clears both stores after every save from the previous login is invalidated.
- * Unlike the other queue helpers this rejects on failure: callers await it
- * before signing a new account in, and stale data must not survive silently.
- */
+/** Invalidate old-session writes before clearing both stores. Reject on failure so a new login cannot inherit stale data. */
 export function clearPersistedLocalData(): Promise<void> {
   persistenceGeneration += 1
   const clear = saveQueue
@@ -165,9 +158,7 @@ export function discardPersistedOutbox(): Promise<void> {
   return discard
 }
 
-/** Persists a full snapshot already fetched for journal recovery. This is
- * separate from the normal middleware path because that path correctly stood
- * down while the raw corrupt outbox was quarantined. */
+/** Persist the recovered snapshot after quarantine; normal middleware intentionally skipped it. */
 export function persistRecoveryCheckpoint(snapshot: TDataStore): Promise<void> {
   const generation = persistenceGeneration
   const recovery = saveQueue
@@ -193,10 +184,7 @@ export function persistRecoveryCheckpoint(snapshot: TDataStore): Promise<void> {
   return recovery
 }
 
-/**
- * Runs one retention pass at startup. Never rejects: retention is secondary to
- * having a replica at all, so a failure here only postpones compaction.
- */
+/** Startup retention is best effort. Failure only postpones compaction. */
 export function compactPersistedReplica(): Promise<void> {
   const generation = persistenceGeneration
   saveQueue = saveQueue

@@ -2,28 +2,13 @@ import { useCallback } from 'react'
 import { useOverlayMethods, useOverlayState } from './context'
 import { useScreenClose } from './useScreenClose'
 
-/** Declares an overlay a person can come back to.
- *
- * A screen is described entirely by its value, so it can be rebuilt from the
- * address alone: Back, Forward and a reload all restore it. The value lives in
- * the history entry, which means it must be plain data — an id, or an object
- * of ids. A callback in there would make the screen unrestorable, and then it
- * is not a screen (R3).
- *
- * Values ride in the invisible half of the address for now. Moving one into
- * the browser's address bar is a later, separate change per screen, and only
- * where a shareable link is worth having. */
+/** Screen values must be serializable so Back, Forward, and reload can reconstruct them. */
 export function defineScreen<T>(name: string) {
-  // Open screens are held in one object and their order is that object's key
-  // order, which puts integer-like keys first whatever the insertion order.
-  // Such a name would silently sink to the bottom of the stack, so it is
-  // refused outright rather than debugged later.
+  // Integer-like keys sort before other keys, so they cannot preserve opening order.
   if (import.meta.env.DEV && String(Number(name)) === name)
     throw new Error(`Screen name "${name}" must not read as a number`)
 
-  /** Like `useState`, except the state lives in the address: `set(null)`
-   * closes, Back does the same, and a reload loses nothing. Optional onClose
-   * belongs in the stable owner, above conditionally mounted screen content. */
+  /** Set null to close. Register onClose above the conditionally mounted surface. */
   function use(
     onClose?: () => void
   ): [T | undefined, (value: T | null) => void] {
@@ -40,7 +25,6 @@ export function defineScreen<T>(name: string) {
     return [screens[name] as T | undefined, set]
   }
 
-  /** Opens it from anywhere. */
   function useOpen() {
     const { openScreen } = useOverlayMethods()
     return useCallback((value: T) => openScreen(name, value), [openScreen])
@@ -62,7 +46,6 @@ export function defineScreen<T>(name: string) {
     return useCallback(() => removeScreen(name), [removeScreen])
   }
 
-  /** Reads it without the setter, for a surface that only draws. */
   function useValue(): T | undefined {
     return useOverlayState().screens[name] as T | undefined
   }

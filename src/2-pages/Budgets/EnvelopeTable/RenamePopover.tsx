@@ -4,13 +4,8 @@ import { useAsked } from '@/6-shared/overlays'
 import { Input } from '@/6-shared/ui/kit/Input'
 import { PopoverSurface } from '@/6-shared/ui/kit/Popover'
 
-/** «What should it be called?». Answers the new name, or nothing when it is
- * unchanged. Closing keeps a changed draft, as Enter does.
- *
- * An ordinary field surfaces over the name it renames: it takes the anchor's
- * own type and sits so that its text covers the anchor's text exactly, so
- * nothing jumps when it opens. The anchor is the text element itself, not a
- * padded wrapper. */
+/** Closing saves a changed name; unchanged text yields no answer.
+ * Anchor to the text itself so the editable value does not move. */
 export function RenamePopover(props: {
   value: string
   anchor: Element | null
@@ -43,7 +38,6 @@ export function RenamePopover(props: {
       // Staying over the name matters more than a few pixels past an edge.
       collisionAvoidance={{ side: 'none', align: 'none' }}
       initialFocus={inputRef}
-      // The popover is only the field's elevation: same shape, no padding.
       className="w-[calc(var(--anchor-width)+3rem)] min-w-64 rounded-ui-control bg-ui-card"
       contentClassName="p-0"
     >

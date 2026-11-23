@@ -15,11 +15,6 @@ const entries = Object.entries(Icons).filter(([name]) =>
   name.endsWith('Icon')
 ) as [string, (props: TIconProps) => ReactNode][]
 
-/** Every icon at the three sizes the interface places them at.
- *
- * The stroke is what the three columns are here to show: it stays 1.5px
- * across all of them, so a 16px icon reads as the same weight of line as the
- * 24px one beside it. */
 export const Showcase: Story = {
   tags: ['!test'],
   render: () => (
@@ -43,8 +38,6 @@ export const Showcase: Story = {
   ),
 }
 
-/** The stroke is a prop, so a surface that wants a heavier line can have one.
- * 1.5 is the interface's own weight and the default. */
 export const StrokeWeights: Story = {
   tags: ['!test'],
   render: () => (

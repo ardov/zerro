@@ -76,7 +76,6 @@ import {
   saveLastTransactionAccount,
 } from './createStorage'
 
-/** Empty state for transaction preview */
 export const TrEmptyState = () => {
   const { t } = useTranslation('transaction')
   return (
@@ -93,7 +92,6 @@ export type TransactionPreviewProps = {
   onClose: () => void
   onOpenOther: (id: TTransactionId) => void
   onPendingEdit?: TPendingEdit
-  /** Opens a list of related transactions over this surface. */
   onOpenList?: (
     query: core.transactions.TTransactionQuery,
     title: string
@@ -219,7 +217,6 @@ const TransactionEditor = ({
   const instruments = core.instruments.useAll()
   const debtAccountId = useAppSelector(core.accounts.selectDebtAccountId)
 
-  // Debt accounts are selected through the transaction type, not the account picker.
   const excludedAccounts = debtAccountId ? [debtAccountId] : []
   const options = useMemo(
     () =>
@@ -266,22 +263,15 @@ const TransactionEditor = ({
     merchants,
   })
   if (draft !== storedDraft) setDraft(draft)
-  // Nothing is wrong until saving has been asked for and refused, and what it
-  // refused over is remembered by field. A mark leaves for good the moment
-  // its field is right — breaking the same field again says nothing until
-  // saving is refused a second time.
+  // Clear each marked field once it becomes valid; only another rejected save may mark it again.
   const [marked, setMarked] = useState<readonly TDraftField[]>([])
   if (createPopup?.open === false && marked.length) setMarked([])
   const [headline, shakeHeadline] = useShake<HTMLDivElement>()
-  // A transaction arriving from a sync, or the replacement a save just made,
-  // replaces what is being edited. Comparing the entity rather than its id:
-  // the id is the same one after a field of it changed elsewhere.
+  // Compare editable data rather than ID so a remote update to the same transaction can refresh the draft.
   const [source, setSource] = useState(tr)
   if (tr && source !== tr) {
     setSource(tr)
-    // Only what the form is editing replaces what is in it. Marking the
-    // operation viewed from its Actions menu applies at once and leaves
-    // unsaved fields alone; a content change from a sync still refreshes.
+    // Viewed state is list metadata. Applying it must keep unfinished edits.
     if (!source || source.id !== tr.id || !sameDraftSource(source, tr)) {
       setDraft(toDraft(tr, ctx))
       setMarked([])
@@ -297,8 +287,6 @@ const TransactionEditor = ({
     stillWrong.map(field => [field, issues[field]])
   )
 
-  /** Types this transaction has nowhere to go: a transfer needs a second
-   * account, and a debt needs the account Zenmoney keeps them on. */
   const unavailable = useMemo(
     () =>
       draftTypes.filter(type => {
@@ -329,9 +317,7 @@ const TransactionEditor = ({
     onCreated?.()
   }
 
-  // A completed choice or input applies the current valid draft. A switch to
-  // debt can wait here for a counterparty, without opening another surface.
-  // Closing the editor discards that unfinished draft.
+  // Complete inputs apply a valid draft. A debt without a counterparty stays pending until edited or closed.
   const save = (next: TTransactionDraft, leaving = false) => {
     if (!tr) return
     // A blur may already have applied this draft, or sync/Undo may have
@@ -402,8 +388,6 @@ const TransactionEditor = ({
     )
   })
 
-  /** What an account counts in, spelled the short way an amount is labelled
-   * with — `CZK` rather than the instrument it comes from. */
   const currencyOf = (accountId: TAccountId) => {
     const instrument = ctx.instrumentOf(accountId)
     return instrument === undefined
@@ -461,10 +445,7 @@ const TransactionEditor = ({
               })
             }}
             onRestore={() => {
-              // Restoring makes a copy under a new id — the server's deletion
-              // cannot be taken back — so this screen is left naming a
-              // tombstone. It closes rather than going on offering a Restore
-              // that would make a second copy.
+              // Restore makes a new entity. Close the screen for the tombstone so it cannot restore a second copy.
               restore(id)
               track('transaction_restored', { source: 'preview' })
               onClose()
@@ -547,9 +528,6 @@ const TransactionEditor = ({
                 }
               />
             </FieldGroup>
-            {/* Centred on the seam between the two halves, and it turns the
-                transfer around rather than turning the arrow around: the
-                arrow states which way money moves, and that never changes. */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ui-card p-0.5">
               <IconButton
                 variant="secondary"
@@ -710,9 +688,7 @@ const TransactionEditor = ({
   )
 }
 
-/** The fields `toDraft` reads, named rather than derived by excluding the two
- * that are known not to matter: an allowlist says what the form is editing,
- * and a field Zenmoney adds later cannot quietly join it. */
+/** List the fields toDraft reads so new Zenmoney fields cannot trigger a draft replacement. */
 const draftSourceFields = [
   'date',
   'created',
@@ -728,10 +704,7 @@ const draftSourceFields = [
   'comment',
 ] as const satisfies readonly (keyof TTransaction)[]
 
-/** Whether the arriving transaction still describes the same thing the form
- * is editing. `changed` moves with every command and `viewed` is list
- * metadata, so neither is here; `tag` is compared by content, because a store
- * that rebuilt the array would otherwise read as an edit. */
+/** Compare tag arrays by content so rebuilding the same tags does not reset the draft. */
 function sameDraftSource(before: TTransaction, after: TTransaction) {
   return draftSourceFields.every(key =>
     key === 'tag'
@@ -749,9 +722,6 @@ function sameTags(before: TTransaction['tag'], after: TTransaction['tag']) {
   )
 }
 
-/** Rows that belong to one thing: an account and what it moves. They close up
- * into a block, so the pair reads as one field with two lines rather than two
- * unrelated ones. */
 const FieldGroup: FC<{ children: ReactNode; className?: string }> = ({
   children,
   className,

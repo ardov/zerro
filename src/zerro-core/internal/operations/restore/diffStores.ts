@@ -1,11 +1,4 @@
-/**
- * Store-to-store reconciliation for restore and backup import.
- *
- * Restore cannot create under an absent backup id: Zenmoney hard-deletion
- * tombstones are permanent and this replica does not retain enough history to
- * prove an id is safe to reuse. The planner therefore reconciles desired rows
- * to live current rows first, then allocates a new id only where necessary.
- */
+/** Zenmoney tombstones cannot be reused. Match live rows first, then allocate fresh IDs where needed. */
 import {
   AccountType,
   type TAccountType,
@@ -56,7 +49,6 @@ type TReference = {
   many?: boolean
 }
 
-/** What the current pass of the planner has already committed to deleting. */
 type TRemovalContext = {
   deletedAccountIds: Set<string>
 }
@@ -78,16 +70,10 @@ type TEntityDefinition = {
   ) => boolean
   generatedId?: boolean
   remap?: (row: TRow, mappings: TRestoreIdMappings) => TRow
-  /**
-   * Reused only where the backup names the live id, never on resemblance.
-   * Reusing a resembling account forces every operation inside it to be
-   * removed one at a time as a soft delete — a permanent server-side ratchet.
-   * Deletion hard-purges them instead, which is observed server behaviour.
-   */
+  /** Match accounts by live ID only. Keeping a similar account would soft-delete its old transactions instead of purging them by cascade. */
   matchByIdOnly?: boolean
 }
 
-/** A definition bound to its key and to the references it has to rewrite. */
 type TEntityRow = TEntityDefinition & {
   key: TIntentEntityKey
   references: readonly TReference[]
@@ -115,9 +101,7 @@ const entityDefinitions: Record<TIntentEntityKey, TEntityDefinition> = {
     // MCC is editable metadata; it does not change title-based backup matching.
     semanticFields: ['title'],
     removal: 'deletion',
-    // The server silently refuses merchant deletion while an active debt
-    // transaction references it. Keeping the merchant is the only local
-    // state that remains canonical without first reconciling that debt row.
+    // An active debt blocks merchant deletion. Keep the merchant until that debt is reconciled.
     skipRemoval: (merchant, current) =>
       Object.values(current.transaction).some(
         transaction =>
@@ -158,7 +142,6 @@ const entityDefinitions: Record<TIntentEntityKey, TEntityDefinition> = {
     removal: 'softDelete',
     generatedId: true,
     skip: row => row.deleted === true,
-    // See `bothLegsInsideDeletedAccounts` for why this is skipped.
     skipRemoval: (row, _current, context) =>
       bothLegsInsideDeletedAccounts(row, context),
   },
@@ -178,11 +161,7 @@ const entityDefinitions: Record<TIntentEntityKey, TEntityDefinition> = {
   },
 }
 
-/**
- * Definitions in dependency order, each carrying the references it has to
- * rewrite. Both come from the entity graph: a reference to an entity whose ids
- * a restore can reallocate is a reference this planner must remap.
- */
+/** Order restore definitions by the reference graph. Any reference to a reallocated ID must be rewritten. */
 const entityRows: readonly TEntityRow[] = entityUpsertOrder.map(key => ({
   ...entityDefinitions[key],
   key,
@@ -216,10 +195,7 @@ export type TRestorePlannerOptions = {
   allocateId?: (key: TIntentEntityKey, desiredId: string) => string
 }
 
-/**
- * Builds a transient restore plan. `allocateId` is deterministic in preview
- * and bound to `ctx.uuid()` only while issuing the eventual command.
- */
+/** Preview uses deterministic IDs. Issuing the real command allocates with ctx.uuid(). */
 export function buildRestorePlan(
   current: TDataStore,
   desired: TDataStore,
@@ -303,10 +279,7 @@ export function buildRestorePlan(
       mappedDesired.add(String(rawDesired.id))
     })
 
-    // Exact semantic matches are a multiset: each live current candidate is
-    // consumed at most once, so duplicate imported operations retain
-    // cardinality. Skipped entirely for a row matched by id alone — see
-    // `matchByIdOnly`.
+    // Consume each semantic match once so duplicate imported rows keep their cardinality.
     const candidatesByFingerprint = new Map<string, TRow[]>()
     if (!row.matchByIdOnly) {
       activeCurrent.forEach(entity => {
@@ -322,8 +295,6 @@ export function buildRestorePlan(
       const desiredId = String(rawDesired.id)
       if (isAbsent(row, rawDesired) || mappedDesired.has(desiredId)) return
       const desiredEntity = remapEntity(row, rawDesired, mappings)
-      // Empty whenever `matchByIdOnly` skipped populating it above, so this
-      // lookup never matches — no separate guard needed here.
       const candidates = candidatesByFingerprint.get(
         entityFingerprint(row, desiredEntity)
       )
@@ -375,13 +346,7 @@ export function buildRestorePlan(
   return { patch, mappings }
 }
 
-/**
- * Canonical Zenmoney snapshots may retain historical dependants after their
- * owner disappeared. They are valid to read but cannot be recreated through
- * the write API, so the entity graph's write rules decide what a restore
- * target may contain: required-owner orphans are dropped, and references that
- * would point at a dropped or never-recreated row are cleared.
- */
+/** Restore can read canonical historical orphans but cannot recreate them; apply the graph's write policies. */
 function normalizeRestoreTarget(desired: TDataStore): TDataStore {
   return pruneUnwritableRows(desired)
 }
@@ -418,7 +383,6 @@ function seedDebtAccountMapping(
   }
 }
 
-/** Preview-safe patch form retained for focused internal callers and tests. */
 export function diffStores(
   current: TDataStore,
   desired: TDataStore,
@@ -495,11 +459,7 @@ function remapEntity(
   return row.remap ? row.remap(remapped, mappings) : remapped
 }
 
-/**
- * Rewrites Zerro-owned payload keys after their Zenmoney entities receive new
- * ids. Unknown and unreadable comments remain untouched: the reminder is
- * still part of the backup even if this version cannot interpret its payload.
- */
+/** Rewrite hidden-data keys after ID remapping. Preserve unknown or unreadable reminder comments intact. */
 function remapHiddenDataComment(
   comment: unknown,
   mappings: TRestoreIdMappings
@@ -598,12 +558,6 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value)
 }
 
-/**
- * An account leg's type, where the leg may be absent.
- *
- * A soft-deleted row can carry a leg that an account deletion nulled, so a
- * question about "the account on this side" has no answer for it.
- */
 function accountTypeOf(
   store: TDataStore,
   id: string | null
@@ -611,13 +565,7 @@ function accountTypeOf(
   return id === null ? undefined : store.account[id]?.type
 }
 
-/**
- * Whether a transaction's own removal would be redundant: both of its legs
- * sit on accounts this same plan is already deleting, so the account
- * deletion's cascade purges it without help. A leg that survives — including
- * every debt leg, since the debt account is never deleted — still needs the
- * transaction removed explicitly.
- */
+/** Skip a transaction removal only if both legs are purged by account deletions. The protected debt leg never qualifies. */
 function bothLegsInsideDeletedAccounts(
   transaction: TRow,
   context: TRemovalContext
@@ -789,8 +737,6 @@ export function summarizeStoreDiff(
     ) {
       return
     }
-    // A deleted hidden-data reminder takes its whole payload with it, and the
-    // current store still holds it — so this is countable too.
     if (object === 'reminder') {
       const hidden = countHiddenDataRemoval(
         (current.reminder ?? {})[id as string] as TRow | undefined
@@ -805,27 +751,13 @@ export function summarizeStoreDiff(
   return summary
 }
 
-/**
- * Whether a planned account write lands on Zerro's own storage anchor.
- *
- * It is not an account the user keeps — hidden-data writes create it and every
- * other surface in the app hides it — so counting it here would bill Zerro's
- * plumbing as part of what a restore costs. Either side identifies it: a
- * creation intent carries the title, while a removal or an update leaves the
- * title to the live row.
- *
- * Only the count is dropped. The plan still writes it, because restoring past
- * its creation really does remove it, and the next goal or budget write brings
- * it straight back.
- */
+/** Exclude the Zerro data account from the count while retaining its writes in the restore plan. */
 function isZerroDataAccountWrite(currentById: TById, intent: TRow): boolean {
   if (isZerroDataAccount(intent)) return true
   const before = currentById[intent.id]
   return !!before && isZerroDataAccount(before)
 }
 
-/** What a deleted hidden-data reminder takes with it: its payload entries, or
- * the record itself when the payload is empty. */
 function countHiddenDataRemoval(
   row: TRow | undefined
 ): { key: THiddenDataSummaryKey; removed: number } | null {
@@ -838,16 +770,7 @@ function countHiddenDataRemoval(
   }
 }
 
-/**
- * How many entries of Zerro's own state one reminder write moves.
- *
- * The payload is a map keyed by envelope (or by setting), so comparing the
- * comment before and after says which entries changed rather than only that
- * the month's record did. Returns `null` for a reminder that carries no
- * hidden data, or one whose comment cannot be read — an unreadable payload is
- * still a reminder being written, and a preview must not throw on data it does
- * not recognize.
- */
+/** Count changed entries by payload key. Fall back to a normal reminder for unreadable or unrelated comments. */
 function countHiddenDataChanges(
   before: TRow | undefined,
   after: TRow
@@ -887,7 +810,6 @@ function asPayloadMap(payload: unknown): Record<string, unknown> {
     : {}
 }
 
-/** Structural equality over parsed JSON, which is all a payload ever holds. */
 function isSameJsonValue(a: unknown, b: unknown): boolean {
   if (a === b) return true
   if (typeof a !== typeof b || a === null || b === null) return false

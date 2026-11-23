@@ -1,12 +1,4 @@
-/**
- * Reading a full backup file back into the app.
- *
- * The file format is the export format, so nothing new is defined here: a
- * backup is a complete Zenmoney diff, and importing it means diffing the store
- * it describes against the current one. The result is an ordinary command, so
- * the import lands in the outbox, is undoable, and is only sent on a manual
- * sync like any other change.
- */
+/** A backup is a full Zenmoney diff. Import applies the difference as an undoable local command. */
 import { track } from '@/6-shared/analytics'
 import type { TDataStore } from '@/6-shared/types'
 import type { AppThunk } from '@/store'
@@ -26,7 +18,6 @@ export function checkBackupCompatibility(
     core.restore.checkBackupCompatibility(getState(), backup)
 }
 
-/** What importing this backup would change, without changing anything. */
 export function previewBackup(
   backup: TDataStore
 ): AppThunk<core.restore.TStoreDiffSummary> {

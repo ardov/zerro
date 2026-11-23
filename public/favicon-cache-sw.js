@@ -1,5 +1,4 @@
-/* Imported by the generated service worker. Keep the message protocol and cache
- * name in sync with src/6-shared/favicon-cache/index.ts. No app data lives here. */
+/* Keep the worker protocol and cache name in sync with src/6-shared/favicon-cache/index.ts. */
 ;(() => {
   const CACHE = 'zerro-favicons-v1'
   const MAX_ENTRIES = 100
@@ -65,8 +64,7 @@
       key.searchParams.set(STAMP, String(Date.now()))
       await cache.put(key.href, item.response)
     } catch (error) {
-      // Opaque responses can consume a large quota. Storage is an optimization;
-      // never let a full/disabled cache break the image or the offline app shell.
+      // Opaque responses can exhaust quota; cache failures must leave images and the offline shell working.
       if (error.name === 'QuotaExceededError') {
         writesDisabled = true
         await caches.delete(CACHE)
@@ -103,7 +101,6 @@
         finish()
       }
       pending.set(id, item)
-      // Bound temporary responses as well, including images unmounted before load.
       if (pending.size > MAX_ENTRIES) pending.values().next().value.finish()
       item.result = (async () => {
         const cached = await serial(async () => {
@@ -117,8 +114,7 @@
         if (cached) {
           return cached
         }
-        // A reset/expiry really refreshes the image, even if its HTTP cache has
-        // a longer lifetime. Normal hits above cause no network request at all.
+        // Bypass the HTTP cache after expiry or reset so a retry actually refreshes the image.
         const response = await fetch(new Request(url, request), {
           cache: 'reload',
         })

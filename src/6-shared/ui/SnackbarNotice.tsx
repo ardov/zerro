@@ -11,10 +11,7 @@ type SnackbarNoticeProps = {
   position?: 'bottom-center' | 'top-center'
 }
 
-/** A Redux-controlled alert that uses the same Base UI toast primitive as the
- * transient snackbar. It owns a one-toast provider so a conditional notice can
- * keep its normal component lifecycle instead of mirroring Redux state into a
- * global queue. */
+/** Give the Redux notice its own provider so its lifetime stays tied to the component instead of a global queue. */
 export function SnackbarNotice(props: SnackbarNoticeProps) {
   return (
     <Toast.Provider timeout={0} limit={1}>

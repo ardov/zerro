@@ -13,7 +13,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** One period drives both headings; pressing either moves both on. */
 export const PageSurface: Story = {
   tags: ['check'],
   play: async ({ canvasElement }) => {

@@ -5,7 +5,6 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import type { AmountProps } from '@/6-shared/ui/Amount'
 import type { TooltipProps } from '@/6-shared/ui/kit/Tooltip'
 import { Tooltip } from '@/6-shared/ui/kit/Tooltip'
-// TODO: use Amount instead
 import type { TSmartAmountProps } from '@/3-widgets/Amount'
 import { SmartAmount } from '@/3-widgets/Amount'
 

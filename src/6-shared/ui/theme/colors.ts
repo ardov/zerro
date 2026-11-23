@@ -1,7 +1,5 @@
 import { ColorScale } from '@/6-shared/helpers/color'
 
-/** The resolved application colour scheme. The page-level theme manager owns
- * the preference; this module retains chart, warning and snackbar colours. */
 export type ColorScheme = 'light' | 'dark'
 
 type SemanticLevels = {
@@ -18,9 +16,6 @@ type SemanticLevels = {
   SOLID_HOVER: number
 }
 
-/** A few representative stops preserve the character of the shipped theme;
- * ColorScale supplies the continuous lightness coordinate and black/white
- * anchors between and beyond them. */
 const concreteScales = {
   neutral: new ColorScale([
     '#121212',
@@ -48,7 +43,6 @@ const concreteScales = {
   red: new ColorScale(['#c62828', '#d32f2f', '#f44336', '#ef5350', '#e57373']),
 }
 
-/** UI meaning stays independent from the present hue assignment. */
 const semanticScales = {
   neutral: concreteScales.neutral,
   primary: concreteScales.blueGrey,
@@ -59,9 +53,7 @@ const semanticScales = {
   error: concreteScales.red,
 }
 
-/** Measured from the effective pre-migration theme. Transparent roles are
- * measured after compositing over white (light) or black (dark), matching the
- * reference surfaces used by ColorScale's transparent renderings. */
+/** Composite translucent roles over white in light mode and black in dark mode when calibrating levels. */
 const LEVELS: Record<ColorScheme, SemanticLevels> = {
   light: {
     BACKGROUND: 0.97,
@@ -91,9 +83,6 @@ const LEVELS: Record<ColorScheme, SemanticLevels> = {
   },
 }
 
-/** One flat factory evaluates each token formula against the selected scheme.
- * Local arithmetic is the intentional escape hatch for optical corrections:
- * the exception stays visible beside the role it corrects. */
 function createColorTokens(mode: ColorScheme) {
   const isLight = mode === 'light'
   const {
@@ -123,10 +112,7 @@ function createColorTokens(mode: ColorScheme) {
   const infoSolidLevel = SOLID + (isLight ? 0.035 : 0)
   const errorSolidLevel = SOLID + (isLight ? 0 : -0.091)
 
-  /* The one surface a transparent rendering is wrong for: reading the page
-     through a tooltip is the thing a tooltip exists to prevent. It is also
-     the same dark chip in both schemes rather than a role sampled twice, so
-     the level is written out instead of derived from one. */
+  /* Keep the tooltip opaque and the same dark surface in either scheme. */
   const tooltipLevel = 0.5
 
   const primary = semanticScales.primary.at(primarySolidLevel)
@@ -197,8 +183,6 @@ export const themeTokensCss = [
 
 const SHOWCASE_LEVELS = [0.1, 0.25, 0.4, 0.55, 0.7, 0.85, 1]
 
-/** Read-only samples for the Storybook showcase. Scale objects and authoring
- * levels remain private to this module. */
 export const getThemeColorShowcase = (mode: ColorScheme) => ({
   concreteScales: Object.entries(concreteScales).map(([name, scale]) => ({
     name,

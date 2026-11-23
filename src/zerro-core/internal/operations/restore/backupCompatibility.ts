@@ -9,14 +9,7 @@ export type TBackupCompatibilityResult =
   | { ok: true; foreign: boolean }
   | { ok: false; reason: 'incompatibleBackup' | 'invalidCurrentState' }
 
-/**
- * Checks whether a structurally valid full backup can be restored into this
- * account. It deliberately does not compare writable data: restore is meant
- * to change that data. Read-only dictionary identities must already exist
- * locally instead of being silently adopted from another user. A root-user
- * mismatch is reported as a foreign backup rather than a compatibility
- * failure.
- */
+/** Read-only dictionary IDs must already exist locally. A different root user makes the backup foreign. */
 export function checkBackupCompatibility(
   current: TDataStore,
   backup: TDataStore

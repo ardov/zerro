@@ -5,11 +5,7 @@ import { presentEnvelopes, type TEnvelopeLabels } from './envelopePresentation'
 import { presentTags } from './tagPresentation'
 import { selectData } from './state'
 
-// Command-side reads. `commands.ts` cannot import the domain namespace modules
-// (envelopes/fxRates re-export command creators from commands.ts, which would
-// cycle), so these expose the same graph nodes under command-local names. They
-// read the committed snapshot, so they hit the shared memo the UI
-// already populated rather than recomputing.
+// Read the shared graph directly here. Namespace modules re-export commands and would create import cycles.
 
 export const getCommandDomainEnvelopes = fromGraph(graph.envelopes)
 

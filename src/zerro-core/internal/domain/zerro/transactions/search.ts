@@ -4,7 +4,6 @@ import {
   TrType,
 } from '../../zenmoney/entities/transactions'
 
-/** Entity names come from the same snapshot as the operations being searched. */
 export type TTransactionSearchContext = {
   accounts: Readonly<Record<string, { title: string }>>
   tags: Readonly<Record<string, { title: string }>>

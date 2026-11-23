@@ -25,7 +25,6 @@ type DialogOptions = SurfaceName & {
   /** Keep the editor open when its backdrop is pressed. */
   disablePointerDismissal?: boolean
   mobile?: 'dialog' | 'drawer'
-  /** Centered dialogs show a close button; bottom sheets never do. */
   closeButton?: boolean
   className?: string
   contentClassName?: string
@@ -68,7 +67,6 @@ export function DialogSurface(props: DialogSurfaceProps) {
   )
 }
 
-/** Internal shared frame for Dialog and Confirm's AlertDialog primitive. */
 export function AlertDialogSurface(props: DialogSurfaceProps) {
   const finalFocus = useSurfaceFinalFocus(props)
   return <CenteredDialog {...props} finalFocus={finalFocus} alert />

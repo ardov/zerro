@@ -23,7 +23,6 @@ import {
 import './Calendar.css'
 
 export type MonthPickerHandle = {
-  /** Focus the current keyboard entry point in the month grid. */
   focus: () => void
 }
 
@@ -36,7 +35,6 @@ export type MonthPickerProps = {
   className?: string
 }
 
-/** Controlled month selection. The caller owns its surface and dismissal. */
 export function MonthPicker(props: MonthPickerProps) {
   const { ref, value, onChange, minMonth, maxMonth, className } = props
   const { t } = useTranslation()

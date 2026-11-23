@@ -31,12 +31,7 @@ export enum AccountType {
   Debt = 'debt',
 }
 
-/**
- * Zenmoney owns these discriminators and may add values before Zerro knows
- * their behavior. The known values are listed once here: the domain type, the
- * wire schema and the backup warning all read the same list, and an unknown
- * string stays representable so a complete backup can still be restored.
- */
+/** Unknown server discriminators must remain representable so newer backups still restore. */
 export const accountTypes = Object.values(AccountType)
 
 export const balanceCorrectionTypes = [
@@ -90,29 +85,21 @@ export type TAccount = {
   archive: boolean
   private: boolean
 
-  /** Meaningful only for loan and deposit accounts; otherwise usually null. */
   capitalization: boolean | null
 
-  /** Meaningful only for loan and deposit accounts; otherwise usually null. */
   percent: number | null
 
-  /** Meaningful only for loan and deposit accounts; otherwise usually null. */
   startDate: TISODate | null
 
-  /** Meaningful only for loan and deposit accounts; otherwise usually null. */
   endDateOffset: number | null
 
-  /** Meaningful only for loan and deposit accounts; otherwise usually null. */
   endDateOffsetInterval: TAccountOffsetInterval | null
 
-  /** Meaningful only for loan and deposit accounts; otherwise usually null. */
   payoffStep: number | null
 
-  /** Meaningful only for loan and deposit accounts; otherwise usually null. */
   payoffInterval: TAccountPayoffInterval | null
 }
 
-/** Fields the factory cannot default: creation intent must supply them. */
 export const accountRequiredFields = [
   'instrument',
   'title',
@@ -167,7 +154,6 @@ export function getAccountList(accounts: ById<TAccount>): TAccount[] {
 }
 
 export function getAccStartBalance(acc: TAccount): number {
-  // For deposit and loan field `startBalance` means initial deposit/loan amount
   if (acc.type === AccountType.Deposit) return 0
   if (acc.type === AccountType.Loan) return 0
   return acc.startBalance

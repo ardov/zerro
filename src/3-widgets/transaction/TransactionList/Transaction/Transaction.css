@@ -1,9 +1,5 @@
 @layer components {
-  /* A transaction's two lines. Both are a flex row whose first child takes the
-     room and fades out under the ones after it, which stay their own size.
-     These are child rules rather than classes on the children themselves:
-     which element ends up first depends on the transaction's type, and every
-     one of them would otherwise have to know where it landed. */
+  /* Apply the flex and fade to the first rendered child because its identity depends on the transaction type. */
   .transaction-line > * + * {
     margin-left: 12px;
     flex-shrink: 0;
@@ -24,7 +20,6 @@
     margin-left: 0;
   }
 
-  /* Deleted accounts and absent counterparties can render no DOM node. */
   .transaction-direction:first-child,
   .transaction-direction:last-child {
     display: none;

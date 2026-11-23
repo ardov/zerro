@@ -23,7 +23,6 @@ const iconByType = {
   [AccountType.Debt]: DebtAccountIcon,
 } satisfies Record<AccountType, typeof AccountGlyph>
 
-/** Bank artwork takes priority; missing or failed assets fall back to the account type. */
 export function AccountIcon({
   account,
 }: {
@@ -39,9 +38,7 @@ export function AccountIcon({
         loadedBankIcons = module.bankIconById
         setIcons(module.bankIconById)
       },
-      () => {
-        /* Keep the account glyph if the catalog is unavailable. */
-      }
+      () => {}
     )
   }, [company, icons])
   const url = company == null ? undefined : icons?.[company]

@@ -13,8 +13,6 @@ export default class GlobalErrorBoundary extends React.Component<{
   static getDerivedStateFromError = (_error: any) => ({ hasError: true })
 
   override componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
-    // Automatically reload the page if a chunk fails to load
-    // This usually happens after a new deployment
     if (
       error.message.includes('Loading chunk') ||
       error.message.includes('dynamically imported module')

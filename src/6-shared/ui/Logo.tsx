@@ -37,7 +37,6 @@ const styles = {
   o: makeLetterStyles(5),
 }
 
-/** The mark's own outlines, shared by the animated logo and the bare mark. */
 const ZERO_PATH =
   'M38 1q16.65 0 25.25 12.6Q72 26.2 72 49.85q0 23.8-8.75 36.55Q54.65 99 38 99T12.6 86.4Q4 73.65 4 49.85 4 26.2 12.6 13.6 21.35 1 38 1m0 13.6q-8.05 0-11.7 8.1-3.7 8-3.7 27.15 0 19.3 3.65 27.45T38 85.4t11.7-8q3.7-8.1 3.7-27.6 0-19.3-3.65-27.3T38 14.6'
 // Normalize the longer slash to the animation's existing 100-unit dash.
@@ -87,8 +86,6 @@ export function Logo({ fill = '#000', visible = true, ...rest }) {
   )
 }
 
-/** The crossed zero on its own, without the wordmark or the entrance
- * animation. */
 export function LogoMark({ fill = 'currentColor', ...rest }) {
   return (
     <svg

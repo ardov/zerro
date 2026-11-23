@@ -8,7 +8,6 @@
     justify-content: center;
     gap: var(--column-gap);
     padding: 8px 8px 8px 0;
-    /* Keep receding columns above the canvas and below the visible content. */
     isolation: isolate;
   }
 

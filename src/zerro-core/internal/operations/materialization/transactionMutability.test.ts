@@ -41,7 +41,6 @@ describe('transaction creation metadata', () => {
         transaction: [{ id: transaction.id, payee: 'New shop' }],
       })
 
-      // Already persisted commands must obey the same rules during replay.
       const persisted: TCommand = {
         issuedAt: 100,
         operations: testOperations(patch),
@@ -103,7 +102,6 @@ describe('transaction creation metadata', () => {
       payee: 'Visible shop',
       originalPayee: 'Bank terminal',
     })
-    // Once that id exists, replay cannot overwrite newer canonical metadata.
     const canonical = makeStore({
       ...current,
       transaction: {

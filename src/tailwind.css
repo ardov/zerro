@@ -11,18 +11,11 @@
 @theme {
   --spacing: 0.25rem;
 
-  /* Stacking levels. A tooltip sits above every overlay, including the modal
-     ones it can be opened from inside; the docked navigation panel is fixed
-     and so has to sit above the page it reserves room in, but under every
-     overlay. */
+  /* Keep the docked rail under modal surfaces and tooltips above all of them. */
   --z-index-drawer: 1200;
   --z-index-modal: 1300;
   --z-index-tooltip: 1500;
 
-  /* Corner radii, in pixels: the scale descends from `shape.borderRadius`,
-     which is 8px, and a corner has no reason to follow the root font size.
-     Cleared first so the registered steps are exactly the ones below. */
-  /* --radius-*: initial; */
   --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -31,25 +24,18 @@
   --radius-2xl: 16px;
   --radius-3xl: 24px;
 
-  /* Mirrors `breakpoints` in src/6-shared/ui/theme/breakpoints.ts, which is
-     the single source these values are derived from. Keep them in step.
-     Pixels, not rem: `useBreakpointDown` queries pixels, and a rem
-     mirror would drift from them whenever the root font size is not 16px. */
+  /* Mirror breakpoints.ts in pixels so Tailwind variants agree with useBreakpointDown at any root font size. */
   --breakpoint-sm: 600px;
   --breakpoint-md: 900px;
   --breakpoint-lg: 1200px;
   --breakpoint-xl: 1536px;
-  /* Tailwind ships a `2xl` at 96rem, which is this scale's `xl` under another
-     name and in another unit. Clear it so the registered breakpoints are
-     exactly the ones `breakpoints.ts` defines. */
+  /* Reset Tailwind's default 2xl so it cannot overlap the app's xl threshold. */
   --breakpoint-2xl: initial;
 }
 
 @theme inline {
-  /* The application font family. */
   --font-sans: 'IBM Plex Sans', sans-serif;
 
-  /* Typography */
   --text-body: 1rem;
   --text-body--line-height: 1.5rem;
   --text-body--font-weight: 400;
@@ -78,7 +64,6 @@
   --text-title-lg--line-height: 1.334;
   --text-title-lg--font-weight: 400;
 
-  /* Elevation shadows */
   --shadow-elevation-1:
     0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
     0px 1px 3px 0px rgba(0, 0, 0, 0.12);

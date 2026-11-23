@@ -7,7 +7,6 @@ import { Popover } from './Popover'
 import { IconButton } from './Button'
 import { FieldAddon } from './Field'
 
-/** Keep native segmented editing, with the kit calendar as the picker. */
 export const nativeDateTimeControlClass =
   'appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-datetime-edit]:p-0'
 

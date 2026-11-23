@@ -107,7 +107,6 @@ export const Navigation: Story = {
     await expect(canvas.getByRole('grid').getBoundingClientRect().height).toBe(
       initialHeight
     )
-    // Rapid direction changes must leave the final month usable, with no clone.
     await userEvent.click(next)
     await userEvent.click(next)
     await userEvent.click(previous)
@@ -274,7 +273,6 @@ export const Bounds: Story = {
     await expect(previous).toHaveAttribute('aria-disabled', 'true')
     await userEvent.click(next)
     await settled(canvasElement, 'March 2026')
-    // The last week is entirely outside the final allowed month.
     await expect(canvas.getByRole('grid').getBoundingClientRect().height).toBe(
       initialHeight
     )

@@ -4,12 +4,7 @@ const bankModules = import.meta.glob<string>('./banks/ic_bank_*_54px.svg', {
   query: '?inline',
 })
 
-/**
- * Zenmoney bank icon ID to its original-color asset.
- *
- * AccountIcon resolves account.company directly against this catalog.
- * Keep bank artwork separate from monochrome category assets.
- */
+/** Map account.company to original-color bank artwork, separate from monochrome category icons. */
 export const bankIconById = Object.fromEntries(
   Object.entries(bankModules).map(([path, url]) => {
     const match = /ic_bank_(\d+)_54px\.svg$/.exec(path)

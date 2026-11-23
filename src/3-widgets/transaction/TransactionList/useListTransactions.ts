@@ -5,8 +5,6 @@ import { useLocalDay } from '@/6-shared/hooks/useLocalDay'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 
-/** What a list shows for its filter and search, in list order. Shared with
- * the summary of that list, so the two can never count different rows. */
 export function useListTransactions(
   transactionIds: TTransactionId[] | undefined,
   query: core.transactions.TTransactionQuery,

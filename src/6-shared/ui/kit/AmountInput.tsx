@@ -12,12 +12,10 @@ type AmountEditingProps = {
   children?: ReactNode
   value: number
   onChange: (value: number) => void
-  /** Finishes the expression before handing its amount to the form. */
   onEnter?: (value: number) => void
   /** A finished expression, on Enter or when focus leaves the whole field. */
   onCommit?: (value: number) => void
   selectOnFocus?: boolean
-  /** Shows buttons for arithmetic on keyboards without operator keys. */
   operators?: boolean
 }
 
@@ -45,13 +43,10 @@ export type AmountInlineFieldProps = Omit<
 > &
   AmountEditingProps
 
-/** A numeric value with an editable, live-formatted arithmetic expression. */
 export function AmountInput(props: AmountInputProps) {
   return <AmountEditor {...props} presentation="field" />
 }
 
-/** An amount that inherits typography and grows with its text. Start/end
- * content sits next to the amount, including in a transaction headline. */
 export function AmountInlineField(props: AmountInlineFieldProps) {
   return <AmountEditor {...props} presentation="inline" />
 }
@@ -63,8 +58,6 @@ const operators = [
   { value: '/', label: '÷' },
 ] as const
 
-/** Both presentations share one editing session, including focus moving
- * between the input, its addons and the optional operator buttons. */
 function AmountEditor(
   props: AmountInputProps & { presentation: 'field' | 'inline' }
 ) {

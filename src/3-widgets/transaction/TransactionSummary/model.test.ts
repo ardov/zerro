@@ -15,7 +15,6 @@ const codes: Record<number, TFxCode> = { 1: 'USD', 2: 'EUR' }
 const ctx: TSummaryContext = {
   debtAccountId: 'debt',
   currencyOf: instrument => codes[instrument],
-  // A euro is worth two dollars, whatever the date.
   rate: (from, to) => (from === to ? 1 : from === 'EUR' ? 2 : 0.5),
 }
 
@@ -41,7 +40,6 @@ describe('summarize', () => {
       ['transfer', 50],
     ])
     expect(summary.net).toBe(50)
-    // One currency is shown as it is, whatever currency was asked for.
     expect(summary).toMatchObject({ currency: 'USD', converted: false })
     expect(summary.range).toEqual({ from: '2026-01-10', to: '2026-03-05' })
     expect(summary.sides).toEqual(['outcome', 'income'])
@@ -69,7 +67,6 @@ describe('summarize', () => {
         ],
       },
     ])
-    // A single flow has nothing to net against.
     expect(summary.net).toBeNull()
   })
 })
@@ -103,7 +100,6 @@ describe('breakdown and timeline', () => {
 
   it('fills empty periods and opens with the finest readable step', () => {
     expect(getTimeline(entries, 'month')).toEqual([
-      // The outer months are cut to the days the entries cover.
       {
         from: '2026-01-10',
         to: '2026-01-31',
@@ -126,7 +122,6 @@ describe('breakdown and timeline', () => {
         ongoing: false,
       },
     ])
-    // Seventy days are too many bars; eleven weeks are not.
     expect(getSteps(entries)).toEqual({
       available: ['week', 'month'],
       initial: 'week',
@@ -159,12 +154,10 @@ describe('breakdown and timeline', () => {
         'USD',
         ctx
       ).entries
-    // Three days in two weeks: worth a chart, whichever step is chosen.
     const spread = days('2026-03-02', '2026-03-03', '2026-03-09')
     expect(getSteps(spread).available).toEqual(['day', 'week'])
     expect(isSpreadOverTime(spread)).toBe(true)
     expect(isSpreadOverTime(days('2026-03-02', '2026-03-09'))).toBe(false)
-    // One day cannot be split, yet it is still a period to draw.
     expect(getSteps(days('2026-03-02', '2026-03-02'))).toEqual({
       available: ['day'],
       initial: 'day',

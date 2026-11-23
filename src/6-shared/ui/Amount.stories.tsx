@@ -12,7 +12,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** One component instance, entirely controlled by the Args panel. */
 export const Bench: Story = {}
 
 export const Showcase: Story = {

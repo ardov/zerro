@@ -18,10 +18,6 @@ export type TToken = string | null
 export type TFxAmount = Record<TFxCode, number>
 export type TRates = Record<TFxCode, number>
 
-// ---------------------------------------------------------------------
-// Other
-// ---------------------------------------------------------------------
-
 export type TTagMeta = {
   comment?: string
   currency?: TInstrumentId
@@ -29,5 +25,4 @@ export type TTagMeta = {
 
 export type TLocalData = Omit<TZmDiff, 'deletion'>
 
-// The normalized store and patch shapes are owned by Zerro Core.
 export type { TDataStore } from '@/zerro-core/internal/domain/zenmoney'

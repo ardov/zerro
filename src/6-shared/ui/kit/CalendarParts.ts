@@ -1,7 +1,6 @@
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import './Press.css'
 
-/** Shared visual states for date and month cells. */
 export function calendarCellClass(states: {
   selected?: boolean
   current?: boolean

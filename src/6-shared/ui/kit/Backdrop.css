@@ -1,7 +1,5 @@
 @layer components {
-  /* While a modal is open, the page behind it steps back a little. Modals
-     are portalled outside #root, so only the page scales; the body behind it
-     is the canvas colour, so its edges show no seam. */
+  /* Modals render outside #root so the page can scale without scaling the modal. */
   #root {
     transition: scale 250ms ease-out;
   }

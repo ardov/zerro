@@ -1,9 +1,5 @@
 @layer components {
-  /* Prefixed because Tailwind owns the bare `container` and `shadow` class
-   names. An unlayered rule here wins for the properties it declares, but
-   Tailwind's utility still contributes the ones it does not: `container` was
-   adding breakpoint max-widths and `shadow` a real box-shadow behind the
-   blurred year. */
+  /* Prefix these classes so Tailwind's container and shadow utilities cannot add unintended styles. */
   .review-container {
     display: flex;
     flex-direction: column;

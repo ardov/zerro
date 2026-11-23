@@ -9,18 +9,9 @@ export type TLastSyncResult = {
   errorMessage: string | null
 }
 
-/**
- * What synchronization is doing right now, as one value.
- *
- * Everything a screen needs about a running push hangs off the state it
- * belongs to, so "stopped without a remainder" or "sending with no rows" are
- * not states this slice can hold. The stopped variant keeps `maxBytes` rather
- * than a prepared request: a retry re-derives the run from the replica, which
- * is the same path a reload takes.
- */
+/** A stopped run keeps its byte bound; a retry derives requests anew from the remaining replica. */
 export type TSyncStatus =
   | { kind: 'idle' }
-  /** A pull with nothing of ours to acknowledge. */
   | { kind: 'pulling' }
   | {
       kind: 'pushing'
@@ -38,7 +29,6 @@ export type TSyncStatus =
       maxBytes: number
     }
 
-/** The states a progress surface has something to show for. */
 export type TSyncProgress = Extract<
   TSyncStatus,
   { kind: 'pushing' } | { kind: 'stopped' }
@@ -64,10 +54,6 @@ const { reducer, actions } = createSlice({
       state.status = { kind: 'pulling' }
       state.detailsOpen = false
     },
-    /**
-     * The only way a push run reports itself. The thunk owns the state
-     * machine; this slice just holds the state it is in.
-     */
     syncStatusChanged: (
       state,
       action: PayloadAction<{ status: TSyncStatus; openDetails?: boolean }>
@@ -106,7 +92,6 @@ export const selectIsSyncPending = (state: RootState) =>
 
 export const selectLastSyncResult = (state: RootState) => state.sync.lastResult
 
-/** The rows and phase a progress surface renders, or nothing to render. */
 export const selectSyncProgress = (state: RootState): TSyncProgress | null => {
   const status = state.sync.status
   if (status.kind === 'pushing' || status.kind === 'stopped') return status

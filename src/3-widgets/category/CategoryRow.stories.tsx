@@ -316,7 +316,6 @@ export const Editing: Story = {
     const canvas = within(canvasElement),
       body = within(canvasElement.ownerDocument.body)
     await userEvent.click(canvas.getByRole('combobox', { name: 'Cafe' }))
-    // An excluded parent remains selectable, and selecting it deduplicates.
     const parent = await body.findByRole('option', { name: 'Food' })
     await expect(parent).not.toHaveAttribute('aria-disabled', 'true')
     await userEvent.click(parent)

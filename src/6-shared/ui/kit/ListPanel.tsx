@@ -4,9 +4,7 @@ import { cn } from '@/6-shared/ui/shadcn/utils'
 import './edgeFade.css'
 
 export type ListPanelProps = useRender.ComponentProps<'div'> & {
-  /** Embedded panels share their host surface and consume its scroll inset. */
   surface?: 'popover' | 'embedded'
-  /** Fixed header aligned with the rows; a 4px gap scrolls with the list. */
   header?: ReactNode
   /** Register the actual scrollport with the owning list primitive. */
   scrollRender?: useRender.ComponentProps<'div'>['render']
@@ -19,7 +17,6 @@ export type ListPanelProps = useRender.ComponentProps<'div'> & {
   preserveHeight?: boolean
 }
 
-/** Surface only: the owner supplies list semantics, focus and positioning. */
 export function ListPanel(props: ListPanelProps) {
   const {
     header,
@@ -49,7 +46,6 @@ export function ListPanel(props: ListPanelProps) {
     let frame = 0
     let previousHeight = scroller.clientHeight
     const edges = () => {
-      // Feed the same overflow distances that Base UI supplies for ScrollArea.
       scroller.style.setProperty(
         '--scroll-area-overflow-y-start',
         `${Math.max(0, scroller.scrollTop)}px`
@@ -63,7 +59,6 @@ export function ListPanel(props: ListPanelProps) {
       // Freeze the pre-filter height, including intermediate queries that match
       // more results. Explicit expansion resumes measurement when not frozen.
       if (!preserveHeight || retainedHeight.current === 0) {
-        // Everything the panel holds, not only what scrolls.
         retainedHeight.current = [body, head.current, notice.current].reduce(
           (total, part) => total + (part?.getBoundingClientRect().height ?? 0),
           0
@@ -113,10 +108,7 @@ export function ListPanel(props: ListPanelProps) {
     }
   }, [panel, preserveHeight])
 
-  // Its own scrollport rather than a ScrollArea: the scroller has to be the
-  // list primitive's element, which owns scroll-to-selected and keyboard
-  // navigation, and a ScrollArea viewport rendered as that element would
-  // replace its listbox role.
+  // Use the list primitive as the scrollport so it retains its listbox role and scroll-to-selected behavior.
   const scrollport = useRender({
     defaultTagName: 'div',
     render: scrollRender,
@@ -151,7 +143,6 @@ export function ListPanel(props: ListPanelProps) {
     props: {
       ...restProps,
       className: cn(
-        // The surface clips at its own corners; no padding around the scrollport.
         'flex min-h-0 flex-col overflow-hidden text-ui-primary outline-none',
         surface === 'popover'
           ? 'w-80 max-w-[var(--available-width,calc(100dvw-var(--list-panel-margin,16px)*2))] rounded-ui-popover rounded-smooth bg-ui-popover shadow-ui-popover max-h-[min(var(--available-height,100dvh),calc(100dvh-var(--list-panel-margin,16px)*2))]'

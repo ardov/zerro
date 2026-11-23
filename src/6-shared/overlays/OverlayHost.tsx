@@ -19,36 +19,22 @@ import {
   OverlayStateContext,
 } from './context'
 
-/** How long an answered surface is given before it is taken off the page.
- *
- * A ceiling rather than a duration: the exits themselves are timed in CSS
- * (kit `Drawer.css` and `Surface.css` — the longest is 250ms), and this only
- * has to outlast them. The answer is handed over at once either way, so the
- * animation starts on the press rather than after the browser replies. */
+/** The unmount timeout must outlast Drawer.css and Surface.css exits; settle the answer immediately. */
 const EXIT_CEILING_MS = 400
 
-/** How long to wait for a history step before deciding the browser refused it.
- * A slot is always laid over something, so the step is safe; this only catches
- * the case where it silently did not happen. */
+/** Recover if the browser silently refuses a requested history step. */
 const STUCK_MS = 250
 
 type AskLayer = {
   id: string
   element: ReactElement
   resolve: (value: unknown) => void
-  /** False once answered: the promise is settled, the surface is on its way
-   * out, and nothing more can come from it. */
   open: boolean
 }
 
 let askCounter = 0
 
-/** The one place in the app that touches browser history.
- *
- * It holds the popup layers that are alive, hands them and the current history
- * entry to `decide`, and carries out the answer. Screen membership and order
- * come from that entry. The latest values of repeatable instances are cached
- * across Back and written into the entry so they also survive a reload. */
+/** The host executes decide. History owns membership and order; cached view revisions survive Back and reload. */
 export function OverlayHost({ children }: { children: ReactNode }) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -56,10 +42,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
 
   const [live, setLive] = useState<readonly string[]>([])
   const [asks, setAsks] = useState<readonly AskLayer[]>([])
-  // Screens asked to close whose entry has not gone yet. Closing one steps
-  // back through history, which lands a good few frames later; until then
-  // the screen already reads as closed, so a surface that animates out on its
-  // own — a swiped drawer — is not told to come back meanwhile.
+  // Read a pending close as closed so the browser's delayed Back cannot reopen a swiped drawer.
   const [closing, setClosing] = useState<ReadonlySet<string>>(new Set())
 
   const liveRef = useRef(live)
@@ -97,20 +80,14 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     [notifyClose]
   )
 
-  // The step we have asked for and not seen land yet, held as its own mark
-  // rather than a flag: a stuck step that wakes up to find a later one in
-  // flight must recognise that the pending step is no longer its own.
+  // Use a step token so a stale timeout cannot cancel a later history request.
   const stepRef = useRef<object | null>(null)
   const closingThroughRef = useRef<string | undefined>(undefined)
   const backDispatchRef = useRef(false)
 
-  // Actions asked for while that step was in flight. They are held rather than
-  // answered, and asked again on the landing — see `decide`.
   const pendingRef = useRef<OverlayAction[]>([])
 
-  // Values are cached by instance id, but order always comes from history.
-  // A wide pair can change its list while Details are open; Back must not
-  // restore the older copy of that list's view state from an earlier entry.
+  // Cache values by instance ID while keeping history order. Back must retain newer edits to the list under Details.
   const [memory, setMemory] = useState<ScreenMemory>(() =>
     remember({}, readEntry(location))
   )
@@ -129,10 +106,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     [recordedEntry, memory]
   )
 
-  // The entry as we believe it to be, which is not always the one the router
-  // has told us about yet: two opens in the same tick must not both read the
-  // state the first one is replacing, or both would push. It is brought back
-  // in step with the router below, so a Back press still wins.
+  // Read optimistic writes so two opens in one tick cannot both push from the same old entry.
   const entryRef = useRef(entry)
 
   const previousScreenIds = useRef(new Set(Object.keys(entry.screens ?? {})))
@@ -159,8 +133,6 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     previousScreenIds.current = ids
   }, [location, entry, recordedEntry, notifyScreenClose, updateMemory])
 
-  /** Writes an entry at the address we are on, which is the only thing an
-   * overlay ever changes about it. */
   const write = useCallback(
     (next: OverlayEntry, replace: boolean) => {
       updateMemory(previous => remember(previous, next))
@@ -174,10 +146,6 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     [navigate, updateMemory]
   )
 
-  /** Asks the browser for a history step and waits for it. A step is the one
-   * thing here we cannot do ourselves: it lands when the browser says so,
-   * which is a good few frames later, and until then this marks the stack as
-   * not to be written on. */
   const step = useCallback(
     (delta: number) => {
       const mark = {}
@@ -185,13 +153,8 @@ export function OverlayHost({ children }: { children: ReactNode }) {
       navigate(delta)
       const timer = setTimeout(() => {
         timersRef.current.delete(timer)
-        // Ours landed, or a later step took its place: either way the stack is
-        // no longer this step's to speak for.
         if (stepRef.current !== mark) return
-        // The step did not happen. Clear the mark instead of leaving behind a
-        // Back press that would do nothing, and let the stack be written on
-        // again. The replace lands like any other arrival, which is where
-        // anything held in the meantime gets asked again.
+        // Unblock writes if the step never lands. Replacing the entry replays deferred actions on arrival.
         stepRef.current = null
         write({ ...entryRef.current, slots: 0 }, true)
       }, STUCK_MS)
@@ -227,8 +190,6 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     timersRef.current.add(timer)
   }, [])
 
-  /** Gives up the top `count` live layers, because history no longer has slots
-   * for them — Back was pressed, or the page changed under them. */
   const dismiss = useCallback(
     (count: number) => {
       if (count <= 0) return
@@ -243,11 +204,6 @@ export function OverlayHost({ children }: { children: ReactNode }) {
     [settleAsk, notifyClose]
   )
 
-  /** Puts one action to `decide` — against the entry as we believe it to be,
-   * and the layers alive right now — and carries out the answer. The single
-   * way anything here reaches history: what a step in flight forbids, what a
-   * mistaken call earns, and what each answer costs memory are all settled in
-   * one place, for every action alike. */
   const perform = useCallback(
     (action: OverlayAction): boolean => {
       const decision = decide(
@@ -380,9 +336,7 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   // A native close request can be delivered to a drawer underneath a select
   // or an asked popup. The host owns the actual order of all these layers.
   const back = useCallback(() => {
-    // One native close signal can notify multiple watchers in the same task.
-    // Deduplicate that dispatch, not the entire asynchronous history step:
-    // a later gesture must still close the next owner via the existing queue.
+    // Deduplicate watchers within one native close dispatch; a later gesture must still close the next layer.
     if (backDispatchRef.current) return true
     const popup = liveRef.current.at(-1)
     const screen = Object.keys(entryRef.current.screens ?? {})
@@ -412,38 +366,27 @@ export function OverlayHost({ children }: { children: ReactNode }) {
   useEffect(() => {
     const arrived = lastArrival.current !== location.key
     lastArrival.current = location.key
-    // The step we asked for, arriving. It is a POP, which is what tells it
-    // apart from a page navigated to while it was in flight — that one leaves
-    // the step pending, and the stuck timer has the last word on it.
+    // Only a POP can settle this pending history step; other navigation leaves it for the timeout.
     if (arrived && navigationType === 'POP') stepRef.current = null
-    // Back may cancel a popup push before that location commits. Its key then
-    // stays the same, but live layers still need reconciling with history.
-    // Persist a restored live value into this entry so a reload sees it too.
+    // A Back that cancels a pending popup push can leave the same key; reconcile live layers anyway.
     if (!stepRef.current && entry !== recordedEntry)
       write(entryRef.current, true)
     // Finish an explicit group close before replaying new opens. Otherwise a
     // child opened on an intermediate entry would be closed with that group.
     if (!stepRef.current && closingThroughRef.current)
       perform({ kind: 'arrive' })
-    // What was held while the step was in flight is asked again here, against
-    // the entry we have actually landed on. Each answer writes its own entry,
-    // so popups that piled up in that window still get one Back apiece.
+    // Replay deferred actions against the landed entry so each popup gets its own Back step.
     while (!stepRef.current) {
       const held = pendingRef.current.shift()
       if (!held) break
       perform(held)
     }
-    // Reconcile only once the stack is ours again: an answer that stepped has
-    // left history mid-move, and there is nothing to compare it against yet.
     if (!stepRef.current) perform({ kind: 'arrive' })
-    // Settled: nothing in flight, nothing held. From here the entry alone says
-    // what is open — including a close the browser refused, which shows the
-    // screen again rather than leaving it hidden over a live entry.
+    // Once settled, the entry owns visibility; a refused close shows the screen again.
     if (!stepRef.current && !pendingRef.current.length)
       setClosing(names => (names.size ? new Set() : names))
   }, [location.key, navigationType, perform, entry, recordedEntry, write])
 
-  // Nothing is left waiting on an answer that can no longer come.
   useEffect(() => {
     const timers = timersRef.current
     return () => {
@@ -537,16 +480,7 @@ function AskedLayerView({
   )
 }
 
-/** An asked surface is mounted only once it is already open, so Base UI has
- * nothing closed to transition from: its transition status starts at whatever
- * the first committed frame said, and a popup that was open on that frame gets
- * no starting style. Withhold the open by one frame to give it that frame.
- *
- * Closing is not delayed — an answer has to start its exit on the press.
- *
- * Here rather than in each surface: every asked overlay mounts this way, so a
- * fix at the call site is one every next surface has to remember, and it would
- * have to know which breakpoint it is animating for. */
+/** Base UI needs an initial closed frame to animate an already-open mount. Start the exit immediately. */
 function useEntranceOpen(open: boolean) {
   const [entered, setEntered] = useState(false)
   // Reset while rendering the closed layer, so the next opening of a layer

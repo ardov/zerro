@@ -15,9 +15,7 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
-      // Keeps import statements compatible with verbatimModuleSyntax.
-      // Inline import() type annotations are unrelated to that and stay
-      // allowed: Vitest's importOriginal<typeof import('...')>() needs them.
+      // Inline import() type annotations remain available to Vitest's importOriginal.
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {
@@ -36,8 +34,6 @@ export default tseslint.config(
         },
       ],
       '@typescript-eslint/no-empty-object-type': 'warn',
-      // Compiler-level react-hooks rules find real problems,
-      // but fixing them is a separate refactoring
       'react-hooks/set-state-in-effect': 'warn',
       'react-hooks/immutability': 'warn',
       'react-hooks/static-components': 'warn',
@@ -49,8 +45,7 @@ export default tseslint.config(
         { skipStrings: true, skipTemplates: true, skipJSXText: true },
       ],
       'no-empty': ['error', { allowEmptyCatch: true }],
-      // `cn` (clsx + tailwind-merge) is the only class-name helper we use:
-      // raw clsx skips the Tailwind conflict resolution.
+      // Use cn so conflicting Tailwind classes are resolved.
       'no-restricted-imports': [
         'error',
         {
@@ -70,7 +65,6 @@ export default tseslint.config(
     },
   },
   {
-    // The single place clsx is allowed: the implementation of `cn` itself.
     files: ['src/6-shared/ui/shadcn/utils.ts'],
     rules: { 'no-restricted-imports': 'off' },
   },

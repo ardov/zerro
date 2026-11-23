@@ -12,7 +12,6 @@ export type ActionListHandle = { focus: () => void }
 type ActionListProps = Omit<Toolbar.Root.Props, 'ref' | 'className'> & {
   ref?: Ref<ActionListHandle>
   className?: string
-  /** ArrowUp from the first item can return to an associated field. */
   onNavigateBefore?: () => void
 }
 

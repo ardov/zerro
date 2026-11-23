@@ -5,9 +5,7 @@ import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
 
 const HANDOVER_MS = 250
 
-/** A time edit recreates the entity before history names its replacement.
- * Keep the editor alive for that handover; an entity still missing afterwards
- * removes only its own Screen. The stable owner separately owns pending edits. */
+/** Keep the owner alive while a time edit recreates the transaction ahead of navigation. */
 export function useTransactionHandover(
   id: string | undefined,
   onGone: () => void

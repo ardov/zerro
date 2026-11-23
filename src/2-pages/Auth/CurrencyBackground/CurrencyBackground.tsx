@@ -7,7 +7,6 @@ import type { CurrencySettings } from './interaction'
 
 export type CurrencyBackgroundHandle = { collapse(): void; reset(): void }
 
-/** Decorative login artwork; lifecycle and motion preferences belong to the renderer. */
 export function CurrencyBackground({
   settings,
   ref,

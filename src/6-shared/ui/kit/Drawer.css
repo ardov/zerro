@@ -38,10 +38,7 @@
       transition: none;
     }
 
-    /* Pulled the wrong way, against the edge it is attached to, a drawer
-       gives a little (Base UI damps the drag to its square root). Its
-       surface continues past the screen edge, so the pull shows more of the
-       sheet rather than the page behind its cut-off edge. */
+    /* Extend the sheet past the viewport so pulling toward its edge never exposes the page. */
     &[data-attached]::after {
       position: absolute;
       content: '';

@@ -76,8 +76,6 @@ export function EnvelopeInfo(props: {
         <hr className="m-0 w-full border-0 border-t border-ui-border opacity-60" />
       </div>
       <ListRows className="-mx-4 text-ui-secondary">
-        {/* Not a button: it reports a number and has no action. `text-inherit`
-            keeps the list's muted color without adding an affordance. */}
         <div
           className={cn(
             listItemDenseClass,

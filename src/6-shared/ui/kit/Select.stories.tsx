@@ -344,8 +344,7 @@ function ControlledAlignmentDemo() {
   )
 }
 
-/** Alignment is decided as the panel opens, so it also works when the consumer
- * opens through `usePopup` and Base UI's change handler never runs. */
+/** Decide alignment at opening so it works with usePopup's externally controlled visibility. */
 export const ControlledAlignment: Story = {
   render: () => <ControlledAlignmentDemo />,
   play: async ({ canvasElement }) => {
@@ -356,7 +355,6 @@ export const ControlledAlignment: Story = {
       canvas.getByRole('button', { name: 'Open from outside' })
     )
     const option = await body.findByRole('option', { name: 'Everyone' })
-    // Aligned mode lays the selected row over the field; anchored sits below it.
     await waitFor(() =>
       expect(option.getBoundingClientRect().top).toBeLessThan(
         trigger.getBoundingClientRect().bottom
@@ -485,7 +483,6 @@ function OverlappingList() {
   )
 }
 
-/** A slow release of the opening press must not select the row under the pointer. */
 export const OpeningPressDoesNotSelect: Story = {
   render: () => <OverlappingList />,
   play: async ({ canvasElement }) => {
@@ -548,8 +545,6 @@ function ModalFieldDemo() {
   )
 }
 
-/** A pointer that opens and closes the popup leaves focus on the trigger
- * without the field's focus ring; keyboard focus still shows it. */
 export const QuietFocusAfterPointer: Story = {
   render: () => <Demo />,
   play: async ({ canvasElement }) => {
@@ -587,7 +582,6 @@ export const WholeFieldAndModalDismissal: Story = {
     for (const trigger of canvas.getAllByRole('combobox')) {
       const field = trigger.closest('.group\\/select-field')!
       const bounds = field.getBoundingClientRect()
-      // Real hit testing covers the leading icon, blank padding, and chevron.
       for (const x of [bounds.left + 26, bounds.left + 5, bounds.right - 26]) {
         const hit = document.elementFromPoint(
           x,

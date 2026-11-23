@@ -24,7 +24,6 @@ import {
 
 export type TransactionDrawerProps = {
   title?: string
-  /** Entity identifiers keep the list live across edits and reloads. */
   ids?: TTransactionId[]
   initialQuery?: core.transactions.TTransactionQuery
   initialDate?: TTransactionListProps['initialDate']
@@ -37,7 +36,6 @@ type TransactionListValue = TransactionDrawerProps & {
 }
 type DetailsValue = {
   ownerListId: string
-  /** One transaction, or what the owner list adds up to. */
   content: { kind: 'transaction'; id: TTransactionId } | { kind: 'summary' }
 }
 

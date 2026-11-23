@@ -41,11 +41,9 @@ export const populateTransaction = (
   outcomeAccount: raw.outcomeAccount ? accounts[raw.outcomeAccount] : undefined,
   opOutcomeInstrument: instruments[Number(raw.opOutcomeInstrument)],
   tag: mapTags(raw.tag, tags),
-  //COMPUTED PROPERTIES
   type: core.transactions.getType(raw),
 })
 
 function mapTags(ids: TTagId[] | null, tags: ByIdOld<TTag>) {
-  // TODO: Надо что-то придумать с null тегом 🤔    ⤵
   return ids && ids.length ? ids.map(id => tags[id + '']) : null
 }

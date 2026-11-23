@@ -176,7 +176,6 @@ export const IconButtons: Story = {
   },
 }
 
-/** Compact controls share the 32px height; icon shapes keep a square hit area. */
 export const Compact: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
@@ -223,7 +222,6 @@ export const Compact: Story = {
   },
 }
 
-/** Explicit icon sizes survive button styling; the application default is 20px. */
 export const IconSizes: Story = {
   render: () => (
     <div className="flex items-center gap-3">

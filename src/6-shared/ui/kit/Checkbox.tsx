@@ -9,8 +9,6 @@ export type CheckboxProps = Omit<
   'children' | 'className' | 'parent' | 'color'
 > & {
   className?: string
-  /** Fill and outline color, including CSS variables or currentColor to inherit.
-   * The check and mixed marks are transparent cutouts. */
   color?: string
 }
 
@@ -73,7 +71,6 @@ export type CheckboxFieldProps = Omit<
   'className' | 'render' | 'nativeButton'
 > & {
   label: ReactNode
-  /** Styles the label wrapper. */
   className?: string
 }
 

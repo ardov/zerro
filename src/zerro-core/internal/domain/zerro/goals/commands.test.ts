@@ -15,25 +15,13 @@ import { compileSetGoal } from './commands'
 import { getRawGoals } from './read'
 import { goalType, type TGoal } from './types'
 
-// These tests assert on the OUTCOME (the goals you can read back after the
-// command is applied), not on the MECHANISM (which reminder/account/deletion
-// objects the patch happens to contain). That way they survive a rewrite of
-// how goals are persisted and only break when the actual behaviour changes.
-//
-// The exact shape of the sync patch IS a contract of its own — but that belongs
-// in one dedicated place (see operations/replication/outbox.test.ts), not
-// re-asserted incidentally in every command test.
-
 const envelopeId = envId.get(EnvType.Tag, 'food')
 
-/** Applies a set-goal command and returns the goals visible afterwards. */
 function setGoal(
   data: Parameters<typeof compileSetGoal>[0],
   month: TISOMonth,
   goal: TGoal | null
 ) {
-  // uuid/now are provided so the command can run, but nothing asserts on the
-  // values — the test is not coupled to the generated ids.
   let n = 0
   const patch = materializeTestInput(
     data,
@@ -60,8 +48,6 @@ const goalReminder = (id: string, month: string, payload: object) =>
 
 describe('goal commands', () => {
   it('stores a monthly goal so it reads back', () => {
-    // No data-account yet: applying the command must bootstrap storage, which
-    // the round-trip below proves end-to-end without asserting the plumbing.
     const data = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
     })
@@ -93,8 +79,6 @@ describe('goal commands', () => {
       },
     })
 
-    // Setting a January goal clears the redundant February blocker: February
-    // simply disappears from the resulting goals, no plumbing details asserted.
     expect(
       setGoal(data, '2026-01', { type: goalType.MONTHLY_SPEND, amount: 50 })
     ).toEqual({
@@ -114,7 +98,6 @@ describe('goal commands', () => {
       },
     })
 
-    // The February goal shields the March blocker, so all three months survive.
     expect(
       setGoal(data, '2026-01', { type: goalType.MONTHLY, amount: 100 })
     ).toEqual({

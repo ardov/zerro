@@ -10,7 +10,6 @@ export function getDateRange(
   return trimMonths(dates, range, idx)
 }
 
-/** Cuts out a range with target index in center */
 export function trimMonths<T>(
   arr: Array<T>,
   windowSize: number,
@@ -23,7 +22,6 @@ export function trimMonths<T>(
 
   if (cleanArr.length <= windowSize) return cleanArr
 
-  // Calculate the range with the target in the center
   const padLeft = Math.floor((windowSize - 1) / 2)
   const padRight = windowSize - 1 - padLeft
   const rangeStart = targetIdx - padLeft

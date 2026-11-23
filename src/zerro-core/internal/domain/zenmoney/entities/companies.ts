@@ -3,7 +3,6 @@ import type { TMsTime, TUnixTime } from '../primitives'
 
 export type TCompanyId = number
 
-/** Synchronized bank or financial-provider reference data. */
 export type TCompany = {
   id: TCompanyId
   changed: TMsTime

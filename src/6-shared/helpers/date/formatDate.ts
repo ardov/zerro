@@ -12,22 +12,8 @@ import { t } from 'i18next'
 import { parseDate } from './utils'
 import { i18n } from '@/6-shared/localization'
 
-/**
- * Formats date.
- * @link https://date-fns.org/v2.25.0/docs/format doc
- * @param date
- * @param template
- */
 const DAY = 24 * 60 * 60 * 1000
 
-/**
- * "5 minutes ago" while that is the useful answer, an absolute date once it
- * stops being one.
- *
- * A change made seconds ago reads badly as a wall-clock timestamp: the user
- * knows *when* they did it and wants to know *how long ago*. Past a day the
- * relation stops helping and the date itself is what identifies the point.
- */
 export function formatTimeAgo(date: TDateDraft): string {
   const d = parseDate(date)
   const elapsed = Date.now() - d.getTime()
@@ -36,7 +22,6 @@ export function formatTimeAgo(date: TDateDraft): string {
   return formatDistanceToNow(d, { addSuffix: true, locale: getDateLocale() })
 }
 
-/** Compact timestamp shared by transaction creation and update metadata. */
 export function formatTransactionTimestamp(date: TDateDraft): string {
   const d = parseDate(date)
   const elapsed = Date.now() - d.getTime()
@@ -57,9 +42,7 @@ export function formatAbsoluteTimestamp(date: TDateDraft): string {
   return `${day.replace(/\./g, '')}, ${formatDate(d, 'HH:mm')}`
 }
 
-/** The `date-fns` locale the interface is currently in. Read at call time
- * rather than held, so a language change is one re-render away — the calendar
- * reads it the same way this file's own formatting does. */
+/** Read the date-fns locale at call time so language changes reach calendars and date labels. */
 export function getDateLocale(
   language = i18n.resolvedLanguage || i18n.language
 ) {

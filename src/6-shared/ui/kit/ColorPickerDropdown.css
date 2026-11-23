@@ -12,7 +12,6 @@
     outline: 1px solid currentcolor;
   }
 
-  /* Keyboard focus thickens the thumb; the plane itself draws no ring. */
   :root[data-input-modality='keyboard']
     .color-picker-plane:focus
     .color-picker-thumb {

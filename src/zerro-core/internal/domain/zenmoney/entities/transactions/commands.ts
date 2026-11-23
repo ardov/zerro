@@ -333,13 +333,7 @@ export function compileBulkEditTransactions(
   }
 }
 
-/**
- * Combines selected income transactions into the single selected outcome:
- * the outcome amount is reduced by each income, same-account incomes are
- * deleted, and cross-account incomes become transfers into the outcome
- * account. Availability (single same-instrument outcome larger than the
- * incomes) is decided by the caller.
- */
+/** Same-account incomes are deleted; cross-account incomes become transfers into the reduced expense's account. */
 export function compileCombineToOutcome(
   transactions: ById<TTransaction>,
   ids: TTransactionId[]
@@ -375,10 +369,6 @@ export function compileCombineToOutcome(
   return { transaction }
 }
 
-/**
- * Mirror of {@link compileCombineToOutcome}: combines selected outcomes into
- * the single selected income.
- */
 export function compileCombineToIncome(
   transactions: ById<TTransaction>,
   ids: TTransactionId[]
@@ -414,11 +404,7 @@ export function compileCombineToIncome(
   return { transaction }
 }
 
-/**
- * Merges one selected outcome and one selected income into a single transfer:
- * the income transaction gains the outcome side and the standalone outcome is
- * deleted. The caller guarantees exactly one income and one outcome.
- */
+/** Give the income transaction the outgoing leg and delete the standalone expense. */
 export function compileMergeTransactionsAsTransfer(
   transactions: ById<TTransaction>,
   ids: TTransactionId[]
@@ -469,7 +455,6 @@ function getExistingTransaction(
   return transaction
 }
 
-/** Remove the uncategorized sentinel and duplicates, keeping the first occurrence. */
 export function normalizeTransactionTags(tags: readonly TTagId[]): TTagId[] {
   return [...new Set(tags.filter(id => id !== 'null'))]
 }

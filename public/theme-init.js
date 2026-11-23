@@ -1,10 +1,4 @@
-/*
-  Applies the colour scheme before first paint and exposes window.themeManager.
-
-  The absence of a stored preference means "follow the system". An explicit
-  light or dark value overrides it until a toggle lands back on the system
-  scheme. Storage failures fall back to memory for the current page.
-*/
+/* Apply the scheme before first paint. An absent preference follows the system. */
 
 ;(() => {
   const STORAGE_KEY = 'theme'

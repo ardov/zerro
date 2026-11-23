@@ -1,8 +1,7 @@
 import { AccountType } from '../../../internal/domain/zenmoney/entities/accounts'
 import type { TDemoProfile } from './en'
 
-// Illustrative household amounts in RUB, not currency-converted euro prices.
-// Merchants and banks are global brands so the data does not point to a country.
+// Russian demo amounts are illustrative household RUB values; no conversion from euros.
 export const russianProfile: TDemoProfile = {
   currency: 2,
   country: 1,

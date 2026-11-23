@@ -51,7 +51,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** One component instance, entirely controlled by the Args panel. */
 export const Bench: Story = {}
 
 function Case(props: { title: string; children: ReactNode }) {
@@ -64,7 +63,6 @@ function Case(props: { title: string; children: ReactNode }) {
   )
 }
 
-/** Every arrangement at once, for comparison by eye. */
 export const Showcase: Story = {
   render: () => (
     <div className="grid grid-cols-[repeat(auto-fill,18rem)] gap-6">
@@ -94,12 +92,9 @@ export const Showcase: Story = {
   ),
 }
 
-/** Target the actual viewport, not Base UI's presentational wrappers. */
 const viewportOf = (root: HTMLElement) =>
   root.querySelector<HTMLElement>('.kit-scroll-viewport')!
 
-/** The viewport stays out of the tab order: Tab goes from the button before
- * the area straight to the first control inside it. */
 export const NotATabStop: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => (
@@ -123,8 +118,6 @@ export const NotATabStop: Story = {
   },
 }
 
-/** A label too long for the row neither widens the content nor scrolls the
- * area sideways: the row's right edge stays in sight. */
 export const NoSidewaysScroll: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => (
@@ -147,7 +140,6 @@ export const NoSidewaysScroll: Story = {
   },
 }
 
-/** A sticky header in the content holds the top edge of the surface. */
 export const StickyHeader: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => (
@@ -174,7 +166,6 @@ export const StickyHeader: Story = {
   },
 }
 
-/** Grows with short content and stops at its max-height with long content. */
 export const GrowsToMaxHeight: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => (
@@ -196,7 +187,6 @@ export const GrowsToMaxHeight: Story = {
   },
 }
 
-/** The fade appears only at an edge with more past it. */
 export const FadeFollowsOverflow: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => (
@@ -220,8 +210,6 @@ export const FadeFollowsOverflow: Story = {
   },
 }
 
-/** The bottom inset pads the area's own scroll and lifts its track; an area
- * nested in the content starts from none. */
 export const BottomInset: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => (

@@ -103,7 +103,6 @@ export const PresenceAndReversal: Story = {
       expect(main.getBoundingClientRect().width).toBeGreaterThan(400)
       expect(main.getBoundingClientRect().width).toBeLessThan(612)
     }
-    // Reverse before exit completes: retain the same input and unfinished value.
     container.style.width = '800px'
     await waitFor(() => expect(aside).not.toHaveAttribute('inert'))
     for (const animation of root.getAnimations({ subtree: true }))
@@ -128,7 +127,6 @@ export const PresenceAndReversal: Story = {
       animation.pause()
       animation.currentTime = Number(animation.effect!.getTiming().duration) / 2
     }
-    // Also reverse an entrance: its partially expanded surface stays readable.
     container.style.width = '620px'
     await waitFor(() => expect(aside).toHaveAttribute('inert'))
     expect(surface.offsetWidth).toBeGreaterThan(0)

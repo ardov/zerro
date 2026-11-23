@@ -11,7 +11,6 @@ import { beginPush } from './pushRun'
 
 const now = Date.parse('2026-08-31T12:00:00.000Z')
 
-/** Two accounts, so a one-byte bound forces a chunk per account. */
 function makeReplica() {
   const base = makeStore({
     serverTimestamp: 100_000,
@@ -163,8 +162,6 @@ describe('push driver', () => {
       commit: () => ({ ok: false, message: 'disk is full' }),
     })
 
-    // Not `stopped`: the server already has this chunk, so the run must not
-    // come back with an offer to send it again.
     expect(outcome).toEqual({
       kind: 'abandoned',
       progress: expect.any(Array),

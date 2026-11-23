@@ -18,7 +18,6 @@ export type TAccountPopulated = TAccount & {
   fxCode: TFxCode
 }
 
-/** Zerro's UI account projection; Zenmoney entities remain policy-free. */
 export function getPopulatedAccounts(
   accounts: ById<TAccount>,
   instrumentCodeById: Record<TInstrumentId, TFxCode>
@@ -44,14 +43,7 @@ export function getZerroDataAccountId(
   }
 }
 
-/**
- * Zerro's own storage anchor rather than an account its user keeps.
- *
- * The title is the whole identity, so the row is typed as loosely as that test
- * needs: callers ask this of sparse patch rows too, where only the fields a
- * write actually touched are present and a missing title simply fails to
- * match.
- */
+/** The title identifies Zerro's storage account, including sparse patches that only contain changed fields. */
 export function isZerroDataAccount(row: object): boolean {
   return (row as { title?: unknown }).title === ZERRO_DATA_ACCOUNT_NAME
 }

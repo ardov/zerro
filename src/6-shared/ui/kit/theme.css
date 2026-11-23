@@ -1,33 +1,25 @@
-/* `static`: plain CSS files read these variables too, so every one must be
-emitted, not only those Tailwind finds used. */
+/* Emit all tokens: plain CSS consumes them outside Tailwind's usage scan. */
 /* prettier-ignore */
 @theme static {
-  /* 🪟 Opacity */
   --opacity-ui-border:   0.1;
   --opacity-ui-disabled: 0.32;
 
-  /* 🌫 Blur */
   --blur-ui-backdrop: 1.5px;
 
-  /* 📚 Z-index */
   --z-index-drawer:  1200;
   --z-index-modal:   1300;
   --z-index-popover: 1400;
   --z-index-tooltip: 1500;
 
-  /* Main colors */
-  /* 🎨 Surfaces */
   --color-ui-base:        oklch(0.97 0.002 214);
   --color-ui-card:        oklch(1 0 0);
   --color-ui-popover:     oklch(1 0 0);
   --color-ui-backdrop:    oklch(from var(--color-ui-base) l c h / 80%);
   --color-ui-field-hatch: oklch(0 0 0 / 0.03);
-  /* 🎨 State colors */
   --color-ui-focus:     oklch(0 0 0);
   --color-ui-highlight: oklch(0 0 0 / 0.04);
   --color-ui-pressed:   oklch(0 0 0 / 0.06);
   --color-ui-selected:  oklch(0.95 0.002 214);
-  /* 🎨 Text */
   --color-ui-primary:     oklch(0 0 0 / 0.95);
   --color-ui-secondary:   oklch(0 0 0 / 0.6);
   --color-ui-tertiary:    oklch(0 0 0 / 0.35);
@@ -47,41 +39,33 @@ emitted, not only those Tailwind finds used. */
   --color-ui-error-solid:   #d32f2f;
   --color-ui-on-error:      #ffffff;
 
-  /* 🎨 Border */
   --color-ui-border: oklch(0 0 0 / var(--opacity-ui-border));
 
-  /* 🎨 Semantic component tokens */
   --color-ui-button-primary:       oklch(0 0 0);
   --color-ui-button-primary-hover: oklch(0 0 0);
   --color-ui-on-button-primary:    oklch(1 0 0);
   --color-ui-tooltip:              oklch(0.22 0 0);
   --color-ui-on-tooltip:           oklch(1 0 0);
   --color-ui-scrollbar:            oklch(0 0 0 / 0.12);
-  /* 🎨 Control colors, checkbox and switch */
   --color-ui-control-active:   oklch(0 0 0);
   --color-ui-control-inactive: oklch(0.58 0 0);
   --color-ui-on-control:       oklch(1 0 0);
   --color-ui-toggle-hover:     oklch(0.5 0 0 / 0.12);
   --color-ui-toggle-pressed:   oklch(0.5 0 0 / 0.22);
 
-  /* 📏 Surface spacing */
   --spacing-ui-drawer-inset: 8px;
   --spacing-ui-panel-gap: 8px;
 
-  /* Panel layout and paired surfaces move as one interaction. */
   --ease-ui-panel: cubic-bezier(0.25, 1, 0.5, 1);
   --duration-ui-panel: 250ms;
 
-  /* 📏 Stroke thickness */
   --stroke-ui-control: 1.5px;
 
-  /* ⭕ Radius */
   --radius-ui-card:         16px;
   --radius-ui-control:      12px;
   --radius-ui-control-inner: 8px;
   --radius-ui-popover:      16px;
 
-  /* 🌚 Shadows */
   --shadow-ui-card: 0 2px 4px oklch(0 0 0 / 0.04);
   --shadow-ui-popover:
     0 0 0 0.5px var(--color-ui-border),
@@ -90,7 +74,6 @@ emitted, not only those Tailwind finds used. */
   --shadow-ui-toast:
     0 8px 24px oklch(0 0 0 / 0.1), 0 24px 56px oklch(0 0 0 / 0.2);
 
-  /* 💫 Easing */
   --ease-overshoot-soft: linear(
     0,
     0.03 1.8%,
@@ -119,7 +102,6 @@ emitted, not only those Tailwind finds used. */
     1
   );
 
-  /* 🅰️ Typography */
   --text-ui-14: 14px;
   --text-ui-14--line-height: 20px;
   --text-ui-14--letter-spacing: 0.02em;
@@ -208,9 +190,6 @@ emitted, not only those Tailwind finds used. */
   );
 }
 
-/* A field shows focus a person should see: any focus in its text, and
-   keyboard focus on a trigger. A trigger that gets focus back after a pointer
-   closed its popup stays quiet, as a plain button does. The modality comes
-   from `6-shared/ui/inputModality.ts`; before any input, visible focus counts. */
+/* Text focus always shows; a trigger gets a ring only for visible focus that did not come from a pointer dismissal. */
 @custom-variant field-focus (&:has(> [data-field-control] :is(input, textarea):focus), :root:not([data-input-modality='pointer']) &:has(> [data-field-control] :focus-visible));
 @custom-variant in-field-focus (:where([data-field-content]:has(:is(input, textarea):focus)) &, :root:not([data-input-modality='pointer']) :where([data-field-content]:has(:focus-visible)) &);

@@ -58,18 +58,16 @@ export function nextYear(d: TDateDraft) {
   return new Date(date.getFullYear() + 1, 0, 1)
 }
 
-/** Checks if string is valid ISO month */
 export function isISOMonth(date?: any): date is TISOMonth {
   if (!date) return false
   if (typeof date !== 'string') return false
-  const regex = /\d{4}-\d{2}/g // 0000-00
+  const regex = /\d{4}-\d{2}/g
   return regex.test(date) && date.length === 7
 }
 
-/** Checks if string is valid ISO date */
 function isISODate(date?: any): date is TISODate {
   if (!date) return false
   if (typeof date !== 'string') return false
-  const regex = /\d{4}-\d{2}-\d{2}/g // 0000-00-00
+  const regex = /\d{4}-\d{2}-\d{2}/g
   return regex.test(date) && date.length === 10
 }

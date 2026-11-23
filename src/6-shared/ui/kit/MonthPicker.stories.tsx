@@ -123,7 +123,6 @@ export const ExternalSelection: Story = {
     await userEvent.click(
       canvas.getByRole('button', { name: 'Set April 2031' })
     )
-    // Repeating the same controlled value leaves the browsed year alone.
     await waitFor(() =>
       expect(canvas.getByText('2030', { exact: true })).toBeVisible()
     )
@@ -136,7 +135,6 @@ export const YearTransition: Story = {
     const canvas = within(canvasElement)
     const next = canvas.getByRole('button', { name: 'Next year' })
     next.focus()
-    // Observe the outgoing page synchronously, before the transition finishes.
     fireEvent.click(next)
     const outgoing = canvasElement.querySelector<HTMLElement>('[inert]')
     await expect(outgoing).not.toBeNull()

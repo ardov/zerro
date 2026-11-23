@@ -1,33 +1,13 @@
-/** The OKLab/OKLCh ↔ sRGB and Display P3 conversions `ColorScale` samples
- * through.
- *
- * Vendored rather than taken from a colour library for the same reason
- * `APCAcontrast.ts` is: these are fixed matrices from a published
- * specification, they are the only part of such a library this app would call,
- * and a scale that generates the palette at runtime would put the whole
- * library in the bundle. The constants are Björn Ottosson's
- * (https://bottosson.github.io/posts/oklab/); the transfer curve is the sRGB
- * piecewise one, not the 2.4 power approximation `APCAcontrast.ts` uses, which
- * is deliberate — APCA specifies its own linearization and this does not share
- * it. */
+/** OKLab matrices: https://bottosson.github.io/posts/oklab/. Companding follows CSS Color 4. */
 
 export type Oklch = { l: number; c: number; h: number; alpha?: number }
 export type Rgb = { r: number; g: number; b: number; alpha?: number }
 
-/** Which set of primaries a colour has to fit inside. sRGB contains no colour
- * P3 does not, so this only ever widens what a scale may keep. */
 export type Gamut = 'srgb' | 'p3'
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value))
 
-/** sRGB companding — shared by Display P3, which differs only in primaries.
- *
- * Applied through the magnitude and the sign put back afterwards, as CSS Color
- * 4 specifies. A channel outside 0…1 is not a mistake to be clamped away here:
- * it is how a colour states that it falls outside these primaries, and it is
- * the only thing the gamut checks have to read. Companding it directly would
- * raise a negative number to a fractional power and hand back `NaN`, which
- * every comparison downstream would then answer `false` to. */
+/** Compand the magnitude and restore the sign; out-of-gamut channels must not become NaN. */
 const gammaEncode = (channel: number) => {
   const magnitude = Math.abs(channel)
   const encoded =
@@ -46,9 +26,7 @@ const gammaDecode = (channel: number) => {
   return Math.sign(channel) * decoded
 }
 
-/** Linear-light sRGB, before companding. Channels outside 0…1 are meaningful
- * here: they are exactly how a colour says it sits outside the sRGB gamut, and
- * the P3 conversion below needs to see them. */
+/** Linear channels can fall outside 0…1 before gamut conversion. */
 function oklchToLinearSrgb(color: Oklch): Rgb {
   const hue = (color.h * Math.PI) / 180
   const a = color.c * Math.cos(hue)
@@ -76,10 +54,6 @@ export function oklchToRgb(color: Oklch): Rgb {
   }
 }
 
-/* Linear sRGB ↔ linear Display P3. Both share white point and transfer curve,
-   so only the primaries differ and a single matrix carries the whole
-   conversion. sRGB's primaries sit inside P3's, which is why the forward
-   matrix maps the unit cube into itself and the reverse one does not. */
 const toLinearP3 = (color: Rgb): Rgb => ({
   r: 0.8224621 * color.r + 0.177538 * color.g,
   g: 0.0331941 * color.r + 0.9668058 * color.g,
@@ -94,7 +68,6 @@ const fromLinearP3 = (color: Rgb): Rgb => ({
   alpha: color.alpha,
 })
 
-/** The companded channels a colour is composited in on a display of `gamut`. */
 export function toChannels(color: Oklch, gamut: Gamut): Rgb {
   const linear = oklchToLinearSrgb(color)
   const target = gamut === 'p3' ? toLinearP3(linear) : linear
@@ -106,7 +79,6 @@ export function toChannels(color: Oklch, gamut: Gamut): Rgb {
   }
 }
 
-/** The inverse of `toChannels`. */
 export function fromChannels(color: Rgb, gamut: Gamut): Oklch {
   const linear = {
     r: gammaDecode(color.r),
@@ -147,29 +119,19 @@ function linearSrgbToOklch(color: Rgb): Oklch {
     0.0259040371 * lCone + 0.7827717662 * mCone - 0.808675766 * sCone
 
   const chroma = Math.sqrt(a * a + bAxis * bAxis)
-  /* An achromatic colour has no meaningful hue, and `atan2(0, 0)` would report
-     0 — a red that interpolation would then drag a scale through. Reporting
-     `NaN`-free 0 with a zero chroma is safe because every consumer here reads
-     hue only after weighting it by chroma. */
+  /* Achromatic hue is arbitrary; interpolation weights it by chroma. */
   const hue = chroma < 1e-6 ? 0 : (Math.atan2(bAxis, a) * 180) / Math.PI
 
   return { l: lightness, c: chroma, h: (hue + 360) % 360, alpha: color.alpha }
 }
 
-/** Whether every channel fits between the primaries of `gamut`. The tolerance
- * is a little over half an 8-bit step, so a colour that only misses by less
- * than one renders identically to one that fits. */
+/** Allow a little over half an 8-bit step when checking RGB gamut bounds. */
 const inGamut = (color: Oklch, gamut: Gamut) => {
   const { r, g, b } = toChannels(color, gamut)
   return [r, g, b].every(channel => channel >= -0.002 && channel <= 1.002)
 }
 
-/** The same colour at the highest chroma `gamut` can hold, found by bisection
- * on chroma with lightness and hue fixed. Reducing chroma is what the eye
- * forgives; moving lightness would break the level the scale was sampled at,
- * which is the one thing every contrast decision downstream depends on — and
- * it is why the sRGB and P3 renderings of one level stay interchangeable for
- * every contrast question. */
+/** Find the highest fitting chroma without moving lightness or hue. */
 export function clampChroma(color: Oklch, gamut: Gamut = 'srgb'): Oklch {
   if (inGamut(color, gamut)) return color
 
@@ -183,10 +145,6 @@ export function clampChroma(color: Oklch, gamut: Gamut = 'srgb'): Oklch {
   return { ...color, c: low }
 }
 
-/** Parses the notations a scale's stops are written in: `oklch(L C H)` with an
- * optional `/ alpha`, `#rgb`, `#rrggbb`, `rgb(…)` and `rgba(…)`. Percentages
- * are accepted on OKLCh lightness because that is how the notation is
- * usually written by hand. */
 export function parseColor(color: string): Oklch {
   const value = color.trim()
 
@@ -238,13 +196,6 @@ function parseRgb(color: string): Rgb {
   }
 }
 
-/** Serializes an OKLCh literal — the only notation that can carry a colour
- * outside sRGB. Rounded, because the trailing digits of a bisection are noise
- * that would otherwise make one build's tokens differ from the next.
- *
- * A literal, not an expression: `oklch(0.53 0.12 240 / 0.6)` is a value
- * `parseColor` reads straight back, which is what `colors.ts` needs of a token
- * and what `rgb(from var(--x) …)` could never be. */
 export function formatOklch(color: Oklch): string {
   const round = (value: number, places: number) => {
     const factor = 10 ** places
@@ -255,16 +206,11 @@ export function formatOklch(color: Oklch): string {
   return alpha >= 1 ? `oklch(${base})` : `oklch(${base} / ${alpha})`
 }
 
-/** Serializes to the sRGB notations the theme is written in today: `#rrggbb`
- * when opaque, `rgba(r, g, b, a)` otherwise. */
 export function formatRgb(color: Rgb): string {
   const r = Math.round(clamp01(color.r) * 255)
   const g = Math.round(clamp01(color.g) * 255)
   const b = Math.round(clamp01(color.b) * 255)
-  /* Rounded before the comparison, not after: a colour that comes back from
-     the conversions at 0.9999996 is opaque once written down, and printing it
-     as `rgba(…, 1)` would be a second spelling of a value the hex branch
-     already has. */
+  /* Round alpha before testing opacity so near-opaque values serialize as HEX. */
   const alpha =
     color.alpha === undefined
       ? 1

@@ -5,7 +5,6 @@ import { Button } from '@/6-shared/ui/kit/Button'
 import { CurrencyBackground } from '../Auth/CurrencyBackground/CurrencyBackground'
 import './NotFound.css'
 
-/** Drawn on the mark's 100-unit scale, with an 18-unit stem and a 14-unit crossbar. */
 function Four() {
   return (
     <span className="not-found-four" aria-hidden="true">

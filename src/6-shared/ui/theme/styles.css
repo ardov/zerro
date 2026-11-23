@@ -9,9 +9,6 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    /* What `enableColorScheme` set from the palette mode. It follows the same
-       class the Tailwind `dark` variant does, so the two cannot disagree about
-       which scheme the page is in. */
     color-scheme: light;
   }
 

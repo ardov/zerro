@@ -147,7 +147,6 @@ function PickerControls(props: PickerProps) {
   useEffect(() => {
     const element = canvas.current!
     const ctx = element.getContext('2d')!
-    // Sample the OKHSV plane; the browser interpolates the smooth surface.
     const draw = () => {
       const { width, height } = element
       const displayWidth = element.clientWidth

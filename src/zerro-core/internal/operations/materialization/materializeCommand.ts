@@ -52,7 +52,6 @@ import type { TCommandLabel } from './commandLabel'
 export type TCommand = {
   issuedAt: TMsTime
   operations: TOperation[]
-  /** What the user did, for history. Inert: nothing below this line reads it. */
   label?: TCommandLabel
 }
 
@@ -72,7 +71,6 @@ type TEntityRow = {
     draft: TEntity,
     ctx: ReturnType<typeof deterministicContext>
   ) => TEntity
-  /** This type may only modify a row that already exists. */
   existingOnly?: boolean
   existingFields?: (fields: TEntity) => TEntity
   skipExisting?: (current: TEntity) => boolean
@@ -229,7 +227,6 @@ export function prepareCommand(
   return { issuedAt, operations: prepared, ...(label && { label }) }
 }
 
-/** Materializes one command against the latest local snapshot. */
 export function materializeCommand(
   snapshot: TDataStore,
   command: TCommand,
@@ -299,14 +296,7 @@ function materializeOperations(
   return result
 }
 
-/**
- * Adds predicted server effects to a primary patch. Local only: transport is
- * built from `materializePrimaryCommand`, so nothing here is ever sent as
- * client intent.
- *
- * Purge runs first, because it decides whether a row still exists before
- * balances ask what that row contributes.
- */
+/** Run purge before balance prediction so balances see the surviving rows. Neither effect is sent as intent. */
 function withPredictedEffects(
   snapshot: TDataStore,
   patch: TNormalizedPatch,
@@ -322,16 +312,7 @@ function withPredictedEffects(
   )
 }
 
-/**
- * Rule 2: a write that leaves both amounts stored as zero makes Zenmoney purge
- * the row and answer with a real tombstone rather than an updated entity.
- * Predicting the removal keeps `current` identical to the state the next
- * canonical diff will confirm.
- *
- * The primary patch still carries the amount write, because that is what
- * triggers the server-side purge. A `deletion` entry would not:
- * Zenmoney converts a direct transaction deletion into a soft delete instead.
- */
+/** Predict a local purge for amounts that store as zero. Send the primary amount write; a deletion entry would only soft-delete. */
 function withPurgedTransactions(
   snapshot: TDataStore,
   patch: TNormalizedPatch,
@@ -362,20 +343,8 @@ function withPurgedTransactions(
   return result
 }
 
-/**
- * Zenmoney stores amounts with four decimals, so anything below half of the
- * last place is stored as `0`. A row whose income and outcome are both stored
- * as `0` is purged — on a create as much as on a rewrite, and for any
- * combination of accounts.
- *
- * The band deliberately stops below the halfway value: `0.00005` was stored as
- * `0` on one side and `0.0001` on the other within a single write, so only
- * amounts that round to zero unambiguously predict a purge.
- *
- * Both amounts at exactly `0` is the one zeroed shape that does not purge. The
- * server rejects `income == outcome == 0` with a 400 on the submitted numbers,
- * before any rounding applies, so that write lands nothing at all.
- */
+/** Exactly 0.00005 can round either way; predict only below that boundary.
+ * Two submitted zeros fail with HTTP 400 before rounding, so they do not purge. */
 const storedAsZeroBelow = 0.00005
 
 export function isPurgedByAmounts(entity: {
@@ -596,7 +565,6 @@ function nextChanged(changedAt: number, currentChanged = 0): number {
   return Math.max(changedAt, currentChanged + 1000)
 }
 
-/** Sequential operations can create, update and delete the same row. */
 function mergeApplied(
   left: TNormalizedPatch,
   right: TNormalizedPatch

@@ -40,9 +40,6 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
       <div className="flex flex-col gap-1 px-4 pt-4">
         <DataLine
           name={`${t('balanceFor')} ${formatDate(month, 'LLL')}`}
-          // color={activityColor}
-          // amount={selectedData?.activity}
-          // amount={0}
           currency={currency}
           tooltip={t('balanceChartTooltip')}
         />
@@ -164,19 +161,12 @@ function useDataTrend(
 
   const currentISODate = toISODate(new Date())
   return array.map(node => {
-    // Balance for future dates is null
     const isInFuture = !node.date || node.date > currentISODate
     const balance = isInFuture ? null : toDisplay(node.balance)
     return { ...node, balance }
   })
 }
 
-/**
- * Returns an array of 31 nodes, each representing a day of the month.
- * @param month
- * @param id
- * @returns
- */
 function useActivityTrend(
   month: TISOMonth,
   id: core.envelopes.TEnvelopeId

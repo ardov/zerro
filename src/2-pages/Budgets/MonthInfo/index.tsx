@@ -19,8 +19,6 @@ import { useAsk } from '@/6-shared/overlays'
 import { Confirm } from '@/6-shared/ui/kit/Confirm'
 import { useTranslation } from 'react-i18next'
 
-/** The month's overview. It has no header of its own: docked beside the table
- * it is part of the page, and the drawer that shows it modally supplies one. */
 export const MonthInfo: FC<HTMLAttributes<HTMLDivElement>> = ({
   className,
   ...rest

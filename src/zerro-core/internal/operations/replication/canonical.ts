@@ -13,13 +13,7 @@ export type TAcceptedCanonicalPatch = {
   redo: TCommand[]
 }
 
-/**
- * Accepts one canonical server patch over a durable `base + outbox` replica.
- *
- * This is the pull half of replication and acknowledges nothing: every pending
- * command rebases over the new base. Acknowledging sent work belongs to a Push
- * run, which retires exact item receipts Chunk by Chunk — see `pushRun`.
- */
+/** A pull rebases pending commands without acknowledging them. Push retires exact item receipts per chunk. */
 export function acceptCanonicalPatch(
   replica: {
     base: TDataStore
@@ -35,10 +29,7 @@ export function acceptCanonicalPatch(
     base,
     current: replayOutbox(base, outbox),
     outbox,
-    // A pull commits nothing and is only a rebase, which leaves the redo stack
-    // valid: an undone command is by definition one that was never sent, and
-    // it is an absolute patch, so redoing it replays over the new base exactly
-    // like any pending command.
+    // Redo only contains unsent commands, so a pull leaves them replayable over the new base.
     redo: [...(replica.redo ?? [])],
   }
 }

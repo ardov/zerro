@@ -15,7 +15,6 @@ export type AmountFieldProps = {
   className?: string
 }
 
-/** The currency stays beside the amount, with the shared field's validation. */
 export function AmountField(props: AmountFieldProps) {
   const { currency, icon, className, invalid, onCommit, ...restProps } = props
   const [surface, shake] = useShake<HTMLDivElement>()

@@ -12,10 +12,7 @@ type TextSwapProps<T extends string> = {
   className?: string
 }
 
-/** Decorative text for a control that provides its current accessible name.
- * Two bounded layers replace each other without queuing rapid changes: the
- * old text blurs away while the new one comes into focus, and the width
- * eases from one to the other. The text stays on one line. */
+/** Two decorative layers replace each other without queuing; the surrounding control provides the accessible name. */
 export function TextSwap<T extends string>({
   value,
   formatValue,
@@ -31,9 +28,7 @@ export function TextSwap<T extends string>({
   const format = (text: T) => formatValue?.(text) ?? text
 
   const root = useRef<HTMLSpanElement>(null)
-  /** The width on screen right now, followed through an easing in flight. */
   const shownWidth = useRef<number | null>(null)
-  // Each value gets a new element, so this runs once per value.
   useLayoutEffect(() => {
     const element = root.current
     if (!element) return
@@ -69,10 +64,7 @@ export function TextSwap<T extends string>({
           }
         )
       }
-      // A frame held up by a long render still carries the time it was due
-      // at, and an animation that starts in it has already run for that long
-      // by the next one. Paint this frame as the start, then begin again in
-      // a frame that is on time.
+      // A delayed frame's timestamp can start an animation in the past. Paint the initial state and retry on time.
       if (frameIsLate()) {
         if (resize) element.style.width = `${from}px`
         frame = requestAnimationFrame(() => {
@@ -116,7 +108,6 @@ export function TextSwap<T extends string>({
   )
 }
 
-/** More than a frame or two behind: the page was busy when it was due. */
 const LATE_FRAME_MS = 32
 
 function frameIsLate() {

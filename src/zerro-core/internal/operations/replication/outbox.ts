@@ -3,16 +3,7 @@ import {
   validateEntityOperation,
 } from '../../domain/zenmoney/operations'
 import { parseZerroOperation } from '../../domain/zerro/operations/types'
-/**
- * Engine core: the pure replica operations over durable `base + outbox` and
- * session-only `redo`.
- *
- * Every append, undo, redo, replay, and transport rule lives here as a plain
- * function, so the only runtime-specific part left is who owns the state. In
- * this app Redux owns it (`store/data/slice.ts`); a future standalone package
- * wraps these same functions. Do not grow a second implementation of append,
- * replay or history-stack rules beside this file.
- */
+/** Shared pure replica rules over durable base and outbox plus session-only redo. */
 import {
   isPurgedByAmounts,
   materializeCommand,
@@ -46,10 +37,7 @@ export type TStagedCompiledCommand<TReceipt> = {
   receipt: TReceipt | undefined
 }
 
-/**
- * Validates the durable command-array shape without importing a runtime
- * persistence format. Entity fields are validated when materialized.
- */
+/** Validate the durable array shape now; materialization validates entity fields. */
 export function parseCommandOutbox(value: unknown): TCommand[] {
   if (!Array.isArray(value)) throw new Error('Command outbox must be an array')
 
@@ -82,7 +70,6 @@ export function parseCommandOutbox(value: unknown): TCommand[] {
   })
 }
 
-/** Issues and appends one compiled semantic intent against the latest replay. */
 export function stageCompiledCommand<TReceipt>(
   base: TDataStore,
   outbox: readonly TCommand[],
@@ -111,7 +98,6 @@ export function appendOutbox(
   return { outbox: [...outbox, command], redo: [] }
 }
 
-/** Replace the editable tail with one command; a `null` command drops it. */
 export function editOutbox(
   outbox: readonly TCommand[],
   command: TCommand | null,
@@ -147,12 +133,7 @@ export function redoOutbox(
   }
 }
 
-/**
- * Undoes every command after `keepCount` in one step, equivalent to calling
- * `undoOutbox` that many times: the dropped suffix lands on `redo` oldest-last,
- * so `redoOutbox` restores it one command at a time in the same order a
- * sequence of single undos would have.
- */
+/** Undo the suffix after keepCount and order redo exactly as repeated single undos would. */
 export function undoOutboxTo(
   outbox: readonly TCommand[],
   redo: readonly TCommand[],
@@ -185,15 +166,7 @@ export function getMaterializedOutboxPatches(
   return materializeOutbox(base, outbox).patches
 }
 
-/**
- * Replays the sent command prefix independently from UI `current` and returns
- * the final full primary entities plus surviving deletions for transport.
- *
- * Treat `base` as the authoritative server state. Omit entities absent from
- * it that are deleted by the end of this prefix: soft-deleted transactions,
- * transactions purged by their final amounts, and real deletion objects.
- * The local commands stay intact for undo and replay.
- */
+/** Replay only the sent prefix over canonical base. Omit deletions for entities the server never saw. */
 export function buildOutboxTransport(
   base: TDataStore,
   outbox: readonly TCommand[],
@@ -261,12 +234,7 @@ export function buildOutboxTransport(
   return Object.keys(transport).length ? transport : undefined
 }
 
-/**
- * Advance `current` by one command without replaying from base. Callers
- * must hold the invariant that `current` already equals the replay of the
- * durable outbox; append then only needs this command's effect. Undo, redo,
- * and base changes still require a full `replayOutbox`.
- */
+/** Append one command only when current already equals the replay of the old outbox. Undo, redo, and rebase replay from base. */
 export function applyOutboxCommand(
   current: TDataStore,
   command: TCommand

@@ -1,8 +1,6 @@
 import { formatHex } from 'culori'
 
-/** User input -> opaque sRGB HEX; null clears, undefined leaves it unchanged.
- * Short bare/# HEX takes precedence over named CSS colors. Alpha is discarded.
- * This leniency belongs at the input boundary, not in stored-color validation. */
+/** Short HEX beats named CSS colors; discard alpha. Null clears the value, and undefined leaves it unchanged. */
 export function parseColorInput(input: string): string | null | undefined {
   let text = input.trim()
   if (!text || text === '#') return null
@@ -12,12 +10,10 @@ export function parseColorInput(input: string): string | null | undefined {
     else if (digits.length === 5) text = `#${digits}0`
     else text = `#${digits}`
   }
-  // Culori handles CSS color literals and drops alpha when formatting HEX.
   const hex = formatHex(text)
   return hex && /^#[\da-f]{6}$/i.test(hex) ? hex : undefined
 }
 
-/** HEX values compare case-insensitively; two missing colours are the same. */
 export function isSameColor(
   a: string | null | undefined,
   b: string | null | undefined

@@ -12,8 +12,6 @@ import type { Column } from './columnLayout'
 import { useColumns } from './useColumns'
 import './layout.css'
 
-/** Children follow the definition's order, including conditional empty slots.
- * Each column owns its flex sizing; panels and drawers keep their own surfaces. */
 export function Columns({ children }: { children: ReactNode }) {
   const layout = useColumns()
   const root = useRef<HTMLDivElement>(null)

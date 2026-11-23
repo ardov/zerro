@@ -101,9 +101,7 @@ export const SelectionMode: Story = {
   },
 }
 
-/** One expense, and everything about it the checks below assert on. The id is
- * captured once: an edit can stop it being an expense, and the harness has to
- * keep watching the same transaction when it does. */
+/** Keep the fixture's initial ID: a type edit can remove it from the expense selector. */
 function PreviewHarness() {
   const transactions = useAppSelector(core.transactions.selectAll)
   const getType = core.transactions.useType()
@@ -216,7 +214,6 @@ export const DirectionSeparators: Story = {
       expect(arrow).toBeVisible()
       expect(arrow.getBoundingClientRect().width).toBe(16)
       expect(arrow.getBoundingClientRect().height).toBe(16)
-      // Lucide preserves the standard 1.5px stroke at 16px.
       expect(arrow).toHaveAttribute('stroke-width', '2.25')
       const before = arrow.previousElementSibling!.getBoundingClientRect()
       const after = arrow.nextElementSibling!.getBoundingClientRect()

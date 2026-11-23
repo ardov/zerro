@@ -21,7 +21,6 @@ import {
   toPatch,
 } from './draft'
 
-/** Two roubles accounts, one euro account, and a debt account. */
 const instruments: Record<string, number> = {
   card: 1,
   cash: 1,

@@ -41,8 +41,6 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const [rawValue, setRawValue] = useState(getInput(goal?.amount))
   const [endDate, setEndDate] = useState<core.goals.TGoal['end']>(goal?.end)
 
-  // On the overlay stack, so Back closes the month list rather than the goal
-  // popover underneath it.
   const { open: monthOpen, setOpen: setMonthOpen } = usePopup()
   const [monthPopoverAnchor, setMonthPopoverAnchor] =
     useState<HTMLButtonElement | null>(null)
@@ -142,9 +140,6 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
             <Button
               ref={setMonthPopoverAnchor}
               variant="secondary"
-              // The calendar hangs off this button, not off whatever opened
-              // the goal: it is a nested surface, and it lands over its own
-              // control rather than over the form it belongs to.
               onClick={() => setMonthOpen(true)}
               className="min-w-0 flex-1"
             >

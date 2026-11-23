@@ -27,7 +27,6 @@ export type SwitchFieldProps = Omit<
   'className' | 'render' | 'nativeButton'
 > & {
   label: ReactNode
-  /** Styles the label wrapper. */
   className?: string
 }
 

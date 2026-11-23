@@ -34,13 +34,10 @@ const { reducer, actions } = createSlice({
   },
 })
 
-// REDUCER
 export default reducer
 
-// ACTIONS
 export const { setCurrency } = actions
 
-// SELECTORS
 export const getSavedCurrency = (state: RootState) => state.displayCurrency
 
 export const loadSavedCurrency = (): AppThunk => (dispatch, getState) => {

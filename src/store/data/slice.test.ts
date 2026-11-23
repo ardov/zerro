@@ -38,11 +38,7 @@ function getPendingDiff(state: ReturnType<typeof reducer>) {
   return getPendingSyncDiff(getRootState(state))
 }
 
-/**
- * Runs the real push acknowledgement: capture the outbox, accept one Chunk.
- * `atAccept` is the replica as it stands when the response lands, which is how
- * a command appended while the request was in flight is modelled.
- */
+/** atAccept models the replica after a local command was appended during the request. */
 function acknowledgePush(
   captured: ReturnType<typeof reducer>,
   canonicalPatch: TNormalizedPatch,
@@ -137,8 +133,6 @@ describe.each([false, true])('outbox (production: %s)', production => {
 
     expect(appended.current.account.cash.title).toBe('Vault')
     expect(getPendingDiff(appended)?.account?.[0].title).toBe('Vault')
-    // Two commands touched the same account, so the count is the number of
-    // undoable commands (2), not the one entity they collapse to in the diff.
     expect(getChangedNum(getRootState(appended))).toBe(2)
 
     const undone = reducer(appended, undoClientCommand())

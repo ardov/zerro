@@ -125,15 +125,11 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
 }
 
 type TPayload = {
-  // chartType: undefined
   color: string
   dataKey: string
   fill: string
-  // formatter: undefined
   name: string
   payload: Point
-  // type: undefined
-  // unit: undefined
   value: number
 }
 

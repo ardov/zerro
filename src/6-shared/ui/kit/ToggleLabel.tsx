@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 
-/** The labelled row shared by checkbox and switch fields. */
 export function ToggleLabel(props: {
   label: ReactNode
   disabled?: boolean

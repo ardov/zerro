@@ -1,12 +1,4 @@
-/**
- * Field equality as Zenmoney canonicalizes it.
- *
- * A value that differs from the stored one only by a canonicalization is not a
- * change: writing it would produce the value already there. Both the command
- * compiler, which drops no-op fields at issue time, and `diffStores`, which
- * decides what a restore has to write at all, must agree on this — otherwise a
- * diff proposes writes the compiler immediately discards.
- */
+/** Use the same canonical field equality for issuing commands and planning restore writes. */
 export function isSameFieldValue(
   field: string,
   left: unknown,
@@ -15,10 +7,6 @@ export function isSameFieldValue(
   return isSameEntityFieldValue(undefined, field, left, right)
 }
 
-/**
- * Field equality with the entity-specific canonicalizations that affect both
- * restore reconciliation and no-op removal at command issue time.
- */
 export function isSameEntityFieldValue(
   entityKey: string | undefined,
   field: string,

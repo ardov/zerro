@@ -48,8 +48,6 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   const [moneyDestination, setMoneyDestination] = useState<
     core.envelopes.TEnvelopeId | 'toBeAssigned'
   >('toBeAssigned')
-  // On the overlay stack, so Back closes the move-money dialog rather than
-  // leaving the budget page.
   const { open: isOpen, setOpen: setMoveOpen } = usePopup()
   const openTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => () => clearTimeout(openTimer.current), [])

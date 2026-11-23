@@ -435,7 +435,6 @@ const followLink: Story['play'] = async ({ canvasElement }) => {
   await userEvent.click(link)
   await waitFor(() => expect(path).toHaveTextContent('/accounts'))
   await waitFor(() => expect(link).not.toBeInTheDocument())
-  // Back returns to the page the menu was opened on, without reopening it.
   await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
   await waitFor(() => expect(path).toHaveTextContent(/^\/$/))
   await new Promise(resolve => setTimeout(resolve, 350))

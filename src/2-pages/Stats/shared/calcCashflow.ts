@@ -25,14 +25,7 @@ type TPoint = {
   transfers: TFxAmount
 }
 
-/**
- * Calculates the cashflow for a given period, aggregated by time groups.
- * Returns a map of date groups to cashflow points containing income, outcome,
- * transfers and debt movements in their original currencies.
- *
- * Memoized by argument identity: widgets reading the same snapshot share one
- * result, and weak keys let old transaction histories go.
- */
+/** Cache by argument identity; weak keys let old transaction histories be collected. */
 export const calcCashflow = weakMapMemoize(function calcCashflow(
   transactions: TTransaction[],
   debtAccId: TAccountId | undefined,

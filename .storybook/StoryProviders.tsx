@@ -52,10 +52,7 @@ export function StoryProviders(props: {
   )
 }
 
-/** The Library uses the same rendering environment as the application without
- * smuggling Redux into reusable components. App Scenarios keep the full store
- * adapter above; a Bench that needs it is a layering leak, not a decorator
- * requirement. */
+/** Library stories exercise reusable components without Redux. App Scenarios install the real store. */
 export function LibraryStoryProviders(props: {
   children: ReactNode
   context: StoryContextLike
@@ -76,9 +73,7 @@ function StoryRouter(props: {
   const locale = props.context.globals.locale || 'en'
   const route = props.context.parameters.app?.route || '/'
 
-  // Both resource bundles are imported synchronously. Updating before paint
-  // keeps the toolbar responsive without blanking the canvas or remounting the
-  // router and its Scenario state.
+  // Locale bundles load synchronously, so switch before paint without remounting the router.
   useLayoutEffect(() => {
     void i18n.changeLanguage(locale)
   }, [locale])
@@ -95,10 +90,8 @@ function StoryRouter(props: {
   )
 }
 
-/** MemoryRouter does not hear the browser's Back and Forward. These keys stand
- * in for them, on `window` in the capture phase: a popup is drawn by the
- * overlay host, outside the story, and must not see the press first.
- * Opt-in, because Alt+Arrow also moves the caret by word on macOS. */
+/** MemoryRouter needs keyboard substitutes for Back and Forward; capture them before portal handlers.
+ * Opt in because Alt+Arrow also moves the caret on macOS. */
 function HistoryShortcuts() {
   const navigate = useNavigate()
   useEffect(() => {

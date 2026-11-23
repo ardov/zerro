@@ -23,7 +23,6 @@ export const filterKinds: AddableFilterKind[] = [
   'deleted',
 ]
 
-/** Replace in place so an edit never reorders chips. */
 export function upsertFilter(
   query: core.transactions.TTransactionQuery,
   clause: Clause

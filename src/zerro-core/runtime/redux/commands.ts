@@ -83,11 +83,7 @@ import type { TCommandLabel } from '../../internal/operations/materialization'
 
 export type { TBudgetUpdate } from '../../internal/domain/zerro'
 
-/**
- * Every command names its own verb. It is the only place that can: by the time
- * a patch exists, the intent has been compiled into rows that no longer say
- * whether an envelope was renamed or repainted.
- */
+/** Name each command's intent before compiling it into rows for the history log. */
 function executeCommand<TReceipt = undefined>(
   compile: TReduxCommandCompiler<TReceipt>,
   label: TCommandLabel
@@ -617,13 +613,7 @@ export function mergeTransactionsAsTransfer(ids: TTransactionId[]): AppThunk {
   )
 }
 
-/**
- * Writes whatever moves the full current store toward `desired`.
- *
- * The diff is recomputed at dispatch time rather than taken from the caller's
- * preview: a background pull may have landed since, and the restore is defined
- * against the store it is applied to.
- */
+/** Recompute the restore diff at dispatch because the accepted snapshot may have advanced since preview. */
 export function restoreDataStore(desired: TDataStore): AppThunk<boolean> {
   return (dispatch, getState, extra) =>
     (() => {

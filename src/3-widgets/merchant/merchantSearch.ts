@@ -13,7 +13,6 @@ export const initialMerchantSearch = (
   payee: string | null
 ) => (hasMerchant ? '' : (payee ?? ''))
 
-/** Convert punctuation keys to letters before normalizing merchant names. */
 export function merchantSearchQueries(query: string): string[] {
   return searchQueries(query).map(core.merchants.normalizePayee).filter(Boolean)
 }

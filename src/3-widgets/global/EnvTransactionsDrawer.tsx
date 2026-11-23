@@ -20,7 +20,6 @@ export type EnvTransactionsDrawerProps = {
   envelopeConditions: TEnvConditions
 }
 
-/** Envelope activity uses the same independently owned transaction list. */
 export function useEnvTransactionsDrawer() {
   const openList = useTransactionDrawer()
   return useCallback(

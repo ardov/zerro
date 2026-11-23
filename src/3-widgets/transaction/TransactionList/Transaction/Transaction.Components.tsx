@@ -287,8 +287,6 @@ const Payee: FC<{
   )
 }
 
-/** Styles */
-
 const SymbolWrapper: FC<HTMLDivProps> = props => (
   <div {...props} className="relative shrink-0 self-center" />
 )
@@ -332,7 +330,6 @@ const amountColors = {
   outcome: 'text-ui-primary',
 }
 
-/** Keep separators independent of whether a neighbour is text or a button. */
 const AmountsWrapper: FC<
   HTMLDivProps & { type: 'income' | 'outcome' | 'transfer' }
 > = ({ type, className, children, ...props }) => (

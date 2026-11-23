@@ -13,9 +13,7 @@ export function reportablePath(pathname: string) {
           )
         )
           return segment
-      } catch {
-        // Malformed percent escapes are common in broken links.
-      }
+      } catch {}
       return '[redacted]'
     })
     .join('/')

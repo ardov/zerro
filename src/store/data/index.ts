@@ -1,7 +1,6 @@
 import reducer from './slice'
 export default reducer
 
-// ACTIONS
 export {
   appendClientCommand,
   editClientCommand,
@@ -28,7 +27,6 @@ export {
   waitForPersistedReplica,
 } from './replicaPersistence'
 
-// SELECTORS
 export {
   getPendingSyncDiff,
   getCanUndoClientCommand,

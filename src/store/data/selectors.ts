@@ -24,12 +24,7 @@ export const getOutboxRecoveryReason = (state: RootState) =>
 export const getPersistenceWarning = (state: RootState) =>
   state.data.persistenceWarning
 
-/**
- * Either recovery state means the durable replica cannot accept a local write:
- * the canonical base is unusable, or the outbox those commands would join is
- * quarantined until the user discards it. Sync and persistence make their own,
- * narrower exceptions for the one exchange that resolves each state.
- */
+/** Recovery blocks local durable writes. Sync and persistence allow only the exchange that resolves the active recovery state. */
 export const getReplicaWriteBlocked = (state: RootState) =>
   state.data.journalRecoveryRequired || state.data.outboxRecoveryReason !== null
 
@@ -49,23 +44,13 @@ export const getCanRedoClientCommand = (state: RootState) =>
   !getReplicaWriteBlocked(state) &&
   getRedo(state).length > 0
 
-/** Commands, not entities: how many undoable actions are waiting to be sent. */
 export const getChangedNum = (state: RootState) => getOutbox(state).length
 
 export const getLastSyncTime = (state: RootState) => {
   return state.data.current.serverTimestamp
 }
 
-/**
- * Read cursor sent to Zenmoney, deliberately one second behind the accepted
- * base.
- *
- * The server returns its own wall clock as `serverTimestamp` and the diff
- * boundary is exclusive (`changed > cursor`). An entity another client commits
- * in the same second as our response would therefore never appear in any later
- * incremental pull. Overlapping by one second re-delivers at most that second
- * of changes, which `applyPatch` merges idempotently.
- */
+/** Overlap one second because Zenmoney's changed > cursor boundary is exclusive; duplicate changes merge idempotently. */
 export const getSyncCursor = (state: RootState) => {
   return getCoreSyncCursor(getLastSyncTime(state))
 }

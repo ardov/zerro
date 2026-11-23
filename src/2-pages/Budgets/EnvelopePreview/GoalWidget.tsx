@@ -10,8 +10,6 @@ import { core } from '@/zerro-core/redux'
 import { useMonth } from '../MonthProvider'
 import { useGoalPopover } from '../GoalPopover'
 
-/** The goal, drawn as a field beside the comment: same surface, hover and
- * first-line icon. The whole field is one button that opens the goal editor. */
 export const GoalWidget: FC<{
   id: core.envelopes.TEnvelopeId
   currency: TFxCode
@@ -39,7 +37,6 @@ export const GoalWidget: FC<{
         onClick={() => openGoalPopover(id, surfaceRef.current ?? undefined)}
         className={cn(
           'min-w-0 flex-1 cursor-default py-3 text-left wrap-anywhere outline-none',
-          // The whole field opens the editor, so the button reaches over it.
           'before:absolute before:inset-0 before:rounded-[inherit]',
           !goal && 'text-ui-placeholder'
         )}

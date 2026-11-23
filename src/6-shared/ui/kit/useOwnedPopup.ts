@@ -2,7 +2,6 @@ import { useCallback, useEffect } from 'react'
 import { usePopup, type PopupController } from '@/6-shared/overlays'
 import { useCloseNotification } from '@/6-shared/overlays/useCloseNotification'
 
-/** The rendering owner releases its history entry when unavailable or gone. */
 export function useOwnedPopup(props: {
   popup?: PopupController
   unavailable?: boolean

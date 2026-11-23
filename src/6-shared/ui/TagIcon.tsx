@@ -56,7 +56,6 @@ export function TagIcon(props: TagIconProps) {
         'tag-icon group relative flex shrink-0 items-center justify-center rounded-full',
         size === 's' ? 'size-8' : 'size-10',
         color ? 'colored-surface' : '',
-        // Icons without a custom colour use the theme surface and foreground.
         !color && 'bg-ui-highlight text-ui-primary',
         button
           ? 'cursor-pointer hover:scale-110 active:scale-100'

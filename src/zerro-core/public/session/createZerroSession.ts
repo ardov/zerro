@@ -8,15 +8,9 @@ import { createProjectionGraph } from '../../internal/projections/graph'
 
 export type TZerroSession = ReturnType<typeof createZerroSession>
 
-/**
- * One immutable snapshot exposed as `get*` reads grouped by domain. It is a
- * thin façade over the shared projection graph: every read binds a graph node
- * to this snapshot's data. New reads belong on the matching namespace.
- */
+/** Bind shared graph reads to one immutable snapshot, grouped by domain. */
 export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
-  // One snapshot means one instant. The graph reads `now()` per call so the
-  // long-lived Redux instance follows the clock; a session must not, so freeze
-  // it here and every derived date stays stable for the session lifetime.
+  // Freeze now() for this snapshot so its derived dates cannot drift during its lifetime.
   const frozenNow = ctx.now()
   const g = createProjectionGraph({ ...ctx, now: () => frozenNow })
   const bind =

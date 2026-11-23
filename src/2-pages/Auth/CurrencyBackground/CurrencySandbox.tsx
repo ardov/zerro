@@ -83,7 +83,6 @@ const groups: { title: string; controls: Control[] }[] = [
 ]
 const sandboxDefaults = { ...defaultCurrencySettings, collapseAfterClicks: 0 }
 
-/** Runs the production canvas with live controls; never enters the app bundle. */
 export function CurrencySandbox() {
   const [settings, setSettings] = useState(sandboxDefaults)
   const scene = useRef<CurrencyBackgroundHandle>(null)

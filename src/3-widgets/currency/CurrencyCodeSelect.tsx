@@ -12,7 +12,6 @@ type CurrencyCodeSelectProps = Omit<
     | { required?: false; onChange: (value: string | null) => void }
   )
 
-/** Callers choose the available currencies; their presentation is shared. */
 export function CurrencyCodeSelect({
   currencies,
   ...props

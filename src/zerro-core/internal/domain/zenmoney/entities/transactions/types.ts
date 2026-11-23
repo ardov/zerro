@@ -25,15 +25,11 @@ export type TZmTransaction = {
   qrCode: string | null
   incomeBankID: TBankOperationId | null
   incomeInstrument: TInstrumentId
-  /**
-   * Null only on a soft-deleted row: deleting an account nulls the leg that
-   * pointed at it on a debt operation, instead of purging the row.
-   */
+  /** Deleting an account can null a leg on a soft-deleted debt row; live rows require both accounts. */
   incomeAccount: TAccountId | null
   income: TUnits
   outcomeBankID: TBankOperationId | null
   outcomeInstrument: TInstrumentId
-  /** Null only on a soft-deleted row — see `incomeAccount`. */
   outcomeAccount: TAccountId | null
   outcome: TUnits
   tag: TTagId[] | null
@@ -62,7 +58,6 @@ export type TTransaction = Omit<TZmTransaction, 'changed' | 'created'> & {
   created: TMsTime
 }
 
-/** Fields that a local transaction patch may set directly. */
 const transactionEditableFields = [
   'hold',
   'viewed',
@@ -97,7 +92,6 @@ export type TTransactionEditablePatch = Partial<
   Pick<TTransaction, TTransactionEditableField>
 >
 
-/** Fields the factory cannot default: creation intent must supply them. */
 export const transactionRequiredFields = [
   'date',
   'incomeInstrument',
@@ -106,7 +100,6 @@ export const transactionRequiredFields = [
   'outcomeAccount',
 ] as const satisfies readonly (keyof TTransaction)[]
 
-/** Existing transaction fields that may be changed, including lifecycle. */
 export const transactionWritableFields = [
   'deleted',
   ...transactionEditableFields,
@@ -134,7 +127,6 @@ export type TTransactionPatch = EntityPatch<
   TTransactionIntentField
 >
 
-/** Fields accepted while creating a replacement transaction. */
 export type TTransactionRecreateField =
   (typeof transactionImmutableFields)[number] | TTransactionEditableField
 

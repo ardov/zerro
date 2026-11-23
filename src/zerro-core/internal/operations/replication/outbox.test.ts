@@ -92,8 +92,6 @@ describe('outbox operations', () => {
       },
     ])
 
-    // A label is decoration over unsent work: losing the decoration is fine,
-    // losing the command is not.
     expect(parsed.map(command => command.label)).toEqual([
       { verb: 'budget-set' },
       undefined,
@@ -121,7 +119,6 @@ describe('outbox operations', () => {
       label: { verb: 'envelope-renamed', args: { id: 'x', name: 'Food' } },
     }
 
-    // Inert by contract: a label may never change what reaches the server.
     expect(materializeCommand(base, labeled)).toEqual(
       materializeCommand(base, plain)
     )
@@ -252,8 +249,6 @@ describe('outbox operations', () => {
       transaction: [{ id: 'tr', income: 0.00001, outcome: 0.00001 }],
     })
 
-    // Local state matches what the server will confirm: the row is gone, so
-    // showing deleted transactions cannot surface the temporary tiny transfer.
     expect(replayOutbox(base, [purge]).transaction).toEqual({})
 
     // The request still carries the exact amount write, which is what makes
@@ -269,8 +264,6 @@ describe('outbox operations', () => {
       ],
     })
 
-    // Undo replays the surviving outbox over `base`, which still holds the
-    // original entity, so the predicted purge reverses itself.
     expect(
       replayOutbox(base, undoOutbox([purge], []).outbox).transaction
     ).toEqual(base.transaction)
@@ -346,7 +339,6 @@ describe('outbox operations', () => {
       makeCommand(30, { deletion: [{ id: 'old', object: 'reminder' }] }),
     ]
 
-    // A `deletion` object for `new` would name an id the server has never seen.
     expect(buildOutboxTransport(base, commands, 100)).toEqual({
       deletion: [{ id: 'old', object: 'reminder', stamp: 100, user: 1 }],
     })

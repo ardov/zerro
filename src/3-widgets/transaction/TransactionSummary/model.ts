@@ -9,16 +9,12 @@ import { parseDate, toISODate } from '@/6-shared/helpers/date'
 import { round } from '@/6-shared/helpers/money/currencyHelpers'
 import { core } from '@/zerro-core/redux'
 
-/** Money in, money out, a debt either way, or a move between own accounts. */
 export type TFlow = 'income' | 'outcome' | 'debt' | 'transfer'
-/** What a breakdown or a timeline is about. Debts and transfers have none. */
 export type TSide = 'income' | 'outcome'
 export type TDimension = 'category' | 'place' | 'account' | 'currency'
 export type TStep = 'day' | 'week' | 'month' | 'year'
 
-/** What the summary was last switched to. It is kept with the list's view,
- * so it comes back from history and outlives the transactions it was chosen
- * for: every value is checked against what the summary can offer now. */
+/** The summary choice survives history; recheck it against the options the current data supports. */
 export type TSummaryChoices = Partial<
   Record<'side' | 'dimension' | 'step' | 'currency', string>
 >
@@ -36,38 +32,31 @@ export type TEntry = {
   /** Signed, in its own currency. A transfer carries what left, unsigned. */
   amount: number
   currency: TFxCode
-  /** The same amount in the summary's currency. */
   value: number
 }
 
 export type TFlowTotal = {
   flow: TFlow
   value: number
-  /** Exact sums, one per currency, largest first. */
   native: { currency: TFxCode; amount: number }[]
 }
 
 export type TSummary = {
   count: number
   range: { from: TISODate; to: TISODate } | null
-  /** Every currency met, most used first. */
   currencies: TFxCode[]
-  /** The currency values are in: the only one met, or the one asked for. */
   currency: TFxCode
-  /** Several currencies were met, so values are an estimate at past rates. */
   converted: boolean
   flows: TFlowTotal[]
   /** Income, outcome and debts together. Null when only one of them is here;
    * transfers move money between own accounts and never count. */
   net: number | null
-  /** Sides present. Spending is what a summary is most often read for. */
   sides: TSide[]
   entries: TEntry[]
 }
 
 const flowOrder: TFlow[] = ['income', 'outcome', 'debt', 'transfer']
 
-/** Counts exactly the given transactions, by their own type. */
 export function summarize(
   transactions: readonly TTransaction[],
   target: TFxCode,
@@ -164,7 +153,6 @@ export type TGroup = {
   key: string
   value: number
   count: number
-  /** Any member, for what the key alone cannot name: a payee as it was typed. */
   sample: TTransaction
 }
 
@@ -191,7 +179,6 @@ function getGroupKey(entry: TEntry, dimension: TDimension): string {
   }
 }
 
-/** One side's entries, grouped and sorted with the largest first. */
 export function getBreakdown(
   entries: readonly TEntry[],
   dimension: TDimension
@@ -215,9 +202,7 @@ export function getBreakdown(
 
 const dimensions: TDimension[] = ['category', 'place', 'account', 'currency']
 
-/** A dimension is worth offering when it splits at least one of the lists.
- * Each side is a list: what splits spending is offered for income too, so the
- * choice does not come and go with the side being looked at. */
+/** Offer a dimension if it splits either side, so changing sides does not change the options. */
 export function getDimensions(...lists: (readonly TEntry[])[]): TDimension[] {
   return dimensions.filter(dimension =>
     lists.some(entries => {
@@ -231,16 +216,12 @@ export type TBucket = {
   from: TISODate
   to: TISODate
   value: number
-  /** How many entries fell into the period. */
   count: number
-  /** The period is not over yet, so it holds less than it will. */
   ongoing: boolean
 }
 
 const steps: TStep[] = ['day', 'week', 'month', 'year']
-/** More bars than this stop reading as a chart in a side panel. */
 const MAX_BUCKETS = 60
-/** The finest step that still fits this many bars opens the timeline. */
 const COMFORTABLE_BUCKETS = 31
 
 function bucketStart(date: TISODate, step: TStep): TISODate {
@@ -259,9 +240,7 @@ function nextBucket(start: TISODate, step: TStep): TISODate {
   return toISODate(addDays(date, step === 'week' ? 7 : 1))
 }
 
-/** Every period from the first day of `span` to its last, empty ones
- * included, holding what `entries` put there. One side is drawn over the span of both,
- * so switching sides keeps every period where it was. */
+/** Keep empty periods and use the span of both sides so switching sides preserves the axis. */
 export function getTimeline(
   entries: readonly TEntry[],
   step: TStep,
@@ -304,8 +283,6 @@ export function getTimeline(
   return buckets
 }
 
-/** Steps that give a readable chart, and the one to open with. Entries that
- * all fall on one day still get that day: there is always a step to draw. */
 export function getSteps(span: readonly TEntry[]): {
   available: TStep[]
   initial: TStep
@@ -321,12 +298,9 @@ export function getSteps(span: readonly TEntry[]): {
   return { available, initial }
 }
 
-/** Fewer periods with anything in them say nothing a short list does not. */
 const MIN_FILLED = 3
 
-/** Whether a timeline has something to say about these entries. Judged on
- * the finest step on offer, never on the one being looked at: a coarser step
- * only ever merges periods, and choosing one must not take the chart away. */
+/** Test chart eligibility at the finest step; choosing a coarser step must not hide it. */
 export function isSpreadOverTime(span: readonly TEntry[]): boolean {
   const finest = getSteps(span).available[0]
   const filled = getTimeline(span, finest).filter(bucket => bucket.count)

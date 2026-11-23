@@ -1,6 +1,5 @@
 export type Column = {
   id: string
-  /** Selection minimum, flex basis and proportional growth weight. */
   min: number
   /** Omit for unlimited growth; equal min and max fixes the width. */
   max?: number

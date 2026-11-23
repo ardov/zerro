@@ -104,10 +104,7 @@ export function getAvailableColor(
   if (available === 0) return neutral
   if (available > 0) return positive
 
-  // available < 0
-  // main tag or child with budget
   if (!isChild || hasAssigned) return negative
-  // child tag without budget
   else return neutral
 }
 

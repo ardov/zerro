@@ -13,11 +13,7 @@ import {
   type TTransaction,
 } from '../../domain/zenmoney'
 
-/**
- * Predicts only deletion effects that have a matching canonical server
- * fixture. These additions are local read-model state: transport replays the
- * primary command and never sends them as user intent.
- */
+/** Predict only observed server effects. Transport sends the primary command, not these derived writes. */
 export function predictDeletionCascades(
   snapshot: TDataStore,
   patch: TNormalizedPatch,
@@ -34,19 +30,8 @@ export function predictDeletionCascades(
   )
 }
 
-/**
- * Deleting an ordinary account hard-purges transactions wholly contained in
- * it. A transfer that touches one surviving account remains, with that id on
- * both legs and the deleted side zeroed.
- *
- * A debt operation is the exception, because the server rejects the debt
- * account on both sides. It is soft-deleted instead, with the leg
- * that pointed at the deleted account nulled and both amounts untouched.
- *
- * An already soft-deleted transaction stays out of the prediction: its server
- * cascade has not been independently observed, and it is already absent from
- * every local read model.
- */
+/** Deleting an account purges its isolated rows and collapses transfers onto the survivor.
+ * Debt rows instead soft-delete with the removed leg nulled; skip rows already soft-deleted. */
 function predictAccountDeletion(
   snapshot: TDataStore,
   patch: TNormalizedPatch,
@@ -82,8 +67,6 @@ function predictAccountDeletion(
       return
     }
     const { incomeAccount, outcomeAccount } = transaction
-    // Only a soft-deleted row can carry a leg an earlier account deletion
-    // nulled, and those already returned above.
     if (incomeAccount === null || outcomeAccount === null) return
     const incomeDeleted = deletedAccounts.has(incomeAccount)
     const outcomeDeleted = deletedAccounts.has(outcomeAccount)
@@ -100,15 +83,7 @@ function predictAccountDeletion(
 
     const survivor = incomeDeleted ? outcomeAccount : incomeAccount
 
-    // A debt operation cannot collapse the way an ordinary transfer does: the
-    // server refuses a row with the debt account on both sides. The row is
-    // soft-deleted and the leg that
-    // pointed at the deleted account becomes null, while both amounts are kept
-    // as they were. The row stops counting towards the debt account's balance
-    // because `isDeletedTransaction` excludes it.
-    //
-    // `tag` is deliberately left alone; this file predicts only
-    // effects it has actually seen.
+    // Debt cannot occupy both legs. Null only the removed account leg and retain the original amounts and tags.
     if (snapshot.account[survivor]?.type === AccountType.Debt) {
       primaryTransactions.set(transaction.id, {
         ...transaction,
@@ -177,11 +152,7 @@ function getDeletedAccounts(
   )
 }
 
-/**
- * A tag deletion removes its id from every category reference. Empty category
- * arrays canonicalize to null; a budget is itself keyed by the tag and is
- * therefore removed, not zeroed.
- */
+/** Tag deletion clears references; remove a budget keyed by the deleted tag instead of zeroing it. */
 function predictTagDeletion(
   snapshot: TDataStore,
   patch: TNormalizedPatch,
@@ -306,12 +277,7 @@ function getDeletedTags(
   )
 }
 
-/**
- * A merchant deletion preserves its linked rows but removes the derived
- * display link and payee. `originalPayee` remains historical transaction
- * data. The server never stores merchant/payee on a transfer, so there is no
- * transfer-specific rewrite to predict.
- */
+/** Deleting a merchant clears the link and payee but preserves originalPayee as historical data. */
 function predictMerchantDeletion(
   snapshot: TDataStore,
   patch: TNormalizedPatch,
@@ -320,9 +286,7 @@ function predictMerchantDeletion(
   const requestedMerchants = getDeletedMerchants(snapshot, patch)
   if (!requestedMerchants.size) return patch
 
-  // Zenmoney silently leaves a merchant in place while an active debt row
-  // references it. Keep local current canonical by withholding only that
-  // predicted deletion; transport still receives the user's primary command.
+  // An active debt blocks merchant deletion on the server. Omit only the local prediction; still send the command.
   const debtBlockedMerchants = getDebtBlockedMerchants(snapshot, patch)
   const deletedMerchants = new Set(
     [...requestedMerchants].filter(id => !debtBlockedMerchants.has(id))

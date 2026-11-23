@@ -1,4 +1,3 @@
-/** Delay between syncs if nothing changed. */
 const IDLE_SYNC_DELAY = 60_000
 
 type TSyncPolicyInput = {
@@ -10,7 +9,6 @@ type TSyncPolicyInput = {
   now: number
 }
 
-/** Decides whether the background handler may start a sync. */
 export function needSync({
   isOnline,
   isLoggedIn,

@@ -50,7 +50,6 @@ export const FadeLabels: Story = {
     const long = canvas.getByRole('button', {
       name: 'A long label that fades before the removal action',
     })
-    // Overflow is measured when the first frame lays out.
     await waitFor(() =>
       expect(long.querySelector('[data-overflow]')).not.toBeNull()
     )

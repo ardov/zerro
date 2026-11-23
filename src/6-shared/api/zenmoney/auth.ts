@@ -11,7 +11,6 @@ type TAccessToken = {
   refresh_token: string
 }
 
-/** Returns the popup's auth code to the page that opened it. */
 export function processAuthCode() {
   const parsedUrl = new URL(window.location.href)
   const code = parsedUrl.searchParams.get('code')
@@ -28,13 +27,7 @@ export function processAuthCode() {
   }
 }
 
-/**
- * Inits and handles the authorization process
- * @param {string} preference preferred endpoint (.ru or .app)
- * @returns {(string|null)} token
- */
 export async function authorize(preference: EndpointPreference) {
-  /* Open Zenmoney auth window */
   const authUrl =
     endpoints[preference].auth +
     `?client_id=${clientId}` +
@@ -46,17 +39,9 @@ export async function authorize(preference: EndpointPreference) {
     return null
   }
 
-  /*
-    - User logs in to Zenmoney
-    - Zenmoney redirects to Zerro with an authorization code in the URL
-    - Zerro returns the code through postMessage or a storage event
-  */
-
-  /* Wait for the authorization code from the popup. */
   const authCode = await waitForAuthCode(popup)
   if (!authCode) return null
 
-  /* Request access token with the received code */
   const tokenUrl = endpoints[preference].token
   const body = JSON.stringify({
     client_id: clientId,
@@ -75,8 +60,6 @@ export async function authorize(preference: EndpointPreference) {
 
   return token
 }
-
-// HELPERS
 
 const AUTH_CODE_KEY = 'auth-code-data'
 const AUTH_CODE_MESSAGE = 'zerro:auth-code'
@@ -123,7 +106,6 @@ function waitForAuthCode(popup: Window) {
   })
 }
 
-/** Opens a popup window in the center of the screen */
 function openPopupWindow(url: string, target: string, w: number, h: number) {
   const y = window.outerHeight / 2 + window.screenY - h / 2
   const x = window.outerWidth / 2 + window.screenX - w / 2

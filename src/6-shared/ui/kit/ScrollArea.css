@@ -1,10 +1,6 @@
 @layer components {
-  /* The thumb is there only while the area is pointed at or moving: a bar
-     that never goes away is most of what a person sees down the side of a
-     short list. Base UI sets both attributes on the scrollbar, and drops
-     `data-scrolling` half a second after the last scroll. */
-  /* The thumb sits 4px from the edge and widens inward on hover; the rest
-     of the track's width is there to be grabbed. */
+  /* Base UI clears data-scrolling after scrolling stops; the thumb appears only on hover or scroll. */
+  /* The thumb widens inward on hover; the rest of the track is a hit area. */
   .kit-scrollbar {
     display: flex;
     justify-content: flex-end;
@@ -33,9 +29,7 @@
     }
   }
 
-  /* The bottom inset sits inside the scroll, so content passes under the
-     cover and the last row can still be scrolled clear of it. The content
-     resets it: an area nested inside does not reach the cover. */
+  /* Pad inside the scrollport so the last row clears the cover. Reset the inset for nested areas. */
   .kit-scroll-viewport {
     isolation: isolate;
     scroll-padding-top: var(--kit-scroll-top-inset, 0px);

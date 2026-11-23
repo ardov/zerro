@@ -118,11 +118,7 @@ function isHiddenDataPayloadEmpty(payload: unknown): boolean {
   return false
 }
 
-/**
- * Best-effort application of a sparse intent patch onto a snapshot for chained
- * compilation: sparse entities merge over current so later reads in the same
- * compile see earlier writes. Not a substitute for real materialization.
- */
+/** Merge sparse writes for later reads in the same compile. Actual materialization still happens separately. */
 export function applyIntentPatch(
   base: TDataStore,
   patch: TIntentPatch

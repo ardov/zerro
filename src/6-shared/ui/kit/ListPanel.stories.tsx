@@ -75,7 +75,6 @@ export const HeaderGeometry: Story = {
         expect(rowBounds.right).toBeCloseTo(fieldBounds.right, 1)
         expect(rowBounds.top - fieldBounds.bottom).toBeCloseTo(4, 1)
       })
-      // The gap belongs to the scrolling content, not to the fixed header.
       let scrollport = row.parentElement!
       while (getComputedStyle(scrollport).overflowY !== 'auto')
         scrollport = scrollport.parentElement!
@@ -282,7 +281,6 @@ export const Filtering: Story = {
     )
     const input = await body.findByRole('textbox', { name: 'Search accounts' })
     const panel = body.getByTestId('accounts-panel')
-    // Compare behavior, not a prescribed height: filtering must not move the panel.
     await waitFor(() =>
       expect(panel.getBoundingClientRect().height).toBeGreaterThan(100)
     )

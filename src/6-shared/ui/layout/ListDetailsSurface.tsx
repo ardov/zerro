@@ -45,8 +45,6 @@ export type ListDetailsSurfaceProps = {
   }
 }
 
-/** The owner supplies navigation. This surface presents its list and one
- * Details view in one modal region when they fit, or nested when they do not. */
 export function ListDetailsSurface({
   title,
   active = true,

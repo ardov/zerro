@@ -6,10 +6,7 @@ export function applyPatch(
   base: TDataStore,
   patch: TNormalizedPatch | TIntentPatch
 ): TDataStore {
-  // Clone only the entity maps the patch touches; keep every other map's
-  // reference from base. Downstream memoized selectors depend on unrelated
-  // maps staying reference-stable across a write (architecture invariant 5), so
-  // cloning all maps here would invalidate every calculation on any change.
+  // Copy touched maps only; reference stability keeps unrelated projections cached.
   const next: TDataStore = { ...base }
   touchedEntityKeys(patch).forEach(key => {
     // @ts-expect-error Dynamic Zenmoney entity access.
@@ -43,7 +40,6 @@ function applyPatchMutable(
 
   patch.deletion?.forEach(obj => {
     try {
-      // TODO: replace with typed entity-map access when core owns data types.
       // @ts-expect-error Dynamic Zenmoney entity access.
       delete store[obj.object][obj.id]
     } catch (error) {
@@ -65,7 +61,6 @@ function applyPatchMutable(
 
     patch[key].forEach(el => {
       try {
-        // TODO: replace with typed entity-map access when core owns data types.
         // @ts-expect-error Dynamic Zenmoney entity access.
         store[key][el.id] = { ...store[key][el.id], ...el }
       } catch (error) {

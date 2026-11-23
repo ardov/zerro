@@ -93,7 +93,7 @@ const ArchivedList: FC<{
   if (!accs.length) return null
 
   const sum = getTotal(accs)
-  const hasArchivedMoney = Boolean(toDisplay(sum)) // It can be too small to show
+  const hasArchivedMoney = Boolean(toDisplay(sum))
 
   return (
     <>

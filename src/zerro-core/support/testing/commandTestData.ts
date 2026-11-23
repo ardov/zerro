@@ -18,7 +18,6 @@ import {
 } from '../../internal/operations/materialization'
 import type { TDataStore } from '../../types'
 
-/** Unissued fixture fields: creation semantics are explicit in the resulting operations. */
 export function testOperations(patch: TTestInput) {
   return 'operations' in patch
     ? patch.operations

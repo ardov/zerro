@@ -10,7 +10,6 @@ import { merchantMatchPriority, merchantSearchQueries } from './merchantSearch'
 const merchantKey = (id: string | null) =>
   id === null ? 'none' : `merchant:${id}`
 
-/** Existing merchants only; creation and transaction-draft rules belong to MerchantField. */
 export function MerchantMultiSelect({
   value,
   onChange,

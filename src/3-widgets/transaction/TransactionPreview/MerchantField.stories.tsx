@@ -25,7 +25,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** A bare payee has not yet been made into a merchant. */
 export const BarePayee: Story = {
   args: {
     merchant: null,
@@ -185,7 +184,6 @@ export const CreateWithArrowKeys: Story = {
     const create = await body.findByRole('option', { name: /^Create / })
     const options = body.getAllByRole('option')
     await expect(options.length).toBeGreaterThan(1)
-    // The first match is already active; arrows can reach the final create choice.
     for (let i = 1; i < options.length; i++)
       await userEvent.keyboard('{ArrowDown}')
     await expect(input).toHaveAttribute('aria-activedescendant', create.id)
@@ -240,7 +238,6 @@ export const EmptyDebtor: Story = {
     const trigger = within(canvasElement).getByRole('combobox', {
       name: 'Debtor',
     })
-    // The leading person icon is separate from the trailing disclosure arrow.
     expect(
       trigger
         .closest('.group\\/select-field')

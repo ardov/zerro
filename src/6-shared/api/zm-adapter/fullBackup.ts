@@ -1,12 +1,4 @@
-/**
- * Decode the complete file produced by Zerro's JSON exporter.
- *
- * This is a protocol adapter: it validates untrusted wire JSON, converts it
- * through the shared Zenmoney codec, then returns a normalized Core snapshot.
- * Structural rules that are about the data rather than the file — references,
- * tag cycles, cardinalities — belong to the store validator, which every
- * other source of a snapshot passes through as well.
- */
+/** Validate wire JSON here; normalized references and invariants belong to the Core store validator. */
 import { z } from 'zod'
 import {
   applyPatch,
@@ -26,9 +18,7 @@ import {
 const fullBackupWireSchema = z
   .object({
     serverTimestamp: z.number().nonnegative(),
-    // Unknown keys pass so a newer export stays importable; this is the one
-    // that must not, because it is what tells an incremental diff from a
-    // complete backup.
+    // Keep unknown keys for forward compatibility. The snapshot discriminator must still identify a complete backup.
     deletion: z.never().optional(),
     ...fullBackupCollectionsShape,
   })
@@ -47,7 +37,6 @@ export type TFullBackupParseResult =
   | { ok: true; store: TDataStore; warnings: TFullBackupWarning[] }
   | { ok: false; reason: 'unreadable' | 'notABackup' }
 
-/** Parses a structurally valid backup without considering the current account. */
 export function parseFullBackup(text: string): TFullBackupParseResult {
   let value: unknown
   try {
@@ -72,11 +61,7 @@ export function parseFullBackup(text: string): TFullBackupParseResult {
   return { ok: true, store, warnings: collectWarnings(parsed.data, store) }
 }
 
-/**
- * A complete export always describes a live account. The store validator
- * deliberately accepts the half-empty shape of a replica that is still
- * bootstrapping, which a backup file never is.
- */
+/** Backups require a live account; the store validator also permits a bootstrapping replica. */
 function describesAnAccount(store: TDataStore): boolean {
   const debtAccounts = Object.values(store.account).filter(
     account => account.type === AccountType.Debt
@@ -98,7 +83,6 @@ function collectWarnings(
   ]
 }
 
-/** Data a newer exporter wrote and this version has no meaning for. */
 function unknownFieldWarnings(backup: TFullBackupWire): TFullBackupWarning[] {
   const warnings: TFullBackupWarning[] = []
   const knownTopLevelFields = new Set([
@@ -135,7 +119,6 @@ function unknownFieldWarnings(backup: TFullBackupWire): TFullBackupWarning[] {
   return warnings
 }
 
-/** Values the protocol allows but this version has no behavior for. */
 function unknownValueWarnings(backup: TFullBackupWire): TFullBackupWarning[] {
   const warnings: TFullBackupWarning[] = []
 
@@ -152,7 +135,6 @@ function unknownValueWarnings(backup: TFullBackupWire): TFullBackupWarning[] {
   return warnings
 }
 
-/** Rows Zenmoney kept after their owner was deleted — see the entity graph. */
 function danglingReferenceWarnings(store: TDataStore): TFullBackupWarning[] {
   const counts = new Map<string, number>()
   eachReferenceIssue(store, issue => {
@@ -171,10 +153,7 @@ function rowsOf(backup: TFullBackupWire, collection: string): TWireRow[] {
   return (backup as Record<string, unknown>)[collection] as TWireRow[]
 }
 
-/**
- * Duplicates have to be caught on the wire: a normalized store is keyed by id,
- * so building it silently keeps the last row of a repeated identity.
- */
+/** Reject duplicate IDs before normalization silently keeps only the last row. */
 function hasUniqueRows(backup: TFullBackupWire): boolean {
   return Object.keys(wireSchemas).every(collection =>
     collection === 'budget'

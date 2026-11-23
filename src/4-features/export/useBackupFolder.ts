@@ -40,14 +40,12 @@ export function useBackupFolder(userId: number | null) {
   return read?.userId === userId ? read.folder : undefined
 }
 
-/** The settings string that names what keeps backups from saving. */
 export function backupProblemKey(
   problem: NonNullable<BackupFolder['problem']>
 ) {
   return problem === 'write' ? 'backupFailed' : 'folderBackupsPaused'
 }
 
-/** What keeps automatic backups from saving, in words, if anything does. */
 export function useBackupProblem() {
   const { t } = useTranslation('settings')
   const problem = useBackupFolder(useAppSelector(selectBackupUser))?.problem

@@ -6,7 +6,6 @@ import type { ById } from '@/6-shared/types'
 import type { AppThunk } from '@/store'
 import { core } from '@/zerro-core/redux'
 
-// Only for CSV
 const getPopulatedTransactions = createSelector(
   [
     core.instruments.selectAll,
@@ -43,7 +42,6 @@ export const exportCSV: AppThunk = (_, getState) => {
   link.click()
 }
 
-// TODO: i18n
 interface RowObj {
   Дата: string
   Создана: string

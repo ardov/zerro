@@ -24,22 +24,18 @@ describe('date input', () => {
   })
 
   test('is looser than the pattern it prints', () => {
-    // Single digits, a two-digit year, and whatever separates them.
     expect(parseDateInput('3/9/27', enGB)).toBe('2027-09-03')
     expect(parseDateInput('3-9-2027', enGB)).toBe('2027-09-03')
     expect(parseDateInput(' 03 09 2027 ', enGB)).toBe('2027-09-03')
   })
 
   test('reads the numbers in the order the locale writes them', () => {
-    // The same three numbers, and the American order is not this one: a
-    // locale added later needs no entry anywhere for this to hold.
     const month = { ...enGB, formatLong: shortDateAs(enGB, 'MM/dd/yyyy') }
     expect(parseDateInput('09/03/2027', month)).toBe('2027-09-03')
     expect(dateInputPlaceholder(month)).toBe('mm/dd/yyyy')
   })
 
   test('refuses a date the calendar cannot land on', () => {
-    // Not the 1st of October, which is where constructing it would land.
     expect(parseDateInput('31/09/2026', enGB)).toBe(null)
     expect(parseDateInput('29/02/2027', enGB)).toBe(null)
     expect(parseDateInput('29/02/2028', enGB)).toBe('2028-02-29')
@@ -48,9 +44,7 @@ describe('date input', () => {
   })
 
   test('refuses a year that is not four digits wide', () => {
-    // `202` is what every keystroke of `2026` passes through, and `toISODate`
-    // would write it back unpadded as `202-08-15` — a string `parseISO` reads
-    // as an invalid date and `format` throws on.
+    // Partial years would produce an ISO string that neither parseISO nor format accepts.
     expect(parseDateInput('15/08/202', enGB)).toBe(null)
     expect(parseDateInput('15/08/0000', enGB)).toBe(null)
     expect(parseDateInput('15/08/12345', enGB)).toBe(null)
@@ -59,8 +53,6 @@ describe('date input', () => {
   })
 
   test('reads two digits as the century they are likeliest to mean', () => {
-    // A ledger holds old records and few distant plans, so the split is
-    // `strftime`'s rather than always this century's.
     expect(parseDateInput('15/08/26', enGB)).toBe('2026-08-15')
     expect(parseDateInput('15/08/68', enGB)).toBe('2068-08-15')
     expect(parseDateInput('15/08/69', enGB)).toBe('1969-08-15')

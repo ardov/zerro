@@ -353,7 +353,6 @@ export const MultilineIconAlignment: Story = {
   },
 }
 
-/** Focus belongs to the editable area or its action, never to both. */
 export const ActionAddonFocus: Story = {
   render: () => <SearchExample />,
   play: async ({ canvas }) => {

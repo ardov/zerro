@@ -25,9 +25,7 @@ export const createEnvelope =
 export const createEnvelopeInGroup =
   (group: string): AppThunk =>
   (dispatch, getState) => {
-    // In order for group not jump to the top of the list
-    // we need to find the first envelope in the group
-    // and create a new envelope right before it
+    // Insert before the first envelope in the group so adding a member does not reorder the group.
     const envelopes = core.envelopes.selectAll(getState())
     const structure = core.envelopes.selectStructure(getState())
     const groupNode = structure.find(gr => gr.id === group)

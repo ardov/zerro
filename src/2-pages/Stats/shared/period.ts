@@ -13,17 +13,17 @@ export function getStart(
   period: Period,
   aggregation: GroupBy
 ): TISODate | undefined {
-  if (period === Period.All) return undefined //'2000-01-01' as TISODate
+  if (period === Period.All) return undefined
   if (period === Period.LastYear) {
     const date = new Date()
     date.setFullYear(date.getFullYear() - 1)
-    date.setDate(date.getDate() + 1) // Exclude the first day
+    date.setDate(date.getDate() + 1)
     return toGroup(toISODate(date), aggregation)
   }
   if (period === Period.ThreeYears) {
     const date = new Date()
     date.setFullYear(date.getFullYear() - 3)
-    date.setDate(date.getDate() + 1) // Exclude the first day
+    date.setDate(date.getDate() + 1)
     return toGroup(toISODate(date), aggregation)
   }
   throw new Error(`Unknown period: ${period}`)
@@ -36,7 +36,6 @@ export const nextPeriod = (current: Period) => {
   return order[nextIdx]
 }
 
-/** The localized title of the period. */
 export function usePeriodTitle(period: Period): string {
   const { t } = useTranslation('analytics')
   if (period === Period.LastYear) return t('period_year')

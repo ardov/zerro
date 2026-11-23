@@ -13,7 +13,6 @@ type Story = StoryObj<typeof meta>
 
 const modes = ['always', 'hover', 'none'] as const
 
-/** One component instance, entirely controlled by the Args panel. */
 export const Bench: Story = {}
 
 export const Showcase: Story = {

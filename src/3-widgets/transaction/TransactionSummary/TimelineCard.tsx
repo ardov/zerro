@@ -18,19 +18,14 @@ import {
 
 const BAR_COLOR = 'var(--info)'
 
-/** One side over time. The line above the chart reads the period under the
- * pointer, or the average while nothing is pointed at. Whether to show the
- * card is its owner's call; once shown, no step or side takes it away. */
 export function TimelineCard(props: {
   entries: readonly TEntry[]
   /** Both sides together: they set the periods, so a side keeps its axis. */
   span: readonly TEntry[]
   currency: TFxCode
   side: ReactNode
-  /** The step last chosen. Ignored once the span no longer offers it. */
   chosen?: string
   onChoose: (step: TStep) => void
-  /** Narrows the list to one period. */
   onPeriod?: (from: TISODate, to: TISODate) => void
 }) {
   const { entries, span, currency, side, chosen, onChoose, onPeriod } = props
@@ -41,7 +36,6 @@ export function TimelineCard(props: {
   const [pointed, setPointed] = useState<TISODate | null>(null)
   const step = steps.available.find(step => step === chosen) ?? steps.initial
   const buckets = getTimeline(entries, step, span, today)
-  // A period with nothing on either side would narrow the list to nothing.
   const occupied = new Set(
     getTimeline(span, step)
       .filter(bucket => bucket.count)
@@ -103,7 +97,6 @@ export function TimelineCard(props: {
                 onPeriod?.(bucket.from, bucket.to)
             }}
           >
-            {/* A period still running is hatched: it is not a low one yet. */}
             <defs>
               <pattern
                 id={hatch}

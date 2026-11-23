@@ -95,11 +95,7 @@ export function compactCanonicalTransition(
   return Object.keys(transition).length ? transition : undefined
 }
 
-/**
- * Applies canonical transitions in order. Each entity map the run touches is
- * cloned once for the whole run; maps it never touches keep their reference
- * from `base`, and `base` itself is not mutated.
- */
+/** Clone each touched map once for the entire sequence and keep all untouched map references. */
 export function applyCompactTransitions(
   base: TDataStore,
   transitions: readonly TCompactCanonicalTransition[]

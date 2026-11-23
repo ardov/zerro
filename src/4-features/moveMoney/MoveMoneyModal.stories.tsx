@@ -47,8 +47,7 @@ function AmountHarness({ longNames = false }: { longNames?: boolean }) {
       <button
         type="button"
         onClick={event => {
-          // This is an input/commit regression, not an FX round-trip test.
-          // Edit in the envelope currency so cent rounding cannot change 30.
+          // Edit in the envelope currency so the commit assertion is independent of FX rounding.
           setCurrency(envelopes[id].currency)
           if (longNames) {
             dispatch(

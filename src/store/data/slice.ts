@@ -30,8 +30,6 @@ interface DataSlice {
   editableTail: { group: string; command: TCommand } | null
   /** Undone commands; pulls preserve them, a new command or push clears them. */
   redo: TCommand[]
-  /** The replayed canonical journal failed domain validation and needs a full
-   * reload. */
   journalRecoveryRequired: boolean
   journalRecoveryReason: string | null
   /** The canonical state loaded, but the durable local command queue did not
@@ -44,12 +42,10 @@ interface DataSlice {
 
 export type TAcceptedPushReplica = Omit<TAcceptedPushChunk, 'next' | 'progress'>
 
-/** A canonical pull response, optionally replacing the complete base. */
 export interface TServerPatch extends TNormalizedPatch {
   fullReload?: boolean
 }
 
-// INITIAL STATE
 const initialBase = createEmptyDataStore()
 const initialState: DataSlice = {
   rootUserId: null,
@@ -64,8 +60,6 @@ const initialState: DataSlice = {
   persistenceWarning: null,
 }
 
-// SLICE
-/** True while the outbox tail is still the group's own edit. */
 export function canReplaceTail(
   data: Pick<DataSlice, 'outbox' | 'editableTail'>,
   group: string
@@ -154,9 +148,7 @@ const { reducer, actions } = createSlice({
         const { fullReload, ...canonicalPatch } = payload
         if (fullReload) {
           const checkpoint = applyPatch(createEmptyDataStore(), canonicalPatch)
-          // Validate the server snapshot before attributing a replay failure
-          // to local commands. A rejected response must not replace the last
-          // accepted base or discard the pending outbox.
+          // Validate the server snapshot first so rejection cannot replace the accepted base or discard pending commands.
           const validation = validateDataStore(checkpoint)
           if (!validation.ok) {
             state.journalRecoveryRequired = true
@@ -226,9 +218,7 @@ const { reducer, actions } = createSlice({
         const next = appendOutbox(snapshot.outbox, payload)
         state.outbox = next.outbox
         state.redo = next.redo
-        // `current` already reflects the durable outbox, so advancing by this
-        // one entry is equivalent to a full replay but keeps unrelated entity
-        // maps reference-stable for memoized selectors.
+        // Apply the one new command to current to avoid replaying unchanged maps and invalidating memoized selectors.
         state.current = applyOutboxCommand(snapshot.current, payload)
       }
     ),
@@ -309,14 +299,7 @@ const { reducer, actions } = createSlice({
       state.journalRecoveryRequired = false
       state.journalRecoveryReason = null
     },
-    /**
-     * Restores a local (unsent) point by undoing to it, not by diffing and
-     * appending: the dropped commands were never sent, so there is nothing on
-     * the server to overwrite. Reversible through redo, like a plain undo.
-     *
-     * `payload` is the same inclusive outbox index a `{ kind: 'local' }`
-     * history point ref carries — keep `outbox[0..index]`.
-     */
+    /** Restore an unsent point by undoing after its inclusive outbox index; the discarded suffix stays redoable. */
     restoreOutboxPosition: withPerf(
       'restoreOutboxPosition',
       (state, { payload: index }: PayloadAction<number>) => {
@@ -333,10 +316,8 @@ const { reducer, actions } = createSlice({
   },
 })
 
-// REDUCER
 export default reducer
 
-// ACTIONS
 export const {
   hydrateReplica,
   hydrateCorruptOutbox,
@@ -360,7 +341,6 @@ function replayAndValidateOutbox(
   base: TDataStore,
   outbox: TCommand[]
 ): { ok: true; current: TDataStore } | { ok: false; reason: string } {
-  // The full snapshot has already passed validation.
   if (!outbox.length) return { ok: true, current: base }
   try {
     const current = replayOutbox(base, outbox)

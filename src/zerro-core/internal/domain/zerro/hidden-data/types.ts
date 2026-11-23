@@ -15,15 +15,7 @@ export type THiddenDataComment<TPayload = unknown> = {
   payload: TPayload
 }
 
-/**
- * Stable names for what a hidden-data payload holds, used wherever a change
- * is reported to the user.
- *
- * These payloads are not Zenmoney entities — they are JSON inside a reminder's
- * comment — so without a name of their own every budget, goal and envelope
- * setting is reported as a changed reminder, which is true about the row and
- * useless about the act.
- */
+/** Report hidden reminder payloads by their Zerro entity type instead of counting every edit as a reminder. */
 export const hiddenDataSummaryKeys = {
   [HiddenDataType.Goals]: 'goal',
   [HiddenDataType.Budgets]: 'envelope-budget',

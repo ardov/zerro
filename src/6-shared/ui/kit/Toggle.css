@@ -70,7 +70,6 @@
       border-radius: inherit;
       pointer-events: none;
       content: '';
-      /* Keep the outline visible while the checked fill starts fading in. */
       transition: border-color 150ms ease;
     }
 
@@ -142,7 +141,6 @@
   }
 
   .kit-toggle-label .kit-toggle::after {
-    /* The label supplies the target without covering adjacent rows. */
     inset: 0;
     width: auto;
     height: auto;

@@ -24,9 +24,6 @@ type RefreshButtonProps = Pick<
 const RefreshButton: FC<RefreshButtonProps> = props => {
   const { t } = useTranslation(['common', 'syncProgress'])
   const dispatch = useAppDispatch()
-  // Sync only. History used to hang off a right-click here, which made the
-  // feature undiscoverable and gave one button two unrelated meanings; it is
-  // a named item in the settings menu now.
   const changedNum = useAppSelector(getChangedNum)
   const isPending = useAppSelector(selectIsSyncPending)
   const progress = useAppSelector(selectSyncProgress)

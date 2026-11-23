@@ -10,24 +10,7 @@ import {
   toChannels,
 } from './oklch'
 
-/** A continuous ramp through a few colour stops, addressed by lightness.
- *
- * The point is that lightness stops being something a colour *has* and becomes
- * the coordinate a colour is *chosen by*: `at(0.23)` is the same visual step
- * on every scale, so one table of levels can drive every hue, and a second
- * table drives the dark scheme without a second set of hand-picked values.
- *
- * Stops are sorted by lightness and extended to pure black and pure white, so
- * the domain is always the whole 0…1 range and no level can fall off an end.
- *
- * Sampling happens in OKLCh, where a fixed lightness step looks like a fixed
- * step. An sRGB scale serializes to `#rrggbb` and `rgba()`; a P3 one has to
- * serialize to `oklch()`, because no sRGB notation can spell a colour outside
- * sRGB. Both are literals `parseColor` reads back, so which one a scale uses
- * is a choice about reach, not about whether its output stays inspectable.
- *
- * The two renderings of a level differ only in chroma — clamping never moves
- * lightness — so a contrast decision taken against one holds for the other. */
+/** Sample in OKLCh by lightness so one level means the same across hues and gamuts. */
 export class ColorScale {
   private readonly stops: Oklch[]
   readonly gamut: Gamut
@@ -38,10 +21,6 @@ export class ColorScale {
 
     const stops = colors.map(parseColor).sort((a, b) => a.l - b.l)
 
-    /* Anchoring both ends keeps `at` total. The anchors drop chroma to zero
-       rather than carrying the neighbouring hue, because a scale run to its
-       extreme is black or white — a tinted one would make `at(0)` and `at(1)`
-       differ between hues that should agree there. */
     if (stops[0].l > 0) stops.unshift({ l: 0, c: 0, h: stops[0].h })
     const last = stops[stops.length - 1]
     if (last.l < 1) stops.push({ l: 1, c: 0, h: last.h })
@@ -49,7 +28,6 @@ export class ColorScale {
     this.stops = stops
   }
 
-  /** The colour at lightness `level`, in the scale's target gamut. */
   private sampleAt(level: number): Oklch {
     const l = Math.min(1, Math.max(0, level))
 
@@ -73,7 +51,6 @@ export class ColorScale {
     )
   }
 
-  /** The colour at lightness `level`. */
   at(level: number): string {
     return this.format(this.sampleAt(level))
   }
@@ -84,13 +61,7 @@ export class ColorScale {
       : formatRgb(oklchToRgb(color))
   }
 
-  /** The most transparent colour that looks like `at(level)` over white, and
-   * `opaqueInvAt` the same over black.
-   *
-   * This is what makes a border or a divider a derived value rather than a
-   * decision: instead of writing `rgba(0, 0, 0, 0.12)` and hoping it reads on
-   * every surface, pick the level the border should sit at and let the scale
-   * say which translucent colour composites to it. */
+  /** Find the most transparent color that composites to this level over white, or black for opaqueInvAt. */
   opaqueAt(level: number): string {
     return this.opaqueOver(level, 1)
   }
@@ -102,15 +73,11 @@ export class ColorScale {
   /** @param background channel value the colour is composited over: 1 for
    * white, 0 for black. */
   private opaqueOver(level: number, background: number): string {
-    /* Compositing happens in the channels the display actually blends, so a P3
-       scale has to solve this in P3 channels — solving it in sRGB would first
-       throw away the chroma that made the scale P3 in the first place. */
+    /* Blend in the display's own RGB channels so P3 retains its extra chroma. */
     const { r, g, b } = toChannels(this.sampleAt(level), this.gamut)
     const channels = [r, g, b].map(channel => Math.min(1, Math.max(0, channel)))
 
-    /* The channel furthest from the background is the one that saturates
-       first, so its distance is the strongest alpha that keeps every channel
-       representable. */
+    /* The channel farthest from the background sets the minimum representable alpha. */
     const alpha = Math.max(...channels.map(c => Math.abs(c - background)))
     if (alpha < 1e-4) {
       return this.formatChannels({
@@ -132,13 +99,7 @@ export class ColorScale {
       : formatRgb(color)
   }
 
-  /** The lightest or darkest colour on this scale that still reads at
-   * `targetLc` APCA **as text on** `background`. `apcaUnder` is the same
-   * question asked the other way round: as a **background under** `text`.
-   *
-   * Contrast becomes a constraint the colour is solved for rather than a
-   * property checked afterwards — which is the difference between "this
-   * passes" and "this is the closest colour that passes". */
+  /** Find the closest passing level: apcaOn treats the result as text, and apcaUnder as background. */
   apcaOn(targetLc: number, background: string): string {
     const bg = parseColor(background)
     return this.solveForContrast(targetLc, sample =>
@@ -153,15 +114,7 @@ export class ColorScale {
     )
   }
 
-  /** Bisects on lightness for the first level reaching `target`.
-   *
-   * Contrast against a fixed reference is monotonic in lightness on either
-   * side of that reference, but which way it runs depends on whether the
-   * reference is darker or lighter than the scale's ends — so the direction is
-   * read off the endpoints rather than assumed. When neither end reaches the
-   * target, the closer end is returned: a scale that cannot satisfy the
-   * constraint should give its best colour, not throw in the middle of
-   * building a theme. */
+  /** Contrast is monotonic only on each side of the reference. If the target is unreachable, return the closer endpoint. */
   private solveForContrast(
     target: number,
     contrastAt: (sample: Oklch) => number
@@ -188,11 +141,7 @@ export class ColorScale {
   }
 }
 
-/** APCA is defined over sRGB, so a P3 colour is answered for at its sRGB
- * rendering. Chroma is clamped rather than the channels clipped: clipping
- * moves lightness, and lightness is very nearly the whole of the contrast.
- * Clamping leaves it exactly where the level put it, which is what lets one
- * contrast decision serve both renderings of a colour. */
+/** APCA uses sRGB. Clamp chroma before comparing so a P3 rendition has the same target lightness. */
 const to255 = (color: Oklch): [number, number, number] => {
   const { r, g, b } = oklchToRgb(clampChroma(color, 'srgb'))
   return [
@@ -202,9 +151,7 @@ const to255 = (color: Oklch): [number, number, number] => {
   ]
 }
 
-/** Weighted by chroma, so a stop with no chroma — the black and white anchors,
- * or a grey — adopts its neighbour's hue instead of dragging the ramp towards
- * an arbitrary one. Otherwise the shorter way round the wheel. */
+/** Weight by chroma so gray borrows its colored neighbor's hue; otherwise take the short hue path. */
 function interpolateHue(from: Oklch, to: Oklch, t: number): number {
   if (from.c < 1e-6) return to.h
   if (to.c < 1e-6) return from.h

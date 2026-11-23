@@ -10,21 +10,9 @@ import type {
 import { formatDate, parseDate, toISODate } from '@/6-shared/helpers/date'
 import { core } from '@/zerro-core/redux'
 
-/** What a transaction editor is editing.
- *
- * A draft is not a transaction: it holds a transfer's two sides *and* a
- * one-sided operation's single side at once, whichever type is selected. That
- * is what makes switching type non-destructive — a category chosen for an
- * expense survives a detour through a transfer, and so do the accounts.
- *
- * Nothing here knows about a source transaction. A draft can be read off one
- * (`toDraft`) or started from nothing (`emptyDraft`), and what it is worth
- * (`toPatch`) is the same question either way. Only the three functions under
- * "Against a source" compare it with the transaction it came from. */
+/** Keep one-sided and transfer fields together so switching type preserves both sets of edits. */
 export type TDraftType = `${core.transactions.TrType}`
 
-/** A merchant that exists is `{ id }`; one the save still has to create is
- * `{ title }`. */
 export type TDraftMerchant = { id: TMerchantId } | { title: string } | null
 
 /** A merchant by name: with an id when one already carries it, without when
@@ -33,12 +21,8 @@ export type TNamedMerchant = { id?: TMerchantId; title: string }
 
 export type TTransactionDraft = {
   type: TDraftType
-  /** The account a one-sided operation touches: an expense's, an income's, or
-   * the real account a debt is settled through. */
   account: TAccountId
-  /** What that operation is worth, in that account's currency. */
   amount: number
-  /** A transfer's two sides. */
   fromAccount: TAccountId
   toAccount: TAccountId
   fromAmount: number
@@ -46,7 +30,6 @@ export type TTransactionDraft = {
   /** Categories. Only an income or an expense sends them; the others keep
    * them so that coming back restores them. */
   tag: TTagId[] | null
-  /** Who the operation is with. */
   merchant: TDraftMerchant
   /** The free text beside the merchant. An old transaction can carry one with
    * no merchant at all, and leaving both alone is what keeps it that way. */
@@ -57,15 +40,10 @@ export type TTransactionDraft = {
   time: string
 }
 
-/** What the draft cannot work out on its own: which accounts exist, what
- * currency each is in, and which one holds debts. */
 export type TDraftContext = {
-  /** Selectable accounts, in the order a picker offers them. */
   accountIds: TAccountId[]
   instrumentOf: (id: TAccountId) => TInstrumentId | undefined
-  /** The user's debt account. A replica always has exactly one —
-   * `validateStore` refuses a store that does not — so this is optional only
-   * because the selector that reads it says so. */
+  /** A valid replica has exactly one debt account; the selector exposes it as optional. */
   debtAccountId?: TAccountId
 }
 
@@ -75,12 +53,6 @@ export type TCreateDraftDefaults = Partial<
 
 const { TrType } = core.transactions
 
-// ---------------------------------------------------------------------------
-// Making one
-// ---------------------------------------------------------------------------
-
-/** A draft with nothing in it yet, for composing a transaction rather than
- * editing one. */
 export function emptyDraft(
   ctx: TDraftContext,
   now: number,
@@ -154,16 +126,12 @@ export function fixDraft(
     : next
 }
 
-/** Reads a transaction as a draft. Both sides are filled in whatever the type
- * is, so the first switch has something to switch to. */
 export function toDraft(
   tr: TTransaction,
   ctx: Pick<TDraftContext, 'accountIds' | 'debtAccountId'>
 ): TTransactionDraft {
   const type = core.transactions.getType(tr, ctx.debtAccountId)
-  // A soft-deleted row can have a leg with no account at all. The empty
-  // string stands in for it, and nothing downstream can find a currency for
-  // it, so such a draft refuses to build legs rather than inventing one.
+  // A soft-deleted row can have a missing leg. An empty account ID makes the draft refuse to build it.
   const outcomeAccount = tr.outcomeAccount ?? tr.incomeAccount ?? ''
   const incomeAccount = tr.incomeAccount ?? tr.outcomeAccount ?? ''
 
@@ -171,9 +139,7 @@ export function toDraft(
     ? { account: incomeAccount, amount: tr.income }
     : { account: outcomeAccount, amount: tr.outcome }
 
-  // A transfer states its two sides. Anything else has one account, so the
-  // other side is the first account that is not it — the same choice
-  // switching to a transfer would make.
+  // Seed the unused side with a different account so switching to transfer can reuse it.
   const transfer =
     type === TrType.Transfer
       ? {
@@ -202,15 +168,6 @@ export function toDraft(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Editing one
-// ---------------------------------------------------------------------------
-
-/** Switches the type, carrying over as much as the new type can hold.
- *
- * Both sides are kept, so only the crossing between them moves anything:
- * leaving a transfer picks the side the new type cares about, and entering
- * one seeds it from the side that was being edited. */
 export function setDraftType(
   draft: TTransactionDraft,
   type: TDraftType,
@@ -245,8 +202,6 @@ export function setDraftType(
   }
 
   if (draft.type === TrType.Transfer) {
-    // Money arrives on the receiving account and leaves the paying one, so
-    // which side survives is the direction of the new type.
     const arriving = isIncoming(type)
     return {
       ...draft,
@@ -274,8 +229,6 @@ export function setDraftMerchant(
   }
 }
 
-/** Turns a transfer around: accounts and amounts change places together, so
- * the operation keeps meaning what it meant. */
 export function swapTransferSides(draft: TTransactionDraft): TTransactionDraft {
   return {
     ...draft,
@@ -325,12 +278,6 @@ export function setTransferAccount(
       : { ...draft, toAccount: account }
 }
 
-// ---------------------------------------------------------------------------
-// What it is worth
-// ---------------------------------------------------------------------------
-
-/** The two legs: an account, a currency and an amount each. Required, because
- * a draft always knows all six. */
 export type TDraftLegs = Required<
   Pick<
     TTransactionEditablePatch,
@@ -343,13 +290,7 @@ export type TDraftLegs = Required<
   >
 >
 
-/** The two legs the draft describes.
- *
- * This is where each type stops being a label: an expense pays itself, a
- * transfer has two ends, and a debt is a transfer with the debt account on
- * whichever end the direction puts it. A debt's legs carry the same amount
- * and the same currency as the real account — the debt account holds debts in
- * every currency, so it imposes none. */
+/** A debt uses the real account's amount and currency on both legs; the debt account imposes no currency. */
 export function toLegs(
   draft: TTransactionDraft,
   ctx: TDraftContext
@@ -397,7 +338,6 @@ export function toLegs(
   }
 }
 
-/** Every field the draft claims. */
 export function toPatch(
   draft: TTransactionDraft,
   ctx: TDraftContext
@@ -417,8 +357,6 @@ export function toPatch(
   }
 }
 
-/** The merchant a save has to create before the transaction can point at it.
- * A draft that names no new one answers `null`. */
 export function newMerchantTitle(draft: TTransactionDraft): string | null {
   const { merchant } = draft
   return merchant && 'title' in merchant ? merchant.title : null
@@ -447,15 +385,7 @@ export function draftCreated(
   return +created
 }
 
-// ---------------------------------------------------------------------------
-// Against a source
-// ---------------------------------------------------------------------------
-
-/** The original-currency amounts to drop, for a leg the draft has moved.
- *
- * `opOutcome` records what a card was actually charged abroad. Once the leg
- * is a different account, a different currency or a different number, that
- * record is about a transaction this one no longer is. */
+/** Drop the original-currency charge when its account, currency, or amount no longer describes the same leg. */
 export function staleRates(
   legs: TDraftLegs,
   tr: TTransaction
@@ -470,9 +400,7 @@ export function staleRates(
   }
 }
 
-/** Only the fields the patch actually changes. An `update` of nothing is
- * still a command in the outbox, so a save that changes one field says one
- * field. */
+/** Include only changed fields; even an empty update would enqueue a command. */
 export function changedFields(
   tr: TTransaction,
   patch: TTransactionEditablePatch
@@ -484,9 +412,7 @@ export function changedFields(
   return changed as TTransactionEditablePatch
 }
 
-/** `created` is immutable on the server, so a changed time is a different
- * transaction — which is why the editor recreates rather than updates when
- * this moves. */
+/** Zenmoney makes created immutable. An edited time requires a replacement transaction. */
 export function timeChanged(
   draft: TTransactionDraft,
   tr: TTransaction
@@ -494,11 +420,6 @@ export function timeChanged(
   return draft.time !== formatDate(tr.created, 'HH:mm')
 }
 
-// ---------------------------------------------------------------------------
-// What is wrong with it
-// ---------------------------------------------------------------------------
-
-/** A field a mark can be put on. */
 export type TDraftField =
   | 'account'
   | 'amount'
@@ -508,20 +429,10 @@ export type TDraftField =
   | 'toAccount'
   | 'payee'
 
-/** Why that field is wrong. */
 export type TDraftIssue = 'account' | 'amount' | 'sameAccount' | 'debtor'
 
 export type TDraftIssues = Partial<Record<TDraftField, TDraftIssue>>
 
-/** Everything wrong with the draft, by the field it is wrong on.
- *
- * By field rather than one answer for the whole draft, because that is how it
- * is shown: the mark sits beside the field it is about, and a transfer has
- * two amounts that can each be the empty one.
- *
- * It needs no context. A replica always has exactly one debt account —
- * `validateStore` refuses a store that does not — so there is no such thing
- * as a debt with nowhere to record it. */
 export function draftIssues(draft: TTransactionDraft): TDraftIssues {
   if (draft.type === TrType.Transfer) {
     const fromMissing = !draft.fromAccount
@@ -552,19 +463,14 @@ export function hasIssues(issues: TDraftIssues): boolean {
   return Object.keys(issues).length > 0
 }
 
-// ---------------------------------------------------------------------------
-
 export function isDebt(type: TDraftType): boolean {
   return type === TrType.IncomeDebt || type === TrType.OutcomeDebt
 }
 
-/** Whether the type puts money on the account or takes it off, which is the
- * sign the amount is shown with. */
 export function isIncoming(type: TDraftType): boolean {
   return type === TrType.Income || type === TrType.IncomeDebt
 }
 
-/** Only an income and an expense carry categories. */
 export function isCategorized(type: TDraftType): boolean {
   return type === TrType.Income || type === TrType.Outcome
 }
@@ -610,7 +516,6 @@ export type TCreateDraftCommand =
       input: core.transactions.TCreateTransferInput
     }
 
-/** The semantic creation command, sharing the editor's normalization. */
 export function toCreateInput(
   draft: TTransactionDraft,
   ctx: TDraftContext,

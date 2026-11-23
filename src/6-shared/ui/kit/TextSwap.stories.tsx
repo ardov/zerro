@@ -78,7 +78,6 @@ function BusyPageButton() {
   )
 }
 
-/** A long render in the same update must not play the swap out unseen. */
 export const AfterLongRender: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => <BusyPageButton />,

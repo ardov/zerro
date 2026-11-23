@@ -43,7 +43,6 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
       startingAmount = available
     }
 
-    // Prevent chart going weird
     if (startingAmount < 0) startingAmount = 0
 
     return {

@@ -1,7 +1,6 @@
 const smooth = (t: number) => t * t * (3 - 2 * t)
 const mix = (a: number, b: number, t: number) => a + (b - a) * t
 
-/** Expanding weak spots with noisy edges release nearby glyphs together. */
 export function createReleaseDelays(
   points: readonly { x: number; y: number }[],
   width: number,

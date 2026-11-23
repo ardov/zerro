@@ -136,10 +136,6 @@ export function compileCreateEnvelope(
   }
 }
 
-/**
- * Converts a projected structure tree into the minimal semantic structure
- * input, keeping group, nesting, and index order.
- */
 export function toEnvelopeStructureInput(
   structure: TGroupNode[]
 ): TApplyEnvelopeStructureInput {
@@ -153,13 +149,7 @@ function toStructureNodeInput(node: TEnvNode): TEnvelopeStructureNodeInput {
   return { id: node.id, children: node.children.map(toStructureNodeInput) }
 }
 
-/**
- * Compiles the full desired envelope hierarchy into one atomic patch. The
- * input is the complete ordered structure; envelopes absent from it stay
- * untouched. Normalization mirrors the projector: empty groups are dropped,
- * same-named groups merge, deep nesting flattens to two levels, and tags
- * nested under non-tag parents are elevated to the group level.
- */
+/** Compile the complete ordered hierarchy atomically. Envelopes absent from it remain untouched. */
 export function compileApplyEnvelopeStructure(
   data: TDataStore,
   envelopes: ById<TEnvelope>,
@@ -274,9 +264,6 @@ export function compileRenameEnvelope(
         ),
       }
     case EnvType.Payee:
-      // TODO: Resolve the payee envelope to all debtor.payeeNames variants and
-      // patch `transaction.payee` for every matching transaction. Merchant
-      // envelopes already rename their normalized merchant entity above.
       throw new Error('Payee envelopes cannot be renamed')
   }
 }

@@ -70,7 +70,6 @@ export const RangeSelection: Story = {
       }
     }
     expect(checkboxes).toHaveLength(4)
-    // Deselecting the final checked row keeps the latest click as the anchor.
     await user.click(checkboxes[0])
     await user.click(checkboxes[0])
     await expectChecked([])
@@ -82,7 +81,6 @@ export const RangeSelection: Story = {
       canvas.getByRole('button', { name: 'Remove Selected 3 transactions' })
     )
     await expectChecked([])
-    // Keep the separate first selection when extending from the latest click.
     await user.click(checkboxes[0])
     await user.click(checkboxes[2])
     await user.keyboard('{Shift>}')
@@ -93,13 +91,11 @@ export const RangeSelection: Story = {
       canvas.getByLabelText('Opened operation')
     ).toBeEmptyDOMElement()
 
-    // Reverse direction, using the last range endpoint as the new anchor.
     await user.keyboard('{Shift>}')
     await user.click(checkboxes[1])
     await user.keyboard('{/Shift}')
     await expectChecked([0, 1, 2, 3])
 
-    // Shift on a checked endpoint clears the range, preserving outside rows.
     await user.keyboard('{Shift>}')
     await user.click(checkboxes[3])
     await user.keyboard('{/Shift}')
@@ -133,7 +129,6 @@ export const RangeSelection: Story = {
       canvas.getByRole('button', { name: 'Remove Selected 4 transactions' })
     )
     await expectChecked([])
-    // Clearing selection also forgets its old anchor.
     await user.keyboard('{Shift>}')
     await user.click(checkboxes[0])
     await user.keyboard('{/Shift}')
@@ -144,7 +139,6 @@ export const RangeSelection: Story = {
     checkboxes[0].focus()
     await user.keyboard('{Shift>} {/Shift}')
     await expectChecked([])
-    // The same anchor survives when Shift clears the entire selected range.
     checkboxes[2].focus()
     await user.keyboard('{Shift>} {/Shift}')
     await expectChecked([0, 1, 2])
@@ -275,7 +269,6 @@ export const SearchAndMerchant: Story = {
       canvas.getByRole('combobox', { name: 'Lidl' })
     ).toBeInTheDocument()
     await expect(canvas.queryByRole('textbox')).toBeNull()
-    // Narrow screens keep the payee as ordinary row content.
     await userEvent.click(
       canvas
         .getAllByText('Lidl')

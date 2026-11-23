@@ -6,7 +6,6 @@ const russian =
   'ё1234567890-=йцукенгшщзхъ\\фывапролджэячсмитьбю.' +
   'Ё!"№;%:?*()_+ЙЦУКЕНГШЩЗХЪ/ФЫВАПРОЛДЖЭЯЧСМИТЬБЮ,'
 
-/** Convert keyboard positions without normalizing case, whitespace, or unknown symbols. */
 export function convertKeyboardLayout(
   text: string,
   direction: 'en-ru' | 'ru-en'

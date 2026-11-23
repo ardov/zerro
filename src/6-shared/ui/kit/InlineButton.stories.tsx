@@ -21,7 +21,6 @@ export const Bench: Story = {}
 
 const values = ['categories', 'places', 'accounts']
 
-/** The sentence keeps its line while the words inside it change. */
 export const Cycle: Story = {
   tags: ['!test'],
   render: () => {

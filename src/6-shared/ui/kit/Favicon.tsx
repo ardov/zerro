@@ -7,7 +7,6 @@ export type FaviconProps = {
   fallback: ReactNode
 }
 
-/** Decorative site icon. Its accessible name belongs to the surrounding control. */
 export function Favicon({ domain, fallback }: FaviconProps) {
   return <FaviconImage key={domain} domain={domain} fallback={fallback} />
 }

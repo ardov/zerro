@@ -5,7 +5,6 @@ import {
   type ArticleRoute,
 } from '../../6-shared/pageRoutes'
 
-/** Shared by the HTTP document and the client router. */
 export function PageHead({
   article,
   includeTitleAndDescription = true,

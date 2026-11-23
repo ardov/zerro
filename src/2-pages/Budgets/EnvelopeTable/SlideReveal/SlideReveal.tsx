@@ -15,7 +15,6 @@ export type RevealItem = {
   key: React.Key
   label: string
   value: number
-  /** Tailwind text color utility. */
   color: string
   onClick?: (e: React.MouseEvent<HTMLElement>) => void
   draggable?: {
@@ -43,8 +42,6 @@ type DragState = {
 
 function useSlideRevealGesture(revealWidth: number) {
   const [offsetX, setOffsetX] = useState(0)
-  // Keep a ref so pointer handlers always see the current value without
-  // needing offsetX in their dependency arrays.
   const offsetXRef = useRef(offsetX)
   useEffect(() => {
     offsetXRef.current = offsetX
@@ -58,7 +55,6 @@ function useSlideRevealGesture(revealWidth: number) {
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef<DragState | null>(null)
 
-  // Clamp or close when the panel width changes (column switch, breakpoint).
   const [prevRevealWidth, setPrevRevealWidth] = useState(revealWidth)
   if (prevRevealWidth !== revealWidth) {
     setPrevRevealWidth(revealWidth)
@@ -90,7 +86,6 @@ function useSlideRevealGesture(revealWidth: number) {
     (e: React.PointerEvent) => {
       const t = dragRef.current
       if (!t) return
-      // Released outside the row before the swipe captured the pointer.
       if (e.pointerType === 'mouse' && e.buttons === 0) {
         dragRef.current = null
         setIsDragging(false)

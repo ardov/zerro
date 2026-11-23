@@ -3,12 +3,10 @@ import { IconButton } from '@/6-shared/ui/kit/Button'
 import { BarChartIcon } from '@/6-shared/ui/Icons'
 
 export type SummaryToggle = {
-  /** The summary of this list is on screen now. */
   shown: boolean
   onToggle: () => void
 }
 
-/** Opens what the list adds up to, beside or over the list. */
 export function SummaryButton({ shown, onToggle }: SummaryToggle) {
   const { t } = useTranslation('transactionSummary')
   return (

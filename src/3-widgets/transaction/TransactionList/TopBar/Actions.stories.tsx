@@ -115,7 +115,6 @@ export const SaveAndCancel: Story = {
       dialog.getByRole('textbox', { name: 'Comment' }),
       'Discard this draft'
     )
-    // Click outside, then wait past the surface's exit animation.
     const dialogElement = body.getByRole('dialog', {
       name: 'Edit Transactions',
     })
@@ -155,7 +154,6 @@ export const SaveAndCancel: Story = {
       canvas.getByRole('button', { name: 'Select two transactions' })
     )
     dialog = await open()
-    // Explicitly clearing a shared comment applies to both selected rows.
     await userEvent.clear(dialog.getByRole('textbox', { name: 'Comment' }))
     await userEvent.click(dialog.getByRole('button', { name: 'Apply Changes' }))
     await waitFor(() =>

@@ -11,6 +11,5 @@ it('spreads release across the screen while keeping neighboring glyphs together'
   expect(Math.max(...delays)).toBeCloseTo(1800)
   expect(delays.filter(delay => delay < 600).length).toBeGreaterThan(0)
   expect(delays.filter(delay => delay > 1200).length).toBeGreaterThan(0)
-  // The added point is 1 CSS pixel from a point in the fourth row.
   expect(Math.abs(delays[33] - delays[100])).toBeLessThan(20)
 })

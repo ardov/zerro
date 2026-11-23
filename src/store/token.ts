@@ -11,12 +11,9 @@ const { reducer, actions } = createSlice({
   },
 })
 
-// REDUCER
 export default reducer
 
-// ACTIONS
 export const { setToken } = actions
 
-// SELECTORS
 export const getToken = (state: RootState) => state.token
 export const getLoginState = (state: RootState) => Boolean(getToken(state))

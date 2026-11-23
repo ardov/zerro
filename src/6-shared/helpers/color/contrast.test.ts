@@ -8,7 +8,6 @@ it.each([
   ['#3f51b5', '#ffffff'],
   ['#ff9800', '#000000'],
   ['#ffff8d', '#000000'],
-  // Midtones where the former WCAG luminance threshold chose black.
   ['#43a047', '#ffffff'],
   ['#777', '#ffffff'],
   ['rgb(67 160 71)', '#ffffff'],

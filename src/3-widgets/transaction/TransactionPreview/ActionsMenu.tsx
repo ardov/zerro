@@ -22,7 +22,6 @@ export type TransactionActions = {
   onDelete: () => void
   onRestore: () => void
   onSetViewed: (viewed: boolean) => void
-  /** Lists this transaction leads to. Offered where one can be opened. */
   lists: readonly TRelatedList[]
   onOpenList: (list: TRelatedList) => void
 }
@@ -43,7 +42,6 @@ export function ActionsMenu(
   const { t, i18n } = useTranslation(['transaction', 'transactionContextMenu'])
   const popup = usePopup()
   const counts = useListCounts(lists, popup.open)
-  // What changes this transaction comes first; where it leads comes after.
   const items: MenuItem[] = [
     {
       id: 'copy',

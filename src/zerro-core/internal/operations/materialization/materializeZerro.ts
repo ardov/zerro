@@ -18,7 +18,6 @@ import {
 } from '../../domain/zerro/operations/prepare'
 import type { TZerroOperation } from '../../domain/zerro/operations/types'
 
-/** Resolve domain intent using current storage; never infer intent from JSON. */
 export function materializeZerro(
   data: TDataStore,
   operation: TZerroOperation,

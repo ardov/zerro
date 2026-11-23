@@ -112,15 +112,12 @@ function whatsHappening(
   const overRect = e.over?.rect
 
   if (
-    // has active
     !activeData ||
     !activeData.id ||
     !activeRect ||
-    // has over
     !overData ||
     !overData.id ||
     overData.type !== DragTypes.envelope ||
-    // overData.type !== DragTypes.newGroup ||
     !overRect
   ) {
     return null
@@ -134,14 +131,12 @@ function whatsHappening(
 
   return {
     isOverChild,
-    isNesting:
-      // overData.type === DragTypes.newGroup ||
-      getNestingState(
-        tryingToNest,
-        isOverChild,
-        isLastVisibleChild,
-        isExpanded
-      ),
+    isNesting: getNestingState(
+      tryingToNest,
+      isOverChild,
+      isLastVisibleChild,
+      isExpanded
+    ),
 
     activeId: activeData.id as core.envelopes.TEnvelopeId,
     activeType: activeData.type as DragTypes,
@@ -160,11 +155,9 @@ function getNestingState(
   isExpanded: boolean
 ) {
   if (overChild) {
-    // Child
     if (overLastVisibleChild) return tryingToNest
     return true
   } else {
-    // Parent
     if (isExpanded) return true
     return tryingToNest
   }

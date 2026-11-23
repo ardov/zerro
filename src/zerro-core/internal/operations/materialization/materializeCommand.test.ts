@@ -278,9 +278,6 @@ describe('materializeCommand', () => {
       ],
     })
 
-    // Local materialization predicts the server-side purge of the source, so
-    // `current` never keeps the tiny row that would surface as a nonsense
-    // transfer once deleted transactions are made visible.
     const initial = materializeCommand(snapshot, command)
     expect(initial.transaction).toEqual([{ ...replacement, changed: 300 }])
     expect(initial.deletion).toEqual([
@@ -334,7 +331,6 @@ describe('materializeCommand', () => {
     const patch = materializeCommand(snapshot, command)
     expect(applyPatch(snapshot, patch).transaction).toEqual({})
 
-    // Transport still carries the write that triggers the purge.
     expect(materializePrimaryCommand(snapshot, command).transaction).toEqual([
       { ...source, income: 0.00001, outcome: 0.00001, changed: 1001 },
     ])
@@ -366,12 +362,9 @@ describe('materializeCommand', () => {
       300
     )
 
-    // The row the create asks for never reaches `current`: the server rounds
-    // both amounts to zero and answers with a tombstone instead.
     const patch = materializeCommand(snapshot, command)
     expect(applyPatch(snapshot, patch).transaction).toEqual({})
 
-    // Transport still creates it, because that write is what purges it.
     expect(
       materializePrimaryCommand(snapshot, command).transaction
     ).toMatchObject([{ id: 'created', income: 0.00004, outcome: 0.00004 }])
@@ -696,9 +689,7 @@ describe('materializeCommand', () => {
     expect(applyPatch(snapshot, patch).account[survivor.id].balance).toBe(11)
   })
 
-  // The debt account cannot be the survivor of a collapse, because a
-  // row with debt on both sides is rejected. The server soft-deletes the row
-  // and nulls the leg that pointed at the deleted account, keeping the amounts.
+  // The server rejects debt on both sides, so it nulls the deleted leg and preserves the amounts on a soft-deleted row.
   it('soft-deletes a debt operation instead of collapsing it onto the debt account', () => {
     const deleted = makeAccount({ id: 'deleted', balance: -13 })
     const debt = makeAccount({
@@ -738,8 +729,6 @@ describe('materializeCommand', () => {
       },
     ])
 
-    // The soft-deleted row stops counting, so the debt account loses exactly
-    // what the operation contributed.
     expect(applyPatch(snapshot, patch).account[debt.id].balance).toBe(302)
   })
 

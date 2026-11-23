@@ -1,17 +1,7 @@
 export type InteractionType = 'mouse' | 'touch' | 'pen' | 'keyboard' | ''
 
-/** The last real input, tracked once for the whole document.
- *
- * Base UI keeps the same thing for its own dismissals, but does not expose it,
- * and a surface this app closes by setting `open={false}` — Back, a call site's
- * `onClose` — emits no `openchange` at all, so the close type Base UI hands to
- * `finalFocus` is an empty string. This is the answer for those.
- *
- * Its kind is also kept on the root as `data-input-modality`. A trigger that
- * gets focus back after a pointer closed its popup still matches
- * `:focus-visible` in Chrome: the popup returns focus by script, and the
- * browser carries visibility over from the element it leaves. Fields read the
- * attribute to keep that focus quiet, as a plain button's would be. */
+/** Track real input for controlled closes: Base UI receives no close modality when open is set directly.
+ * Fields use the root modality to suppress a pointer-induced focus ring on return. */
 let lastInteraction: InteractionType = ''
 
 export const getLastInteraction = () => lastInteraction

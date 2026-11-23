@@ -10,7 +10,6 @@ import type { useTranslation } from 'react-i18next'
 import { getDateLocale, parseDate } from '@/6-shared/helpers/date'
 import type { DateClause } from './filterModel'
 
-/** Compact calendar dates; only bounded single days get relative names. */
 export function getDateFilterLabel(
   clause: DateClause,
   t: ReturnType<typeof useTranslation>['t'],

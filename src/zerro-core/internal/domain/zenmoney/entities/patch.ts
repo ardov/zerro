@@ -2,11 +2,7 @@ import type { ById } from '../../foundation/types'
 
 type TEntityId = string | number
 
-/**
- * Validates a patch against one normalized entity map without depending on the
- * later aggregate model. Entity compilers return their own narrow patch shape;
- * `model/store.ts` aggregates those shapes into `TIntentPatch`.
- */
+/** Validate against one entity map without importing the aggregate store model. */
 export function compileExistingEntityPatch<
   TKey extends string,
   TEntity extends { id: TEntityId },

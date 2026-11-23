@@ -37,7 +37,6 @@ const settled = (el: HTMLElement) =>
     expect(el.getAnimations().some(a => a.playState === 'running')).toBe(false)
   )
 
-/** One component instance, entirely controlled by the Args panel. */
 export const Bench: Story = {}
 
 export const Transition: Story = {
@@ -63,7 +62,6 @@ export const Transition: Story = {
   },
 }
 
-/** The root is layout-transparent inside a flex column. */
 export const InFlexColumn: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => (
@@ -88,7 +86,6 @@ export const InFlexColumn: Story = {
   },
 }
 
-/** Verifies that a panel follows content that grows while it is open. */
 export const GrowsWhileOpen: Story = {
   tags: ['!dev', '!autodocs'],
   render: function Render() {

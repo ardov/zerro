@@ -2,24 +2,17 @@ import type { TDateDraft } from '@/6-shared/types'
 import { isValidDate, parseDate } from './date'
 
 interface TReceipt {
-  /** Timestamp */
   t: Date
-  /** Amount */
   s: number
-  /**  */
   fn: string
-  /** Receipt number */
   i: string
-  /**  */
   fp: string
-  /** Type of transaction */
   n: string
 }
 
 // Receipt string looks like this
 // t=20211028T1636&s=1299.00&fn=9287440301110113&i=19313&fp=1992968429&n=1
 
-/** Parses receipt string */
 export function parseReceipt(string: string): TReceipt | null {
   try {
     return parseReceiptUnsafe(string)

@@ -31,32 +31,23 @@ import './Drawer.css'
 
 export type DrawerProps = SurfaceName & {
   'aria-describedby'?: string
-  /** Auto uses bottom below 500px and right on wider screens. Below 500px a
-   * right sheet fills the screen as a page. A left sheet does the same, from
-   * the other edge. */
+  /** Auto uses a bottom sheet below 500px and a right sheet at larger widths. Narrow side sheets fill the screen. */
   side?: 'auto' | 'bottom' | 'right' | 'left'
   className?: string
   style?: CSSProperties
   contentClassName?: string
-  /** The children bring their own scroller, such as a virtual list, and fill
-   * the drawer's body instead of scrolling in it. The body then has no
-   * padding of its own; `contentClassName` styles it. A bottom sheet then
-   * takes its full height rather than its content's, so the scroller has a
-   * definite height to fill. The scroller consumes `--kit-scroll-bottom-inset`
-   * inside its content (ScrollArea does this automatically). */
+  /** For a child-owned scrollport, give the drawer a definite height and no body padding.
+   * The child's scroll content must consume --kit-scroll-bottom-inset; ScrollArea does so automatically. */
   contentScrolls?: boolean
   children: ReactNode
   onClose?: () => void
-  /** Called after the surface finishes opening or closing. */
   onOpenChangeComplete?: (open: boolean) => void
   disabled?: boolean
-  /** Keep the editor open when its backdrop is pressed. */
   disablePointerDismissal?: boolean
   trigger?: ReactElement
   popup?: PopupController
 }
 
-/** History owns visibility; Base UI owns the modal and swipe gesture. */
 export function Drawer(props: DrawerProps) {
   const { popup, onClose, ...restProps } = props
   const controller = useOwnedPopup({
@@ -76,7 +67,6 @@ type DrawerSurfaceProps = Omit<DrawerProps, 'popup' | 'onClose'> & {
   initialFocus?: Primitive.Popup.Props['initialFocus']
 }
 
-/** Shared rendering for surfaces whose owner already registered a history entry. */
 export function DrawerSurface(props: DrawerSurfaceProps) {
   return <DrawerFrame {...props} finalFocus={useSurfaceFinalFocus(props)} />
 }
@@ -146,8 +136,6 @@ function DrawerFrame(props: DrawerSurfaceProps) {
         ? 'bottom'
         : 'right'
       : requestedSide
-  // On a phone a side sheet is a page of its own: it fills the screen, and
-  // from 500px it floats beside the page with an inset.
   const page = side !== 'bottom' && bottomSheet
   return (
     <Primitive.Root
@@ -201,14 +189,11 @@ function DrawerFrame(props: DrawerSurfaceProps) {
             initialFocus={active ? initialFocus : false}
             onKeyDown={keepArrowKeys}
             data-side={side}
-            // Against the screen edge rather than floating beside the page.
             data-attached={side === 'bottom' || page ? '' : undefined}
             finalFocus={covered ? false : finalFocus}
             className={cn(
               'kit-modal-popup kit-drawer-popup pointer-events-auto relative flex flex-col rounded-smooth bg-ui-card text-ui-primary shadow-ui-popover outline-none',
-              // A floating drawer clips its content to all four corners. An
-              // attached one has nothing at its rounded corners to clip, and
-              // must not clip the surface it extends past the screen edge.
+              // Clip floating sheets at all corners. Attached sheets must paint beyond the viewport during a pull.
               side !== 'bottom' && !page && 'overflow-hidden',
               side === 'bottom'
                 ? cn(

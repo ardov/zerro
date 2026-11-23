@@ -204,8 +204,7 @@ function AnalyticsNavigation() {
   return null
 }
 
-/** The route picks the page's columns. Reading the location here rather than
- * in `Application` keeps a screen opening from rebuilding every route. */
+/** Subscribe to location here so opening an overlay does not rebuild the route table. */
 function RouteLayout(
   props: Omit<React.ComponentProps<typeof Layout>, 'columns'>
 ) {

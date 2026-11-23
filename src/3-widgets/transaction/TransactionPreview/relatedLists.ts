@@ -10,7 +10,6 @@ export type TRelatedList = {
   title: string
 }
 
-/** Lists a transaction can lead to, each opened over the surface showing it. */
 export function relatedLists(
   tr: TTransaction,
   context: {
@@ -32,7 +31,6 @@ export function relatedLists(
     ? merchants[tr.merchant]
     : undefined
   const payee = tr.payee?.trim()
-  // A debtor is one name, whether a merchant or an old text payee carries it.
   const debtor = debt ? core.debtors.getDebtorId(tr, merchants) : ''
   if (debtor)
     lists.push({
@@ -57,7 +55,6 @@ export function relatedLists(
       title: t('counterpartySearch', { name: payee }),
     })
 
-  // The main category: the one a transaction is budgeted under.
   const tag = tr.tag?.[0]
   const category = tag ? tagNames[tag] : undefined
   if (tag && category)

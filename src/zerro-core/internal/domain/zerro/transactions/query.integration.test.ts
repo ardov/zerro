@@ -7,9 +7,7 @@ import { TrFilterMode } from './query'
 
 describe('transaction query integration', () => {
   it('reconstructs activity and envelope transaction counts on demand', () => {
-    // One representative year covers recurring income, outcome, transfer,
-    // debt, and envelope shapes without making this parity check repeatedly
-    // scan the full four-year demo history for every projection node.
+    // One year covers each operation type without repeating a full demo-history scan for each projection.
     const store = makeDemoStore({ until: '2023-06-19' })
     const session = createZerroSession(store, {
       now: () => Date.parse('2026-07-06T12:00:00.000Z'),

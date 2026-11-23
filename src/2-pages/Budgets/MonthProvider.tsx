@@ -42,7 +42,6 @@ export const MonthProvider: FC<{ children: ReactNode }> = props => {
   )
 }
 
-/** Returns a month within given range */
 function getValidMonth(selected: TISOMonth, min: TISOMonth, max: TISOMonth) {
   if (selected < min) return min
   if (selected > max) return max

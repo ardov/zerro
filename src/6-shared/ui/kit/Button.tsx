@@ -70,7 +70,6 @@ type ButtonVariants = {
 export type ButtonProps = Omit<ButtonPrimitive.Props, 'className'> &
   Partial<ButtonVariants> & {
     className?: string
-    /** Secondary foreground for ghost buttons; hover and expanded stay primary. */
     muted?: boolean
   }
 
@@ -78,11 +77,9 @@ export type IconButtonProps = Omit<ButtonProps, 'aria-label'> & {
   label: string
   tooltip?: boolean
   tooltipSide?: TooltipProps['side']
-  /** Rounded rectangle by default; circle for standalone icon actions. */
   shape?: 'rounded' | 'circle'
 }
 
-/** Values for stories */
 const buttonOptions: {
   [K in keyof ButtonVariants]: NonNullable<ButtonVariants[K]>[]
 } = {

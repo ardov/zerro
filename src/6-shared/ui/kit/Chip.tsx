@@ -49,11 +49,8 @@ export type ChipProps = Omit<
   /** Opaque HEX, RGB or OKLCH fill. Only used by the filled variant. */
   color?: string
   variant?: NonNullable<VariantProps<typeof chipVariants>['variant']>
-  /** sm is 24px; md is 32px (default). */
   size?: 'sm' | 'md'
-  /** Controlled toggle state. With onClick, exposes aria-pressed and owns the fill. */
   checked?: boolean
-  /** Decorative leading icon. */
   start?: ReactNode
   onClick?: MouseEventHandler<HTMLButtonElement>
   onRemove?: () => void

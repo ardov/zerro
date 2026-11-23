@@ -24,7 +24,6 @@ describe('history shortcuts', () => {
     [{ key: 'z', code: 'KeyZ', ctrlKey: true }, 'undo'],
     [{ key: 'z', code: 'KeyZ', ctrlKey: true, shiftKey: true }, 'redo'],
     [{ key: 'y', code: 'KeyY', ctrlKey: true }, 'redo'],
-    // Physical-key codes keep shortcuts working with non-Latin layouts.
     [{ key: 'я', code: 'KeyZ', metaKey: true }, 'undo'],
   ] satisfies [KeyboardEventInit, 'undo' | 'redo'][])(
     'maps %o to %s',

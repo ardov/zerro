@@ -32,12 +32,9 @@ export default function TransactionsView() {
     (summary: TSummaryChoices) => dispatch(patchTransactionsPage({ summary })),
     [dispatch]
   )
-  // One selected editor moves between its column and a modal as space changes.
   const opened = transactionScreen.useValue()
   const openPreview = transactionScreen.useOpen()
 
-  // The summary follows the list: with a filter, a search or checked rows it
-  // is what the docked panel rests on, and the button opens it anywhere else.
   const [summaryOpen, setSummaryOpen] = transactionSummaryScreen.use()
   const openSummary = transactionSummaryScreen.useOpenInstead()
   const summaryByDefault =

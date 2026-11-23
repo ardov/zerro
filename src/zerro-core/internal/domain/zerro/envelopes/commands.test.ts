@@ -463,7 +463,6 @@ describe('envelope commands', () => {
     const next = applyPatch(data, patch)
     const meta = getEnvelopeMeta(next.reminder)
 
-    // Flat order: [Costs, parent, food, Savings, cash, fun]
     expect(next.tag.food.parent).toBe('parent')
     expect(meta[parentId]).toMatchObject({ index: 1 })
     expect(meta[foodId]).toMatchObject({ index: 2 })
@@ -549,7 +548,6 @@ describe('envelope commands', () => {
     const next = applyPatch(data, patch)
     const meta = getEnvelopeMeta(next.reminder)
 
-    // Flat order: [G, virt, t (elevated), p, c2, c1]
     expect(next.tag.t.parent).toBeNull()
     expect(next.tag.c2.parent).toBe('p')
     expect(meta[tId]).toMatchObject({ group: 'G', index: 2 })
@@ -619,7 +617,6 @@ describe('envelope commands', () => {
     const next = applyPatch(data, merged)
     const meta = getEnvelopeMeta(next.reminder)
 
-    // Flat order: [A, food, fun] — the empty group takes no index
     expect(meta[foodId]).toBeUndefined()
     expect(meta[funId]).toEqual({ id: funId, group: 'A', index: 2 })
   })

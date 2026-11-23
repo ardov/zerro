@@ -16,7 +16,6 @@ type MonthSelectPopoverProps = {
   disablePast?: boolean
 }
 
-/** Shared surface adapter; MonthPicker owns the calendar interaction. */
 export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
   const {
     open,

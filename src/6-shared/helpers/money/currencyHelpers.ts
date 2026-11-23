@@ -6,25 +6,11 @@ export function unitsPerWhole(symbol: string | undefined): number {
   return symbol && /^[μµ]/u.test(symbol) ? 1_000_000 : 1
 }
 
-/** Decimal arithmetic used by financial calculations.
- *
- * Money is counted to two decimals, and a half-cent rounds up. Ties on
- * negative amounts go towards positive infinity, which is what `Math.round`
- * has always done here.
- *
- * Core keeps its own copy in
- * `zerro-core/internal/domain/foundation/numbers.ts`: Core owns no dependency
- * on `6-shared`, so the two cannot be one. Change them together.
- */
+/** Half-cent ties go toward positive infinity. Keep this in sync with zerro-core/internal/domain/foundation/numbers.ts. */
 export function round(amount: number): number {
   if (!Number.isFinite(amount)) return amount
   if (amount === 0) return 0
-  // Fast path for everyday amounts. Away from a half cent, multiplying lands
-  // on the same whole number of cents as the printed form below: the product
-  // and the printed value differ by a few units in the last place, far less
-  // than the margin checked here. A whole number of cents divided by 100 is
-  // then the same double that "123e-2" parses to. This also rounds tiny
-  // remainders from currency conversion to unsigned zero.
+  // Away from a half-cent, multiplication is safely within the rounding margin.
   const cents = amount * 100
   const whole = Math.round(cents)
   const margin = Math.max(1e-9, Math.abs(cents) * 8 * Number.EPSILON)
@@ -34,11 +20,7 @@ export function round(amount: number): number {
   ) {
     return whole / 100 + 0
   }
-  // The decimal point is moved through the number's own printed form rather
-  // than by multiplying. 1.005 is stored as 1.00499999999999989, so
-  // `1.005 * 100` is 100.49999999999999 and rounds down to a cent nobody
-  // typed. `${amount}` prints the shortest text that reads back as the same
-  // number — "1.005" — so "1.005e2" parses as exactly 100.5.
+  // Shift the printed decimal near ties: 1.005 * 100 falls below 100.5 in binary.
   const shifted = Number(`${amount}e2`)
   // At this point only large amounts can print with an exponent. They are
   // already whole numbers.
@@ -54,8 +36,6 @@ export function add(...params: number[]): number {
 export function sub(first: number, ...params: number[]): number {
   return params.reduce((acc, cur) => round(acc - cur), first)
 }
-
-// Helpers for currency objects
 
 export function createFxAmount(currency: TFxCode, value: number): TFxAmount {
   return { [currency]: value }

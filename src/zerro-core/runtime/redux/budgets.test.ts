@@ -76,7 +76,6 @@ describe('selectBudgets', () => {
     const core = selectBudgets(state)
     expect(core[MONTH][envId.get(EnvType.Tag, tagA)]).toBe(10_000)
     expect(core[NEXT_MONTH][envId.get(EnvType.Tag, tagB)]).toBe(5_000)
-    // Zenmoney tag budget is ignored while preferZmBudgets is off
     expect(core[MONTH][envId.get(EnvType.Tag, tagB)]).toBeUndefined()
   })
 
@@ -90,7 +89,6 @@ describe('selectBudgets', () => {
     const state = makeRootState(applyPatch(store, settingsPatch))
 
     const core = selectBudgets(state)
-    // Zenmoney tag budget wins for tag envelopes now
     expect(core[MONTH][envId.get(EnvType.Tag, tagB)]).toBe(7_000)
   })
 

@@ -17,7 +17,6 @@ export type TEntityOperation =
     }[TIntentEntityKey]
   | { type: 'entity.delete'; entity: TDataEntityKey; id: string | number }
 
-/** Entity builders produce sparse fields; preparation fixes create versus edit. */
 export function entityOperations(
   snapshot: TDataStore,
   patch: TIntentPatch

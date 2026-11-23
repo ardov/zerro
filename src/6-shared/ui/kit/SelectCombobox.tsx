@@ -63,7 +63,6 @@ function visibleItems<T extends string>(
   return result
 }
 
-/** Combobox selection shared by searchable popovers and mobile sheets. */
 export function SelectCombobox<T extends string>(
   props: SelectControlProps<T> & { search: SelectSearchOptions<T> | false }
 ) {
@@ -107,7 +106,6 @@ export function SelectCombobox<T extends string>(
     query: search.initialQuery ?? '',
     expanded: false,
   })
-  // Also reset when the consumer closes the popup through its controlled prop.
   if (session.open !== open)
     setSession({
       open,
@@ -257,9 +255,7 @@ export function SelectCombobox<T extends string>(
       {displayValue}
     </Combobox.Trigger>
   )
-  // Adaptive panels move their fields into a drawer without remounting them.
-  // Nest the picker in the field's current portal so releasing the opening
-  // press over the picker is still an interaction inside that drawer.
+  // Place the picker in the field's current portal so releasing the opening press stays inside the adaptive drawer.
   const portalContainer =
     surface?.closest<HTMLElement>('[data-base-ui-portal]') ?? undefined
   return (

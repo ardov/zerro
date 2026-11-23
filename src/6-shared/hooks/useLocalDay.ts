@@ -24,7 +24,6 @@ function subscribe(notify: () => void) {
   }
 }
 
-/** Local midnight, shared by relative date labels and calendar-day queries. */
 export function useLocalDay() {
   return useSyncExternalStore(subscribe, getSnapshot)
 }

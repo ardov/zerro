@@ -14,31 +14,20 @@ import { useTransactionHandover } from '../transaction/TransactionPreview/useTra
 import { usePendingEdit } from '../transaction/TransactionPreview/usePendingEdit'
 import { useOpenRelatedTransactions } from './TransactionListDrawer'
 
-/** A screen: one transaction, described by its id alone, so Back, Forward and
- * a reload all bring it back.
- *
- * Opening the next transaction from inside it names this same screen, which
- * hands over rather than stacks — ten transactions later Back is still one
- * press away from the page. */
+/** Opening another transaction in the same screen replaces its entry, so Back still returns to the page. */
 export const transactionScreen = defineScreen<TTransactionId>('transaction')
 
 /** Read saved previews from before lists owned their own Details instance. */
 const modalTransactionScreen = defineScreen<TTransactionId>('modalTransaction')
 
-/** A screen: the summary of the transactions page list, in the editor's place.
- * A transaction opened from the list sits above it, so Back returns here. */
 export const transactionSummaryScreen = defineScreen<true>('transactionSummary')
 
-/** Draws a list's summary. It is handed a close action only where closing
- * would change what the panel shows. */
 type SummarySlot = (onClose?: () => void) => ReactNode
 
 export function useTransactionPreview() {
   return transactionScreen.useOpen()
 }
 
-/** The transactions page owns its persistent adaptive editor. Other pages
- * open the same URL-backed screen in a modal. */
 export const TransactionPreviewDrawer = () => {
   const { pathname } = useLocation()
   return (
@@ -58,7 +47,6 @@ export function TransactionScreenPanel({
 }: {
   docked: boolean
   summary?: SummarySlot
-  /** Docked with nothing open, the summary is what the panel rests on. */
   summaryByDefault?: boolean
 }) {
   return (
@@ -97,7 +85,6 @@ function TransactionScreenDrawer({
   const [id, setId] = screen.use(pending.finish)
   const openOther = screen.useOpen()
   const remove = screen.useRemove()
-  // A transaction is always above the summary, so it is what closes first.
   const onClose = useCallback(
     () => (id ? setId(null) : setSummary(null)),
     [id, setId, setSummary]

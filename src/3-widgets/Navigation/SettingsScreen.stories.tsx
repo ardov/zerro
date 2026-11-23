@@ -172,8 +172,6 @@ const checkHistory: Story['play'] = async ({ canvasElement }) => {
     expect(body.queryByRole('dialog', { name: 'Change history' })).toBeNull()
   )
   await expect(body.getByRole('button', { name: 'Full backup' })).toBeVisible()
-  // One further Back reaches the page; Forward reconstructs settings from
-  // the same history value.
   await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
   await waitFor(() =>
     expect(body.queryByRole('button', { name: 'Full backup' })).toBeNull()
@@ -287,7 +285,6 @@ const checkStartPage: Story['play'] = async ({ canvasElement }) => {
       '/transactions'
     )
 
-    // Reopening Advanced remounts the row and reads the saved preference.
     await userEvent.click(advanced)
     await waitFor(() => expect(button).not.toBeInTheDocument())
     await userEvent.click(advanced)
@@ -636,8 +633,6 @@ export const DailyFolderBackupMobile: Story = {
   play: checkDailyFolderBackup('dialog'),
 }
 
-/** A paused or failing automatic backup marks the settings button, so it is
- * noticed without opening settings. */
 export const BackupProblemNotice: Story = {
   tags: ['!autodocs'],
   render: () => <FolderBackupHarness />,

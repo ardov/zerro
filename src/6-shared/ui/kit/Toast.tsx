@@ -36,7 +36,6 @@ export type ToastUpdate = Partial<Omit<ToastOptions, 'id'>>
 /** Create an isolated instance for a separate React root or Storybook canvas. */
 export function createToastManager() {
   const manager = Primitive.createToastManager()
-  // The provider only subscribes; callers get the smaller, typed kit API.
   return manager as Omit<typeof manager, 'add' | 'update' | 'promise'> & {
     add: (options: ToastOptions) => string
     update: (id: string, options: ToastUpdate) => void

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { Decision, HistoryOp, OverlayAction, OverlayEntry } from './decide'
 import { decide } from './decide'
 
-/** No decision to carry out. */
 const nothing: Decision = { history: { kind: 'none' }, dismiss: 0 }
 
 describe('instance updates, removal and group closing', () => {
@@ -124,21 +123,15 @@ describe('instance updates, removal and group closing', () => {
   })
 })
 
-/** A history stack plus the app's live popup layers, driven exactly the way
- * `OverlayHost` drives them. Scenarios below read as a person's session:
- * open, press Back, reload. */
 function session(
   initial: OverlayEntry = {},
-  /** Hold every step the way a browser does, until `land` is called. A real
-   * one takes several frames over it, which is long enough for a surface to
-   * open in the meantime. */
+  /** Hold Back until land() so tests can open or close a surface before navigation completes. */
   { holdSteps = false } = {}
 ) {
   const entries: OverlayEntry[] = [initial]
   let idx = 0
   let live = 0
   let held: number | null = null
-  /** Actions `decide` told us to hold until the step has landed. */
   const pending: OverlayAction[] = []
 
   function entry() {
@@ -151,7 +144,6 @@ function session(
 
   function ask(action: OverlayAction): Decision {
     const decision = decide(entry(), layers(), action)
-    // The host holds what it is told to hold and asks again on the landing.
     if (decision.defer) {
       pending.push(action)
       return decision
@@ -174,7 +166,6 @@ function session(
     }
   }
 
-  /** The step the browser was asked for, arriving. */
   function land() {
     if (held === null) return
     idx += held
@@ -182,8 +173,6 @@ function session(
     settle()
   }
 
-  /** What the host's effect does on every landing: carry out what was held,
-   * then reconcile until still. */
   function settle() {
     for (let guard = 0; guard < 10; guard++) {
       if (pending.length) {
@@ -221,27 +210,22 @@ function session(
       return ask({ kind: 'openPopup' })
     },
     closePopup() {
-      // The host closes a layer by id and ignores one already dismissed.
       if (live === 0) return nothing
       live--
       return ask({ kind: 'closePopup' })
     },
-    /** The step the browser was asked for, arriving. */
     land,
-    /** The browser's Back button. */
     back() {
       if (idx === 0) throw new Error('Back would have left the app')
       idx--
       settle()
     },
-    /** Leaving for another page: a plain push with no overlay state. */
     goToPage() {
       entries.splice(idx + 1)
       entries.push({})
       idx++
       settle()
     },
-    /** Reload drops everything held in memory; history survives. */
     reload() {
       live = 0
       settle()
@@ -371,13 +355,12 @@ describe('R2 — closing is returning to the previous address', () => {
 describe('one surface handing over to another, while the step is in flight', () => {
   it('keeps the replacement popup when the step lands and gives it a Back step', () => {
     const s = session({}, { holdSteps: true })
-    s.openPopup() // the filter bar's menu
-    s.closePopup() // a filter is picked, so the menu closes
-    s.openPopup() // and the clause editor opens in its place
+    s.openPopup()
+    s.closePopup()
+    s.openPopup()
     expect(s.live).toBe(1)
 
     s.land()
-    // The editor is still open, and it has a slot of its own to be closed by.
     expect(s.live).toBe(1)
     expect(s.entry.slots).toBe(1)
 
@@ -400,7 +383,7 @@ describe('one surface handing over to another, while the step is in flight', () 
     const s = session({}, { holdSteps: true })
     s.openPopup()
     s.closePopup()
-    s.openPopup() // both open in the window the step is in flight for
+    s.openPopup()
     s.openPopup()
     s.land()
     expect(s.live).toBe(2)
@@ -414,7 +397,7 @@ describe('one surface handing over to another, while the step is in flight', () 
 
   it('keeps a screen that opened as the popup stepped off', () => {
     const s = session({}, { holdSteps: true })
-    s.openPopup() // the settings menu
+    s.openPopup()
     s.closePopup()
     s.openScreen('historyPanel', true)
     s.land()
@@ -431,7 +414,7 @@ describe('one surface handing over to another, while the step is in flight', () 
   it('holds the action rather than answering it, while the step is in flight', () => {
     const s = session({}, { holdSteps: true })
     s.openPopup()
-    const decision = s.closePopup() // steps off the slot
+    const decision = s.closePopup()
     expect(decision.history).toEqual({ kind: 'go', delta: -1 })
     expect(s.openPopup().defer).toBe(true)
     expect(s.openScreen('tr', 'a').defer).toBe(true)

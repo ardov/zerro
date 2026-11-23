@@ -84,21 +84,11 @@ export {
   reminderMarkerStates,
 } from '@/zerro-core/internal/domain/zenmoney'
 
-// export type TToken = TAccessToken['access_token']
-
-// ---------------------------------------------------------------------
-// DELETION — owned by Zerro Core
-// ---------------------------------------------------------------------
-
 export type {
   TZmDeletionObject,
   TDeletionObject,
 } from '@/zerro-core/internal/domain/zenmoney'
 import type { TZmDeletionObject } from '@/zerro-core/internal/domain/zenmoney'
-
-// ---------------------------------------------------------------------
-// DIFF
-// ---------------------------------------------------------------------
 
 export type TZmDiff = {
   serverTimestamp: TUnixTime
@@ -116,7 +106,6 @@ export type TZmDiff = {
   transaction?: TZmTransaction[]
 }
 
-// The normalized diff/patch shape is owned by Zerro Core.
 export type {
   TDataEntityKey,
   TNormalizedPatch,

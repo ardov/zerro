@@ -12,5 +12,4 @@ export type TISOMonth = `${YYYY}-${MM}`
 export type TISODate = `${YYYY}-${MM}-${DD}`
 export type TDateDraft = number | TISOMonth | TISODate | Date
 
-/** Money amount in a single currency or instrument. */
 export type TUnits = number

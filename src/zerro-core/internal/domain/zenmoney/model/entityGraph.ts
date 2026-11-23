@@ -1,14 +1,4 @@
-/**
- * The reference graph between Zenmoney entities: who points at whom, whether
- * the pointer may be empty, and what a reader and a writer each do when it
- * dangles.
- *
- * One declaration, four consumers. Validation reads it as "what to check",
- * backup import as "what to warn about", restore and push as "what a write
- * may not contain", and the write order is derived from it — so an entity
- * added to the graph cannot be remembered in one of those places and
- * forgotten in another.
- */
+/** Reference declarations drive validation, backup warnings, write pruning, and dependency order. */
 import { globalBudgetTagId } from '../entities/budgets'
 import {
   dataEntityKeys,
@@ -20,19 +10,15 @@ import {
 
 type TRowLike = { [field: string]: unknown }
 
-/** Whether a dangling pointer makes the snapshot corrupt. */
 export type TReferenceRead = 'reject' | 'tolerate'
 
-/** What a write path does when the target row will not exist. */
 export type TReferenceWrite = 'reject' | 'prune' | 'clear'
 
 export type TEntityReference = {
   from: TDataEntityKey
   field: string
   to: TDataEntityKey
-  /** The field holds an array of ids; `null` stands for "none". */
   many?: boolean
-  /** `null` is a legitimate value rather than a dangling pointer. */
   nullable?: boolean
   /** Rows on which a normally required reference may still be null. */
   nullableWhen?: (row: TRowLike) => boolean
@@ -44,11 +30,7 @@ export type TEntityReference = {
   write?: TReferenceWrite
 }
 
-/**
- * `read: 'tolerate'` keeps canonical rows whose missing reference does not
- * prevent reading them. Write policy is separate: only `write: 'prune'`
- * removes rows from restore/push. The import seam reports tolerated issues.
- */
+/** Read tolerance keeps canonical rows; write pruning is a separate policy that affects restore and push. */
 export const entityReferences: readonly TEntityReference[] = [
   { from: 'country', field: 'currency', to: 'instrument' },
 
@@ -112,9 +94,7 @@ export const entityReferences: readonly TEntityReference[] = [
   { from: 'transaction', field: 'user', to: 'user' },
   { from: 'transaction', field: 'incomeInstrument', to: 'instrument' },
   { from: 'transaction', field: 'outcomeInstrument', to: 'instrument' },
-  // Deleting an account nulls the leg that pointed at it on a debt operation
-  // and soft-deletes the row instead of purging it. A live row with a missing
-  // leg is still corruption.
+  // Account deletion nulls a debt leg and soft-deletes the row. A live row with a missing leg is corrupt.
   {
     from: 'transaction',
     field: 'incomeAccount',
@@ -163,10 +143,7 @@ export function referencesFrom(
   return referencesByEntity.get(key) ?? []
 }
 
-/**
- * Rows a snapshot contains but a write world never does. A restore does not
- * recreate a deleted marker, so nothing written may point at one either.
- */
+/** Never write a reference to a deleted marker: restore cannot recreate it. */
 const absentRowPredicates: Partial<
   Record<TDataEntityKey, (row: TRowLike) => boolean>
 > = {
@@ -177,25 +154,15 @@ export function isAbsentRow(key: TDataEntityKey, row: TRowLike): boolean {
   return absentRowPredicates[key]?.(row) ?? false
 }
 
-/**
- * Write order: an entity lands only after everything it points at. Derived
- * from the graph, with the declaration order of `dataEntityKeys` as the
- * tie-break between entities the graph leaves independent.
- */
+/** Write dependencies first; break ties between independent collections using dataEntityKeys order. */
 export const entityWriteOrder = topologicalOrder()
 
-/** The same order, restricted to the entities a client may write. */
 export const entityUpsertOrder = entityWriteOrder.filter(
   (key): key is TIntentEntityKey =>
     (intentEntityKeys as readonly string[]).includes(key)
 )
 
-/**
- * Deletion order, and deliberately not the reverse of the write order.
- * An account deletion cascades server-side, so it runs first and prunes what
- * would otherwise need deleting one row at a time. Tags run last because
- * every other entity may still point at one while it is being removed.
- */
+/** Delete accounts first to use the server cascade, and tags last because other entities can still reference them. */
 export const entityCleanupOrder = [
   'account',
   'transaction',
@@ -210,7 +177,6 @@ export const entityCleanupOrder = [
   'tag',
 ] as const satisfies readonly TDataEntityKey[]
 
-/** Reporting order: writable entities first, then read-only reference data. */
 export const entityProgressOrder = [
   ...entityUpsertOrder,
   ...dataEntityKeys.filter(
@@ -244,16 +210,10 @@ function topologicalOrder(): TDataEntityKey[] {
 
 export type TReferenceIssue = {
   reference: TEntityReference
-  /** `budget[3].tag` — the shape validation failures are reported in. */
   path: string
   message: string
 }
 
-/**
- * Walks every declared reference of a snapshot and reports the ones that do
- * not resolve. Row order follows `Object.values`, which is the order the
- * store was built in.
- */
 export function eachReferenceIssue(
   store: TDataStore,
   visit: (issue: TReferenceIssue) => void
@@ -314,7 +274,6 @@ function checkReference(
   }
 }
 
-/** Whether a single-valued reference legitimately points at nothing. */
 function isEmptyReference(
   reference: TEntityReference,
   value: unknown,
@@ -330,15 +289,9 @@ function hasRow(store: TDataStore, key: TDataEntityKey, id: unknown): boolean {
   return Object.hasOwn(store[key], id)
 }
 
-/** Whether a row exists in the world a write is about to produce. */
 export type TRowPresence = (key: TDataEntityKey, id: unknown) => boolean
 
-/**
- * Whether a write may contain this row at all. Only `write: 'prune'` decides
- * that: those are the references Zenmoney leaves dangling in a snapshot and
- * refuses to recreate, so the row has to go. Other reference policies never
- * silently drop the row here.
- */
+/** Only write: 'prune' may remove a row; other policies must not silently drop it. */
 export function isRowWritable(
   key: TDataEntityKey,
   row: TRowLike,
@@ -352,10 +305,6 @@ export function isRowWritable(
   })
 }
 
-/**
- * Nulls the references whose target the write world will not contain. Returns
- * the original row when nothing has to change.
- */
 export function clearAbsentReferences<TRow extends TRowLike>(
   key: TDataEntityKey,
   row: TRow,
@@ -372,11 +321,7 @@ export function clearAbsentReferences<TRow extends TRowLike>(
   return result
 }
 
-/**
- * Drops the rows a write cannot contain and clears the references that would
- * point at them. Entities are visited in write order, so a pruned owner is
- * already gone when its dependants are considered.
- */
+/** Prune in write order so a removed owner is already absent when its dependants are checked. */
 export function pruneUnwritableRows(store: TDataStore): TDataStore {
   const result = { ...store }
   const present: TRowPresence = (key, id) => {

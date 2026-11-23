@@ -7,8 +7,6 @@ import RefreshButton from '@/3-widgets/RefreshButton'
 import { MenuButton } from './MenuButton'
 import { type TDestination, useDestinations } from './destinations'
 
-/** The icon-only strip of destinations on the left of a wide window. It sits
- * on the canvas, not on a panel, and holds no lists of data. */
 export const Rail: FC<{ accountsPanelFits: boolean }> = ({
   accountsPanelFits,
 }) => {

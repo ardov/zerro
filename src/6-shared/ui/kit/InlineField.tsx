@@ -22,8 +22,6 @@ export type InlineFieldProps = Omit<
   end?: ReactNode
 }
 
-/** A controlled text input that inherits typography and grows within the
- * available width. Its caller owns saving, cancellation and error feedback. */
 export function InlineField({
   label,
   value,

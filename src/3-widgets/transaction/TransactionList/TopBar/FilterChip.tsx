@@ -21,7 +21,6 @@ import {
   type DateClause,
 } from './filterModel'
 
-/** Each stable chip owns exactly one modal editor and its editing-session draft. */
 export function FilterChip({
   clause,
   label,

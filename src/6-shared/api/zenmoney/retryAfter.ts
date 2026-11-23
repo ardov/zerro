@@ -1,10 +1,4 @@
-/**
- * `Retry-After` as milliseconds, in the one form both transports read.
- *
- * The header comes in two shapes — delay seconds, or an HTTP date — and a
- * transport that understands only the first silently falls back to its own
- * backoff whenever the server sends the second.
- */
+/** Retry-After accepts delay seconds or an HTTP date; return milliseconds in either case. */
 export function readRetryAfterMs(response: {
   headers?: { get(name: string): string | null }
 }): number | undefined {

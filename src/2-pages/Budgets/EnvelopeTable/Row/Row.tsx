@@ -43,7 +43,6 @@ type EnvelopeRowProps = {
   openTransactionsPopover: (id: core.envelopes.TEnvelopeId) => void
 }
 
-/** Builds reveal items for metrics not currently shown as columns. */
 function useRevealItems(params: {
   id: core.envelopes.TEnvelopeId
   columns: Metric[]

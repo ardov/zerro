@@ -1,6 +1,3 @@
-// Internal utilities. Not part of the public Zerro Core API: the module
-// exports domain semantics, not generic helpers.
-
 export function keys<O extends object>(o: O) {
   return Object.keys(o) as (keyof O)[]
 }

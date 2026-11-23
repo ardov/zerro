@@ -15,13 +15,10 @@ import '../inputModality'
 
 const surfaceVariants = cva(
   [
-    // Layout and typography
     'relative flex min-h-(--field-row-height) [--field-row-height:--spacing(12)] w-full items-center rounded-ui-control text-ui-16 text-ui-primary',
-    // Surface and interaction
     'border-0 bg-ui-highlight inset-ring-(length:--stroke-ui-control) inset-ring-transparent',
     // The focus ring outranks the hover ring by specificity.
     'hover:inset-ring-ui-border field-focus:inset-ring-ui-focus field-focus:bg-ui-card',
-    // Validation and availability
     'data-invalid:field-focus:inset-ring-ui-error',
     'data-disabled:pointer-events-none data-disabled:opacity-ui-disabled data-disabled:inset-ring-transparent',
   ],
@@ -35,9 +32,7 @@ const surfaceVariants = cva(
   }
 )
 
-/** A press on a field's passive parts focuses its control. Interactive
- * descendants keep the press, and presses bubbling out of a portal are not
- * the field's. */
+/** Passive parts focus the field; interactive targets and events bubbling from portals keep their own behavior. */
 export function focusControlOnPress(
   event: MouseEvent<HTMLElement>,
   control: HTMLElement | null | undefined
@@ -62,11 +57,9 @@ export type FieldSurfaceProps = ComponentPropsWithRef<'div'> & {
   tall?: boolean
   size?: 'lg' | 'sm'
   addonAlign?: 'stretch' | 'first-line'
-  /** Optional control to focus from the background or passive addons. */
   controlRef?: RefObject<HTMLElement | null>
 }
 
-/** Shared appearance and optional click-to-focus; children own their values. */
 export function FieldSurface(props: FieldSurfaceProps) {
   const {
     start,
@@ -151,14 +144,11 @@ function InvalidMark() {
   return (
     <svg
       aria-hidden
-      // An SVG is a replaced element: `top` and `bottom` together would leave
-      // it at its intrinsic 150px rather than stretching, so the height is
-      // spelled out.
+      // An SVG retains its intrinsic height with just top and bottom; set height explicitly instead.
       className="pointer-events-none absolute top-3 left-0 h-[calc(100%-1.5rem)] w-[6px] translate-x-1 text-ui-error"
       preserveAspectRatio="none"
     >
       <defs>
-        {/* One tile of the zigzag: 3px out and 3px down, then back. */}
         <pattern
           id={id}
           width="6"
@@ -179,7 +169,6 @@ function InvalidMark() {
   )
 }
 
-/** Passive addons focus the control; action addons preserve their own interaction. */
 export function FieldAddon({
   kind = 'text',
   className,
@@ -204,7 +193,6 @@ export function FieldAddon({
 }
 
 export const fieldControlClass = cn(
-  // The surface owns decoration; controls keep native editing behavior.
   'm-0 block w-full min-w-0 border-0 bg-transparent p-0 font-[family-name:inherit] text-ui-16 text-ui-primary outline-none',
   'placeholder:text-ui-placeholder disabled:cursor-default'
 )
@@ -224,7 +212,6 @@ export type FieldPresentation = {
   controlStyle?: CSSProperties
 }
 
-/** Shared label geometry; callers supply the label's semantic primitive. */
 export function FieldContent(props: {
   as?: 'div' | 'span'
   size?: 'lg' | 'sm'
@@ -305,7 +292,6 @@ type FieldProps = FieldPresentation & {
   children: ReactNode
 }
 
-/** Base UI owns field state and accessibility; the surface owns appearance. */
 export function Field(props: FieldProps) {
   const {
     label,

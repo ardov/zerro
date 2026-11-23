@@ -11,7 +11,6 @@ import { CategorySymbol } from '@/6-shared/ui/CategoryIcon'
 import type { CategoryRowAction, PreferredCategoryType } from './model'
 
 export type CategoryRowProps = {
-  /** Concrete common prefix; the differing suffix is represented by mixed. */
   value: readonly TTagId[]
   mixed?: boolean
   onAction: (action: CategoryRowAction) => void
@@ -83,7 +82,6 @@ export function CategoryRow(props: CategoryRowProps) {
       className={cn(
         'flex flex-wrap items-center gap-1',
         align === 'center' && 'justify-center',
-        // Symmetric outer clearance keeps an out-of-flow Add inside the row.
         centered && 'px-9',
         className
       )}
@@ -124,7 +122,6 @@ export function CategoryRow(props: CategoryRowProps) {
               }
             />
             {last && !mixed && (
-              // The last chip and Add move together. Centered Add has no layout weight.
               <div
                 className={
                   centered ? 'absolute start-full top-0 ms-1' : 'ms-1 shrink-0'

@@ -1,11 +1,4 @@
-/**
- * Delivery of a Push run: send, apply, repack, retry, repeat.
- *
- * Transport belongs to the host — HTTP, persistence, presentation — but when
- * to retry, how long to wait and what a rejection means are properties of the
- * protocol, not of the browser or the CLI. Both drive their runs through this
- * one loop so the two cannot drift apart.
- */
+/** The host owns HTTP, persistence, and presentation; Core owns shared retry and repacking rules. */
 import type { TDataStore, TNormalizedPatch } from '../../domain/zenmoney'
 import type { TCommand } from '../materialization'
 import {
@@ -31,16 +24,10 @@ export type TPushSendResult =
   | {
       ok: false
       message: string
-      /** Absent when the request never received an answer at all. */
       status?: number
       retryAfterMs?: number
-      /**
-       * Overrides the status rule, for adapters whose failures are not all
-       * HTTP — a transport that never reached the server, or a response that
-       * arrived intact and cannot be understood.
-       */
+      /** Override status-based policy for transport failures with no usable HTTP response. */
       retryable?: boolean
-      /** Carried back untouched, so a host can rethrow its own error. */
       cause?: unknown
     }
 
@@ -66,19 +53,12 @@ export type TPushEvent =
 export type TPushDriverPorts = {
   /** Performs one request. Never throws: a failure is a result. */
   send: (request: TNormalizedPatch) => Promise<TPushSendResult>
-  /**
-   * Applies and durably records one accepted chunk. Returning a failure ends
-   * the run without a retry offer: the server already accepted this chunk, so
-   * resending it is the host's recovery to own, not the driver's. A host that
-   * would rather fail loudly may throw instead; the exception reaches whoever
-   * started the run.
-   */
+  /** Failure folding in an accepted chunk ends the run without retry: the server already has it. */
   commit: (chunk: {
     prepared: TPreparedPush
     accepted: TAcceptedPushChunk
     canonicalPatch: TNormalizedPatch
   }) => Promise<TPushCommitResult> | TPushCommitResult
-  /** The replica as it stands now — after every chunk committed so far. */
   readReplica: () => {
     base: TDataStore
     outbox: readonly TCommand[]
@@ -92,36 +72,21 @@ export type TPushDriverPorts = {
 
 export type TPushOutcome =
   | { kind: 'done' }
-  /** Delivery stopped with the remainder intact; retrying is meaningful. */
   | {
       kind: 'stopped'
       progress: TPushProgressRow[]
       message: string
       status?: number
-      /**
-       * The bound the run ended on, which an HTTP 413 may have lowered. A
-       * retry that starts from the default again would earn the same 413.
-       */
+      /** Carry the byte limit reduced by HTTP 413 into the next run. */
       maxBytes: number
-      /**
-       * Whether the run was delivering in Chunks when it stopped. A 413 turns
-       * a one-request run into one, so this is the mode at the stop rather
-       * than the mode it started in.
-       */
       multiChunk: boolean
-      /**
-       * Chunks the server accepted before the stop. Zero with `multiChunk`
-       * false means the outbox is untouched and this was one failed request.
-       */
+      /** Zero accepted chunks in a single-request run means that the outbox is still untouched. */
       acceptedChunks: number
-      /** A single item exceeds the server limit; repacking cannot help. */
       itemTooLarge?: boolean
       cause?: unknown
     }
-  /** The run cannot continue from here, and retrying it would be unsafe. */
   | { kind: 'abandoned'; progress: TPushProgressRow[]; message: string }
 
-/** Whether a failed request is worth repeating unchanged. */
 export function isRetryablePushStatus(status: number | undefined): boolean {
   return status === undefined || status === 429 || status >= 500
 }
@@ -161,10 +126,7 @@ export async function drivePush(
         }
       }
 
-      // Every accepted Chunk has to retire at least one item, or the loop
-      // would resend the same request forever. Only a receipt that fails to
-      // match the command it came from can do this, which is a bug rather
-      // than a state to retry from.
+      // Retire at least one item per accepted chunk so a mismatched receipt cannot resend the same request indefinitely.
       if (
         accepted.next &&
         remainingItems(accepted.progress) >= remainingItems(prepared.progress)

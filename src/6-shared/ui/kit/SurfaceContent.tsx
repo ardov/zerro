@@ -53,11 +53,7 @@ export function SurfaceCloseButton(
   )
 }
 
-/** Internal layout, not a set of required slots for callers. The body
- * scrolls in a ScrollArea that fills the rest of the surface; `className` is
- * the padding and layout of the content inside that scroll. With
- * `contentScrolls` (see `DrawerProps`) the body is a plain column instead,
- * and `className` styles that column. */
+/** When contentScrolls is set, children own scrolling and className styles their plain column. */
 export function SurfaceContent(props: {
   title?: ReactNode
   titleId: string
@@ -65,11 +61,8 @@ export function SurfaceContent(props: {
   children: ReactNode
   className?: string
   contentScrolls?: boolean
-  /** Keep swipe dismissal off the body. A side drawer swipes across the way
-   * its body scrolls, so a scroll that drifts sideways would close it; it is
-   * dismissed from the header instead. */
+  /** Side drawers dismiss from the header so a scroll drifting sideways does not close them. */
   disableBodySwipe?: boolean
-  /** How the body says it goes on: a thumb, or faded edges for popovers. */
   scroll?: Pick<ScrollAreaProps, 'scrollbar' | 'fade'>
 }) {
   const {

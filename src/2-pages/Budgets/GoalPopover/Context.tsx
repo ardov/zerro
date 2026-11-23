@@ -7,8 +7,6 @@ import { GoalPopover } from './GoalPopover'
 import { useAsk, useAsked } from '@/6-shared/overlays'
 import type { TISOMonth } from '@/6-shared/types'
 
-/** A popup, not a screen: this is small editing, like a select. Back closes
- * it, and there is nothing to come back to. */
 export const useGoalPopover = () => {
   const [month] = useMonth()
   const ask = useAsk()

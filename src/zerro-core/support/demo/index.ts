@@ -56,21 +56,6 @@ export function getDemoData(options: TDemoDataOptions = {}): TNormalizedPatch {
 }
 
 export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
-  /*
-    Order of creating demo data:
-    01. instrument
-    02. country
-    03. company
-    04. user
-    05. merchant
-    06. account
-    07. tag
-    08. budget
-    09. reminder
-    10. reminderMarker
-    11. transaction
-  */
-
   const profile: TDemoProfile =
     options.locale === 'ru' ? russianProfile : englishProfile
   const NOW = resolveDemoNow(options.now)
@@ -101,7 +86,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       },
     })
 
-  // User
   const mainUser: TUser = {
     id: 23880,
     changed: NOW,
@@ -123,8 +107,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
     main: mainUser,
   }
 
-  // Merchants
-
   function makeMerchants(user: TUser) {
     const makeMerchant = (key: keyof TDemoProfile['merchants']) => {
       const { title, domain } = profile.merchants[key]
@@ -133,36 +115,28 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
     }
 
     const merchants = {
-      // Grocery stores
       supermarket: makeMerchant('supermarket'),
       localStore: makeMerchant('localStore'),
 
-      // Restaurants & Food
       pizzaPlace: makeMerchant('pizzaPlace'),
       cafe: makeMerchant('cafe'),
       fastFood: makeMerchant('fastFood'),
 
-      // Delivery services
       deliveryApp: makeMerchant('deliveryApp'),
       pizzaDelivery: makeMerchant('pizzaDelivery'),
 
-      // Transportation
       taxiService: makeMerchant('taxiService'),
       gasStation: makeMerchant('gasStation'),
 
-      // Shopping
       electronics: makeMerchant('electronics'),
       clothing: makeMerchant('clothing'),
 
-      // Bills & Services
       electricCompany: makeMerchant('electricCompany'),
       internetProvider: makeMerchant('internetProvider'),
 
-      // Healthcare
       pharmacy: makeMerchant('pharmacy'),
       clinic: makeMerchant('clinic'),
 
-      // People
       friend: makeMerchant('friend'),
       mother: makeMerchant('mother'),
       wife: makeMerchant('wife'),
@@ -172,7 +146,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
 
   const merchants = makeMerchants(mainUser)
 
-  // Accounts
   const makeAccount = (key: keyof TDemoProfile['accounts']) => {
     const acc = profile.accounts[key]
     return makeCoreAccount(
@@ -194,7 +167,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
     cash: makeAccount('cash'),
   }
 
-  // Tags
   const makeTag = (tag: {
     key: keyof TDemoProfile['tags']
     parent?: TTagId
@@ -217,7 +189,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
   }
 
   const tags = {
-    // Income
     salary: makeTag({
       key: 'salary',
       showIncome: true,
@@ -237,7 +208,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       color: '#CC3077',
     }),
 
-    // Outcome
     food: makeTag({
       key: 'food',
       showOutcome: true,
@@ -281,7 +251,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       color: '#91929A',
     }),
 
-    // Adjustment
     adjustment: makeTag({
       key: 'adjustment',
       showIncome: true,
@@ -359,19 +328,7 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
     }),
   }
 
-  // Budgets
-  // skip for now
-
-  // Reminders
-  // skip for now
-
-  // ReminderMarkers
-  // skip for now
-
-  // Transactions
-
   const transactions = [
-    // Salary transactions
     ...demoTransactions('salary', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 5 },
       user: mainUser.id,
@@ -379,7 +336,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       incomeAccount: accounts.main,
     }),
 
-    // Freelance transactions
     ...demoTransactions('freelance', {
       pattern: { since, repeat: 'monthly', every: 3, offset: 15 },
       user: mainUser.id,
@@ -387,7 +343,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       incomeAccount: accounts.daily,
     }),
 
-    // Birthday Gifts
     ...demoTransactions('birthday-gifts', {
       pattern: { since, repeat: 'monthly', every: 12, offset: 0 },
       user: mainUser.id,
@@ -396,7 +351,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       merchant: merchants.wife.id,
     }),
 
-    // Public Transport
     ...demoTransactions('public-transport', {
       pattern: { since, repeat: 'daily', every: 1, offset: 1 },
       user: mainUser.id,
@@ -404,7 +358,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       outcomeAccount: accounts.cash,
     }),
 
-    // Groceries transactions
     ...demoTransactions('groceries-supermarket', {
       pattern: { since, repeat: 'daily', every: 4, offset: 1 },
       user: mainUser.id,
@@ -420,7 +373,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       outcomeAccount: accounts.daily,
     }),
 
-    // Delivery transactions
     ...demoTransactions('delivery-app', {
       pattern: { since, repeat: 'daily', every: 8, offset: 1 },
       user: mainUser.id,
@@ -436,7 +388,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       outcomeAccount: accounts.main,
     }),
 
-    // Restaurant transactions
     ...demoTransactions('restaurant-pizza', {
       pattern: { since, repeat: 'daily', every: 7, offset: 2 },
       user: mainUser.id,
@@ -459,7 +410,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       outcomeAccount: accounts.main,
     }),
 
-    // Transportation
     ...demoTransactions('taxi', {
       pattern: { since, repeat: 'daily', every: 10, offset: 3 },
       user: mainUser.id,
@@ -475,7 +425,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       outcomeAccount: accounts.main,
     }),
 
-    // Shopping
     ...demoTransactions('electronics', {
       pattern: { since, repeat: 'monthly', every: 2, offset: 20 },
       user: mainUser.id,
@@ -491,7 +440,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       outcomeAccount: accounts.shopping,
     }),
 
-    // Bills
     ...demoTransactions('electricity', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 10 },
       user: mainUser.id,
@@ -513,7 +461,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       outcomeAccount: accounts.bills,
     }),
 
-    // Healthcare
     ...demoTransactions('pharmacy', {
       pattern: { since, repeat: 'monthly', every: 3, offset: 18 },
       user: mainUser.id,
@@ -529,7 +476,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       outcomeAccount: accounts.main,
     }),
 
-    // Entertainment
     ...demoTransactions('entertainment', {
       pattern: { since, repeat: 'daily', every: 15, offset: 8 },
       user: mainUser.id,
@@ -537,7 +483,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       outcomeAccount: accounts.main,
     }),
 
-    // Personal transfers (friends/family)
     ...demoTransactions('friend-loan', {
       pattern: { since, repeat: 'monthly', every: 3, offset: 12 },
       user: mainUser.id,
@@ -552,14 +497,12 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
       merchant: merchants.mother.id,
       outcomeAccount: accounts.daily,
     }),
-    // Regular cash withdrawals
     ...demoTransactions('cash-withdrawal', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 2 },
       user: mainUser.id,
       outcomeAccount: accounts.daily,
       incomeAccount: accounts.cash,
     }),
-    // Transfer to daily account
     ...demoTransactions('daily-account-transfer', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 10 },
       user: mainUser.id,

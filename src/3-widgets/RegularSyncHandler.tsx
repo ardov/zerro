@@ -8,8 +8,7 @@ import { loadLocalData } from '@/4-features/localData'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { needSync } from './regularSyncPolicy'
 
-/** Delay between checks if sync is needed */
-const CHECK_INTERVAL = 5_000 // 5sec
+const CHECK_INTERVAL = 5_000
 
 function useConditionalSync() {
   const dispatch = useAppDispatch()
@@ -34,12 +33,7 @@ function useConditionalSync() {
   return trySyncing
 }
 
-/**
- * Asks before closing only when local saving has failed. Unsent changes alone
- * are no reason: they are already stored locally and come back after reload.
- * After a failure local storage is frozen at that moment, so anything since
- * then lives only in this tab.
- */
+/** Warn on close when durable writes have failed; pending commands normally survive reload. */
 function usePersistenceFailureAlert() {
   const persistenceFailed = useAppSelector(getPersistenceWarning) !== null
   useEffect(() => {
@@ -61,15 +55,12 @@ export const RegularSyncHandler: FC = () => {
   const dispatch = useAppDispatch()
   const sync = useConditionalSync()
 
-  // We need ref to pass useEffect equality checks
   const syncRef = useRef(sync)
 
-  // Keep ref updated
   useEffect(() => {
     syncRef.current = sync
   }, [sync])
 
-  // Main initializer. At first it loads local data and then starts regular sync process
   useEffect(() => {
     let timer: ReturnType<typeof setInterval>
     async function init() {

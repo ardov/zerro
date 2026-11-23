@@ -16,7 +16,6 @@ import { loadBackup, loadDemoData, logIn } from '@/4-features/authorization'
 import { CurrencyBackground } from './CurrencyBackground/CurrencyBackground'
 import './Auth.css'
 
-/** Supplies the duration consumed by the co-located reveal animation. */
 const reveal = (ms: number) =>
   ({ '--auth-reveal-duration': `${ms}ms` }) as CSSProperties
 

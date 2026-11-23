@@ -33,13 +33,6 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
     core.merchants.selectAll,
   ],
   (transactions, codeMap, debtAcc, merchants) => {
-    // const rates = convert('current').rates
-    // const toValue = (n: number, instr: TInstrumentId) => {
-    //   return convertFx({ [codeMap[instr]]: n }, 'USD', rates)
-    // }
-
-    // const transactions = transactions.sort(compareByAmount(toValue))
-
     const result: Record<string, TStats> = {}
     transactions.forEach(processTransaction)
     return result
@@ -106,19 +99,6 @@ export function useStats(year: string | number) {
   return stats[year] || makeStatsNode()
 }
 
-/*
- *
- *
- *
- *
- *   H E L P E R S
- *
- *
- *
- *
- */
-
-/** Creates InfoNode */
 function makeInfoNode(): TInfoNode {
   return {
     income: {},
@@ -129,7 +109,6 @@ function makeInfoNode(): TInfoNode {
   }
 }
 
-/** Creates Stats node */
 function makeStatsNode(): TStats {
   return {
     total: makeInfoNode(),

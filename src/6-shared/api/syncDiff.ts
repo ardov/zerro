@@ -4,7 +4,6 @@ import { zenmoney } from '@/6-shared/api/zenmoney'
 import { DiffRequestError } from '@/6-shared/api/zenmoney/fetchDiff'
 import { convertDiff } from '@/6-shared/api/zm-adapter'
 
-/** Exchanges a client patch with the Zenmoney server, converting both ways. */
 export async function sync(
   token: string,
   preference: EndpointPreference,

@@ -32,7 +32,6 @@ export const logIn =
     // persistence cleanup before installing the new session.
     await dispatch(logOut())
 
-    // Save token and endpoint preference
     zmPreferenceStorage.set(endpoint)
     tokenStorage.set(token)
     dispatch(setToken(token))
@@ -50,7 +49,6 @@ export const loadBackup =
       const data = JSON.parse(txt)
       const converted = convertDiff.toClient(data)
       const currency = getState().displayCurrency
-      // TODO: maybe later make more elegant solution for local data
       tokenStorage.set(zenmoney.fakeToken)
       dispatch(setToken(zenmoney.fakeToken))
       dispatch(setSavedCurrency(currency))
@@ -72,7 +70,6 @@ export const loadDemoData =
       const language = i18n.resolvedLanguage || i18n.language
       const locale = language.startsWith('ru') ? 'ru' : 'en'
       const diff = getDemoData({ locale })
-      // TODO: maybe later make more elegant solution for local data
       tokenStorage.set(zenmoney.fakeToken)
       dispatch(setToken(zenmoney.fakeToken))
       dispatch(setSavedCurrency(null))

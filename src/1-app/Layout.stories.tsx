@@ -189,7 +189,6 @@ export const CenteredColumns: Story = {
     expect(first.width).toBe(400)
     expect(last.width).toBe(240)
     expect(last.left - first.right).toBe(8)
-    // Center in the content area after the rail and the right canvas margin.
     expect(first.left - 56).toBeCloseTo(window.innerWidth - 8 - last.right)
   },
 }
@@ -275,7 +274,6 @@ export const ProportionalColumns: Story = {
       expect(panels[1].getBoundingClientRect().width).toBe(150)
     })
     container.style.width = '722px'
-    // The main column hits its max; the remaining room centers the capped pair.
     expect(panels[0].getBoundingClientRect().width).toBe(400)
     expect(panels[1].getBoundingClientRect().width).toBe(240)
     expect(panels[0].getBoundingClientRect().left - 56).toBeCloseTo(

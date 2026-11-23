@@ -10,7 +10,6 @@ import {
   getOutboxRecoveryReason,
 } from '@/store/data'
 
-/** Persistent recovery prompt for a semantically invalid accepted branch. */
 export const JournalRecoveryNotice = () => {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()

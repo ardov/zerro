@@ -8,7 +8,6 @@ import { AnimatedItem } from '@/6-shared/ui/kit/AnimatedItem'
 import { InputWidth } from '@/6-shared/ui/kit/InputWidth'
 import { SearchIcon, CloseIcon } from '@/6-shared/ui/Icons'
 
-/** Search edits the live query; collapsing never rolls back visible results. */
 export function SearchChip({
   value,
   onChange,

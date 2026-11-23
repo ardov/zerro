@@ -1,11 +1,8 @@
-// Currency-specific amounts are Zenmoney domain values. Generic rounding stays
-// in foundation so this module has no reverse dependency.
 import { MoneyDecimal } from '../../foundation/decimal'
 import { keys } from '../../foundation/keys'
 import { round } from '../../foundation/numbers'
 import type { TFxCode } from '../entities/instruments'
 
-/** Money amounts by currency code */
 export type TFxAmount = Record<TFxCode, number>
 export type TRates = Record<TFxCode, number>
 

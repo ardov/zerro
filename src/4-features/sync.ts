@@ -41,7 +41,6 @@ type TSyncRuntime = {
   maxBytes?: number
 }
 
-/** Pushes the captured Outbox through one or more bounded requests. */
 export const syncData =
   (runtime: TSyncRuntime = {}): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
@@ -113,10 +112,7 @@ export const syncData =
     }
     console.warn('Syncing failed', outcome.message)
 
-    // A one-request run that delivered nothing leaves the outbox exactly as
-    // it was, so there is no partial delivery to decide about. Parking that in
-    // `stopped` would keep undo, redo and background pull switched off behind
-    // a dialog nothing opened — which an ordinary offline blip must not do.
+    // An offline push with no delivery stays at rest; marking it stopped would disable undo, redo, and background pull.
     if (!outcome.multiChunk && !outcome.acceptedChunks) {
       dispatch(syncFinished(failedResult(now(runtime), stopMessage(outcome))))
       return
@@ -144,11 +140,7 @@ function stopMessage(outcome: Extract<TPushOutcome, { kind: 'stopped' }>) {
     : outcome.message
 }
 
-/**
- * Retries a stopped run. The outbox already holds the unconfirmed remainder as
- * one command, so this is an ordinary push — the same thing a reload would do,
- * carrying only the byte limit an HTTP 413 established.
- */
+/** Retry the remaining outbox as a new push, carrying the reduced byte limit from HTTP 413. */
 export const retryStoppedSync =
   (runtime: TSyncRuntime = {}): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
@@ -157,7 +149,6 @@ export const retryStoppedSync =
     await dispatch(syncData({ ...runtime, maxBytes: status.maxBytes }))
   }
 
-/** Leaves every unconfirmed item pending and closes the stopped dialog. */
 export const continueSyncLater =
   (runtime: TSyncRuntime = {}): AppThunk =>
   (dispatch, getState) => {
@@ -167,21 +158,13 @@ export const continueSyncLater =
     dispatch(syncFinished(failedResult(now(runtime), message)))
   }
 
-/**
- * Pulls the canonical diff without pushing anything. Background sync uses
- * this, so an idle tab stays current without acknowledging local commands.
- */
+/** Background pulls update the replica without acknowledging local commands. */
 export const refreshData = (): AppThunk =>
   exchangeWithoutPush({ fullReload: false })
 
-/** Pulls a complete server snapshot and appends a canonical checkpoint. */
 export const reloadData = (): AppThunk =>
   exchangeWithoutPush({ fullReload: true })
 
-/**
- * The browser's half of a Push run: HTTP, Redux, durable storage and the
- * progress surface. Ordering, packing and retry policy stay in Core.
- */
 function pushPorts(
   dispatch: Parameters<AppThunk>[0],
   getState: Parameters<AppThunk>[1],
@@ -210,10 +193,7 @@ function pushPorts(
       captureMerchantUserWarnings(getState().data.base, 'push')
       await waitForPersistedReplica()
       if (getState().data.persistenceWarning) {
-        // The server has already accepted this chunk and Redux has already
-        // advanced past it. Retrying from here could resend work the client
-        // now considers confirmed; the global persistence warning owns
-        // recovery from this point.
+        // The server already accepted this chunk. Retrying can resend confirmed work; surface the persistence warning instead.
         return { ok: false, message: 'Accepted sync data could not be stored' }
       }
       await dispatch(refreshSelectedHistoryPoint())
@@ -330,7 +310,6 @@ function exchangeWithoutPush(
   }
 }
 
-/** A new run may start from rest or from a stop, but never mid-flight. */
 function syncIsBlocked(state: RootState): boolean {
   const kind = state.sync.status.kind
   return (

@@ -5,9 +5,6 @@ import { Select } from '@/6-shared/ui/kit/Select'
 import { ChevronDownIcon } from '@/6-shared/ui/Icons'
 import type { TDraftType } from './draft'
 
-/** Every type a transaction can be turned into, in the order the menu offers
- * them. The two debt directions are last because they are the two a person
- * reaches for least, and one of them may not be offered at all. */
 export const draftTypes = [
   'outcome',
   'income',
@@ -16,7 +13,6 @@ export const draftTypes = [
   'incomeDebt',
 ] as const satisfies readonly TDraftType[]
 
-/** The transaction type remains the editor heading and its selection trigger. */
 export function TypeSelect(props: {
   value: TDraftType
   onChange: (type: TDraftType) => void

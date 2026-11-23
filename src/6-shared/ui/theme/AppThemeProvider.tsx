@@ -14,9 +14,7 @@ export type AppThemeProviderProps = {
   children?: ReactNode
 }
 
-/** Injects both generated token blocks. The page-level theme manager owns the
- * root class and storage; a pinned renderer temporarily mirrors its local
- * scheme onto the root for CSS tokens. */
+/** The page theme manager owns preference and root mode. A pinned renderer temporarily sets the root for its isolated palette. */
 export const AppThemeProvider: FC<AppThemeProviderProps> = props => {
   const override = props.defaultMode ?? null
 

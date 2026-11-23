@@ -121,11 +121,8 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
 }
 
 function suggestAmount(from = 0, to = 0) {
-  // No money to move --> 0
   if (from <= 0) return 0
-  // Enough money to cover overspend --> overspend
   if (to < 0 && from >= -to) return -to
-  // Otherwise --> move all we have
   return from
 }
 

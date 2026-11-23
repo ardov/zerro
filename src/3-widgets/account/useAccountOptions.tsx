@@ -7,8 +7,6 @@ import { accountChoices, type AccountChoicesOptions } from './model'
 import type { SelectItem, SelectOption } from '@/6-shared/ui/kit/Select'
 import type { SelectSearchOptions } from '@/6-shared/ui/kit/SelectCombobox'
 
-/** Select props for accounts. The option source is built once per account
- * set; search and archive grouping come from `accountChoices`. */
 export function useAccountOptions(
   options: Pick<AccountChoicesOptions, 'selectedIds' | 'excludeIds'>,
   label: string

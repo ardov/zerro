@@ -9,7 +9,6 @@ type CategoryIconProps = {
   size?: 's' | 'm'
 }
 
-/** A decorative category mark; selection and interaction belong to its owner. */
 export function CategoryIcon(props: CategoryIconProps) {
   const { symbol, color, size = 's' } = props
   const foreground = color ? getContrastText(color) : undefined

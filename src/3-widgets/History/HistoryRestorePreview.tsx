@@ -16,16 +16,7 @@ import {
 import { core } from '@/zerro-core/redux'
 import { useRestoreSelectedPoint } from './useRestoreSelectedPoint'
 
-/**
- * What restoring the selected point would write over the live state, and the
- * button that does it.
- *
- * The row's own summary says what the point changed when it happened; this
- * says what it would cost now, which is the question the button actually asks.
- * The two live together because a count without the action it justifies is
- * just trivia. Computed only while a point is selected, because it is a full
- * store-to-store reconciliation rather than a stored transition.
- */
+/** The row summary describes its original change; this preview reconciles the selected snapshot with the live store. */
 export function HistoryRestorePreview() {
   const { t } = useTranslation('settings')
   const { t: tHistory } = useTranslation('history')
@@ -40,8 +31,6 @@ export function HistoryRestorePreview() {
     [current, data]
   )
 
-  // Nothing selected means the list is showing live state; there is no
-  // "restore" question to answer and the panel should not reserve room for one.
   if (!point) return null
 
   const counted = byLabelKey(summary)

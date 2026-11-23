@@ -12,7 +12,6 @@ export type DateTimeFieldProps = {
   date: TISODate
   onDateChange: (date: TISODate) => void
   onDateCommit?: (date: TISODate) => void
-  /** `HH:mm`. */
   time: string
   onTimeChange: (time: string) => void
   onTimeCommit?: (time: string) => void
@@ -25,8 +24,6 @@ const nativeControlClass = cn(
   'py-3'
 )
 
-/** Native date and time share one surface. Incomplete dates revert on blur;
- * choosing a calendar day changes only the date. */
 export function DateTimeField(props: DateTimeFieldProps) {
   const {
     date,

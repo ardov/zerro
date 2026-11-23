@@ -8,9 +8,6 @@ import { useDestinations } from './destinations'
 
 import './MobileNavigation.css'
 
-/** The bottom bar of a narrow window: destinations and settings as icons, and
- * Sync beside them as a separate round button — it is an action, not a
- * place. About moves into the settings panel. */
 export const MobileNavigation: FC = () => {
   const { t } = useTranslation('navigation')
   const path = useLocation().pathname

@@ -1,9 +1,4 @@
-/**
- * Narrow source boundary for non-Redux local consumers.
- *
- * This entrypoint composes existing Core capabilities; it owns no state,
- * persistence, network, CLI, or MCP behavior.
- */
+/** Local, non-Redux entry point for Core operations. */
 export {
   createZerroSession,
   type TZerroSession,

@@ -36,11 +36,7 @@ export const coreContext: TCoreContext = {
   uuid: () => uuidv1(),
 }
 
-/**
- * Cycle-safe Redux execution primitive. It intentionally imports no selectors
- * or app entity modules, so hidden-store reminder writers can join the outbox
- * without entering the adapter selector graph during module initialization.
- */
+/** Avoid selectors and app entity modules so hidden-store writers can execute commands without entering an import cycle. */
 export function executeReduxCommand<TReceipt = unknown>(
   compile: TReduxCommandCompiler<TReceipt>,
   options: TExecuteOptions = {}
@@ -56,11 +52,9 @@ export function executeReduxCommand<TReceipt = unknown>(
 
 export type TExecuteOptions = {
   allowHistory?: boolean
-  /** What the user did, carried onto the command for history. */
   label?: TCommandLabel
 }
 
-/** Like `executeReduxCommand`, but reports whether an outbox command was added. */
 export function executeReduxCommandWithStatus<TReceipt = unknown>(
   compile: TReduxCommandCompiler<TReceipt>,
   options: TExecuteOptions = {}
@@ -124,9 +118,7 @@ let blockedGroup: string | null = null
 // the snapshot, so a miss replays the outbox prefix from base once.
 const beforeGroupedEdit = new WeakMap<TDataStore, TDataStore>()
 
-/** Replace the group's tail command with one compiled against the state
- * before the group's first edit. Once the tail is sealed (any other outbox
- * change, sync or undo), the next edit starts a new command. */
+/** Compile a replacement against the snapshot before the group's first edit. A sealed tail starts a fresh command. */
 export function editGroupedCommand(
   group: string,
   label: TCommandLabel,

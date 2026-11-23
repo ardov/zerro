@@ -1,10 +1,4 @@
-/** The app's breakpoints, in pixels.
- *
- * Single source of truth. The `useBreakpointDown` hook queries this map, and
- * `src/tailwind.css` mirrors the same numbers for Tailwind's own variants — in
- * pixels, not Tailwind's usual `rem`, so the mirror cannot drift from the pixel
- * queries the hook runs whenever the root font size is not 16px.
- * `breakpoints.test.ts` checks that mirror. */
+/** Mirror these pixel values in src/tailwind.css. The breakpoint test checks both sources agree. */
 export const breakpoints = {
   xs: 0,
   sm: 600,
@@ -19,9 +13,7 @@ export type TBreakpoint = keyof typeof breakpoints
  * under it. It stays in the map because it is the bottom of the scale. */
 export type TBreakpointDown = Exclude<TBreakpoint, 'xs'>
 
-/** Stops 0.05px short of the breakpoint so
- * that a `down` query and the Tailwind variant of the same name cannot both
- * match on the breakpoint pixel itself. */
+/** Stop short so the down query and its Tailwind variant cannot both match at the breakpoint. */
 export function mediaQueryDown(key: TBreakpointDown) {
   return `(max-width: ${breakpoints[key] - 0.05}px)`
 }

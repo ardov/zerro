@@ -45,8 +45,6 @@ const changedToUnix = <T extends { changed: TMsTime }>(el: T): T =>
 
 const changedAdapter = { toClient: changedToMs, toServer: changedToUnix }
 
-// Converters
-
 const convertInstrument: TZmAdapter<TZmInstrument, TInstrument> = changedAdapter
 const convertCountry: TZmAdapter<TZmCountry, TCountry> = {
   toClient: el => el,
@@ -80,7 +78,6 @@ const convertDeletion: TZmAdapter<TZmDeletionObject, TDeletionObject> = {
   toServer: el => ({ ...el, stamp: msToUnix(el.stamp) }),
 }
 
-/** Main diff converter */
 export const convertDiff: TZmAdapter<TZmDiff, TNormalizedPatch> = {
   toClient: d => {
     const r: TNormalizedPatch = { serverTimestamp: 0 }

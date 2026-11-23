@@ -30,7 +30,6 @@ function App({ children }: { children: ReactNode }) {
   )
 }
 
-/** The browser's Back button. */
 function Back() {
   const navigate = useNavigate()
   return <button onClick={() => navigate(-1)}>back</button>
@@ -74,15 +73,12 @@ describe('usePopup', () => {
     await user.click(screen.getByText('open menu'))
     await user.click(screen.getByText('dismiss'))
     expect(screen.queryByText('menu body')).toBeNull()
-    // Still here: the page itself was never left.
     expect(screen.getByText('open menu')).toBeTruthy()
   })
 })
 
 describe('one popup handing over to another', () => {
-  /** The filter bar: a menu picks a filter, and the editor for it opens as
-   * the menu goes. The second one opens before the step that closes the first
-   * has landed. */
+  /** The filter editor opens before the history step that closes the preceding menu has landed. */
   function Handover() {
     const { open: menuOpen, setOpen: setMenuOpen } = usePopup()
     const { open: editorOpen, setOpen: setEditorOpen } = usePopup()
@@ -131,7 +127,6 @@ describe('one popup handing over to another', () => {
 
     await user.click(screen.getByText('back'))
     expect(screen.queryByText('editor')).toBeNull()
-    // Still here: the page itself was never left.
     expect(screen.getByText('open menu')).toBeTruthy()
   })
 })
@@ -234,8 +229,6 @@ describe('a screen opened from a popup takes its place', () => {
     await user.click(screen.getByText('back'))
     expect(screen.queryByText('panel body')).toBeNull()
     expect(screen.queryByText('menu body')).toBeNull()
-    // Still on the page: one Back, one visible change, and no step wasted on
-    // the slot the menu left behind.
     expect(screen.getByText('open menu')).toBeTruthy()
   })
 })
@@ -316,8 +309,6 @@ describe('defineScreen', () => {
     await user.click(screen.getByText('tap twice'))
     expect(screen.getByText('preview b')).toBeTruthy()
 
-    // One press, one visible change: the second open replaced the first
-    // rather than stacking on a state it had not seen yet.
     await user.click(screen.getByText('back'))
     expect(screen.queryByText(/preview/)).toBeNull()
   })
@@ -485,7 +476,6 @@ function renderWithSlowHistory(
   initialStates: unknown[] = [null]
 ) {
   let keys = 0
-  // Steps asked for and not landed yet, each landing when called.
   const steps: Array<() => void> = []
   const toLocation = (to: To, state: unknown): Location => ({
     pathname: '/budget',

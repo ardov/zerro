@@ -18,7 +18,6 @@ export type TBudgetPresetKind =
 
 export type TBudgetPreset = {
   kind: TBudgetPresetKind
-  /** Total assignment, in the envelope currency. */
   amount: number
   months?: number
 }

@@ -1,4 +1,3 @@
-/** Rendering needs only visibility and a normal change callback. */
 export type SurfaceController = {
   open: boolean
   setOpen: (open: boolean) => void

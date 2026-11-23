@@ -210,10 +210,7 @@ export const loadHistoryPage =
     if (history.pageStatus === 'loading') return
     dispatch(historyPageLoading())
     try {
-      // Same read barrier the selection uses. A canonical commit clears this
-      // page synchronously and the panel reloads it immediately, so without
-      // the wait the list would race the write that produced the new entry
-      // and settle without it.
+      // Wait for the queued commit; clearing this page causes the UI to immediately reload it.
       await waitForPersistedReplica()
       const page = await replicaStorage.listHistory({
         limit: 100,
@@ -284,17 +281,9 @@ export type THistoryRow =
       entries: TStoredHistoryEntry[]
       expanded: boolean
     }
-  /**
-   * Names the two halves of the list. The split is the one thing a user has to
-   * understand here — above it is theirs and not sent, below it is what the
-   * server has accepted — and an unlabelled rule was indistinguishable from
-   * the hairline between rows.
-   */
   | { type: 'section'; id: 'local' | 'journal' }
 
-/** Redo tail and applied local commands. Split out from the full list so the
- * two halves stay separately memoized: it recomputes on every command, while
- * the journal half only changes when a page loads. */
+/** Keep local history separate so local changes do not invalidate memoized journal pages. */
 const selectLiveHistoryRows = createSelector(
   [selectRedo, selectOutbox, selectBase],
   (redo, outbox, base): THistoryRow[] => {
@@ -352,11 +341,6 @@ const selectSelectablePoints = createSelector(
   ]
 )
 
-/**
- * The row that is the live state. It is an ordinary row, not a synthetic
- * "now" entry: `current` really is the newest applied command, and marking
- * that row says so instead of asserting it beside the list.
- */
 export const selectHistoryHeadPoint = createSelector(
   [selectSelectablePoints],
   points => points[0] ?? null

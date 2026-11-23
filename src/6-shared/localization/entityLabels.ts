@@ -1,14 +1,6 @@
 import type { TChangeSummaryKey } from '@/zerro-core/replica'
 
-/**
- * Display order for a change summary, and the `settings` namespace key that
- * names each type.
- *
- * Shared so the backup confirmation and the change history name the same
- * things the same way — a user who reads "Операции 3" in one place should not
- * meet "Транзакции" in the other. A restore writes Zenmoney entities only, so
- * it simply never matches the Zerro-side keys.
- */
+/** Use the same entity terminology in history and backup confirmation. */
 export const entityLabelKeys = [
   ['transaction', 'entity_transaction'],
   ['envelope-budget', 'entity_envelopeBudget'],
@@ -33,12 +25,7 @@ export const entityLabelKeys = [
   ['company', 'entity_company'],
 ] as const satisfies readonly (readonly [TChangeSummaryKey, string])[]
 
-/**
- * Widens a summary to the whole display order so it can be indexed by any key
- * in the list. Producers emit different subsets — a restore never writes
- * reference data, a journal point never writes a preview count — and the keys
- * a given producer cannot emit are simply absent.
- */
+/** Producers emit subsets of this display order; widening permits lookup without requiring missing keys. */
 export function byLabelKey<TCounts>(
   summary: Partial<Record<TChangeSummaryKey, TCounts>> | undefined
 ): Partial<Record<TChangeSummaryKey, TCounts>> {

@@ -51,9 +51,7 @@ function Demo({ popupParent = false, search = false, nestedDrawer = false }) {
   )
 }
 
-// Capture real browser watchers, preserving their one-shot lifecycle. With
-// STORYBOOK_ANDROID=1 this reaches Base UI's Android-only Back handler.
-// On desktop there is no watcher and Back goes through router history.
+// With STORYBOOK_ANDROID=1 this exercises native CloseWatcher; desktop Back goes through router history.
 type Watcher = EventTarget & { requestClose(): void; destroy(): void }
 const browser = window as typeof window & {
   CloseWatcher: new (options?: { signal?: AbortSignal }) => Watcher

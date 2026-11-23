@@ -11,8 +11,6 @@ export type NavigationActionProps = Omit<ButtonBaseProps, 'children'> & {
   label: string
   icon: ComponentType<TIconProps>
   tooltipSide?: TooltipProps['side']
-  /** Something that needs attention behind this action: shown as a dot on
-   * the tile, in the tooltip and to screen readers. */
   notice?: string
 }
 

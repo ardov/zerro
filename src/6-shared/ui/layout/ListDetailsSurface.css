@@ -1,5 +1,4 @@
 @layer components {
-  /* One focus boundary, with two independent panel surfaces inside it. */
   .list-details-surface .list-details-content {
     --details-shift: calc(var(--details-width) + var(--spacing-ui-panel-gap));
     position: relative;

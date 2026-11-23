@@ -8,8 +8,6 @@ import type { SelectOption } from '@/6-shared/ui/kit/Select'
 import type { SelectSearchOptions } from '@/6-shared/ui/kit/SelectCombobox'
 import { categoryChoices, type CategoryChoicesOptions } from './model'
 
-/** Select props for categories. The option source is built once per category
- * set; search and hierarchy come from `categoryChoices`. */
 export function useCategoryOptions(
   options: Omit<CategoryChoicesOptions, 'query'>
 ) {

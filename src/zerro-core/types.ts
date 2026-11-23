@@ -15,7 +15,6 @@ export type TCoreContext = {
   uuid: () => string
 }
 
-/** The single result shape consumed by command execution. */
 export type TCompiled<TReceipt = undefined> = {
   operations: TOperation[]
 } & (undefined extends TReceipt

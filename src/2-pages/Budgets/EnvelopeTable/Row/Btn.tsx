@@ -3,8 +3,7 @@ import type { ButtonBaseProps } from '@/6-shared/ui/kit/ButtonBase'
 import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import type { FC } from 'react'
 
-// `font-sans` is not decorative: a native button resets the family to the user
-// agent default, and the `typography: 'body1'` this replaces set it.
+// Native buttons need font-sans to retain the table's font family.
 const style =
   '-mx-3 -my-2 min-w-0 rounded-lg px-3 py-2 text-right font-sans text-body hover:bg-ui-highlight focusable active:bg-ui-pressed'
 

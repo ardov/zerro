@@ -13,13 +13,6 @@ import {
 import { selectIsSyncPending } from '@/store/sync'
 import { syncData } from '@/4-features/sync'
 
-/**
- * Undo/redo and the push, above the list they act on.
- *
- * The pending count rides on the Send button rather than sitting beside it as
- * a sentence: it is the number of things that button is about to do, and the
- * "Unsent" section below already names the same commands one by one.
- */
 export function HistoryControls() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()

@@ -8,11 +8,9 @@ type PanelProps = {
 }
 
 type PanelScrollableProps = PanelProps & {
-  /** Padding and layout of the content, inside the scroll. */
   contentClassName?: string
 }
 
-/** A rounded surface for content that manages its own scrolling. */
 export function Panel({ children }: PanelProps) {
   return (
     <section className="layout-panel rounded-smooth flex overflow-hidden">
@@ -21,7 +19,6 @@ export function Panel({ children }: PanelProps) {
   )
 }
 
-/** A rounded surface with its own scrollport, edge to edge. */
 export function PanelScrollable({
   children,
   contentClassName,

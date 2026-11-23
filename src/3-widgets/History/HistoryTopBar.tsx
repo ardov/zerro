@@ -25,22 +25,7 @@ import {
 import { historyPanelScreen } from './HistoryPanel'
 import { useRestoreSelectedPoint } from './useRestoreSelectedPoint'
 
-/**
- * The transport for browsing history once the panel is closed.
- *
- * While the panel is open it keeps only the job the panel cannot do: saying
- * that the page below is not live. Stepping, opening the panel and restoring
- * all drop out, because the panel is the better version of each — its list is
- * the step arrows, and its footer is the restore button next to what restoring
- * would cost. What stays are the two exits, which exist nowhere else, and the
- * coloured rule that marks the page.
- *
- * The bar itself never comes and goes while browsing, only its contents:
- * it pushes the page down, so appearing when the panel closes would shift what
- * you are reading. For the same reason no control changes meaning — stepping
- * to the newest row disables the forward arrow instead of closing the bar
- * under the finger pressing it.
- */
+/** Keep the bar mounted while browsing so closing the panel does not shift the page. */
 export function HistoryTopBar() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()
@@ -53,7 +38,6 @@ export function HistoryTopBar() {
   const { canRestore, restore } = useRestoreSelectedPoint()
   const [panelOpen, setPanelOpen] = historyPanelScreen.use()
 
-  // Escape leaves history. With ✕ it is the only way out, and both sit still.
   useEffect(() => {
     if (!browsing) return
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -71,7 +55,6 @@ export function HistoryTopBar() {
 
   if (!browsing) return null
 
-  // A null selection is the head of the list: live data under another name.
   const atHead = point === null
   const compact = !!panelOpen
 
@@ -112,9 +95,6 @@ export function HistoryTopBar() {
             </IconButton>
           </>
         )}
-        {/* Left-aligned while the panel is open: the panel overlays the right
-            of the page, and controls pushed under it are controls that are
-            gone. */}
         <TextFade
           className={`${compact ? 'grow-0' : 'grow'} min-w-0 text-caption`}
         >

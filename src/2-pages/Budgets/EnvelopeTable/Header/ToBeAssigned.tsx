@@ -19,7 +19,6 @@ import { useIsSmall } from '../shared/shared'
 
 type TMsgType = 'error' | 'warning' | 'success'
 
-/** Shows funds that have not yet been assigned to a category. */
 type ToBeAssignedProps = ButtonBaseProps
 
 export const ToBeAssigned: FC<ToBeAssignedProps> = props => {

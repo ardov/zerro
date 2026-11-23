@@ -316,15 +316,12 @@ describe('zenmoney transaction commands', () => {
       (patch.transaction ?? []).map(tr => [tr.id, tr])
     )
 
-    // Same-account income is deleted.
     expect(byId.inSame).toMatchObject({ deleted: true })
-    // Cross-account income becomes a transfer into the outcome account.
     expect(byId.inOther).toMatchObject({
       outcomeAccount: 'card',
       outcome: 20,
       outcomeInstrument: 1,
     })
-    // Outcome absorbs both incomes: 100 - 30 - 20 = 50.
     expect(byId.out).toMatchObject({ outcome: 50 })
   })
 

@@ -48,15 +48,8 @@ import {
 } from '../domain/zerro'
 import { memoOn, memoOnObject, sameItems, sameSet } from './memo'
 
-/** A projection: one value derived from a snapshot. */
 type TNode<T> = (data: TDataStore) => T
 
-/**
- * A memoized node from a dependency tuple. Pins the memo's input to
- * `TDataStore` so the dependency selector infers `data` and returns a tuple
- * without a `: TDataStore` annotation or an `as const` at every call site. Use
- * for a compute that takes its dependencies positionally.
- */
 function node<TDeps extends readonly unknown[], TResult>(
   selectDeps: (data: TDataStore) => readonly [...TDeps],
   compute: (...deps: TDeps) => TResult,
@@ -65,12 +58,6 @@ function node<TDeps extends readonly unknown[], TResult>(
   return memoOn(selectDeps, compute, isEqualResult)
 }
 
-/**
- * A memoized node from a named-dependency object. The object matches the
- * compute's parameter, so the compute is the bare `build*`/`get*` function and
- * each dependency is named once, by key. Use for the object-parameter domain
- * functions.
- */
 function nodeObj<TArg extends Record<string, unknown>, TResult>(
   selectArg: (data: TDataStore) => TArg,
   compute: (arg: TArg) => TResult,
@@ -79,28 +66,14 @@ function nodeObj<TArg extends Record<string, unknown>, TResult>(
   return memoOnObject(selectArg, compute, isEqualResult)
 }
 
-/**
- * The projection dependency graph, defined once.
- *
- * Both runtimes instantiate it: the Redux adapter keeps one instance per app
- * so each node memoizes across snapshots, and `createZerroSession` keeps one
- * per snapshot so each node is computed at most once for that session. Nothing
- * here may read Redux, React, i18n, or storage — presentation and hooks stay
- * in the adapter.
- *
- * Not every node is memoized. A node earns its memo entry only if it allocates
- * something a dependent reads, or if it is expensive. Nodes returning a
- * primitive or passing a store map straight through are plain functions: a
- * memo entry there costs more than the call it saves. The cost census behind
- * this split is in documents/design-ledger.md (Reads and Redux adapter).
- */
+/** Share this graph between long-lived Redux and snapshot sessions; keep runtime dependencies out.
+ * Memoize expensive work and allocations, not primitives or store maps returned as-is. */
 export function createProjectionGraph(ctx: TCoreContext) {
   // Called per read, never captured: the Redux instance lives for the whole
   // app session and would otherwise freeze the month at import time.
   const currentMonth = () => toISOMonth(ctx.now())
   const currentDate = () => toISODate(ctx.now())
 
-  // --- pass-through and primitive nodes: no memo ---------------------------
   const debtAccountId: TNode<ReturnType<typeof getDebtAccountId>> = d =>
     getDebtAccountId(d.account)
   // Runs inside the dependency check of every envelope read, so it reads the
@@ -110,7 +83,6 @@ export function createProjectionGraph(ctx: TCoreContext) {
   const historyStart: TNode<ReturnType<typeof getHistoryStart>> = d =>
     getHistoryStart(transactionsHistory(d), currentDate())
 
-  // --- transactions: one sort, two slices ----------------------------------
   const sortedTransactions = node(d => [d.transaction], getSortedTransactions)
   const transactionsHistory = node(
     d => [sortedTransactions(d)],
@@ -118,7 +90,6 @@ export function createProjectionGraph(ctx: TCoreContext) {
   )
   const transactionIds = node(d => [sortedTransactions(d)], toTransactionIds)
 
-  // --- reads off a single entity map ---------------------------------------
   const instrumentCodeById = node(d => [d.instrument], getInstCodeMap)
   const userSettings = node(d => [d.reminder], getUserSettings)
   const envelopeMeta = node(d => [d.reminder], getEnvelopeMeta)
@@ -135,7 +106,6 @@ export function createProjectionGraph(ctx: TCoreContext) {
     sameItems
   )
 
-  // --- fx ------------------------------------------------------------------
   const currentFxRates = nodeObj(
     d => ({ instruments: d.instrument, currentMonth: currentMonth() }),
     buildCurrentFxRates
@@ -150,7 +120,6 @@ export function createProjectionGraph(ctx: TCoreContext) {
   )
   const convertFx = node(d => [fxRatesGetter(d)], buildFxConverter)
 
-  // --- debtors -------------------------------------------------------------
   const debtors = nodeObj(
     d => ({
       transactions: transactionsHistory(d),
@@ -170,7 +139,6 @@ export function createProjectionGraph(ctx: TCoreContext) {
     buildDebtorNames
   )
 
-  // --- merchants -----------------------------------------------------------
   const merchantUsage = nodeObj(
     d => ({
       transactions: transactionsHistory(d),
@@ -180,7 +148,6 @@ export function createProjectionGraph(ctx: TCoreContext) {
     buildMerchantUsage
   )
 
-  // --- envelopes (domain only; presentation stays in the adapter) ----------
   const envelopesCompiled = nodeObj(
     d => ({
       debtors: debtors(d),
@@ -209,7 +176,6 @@ export function createProjectionGraph(ctx: TCoreContext) {
     sameMetricEnvelopes
   )
 
-  // --- budgets and month list ----------------------------------------------
   const budgets = nodeObj(
     d => ({
       tagBudgets: tagBudgets(d),
@@ -227,7 +193,6 @@ export function createProjectionGraph(ctx: TCoreContext) {
     buildMonthList
   )
 
-  // --- activity chain (the expensive nodes) --------------------------------
   const currentFunds = nodeObj(
     d => ({
       accounts: d.account,
@@ -315,7 +280,6 @@ export function createProjectionGraph(ctx: TCoreContext) {
     buildMonthTotals
   )
 
-  // --- goals ---------------------------------------------------------------
   const goals = nodeObj(
     d => ({
       rawGoals: rawGoals(d),
@@ -328,7 +292,6 @@ export function createProjectionGraph(ctx: TCoreContext) {
   )
   const goalTotals = node(d => [goals(d), convertFx(d)], buildGoalTotals)
 
-  // --- balances ------------------------------------------------------------
   const balanceInputs = (d: TDataStore) => ({
     transactions: transactionsHistory(d),
     accounts: d.account,

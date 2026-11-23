@@ -1,8 +1,4 @@
-/**
- * Deterministic Zerro UI color for a tag without an explicit color. The palette
- * is a frozen 201-color scale; it must stay stable so tag
- * colors do not change between releases and clients.
- */
+/** Keep this 201-color palette stable so default tag colors agree between releases and clients. */
 export function getColorForString(str: string): string {
   const seed = hashCode(str)
   let int = getIntFromSeed(seed)

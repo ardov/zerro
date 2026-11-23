@@ -42,7 +42,6 @@ function Harness() {
   )
 }
 
-/** A titled drawer: its first focus lands in the header, outside the scroll. */
 function TitledHarness() {
   const [open, setOpen] = useState(true)
   return (

@@ -2,15 +2,11 @@ import { useSyncExternalStore } from 'react'
 
 type ViewportRect = { height: number; left: number; top: number; width: number }
 
-// One subscription for the whole app. Every panel and drawer reads the same
-// rectangle, so a keyboard opening wakes a single frame instead of one per
-// consumer, and they all agree on the geometry within that frame.
+// One shared visualViewport subscription publishes a consistent rectangle to every drawer on the same frame.
 const listeners = new Set<() => void>()
 let snapshot = readVisualViewport()
 let frame = 0
 
-/** Shared visible-screen geometry. Consumers still own their own positioning;
- * the rectangle doubles as an inline style that pins an element to it. */
 export function useVisualViewport() {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }

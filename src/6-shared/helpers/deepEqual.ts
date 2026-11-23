@@ -1,15 +1,4 @@
-/**
- * Structural equality for JSON-like values: primitives, arrays, and plain
- * objects.
- *
- * Used as a Redux selector equality function, where selectors rebuild plain
- * projections on every state change and reference equality would re-render
- * on data that did not actually change.
- *
- * Not a general-purpose deep equal: Map, Set, Date, RegExp, and class
- * instances are compared as plain objects, and cyclic input overflows the
- * stack. Selector projections in this codebase are plain data.
- */
+/** Structural equality for plain, acyclic JSON-like values. Use it for Redux projections that rebuild references. */
 export function deepEqual(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) return true
 

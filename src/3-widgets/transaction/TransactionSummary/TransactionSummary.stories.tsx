@@ -25,10 +25,8 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Several flows in several currencies: every card has something to say. */
 export const Everything: Story = {}
 
-/** A few checked rows are only added up. */
 export const Selection: Story = {
   render: args => {
     const ids = useAppSelector(core.transactions.selectIds)
@@ -36,8 +34,6 @@ export const Selection: Story = {
   },
 }
 
-/** One income among spending: looking at it keeps both cards and the way
- * back, on the same periods. */
 export const LoneIncome: Story = {
   tags: ['check'],
   render: args => {
@@ -49,7 +45,6 @@ export const LoneIncome: Story = {
       const ofType = (type: string) =>
         byDate.filter(tr => core.transactions.getType(tr) === type)
       const spending = ofType('outcome')
-      // Spread over the whole history, so the periods are years.
       const spread = [0, 0.25, 0.5, 0.75, 1].map(
         share => spending[Math.round(share * (spending.length - 1))]
       )
@@ -68,7 +63,6 @@ export const LoneIncome: Story = {
     expect(
       await canvas.findAllByRole('button', { name: 'Expenses' })
     ).toHaveLength(2)
-    // Neither does another step take the chart away.
     await userEvent.click(canvas.getByRole('button', { name: 'year' }))
     await canvas.findByRole('button', { name: 'month' })
   },

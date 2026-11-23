@@ -5,10 +5,6 @@ import {
   formatAmountExpression,
 } from './amountExpression'
 
-/** What the amount fields were doing before this moved out of one of them.
- * Every case here is reachable by typing into a field, which is why
- * half-finished input has as much of the file as finished input does. */
-
 describe('cleanAmountInput', () => {
   it('keeps digits, separators and the four operators', () => {
     expect(cleanAmountInput('12.5+3*2-1/4')).toBe('12.5+3*2-1/4')
@@ -63,7 +59,6 @@ describe('amountFromExpression', () => {
   })
 
   it('follows an expression that is only half typed', () => {
-    // The operator is there because the second operand is coming.
     expect(amountFromExpression('12+', 7)).toBe(12)
     expect(amountFromExpression('12*', 7)).toBe(12)
     // A leading operator is a keystroke, not an operation.
@@ -85,11 +80,8 @@ describe('amountFromExpression', () => {
   })
 
   it('is worth a sum of money rather than a number', () => {
-    // A division that does not come out evenly.
     expect(amountFromExpression('1200/7', 0)).toBe(171.43)
-    // And the one every binary float does: 0.1 + 0.2 is not 0.3.
     expect(amountFromExpression('0.1+0.2', 0)).toBe(0.3)
-    // Typing past the second decimal rounds; the field still shows the text.
     expect(amountFromExpression('12.345', 0)).toBe(12.35)
     expect(amountFromExpression('99.999', 0)).toBe(100)
   })

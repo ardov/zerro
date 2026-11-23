@@ -1,8 +1,6 @@
 import { useRef } from 'react'
 import type { PopoverSurfaceProps } from '@/6-shared/ui/kit/Popover'
 
-/** Align the editable amount with the table's amount line box. Kept local
- * because this is a budget-table presentation, not a general popover mode. */
 export function useAmountAlignment(enabled: boolean) {
   const inputRef = useRef<HTMLInputElement>(null)
   const measure = () => {

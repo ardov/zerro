@@ -6,11 +6,11 @@ import type { TTransaction } from '../../internal/domain/zenmoney/entities/trans
 type TPatternValue<T> = T | T[] | ((index: number, date: Date) => T)
 
 type TPattern = {
-  since: TISODate // start date
-  until?: TISODate // if not provided, current date is used
-  repeat: 'daily' | 'monthly' // repeat type
-  every: number // repeat every
-  offset?: number // days offset from the start date
+  since: TISODate
+  until?: TISODate
+  repeat: 'daily' | 'monthly'
+  every: number
+  offset?: number
 }
 
 export function generateTransactions(opts: {
@@ -26,7 +26,6 @@ export function generateTransactions(opts: {
   income?: TPatternValue<TTransaction['income']>
   incomeAccount?: TPatternValue<TAccount>
 
-  // Optional
   merchant?: TPatternValue<TTransaction['merchant']>
   payee?: TPatternValue<TTransaction['payee']>
   originalPayee?: TPatternValue<TTransaction['originalPayee']>
@@ -38,7 +37,6 @@ export function generateTransactions(opts: {
 }): TTransaction[] {
   const { pattern } = opts
 
-  // Convert repeat pattern to frequency
   let frequencyMonths = 0
   let frequencyDays = 0
 
@@ -49,18 +47,15 @@ export function generateTransactions(opts: {
 
   const transactions: TTransaction[] = []
 
-  // Calculate all transaction dates based on frequency and offset
   const startDateObj = parseDate(pattern.since)
   const endDateObj = parseDate(pattern.until || opts.until)
 
-  // Apply initial offset
   const firstDate = new Date(startDateObj)
   firstDate.setDate(firstDate.getDate() + (pattern.offset || 0))
 
   let date = new Date(firstDate)
   let index = 0
 
-  // Generate transactions until we reach the end date
   while (date <= endDateObj) {
     function resolve<T>(pattern: TPatternValue<T>): T {
       if (typeof pattern === 'function') {
@@ -118,7 +113,6 @@ export function generateTransactions(opts: {
       throw new Error('No income or outcome provided')
     }
 
-    // INCOME ONLY
     if (trDraft.income && !trDraft.outcome) {
       const incomeAcc = resolve(opts.incomeAccount)
       if (!incomeAcc) {
@@ -131,7 +125,6 @@ export function generateTransactions(opts: {
       trDraft.outcomeInstrument = incomeAcc.instrument
     }
 
-    // OUTCOME ONLY
     if (trDraft.outcome && !trDraft.income) {
       const outcomeAcc = resolve(opts.outcomeAccount)
       if (!outcomeAcc) {
@@ -144,7 +137,6 @@ export function generateTransactions(opts: {
       trDraft.incomeInstrument = outcomeAcc.instrument
     }
 
-    // TRANSFER
     if (trDraft.income && trDraft.outcome) {
       const incomeAcc = resolve(opts.incomeAccount)
       const outcomeAcc = resolve(opts.outcomeAccount)
@@ -160,7 +152,6 @@ export function generateTransactions(opts: {
     transactions.push(trDraft)
     index++
 
-    // Calculate next transaction date
     const nextDate = new Date(date)
     nextDate.setMonth(nextDate.getMonth() + frequencyMonths)
     nextDate.setDate(nextDate.getDate() + frequencyDays)

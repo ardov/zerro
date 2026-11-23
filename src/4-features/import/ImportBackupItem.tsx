@@ -34,11 +34,6 @@ type TPending = {
   warnings: TFullBackupWarning[]
 }
 
-/**
- * Restores the state a backup file describes. The confirmation is not
- * decoration: an import overwrites whatever changed since the backup, so the
- * user sees the size of that before anything is written.
- */
 export function ImportBackupItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()

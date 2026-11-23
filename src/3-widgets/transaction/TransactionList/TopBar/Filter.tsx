@@ -33,11 +33,9 @@ type FilterProps = {
   search: string
   onSearchChange: (search: string) => void
   summary?: SummaryToggle
-  /** Only the search and the chips, for a place that has its own actions. */
   bare?: boolean
 }
 
-/** Owns ordering and focus; each chip owns its editor and its session draft. */
 export default function Filter({
   query,
   onQueryChange,

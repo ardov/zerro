@@ -17,7 +17,6 @@ import { materializeCommand } from './materializeCommand'
 
 const rootUser = makeUser({ id: 1, parent: null, currency: 2 })
 
-/** Cash account holding `balance`, plus whatever else the case needs. */
 function makeSnapshot(patch: Partial<TDataStore> = {}): TDataStore {
   return makeStore({ user: { 1: rootUser }, ...patch })
 }
@@ -92,8 +91,6 @@ describe('predicted account balances', () => {
       },
     })
 
-    // Moving the outcome side to another account returns the amount to `from`
-    // and takes it from `other`, exactly as the server recomputes both.
     const command = prepareCommand(
       snapshot,
       { transaction: [{ id: 'tr', outcomeAccount: 'other' }] },
@@ -147,17 +144,13 @@ describe('predicted account balances', () => {
     const patch = materializeCommand(snapshot, command)
     const next = applyPatch(snapshot, patch)
 
-    // The purged row is gone and contributes nothing, so the balance is the
-    // same as if it had been deleted outright.
     expect(patch.transaction).toBeUndefined()
     expect(next.transaction.tr).toBeUndefined()
     expect(balances(next)).toEqual({ acc: 100 })
   })
 
   it('predicts every account type, including ones with no starting balance', () => {
-    // Deposit and loan recompute their balance from transactions like any other
-    // account; only their base term reads 0. Debt recomputes too, its balance
-    // just feeds no read model.
+    // Deposit and loan balances still include transaction effects, but their startBalance is not the balance base.
     const snapshot = makeSnapshot({
       account: {
         debt: makeAccount({ id: 'debt', type: AccountType.Debt, balance: 20 }),
@@ -222,7 +215,6 @@ describe('predicted account balances', () => {
       100
     )
 
-    // Every income side gains 1; the card funding all four loses 4.
     expect(
       balances(applyPatch(snapshot, materializeCommand(snapshot, command)))
     ).toEqual({ debt: 21, deposit: 501, loan: 701, emoney: 41, card: 96 })
@@ -397,7 +389,6 @@ describe('predicted balances across the replica pipeline', () => {
 
   it('does not double-count after the canonical balance lands in base', () => {
     const command = raiseTo(25, 100)
-    // The server accepted the write and answered with its own recalculation.
     const rebased = applyPatch(snapshot, {
       account: [{ ...snapshot.account.acc, balance: 75 }],
       transaction: [{ ...snapshot.transaction.tr, outcome: 25 }],

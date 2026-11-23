@@ -27,17 +27,13 @@ import {
 type Query = core.transactions.TTransactionQuery
 type Clause = core.transactions.TTransactionFilterClause
 
-/** Fewer checked rows are already read at a glance in the list itself. */
 const MIN_CHECKED_FOR_DETAILS = 3
 
 export type TransactionSummaryProps = {
-  /** The list's own scope, as `TransactionList` takes it. */
   transactionIds?: TTransactionId[]
   query: Query
   search: string
-  /** Checked rows. Any of them make the summary about them alone. */
   checked: TTransactionId[]
-  /** Lets a group or a period narrow the list. */
   onQueryChange?: (query: Query) => void
   onSearchChange?: (search: string) => void
   /** Kept with the list's view. Without them the summary remembers only
@@ -47,13 +43,7 @@ export type TransactionSummaryProps = {
   onClose?: () => void
 }
 
-/** What a list adds up to: its checked rows when there are any, otherwise
- * everything its filter shows.
- *
- * A filtered list always has all three cards. They are how the list is
- * narrowed, so narrowing it, or switching anything inside a card, must never
- * take a card away. A few checked rows are only there to be added up: for
- * them a card appears once the rows give it something to say. */
+/** Filtered lists keep all cards as narrowing controls. Small selections show only cards with useful data. */
 export function TransactionSummary(props: TransactionSummaryProps) {
   const { transactionIds, query, search, checked, onClose } = props
   const { onQueryChange, onSearchChange } = props
@@ -117,7 +107,6 @@ export function TransactionSummary(props: TransactionSummaryProps) {
       side && t(`flow_${side}`)
     )
 
-  // A selection is not what the filter shows, so narrowing it means nothing.
   const narrow =
     onQueryChange && !selection
       ? (clause: Clause) => {

@@ -13,15 +13,12 @@ export type ListRowProps = useRender.ComponentProps<'div'> & {
   description?: ReactNode
   /** Reserve this slot for every row when the source list contains images. */
   reserveStart?: boolean
-  /** Visual indentation only; this is still a flat list, not a tree widget. */
   indent?: number
   selected?: boolean
   highlighted?: boolean
 }
 
-/** Presentation only. The rendered primitive owns semantics and interaction.
- * Highlight comes from the list owner or Base UI's data-highlighted attribute;
- * an independent :hover would leave two highlighted rows during keyboard use. */
+/** The list owns highlight; independent hover would highlight two rows during keyboard use. */
 export function ListRow(props: ListRowProps) {
   const {
     size = 'lg',
@@ -56,19 +53,16 @@ export function ListRow(props: ListRowProps) {
         'data-highlighted': highlighted || undefined,
       }),
       className: cn(
-        // Layout and shared typography
         'relative isolate flex w-full min-w-0 cursor-default items-center border-0 bg-transparent text-left font-[family-name:inherit] text-ui-16 text-ui-primary whitespace-normal select-none',
         'rounded-smooth before:rounded-smooth after:rounded-smooth outline-none',
         size === 'lg'
           ? 'min-h-12 rounded-ui-control px-4 py-3'
           : 'min-h-10 rounded-ui-control-inner px-3 py-2',
         (reserveStart || start != null) && 'pl-0',
-        // Selection is the base; highlight is a separate translucent layer.
         'before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-[inherit] before:bg-ui-selected before:opacity-0',
         'data-selected:before:opacity-100',
         'after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] after:bg-ui-highlight after:opacity-0',
         'data-highlighted:after:opacity-100',
-        // Only the backing moves. Disabled rows never respond to a press.
         'before:transition-transform before:duration-150 before:ease-[ease] after:transition-transform after:duration-150 after:ease-[ease]',
         '[&:active:not(:disabled):not([aria-disabled=true]):not([data-disabled])]:before:scale-98',
         '[&:active:not(:disabled):not([aria-disabled=true]):not([data-disabled])]:after:scale-98',
@@ -117,7 +111,6 @@ export function ListRow(props: ListRowProps) {
   })
 }
 
-/** Label for a group; the owning group connects it with aria-labelledby. */
 export function ListRowHeader(
   props: ComponentPropsWithRef<'div'> & { size?: ListRowSize }
 ) {
@@ -144,7 +137,6 @@ export function ListRowSeparator(props: ComponentPropsWithRef<'div'>) {
   )
 }
 
-/** Native action row for ordinary lists; composite widgets own their highlight. */
 export function ListRowButton({
   className,
   children,

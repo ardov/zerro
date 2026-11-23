@@ -14,8 +14,6 @@ import { defineScreen } from '@/6-shared/overlays'
 import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-/** A screen: the envelope it edits is an id, and the envelope itself is looked
- * up from it — so the dialog comes back from Back, Forward and a reload. */
 const envelopeEditScreen =
   defineScreen<core.envelopes.TEnvelopeId>('envelopeEdit')
 

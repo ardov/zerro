@@ -14,7 +14,6 @@ import { IconButton } from './Button'
 
 export type SelectTriggerProps = useRender.ComponentProps<'button'> & {
   label: string
-  /** Position a popup against the whole field, including its addons. */
   surfaceRef?: Ref<HTMLDivElement>
   size?: 'lg' | 'sm'
   labelMode?: 'hidden' | 'floating'
@@ -26,13 +25,10 @@ export type SelectTriggerProps = useRender.ComponentProps<'button'> & {
   invalid?: boolean
   description?: ReactNode
   error?: ReactNode
-  /** Supply only for an optional, clearable value. */
   onClear?: () => void
-  /** Localized accessible name for the clear button. */
   clearLabel?: string
 }
 
-/** Field appearance; the composed primitive owns popup state and selection. */
 export function SelectTrigger(props: SelectTriggerProps) {
   const {
     label,
@@ -156,7 +152,6 @@ export function SelectTrigger(props: SelectTriggerProps) {
         invalid={effectiveInvalid}
         end={
           clearable ? (
-            // Above the trigger's full-surface hit area, so the press lands here.
             <FieldAddon kind="action" className="relative z-10">
               <IconButton
                 label={clearLabel}

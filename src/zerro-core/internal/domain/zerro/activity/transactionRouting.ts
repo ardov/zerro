@@ -17,14 +17,7 @@ export type TTransactionActivityRoutingContext = {
   debtors: ById<Pick<TEnvelopeDebtor, 'id' | 'merchantId'>>
 }
 
-/**
- * Builds the routing context once. Both consumers of
- * {@link routeTransactionToActivity} — the bulk `buildRawActivity` projection
- * and the per-transaction filter predicate — must share one context, or the
- * transaction filter and the budget table can disagree about the same
- * transaction. `inBudgetAccountIds` stays an array upstream so the Redux
- * adapter can keep its shallow result-equality check on it.
- */
+/** Share the routing context between activity totals and transaction filters so the same transaction cannot count differently. */
 export function buildActivityRoutingContext(input: {
   inBudgetAccountIds: readonly TAccountId[]
   debtAccountId: TAccountId | undefined

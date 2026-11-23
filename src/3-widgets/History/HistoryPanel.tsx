@@ -21,18 +21,7 @@ import { HistoryControls } from './HistoryControls'
 import { HistoryRestorePreview } from './HistoryRestorePreview'
 import { HistoryRowList } from './HistoryRowList'
 
-/**
- * An overlay on every size, not a column beside the page.
- *
- * It was a persistent drawer so history could be browsed next to the live app,
- * but the layout breakpoints watch the viewport rather than the space left
- * over: giving the panel 380px shrank the content box without moving the
- * layout to its narrower form, so the budget table collapsed to bare icons
- * behind a horizontal scrollbar. Overlaying costs nothing that was working.
- */
-/** A screen: it holds nothing but its own presence, and comes back from Back,
- * Forward and a reload alike. Opening it from settings adds a screen above
- * that panel, so Back returns to settings. */
+/** Use an overlay because layout breakpoints track the viewport, not the space left by a side panel. */
 export const historyPanelScreen = defineScreen<true>('historyPanel')
 
 export function HistoryPanel() {
@@ -50,15 +39,12 @@ export function HistoryPanel() {
   )
 }
 
-/** Subscriptions and summaries live inside the drawer's mounted content. */
 function HistoryPanelContent() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()
   const rows = useAppSelector(selectHistoryRows)
   const canLoadOlder = useAppSelector(selectCanLoadOlderHistory)
   const pageStatus = useAppSelector(selectHistoryPageStatus)
-  // Marks the head row while the panel is open, so stepping never leaves the
-  // list without a "you are here".
   const selected = useAppSelector(selectHighlightedHistoryPoint)
   const head = useAppSelector(selectHistoryHeadPoint)
   const restorePoint = useAppSelector(selectSelectedHistoryPoint)
@@ -104,15 +90,11 @@ function HistoryPanelContent() {
           )}
         </ScrollArea>
       )}
-      {/* Pinned under the list: it belongs to the selection, not to the row
-          that happens to be scrolled into view. */}
       <HistoryRestorePreview />
     </>
   )
 }
 
-/** Centred rather than a line of text at the top: an empty full-screen sheet
- * with one sentence pinned to its ceiling reads as a failure to load. */
 function EmptyHistory({ loading }: { loading: boolean }) {
   const { t } = useTranslation('history')
   return (

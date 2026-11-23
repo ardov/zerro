@@ -17,10 +17,8 @@ import {
 export type UseAmountExpressionOptions = {
   value: number
   onChange: (value: number) => void
-  /** Enter, with whatever the field is worth by then. */
   onEnter?: (value: number) => void
   onCommit?: (value: number) => void
-  /** How the amount reads while nobody is typing into it. */
   format: (value: number) => string
   /** Select the whole amount when the field is entered, so the first
    * keystroke replaces it rather than appending to it. */
@@ -37,14 +35,7 @@ type InputIntent = {
   inputType: string
 }
 
-/** The two things every amount field does: hold the arithmetic being typed,
- * and report what it is worth on each keystroke.
- *
- * The expression and the value are separate on purpose. `1200/2` is worth 600
- * the moment it is complete, and the caller hears about it right away — but
- * the text stays `1 200/2` until focus leaves. Group separators and the locale
- * decimal comma are only its projection, so they never become separately
- * editable characters. */
+/** Report the evaluated value on edits while retaining the entered expression and its logical caret positions. */
 export function useAmountExpression(options: UseAmountExpressionOptions) {
   const {
     value,
@@ -207,9 +198,7 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
       end: amountExpressionOffsetFromDisplay(changedDisplay, changedEnd),
     }
 
-    // Deleting a generated group separator leaves the cleaned expression
-    // unchanged. Treat that intent as deleting the adjacent real character,
-    // so Backspace and Delete never appear to get stuck on a space.
+    // Deleting a display separator would leave the model unchanged; remove the adjacent editable character instead.
     const intent = inputIntent.current
     inputIntent.current = null
     if (nextExpression === expression && intent?.collapsed) {
@@ -235,10 +224,7 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
     update(nextExpression, nextSelection)
     if (nextExpression === expression) {
       const input = event.currentTarget
-      // The display did not change, so no layout effect restores selection.
-      // React puts the controlled value back before this microtask; run after
-      // the native edit too, so a discarded character cannot leave the caret
-      // at the end of the field.
+      // Without a display change no layout effect restores the caret. Wait for React and the native edit in a microtask.
       queueMicrotask(() => {
         if (inputRef.current !== input || document.activeElement !== input)
           return
@@ -313,7 +299,6 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
             })
       insert(operator, at)
     },
-    /** Optional wrapper for addons and operator buttons in the same edit session. */
     editorProps: {
       ref: editorRef,
       onBlurCapture: blurWithin,
@@ -331,10 +316,7 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
       autoComplete: 'off' as const,
       onBeforeInput: (event: ReactInputEvent<HTMLInputElement>) => {
         onBeforeInput?.(event)
-        // If none of the inserted text belongs to the amount grammar, leave
-        // the native value and selection untouched. Let mixed input through:
-        // `12x` still inserts `12`, with the normal change path restoring its
-        // logical caret after the `x` is discarded.
+        // Reject an entirely invalid insert without touching the caret. Mixed input goes through normal cleanup.
         if (
           !event.defaultPrevented &&
           event.data &&
@@ -374,10 +356,7 @@ export function useAmountExpression(options: UseAmountExpressionOptions) {
   }
 }
 
-/** The formatted resting value supplies the editable precision too: a regular
- * field enters as `3 240,00`, while the headline enters as `3 240`. Zero stays
- * empty while editing, so it is a placeholder rather than text that has to be
- * cleared before a real amount can be entered. */
+/** Use resting formatting to seed edit precision. Zero opens empty so it does not require a manual clear. */
 function toExpression(
   value: number,
   format: (value: number) => string
@@ -385,7 +364,6 @@ function toExpression(
   return value === 0 ? '' : cleanAmountInput(format(value))
 }
 
-/** Group separators have no editable position of their own. */
 function amountExpressionOffsetFromDisplay(
   display: string,
   offset: number

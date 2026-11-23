@@ -1,6 +1,3 @@
-// The normalized Zenmoney data store and patch shapes. This is the core
-// domain contract: `applyPatch(store, patch)` and command compilers speak in
-// these types.
 import type { ById } from '../../foundation/types'
 import type { TMsTime, TUnixTime } from '../primitives'
 import type { TInstrument } from '../entities/instruments'
@@ -37,7 +34,6 @@ export type TDataStore = {
   transaction:      ById<TTransaction>
 }
 
-/** Creates a fresh empty normalized snapshot for a new replica. */
 export function createEmptyDataStore(): TDataStore {
   return {
     serverTimestamp: 0,
@@ -84,11 +80,7 @@ export type TZmDeletionObject = TDeletionObject & {
 
 export type TDeletionIntent = Pick<TDeletionObject, 'id' | 'object'>
 
-/**
- * Sparse user intent: entity patches carrying only the changed writable
- * fields plus deletion intents. Entity builders return this intermediate shape;
- * command preparation turns it into explicit create, patch and delete operations.
- */
+/** Sparse builder intent becomes explicit create, patch, and delete operations during command preparation. */
 export type TIntentPatch = {
   deletion?: TDeletionIntent[]
   user?: TUserPatch[]
@@ -119,7 +111,6 @@ export const intentPatchKeys = [
   ...intentEntityKeys,
 ] as const satisfies readonly (keyof TIntentPatch)[]
 
-/** Complete normalized entities applied to a snapshot after materialization. */
 export type TNormalizedPatch = {
   serverTimestamp?: TMsTime
   deletion?: TDeletionObject[]

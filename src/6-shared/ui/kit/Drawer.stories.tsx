@@ -175,7 +175,6 @@ export const PreserveContent: Story = {
   },
 }
 
-// Hosted editors mount already open; keep this lifecycle covered at the surface.
 function MountedDrawer(props: { keepMounted?: boolean }) {
   const { keepMounted = false } = props
   const [open, setOpen] = useState(false)
@@ -315,8 +314,6 @@ function touch(
   return event
 }
 
-/** Drags a finger across `target` in a few steps. Returns whether any move
- * was taken over by the drawer rather than left to the page to scroll. */
 function drag(target: Element, dx: number, dy: number) {
   const rect = target.getBoundingClientRect()
   const x = rect.left + Math.min(40, rect.width / 2)
@@ -331,7 +328,6 @@ function drag(target: Element, dx: number, dy: number) {
   return taken
 }
 
-/** Opens the story's drawer and waits until it has slid fully into view. */
 async function openSettled(canvasElement: HTMLElement, name: string) {
   const body = within(canvasElement.ownerDocument.body)
   await userEvent.click(within(canvasElement).getAllByRole('button')[0])
@@ -360,8 +356,6 @@ export const ScrollGesture: Story = {
   play: async ({ canvasElement }) => {
     const sheet = await openSettled(canvasElement, 'Details')
     const content = within(sheet).getByLabelText('Scrollable content')
-    // A scroll that drifts sideways stays a scroll: a side drawer is
-    // dismissed from its header, not its body.
     expect(drag(content, 60, 12)).toBe(false)
     expect(drag(content, 20, 3)).toBe(false)
     await waitFor(() => expect(sheet).not.toHaveAttribute('data-swiping'))
@@ -427,9 +421,7 @@ function HistoryOwner() {
   )
 }
 
-/** A screen swiped away stays closed while history catches up, and Forward
- * brings it back. The slow step itself is covered in the overlays tests:
- * stories run on a MemoryRouter, where steps land at once. */
+/** MemoryRouter lands immediately. The overlay unit tests cover a swipe while Back is still pending. */
 export const HistorySwipeClose: Story = {
   globals: { viewport: { value: 'zerro499' } },
   render: () => <HistoryOwner />,
@@ -454,8 +446,6 @@ export const BottomBodySwipe: Story = {
   },
   play: async ({ canvasElement }) => {
     const sheet = await openSettled(canvasElement, 'Details')
-    // A bottom sheet swipes along its scroll, which Base UI reconciles, so
-    // the body keeps the gesture.
     drag(within(sheet).getByText('Swipe the body down'), 0, 200)
     await waitFor(() => expect(sheet).not.toBeVisible())
   },
@@ -491,7 +481,6 @@ export const BottomOwnScroller: Story = {
       sheet.getBoundingClientRect().bottom,
       0
     )
-    // Emulate a larger bottom safe area: it must scroll with the last row.
     scroller.parentElement!.style.setProperty(
       '--kit-scroll-bottom-inset',
       '32px'

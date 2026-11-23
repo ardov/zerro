@@ -7,7 +7,6 @@ const categoryModules = import.meta.glob<string>('./categories/a*.svg', {
 /** Zenmoney `tag.icon` name to its monochrome category asset. */
 export const categoryIconById = createCategoryIconMap(categoryModules)
 
-/** Fallback used for the synthetic uncategorized tag. */
 export { default as noCategoryIconUrl } from './categories/no_category.svg?inline'
 
 function createCategoryIconMap(

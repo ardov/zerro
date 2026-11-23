@@ -8,7 +8,6 @@ import {
 } from './interaction'
 import type { CurrencySettings, Point, SpringState } from './interaction'
 
-// Selected in the currency-field prototype. All dimensions are CSS pixels.
 const size = 24
 const cellWidth = 32
 const rowHeight = 40
@@ -331,7 +330,6 @@ export function startCurrencyBackground(
   }
 
   function drawNudges() {
-    // Punch out the original cells, then draw displaced glyphs above every hole.
     ctx.globalCompositeOperation = 'destination-out'
     ctx.globalAlpha = 1
     ctx.fillStyle = '#000'
@@ -429,7 +427,6 @@ export function startCurrencyBackground(
       ctx.restore()
       if (nudges.size) drawNudges()
     }
-    // Erase the artwork, revealing the theme's canvas color beneath it.
     if (!pile) {
       ctx.globalAlpha = 1
       ctx.globalCompositeOperation = 'destination-out'
@@ -516,7 +513,6 @@ export function startCurrencyBackground(
             sprites.push({
               artwork: art,
               opacity: row.opacity,
-              // Still-attached regions retain the field's original edge fade.
               edgeOpacity:
                 Math.min(1, Math.min(x, width - x) / fade) *
                 Math.min(1, Math.min(y, height - y) / fade),
@@ -530,7 +526,6 @@ export function startCurrencyBackground(
       onCollapse?.()
       syncMotion()
     } catch {
-      // A failed optional chunk must not interrupt sign-in or the artwork.
       if (disposed || run !== generation) return
       clicks = 0
       setPhase('flowing')
@@ -599,7 +594,6 @@ export function startCurrencyBackground(
     nudges.forEach((nudge, cell) => {
       if (advanceSpring(nudge, delta, settings)) nudges.delete(cell)
     })
-    // Decreasing the source offset moves the visible strip to the right.
     rows.forEach(row => {
       row.offset = modulo(row.offset - row.speed * delta, row.width)
     })
@@ -650,9 +644,7 @@ export function startCurrencyBackground(
       resize()
       syncMotion()
     })
-    .catch(() => {
-      // Keep the theme background if its decorative fonts cannot load.
-    })
+    .catch(() => {})
 
   function dispose() {
     disposed = true

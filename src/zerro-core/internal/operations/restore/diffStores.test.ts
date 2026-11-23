@@ -26,7 +26,6 @@ function makeSnapshot(patch: Partial<TDataStore> = {}): TDataStore {
   return makeStore({ user: { 1: rootUser }, ...patch })
 }
 
-/** Applies a diff the way a real caller does: as an ordinary command. */
 function applyDiff(current: TDataStore, desired: TDataStore): TDataStore {
   const patch = buildRestorePlan(current, desired, {
     allocateId: (key, id) => `restored:${key}:${id}`,
@@ -352,7 +351,6 @@ describe('diffStores removals', () => {
 
     const next = applyDiff(current, desired)
     expect(next.transaction.tr.deleted).toBe(true)
-    // The removal reaches the balance through the existing prediction.
     expect(next.account.acc.balance).toBe(0)
   })
 
@@ -401,8 +399,6 @@ describe('diffStores removals', () => {
     const desired = makeSnapshot()
 
     expect(diffStores(current, desired)).toEqual({
-      // Planning order follows the entity graph; the push run re-sorts
-      // deletions into cleanup order before anything is transmitted.
       deletion: [
         { id: 'shop', object: 'merchant' },
         { id: 'acc', object: 'account' },
@@ -500,8 +496,6 @@ describe('diffStores and account deletion cascades', () => {
     // top would bloat the push and leave a tombstone the server never has.
     expect(patch.transaction).toBeUndefined()
 
-    // The skipped removal must not leave a dangling row behind: the account
-    // deletion's own cascade has to be what actually purges it.
     const restored = applyDiff(current, desired)
     expect(restored.account).toEqual({})
     expect(restored.transaction.transfer).toBeUndefined()
@@ -531,8 +525,6 @@ describe('diffStores and account deletion cascades', () => {
     expect(patch.deletion).toEqual([{ id: 'gone', object: 'account' }])
     expect(patch.transaction).toEqual([{ id: 'mixed', deleted: true }])
 
-    // Balance shifts as a side effect of the soft delete — already covered
-    // elsewhere — so only presence is asserted here, not the exact balance.
     const restored = applyDiff(current, desired)
     expect(restored.account.gone).toBeUndefined()
     expect(restored.account.stays).toBeDefined()
@@ -769,9 +761,6 @@ describe('restore reconciliation', () => {
       },
     })
 
-    // The account keeps the backup's own id — the ordinary same-account case
-    // the identity rule leaves unchanged — so its convergence on replay does
-    // not depend on the account matching rule under test elsewhere.
     const current = makeSnapshot({
       account: {
         account: makeAccount({ id: 'account', title: 'Placeholder' }),
@@ -846,8 +835,6 @@ describe('diffStores scope', () => {
       entities: ['transaction'],
       includes: (_key, row) => String(row.date).startsWith('2026-01'),
     })
-    // `new` is in scope in `current` and out of it in `moved`; `old` is in
-    // neither, so it keeps its own value instead of being deleted.
     expect(patch).toEqual({ transaction: [{ id: 'new', date: '2025-11-01' }] })
   })
 })
@@ -870,7 +857,6 @@ describe('diffStores round trip', () => {
       },
     })
 
-    // The live store drifted: an edit, a rename, and a later transaction.
     const drifted = applyDiff(
       backup,
       makeSnapshot({
@@ -902,7 +888,6 @@ describe('diffStores round trip', () => {
     expect(restored.transaction['restored:transaction:later'].deleted).toBe(
       true
     )
-    // Restoring twice is a no-op: the second diff has nothing left to write.
     expect(diffStores(restored, backup)).toEqual({})
   })
 })
@@ -949,15 +934,13 @@ describe('summarizeStoreDiff', () => {
     const desired = makeSnapshot({
       reminder: {
         budgets: budgets({
-          'tag#food': 5000, // unchanged
-          'tag#car': 4000, // changed
-          'tag#new': 200, // added
+          'tag#food': 5000,
+          'tag#car': 4000,
+          'tag#new': 200,
         }),
       },
     })
 
-    // Both payloads are in hand here, so the count is envelopes rather than
-    // the one monthly record a list row can see.
     expect(summarizeStoreDiff(current, diffStores(current, desired))).toEqual({
       'envelope-budget': { created: 1, updated: 1, removed: 1 },
     })
@@ -1000,9 +983,7 @@ describe('summarizeStoreDiff', () => {
     })
     const patch = diffStores(current, makeSnapshot())
 
-    // The plan still removes it — restoring past its creation really does —
-    // but "Accounts remove 1" would bill Zerro's own storage for a goal the
-    // user set, so only the goal is counted.
+    // The plan still restores or removes the storage account, but its change is omitted from user-visible counts.
     expect(patch.deletion).toContainEqual({ id: 'data', object: 'account' })
     expect(summarizeStoreDiff(current, patch)).toEqual({
       goal: { created: 0, updated: 0, removed: 1 },
@@ -1029,8 +1010,6 @@ describe('summarizeStoreDiff', () => {
       },
     })
 
-    // A creation intent carries the title, so the anchor is recognizable from
-    // the intent alone, with nothing in the current store to compare against.
     expect(summarizeStoreDiff(current, diffStores(current, desired))).toEqual({
       goal: { created: 1, updated: 0, removed: 0 },
     })

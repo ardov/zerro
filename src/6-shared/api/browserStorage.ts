@@ -1,11 +1,9 @@
-// Remember successful reads/writes for later read failures. Only unsaved
-// changes override readable browser storage, so cross-tab changes stay visible.
-// Null values preserve removals even when browser persistence is unavailable.
+// Only unsaved changes override readable browser storage so cross-tab changes still appear.
+// Remember successful reads and writes for failures; null preserves a removal.
 const lastKnown = new Map<string, string | null>()
 const unsaved = new Set<string>()
 let cleared = false
 
-/** Best-effort persistence with a fallback lasting only for this page. */
 export const safeLocalStorage = {
   getItem(key: string): string | null {
     if (unsaved.has(key) || cleared) return lastKnown.get(key) ?? null
@@ -23,9 +21,7 @@ export const safeLocalStorage = {
     try {
       localStorage.setItem(key, value)
       unsaved.delete(key)
-    } catch {
-      // Keep the unsaved value for the current page.
-    }
+    } catch {}
   },
   removeItem(key: string): void {
     lastKnown.set(key, null)
@@ -33,9 +29,7 @@ export const safeLocalStorage = {
     try {
       localStorage.removeItem(key)
       unsaved.delete(key)
-    } catch {
-      // Keep the removal for the current page.
-    }
+    } catch {}
   },
   clear(): void {
     lastKnown.clear()

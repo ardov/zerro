@@ -1,9 +1,3 @@
-/**
- * Returns text in a correct form
- * @param n - number
- * @param textForms - text forms e.g. `['минута', 'минуты', 'минут']`
- * @returns string
- */
 export default function pluralize(
   n: number,
   textForms: [string, string, string]

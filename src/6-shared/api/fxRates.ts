@@ -8,10 +8,7 @@ import type {
   TISODate,
 } from '@/6-shared/types'
 
-/*
-Currency rates are loaded from this great repository by Fawaz Ahmed
-https://github.com/fawazahmed0/exchange-api
-*/
+/* Exchange rates: https://github.com/fawazahmed0/exchange-api */
 
 export const firstPossibleDate: TISODate = '2024-03-10'
 

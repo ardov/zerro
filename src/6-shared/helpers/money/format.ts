@@ -29,12 +29,6 @@ function formatNumber(number: number, decimals: number): string {
   return parts.join(moneyDecimalSeparator)
 }
 
-/**
- * Formats number using thousand separator and decimal separator.
- * @param number - Number to format.
- * @param currency - currency code.
- * @param decimals - Number of decimals to show or 'ifOnly' or 'ifAny' to automatically determine the number of decimals.
- */
 export function formatMoney(
   number: number,
   currency?: TFxCode | null,

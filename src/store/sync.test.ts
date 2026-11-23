@@ -70,7 +70,6 @@ describe('sync reducer', () => {
       detailsOpen: true,
     })
     expect(closed).toEqual(active)
-    // A run large enough to want them opens them itself.
     expect(
       reducer(
         undefined,

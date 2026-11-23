@@ -34,7 +34,6 @@ export type TTransactionListProps = {
   hideFilter?: boolean
   initialDate?: TDateDraft
   view?: TTransactionListView
-  /** Adds the entry to this list's summary; its owner decides where it opens. */
   summary?: SummaryToggle
   className?: string
 }
@@ -169,10 +168,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   const ask = useAsk()
 
-  // Groups carry only ids and depend on the list alone, so opening or checking
-  // a transaction never rebuilds them. The heavy `<Transaction>` elements are
-  // created lazily by `renderTransaction`, only for the rows the virtualizer
-  // actually mounts.
+  // Group IDs by list data alone; render heavy rows only when the virtualizer mounts them.
   const groups = useMemo(() => {
     const byDate: ByDate<{ date: TISODate; ids: TTransactionId[] }> = {}
     trList.forEach(tr => {

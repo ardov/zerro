@@ -3,7 +3,6 @@ import { GroupBy } from '@/6-shared/helpers/date'
 import { useCashFlow, summarizeCashflow } from '../shared/cashflow'
 import { Period } from '../shared/period'
 
-/** Hook to get average monthly expenses */
 export function useAverageExpenses(): number {
   const points = useCashFlow(Period.LastYear, GroupBy.Month)
 

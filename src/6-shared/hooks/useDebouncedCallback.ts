@@ -5,19 +5,10 @@ import { useMemo, useRef } from 'react'
 
 export interface DebouncedFunction<Fn extends (...args: any[]) => any> {
   (this: ThisParameterType<Fn>, ...args: Parameters<Fn>): void
-  /** Runs a pending call now, if there is one. */
   flush(): void
 }
 
-/**
- * Makes passed function debounced, otherwise acts like `useCallback`.
- *
- * @param callback Function that will be debounced.
- * @param deps Dependencies list when to update callback.
- * @param delay Debounce delay.
- * @param maxWait The maximum time `callback` is allowed to be delayed before
- * it's invoked. 0 means no max wait.
- */
+/** A debounced callback with separate flush and cancel controls. A maxWait of zero disables the cap. */
 export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
   callback: Fn,
   deps: DependencyList,
@@ -51,7 +42,6 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
   return useMemo(
     () => {
       const execute = () => {
-        // barely possible to test this line
         /* istanbul ignore next */
         if (!lastCall.current) return
 
@@ -70,10 +60,8 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
 
         lastCall.current = { args, this: this }
 
-        // plan regular execution
         timeout.current = setTimeout(execute, delay)
 
-        // plan maxWait execution if required
         if (maxWait > 0 && !waitTimeout.current) {
           waitTimeout.current = setTimeout(execute, maxWait)
         }

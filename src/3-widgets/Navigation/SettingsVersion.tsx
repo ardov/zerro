@@ -7,7 +7,6 @@ import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import { toast } from '@/6-shared/ui/kit/Toast'
 import { checkAppUpdates } from '@/4-features/appUpdates'
 
-/** Press to check for updates; hold to show and copy the build for a bug report. */
 export function SettingsVersion() {
   const { t } = useTranslation('settings')
   const date = buildDate && new Date(buildDate)

@@ -18,15 +18,11 @@ import './layout.css'
 
 const DockedContext = createContext<boolean | undefined>(undefined)
 
-/** Whether the content is docked beside the page or lies over it in a
- * drawer. Undefined outside an adaptive panel. */
 export function usePanelDocked() {
   return useContext(DockedContext)
 }
 
-/** One editor and one scrollport, with two possible homes. Moving their stable
- * host preserves React state and native input/scroll state across a resize.
- * Changing a portal's target instead would remount the editor. */
+/** Move the same DOM host between dock and drawer to retain focus, inputs, and scroll; changing the portal target remounts it. */
 export function AdaptivePanel({
   docked,
   controller,
@@ -41,7 +37,6 @@ export function AdaptivePanel({
   controller: SurfaceController
   children: ReactNode
   contentClassName?: string
-  /** Styles the docked home; the drawer keeps its standard geometry. */
   className?: string
   active?: boolean
   finalFocus?: ComponentProps<typeof DrawerSurface>['finalFocus']

@@ -25,7 +25,6 @@ export const MainApp = () => {
   )
 }
 
-/** `zerro` can be used in console to access state and modify data */
 function createZerroInstance(s: typeof store) {
   let logsShow = safeLocalStorage.getItem('showLogs') === 'true'
 

@@ -20,9 +20,7 @@ const meta = {
   component: TransactionPreview,
   parameters: {
     layout: 'centered',
-    // The editor is a screen, so it wants the store and the overlay host the
-    // application gives it. Not `/transactions`: that page lays this screen
-    // out as a column of its own.
+    // Use a route outside /transactions so the preview opens in the drawer rather than its own column.
     app: { scenario: 'demo', route: '/budget' },
   },
 } satisfies Meta<typeof TransactionPreview>
@@ -30,8 +28,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The demo store's first transaction of each type, so every story below is
- * about a real one rather than a shape assembled for the picture. */
 function useByType() {
   const transactions = useAppSelector(core.transactions.selectAll)
   const debtAccountId = useAppSelector(core.accounts.selectDebtAccountId)
@@ -134,7 +130,6 @@ export const Showcase: Story = {
   },
 }
 
-/** Transfers have no counterparty place: their two accounts describe both sides. */
 export const Transfer: Story = {
   args: { id: '', onClose: () => {}, onOpenOther: () => {} },
   render: args => {
@@ -183,7 +178,6 @@ export const Transfer: Story = {
   },
 }
 
-/** Nothing selected. */
 export const Empty: Story = {
   args: { id: 'missing', onClose: () => {}, onOpenOther: () => {} },
   render: args => (
@@ -193,8 +187,6 @@ export const Empty: Story = {
   ),
 }
 
-/** The merchant picker with more rows than it can show: the search keeps its
- * place at the top and the list is the only thing that scrolls. */
 export const MerchantPicker: Story = {
   tags: ['!dev', '!autodocs'],
   args: { id: '', onClose: () => {}, onOpenOther: () => {} },
@@ -217,7 +209,6 @@ export const MerchantPicker: Story = {
     const showAll = body.queryByRole('button', { name: 'Show all' })
     if (showAll) await userEvent.click(showAll)
     const list = await body.findByRole('listbox')
-    // Find the scroll owner by behavior rather than the old field's CSS classes.
     let scroller = list
     while (
       getComputedStyle(scroller).overflowY !== 'auto' &&
@@ -242,8 +233,6 @@ export const MerchantPicker: Story = {
   },
 }
 
-/** Viewed state applies immediately, but it is metadata beside the editable
- * draft and must not replace unsaved field work. */
 export const MarkNewPreservesDraft: Story = {
   tags: ['!dev', '!autodocs'],
   args: { id: '', onClose: () => {}, onOpenOther: () => {} },
@@ -274,7 +263,6 @@ export const MarkNewPreservesDraft: Story = {
   },
 }
 
-/** Switching the type replaces the field layout without losing the draft. */
 export const ChangeTypePreservesDraft: Story = {
   ...Bench,
   tags: ['check'],
@@ -462,7 +450,6 @@ export const InlineSaveWithChangedTime: Story = {
   },
 }
 
-/** Watches the same entity and the real undo stack across autosaves. */
 function AutosaveHarness({
   type = 'outcome',
 }: {
@@ -571,7 +558,6 @@ export const DebtWaitsForCounterparty: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
-    // Ensure a nameless expense even when the demo starts with a merchant.
     if (stored(canvas).payee) {
       await userEvent.click(canvas.getByRole('combobox', { name: /^Place/ }))
       await userEvent.click(await body.findByRole('option', { name: 'Clear' }))
@@ -772,7 +758,6 @@ export const DockedBackFinishesInput: Story = {
   },
 }
 
-/** Resize keeps the same input and its unsaved value, without adding history. */
 export const AdaptiveLayoutPreservesPendingEdit: Story = {
   ...DockedBackFinishesInput,
   tags: ['check', '!dev', '!autodocs'],

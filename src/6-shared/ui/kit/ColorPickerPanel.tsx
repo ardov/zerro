@@ -23,7 +23,6 @@ export function ColorPickerPanel(props: ColorPickerPanelProps) {
     ...colors,
     ...customColors.filter(c => !colors.some(base => isSameColor(base, c))),
   ]
-  // While the dropdown is open, its colour gets a swatch of its own.
   const swatches = pickingCustom ? [...palette, value ?? '#ffffff'] : palette
   const grid = usePickerGrid(swatches.length + 1)
   return (

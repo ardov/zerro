@@ -8,11 +8,6 @@ import { SyncProgressDialog } from '@/3-widgets/SyncProgressDialog'
 import { ZerroDataAccountNotice } from '@/3-widgets/ZerroDataAccountNotice'
 import { SettingsScreen } from '@/3-widgets/Navigation/SettingsScreen'
 
-/** The screens that can be opened from anywhere, and the notices.
- *
- * Popups are not here any more: `ask` builds them at the moment of the
- * question and the overlay host draws them, so there is nothing left to mount
- * in advance. */
 export const GlobalWidgets = () => {
   return (
     <>

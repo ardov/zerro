@@ -50,7 +50,6 @@ function getUnavailableReason(): UnavailableReason | undefined {
   if (!('serviceWorker' in navigator)) return 'unsupportedBrowser'
 }
 
-/** Start after the global Toaster mounts. Registration itself checks at startup. */
 export function startAppUpdates(register: typeof registerSW) {
   if (getUnavailableReason()) return
   if (updater) return
@@ -186,7 +185,6 @@ function createUpdater(register: typeof registerSW) {
   }
 
   function updateFound() {
-    // The first offline installation is not a new application version.
     if (registration?.installing && (registration.active || controller)) {
       watch(registration.installing)
     }
@@ -195,7 +193,6 @@ function createUpdater(register: typeof registerSW) {
   function controllerChanged() {
     const previous = controller
     controller = container.controller
-    // Also cover an update activated by another window of the same PWA.
     if (previous && controller && previous !== controller) updateReady()
   }
 
@@ -235,7 +232,6 @@ function createUpdater(register: typeof registerSW) {
       return Promise.resolve()
     }
     lastCheck = Date.now()
-    // Keep background checks quiet until an update is actually found.
     phase = 'checking'
     inFlight = performCheck()
     return inFlight

@@ -35,7 +35,6 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
     toast.add({ type: 'success', title: t('completeAll.done') })
   }
 
-  // No goals
   if (!totalProgress || totalProgress.goalsCount === 0) return null
 
   const { need, target, progress } = totalProgress

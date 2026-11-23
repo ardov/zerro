@@ -6,13 +6,7 @@ import { buildMetadata } from './tools/buildMetadata'
 
 const root = path.dirname(fileURLToPath(import.meta.url))
 
-/**
- * Vite settings shared by Storybook without the app PWA/service worker.
- *
- * The aliases repeat `tsconfig.json` paths on purpose: files under
- * `.storybook/` resolve against `tsconfig.node.json`, which has no `paths`,
- * so `tsconfigPaths` alone cannot resolve their layer imports.
- */
+/** Repeat the layer aliases here because .storybook files resolve against tsconfig.node.json, which has no paths. */
 export default defineConfig({
   plugins: [tailwindcss(), buildMetadata()],
   optimizeDeps: {

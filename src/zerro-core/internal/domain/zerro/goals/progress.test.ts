@@ -19,9 +19,7 @@ describe('calcGoals', () => {
     expect(calc({ ...context, assigned: 0 })).toBe(0)
     expect(calc({ ...context, assigned: 25 })).toBe(0.25)
     expect(calc({ ...context, assigned: 100 })).toBe(1)
-    // Negative budget never dips below zero
     expect(calc({ ...context, assigned: -10 })).toBe(0)
-    // Overshoot clamps to 1, near-complete clamps down to 0.99
     expect(calc({ ...context, assigned: 120 })).toBe(1)
     expect(calc({ ...context, assigned: 99.99 })).toBe(0.99)
   })
@@ -29,14 +27,11 @@ describe('calcGoals', () => {
   it('calculates monthly spend progress relative to leftover', () => {
     const calc = getProgress({ type: goalType.MONTHLY_SPEND, amount: 100 })
 
-    // Without leftover it behaves like a monthly save goal
     expect(calc({ ...context, leftover: 0, assigned: 0 })).toBe(0)
     expect(calc({ ...context, leftover: 0, assigned: 10 })).toBe(0.1)
     expect(calc({ ...context, leftover: 0, assigned: 100 })).toBe(1)
-    // Positive leftover reduces what still needs budgeting
     expect(calc({ ...context, leftover: 100, assigned: 0 })).toBe(1)
     expect(calc({ ...context, leftover: 50, assigned: 10 })).toBe(0.2)
-    // Negative leftover raises the bar
     expect(calc({ ...context, leftover: -100, assigned: 50 })).toBe(0.25)
     expect(calc({ ...context, leftover: -100, assigned: 200 })).toBe(1)
   })
@@ -60,7 +55,6 @@ describe('calcGoals', () => {
     expect(calc({ ...context, generalIncome: 100, assigned: 0 })).toBe(0)
     expect(calc({ ...context, generalIncome: 100, assigned: 25 })).toBe(0.5)
     expect(calc({ ...context, generalIncome: 100, assigned: 50 })).toBe(1)
-    // No income means nothing left to save, so the goal reads as complete
     expect(calc({ ...context, generalIncome: 0, assigned: 0 })).toBe(1)
     expect(calc({ ...context, generalIncome: 0, assigned: -20 })).toBe(0)
   })
@@ -83,7 +77,6 @@ describe('calcGoals', () => {
     expect(calc({ ...context, available: 0 })).toBe(0)
     expect(calc({ ...context, available: 50 })).toBe(0.5)
     expect(calc({ ...context, available: 100 })).toBe(1)
-    // Overspent envelopes stay at zero progress
     expect(calc({ ...context, available: -50 })).toBe(0)
   })
 })

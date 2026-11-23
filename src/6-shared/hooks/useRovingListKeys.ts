@@ -2,19 +2,9 @@ import type { KeyboardEvent } from 'react'
 import { isPlainKey } from '@/6-shared/helpers/keyboard'
 import { useCallback, useRef } from 'react'
 
-/** How long a typed prefix keeps accumulating before it starts over. */
 const TYPEAHEAD_RESET_MS = 500
 
-/** The keys Base UI's roving-focus containers leave to the caller.
- *
- * Its composite root handles the arrows, and it can do Home/End — but only
- * behind an option `Toolbar` does not forward. Typeahead it does not do at
- * all. Both are behaviours a list of labelled actions is expected to have,
- * so they live here rather than being pasted into each list.
- *
- * Returns a `keydown` handler for the container. It never swallows a key it
- * did not act on, so the container's own handler stays in charge.
- */
+/** Base UI Toolbar does not forward Home/End and offers no typeahead; supply those without intercepting its arrows. */
 export function useRovingListKeys(itemSelector: string) {
   const search = useRef({ text: '', time: 0 })
 

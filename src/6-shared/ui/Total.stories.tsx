@@ -13,8 +13,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-// The amount colors are deliberate and reflect the semantic states described
-// by the component props.
 function AmountStates() {
   return (
     <div className="flex gap-8">
@@ -55,13 +53,11 @@ const checkAmountColors: Story['play'] = async ({ canvasElement }) => {
   await expect(amountOf('negative')).toBe(referenceOf('ref-error'))
   await expect(amountOf('positive')).toBe(referenceOf('ref-success'))
 
-  // The title stays muted whatever the amount does.
   const titleOf = (testId: string) =>
     getComputedStyle(canvas.getByTestId(testId).querySelectorAll('p')[0]).color
   await expect(titleOf('negative')).toBe(referenceOf('ref-muted'))
 }
 
-/** One component instance, entirely controlled by the Args panel. */
 export const Bench: Story = {}
 
 export const Showcase: Story = {

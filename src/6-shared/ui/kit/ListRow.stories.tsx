@@ -125,7 +125,6 @@ export const Showcase: Story = {
   ),
 }
 
-/** Base UI supplies the one highlight and keyboard semantics, not ListRow. */
 export const Interaction: Story = {
   render: () => (
     <Select.Root

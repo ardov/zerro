@@ -21,7 +21,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** One component instance, entirely controlled by the Args panel. */
 export const Bench: Story = {
   play: async ({ canvasElement }) => {
     await expect(
@@ -52,7 +51,6 @@ export const Active: Story = {
   },
 }
 
-/** A goal ring repeated down the budget table must not animate at rest. */
 export const StaticRing: Story = {
   tags: ['!dev', '!autodocs'],
   args: { value: 0.55, size: 16, 'aria-label': undefined },
@@ -73,7 +71,6 @@ function StoppingRing() {
   )
 }
 
-/** A ring that stops holds its angle while its dashes close up. */
 export const StoppingKeepsAngle: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => <StoppingRing />,
@@ -94,7 +91,6 @@ export const StoppingKeepsAngle: Story = {
   },
 }
 
-/** A moving indicator spins unless the reader asked for reduced motion. */
 function motionAllowed() {
   return !matchMedia('(prefers-reduced-motion: reduce)').matches
 }

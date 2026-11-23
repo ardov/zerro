@@ -17,7 +17,6 @@ export type TMerchant = {
   title: string
   mcc?: number | null
 }
-/** Fields the factory cannot default: creation intent must supply them. */
 export const merchantRequiredFields = [
   'title',
 ] as const satisfies readonly (keyof TMerchant)[]

@@ -45,7 +45,6 @@ export type CalendarProps = {
   className?: string
 }
 
-/** Single-date grid. Its parent owns the surrounding surface and dismissal. */
 export function Calendar(props: CalendarProps) {
   const {
     value,

@@ -12,7 +12,6 @@ const meta = {
     hiddenOverspend: -100,
   },
   render: args => (
-    // Budget metrics occupy 90px in both the desktop and mobile table.
     <div className="grid w-[90px] gap-4">
       <div data-testid="warning-cell">
         <AvailableCell {...args} />

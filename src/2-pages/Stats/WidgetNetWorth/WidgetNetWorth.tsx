@@ -27,9 +27,7 @@ import { useAverageExpenses } from './useAverageExpenses'
 type Point = TNetWorthPoint & { total: number }
 type TDataKey = keyof Omit<Point, 'date'>
 
-/** The series colours, as tokens rather than palette values: a chart repaints
- * with the colour scheme through the cascade, without re-rendering. The paired
- * shades are what separates two series that share a meaning. */
+/** CSS color tokens let the chart follow the theme without rerendering. */
 const colors: Record<TDataKey, string> = {
   lented: 'var(--data-success)',
   debts: 'var(--data-error)',
@@ -109,7 +107,6 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
   return (
     <div className="layout-panel rounded-smooth">
       <div className="min-w-full p-4">
-        {/* Header */}
         <h2 className="m-0 text-title-lg">
           {t('netWorth.title')}{' '}
           <InlineButton
@@ -123,7 +120,6 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           <SurviveFact />
         </p>
       </div>
-      {/* Chart */}
       <div className="h-[300px] min-w-full p-4">
         <ResponsiveContainer>
           <ComposedChart
@@ -157,7 +153,6 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           </ComposedChart>
         </ResponsiveContainer>
       </div>
-      {/* Legend */}
       <div className="p-4">
         {makeCheck('fundsInBudget')}
         {makeCheck('fundsSaving')}
@@ -171,15 +166,11 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
 }
 
 type TPayload = {
-  // chartType: undefined
   color: string
   dataKey: string
   fill: string
-  // formatter: undefined
   name: string
   payload: Point
-  // type: undefined
-  // unit: undefined
   value: number
 }
 

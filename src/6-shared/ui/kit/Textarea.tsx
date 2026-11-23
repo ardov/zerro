@@ -5,11 +5,8 @@ import { Field, fieldControlClass, type FieldPresentation } from './Field'
 
 export type TextareaProps = Omit<ComponentPropsWithRef<'textarea'>, 'rows'> &
   FieldPresentation & {
-    /** Reports the text after the native onChange handler. */
     onValueChange?: (value: string) => void
-    /** Minimum height in lines. Defaults to one. */
     minRows?: number
-    /** Maximum height in lines; additional content scrolls. */
     maxRows?: number
   }
 

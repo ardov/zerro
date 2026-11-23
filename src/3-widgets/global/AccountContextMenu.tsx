@@ -12,7 +12,6 @@ export type AccountMenuProps = {
   anchor: MenuSurfaceProps['anchor']
 }
 
-/** The account's context menu, asked from a context gesture. */
 export const AccountMenu: FC<AccountMenuProps> = ({ id, anchor }) => {
   const { t } = useTranslation('accountContextMenu')
   const { controller } = useAsked<void>()

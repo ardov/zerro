@@ -50,7 +50,6 @@ export type TReminderMarker = {
 export type TZmReminderMarker = Omit<TReminderMarker, 'changed'> & {
   changed: TUnixTime
 }
-/** Fields creation cannot infer from the local root user or factory defaults. */
 export const reminderMarkerRequiredFields = [
   'incomeAccount',
   'outcomeAccount',

@@ -9,15 +9,7 @@ import { selectOptions as selectDebtorOptions } from './debtors'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 
-/**
- * Guards the memoization contract the whole read model rests on: a projection
- * must depend on the slices it reads, never on the store as a whole. Without
- * this, an unrelated write silently recomputes `buildRawActivity` (~18ms on a
- * large account) and everything downstream of it.
- *
- * `reminderMarker` is changed because no projection reads it, so every node
- * below must survive a change to it with its reference intact.
- */
+/** Change reminderMarker because no projection reads it; all derived references should survive. */
 const nodes: Record<string, (state: RootState) => unknown> = {
   transactionsHistory: selectors.selectTransactionsHistory,
   transactionIds: selectors.selectTransactionIds,
@@ -54,8 +46,6 @@ describe('projection memoization', () => {
       Object.entries(nodes).map(([name, select]) => [name, select(state)])
     )
 
-    // New `current` object and a new unread slice; every read slice keeps its
-    // reference, so nothing below may recompute.
     const unrelated = makeTestRootState({
       ...store,
       reminderMarker: { ...store.reminderMarker },
@@ -68,9 +58,7 @@ describe('projection memoization', () => {
   })
 
   it('spares the activity chain when an account changes but its ids do not', () => {
-    // The expensive guard: `inBudgetAccountIds` is rebuilt from the whole
-    // account map, so without result equality any account edit would recompute
-    // `buildRawActivity` (~18ms on a large account) and everything under it.
+    // Retain the ID array when membership is unchanged so a simple account edit cannot rebuild activity.
     const store = makeDemoStore({ now: NOW })
     const state = makeTestRootState(store)
     const beforeIds = selectors.selectRawActivity(state)
@@ -110,7 +98,6 @@ describe('projection memoization', () => {
     })
 
     expect(selectors.selectRawActivity(changed)).not.toBe(beforeActivity)
-    // …and an unrelated projection is still spared.
     expect(selectors.selectBudgets(changed)).toBe(beforeBudgets)
   })
 })

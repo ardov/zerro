@@ -40,8 +40,6 @@ function MonthConfirmationHarness() {
   )
 }
 
-/** The confirmation lives in GlobalWidgets, outside the drawer's React tree.
- * Both responsive variants must keep focus and dismiss only themselves. */
 export const ConfirmFromDrawer: Story = {
   tags: ['!dev', '!autodocs'],
   globals: { viewport: { value: 'zerro900' } },
@@ -204,8 +202,6 @@ function GoalDraftHarness({ inDrawer = false }: { inDrawer?: boolean }) {
   )
 }
 
-/** Exercise the registered, keyed form: an ordinary component harness cannot
- * catch stale drafts across openings or history-driven dismissal. */
 export const GoalDraftAndNestedMonth: Story = {
   tags: ['!dev', '!autodocs'],
   render: () => (

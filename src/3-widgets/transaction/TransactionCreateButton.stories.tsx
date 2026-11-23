@@ -30,7 +30,6 @@ function CreationCheck() {
   )
 }
 
-/** Narrow screens show the editor as a full-width bottom sheet. */
 async function findCreateSurface(body: ReturnType<typeof within>) {
   const surface = await body.findByRole('dialog', {
     name: /New transaction|Новая операция/,

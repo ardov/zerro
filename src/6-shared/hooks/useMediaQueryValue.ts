@@ -33,11 +33,7 @@ function getStore(query: string) {
 
 const getServerSnapshot = () => false
 
-/** Whether a media query matches.
- *
- * For application layout breakpoints use `useBreakpointDown`. This hook also
- * supports media features and component-specific layout policies; keep each
- * shared policy in one named hook rather than repeating its query in callers. */
+/** For shared application breakpoints use useBreakpointDown; keep other shared queries in a named hook. */
 export function useMediaQueryValue(query: string) {
   const { subscribe, getSnapshot } = getStore(query)
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)

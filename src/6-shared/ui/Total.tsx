@@ -5,7 +5,6 @@ import { Amount } from '@/6-shared/ui/Amount'
 
 interface TotalProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
   title: string
-  /** Semantic state of the amount. A zero amount is muted either way. */
   amountColor?: 'error' | 'success'
   align?: 'center' | 'right' | 'left'
   value: AmountProps['value']

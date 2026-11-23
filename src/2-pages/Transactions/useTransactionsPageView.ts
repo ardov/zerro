@@ -35,9 +35,7 @@ export function useTransactionsPageView(): TTransactionListView {
     },
     [dispatch]
   )
-  // The list reads the position back only when it mounts, so it is saved once
-  // scrolling settles, or when the page unmounts. A save made after the views
-  // were reset carries the old generation and is ignored.
+  // Persist after scrolling settles or on unmount. The view generation rejects writes after a reset.
   const generation = useAppSelector(selectViewGeneration)
   const saveScroll = useDebouncedCallback(
     (topDate: TISODate, scrollOffset: number, savedGeneration: number) =>

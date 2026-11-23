@@ -1,4 +1,3 @@
-// Test-only aggregate for Redux projection assertions.
 export {
   selectAll as selectActivity,
   selectEnvelopeMetrics as selectEnvMetrics,

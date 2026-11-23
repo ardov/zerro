@@ -246,7 +246,6 @@ export const SaveAndCancel: Story = {
   },
 }
 
-/** The child's backdrop must cover the parent's visible area, not just the page. */
 async function dismissOverParent(
   parent: HTMLElement,
   child: HTMLElement,
@@ -356,7 +355,6 @@ function OwnerDraft() {
   )
 }
 
-/** The owner survives conditional content; wrapping setOpen is harmless. */
 export const OwnerCloseNotification: Story = {
   render: () => <OwnerDraft />,
   play: async ({ canvasElement }) => {

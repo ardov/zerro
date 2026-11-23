@@ -76,7 +76,6 @@ function makeSnapshot(title: string) {
   })
 }
 
-/** A valid backup carrying one field this version has no meaning for. */
 function toWarnedBackup(title: string): string {
   const store = makeSnapshot(title)
   const patch: TNormalizedPatch = { serverTimestamp: store.serverTimestamp }

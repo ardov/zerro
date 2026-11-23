@@ -191,9 +191,7 @@ export function createReplicaStorage(
       )
       const replicaStore = tx.objectStore(REPLICAS_STORE)
       const entryStore = tx.objectStore(JOURNAL_ENTRIES_STORE)
-      // Deliberately not `soleReplica`: no replica at all and a replica owned
-      // by someone else are both "start this account's journal from scratch",
-      // which is a reset rather than the corruption that helper reports.
+      // A missing replica or different owner starts a new journal, rather than reporting corruption.
       const replicas = await replicaStore.getAll()
       if (replicas.length !== 1 || replicas[0].rootUserId !== rootUserId) {
         await Promise.all([replicaStore.clear(), entryStore.clear()])
@@ -220,7 +218,6 @@ export function createReplicaStorage(
 
       const replica = replicas[0]
       const nextSequence = replica.headSequence + 1
-      // A cursor-only pull produces no entry: it advances the cursor alone.
       const entry = commit.checkpointReason
         ? createCheckpointEntry(
             rootUserId,
@@ -347,8 +344,6 @@ export function createReplicaStorage(
         )
         const replicaStore = tx.objectStore(REPLICAS_STORE)
         const entryStore = tx.objectStore(JOURNAL_ENTRIES_STORE)
-        // The outcome is both the return value and the interesting half of the
-        // metrics, so every exit reports through here.
         const report = (result: TCompactionResult) => {
           Object.assign(metrics, result)
           return result
@@ -418,11 +413,7 @@ export function createReplicaStorage(
 
 export const replicaStorage = createReplicaStorage(idbBaseName)
 
-/**
- * A single checkpoint plus the outbox is the minimum durable replica, so a
- * journal with nothing older than its head is never compacted even when it is
- * over budget.
- */
+/** Keep at least one checkpoint and the outbox, even when that alone exceeds the budget. */
 function shouldCompact(
   replica: TPersistedReplica,
   maxAge: number,
@@ -435,11 +426,7 @@ function shouldCompact(
   )
 }
 
-/**
- * Today's runtime keeps exactly one replica and clears the store when the root
- * user changes, so more than one row means the invariant is already broken and
- * nothing here can tell which row is live.
- */
+/** Multiple rows violate the single-replica invariant; none can be identified as live. */
 function soleReplica(
   replicas: readonly TPersistedReplica[]
 ): TPersistedReplica | null {
@@ -541,11 +528,6 @@ async function measureStorageOperation<T>(
   }
 }
 
-/**
- * The replica is keyed by its owner, so a snapshot without one cannot be
- * stored. Redux resolves the owner with the same domain helper and skips the
- * write when it finds none, which makes this a guard rather than a live path.
- */
 function requireRootUserId(snapshot: TDataStore): number {
   const rootUserId = getRootUserId(snapshot.user)
   if (rootUserId === null) throw new Error('Snapshot has no root user')

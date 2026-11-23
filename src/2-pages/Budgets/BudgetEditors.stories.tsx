@@ -27,8 +27,6 @@ const meta = {
 export default meta
 type Story = StoryObj
 
-/** Real editors and demo store. No play function: changes stay on screen so
- * this is also a manual review surface, independent of the regression tests. */
 function Editors({ blockedCheck = false }: { blockedCheck?: boolean }) {
   const dispatch = useAppDispatch()
   const current = useAppSelector(state => state.data.current)
@@ -167,7 +165,6 @@ export const BlockedAssignment: Story = {
       await body.findAllByText('Editing is currently unavailable.')
       expect(canvas.getByLabelText('Current data').textContent).toBe(before)
       expect(canvas.getByLabelText('Pending actions').textContent).toBe('0')
-      // Dismiss each notification to check that the next attempt produces one.
       await userEvent.hover(body.getByRole('region', { name: 'Notifications' }))
       await userEvent.click(
         await body.findByRole('button', { name: 'Dismiss notification' })

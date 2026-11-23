@@ -30,7 +30,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** One dialog instance, controlled entirely through args. */
 export const Bench: Story = {}
 
 export const Waiting: Story = {

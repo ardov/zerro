@@ -26,9 +26,7 @@ export type SelectOption<T extends string = string> = {
   start?: ReactNode
   end?: ReactNode
   disabled?: boolean
-  /** Visual nesting in a flat list of selectable options. */
   indent?: number
-  /** Additional terms used by searchable selects. */
   keywords?: readonly string[]
 }
 export type SelectItem<T extends string = string> =
@@ -69,7 +67,6 @@ export type SelectProps<T extends string = string> = Pick<
   /** Align an existing selection; empty values, touch and tight spaces fall back. */
   alignSelected?: boolean
   showValueIcon?: boolean
-  /** Leading icon when no value has been selected. */
   emptyIcon?: ReactNode
   /** Popup minimum CSS length (numbers are pixels), capped by available space. */
   popupMinWidth?: number | string
@@ -77,11 +74,9 @@ export type SelectProps<T extends string = string> = Pick<
   trigger?: ReactElement
   renderValue?: (item: SelectOption<T> | undefined) => ReactNode
   emptyText?: string
-  /** Search inside the popup; selected-row alignment applies only without search. */
   search?: boolean | SelectSearchOptions<T>
 } & SelectionChange<T>
 
-/** Required fields cannot be cleared. Optional fields are clearable by default. */
 export type SelectRequirement =
   | { required: true; clearable?: false }
   | { required?: false; clearable?: boolean }
@@ -91,19 +86,15 @@ type SelectionChange<T> =
   | { required?: false; clearable: false; onChange: (value: T) => void }
   | { required?: false; clearable?: true; onChange: (value: T | null) => void }
 
-/** Internal modes share rendering while preserving the public value contracts. */
 export type SelectControlProps<T extends string> =
   | (SelectProps<T> & { multiple?: false })
   | (MultiSelectProps<T> & { multiple: true; alignSelected?: never })
 
-/** null represents an initially empty field. Required selections cannot be
- * cleared. clearable=false also guarantees non-null answers without requiring
- * a value for form submission. onChange only reports changed values. */
+/** Required blocks clearing. Optional clearable=false still allows an initially empty field with non-null change values. */
 export function Select<T extends string>(props: SelectProps<T>) {
   return <SelectControl {...props} />
 }
 
-/** Internal dispatcher used by the single and multiple public controls. */
 export function SelectControl<T extends string>(props: SelectControlProps<T>) {
   const { search, ...restProps } = props
   const narrow = useBottomSheetLayout()
@@ -148,9 +139,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
   } = useSelectField(props)
   const positioning = useListPanelPositioning()
   const canAlign = () => {
-    // Native overlap positioning uses its own edge tolerances. Near viewport
-    // edges (or a reduced visual viewport), use the boundary-aware positioner.
-    // Alignment also needs clearance for the panel's full expansion.
+    // Fall back to collision-aware positioning when alignment lacks clearance for the full panel.
     const clearance = listPanelMargin + 2 * panelOutset
     const rect = surface?.getBoundingClientRect()
     const viewport = positioning.collisionBoundary
@@ -168,9 +157,7 @@ function PlainSelect<T extends string>(props: SelectControlProps<T>) {
       (!viewport || viewport.height >= document.documentElement.clientHeight)
     )
   }
-  // Decided as the panel opens, not in the change handler: the consumer may
-  // control `open` directly, and then the handler never runs. The decision
-  // survives closing, so the key below never remounts an exiting panel.
+  // Read controlled open changes too, and preserve the selected mode through exit to avoid remounting the panel.
   const [alignment, setAlignment] = useState({ open: false, enabled: false })
   if (alignment.open !== open) {
     setAlignment({ open, enabled: open ? canAlign() : alignment.enabled })

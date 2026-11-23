@@ -50,7 +50,6 @@ const check: Story['play'] = async ({ canvasElement }) => {
     await userEvent.click(trigger)
     const field = await body.findByRole('textbox', { name: 'Rename' })
     await waitFor(() => expect(field).toHaveFocus())
-    // The field's text covers the name's text: same place, same type.
     await waitFor(() => {
       const from = heading.getBoundingClientRect()
       const to = field.getBoundingClientRect()
@@ -73,16 +72,12 @@ const check: Story['play'] = async ({ canvasElement }) => {
     await waitFor(() => expect(trigger).toHaveFocus())
   }
 
-  // Enter without a change answers nothing.
   await rename(null, '{Enter}')
   await expect(answer).toHaveTextContent('unchanged')
-  // Enter answers the changed draft.
   await rename('Food', '{Enter}')
   await expect(answer).toHaveTextContent('Food')
-  // Escape keeps a changed draft.
   await rename('Market', '{Escape}')
   await expect(answer).toHaveTextContent('Market')
-  // So does Back, which closes the popover rather than leaving the page.
   await rename('Bazaar', '{Alt>}{ArrowLeft}{/Alt}')
   await expect(answer).toHaveTextContent('Bazaar')
   await expect(heading).toHaveTextContent('Bazaar')

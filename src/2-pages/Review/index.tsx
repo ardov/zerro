@@ -16,7 +16,6 @@ import { NotFunCard } from './cards/NotFunCard'
 import { OutcomeStatCard } from './cards/OutcomeStatCard'
 import { SavingsCard } from './cards/SavingsCard'
 
-// New report unlocks in december
 const currMonth = new Date().getMonth()
 const currYear = new Date().getFullYear()
 const startingYear = currMonth >= 11 ? currYear : currYear - 1

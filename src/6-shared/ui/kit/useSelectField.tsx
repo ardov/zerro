@@ -4,7 +4,6 @@ import type { SelectItem, SelectOption, SelectControlProps } from './Select'
 import { SelectTrigger, getSelectTriggerLabel } from './SelectTrigger'
 import { ListRow } from './ListRow'
 
-// Compensate for the panel padding so option and field text line up.
 export const selectPanelOutset = 4
 
 export function flattenSelectItems<T extends string>(
@@ -23,7 +22,6 @@ export function preventMouseUpSelection(event: {
   event.preventBaseUIHandler()
 }
 
-/** Shared field rules; each primitive owns its popup and keyboard behavior. */
 export function useSelectField<T extends string>(props: SelectControlProps<T>) {
   const size = props.size ?? 'lg'
   // Alignment needs geometry during the render that opens the panel.
@@ -130,7 +128,6 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
     },
     triggerProps,
     displayValue,
-    /** The row an option renders into, whichever primitive owns the option. */
     optionRow: (item: SelectOption<T>) => (
       <ListRow
         className="[&+[role=option]]:mt-px"
@@ -142,7 +139,6 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
         reserveStart={reserveStart}
       />
     ),
-    /** Shown above the list, so it is never announced as an option. */
     emptyNotice: (shownCount: number) =>
       shownCount === 0 ? (
         <p role="status" className="px-4 py-3 text-ui-14 text-ui-secondary">
@@ -151,9 +147,7 @@ export function useSelectField<T extends string>(props: SelectControlProps<T>) {
       ) : undefined,
     popupStyle: {
       width: 'max-content',
-      // Compact custom triggers (for example filter chips) change width as
-      // selection changes. Their panel sizes to its options, not that summary.
-      // Ordinary field surfaces still establish the panel's minimum width.
+      // Compact triggers size their panel to the options. Regular field width remains the minimum.
       minWidth: `min(var(--available-width, calc(100dvw - var(--list-panel-margin, 16px) * 2)), ${minimumWidth})`,
     } satisfies CSSProperties,
   }

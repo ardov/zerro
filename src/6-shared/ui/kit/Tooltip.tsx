@@ -28,7 +28,6 @@ export type TooltipProps = {
   side?: 'top' | 'bottom' | 'left' | 'right'
   align?: 'start' | 'center' | 'end'
   disabled?: boolean
-  /** Applied to the popup. */
   className?: string
 }
 

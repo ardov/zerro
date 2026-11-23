@@ -35,7 +35,6 @@ export const ColorSchemeOverrideContext = createContext<ColorScheme | null>(
   null
 )
 
-/** The resolved scheme on screen and its reversible two-state toggle. */
 export function useColorScheme() {
   const override = useContext(ColorSchemeOverrideContext)
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)

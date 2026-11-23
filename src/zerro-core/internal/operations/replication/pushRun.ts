@@ -23,11 +23,7 @@ import { buildOutboxTransport, replayOutbox } from './outbox'
 
 export const DEFAULT_PUSH_MAX_BYTES = 2 * 1024 * 1024
 
-/**
- * How large the transmitted body is. The default measures the normalized
- * patch; a host that converts to another representation before sending passes
- * its own, so the bound is checked against the bytes that actually travel.
- */
+/** Pass a wire-size measure when the host sends a different representation from the normalized patch. */
 export type TPushMeasure = (request: TNormalizedPatch) => number
 
 const cleanupRank = new Map<TDataEntityKey, number>(
@@ -170,7 +166,6 @@ export function acceptPushChunk(
   return { base, current, outbox, redo: [], progress, next }
 }
 
-/** Repack the current unconfirmed request after HTTP 413. */
 export function shrinkPushChunk(
   replica: { base: TDataStore },
   prepared: TPreparedPush
@@ -209,13 +204,7 @@ function requiresSingletonCleanup(transport: TNormalizedPatch): boolean {
   )
 }
 
-/**
- * Canonical snapshots may retain historical rows whose required owner no
- * longer exists. They remain readable, but the write API refuses to recreate
- * them. The entity graph names those references; normalize at the transport
- * seam as well as during restore planning so commands already persisted in
- * the outbox are safe to retry.
- */
+/** Prune unwritable historical orphans at the transport seam as well as restore, so persisted commands are safe to retry. */
 function sanitizePushReferences(
   base: TDataStore,
   transport: TNormalizedPatch
@@ -261,12 +250,6 @@ function sanitizePushReferences(
   return result
 }
 
-/**
- * Which rows the world holds once this request is applied: whatever the
- * snapshot already has, plus the patch's own upserts, minus its deletions and
- * the rows a write never contains. A row dropped from the patch falls back to
- * the snapshot, which may still hold it.
- */
 function projectedWorld(base: TDataStore, transport: TNormalizedPatch) {
   const deleted = new Set(
     (transport.deletion ?? []).map(deletion =>
@@ -323,11 +306,7 @@ function allItems(transport: TNormalizedPatch, base: TDataStore): TPushItem[] {
   return [...orderedUpserts(transport), ...orderedDeletions(transport, base)]
 }
 
-/**
- * The next chunk: one phase at a time, upserts before deletions, and never
- * more than the byte bound allows. A singleton deletion travels alone because
- * the server cascade it triggers has to be applied before the rest is planned.
- */
+/** Keep upserts before deletions. Send a cascading deletion alone so its effects can inform the remaining plan. */
 function packNextPhase(
   transport: TNormalizedPatch,
   base: TDataStore,
@@ -346,16 +325,8 @@ function packNextPhase(
   return packable.slice(0, largestFittingPrefix(packable, base, run))
 }
 
-/**
- * The longest prefix whose serialized request fits.
- *
- * Measuring the whole remainder to learn that would serialize the entire run
- * once per Chunk, which is quadratic in the size of the push — worst exactly
- * on the large restores Chunks exist for. So a rough per-entity cost estimate
- * picks the starting point and only the few prefixes around it are measured
- * for real. One item always ships: a single oversized row is HTTP 413's
- * business, not the packer's.
- */
+/** Estimate near the chunk bound first; serializing the full remainder every time is quadratic.
+ * An oversized single item travels alone for HTTP 413 to decide. */
 function largestFittingPrefix(
   items: readonly TPushItem[],
   base: TDataStore,
@@ -368,8 +339,6 @@ function largestFittingPrefix(
   const guess = Math.min(items.length, estimateFittingPrefix(items, base, run))
   if (!fits(guess)) return narrowFittingPrefix(fits, 1, guess)
 
-  // The estimate was low. Doubling steps find an overshoot in a few checks,
-  // and every check stays near the bound instead of near the remainder.
   let fitting = guess
   let step = 1
   while (fitting < items.length) {
@@ -381,7 +350,6 @@ function largestFittingPrefix(
   return items.length
 }
 
-/** The largest count between the two bounds that fits, by halving. */
 function narrowFittingPrefix(
   fits: (count: number) => boolean,
   fitting: number,
@@ -397,11 +365,7 @@ function narrowFittingPrefix(
 
 const ESTIMATE_SAMPLE_SIZE = 8
 
-/**
- * How many items fit, guessed from an average cost per entity kind instead of
- * measured. Rows inside one kind still differ, so this only has to land near
- * the bound — `largestFittingPrefix` measures the exact edge from here.
- */
+/** Estimate per entity kind, then measure the exact prefix only near the limit. */
 function estimateFittingPrefix(
   items: readonly TPushItem[],
   base: TDataStore,
@@ -432,7 +396,6 @@ function estimateFittingPrefix(
   return Math.max(1, count)
 }
 
-/** Deletions of every entity share one shape; upserts do not. */
 function estimateKind(item: TPushItem): string {
   return item.key === 'deletion' ? 'deletion' : item.key
 }

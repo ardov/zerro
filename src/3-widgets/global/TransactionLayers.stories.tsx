@@ -360,14 +360,12 @@ export const RecursivePairs: Story = {
   },
 }
 
-/** The editor's menu leads to lists by category and by exact update time. */
 export const RelatedLists: Story = {
   tags: ['check'],
   render: () => <Harness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
-    // Stamps Lunch alone with a new update time.
     fireEvent.click(canvas.getByTestId('change-lunch-merchant'))
     await userEvent.click(canvas.getByText('Lunch groceries'))
     const editor = await canvas.findByRole('region', { name: 'Transaction' })
@@ -378,7 +376,6 @@ export const RelatedLists: Story = {
       await userEvent.click(await body.findByRole('menuitem', { name }))
     }
 
-    // Each list names how many transactions it holds.
     await openFromMenu(/^From the same sync\s*1$/)
     const updated = await body.findByRole('dialog', { name: /^Updated / })
     await within(updated).findByText('Lunch groceries')
@@ -396,7 +393,6 @@ export const RelatedLists: Story = {
   },
 }
 
-/** A debt leads to its debtor, whichever of merchant or payee names them. */
 export const DebtorList: Story = {
   tags: ['check'],
   parameters: {
@@ -422,7 +418,6 @@ export const DebtorList: Story = {
   },
 }
 
-/** The page panel shows what the list adds up to, and a group narrows it. */
 export const PageSummary: Story = {
   tags: ['check'],
   render: () => <Harness />,
@@ -432,8 +427,6 @@ export const PageSummary: Story = {
     const summary = await canvas.findByRole('region', { name: 'Summary' })
     await within(summary).findByText(/^4 transactions/)
     await userEvent.click(within(summary).getByText('Lidl'))
-    // With a filter the summary is what the panel rests on. Narrowing left
-    // one category on one day, and both cards are still there to say so.
     await within(summary).findByText(/^2 transactions/)
     expect(within(summary).getByText('Expenses by category')).toBeVisible()
     expect(within(summary).getByText('Expenses by day')).toBeVisible()
@@ -446,7 +439,6 @@ export const PageSummary: Story = {
   },
 }
 
-/** What the summary was switched to outlives the transaction opened over it. */
 export const SummaryKeepsChoices: Story = {
   tags: ['check'],
   parameters: {
@@ -474,8 +466,6 @@ export const SummaryKeepsChoices: Story = {
   },
 }
 
-/** Lying over the list on a phone, the summary shows the filter it narrows,
- * so a narrowing can be undone without leaving it. */
 export const SummaryFilterOnPhone: Story = {
   tags: ['check'],
   globals: { viewport: { value: 'iphone13' } },
@@ -495,7 +485,6 @@ export const SummaryFilterOnPhone: Story = {
   },
 }
 
-/** A list opened over the page shows its summary in its Details place. */
 export const ListSummary: Story = {
   tags: ['check'],
   render: () => <Harness />,

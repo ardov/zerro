@@ -52,7 +52,6 @@ export type TReminder = {
   notify: boolean
 }
 
-/** Fields the factory cannot default: creation intent must supply them. */
 export const reminderRequiredFields = [
   'incomeAccount',
   'outcomeAccount',
@@ -146,7 +145,6 @@ export function compileSetReminder(
 
   return {
     reminder: list.map(item => {
-      // Update: pass the sparse patch through; issue keeps only changed fields.
       if (item.id && data.reminders[item.id]) {
         const {
           changed: _ignored,
@@ -162,7 +160,6 @@ export function compileSetReminder(
         return patch
       }
 
-      // Creation: the factory captures generated ids and defaults at issue time.
       const user = getRootUserId(data.users)
       if (!user) throw new Error('User is not defined')
       if (!item.incomeAccount || !item.outcomeAccount) {

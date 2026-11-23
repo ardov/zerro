@@ -14,7 +14,6 @@ import { useAppDispatch, useAppSelector, type RootState } from '@/store'
 import { categoryColors } from '@/6-shared/zenmoney-assets/categoryColors'
 import { selectableIcons } from './icons'
 
-/** A category's icon that opens its colour and icon picker. */
 export function AppearancePicker({
   envelope,
   size = 's',
@@ -117,7 +116,6 @@ function AppearancePopover({
   )
 }
 
-/** Memoized: a colour drag re-renders the picker every frame. */
 const IconGrid = memo(function IconGrid({
   value,
   onChange,

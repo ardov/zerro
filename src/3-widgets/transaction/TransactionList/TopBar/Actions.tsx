@@ -56,8 +56,6 @@ const Actions: FC<ActionsProps> = ({
   const canSetTag =
     transactions.length > 0 &&
     transactions.every(tr => core.transactions.getType(tr) !== 'transfer')
-  // Both are on the overlay stack, so Back closes the dialog or the menu
-  // instead of leaving the page — which is what it used to do here.
   const menuPopup = usePopup()
   const editPopup = usePopup()
   const closeMenu = () => menuPopup.setOpen(false)

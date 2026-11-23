@@ -9,14 +9,7 @@ import {
 } from '@/store/history'
 import { core } from '@/zerro-core/redux'
 
-/**
- * Restoring the selected point, for whichever surface offers it.
- *
- * The panel and the top bar both need this and must not drift: a local point
- * is undone rather than diffed (nothing was ever sent, so there is nothing to
- * overwrite), a server point adds an ordinary undoable restore command. Two copies
- * of that rule would be two chances to get it wrong.
- */
+/** Restore a local point by undoing; restore a server point by queuing an undoable command. */
 export function useRestoreSelectedPoint() {
   const { t } = useTranslation('history')
   const dispatch = useAppDispatch()

@@ -66,8 +66,6 @@ export const PickingFromTheSelects: Story = {
     await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
     await waitFor(() => expect(visibility).toHaveTextContent(nextLabel!))
 
-    // The currency select renders two lines per row and shows only the code
-    // when closed.
     const currency = body.getByRole('combobox', { name: /Currency|Валюта/i })
     await userEvent.click(currency)
     const codes = await body.findByRole('listbox')

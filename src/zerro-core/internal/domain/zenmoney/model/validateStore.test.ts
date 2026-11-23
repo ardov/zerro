@@ -160,10 +160,7 @@ describe('validateDataStore', () => {
     expect(validateDataStore(store)).toEqual({ ok: true })
   })
 
-  // Deleting an ordinary account nulls the leg that pointed at it on
-  // a debt operation and soft-deletes the row instead of purging it. That row
-  // is canonical state the server keeps sending, so rejecting it would put a
-  // replica into a recovery it cannot leave.
+  // A deleted debt row with one null leg is durable server data; rejecting it can trap a replica in recovery.
   it('accepts a null account leg only on a soft-deleted transaction', () => {
     const base = makeStore({
       serverTimestamp: 100,
@@ -178,9 +175,6 @@ describe('validateDataStore', () => {
       },
     })
 
-    // Both legs are still typed as required, which is precisely the lie this
-    // shape exposes. The cast keeps that visible here instead of hiding it
-    // behind a widened field that 21 other files would have to reckon with.
     const nullOutcomeLeg = (patch: Parameters<typeof makeTransaction>[0]) =>
       ({
         ...makeTransaction({ incomeAccount: 'debt', ...patch }),

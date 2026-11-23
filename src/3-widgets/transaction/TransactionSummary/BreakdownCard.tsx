@@ -18,23 +18,16 @@ import {
 type Clause = core.transactions.TTransactionFilterClause
 type TNode = PercentBarItem & { clause?: Clause }
 
-/** How many groups are named before the rest fold into one line. */
 const TOP = 5
 const REST_COLOR = '#808080'
 
-/** What one side is made of, along whichever dimension splits it. Whether to
- * show the card is its owner's call; it draws a single group just as well. */
 export function BreakdownCard(props: {
   entries: readonly TEntry[]
-  /** Dimensions on offer. They are the same for either side. */
   dimensions: readonly TDimension[]
   currency: TFxCode
-  /** The side's name, or the control that switches it. */
   side: ReactNode
-  /** The dimension last chosen. Ignored once it is off the offer. */
   chosen?: string
   onChoose: (dimension: TDimension) => void
-  /** Narrows the list to one group. Absent where there is no filter to narrow. */
   onFilter?: (clause: Clause) => void
 }) {
   const { entries, dimensions: available, currency, side, onFilter } = props

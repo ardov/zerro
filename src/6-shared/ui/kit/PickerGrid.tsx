@@ -6,9 +6,7 @@ const columns = 6
 const cells = (grid: HTMLElement) =>
   Array.from(grid.querySelectorAll<HTMLElement>(':scope > button'))
 
-/** Tab enters each grid once; arrows follow its six-column layout. Up and
- * Down at an edge continue into the neighbouring `[data-picker-grid]` within
- * a `[data-picker-grids]` container. Spread `gridProps` on the grid element. */
+/** Tab enters each picker grid once. Vertical arrows can cross into a sibling grid within data-picker-grids. */
 export function usePickerGrid(count: number) {
   const [active, setActive] = useState(0)
   // Events from the nested dropdown bubble here through the React tree;
@@ -78,7 +76,6 @@ export function usePickerGrid(count: number) {
   }
 }
 
-/** A round picker cell that fills its grid column. */
 export function PickerGridButton(props: Omit<IconButtonProps, 'shape'>) {
   const { className, ...restProps } = props
   return (

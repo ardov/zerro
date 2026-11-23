@@ -3,8 +3,6 @@ import { ColorScale } from './ColorScale'
 import { apcaContrast } from './APCAcontrast'
 import { parseColor, rgbToOklch } from './oklch'
 
-/** The stops a real scale is written with: a few hand-picked OKLCh values that
- * do not reach either end of the range. */
 const blue = new ColorScale([
   'oklch(0.9 0.06 270)',
   'oklch(0.59 0.17 278)',
@@ -13,8 +11,6 @@ const blue = new ColorScale([
 
 const grey = new ColorScale(['oklch(0.94 0.002 180)', 'oklch(0.22 0.01 140)'])
 
-/** Splits `#rrggbb` or `rgba(…)` back into channels, the way the theme's own
- * helpers read a token value. */
 function channels(color: string): [number, number, number, number] {
   if (color.startsWith('#')) {
     const int = parseInt(color.slice(1), 16)
@@ -29,8 +25,6 @@ function channels(color: string): [number, number, number, number] {
 
 describe('ColorScale.at', () => {
   it('returns a colour at the lightness it was asked for', () => {
-    // The whole system rests on this: a level is an address, so `at(0.53)` has
-    // to actually measure 0.53 or a shared table of levels means nothing.
     for (const level of [0.1, 0.23, 0.4, 0.53, 0.64, 0.88, 0.96]) {
       const [r, g, b] = channels(blue.at(level))
       const measured = rgbToOklch({ r: r / 255, g: g / 255, b: b / 255 })
@@ -51,18 +45,12 @@ describe('ColorScale.at', () => {
   })
 
   it('emits a notation the theme can read back', () => {
-    // Theme tokens and their tests need to read generated values back. A
-    // generated colour has to stay a literal — which both serializations are,
-    // and
-    // which no `rgb(from …)` expression would be.
     const levels = [0.2, 0.4, 0.6, 0.8]
     const lightnesses = levels.map(level => parseColor(blue.at(level)).l)
     expect(lightnesses).toEqual([...lightnesses].sort((a, b) => a - b))
   })
 
   it('keeps a hue on one side of the wheel', () => {
-    // Interpolating 270 → 278 the short way stays in the blues. The long way
-    // would swing through green, and a mid-level sample would give it away.
     const [r, g, b] = channels(blue.at(0.75))
     const { h } = rgbToOklch({ r: r / 255, g: g / 255, b: b / 255 })
     expect(h).toBeGreaterThan(265)
@@ -70,9 +58,7 @@ describe('ColorScale.at', () => {
   })
 
   it('does not drag an achromatic anchor towards red', () => {
-    // The black and white anchors carry no chroma. If their hue were read as 0
-    // rather than borrowed from the neighbour, a sample near either end would
-    // pick up a red cast.
+    // Achromatic anchors must borrow hue rather than tint the ramp red.
     const [r, _g, b] = channels(blue.at(0.97))
     expect(b).toBeGreaterThanOrEqual(r)
   })
@@ -102,8 +88,6 @@ describe('ColorScale.opaqueAt', () => {
   })
 
   it('is more transparent the closer the level sits to the background', () => {
-    // A faint border is a faint alpha rather than a light colour, which is the
-    // property that lets it sit on a surface it was not sampled against.
     const [, , , faint] = channels(grey.opaqueAt(0.95))
     const [, , , strong] = channels(grey.opaqueAt(0.3))
     expect(faint).toBeLessThan(strong)
@@ -135,9 +119,7 @@ describe('ColorScale contrast solving', () => {
   })
 
   it('finds the closest passing colour, not merely a passing one', () => {
-    // Asking for more contrast can only move away from the background, never
-    // back towards it. If the search returned any passing colour rather than
-    // the nearest one, this ordering would not hold.
+    // A higher target should move only as far as needed from the reference.
     const levels = [45, 60, 75, 90].map(
       target => parseColor(blue.apcaOn(target, '#ffffff')).l
     )
@@ -145,7 +127,6 @@ describe('ColorScale contrast solving', () => {
   })
 
   it('reverses direction for a dark reference', () => {
-    // Against black the scale has to run lighter, not darker.
     const onBlack = blue.apcaOn(60, '#000000')
     const onWhite = blue.apcaOn(60, '#ffffff')
     expect(parseColor(onBlack).l).toBeGreaterThan(parseColor(onWhite).l)
@@ -167,7 +148,6 @@ describe('ColorScale construction', () => {
   })
 
   it('works from a single stop', () => {
-    // A tag colour arrives as one hex and has to become a whole ramp.
     const scale = new ColorScale(['#cc3077'])
     expect(scale.at(0)).toBe('#000000')
     expect(scale.at(1)).toBe('#ffffff')
@@ -181,8 +161,6 @@ describe('ColorScale construction', () => {
 })
 
 describe('a P3 scale', () => {
-  /* A red saturated past what sRGB holds — the case the wider gamut exists
-     for. Written once and read at the same levels through both gamuts. */
   const stops = [
     'oklch(0.9 0.07 13)',
     'oklch(0.66 0.23 24)',
@@ -203,13 +181,7 @@ describe('a P3 scale', () => {
   })
 
   it('never renders less chroma than sRGB, at any level', () => {
-    // sRGB's primaries sit inside P3's, so the wider gamut can only ever hold
-    // more of a colour. Stated over the whole range rather than at one level,
-    // because where a level clamps is not something to hand-pick: a very light
-    // red clamps in sRGB at a chroma of 0.015, which is easy to guess wrong.
-    //
-    // The sRGB form is quantized to 8-bit channels, so allow the tiny amount of
-    // chroma that spelling can add around the edge of the gamut.
+    // P3 must preserve at least as much chroma; allow for sRGB's 8-bit quantization.
     for (let level = 0.05; level < 1; level += 0.05) {
       expect(parseColor(p3.at(level)).c).toBeGreaterThanOrEqual(
         parseColor(srgb.at(level)).c - 0.003
@@ -218,10 +190,7 @@ describe('a P3 scale', () => {
   })
 
   it('never moves lightness to gain the chroma', () => {
-    // Two decimals, not three: the sRGB rendering is quantized to 8 bits per
-    // channel, which is worth about 0.001 of lightness, and the OKLCh one is
-    // rounded to three places when written down. Neither is the scale moving
-    // a level — both are the cost of naming a colour in a stylesheet.
+    // Allow serialization error from 8-bit sRGB channels and rounded OKLCh literals.
     for (const level of [0.5, 0.66, 0.8, 0.9]) {
       expect(parseColor(p3.at(level)).l).toBeCloseTo(level, 2)
       expect(parseColor(srgb.at(level)).l).toBeCloseTo(level, 2)
@@ -229,10 +198,6 @@ describe('a P3 scale', () => {
   })
 
   it('takes the same contrast decision as the sRGB scale', () => {
-    // The claim the whole two-format arrangement rests on: because clamping
-    // only ever moves chroma, the level that satisfies a contrast target is
-    // the same one in both gamuts. If this drifts, a P3 theme and an sRGB
-    // theme stop being two renderings of one decision.
     for (const target of [45, 60, 75]) {
       const wide = parseColor(p3.apcaOn(target, '#ffffff'))
       const narrow = parseColor(srgb.apcaOn(target, '#ffffff'))
@@ -247,9 +212,7 @@ describe('a P3 scale', () => {
   })
 
   it('reads an out-of-sRGB stop without collapsing it', () => {
-    // Companding a negative linear channel is where this used to return NaN,
-    // and a NaN compares false against every bound — so an out-of-gamut colour
-    // would have been reported as fitting nothing and clamped to grey.
+    // Negative linear channels must compand without NaN so gamut detection works.
     const vividP3 = new ColorScale(['oklch(0.52 0.31 145)'], 'p3')
     const vividSrgb = new ColorScale(['oklch(0.52 0.31 145)'])
     expect(parseColor(vividP3.at(0.52)).c).toBeGreaterThan(

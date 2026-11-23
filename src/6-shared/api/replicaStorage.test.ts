@@ -217,8 +217,6 @@ describe('ReplicaStorage', () => {
     await expect(storage.compactOneBatch()).resolves.toMatchObject({
       entriesDeleted: 2,
     })
-    // The minimal replica is one checkpoint, so further passes stop rather
-    // than keep folding to satisfy a byte budget they cannot reach.
     await expect(storage.compactOneBatch()).resolves.toMatchObject({
       entriesDeleted: 0,
     })
@@ -325,11 +323,6 @@ function uniqueDatabaseName(): string {
   return `zerro-test-${crypto.randomUUID()}`
 }
 
-/**
- * Starts a replica exactly as the app does: the first canonical commit finds no
- * replica and lays down sequence 1. There is no separate initialization API, so
- * tests must not invent one — that would leave this path uncovered.
- */
 function seedReplica(storage: ReplicaStorage, snapshot: TDataStore) {
   return storage.commitCanonical({
     before: snapshot,

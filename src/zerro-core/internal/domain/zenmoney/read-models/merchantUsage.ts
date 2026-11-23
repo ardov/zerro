@@ -6,12 +6,9 @@ import { getTransactionType, TrType } from '../entities/transactions'
 import type { TTransaction } from '../entities/transactions/types'
 import { parse } from 'tldts'
 
-/** How a merchant has been used, so a picker can offer the ones that suit the
- * operation being edited and rank the rest. */
 export type TMerchantUsage = {
   regular: boolean
   debt: boolean
-  /** Uses within the last 30 days. */
   recentUses: number
   searchTerms?: {
     payee: string[]

@@ -1,4 +1,3 @@
-/** The worker owns the cache; UI only reports image decoding and requests reset. */
 export const FAVICON_CACHE_NAME = 'zerro-favicons-v1'
 
 // The token is local to one image attempt. The worker strips it before fetching

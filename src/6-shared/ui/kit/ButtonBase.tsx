@@ -5,7 +5,6 @@ export type ButtonBaseProps = Omit<ButtonPrimitive.Props, 'className'> & {
   className?: string
 }
 
-/** A reset native button for call sites that bring their own styling. */
 export function ButtonBase(props: ButtonBaseProps) {
   const { className, ...restProps } = props
   return (

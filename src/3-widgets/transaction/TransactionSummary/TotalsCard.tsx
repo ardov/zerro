@@ -10,11 +10,8 @@ import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import type { TFlowTotal, TSummary } from './model'
 
-/** One headline number, then what it is made of. A single flow is its own
- * headline; several flows add up to a net, and transfers stay beside it. */
 export function TotalsCard(props: {
   summary: TSummary
-  /** Offered when amounts were converted and another currency can be shown. */
   onCycleCurrency?: () => void
 }) {
   const { summary, onCycleCurrency } = props
@@ -53,8 +50,6 @@ export function TotalsCard(props: {
           <Tooltip
             content={t(historical ? 'convertedSaved' : 'convertedCurrent')}
           >
-            {/* The estimate is the button's name; its text swaps in place
-                when another currency is chosen. */}
             <ButtonBase
               aria-label={estimate}
               className="-mx-2 rounded-lg px-2"
@@ -91,7 +86,6 @@ export function TotalsCard(props: {
           />
         ))}
 
-      {/* One flow in several currencies: the exact sums are the breakdown. */}
       {single &&
         converted &&
         single.native.map(sum => (
@@ -133,7 +127,6 @@ function FlowLine(props: {
         currency={currency}
         sign={signed}
       />
-      {/* Exact sums, unless the one sum is the line above. */}
       {converted &&
         (total.native.length > 1 || total.native[0].currency !== currency) && (
           <p className="m-0 text-right text-caption text-ui-secondary">
@@ -155,7 +148,6 @@ function FlowLine(props: {
   )
 }
 
-/** As `Amount` prints it, in one string. */
 function formatSigned(value: number, currency: TFxCode, sign: boolean) {
   const text = formatMoney(value, currency, 'ifAny').replace(/^-/, '−')
   return value > 0 && sign ? `+${text}` : text

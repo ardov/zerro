@@ -15,7 +15,6 @@ export type CurrencySettings = typeof defaultCurrencySettings
 export type Point = { x: number; y: number }
 export type SpringState = { x: number; y: number; vx: number; vy: number }
 
-/** A soft radial impulse in CSS pixels per second, fading to zero at the edge. */
 export function clickImpulse(
   position: Point,
   cursor: Point,

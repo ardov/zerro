@@ -12,21 +12,15 @@ export type TIconName = string
 export type TTag = {
   id: TTagId
 
-  /** Root user ID. */
   user: TUserId
 
-  /** Normalized timestamp in milliseconds. Zenmoney wire data uses seconds. */
   changed: TMsTime
 
-  /** Icon name. */
   icon: TIconName | null
   budgetIncome: boolean
   budgetOutcome: boolean
-  /** Whether the tag is archived. */
   archive: boolean | null
-  /** Whether the tag is shown in a list of income tags. */
   showIncome: boolean
-  /** Whether the tag is shown in a list of outcome tags. */
   showOutcome: boolean
   title: string
   parent: TTagId | null
@@ -34,13 +28,10 @@ export type TTag = {
 
   /** Used to be used in Zenmoney analytics */
   required: boolean | null
-  /** Deprecated field */
   staticId: string | null
-  /** Deprecated field */
   picture: string | null
 }
 
-/** Fields the factory cannot default: creation intent must supply them. */
 export const tagRequiredFields = [
   'title',
 ] as const satisfies readonly (keyof TTag)[]
@@ -63,7 +54,6 @@ export type TTagPatch = EntityPatch<TTag, TTagWritableField>
 export type TTagIntent = { tag: TTagPatch[] }
 
 export type TZmTag = Omit<TTag, 'changed'> & {
-  /** Zenmoney wire timestamp in seconds. */
   changed: TUnixTime
 }
 

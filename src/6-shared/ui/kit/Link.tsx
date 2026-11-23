@@ -6,8 +6,6 @@ export type LinkProps = ComponentPropsWithoutRef<'a'> & {
   underline?: 'always' | 'hover' | 'none'
 }
 
-/** An anchor in the primary color whose underline is drawn in
- * a fainter shade of itself until the pointer is on it. */
 const linkBase =
   'cursor-pointer text-ui-link focusable [-webkit-tap-highlight-color:transparent]'
 
@@ -19,9 +17,6 @@ export function Link(props: LinkProps) {
       className={cn(
         linkBase,
         underline === 'none' && 'no-underline',
-        // The fainter shade belongs to the underline that is always there.
-        // One that only appears on hover is drawn in the text's own colour,
-        // because there is nothing to distinguish it from at rest.
         underline === 'always' &&
           'underline decoration-ui-link/40 hover:decoration-[inherit]',
         underline === 'hover' && 'no-underline hover:underline',

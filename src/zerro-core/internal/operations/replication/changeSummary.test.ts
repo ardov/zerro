@@ -56,8 +56,6 @@ describe('change summary', () => {
 
     const transition = compactCanonicalTransition(before, after)
 
-    // The row is still in the store: counting it as changed would hide the
-    // one operation a user looking through history is most likely after.
     expect(summarizeCanonicalTransition(transition!)).toEqual({
       transaction: { changed: 0, removed: 1 },
     })
@@ -107,8 +105,6 @@ describe('change summary', () => {
 
     const transition = compactCanonicalTransition(before, after)
 
-    // Budgets and goals are Zerro's own state; only the third row is the
-    // Zenmoney concept a user would call a reminder.
     expect(summarizeCanonicalTransition(transition!)).toEqual({
       'envelope-budget': { changed: 1, removed: 0 },
       goal: { changed: 1, removed: 0 },
@@ -137,10 +133,6 @@ describe('change summary', () => {
 
     const transition = compactCanonicalTransition(before, after)
 
-    // Setting a goal ensures the storage account exists. Counting it would
-    // report "Goals 1 · Accounts 1" and send its reader looking for a change
-    // to their own accounts that never happened — the account the user really
-    // did add is still there.
     expect(summarizeCanonicalTransition(transition!)).toEqual({
       goal: { changed: 1, removed: 0 },
       account: { changed: 1, removed: 0 },

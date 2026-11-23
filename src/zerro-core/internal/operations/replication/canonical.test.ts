@@ -47,8 +47,6 @@ describe('canonical replica operations', () => {
     expect(accepted.base.account.cash.title).toBe('Server')
     expect(accepted.current.account.cash.title).toBe('Local')
     expect(accepted.outbox).toEqual([pending])
-    // A pull acknowledges nothing, so it commits no history branch and the
-    // undone tail stays redoable over the new base.
     expect(accepted.redo).toEqual([undone])
   })
 

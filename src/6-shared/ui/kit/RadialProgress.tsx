@@ -5,7 +5,6 @@ export type RadialProgressProps = SVGProps<SVGSVGElement> & {
   size?: number
   /** Omit when the amount of work is unknown. Numeric values range from 0 to 1. */
   value?: number
-  /** Marks an in-flight step without replacing its determinate value. */
   active?: boolean
 }
 
@@ -37,9 +36,7 @@ export function RadialProgress(props: RadialProgressProps) {
       aria-valuemax={accessible ? 1 : undefined}
       aria-valuenow={accessible && !indeterminate ? ratio : undefined}
       {...restProps}
-      /* The global `svg { max-width: 100% }` reset shrinks this icon's width
-         alone when its button is narrower than `size`, distorting the circle.
-         A fixed-size UI icon isn't responsive content, so it opts out. */
+      /* The responsive SVG reset would shrink only the width of this fixed-size circle in a narrow button. */
       style={{ maxWidth: 'none', flexShrink: 0, ...style }}
     >
       <circle

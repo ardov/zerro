@@ -294,7 +294,6 @@ export const DateSwitchThreshold: Story = {
     )!
     const chip = canvasElement.querySelector('.transaction-date-chip')!
     await canvas.findByRole('button', { name: formatDate('2026-09-20') })
-    // The second day's header starts at 72048, excluding the filter padding.
     viewport.scrollTop = 72039
     await waitFor(() =>
       expect(chip).toHaveAccessibleName(formatDate('2026-09-20'))

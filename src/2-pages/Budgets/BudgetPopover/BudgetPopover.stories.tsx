@@ -86,8 +86,6 @@ const checkAssignment: Story['play'] = async ({ canvasElement }) => {
     expect(rect.right).toBeLessThanOrEqual(window.innerWidth)
     expect(rect.top).toBeGreaterThanOrEqual(0)
   })
-  // The surface, its field and its quick-amount list each carry a name of
-  // their own, and the apply button sits over the field's own padding.
   const dialog = input.closest<HTMLElement>('[role="dialog"]')!
   const list = popup.querySelector<HTMLElement>('[role=toolbar]')!
   await expect(dialog).toHaveAccessibleName('Food')
@@ -103,8 +101,6 @@ const checkAssignment: Story['play'] = async ({ canvasElement }) => {
   await expect(commandCount()).toBe(initialCommands + 1)
   await waitFor(() => expect(trigger).toHaveFocus())
 
-  // Reopening starts from the saved amount. Dismissing unchanged must not
-  // enqueue another command; dismissal after an edit still applies the value.
   await userEvent.click(trigger)
   input = await body.findByPlaceholderText('0')
   await userEvent.click(input)
@@ -131,12 +127,9 @@ const checkAssignment: Story['play'] = async ({ canvasElement }) => {
   if (window.innerWidth < 500) {
     for (let i = 0; i < 4; i++) await userEvent.tab()
   }
-  // Toolbar semantics, not menu: scoped to the list so the field's own Apply
-  // button does not count as one of the quick amounts.
   const quickAmounts = body.getByRole('toolbar', { name: 'Quick amounts' })
   const actions = within(quickAmounts).getAllByRole('button')
   await expect(actions[0]).toHaveFocus()
-  // The field also offers a direct route, without applying the typed amount.
   await userEvent.click(input)
   await userEvent.clear(input)
   await userEvent.type(input, '100+50{ArrowLeft}{ArrowLeft}')
@@ -243,10 +236,6 @@ export const AtBreakpoint: Story = {
   globals: { viewport: { value: 'zerro500' } },
 }
 
-/** Back closes the popover and commits nothing, and Forward does not bring it
- * back: this is a popup, not a screen — the draft lived in memory and Back
- * ended it. Coming back to a half-typed amount was the old behaviour, and it
- * was one of the defects, not a feature. */
 export const HistoryDraft: Story = {
   ...Desktop,
   play: async ({ canvasElement }) => {
@@ -312,11 +301,7 @@ export const NestedDrawer: Story = {
     const input = await body.findByRole('textbox', { name: 'Assigned' })
     const child = input.closest('[role="dialog"]')!
     await waitFor(() => expect(input).toHaveFocus())
-    // The child is portalled outside the parent's DOM. Both Base UI surfaces
-    // still participate in the same overlay stack and focus order.
-    // What has to hold is the behaviour the nesting bought: focus stays in
-    // the child, Escape takes the top surface only, and the parent gets its
-    // trigger back.
+    // The child portal is outside the parent's DOM but still participates in the same focus stack.
     await userEvent.tab()
     await waitFor(() =>
       expect(child).toContainElement(

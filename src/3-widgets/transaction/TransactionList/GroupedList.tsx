@@ -315,7 +315,6 @@ function PinnedDateChip({
         getDirection={(next, previous) =>
           next > previous ? 'backward' : 'forward'
         }
-        // The date follows the scroll position; its width must not lag.
         instantWidth
         className="text-start"
       />
@@ -329,8 +328,6 @@ type TDateDialogProps = {
   maxDate?: TISODate
 }
 
-/** «Which day?». It answers the date, so the caller scrolls there after the
- * `await` — no callback rides along, and nothing has to reach a stale close. */
 const DateDialog = ({ value, minDate, maxDate }: TDateDialogProps) => {
   const { t } = useTranslation()
   const { controller, answer } = useAsked<TISODate>()

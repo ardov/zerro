@@ -17,7 +17,6 @@ export type GlyphSeed = {
   velocityY: number
 }
 
-/** Glyph-sized blocks above a floor with open sides. The canvas owns the clock. */
 export function createGlyphPile(
   seeds: GlyphSeed[],
   width: number,
@@ -121,7 +120,6 @@ export function createGlyphPile(
             y: seeds[index].velocityY / 60,
           })
         }
-        // A glyph resting on a pinned region must fall when its support lets go.
         engine.enableSleeping = released === bodies.length
         Engine.update(engine, step)
         remainder -= step

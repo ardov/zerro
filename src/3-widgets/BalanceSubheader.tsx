@@ -7,7 +7,6 @@ import { TextFade } from '@/6-shared/ui/kit/TextFade'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { DisplayAmount } from './DisplayAmount'
 
-/** A group heading with its balance in the current display currency. */
 export function BalanceSubheader({
   name,
   amount,

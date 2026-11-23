@@ -16,14 +16,12 @@ import { TransactionCopy } from '../transaction/TransactionPreview'
 export type TransactionMenuProps = {
   id: TTransactionId
   anchor: MenuSurfaceProps['anchor']
-  /** List actions. Each item is shown only when its handler is passed. */
   onSelectSimilar?: (changed: TTransaction['changed']) => void
   onMarkOlderViewed?: () => void
   onFilterMerchant?: (id: string) => void
   onSearchPayee?: (name: string) => void
 }
 
-/** The transaction's context menu, asked from a context gesture. */
 export const TransactionMenu: FC<TransactionMenuProps> = props => {
   const {
     id,

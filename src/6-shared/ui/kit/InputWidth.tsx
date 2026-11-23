@@ -8,8 +8,7 @@ type InputWidthProps = {
   children: ReactNode
 }
 
-/** Measures text in the inherited typography; the input fills that width.
- * The trailing space keeps its caret visible, even for an empty value. */
+/** The trailing measure-space reserves room for a caret even when the input is empty. */
 export function InputWidth(props: InputWidthProps) {
   const { value, placeholder, className, children } = props
   return (

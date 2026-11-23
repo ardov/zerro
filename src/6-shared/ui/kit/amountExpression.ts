@@ -4,17 +4,8 @@ import {
   moneyDecimalSeparator,
 } from '@/6-shared/helpers/money/format'
 
-/** The arithmetic an amount field accepts.
- *
- * Amount fields let a sum be worked out in place — `1200/3`, `450+80` — so
- * nobody has to leave the form to add up a bill. The grammar is deliberately
- * the four operators: no functions, percentages or
- * identifiers. That is what makes evaluating it a small parser rather than
- * anything that has to be sandboxed.
- */
+/** The arithmetic grammar accepts only numbers and the four operators; evaluation uses a dedicated parser. */
 
-/** Reduces typed text to the characters the grammar has. Commas become
- * points, so a decimal typed either way is the same number. */
 export function cleanAmountInput(text: string): string {
   return text
     .replace(/−/g, '-')
@@ -24,12 +15,7 @@ export function cleanAmountInput(text: string): string {
     .replace(/,/g, '.')
 }
 
-/** Formats every number in an expression without evaluating it.
- *
- * The expression remains the editable source of truth. Group separators are
- * only a projection of its integer runs, and a decimal point is shown as the
- * locale comma. That preserves half-typed values such as `12.` and arithmetic
- * such as `12000/3`, neither of which can make a round trip through `number`. */
+/** Format editable operands without evaluating them, so partial decimals and operators survive. */
 export function formatAmountExpression(text: string): string {
   return text.replace(/\d+(?:\.\d*)?|\.\d+/g, token => {
     const decimal = token.indexOf('.')
@@ -42,20 +28,7 @@ export function formatAmountExpression(text: string): string {
   })
 }
 
-/** What the expression is worth, or `fallback` when it is not one.
- *
- * Half-typed input is ordinary here — every keystroke is evaluated, and
- * `12+` is a state on the way to `12+5`. Leading zeroes and a trailing or
- * leading operator are trimmed rather than refused, so the amount follows
- * along instead of falling back to the last whole one.
- *
- * The result is rounded to two decimals. A division is the obvious reason —
- * splitting 1200 three ways is a number, splitting it seven ways is not a
- * sum of money — but so is addition: `0.1 + 0.2` is not 0.3 in binary
- * floating point, and without this an amount nobody could type would be the
- * one that ends up in the transaction. Only the answer is rounded, rather
- * than rounding at every operator. Invalid and non-finite results keep the
- * last amount; callers never need a separate calculation-error state. */
+/** Evaluate partial input, round only the final result, and preserve the last valid amount on parse or overflow errors. */
 export function amountFromExpression(text: string, fallback: number): number {
   try {
     const computed = evalExpression(
@@ -67,9 +40,6 @@ export function amountFromExpression(text: string, fallback: number): number {
   }
 }
 
-/** Evaluates numbers and + - * /. Throws on invalid input.
- * Private: `amountFromExpression` is the contract, and it is the one that
- * knows what a half-typed expression is worth. */
 function evalExpression(source: string): number {
   if (source === '' || source === '.') return 0
   const tokens = source.match(/\d+(?:\.\d*)?|\.\d+|[+\-*/]/g) || []

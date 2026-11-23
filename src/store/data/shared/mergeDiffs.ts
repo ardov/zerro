@@ -1,11 +1,5 @@
 import type { TNormalizedPatch } from '@/6-shared/types'
 
-/**
- * Adds changes from the second diff to the first diff
- * @param target - base object, left untouched
- * @param diff - object with changes
- * @returns a new merged object
- */
 export function immutableMergeDiffs(
   target: TNormalizedPatch,
   diff: TNormalizedPatch
@@ -33,10 +27,6 @@ export function immutableMergeDiffs(
 
   return result
 
-  /**
-   * Merges all objects from diff key into target key
-   * @param key - all diff keys except serverTimestamp and deletion
-   */
   function merge(key: keyof TNormalizedPatch) {
     if (key === 'serverTimestamp' || key === 'deletion') return
     if (!diff[key]) return

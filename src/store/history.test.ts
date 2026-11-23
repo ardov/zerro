@@ -71,9 +71,7 @@ describe('paged history view', () => {
   })
 
   it('waits for pending replica writes before reading a page', async () => {
-    // A canonical commit clears the page and the panel reloads it at once, so
-    // a page that read past the queue would settle without the entry that
-    // commit just wrote. Any queued write will do to hold the barrier.
+    // Reloading a cleared history page must wait for the queued write that produced its new entry.
     let releaseWrite = () => {}
     storageMock.clear.mockImplementationOnce(
       () =>

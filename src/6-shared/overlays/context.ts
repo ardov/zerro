@@ -19,9 +19,7 @@ export type OverlayMethods = {
 export const OverlayMethodsContext = createContext<OverlayMethods | null>(null)
 
 export type OverlayState = {
-  /** Ids of the popup layers alive right now, in opening order. */
   live: readonly string[]
-  /** Open screens and their values, read back from the history entry. */
   screens: Record<string, unknown>
 }
 
@@ -40,9 +38,7 @@ export function useOverlayState() {
   return useContext(OverlayStateContext)
 }
 
-/** What an element handed to `ask` is given. */
 export type AskedLayer = {
-  /** False while the surface is animating out. Kept for legacy surfaces. */
   open: boolean
   answer: (value?: unknown) => void
   controller: OverlayController

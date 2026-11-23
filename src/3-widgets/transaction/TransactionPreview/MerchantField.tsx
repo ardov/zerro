@@ -36,7 +36,6 @@ const { normalizePayee } = core.merchants
 const merchantKey = (id: string) => `merchant:${id}`
 const createKey = (title: string) => `create:${title}`
 
-/** The kit owns selection mechanics; merchant history and draft intent stay here. */
 export function MerchantField(props: MerchantFieldProps) {
   const {
     merchant,

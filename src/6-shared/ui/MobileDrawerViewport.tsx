@@ -8,12 +8,7 @@ type MobileDrawerViewportProps = {
   className?: string
 }
 
-/** The part of the screen a mobile drawer can actually occupy.
- *
- * A software keyboard usually shrinks the visual viewport without shrinking
- * the page. Following that viewport here keeps every drawer — and ordinary
- * sticky content inside it — above the keyboard without teaching forms about
- * browser geometry. */
+/** The keyboard can shrink only the visual viewport. Size the drawer against it so content stays above the keyboard. */
 export function MobileDrawerViewport({
   children,
   className,

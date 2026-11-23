@@ -53,7 +53,6 @@ function renameCashTo(title: string, issuedAt: number) {
   }
 }
 
-/** Store holding one accepted account, so a cursor and an outbox both exist. */
 function makeSyncedStore() {
   const store = configureStore({
     reducer: rootReducer,
@@ -345,8 +344,6 @@ describe('syncData', () => {
       status: { kind: 'idle' },
       lastResult: { isSuccessful: true, errorMessage: null },
     })
-    // A fresh replica still asks for a full sync: the overlap never turns a
-    // zero cursor into an incremental one.
     expect(syncMock).toHaveBeenCalledWith('', 'ru', { serverTimestamp: 0 })
     expect(store.getState().data.current.serverTimestamp).toBe(200)
   })
@@ -357,7 +354,6 @@ describe('syncData', () => {
     store.dispatch(appendClientCommand(renameCashTo('Cash', 20)))
     const outbox = store.getState().data.outbox
     syncMock.mockResolvedValue({ error: 'offline' })
-    // The cursor fits, but the unchanged account in the raw transport does not.
     const runtime = { maxBytes: 100, sleep: async () => undefined }
 
     await store.dispatch(syncData(runtime) as any)
@@ -494,11 +490,6 @@ describe('syncData', () => {
     expect(store.getState().data.outbox).toEqual([])
   })
 
-  /**
-   * A network failure answers without a status rather than throwing, so an
-   * offline push exhausts its retries and still has to come back to rest.
-   * Anything else leaves undo, redo and background pull switched off.
-   */
   it('returns to rest after an offline one-request push', async () => {
     syncMock.mockResolvedValue({ error: 'Failed to fetch' })
     const store = makeSyncedStore()
@@ -635,9 +626,7 @@ describe('refreshData', () => {
   })
 
   it('pulls without sending pending commands and keeps those commands undoable', async () => {
-    // The canonical response carries an unrelated remote change, exactly the
-    // background case: a pull must advance `base` without acknowledging
-    // anything the user has not chosen to send.
+    // A background pull advances the accepted base without acknowledging local commands.
     syncMock.mockResolvedValueOnce({
       data: {
         serverTimestamp: 200_000,
@@ -659,7 +648,6 @@ describe('refreshData', () => {
     expect(state.outbox).toEqual([pending])
     expect(state.base.serverTimestamp).toBe(200_000)
     expect(state.current.account.card.title).toBe('Added elsewhere')
-    // The local rename survived the rebase and is still the last command.
     expect(state.current.account.cash.title).toBe('Wallet')
 
     store.dispatch(undoClientCommand())

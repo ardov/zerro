@@ -1,4 +1,3 @@
-// Internal date utilities. Foundation imports no product-domain layer.
 import type { TDateDraft, TISODate, TISOMonth } from './primitives'
 
 const ISO_DATE_OR_MONTH = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/
@@ -63,16 +62,14 @@ function nextYear(d: TDateDraft) {
   return new Date(date.getFullYear() + 1, 0, 1)
 }
 
-/** Checks if string is valid ISO month */
 export function isISOMonth(date?: unknown): date is TISOMonth {
   return typeof date === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(date)
 }
 
-/** Checks if string is valid ISO date */
 function isISODate(date?: unknown): date is TISODate {
   if (!date) return false
   if (typeof date !== 'string') return false
-  const regex = /\d{4}-\d{2}-\d{2}/g // 0000-00-00
+  const regex = /\d{4}-\d{2}-\d{2}/g
   return regex.test(date) && date.length === 10
 }
 

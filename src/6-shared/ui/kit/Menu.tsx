@@ -26,7 +26,6 @@ type ItemContent = {
   label: string
   description?: string
   start?: ReactNode
-  /** Trailing value, such as a count. A checkbox shows its switch instead. */
   end?: ReactNode
   disabled?: boolean
 }
@@ -149,8 +148,6 @@ export type MenuSurfaceProps = {
   anchor: Primitive.Positioner.Props['anchor']
 }
 
-/** A menu opened by an existing overlay owner, such as an asked context menu.
- * Items behave as in Menu: selecting one closes the surface, then runs it. */
 export function MenuSurface(props: MenuSurfaceProps) {
   const { label, controller, items, anchor } = props
   const mobile = useBottomSheetLayout()
@@ -219,7 +216,6 @@ function MenuPopup(props: {
   )
 }
 
-/** Keep gesture recognition and its follow-up click suppression together. */
 function ContextMenuTrigger(props: {
   open: boolean
   mobile: boolean
@@ -238,7 +234,6 @@ function ContextMenuTrigger(props: {
       open={mobile ? false : open}
       disabled={disabled}
       onOpenChange={(next, details) => {
-        // The mobile trigger only recognizes the gesture. Drawer owns modality.
         if (mobile) details.cancel()
         if (next && !open && details.event.type.startsWith('touch')) {
           suppressClick.current = true

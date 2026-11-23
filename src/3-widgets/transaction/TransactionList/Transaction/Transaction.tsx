@@ -17,7 +17,6 @@ export type TTransactionProps = {
   isInSelectionMode: boolean
   onFilterMerchant?: (id: string) => void
   onSearchPayee?: (payee: string) => void
-  // Actions
   onOpen?: (id: TTransactionId) => void
   onToggle?: (id: TTransactionId, extendRange?: boolean) => void
   onContextMenu?: (

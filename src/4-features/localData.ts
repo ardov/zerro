@@ -22,9 +22,7 @@ import {
 import { getRootUserId, validateDataStore } from '@/zerro-core/replica'
 
 export const loadLocalData = (): AppThunk => async dispatch => {
-  // Only hydration decides recovery. Retention runs after it and outside this
-  // `try` on purpose: a failed compaction must never be mistaken for a corrupt
-  // replica and send the user through a full reload.
+  // Only hydration decides whether recovery is necessary. Compaction failure must not trigger a full reload.
   try {
     const loaded = await replicaStorage.loadCurrent()
     if (!loaded) return

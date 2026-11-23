@@ -1,11 +1,5 @@
 @layer components {
-  /* Animate height from zero to the measured content height over 300ms. The
-     content does not fade, and the
-     box clips while it moves so the content does not spill past the edge it
-     is growing from.
-
-     Base UI keeps `--collapsible-panel-height` up to date so a child that grows
-     while open is followed rather than clipped. */
+  /* Base UI reports the panel's live content height, including growth after opening. */
   .collapse-panel {
     height: var(--collapsible-panel-height);
     overflow: hidden;
@@ -14,11 +8,7 @@
       overflow 0s allow-discrete;
   }
 
-  /* Stop clipping once the panel has arrived so a row's hover tint or focus
-     ring is not shaved off at the edge. `overflow` is a discrete property, so
-     it flips rather than eases; the delay is what holds it until the height
-     has finished, and it is declared here rather than on the base rule so it
-     applies to opening only. Closing must clip from the first frame. */
+  /* On opening, stop clipping after the height transition so focus rings can extend past the edge. Clip closing immediately. */
   .collapse-panel[data-open] {
     overflow: visible;
     transition:

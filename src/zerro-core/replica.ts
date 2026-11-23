@@ -1,10 +1,4 @@
-/**
- * Current-app integration seam for the command replica.
- *
- * Consumers import this entrypoint rather than implementation paths. The pure
- * operations and persistence parser remain independently owned internally and
- * may move without changing the app boundary.
- */
+/** Use this entry point for app replica operations and durable outbox parsing. */
 export {
   appendOutbox,
   editOutbox,

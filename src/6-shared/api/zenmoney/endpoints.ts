@@ -1,4 +1,3 @@
-// Zenmoney endpoints
 export const endpoints = {
   ru: {
     auth: 'https://api.zenmoney.ru/oauth2/authorize/',

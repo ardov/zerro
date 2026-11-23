@@ -113,12 +113,7 @@ function jsonBytes(value: unknown): number {
 
 const SIZE_SAMPLE_ROWS = 64
 
-/**
- * A checkpoint's JSON size, estimated from evenly spaced sample rows of each
- * entity map, keys included. Retention budgets are counted in megabytes, so
- * an estimate within a few percent serves, and it costs a few hundred rows of
- * serialization instead of the whole snapshot.
- */
+/** Sample evenly spaced rows for JSON byte size so retention need not serialize the whole checkpoint. */
 function estimateSnapshotBytes(snapshot: TDataStore): number {
   let bytes = jsonBytes({ serverTimestamp: snapshot.serverTimestamp })
   dataEntityKeys.forEach(object => {

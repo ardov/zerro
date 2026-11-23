@@ -1,6 +1,4 @@
-// Root stays the semantic facade only. The current app reaches replica
-// operations through the explicit `zerro-core/replica` integration entrypoint.
-// See the module-boundary decision in support/documents/design-ledger.md.
+// Use zerro-core/replica for replica operations. See support/documents/design-ledger.md for the module boundary.
 export * from './constants'
 export * from './types'
 export * from './public/session'

@@ -1,9 +1,4 @@
-/**
- * Runtime contracts for Zenmoney's wire representation.
- *
- * The adapter owns untrusted JSON at the protocol boundary. Normalized Core
- * entities remain type-only contracts after conversion.
- */
+/** Validate untrusted JSON at the adapter boundary; normalized Core entities use type-only contracts. */
 import { z } from 'zod'
 import type { TDataEntityKey, TOpenEnum } from '@/6-shared/types'
 import {
@@ -25,12 +20,7 @@ const numberArray = z.array(z.number())
 
 const isoDate = z.string().refine(isISODate, 'Expected a calendar ISO date')
 
-/**
- * Discriminators Zenmoney owns, by the wire path that carries them. Unknown
- * values parse — a complete backup has to stay importable when the server
- * learns a new account type — so this table is both what the schema accepts
- * with a known meaning and what the import seam reports against.
- */
+/** Allow unknown discriminators so a backup from a newer Zenmoney version stays importable. */
 export const knownWireValues = {
   'account.type': accountTypes,
   'account.balanceCorrectionType': balanceCorrectionTypes,
@@ -246,10 +236,7 @@ const transactionWireSchema = z
     qrCode: nullable(z.string()),
     incomeBankID: nullable(z.union([numberId, stringId])),
     incomeInstrument: numberId,
-    // Nullable only because deleting an account nulls the leg that pointed at
-    // it on a soft-deleted debt operation. The shape rule — a null
-    // leg is legal only on a deleted row — is enforced in `hasValidReferences`,
-    // which can see `deleted` alongside it.
+    // A deleted debt row can retain a null account leg. Core rejects null legs on live rows.
     incomeAccount: nullable(stringId),
     income: z.number(),
     outcomeBankID: nullable(z.union([numberId, stringId])),
@@ -294,13 +281,7 @@ const deletionWireSchema = z
   })
   .strict()
 
-/**
- * Every entity collection a Zenmoney payload can carry, in dependency order.
- * Individual schemas stay private on purpose: a consumer that needs one of
- * them needs the set.
- * The diff schema, the full-backup schema and the import warnings all read
- * this one record, so a new entity is declared once.
- */
+/** Collection order also controls the diff, full-backup and import-warning schemas. */
 export const wireSchemas = {
   instrument: instrumentWireSchema,
   country: countryWireSchema,
@@ -332,7 +313,6 @@ function collections<TWrap extends z.ZodType>(
   ) as TCollectionShape<TWrap>
 }
 
-/** A partial server response or request diff. */
 export const zenMoneyDiffWireSchema = z
   .object({
     serverTimestamp: timestamp,
@@ -341,7 +321,6 @@ export const zenMoneyDiffWireSchema = z
   })
   .strict()
 
-/** A complete exported snapshot: every collection present, no deletions. */
 export const fullBackupCollectionsShape = collections(schema => z.array(schema))
 
 export type TZenmoneyWireDiff = z.output<typeof zenMoneyDiffWireSchema>

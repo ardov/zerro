@@ -51,39 +51,32 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   const convertFx = useAppSelector(core.currency.selectConvertFx)
 
   const currency = {
-    env: envelope.currency, // Envelope currency
-    disp: dispCurrency, // Display currency
+    env: envelope.currency,
+    disp: dispCurrency,
   }
-  /** Functions to convert amounts */
   const convert = {
     toEnv: (a: TFxAmount) => convertFx(a, currency.env, month),
     toDisp: (a: TFxAmount) => convertFx(a, currency.disp, month),
   }
-  /** Formatters */
   const format = {
     env: (v: number) => formatMoney(v, currency.env),
     disp: (v: number) => formatMoney(v, currency.disp),
   }
-  /** Current assigned */
   const assigned = {
     env: convert.toEnv(envelope.totalAssigned),
     disp: convert.toDisp(envelope.totalAssigned),
   }
-  /** Current available */
   const available = {
     env: convert.toEnv(envelope.totalAvailable),
     disp: convert.toDisp(envelope.totalAvailable),
   }
 
-  /** Input value sets in envelope currency */
   const [inputValue, setInputValue] = useState<number>(assigned.env)
 
-  /** Input value converted to envelope and display currencies */
   const value = {
     env: inputValue,
     disp: convert.toDisp({ [currency.env]: inputValue }),
   }
-  /** Amount of money that will be available after changes applied */
   const availableAfter = {
     env: value.env - assigned.env + available.env,
     disp: value.disp - assigned.disp + available.disp,

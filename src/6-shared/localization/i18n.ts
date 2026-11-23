@@ -13,30 +13,25 @@ const languges = Object.keys(resources) as (keyof typeof resources)[]
 function detectBestLanguage(languges: string[]) {
   const getLangOnly = (lang: string) => lang.split(/-|_/)[0]
 
-  // Try with cached language
   const cachedLanguage = getLangOnly(
     safeLocalStorage.getItem(LOCAL_STORAGE_KEY) || ''
   )
   if (languges.includes(cachedLanguage)) return cachedLanguage
 
-  // Try with browser language list
   const prefered = navigator.languages
     .map(getLangOnly)
     .find(lang => languges.includes(lang))
   if (prefered) return prefered
 
-  // Try with navigator language
   const navigatorLanguage = getLangOnly(navigator.language)
   if (languges.includes(navigatorLanguage)) return navigatorLanguage
 
-  // Return first language
   return languges[0]
 }
 
 i18n.use(initReactI18next).init({
   resources,
   defaultNS,
-  // lng: 'dev',
   lng: detectBestLanguage(languges),
   initAsync: false,
   debug: isProduction,
@@ -46,12 +41,10 @@ i18n.use(initReactI18next).init({
   },
 })
 
-// Set html lang attribute
 try {
   document.documentElement.lang = i18n.resolvedLanguage || i18n.language
 } catch {}
 
-// Cache language on change
 i18n.on('languageChanged', function (lng) {
   safeLocalStorage.setItem(LOCAL_STORAGE_KEY, i18n.resolvedLanguage || lng)
   document.documentElement.lang = i18n.resolvedLanguage || lng

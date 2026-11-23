@@ -47,7 +47,6 @@ function Harness({ disablePast = false }: { disablePast?: boolean }) {
   )
 }
 
-/** One component instance, with its visual props supplied by Args. */
 export const Bench: Story = {
   render: args => <Harness disablePast={args.disablePast} />,
 }

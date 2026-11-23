@@ -26,7 +26,7 @@ type StatisticWidgetProps = Omit<ComponentPropsWithoutRef<'div'>, 'id'> & {
   id: core.envelopes.TEnvelopeId
 }
 
-const WINDOW = 12 // Number of months to show in the chart
+const WINDOW = 12
 
 enum statisticsValue {
   avgAssigned = 'avgAssigned',
@@ -63,7 +63,6 @@ const getPeriodLength = (period: aggregatePeriod): number => {
   }
 }
 
-/** Calculate average assigned and expenses for the given envelope */
 function useAggregatedStats(
   id: core.envelopes.TEnvelopeId,
   currency: TFxCode,
@@ -74,8 +73,8 @@ function useAggregatedStats(
   const convertFx = useAppSelector(core.currency.selectConvertFx)
   const result = dates.map((month, idx) => {
     const aggregatedMonths = dates.slice(
-      Math.max(0, idx - aggregationPeriod + 1), // start index
-      idx + 1 // end index
+      Math.max(0, idx - aggregationPeriod + 1),
+      idx + 1
     )
     const avgAssigned = getAverage(
       aggregatedMonths.map(date =>
@@ -193,7 +192,6 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
               minTickGap={8}
             />
 
-            {/* Selected month indicator */}
             {selectedData && (
               <ReferenceDot
                 x={selectedData.month}

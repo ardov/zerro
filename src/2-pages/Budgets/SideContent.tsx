@@ -12,8 +12,6 @@ import { defineScreen, useIsTopScreen } from '@/6-shared/overlays'
 
 type TDrawerId = core.envelopes.TEnvelopeId | 'overview'
 
-/** A screen: the envelope it shows — or the month overview — is an id, so it
- * comes back from Back, Forward and a reload. */
 const envelopeScreen = defineScreen<TDrawerId>('envelope')
 
 export const useSideContent = () => envelopeScreen.useOpen()
@@ -23,9 +21,6 @@ export function useSelectedEnvelope() {
   return id && id !== 'overview' ? id : undefined
 }
 
-/** Docked beside the table, the month overview is part of the page and has no
- * header. As a drawer it is modal, so it takes the drawer's header and close
- * button. An envelope draws its own header either way. */
 export function SideContent({ docked = false }: { docked?: boolean }) {
   const [id, setId] = envelopeScreen.use()
   const active = useIsTopScreen(envelopeScreen.name)

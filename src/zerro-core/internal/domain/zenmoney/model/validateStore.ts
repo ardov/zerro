@@ -7,17 +7,7 @@ export const dataStoreValidatorVersion = 3 as const
 export type TDataStoreValidationResult =
   { ok: true } | { ok: false; reason: string }
 
-/**
- * Checks the invariants needed before treating a reconstructed server state as
- * a restore source. The loader deliberately calls this once for the final
- * snapshot; canonical sync does not pay this cost on its hot path.
- *
- * Empty/partial fixtures are accepted while an account is being bootstrapped.
- * Once both users and accounts exist, the server graph must have one root user,
- * one debt account, the references Zerro must dereference, and an acyclic
- * tag-parent relation. References come from the entity graph, which also names
- * canonical rows whose unavailable references do not block reading.
- */
+/** Accept bootstrapping snapshots; a live replica needs one root user, one debt account, valid references, and acyclic tags. */
 export function validateDataStore(
   store: TDataStore
 ): TDataStoreValidationResult {

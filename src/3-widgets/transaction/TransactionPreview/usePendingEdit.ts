@@ -2,9 +2,8 @@ import { useCallback, useRef } from 'react'
 
 export type TPendingEdit = (id: string, save?: () => void) => void
 
-/** The screen owner outlives its fields. Close notifications can finish a
- * valid active input even after React has removed it without a blur event.
- * Merely unmounting or changing the drawer layout does not save anything. */
+/** The screen owner can finish an input after its DOM unmounts without blur.
+ * A layout change or remount alone never saves it. */
 export function usePendingEdit() {
   const pending = useRef<{ id: string; save?: () => void } | null>(null)
   const finish = useCallback(() => {
@@ -15,7 +14,6 @@ export function usePendingEdit() {
   const register: TPendingEdit = useCallback((id, save) => {
     const previous = pending.current
     pending.current = { id, save }
-    // Selecting another transaction also completes the previous input.
     if (previous && previous.id !== id) previous.save?.()
   }, [])
   return { finish, register }

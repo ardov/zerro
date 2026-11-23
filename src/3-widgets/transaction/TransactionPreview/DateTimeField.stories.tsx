@@ -41,7 +41,6 @@ export const Editing: Story = {
     const value = canvas.getByRole('status', { name: 'Selected date and time' })
     const outside = canvas.getByRole('button', { name: 'Outside field' })
     await expect(date).toHaveAttribute('type', 'date')
-    // Native date inputs expose an empty value while a segment is incomplete.
     await userEvent.click(date)
     fireEvent.change(date, { target: { value: '' } })
     await expect(value).toHaveTextContent('2026-09-12 18:56')

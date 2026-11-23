@@ -89,7 +89,6 @@ function makeSnapshot(
   })
 }
 
-/** The same file `exportJSON` writes: a full store as a Zenmoney diff. */
 function toBackupFile(store: TDataStore): string {
   const patch: TNormalizedPatch = { serverTimestamp: store.serverTimestamp }
   const target = patch as Record<string, unknown>
@@ -236,12 +235,6 @@ describe('parseFullBackup', () => {
     }
   )
 
-  /**
-   * Every warning the file itself can produce, in one backup: a collection and
-   * a row field this version has no meaning for, and a discriminator value it
-   * does not know.
-   * None of them may reject the backup.
-   */
   it('reports everything it does not fully understand and still accepts', () => {
     const file = JSON.parse(
       toBackupFile(
@@ -371,10 +364,7 @@ describe('parseFullBackup', () => {
     })
   })
 
-  // Deleting an account nulls the leg that pointed at it on a debt
-  // operation and soft-deletes the row. A real account can already hold that
-  // shape, so an export of it has to stay importable — otherwise the backup a
-  // person already has quietly stops working.
+  // A deleted debt operation can have a null account leg. Existing exports with this shape must still import.
   it('reads a soft-deleted transaction whose account leg was nulled', () => {
     const withNullLeg = (deleted: boolean) =>
       makeSnapshot({
@@ -694,9 +684,7 @@ describe('importBackup', () => {
       outcome: 42,
     })
 
-    // The restored account never carries the backup's own id, so a repeat
-    // import cannot recognise it as already restored — it rebuilds instead
-    // of converging, per the account identity rule.
+    // Imports assign new account IDs, so a repeated import cannot match an account by its backup ID.
     expect(runner.dispatch(importBackup(recreated))).toEqual({
       ok: true,
       applied: true,

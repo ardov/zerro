@@ -94,7 +94,6 @@ export const InheritedWrapping: Story = {
   },
 }
 
-/** Keep the exact typography classes used by the budget table. */
 export const BudgetTypography: Story = {
   render: () => (
     <div className="grid gap-2 text-ui-16 font-semibold">

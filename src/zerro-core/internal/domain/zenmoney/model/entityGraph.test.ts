@@ -19,9 +19,6 @@ describe('entity graph', () => {
     })
   })
 
-  // The orders below are what a chunked push, a restore and the progress
-  // display all iterate. An entity missing from one of them is a silent gap,
-  // so completeness is asserted rather than maintained by hand.
   it('covers every entity in every derived and declared order', () => {
     expect([...entityWriteOrder].sort()).toEqual([...dataEntityKeys].sort())
     expect([...entityCleanupOrder].sort()).toEqual([...dataEntityKeys].sort())

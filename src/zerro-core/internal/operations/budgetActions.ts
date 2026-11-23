@@ -268,7 +268,6 @@ function budgetDraft(
       for (const [target, values] of Object.entries(budgets)) {
         if (target <= month) continue
         for (const id of Object.keys(values) as TEnvelopeId[]) {
-          // Only existing envelopes participate in budget actions.
           if (!envelopes[id]) continue
           setOwn(target as TISOMonth, id, 0)
         }

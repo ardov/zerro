@@ -1,12 +1,6 @@
 import type { TCommandVerb } from '@/zerro-core/replica'
 
-/**
- * What each command verb is called in the `history` namespace.
- *
- * Exhaustive by construction: the verb union is closed in Core, so a verb
- * added there without a name here is a compile error rather than a blank row
- * in someone's history.
- */
+/** The exhaustive mapping makes a new Core verb without a history translation a type error. */
 export const commandVerbLabelKeys = {
   'budget-set': 'verb_budgetSet',
   'budget-goals-funded': 'verb_budgetGoalsFunded',

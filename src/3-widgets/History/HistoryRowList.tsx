@@ -22,8 +22,6 @@ import {
 } from '@/store/history'
 import { useChangeSummaryText } from './changeSummaryText'
 
-/** Renders the ordered history list: local changes above, accepted server
- * points below, each half under its own heading. */
 export function HistoryRowList({
   rows,
   selected,
@@ -32,8 +30,6 @@ export function HistoryRowList({
 }: {
   rows: THistoryRow[]
   selected: THistoryPointRef | null
-  /** The row that is the live state, marked so the list always says where
-   * "now" is rather than leaving it to be inferred from the order. */
   head: THistoryPointRef | null
   onSelect: (point: THistoryPointRef) => void
 }) {
@@ -140,8 +136,6 @@ function HistoryRowItem({
         description={<TextFade>{formatTimeAgo(row.command.issuedAt)}</TextFade>}
         onClick={() => onSelect(row.point)}
       >
-        {/* No change counts here: the command's own label already names the
-            act, and "Goal changed · Goals 1" only repeats it in numbers. */}
         <RowText
           primary={commandTitle(row.command, t)}
           isHead={isHead}
@@ -151,7 +145,6 @@ function HistoryRowItem({
     )
   }
 
-  // row.type === 'journal'
   const { entry } = row
   return (
     <ListRowButton
@@ -168,8 +161,6 @@ function HistoryRowItem({
         </TextFade>
       }
     >
-      {/* Counts stay on server rows: a pull has no label of its own, so the
-          only thing that distinguishes one update from another is what moved. */}
       <RowText
         primary={
           entry.kind === 'checkpoint' ? t('checkpoint') : t('serverSync')
@@ -181,7 +172,6 @@ function HistoryRowItem({
   )
 }
 
-/** One row's text, plus the "now" marker when this row is the live state. */
 function RowText({
   primary,
   isHead,
@@ -203,18 +193,11 @@ function RowText({
   )
 }
 
-/** Time first, then what moved. One line, so the row height never changes. */
 function secondaryLine(time: string, summary: string): string {
   return summary ? `${time} · ${summary}` : time
 }
 
-/**
- * What the command says it did, or the generic word for one that says nothing.
- *
- * A label is optional by design — it is dropped when unreadable, and commands
- * issued before labels existed have none — so every row must still render
- * without one.
- */
+/** Older or unreadable commands can have no label; render a generic title. */
 function commandTitle(command: TCommand, t: TFunction<'history'>): string {
   const label = command.label
   if (!label) return t('unnamedChange')
