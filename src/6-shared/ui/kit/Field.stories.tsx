@@ -408,10 +408,8 @@ export const FloatingTextAddons: Story = {
       const input = canvas.getByRole('textbox', { name: `Amount ${size}` })
       const surface = input.closest('[data-field-control]')!.parentElement!
       const value = input.getBoundingClientRect()
-      for (const span of surface.querySelectorAll(
-        '[data-field-addon-side] span'
-      )) {
-        const addon = span.getBoundingClientRect()
+      for (const text of ['USD', 'kg']) {
+        const addon = within(surface).getByText(text).getBoundingClientRect()
         await expect(
           Math.abs(addon.top + addon.height / 2 - value.top - value.height / 2)
         ).toBeLessThan(1)

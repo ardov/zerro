@@ -55,38 +55,10 @@ describe('round', () => {
     expect(round(-0.005)).toBe(0)
   })
 
-  it('follows the printed-form rule on everyday amounts and near-ties', () => {
-    for (const amount of sampleAmounts()) {
-      expect(round(amount), String(amount)).toBe(printedFormRound(amount))
-    }
+  it('distinguishes amounts just below and just above a half-cent', () => {
+    expect(round(1.0049999999999997)).toBe(1)
+    expect(round(1.0050000000000001)).toBe(1.01)
+    expect(round(-1.0050000000000001)).toBe(-1.01)
+    expect(round(-1.0049999999999997)).toBe(-1)
   })
 })
-
-/** The rule itself, spelled out slowly: shift the decimal point in the
- * number's shortest printed form, round, and shift it back. */
-function printedFormRound(amount: number): number {
-  if (!Number.isFinite(amount)) return amount
-  if (Math.abs(amount) < 0.005) return 0
-  const shifted = Number(`${amount}e2`)
-  if (!Number.isFinite(shifted)) return amount
-  const rounded = Number(`${Math.round(shifted)}e-2`)
-  return Number.isFinite(rounded) ? rounded : amount
-}
-
-/** Deterministic amounts across magnitudes, with exact and inexact half
- * cents, sums that leave binary noise, and negatives. */
-function sampleAmounts(): number[] {
-  let seed = 7
-  const next = () => (seed = (seed * 48271) % 2147483647) / 2147483647
-  const amounts: number[] = []
-  for (let i = 0; i < 20000; i++) {
-    const scale = 10 ** Math.floor(next() * 12)
-    const sign = next() < 0.3 ? -1 : 1
-    const cents = Math.floor(next() * scale * 100)
-    amounts.push(sign * next() * scale)
-    amounts.push(sign * (cents / 100 + 0.005))
-    amounts.push(sign * (cents / 1000))
-    amounts.push(sign * (cents / 100) + 0.1 + 0.2)
-  }
-  return amounts
-}

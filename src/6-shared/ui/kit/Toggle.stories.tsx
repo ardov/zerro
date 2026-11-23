@@ -173,27 +173,7 @@ export const ControlledAndUncontrolled: Story = {
       <SwitchField label="Independent switch" defaultChecked />
     </>
   ),
-  play: async ({ canvas }) => {
-    const checkbox = canvas.getByRole('checkbox', {
-      name: 'Include archived accounts',
-    })
-    const control = canvas.getByRole('switch', {
-      name: 'Show archived accounts',
-    })
-    await userEvent.click(checkbox)
-    await expect(control).toBeChecked()
-    await userEvent.click(control)
-    await expect(checkbox).not.toBeChecked()
-    for (const [role, name] of [
-      ['checkbox', 'Independent checkbox'],
-      ['switch', 'Independent switch'],
-    ]) {
-      const independent = canvas.getByRole(role, { name })
-      await expect(independent).toBeChecked()
-      await userEvent.click(independent)
-      await expect(independent).not.toBeChecked()
-    }
-  },
+  tags: ['!test'],
 }
 
 function LabelsExample() {

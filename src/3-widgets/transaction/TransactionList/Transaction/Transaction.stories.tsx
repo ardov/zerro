@@ -151,7 +151,7 @@ export const TypeSwitchRegression: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
-    await expect(canvas.getByTestId('type')).toHaveTextContent(/^outcome$/)
+    await expect(canvas.getByTestId('tags')).not.toBeEmptyDOMElement()
     await userEvent.click(canvas.getByRole('button', { name: 'Edit expense' }))
     await userEvent.click(
       await body.findByRole('combobox', { name: 'Transaction type' })
@@ -160,7 +160,7 @@ export const TypeSwitchRegression: Story = {
     await waitFor(() =>
       expect(canvas.getByTestId('type')).toHaveTextContent(/^transfer$/)
     )
-    await expect(canvas.getByTestId('tags')).toHaveTextContent('')
+    await expect(canvas.getByTestId('tags')).toBeEmptyDOMElement()
   },
 }
 

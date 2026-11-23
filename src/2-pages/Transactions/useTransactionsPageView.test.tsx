@@ -65,8 +65,6 @@ describe('useTransactionsPageView', () => {
       topDate: null,
       scrollOffset: null,
     })
-    expect(result.current).toBe(view)
-
     act(() => vi.advanceTimersByTime(1000))
     expect(store.getState().view.transactionsPage).toMatchObject({
       topDate: '2026-07-23',

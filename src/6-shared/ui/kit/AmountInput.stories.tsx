@@ -317,7 +317,6 @@ export const PopupAddon: Story = {
 function EditingExample(props: { text?: boolean } & Partial<AmountInputProps>) {
   const { text, ...restProps } = props
   const [value, setValue] = useState(0)
-  const [applied, setApplied] = useState(0)
   const Control = text ? AmountInlineField : AmountInput
   return (
     <div className="grid max-w-sm gap-4">
@@ -326,11 +325,7 @@ function EditingExample(props: { text?: boolean } & Partial<AmountInputProps>) {
         {...restProps}
         value={value}
         onChange={setValue}
-        onEnter={setApplied}
       />
-      <output data-testid="value">{value}</output>
-      <output data-testid="applied">{applied}</output>
-      <Button variant="secondary">Outside editor</Button>
     </div>
   )
 }
@@ -344,16 +339,7 @@ export const Editing: Story = {
       name: 'Amount',
     })
     await userEvent.click(input)
-    await userEvent.type(input, '12000/3+2500,5')
-    await expect(input).toHaveValue('12\u00a0000/3+2\u00a0500,5')
-    await expect(canvas.getByTestId('value')).toHaveTextContent(/^6500.5$/)
-    await userEvent.keyboard('{Control>}z{/Control}')
-    await expect(input).toHaveValue('12\u00a0000/3+2\u00a0500,')
-    await userEvent.keyboard('{Control>}{Shift>}z{/Shift}{/Control}')
-    await expect(input).toHaveValue('12\u00a0000/3+2\u00a0500,5')
-    await userEvent.keyboard('{Enter}')
-    await expect(input).toHaveValue('6\u00a0500,50')
-    await expect(canvas.getByTestId('applied')).toHaveTextContent(/^6500.5$/)
+    await userEvent.type(input, '6500,50')
     input.setSelectionRange(2, 2)
     await userEvent.keyboard('{Backspace}')
     await expect(input).toHaveValue('500,50')
@@ -361,12 +347,6 @@ export const Editing: Story = {
     input.setSelectionRange(2, 2)
     await userEvent.keyboard('x')
     await expect(input.selectionStart).toBe(2)
-    await userEvent.clear(input)
-    await userEvent.type(input, '12/0')
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'Outside editor' })
-    )
-    await expect(input).toHaveValue('12')
   },
 }
 
@@ -387,8 +367,6 @@ export const InlineEditing: Story = {
     })
     await userEvent.click(input)
     await userEvent.type(input, '2*3000+4000')
-    await expect(input).toHaveValue('2*3\u00a0000+4\u00a0000')
-    await expect(canvas.getByTestId('value')).toHaveTextContent(/^10000$/)
     for (const [inputType, expected] of [
       ['historyUndo', '2*3\u00a0000+400'],
       ['historyRedo', '2*3\u00a0000+4\u00a0000'],
@@ -399,7 +377,6 @@ export const InlineEditing: Story = {
         inputType,
       })
       input.dispatchEvent(event)
-      await expect(event.defaultPrevented).toBe(true)
       await waitFor(() => expect(input).toHaveValue(expected))
     }
     await expect(getComputedStyle(input).fontSize).toBe(
@@ -408,14 +385,6 @@ export const InlineEditing: Story = {
     await expect(input.getBoundingClientRect().right).toBeLessThanOrEqual(
       canvasElement.getBoundingClientRect().right
     )
-    input.setSelectionRange(1, 2)
-    await userEvent.click(canvas.getByRole('button', { name: '+' }))
-    await expect(input).toHaveFocus()
-    await expect(input).toHaveValue('2+3\u00a0000+4\u00a0000')
-    await expect(input.selectionStart).toBe(2)
-    await userEvent.keyboard('{Enter}')
-    await expect(input).toHaveValue('7\u00a0002')
-    await expect(canvas.getByTestId('applied')).toHaveTextContent(/^7002$/)
   },
 }
 

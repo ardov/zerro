@@ -2,7 +2,7 @@ import { operationPatch } from '@/zerro-core/support/testing/commandTestData'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 import type { RootState } from '@/store'
-import { appendClientCommand, undoClientCommand } from '@/store/data'
+import { undoClientCommand } from '@/store/data'
 import { rootReducer } from '@/store/rootReducer'
 import { makeTestRootState } from '@/store/testing'
 import {
@@ -27,13 +27,8 @@ vi.mock('uuid', () => ({ v1: () => UUID }))
 
 afterEach(() => vi.restoreAllMocks())
 
-function makeDispatch(state: RootState) {
-  const dispatch: any = vi.fn(action =>
-    typeof action === 'function'
-      ? action(dispatch, () => state, undefined)
-      : action
-  )
-  return dispatch
+function makeStoreWithState(preloadedState: RootState) {
+  return configureStore({ reducer: rootReducer, preloadedState })
 }
 
 describe('Redux semantic commands', () => {
@@ -126,56 +121,48 @@ describe('Redux semantic commands', () => {
     expect(store.getState().data.current.merchant[merchantId]).toBeUndefined()
   })
 
-  it('writes sparse account intent through the public wrapper', () => {
+  it('includes a cash account in the balance as an undoable change', () => {
     const account = makeAccount({ id: 'cash', inBalance: false })
-    const dispatch = makeDispatch(
+    const store = makeStoreWithState(
       makeTestRootState(makeStore({ account: { cash: account } }))
     )
+    store.dispatch(setAccountInBalance('cash', true))
 
-    dispatch(setAccountInBalance('cash', true))
+    expect(store.getState().data.current.account.cash.inBalance).toBe(true)
+    expect(operationPatch(store.getState().data.outbox[0])).toEqual({
+      account: [{ id: 'cash', inBalance: true }],
+    })
 
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: appendClientCommand.type,
-        payload: expect.objectContaining({
-          operations: [
-            { type: 'account.patch', value: { id: 'cash', inBalance: true } },
-          ],
-        }),
-      })
-    )
+    store.dispatch(undoClientCommand())
+    expect(store.getState().data.current.account.cash).toEqual(account)
   })
 
-  it('blocks new commands while a corrupt durable outbox is quarantined', () => {
-    const account = makeAccount({ id: 'cash', inBalance: false })
-    const state = makeTestRootState(makeStore({ account: { cash: account } }))
-    state.data.outboxRecoveryReason = 'outbox[0] is invalid'
-    const dispatch = makeDispatch(state)
+  it.each([
+    {
+      source: 'outbox',
+      recovery: { outboxRecoveryReason: 'outbox[0] is invalid' },
+    },
+    {
+      source: 'journal',
+      recovery: {
+        journalRecoveryRequired: true,
+        journalRecoveryReason: 'broken checkpoint',
+      },
+    },
+  ])(
+    'blocks account changes while the $source awaits recovery',
+    ({ recovery }) => {
+      const account = makeAccount({ id: 'cash', inBalance: false })
+      const state = makeTestRootState(makeStore({ account: { cash: account } }))
+      state.data = { ...state.data, ...recovery }
+      const store = makeStoreWithState(state)
 
-    dispatch(setAccountInBalance('cash', true))
+      store.dispatch(setAccountInBalance('cash', true))
 
-    expect(
-      dispatch.mock.calls.some(
-        ([action]: [any]) => action?.type === appendClientCommand.type
-      )
-    ).toBe(false)
-  })
-
-  it('blocks new commands while the canonical journal is awaiting recovery', () => {
-    const account = makeAccount({ id: 'cash', inBalance: false })
-    const state = makeTestRootState(makeStore({ account: { cash: account } }))
-    state.data.journalRecoveryRequired = true
-    state.data.journalRecoveryReason = 'broken checkpoint'
-    const dispatch = makeDispatch(state)
-
-    dispatch(setAccountInBalance('cash', true))
-
-    expect(
-      dispatch.mock.calls.some(
-        ([action]: [any]) => action?.type === appendClientCommand.type
-      )
-    ).toBe(false)
-  })
+      expect(store.getState().data.current.account.cash).toEqual(account)
+      expect(store.getState().data.outbox).toEqual([])
+    }
+  )
 
   describe.each(['Edited', 'Edited $&'])(
     'bulk categories with comment %s',
@@ -351,70 +338,62 @@ describe('Redux semantic commands', () => {
     ])
   })
 
-  it('keeps direct transaction wrappers on the same sparse outbox path', () => {
-    const first = makeTransaction({ id: 'first', viewed: false })
-    const second = makeTransaction({ id: 'second', viewed: false })
-    const dispatch = makeDispatch(
-      makeTestRootState(makeStore({ transaction: { first, second } }))
+  it('marks the selected transactions viewed without changing other fields', () => {
+    const first = makeTransaction({ id: 'first', outcome: 10, viewed: false })
+    const second = makeTransaction({ id: 'second', outcome: 10, viewed: false })
+    const third = makeTransaction({ id: 'third', outcome: 10, viewed: false })
+    const store = makeStoreWithState(
+      makeTestRootState(makeStore({ transaction: { first, second, third } }))
     )
+    const getTransactions = () => store.getState().data.current.transaction
 
-    dispatch(setTransactionsViewed(['first', 'second'], true))
-    dispatch(applyChangesToTransaction({ id: 'first', comment: 'Edited' }))
-    dispatch(
-      bulkEditTransactions(['first', 'second'], {
-        tags: ['food'],
-        comment: 'Shared',
-      })
-    )
+    store.dispatch(setTransactionsViewed(['first', 'second'], true))
 
-    expect(appendedPatches(dispatch)).toEqual([
-      {
-        transaction: [
-          { id: 'first', viewed: true },
-          { id: 'second', viewed: true },
-        ],
-      },
-      { transaction: [{ id: 'first', comment: 'Edited' }] },
-      {
-        transaction: [
-          { id: 'first', tag: ['food'], comment: 'Shared' },
-          { id: 'second', tag: ['food'], comment: 'Shared' },
-        ],
-      },
-    ])
+    expect(getTransactions().first).toMatchObject({ viewed: true, outcome: 10 })
+    expect(getTransactions().second).toMatchObject({
+      viewed: true,
+      outcome: 10,
+    })
+    expect(getTransactions().third).toBe(third)
+
+    store.dispatch(undoClientCommand())
+    expect(getTransactions()).toEqual({ first, second, third })
   })
 
-  it('creates a named merchant in the same command as the edit it belongs to', () => {
-    const dispatch = makeDispatch(
+  it('creates or reuses a named merchant when editing a transaction', () => {
+    const store = makeStoreWithState(
       makeTestRootState(
         makeStore({
           user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
-          transaction: { first: makeTransaction({ id: 'first' }) },
+          transaction: { first: makeTransaction({ id: 'first', outcome: 10 }) },
           merchant: { shop: makeMerchant({ id: 'shop', title: 'Shop' }) },
         })
       )
     )
+    const getCurrent = () => store.getState().data.current
 
-    dispatch(
+    store.dispatch(
       applyChangesToTransaction({ id: 'first', payee: 'Kiosk' }, 'Kiosk')
     )
-    dispatch(applyChangesToTransaction({ id: 'first', payee: 'Shop' }, 'Shop'))
+    expect(getCurrent().merchant[UUID].title).toBe('Kiosk')
+    expect(getCurrent().transaction.first).toMatchObject({
+      payee: 'Kiosk',
+      merchant: UUID,
+    })
 
-    expect(appendedPatches(dispatch)).toEqual([
-      {
-        merchant: [{ id: UUID, title: 'Kiosk' }],
-        transaction: [{ id: 'first', payee: 'Kiosk', merchant: UUID }],
-      },
-      // The title is taken, so nothing is created and the edit points at the
-      // merchant that already carries it.
-      { transaction: [{ id: 'first', payee: 'Shop', merchant: 'shop' }] },
-    ])
+    store.dispatch(
+      applyChangesToTransaction({ id: 'first', payee: 'Shop' }, 'Shop')
+    )
+    expect(Object.keys(getCurrent().merchant).sort()).toEqual([UUID, 'shop'])
+    expect(getCurrent().transaction.first).toMatchObject({
+      payee: 'Shop',
+      merchant: 'shop',
+    })
+
+    store.dispatch(undoClientCommand())
+    expect(getCurrent().transaction.first.merchant).toBe(UUID)
+    store.dispatch(undoClientCommand())
+    expect(getCurrent().transaction.first.merchant).toBeNull()
+    expect(getCurrent().merchant[UUID]).toBeUndefined()
   })
 })
-
-function appendedPatches(dispatch: any) {
-  return dispatch.mock.calls
-    .map(([action]: [any]) => action)
-    .filter((action: any) => action?.type === appendClientCommand.type)
-    .map((action: any) => operationPatch(action.payload))
-}

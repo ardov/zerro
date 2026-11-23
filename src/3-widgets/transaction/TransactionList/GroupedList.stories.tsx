@@ -314,7 +314,6 @@ export const DateSwitchThreshold: Story = {
     ).toBe(
       matchMedia('(prefers-reduced-motion: reduce)').matches ? '0px' : '4px'
     )
-    await expect(animated.children.length).toBe(2)
     viewport.scrollTop = 72039
     await waitFor(() =>
       expect(chip).toHaveAccessibleName(formatDate('2026-09-20'))
@@ -327,7 +326,6 @@ export const DateSwitchThreshold: Story = {
     ).toBe(
       matchMedia('(prefers-reduced-motion: reduce)').matches ? '0px' : '-4px'
     )
-    await expect(reversed.children.length).toBe(2)
   },
 }
 

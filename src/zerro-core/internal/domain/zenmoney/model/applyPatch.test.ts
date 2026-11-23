@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { TNormalizedPatch } from '@/6-shared/types'
 import { makeStore } from '../../../../support/testing/zenmoneyTestData'
-import { applyPatch, applyPatchMutable, replay } from '..'
+import { applyPatch } from './applyPatch'
 
 describe('zenmoney patch primitives', () => {
   it('applies upserts immutably', () => {
@@ -88,29 +88,6 @@ describe('zenmoney patch primitives', () => {
 
     expect(next.tag).not.toBe(base.tag)
     expect(next.account).toBe(base.account)
-  })
-
-  it('applies patches mutably when requested', () => {
-    const store = makeStore()
-
-    applyPatchMutable(store, {
-      merchant: [entity({ id: 'shop', title: 'Shop' })],
-    } as TNormalizedPatch)
-
-    expect(store.merchant.shop.title).toBe('Shop')
-  })
-
-  it('replays patches over base in order', () => {
-    const base = makeStore()
-
-    const next = replay(base, [
-      { account: [entity({ id: 'cash', title: 'Cash' })] },
-      { account: [entity({ id: 'cash', title: 'Cash renamed' })] },
-      { deletion: [{ object: 'account', id: 'cash' }] },
-    ] as TNormalizedPatch[])
-
-    expect(base.account.cash).toBeUndefined()
-    expect(next.account.cash).toBeUndefined()
   })
 })
 

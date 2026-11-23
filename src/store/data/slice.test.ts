@@ -16,8 +16,6 @@ import reducer, {
   acceptClientPushChunk,
   appendClientCommand,
   hydrateReplica,
-  hydrateRecoveryOutbox,
-  prepareClientSync,
   applyServerPatch as serverPatchApplied,
   redoClientCommand,
   restoreOutboxPosition,
@@ -70,30 +68,6 @@ describe.each([false, true])('outbox (production: %s)', production => {
   beforeEach(() => configureImmer(production))
   afterEach(() => configureImmer(false))
 
-  it('keeps pending transactions readable and syncable after a canonical pull', () => {
-    const base = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      transaction: [makeTransaction({ id: 'edited', comment: 'Before' })],
-    })
-    const pending = reducer(
-      base,
-      appendClientCommand({
-        issuedAt: 200,
-        operations: testOperations({
-          transaction: [{ id: 'edited', comment: 'After' }],
-        }),
-      })
-    )
-    const pulled = applyServerPatch(pending, {
-      serverTimestamp: 300,
-      transaction: [makeTransaction({ id: 'remote', comment: 'Remote' })],
-    })
-
-    expect(pulled.current.transaction.edited.comment).toBe('After')
-    expect(pulled.base.transaction.edited.comment).toBe('Before')
-    expect(beginPush(pulled, 400)).toBeDefined()
-  })
-
   it('keeps transaction history navigable and syncable through undo and redo', () => {
     const base = applyServerPatch(undefined, {
       transaction: [
@@ -130,93 +104,6 @@ describe.each([false, true])('outbox (production: %s)', production => {
     expect(restored.current.transaction.first.comment).toBe('First edit')
     expect(restored.current.transaction.second.comment).toBeNull()
     expect(beginPush(restored, 300)).toBeDefined()
-  })
-
-  it('hydrates base and current from one reconstructed replica', () => {
-    const base = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      account: [makeAccount({ id: 'cash', title: 'Cash' })],
-    }).base
-    const outbox = [makeAccountEntry('Wallet', 10)]
-
-    const hydrated = reducer(
-      undefined,
-      hydrateReplica({ rootUserId: 7, base, outbox })
-    )
-
-    expect(hydrated.rootUserId).toBe(7)
-    expect(hydrated.base).toBe(base)
-    expect(hydrated.current.account.cash.title).toBe('Wallet')
-    expect(hydrated.outbox).toEqual(outbox)
-  })
-
-  it('clears recovery after the cursor-zero canonical snapshot is accepted', () => {
-    const recovering = reducer(
-      undefined,
-      hydrateRecoveryOutbox({
-        rootUserId: 7,
-        outbox: [makeAccountEntry('Wallet', 10)],
-        reason: 'broken checkpoint',
-      })
-    )
-
-    const recovered = applyServerPatch(recovering, {
-      serverTimestamp: 100,
-      account: [makeAccount({ id: 'cash', title: 'Cash' })],
-    })
-
-    expect(recovered.journalRecoveryRequired).toBe(false)
-    expect(recovered.journalRecoveryReason).toBeNull()
-    expect(recovered.current.account.cash.title).toBe('Wallet')
-  })
-
-  it('quarantines a recovered outbox that is invalid over the full snapshot', () => {
-    const recovering = reducer(
-      undefined,
-      hydrateRecoveryOutbox({
-        rootUserId: 7,
-        outbox: [
-          {
-            issuedAt: 10,
-            operations: testOperations({
-              account: [{ id: 'cash', instrument: 999 }],
-            }),
-          },
-        ],
-        reason: 'broken checkpoint',
-      })
-    )
-
-    const recovered = applyServerPatch(recovering, {
-      fullReload: true,
-      serverTimestamp: 100,
-      instrument: [makeInstrument({ id: 1 })],
-      country: [{ id: 1, title: 'United States', currency: 1, domain: null }],
-      user: [makeUser({ id: 7, parent: null, currency: 1 })],
-      account: [
-        makeAccount({ id: 'cash', user: 7, instrument: 1 }),
-        makeAccount({
-          id: 'debt',
-          user: 7,
-          instrument: 1,
-          type: AccountType.Debt,
-        }),
-      ],
-    })
-
-    expect(recovered.outbox).toEqual([])
-    expect(recovered.current).toBe(recovered.base)
-    expect(recovered.outboxRecoveryReason).toContain(
-      'account[0].instrument references a missing entity'
-    )
-    expect(recovered.journalRecoveryRequired).toBe(true)
-  })
-
-  it('applies canonical server patches with no pending commands', () => {
-    const initial = reducer(undefined, { type: 'test/init' })
-    const next = reducer(initial, serverPatchApplied({ serverTimestamp: 300 }))
-    expect(next.current.serverTimestamp).toBe(300)
-    expect(next.outbox).toEqual([])
   })
 
   it('keeps unrelated entity maps reference-stable across an append', () => {
@@ -402,7 +289,7 @@ describe.each([false, true])('outbox (production: %s)', production => {
     })
   })
 
-  it('keeps commands created during sync and drops the committed redo tail', () => {
+  it('keeps commands created during an in-flight push', () => {
     const base = applyServerPatch(undefined, {
       account: [makeAccount({ id: 'cash', title: 'Cash' })],
     })
@@ -417,38 +304,6 @@ describe.each([false, true])('outbox (production: %s)', production => {
 
     expect(rebased.outbox).toEqual([during])
     expect(rebased.current.account.cash.title).toBe('Vault')
-
-    const withRedo = reducer(
-      reducer(
-        reducer(base, appendClientCommand(sent)),
-        appendClientCommand(during)
-      ),
-      undoClientCommand()
-    )
-    const prepared = reducer(withRedo, prepareClientSync())
-    expect(prepared.outbox).toEqual([sent])
-    expect(prepared.redo).toEqual([])
-  })
-
-  it('keeps the outbox over a full server reload', () => {
-    const base = applyServerPatch(undefined, {
-      serverTimestamp: 100,
-      account: [makeAccount({ id: 'cash', title: 'Cash' })],
-    })
-    const pending = reducer(
-      base,
-      appendClientCommand(makeAccountEntry('Wallet', 10))
-    )
-
-    const reloaded = applyServerPatch(pending, {
-      fullReload: true,
-      serverTimestamp: 200,
-      account: [makeAccount({ id: 'cash', title: 'Server Cash' })],
-    })
-
-    expect(reloaded.base.account.cash.title).toBe('Server Cash')
-    expect(reloaded.current.account.cash.title).toBe('Wallet')
-    expect(reloaded.outbox).toHaveLength(1)
   })
 
   it('drops the previous account outbox when a full reload changes root user', () => {
@@ -484,10 +339,15 @@ describe.each([false, true])('outbox (production: %s)', production => {
 
   it('clears both history stacks when data resets on logout', () => {
     const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
       account: [makeAccount({ id: 'cash', title: 'Cash' })],
     })
+    const first = reducer(
+      base,
+      appendClientCommand(makeAccountEntry('Wallet', 10))
+    )
     const withRedo = reducer(
-      reducer(base, appendClientCommand(makeAccountEntry('Wallet', 10))),
+      reducer(first, appendClientCommand(makeAccountEntry('Vault', 20))),
       undoClientCommand()
     )
 

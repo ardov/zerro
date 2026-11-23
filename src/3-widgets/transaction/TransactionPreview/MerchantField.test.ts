@@ -24,30 +24,37 @@ describe('merchantSearchQueries', () => {
 
 describe('merchantMatchPriority', () => {
   it('ranks title, payee, then original payee matches', () => {
-    expect(merchantMatchPriority('amazon', usage, ['amazon'])).toBe(0)
-    expect(merchantMatchPriority('retailer', usage, ['legacy shop'])).toBe(1)
-    expect(merchantMatchPriority('retailer', usage, ['amzn mktp'])).toBe(2)
+    const queries = ['amazon', 'legacy shop', 'amzn mktp']
+    const title = merchantMatchPriority('amazon', usage, queries)
+    const payee = merchantMatchPriority('retailer', usage, queries)
+    const original = merchantMatchPriority('retailer', usage, ['amzn mktp'])
+    expect(title).toBeLessThan(payee)
+    expect(payee).toBeLessThan(original)
+    expect(Number.isFinite(original)).toBe(true)
   })
 
   it('ranks by the best matching field across all query variants', () => {
     expect(
       merchantMatchPriority('amazon', usage, ['legacy shop', 'amazon'])
-    ).toBe(0)
+    ).toBe(merchantMatchPriority('amazon', undefined, ['amazon']))
     expect(
       merchantMatchPriority('retailer', usage, ['amzn mktp', 'legacy shop'])
-    ).toBe(1)
+    ).toBe(merchantMatchPriority('retailer', usage, ['legacy shop']))
   })
 
   it('finds a merchant title inside an initial raw payee query', () => {
-    expect(
-      merchantMatchPriority('amazon', usage, ['amzn mktp de amazon de'])
-    ).toBe(0)
+    const query = ['amzn mktp de amazon de']
+    expect(merchantMatchPriority('amazon', undefined, query)).toBeLessThan(
+      merchantMatchPriority('retailer', undefined, query)
+    )
   })
 
   it('does not match partial words in the reverse direction', () => {
-    expect(merchantMatchPriority('mart', usage, ['supermarket purchase'])).toBe(
-      Number.POSITIVE_INFINITY
-    )
+    expect(
+      Number.isFinite(
+        merchantMatchPriority('mart', undefined, ['supermarket purchase'])
+      )
+    ).toBe(false)
   })
 })
 

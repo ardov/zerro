@@ -308,9 +308,12 @@ describe('replica recovery across persisted reloads', () => {
     syncMock.mockResolvedValueOnce({ data: familyResponse(null) })
     await app.dispatch(reloadData())
     await waitForPersistedReplica()
-    expect(app.getState().data.outboxRecoveryReason).toBe(
-      'account[0].instrument references a missing entity'
-    )
+    expect(app.getState().data).toMatchObject({
+      journalRecoveryRequired: true,
+      outboxRecoveryReason: 'account[0].instrument references a missing entity',
+      outbox: [],
+      current: { account: { cash: { instrument: 1 } } },
+    })
     expect(app.getState().sync.lastResult?.isSuccessful).toBe(false)
     expect(await replicaStorage.loadOutboxForRecovery()).toMatchObject({
       outbox: { status: 'ready', commands: [broken] },

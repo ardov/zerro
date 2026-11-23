@@ -4,30 +4,14 @@ import {
   makeStore,
 } from '../../../../support/testing/zenmoneyTestData'
 import { HiddenDataType } from '../hidden-data'
-import {
-  DEFAULT_USER_SETTINGS,
-  getStoredUserSettings,
-  getUserSettings,
-} from './read'
+import { getUserSettings } from './read'
 
 describe('user settings read helpers', () => {
-  it('returns stored partial settings', () => {
-    const data = makeStore({
-      reminder: {
-        settings: makeReminder('settings', {
-          type: HiddenDataType.UserSettings,
-          payload: { preferZmBudgets: true },
-        }),
-      },
-    })
-
-    expect(getStoredUserSettings(data.reminder)).toEqual({
-      preferZmBudgets: true,
-    })
-  })
-
   it('applies defaults for missing settings', () => {
-    expect(getUserSettings(makeStore().reminder)).toEqual(DEFAULT_USER_SETTINGS)
+    expect(getUserSettings(makeStore().reminder)).toEqual({
+      sawMigrationAlert: false,
+      preferZmBudgets: false,
+    })
 
     const data = makeStore({
       reminder: {

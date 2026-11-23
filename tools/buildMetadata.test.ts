@@ -89,7 +89,6 @@ it('versions the deployed SHA along the first parents, including after a shallow
   vi.stubEnv('VERCEL_GIT_REPO_OWNER', 'example')
   vi.stubEnv('VERCEL_GIT_REPO_SLUG', 'version-test')
   await checkBuild(root, merge, '2.3.2')
-  await checkBuild(root, merge, '2.3.2')
   await checkBuild(root, nextMinor, '2.4.0')
 })
 

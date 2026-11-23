@@ -4,12 +4,11 @@ import type { TCoreContext } from '../../../../types'
 import type { TEnvelopeId } from '../envelope-id'
 import { getUserSettings } from '../user-settings'
 import { prepareZerro } from '../operations/prepare'
-export type TEnvBudgetUpdate = {
+export type TBudgetUpdate = {
   id: TEnvelopeId
   month: TISOMonth
   value: number
 }
-export type TBudgetUpdate = TEnvBudgetUpdate
 export function compileSetBudget(
   data: TDataStore,
   update: TBudgetUpdate | TBudgetUpdate[],
@@ -21,13 +20,6 @@ export function compileSetBudget(
     ctx,
     getUserSettings(data.reminder).preferZmBudgets
   )
-}
-export function compileSetEnvBudget(
-  data: TDataStore,
-  update: TEnvBudgetUpdate | TEnvBudgetUpdate[],
-  ctx: TCoreContext
-) {
-  return prepareBudgets(data, update, ctx, false)
 }
 function prepareBudgets(
   data: TDataStore,

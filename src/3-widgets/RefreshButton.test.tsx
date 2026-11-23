@@ -1,20 +1,14 @@
 import '@testing-library/jest-dom'
-import { render, screen } from '@testing-library/react'
+import { configureStore } from '@reduxjs/toolkit'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { Provider } from 'react-redux'
+import { expect, it, vi } from 'vitest'
 
 import { rootReducer } from '@/store/rootReducer'
+import { syncStatusChanged } from '@/store/sync'
+import { SyncProgressDialog } from './SyncProgressDialog'
 
-const { dispatchMock, state } = vi.hoisted(() => ({
-  dispatchMock: vi.fn(),
-  state: { current: null as unknown },
-}))
-
-vi.mock('@/store', () => ({
-  useAppDispatch: () => dispatchMock,
-  useAppSelector: (selector: (root: unknown) => unknown) =>
-    selector(state.current),
-}))
 vi.mock('react-i18next', async importOriginal => ({
   ...(await importOriginal<typeof import('react-i18next')>()),
   useTranslation: () => ({ t: (key: string) => key }),
@@ -22,38 +16,36 @@ vi.mock('react-i18next', async importOriginal => ({
 
 import RefreshButton from './RefreshButton'
 
-describe('RefreshButton', () => {
-  beforeEach(() => {
-    dispatchMock.mockReset()
-    state.current = {
-      ...rootReducer(undefined, { type: 'test' }),
-      sync: {
-        status: {
-          kind: 'pushing',
-          phase: 'sending',
-          rows: [{ key: 'transaction', confirmed: 23, total: 100 }],
-          errorMessage: null,
-          errorStatus: null,
-          retryAt: null,
-        },
-        lastResult: null,
-        detailsOpen: false,
+it('opens and dismisses details while the push continues', async () => {
+  const store = configureStore({ reducer: rootReducer })
+  store.dispatch(
+    syncStatusChanged({
+      status: {
+        kind: 'pushing',
+        phase: 'sending',
+        rows: [{ key: 'transaction', confirmed: 23, total: 100 }],
+        errorMessage: null,
+        errorStatus: null,
+        retryAt: null,
       },
-    }
-  })
-
-  it('opens details instead of starting another push while syncing', async () => {
-    render(<RefreshButton />)
-
-    const button = screen.getByRole('button', {
-      name: 'syncProgress:detailsTitle',
     })
-    expect(button.querySelector('.radial-progress-activity')).toBeVisible()
+  )
+  render(
+    <Provider store={store}>
+      <RefreshButton />
+      <SyncProgressDialog />
+    </Provider>
+  )
 
-    await userEvent.click(button)
-
-    expect(dispatchMock).toHaveBeenCalledWith({
-      type: 'sync/syncDetailsOpened',
-    })
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  await userEvent.click(
+    screen.getByRole('button', { name: 'syncProgress:detailsTitle' })
+  )
+  expect(await screen.findByRole('dialog')).toBeVisible()
+  await userEvent.keyboard('{Escape}')
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+  expect(store.getState().sync.status).toMatchObject({
+    kind: 'pushing',
+    phase: 'sending',
   })
 })

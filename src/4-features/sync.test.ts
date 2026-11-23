@@ -464,17 +464,7 @@ describe('syncData', () => {
     })
   })
 
-  it('acknowledges the sent prefix, dropping it from the undo stack', async () => {
-    syncMock.mockResolvedValueOnce({ data: { serverTimestamp: 200_000 } })
-    const store = makeSyncedStore()
-    store.dispatch(appendClientCommand(renameCashTo('Wallet', 10)))
-
-    await store.dispatch(syncData() as any)
-
-    expect(store.getState().data.outbox).toEqual([])
-  })
-
-  it('publishes hidden details while an ordinary one-request push is active', async () => {
+  it('keeps details closed during an ordinary push and clears sent commands on success', async () => {
     const store = makeSyncedStore()
     store.dispatch(appendClientCommand(renameCashTo('Wallet', 10)))
     let resolveSync: ((value: unknown) => void) | undefined
@@ -501,6 +491,7 @@ describe('syncData', () => {
     await syncing
 
     expect(store.getState().sync.status).toEqual({ kind: 'idle' })
+    expect(store.getState().data.outbox).toEqual([])
   })
 
   /**
@@ -643,19 +634,7 @@ describe('refreshData', () => {
     syncMock.mockClear()
   })
 
-  it('sends the cursor alone, without any pending entity', async () => {
-    syncMock.mockResolvedValueOnce({ data: { serverTimestamp: 200_000 } })
-    const store = makeSyncedStore()
-    store.dispatch(appendClientCommand(renameCashTo('Wallet', 10)))
-
-    await store.dispatch(refreshData() as any)
-
-    expect(syncMock).toHaveBeenCalledWith('', 'ru', {
-      serverTimestamp: 99_000,
-    })
-  })
-
-  it('keeps pending commands undoable by rebasing them over the new base', async () => {
+  it('pulls without sending pending commands and keeps those commands undoable', async () => {
     // The canonical response carries an unrelated remote change, exactly the
     // background case: a pull must advance `base` without acknowledging
     // anything the user has not chosen to send.
@@ -673,6 +652,9 @@ describe('refreshData', () => {
 
     await store.dispatch(refreshData() as any)
 
+    expect(syncMock).toHaveBeenCalledWith('', 'ru', {
+      serverTimestamp: 99_000,
+    })
     const state = store.getState().data
     expect(state.outbox).toEqual([pending])
     expect(state.base.serverTimestamp).toBe(200_000)

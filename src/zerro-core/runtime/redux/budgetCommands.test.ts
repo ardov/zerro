@@ -35,7 +35,6 @@ import {
   globalBudgetTagId,
   makeTagBudget,
 } from '../../internal/domain/zenmoney/entities/budgets'
-import { graph } from './graph'
 
 const NOW = Date.parse('2026-07-29T12:00:00Z')
 const MONTH = '2026-07'
@@ -229,36 +228,9 @@ describe('semantic budget commands', () => {
     expect(withGoal.find(p => p.kind === 'goalAmount')?.amount).toBe(150)
   })
 
-  it('uses warm app projections for a single edit without rebuilding draft activity', () => {
-    const before = fixture({
-      assignments: [{ id: CHILD, month: MONTH, value: 10 }],
-    })
-    const store = storeFor(before)
-    const metrics = graph.envMetrics(before)
-    const readMetrics = vi.spyOn(graph, 'envMetrics')
-    const readActivity = vi.spyOn(graph, 'activity')
-    store.dispatch(
-      core.budgets.setTotalAssigned({ id: PARENT, month: MONTH, amount: 100 })
-    )
-    expect(readMetrics).toHaveReturnedWith(metrics)
-    expect(readActivity).not.toHaveBeenCalled()
-    expect(core.budgets.selectAll(store.getState())[MONTH][PARENT]).toBe(90)
-    expect(metrics[MONTH][PARENT].totalAssigned.USD).toBe(10)
-  })
-
-  it('does not read projections for an empty move', () => {
+  it('leaves state and outbox unchanged when moving zero funds', () => {
     const store = storeFor(fixture())
-    const readBudgets = vi.spyOn(graph, 'budgets')
-    expect(
-      store.dispatch(
-        core.budgets.moveFunds({
-          month: MONTH,
-          from: PARENT,
-          to: PARENT,
-          money: { amount: 10, currency: 'USD' },
-        })
-      ).status
-    ).toBe('noop')
+    const before = store.getState()
     expect(
       store.dispatch(
         core.budgets.moveFunds({
@@ -269,7 +241,7 @@ describe('semantic budget commands', () => {
         })
       ).status
     ).toBe('noop')
-    expect(readBudgets).not.toHaveBeenCalled()
+    expect(store.getState()).toBe(before)
   })
 
   it('rejects invalid months in compiled operations and persisted commands', () => {

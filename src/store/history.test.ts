@@ -50,83 +50,7 @@ afterEach(() => {
 })
 
 describe('paged history view', () => {
-  it('reads live data and history navigation without materializing row summaries', () => {
-    const materialize = vi.spyOn(replica, 'getMaterializedOutboxPatches')
-    const store = makeStoreWithState(snapshot(100, 'Cash'))
-    store.dispatch(
-      appendClientCommand({
-        issuedAt: 10,
-        operations: testOperations({
-          account: [makeAccount({ id: 'cash', title: 'Wallet' })],
-        }),
-      })
-    )
-    expect(selectDisplayedData(store.getState()).account.cash.title).toBe(
-      'Wallet'
-    )
-    expect(selectHistoryStep(store.getState())).toEqual({
-      back: null,
-      forward: null,
-    })
-    expect(materialize).not.toHaveBeenCalled()
-    expect(selectHistoryRows(store.getState())).toMatchObject([
-      { type: 'section', id: 'local' },
-      { type: 'local', point: { kind: 'local', index: 0 } },
-    ])
-    expect(materialize).toHaveBeenCalledOnce()
-  })
-
-  it('recomputes only the half of the list that changed', async () => {
-    const first = snapshot(100, 'Cash')
-    const second = snapshot(200, 'Wallet')
-    const third = snapshot(300, 'Vault')
-    storageMock.listHistory.mockResolvedValue({
-      entries: [
-        replica.createTransitionEntry(7, 3, second, third, false),
-        replica.createTransitionEntry(7, 2, first, second, false),
-        replica.createCheckpointEntry(7, 1, 'full-sync', first),
-      ],
-    })
-    const store = makeStoreWithState(third)
-    store.dispatch(
-      appendClientCommand({
-        issuedAt: 10,
-        operations: testOperations({
-          account: [makeAccount({ id: 'cash', title: 'Safe' })],
-        }),
-      })
-    )
-    await store.dispatch(loadHistoryPage() as any)
-    const loaded = selectHistoryRows(store.getState())
-    expect(loaded.map(row => row.type)).toEqual([
-      'section',
-      'local',
-      'section',
-      'run',
-      'journal',
-    ])
-    const [, local, , run] = loaded
-    if (run.type !== 'run') throw new Error('expected a collapsed run')
-
-    store.dispatch(toggleHistoryRun(run.id))
-    const expanded = selectHistoryRows(store.getState())
-    expect(expanded[1]).toBe(local)
-    expect(expanded[3]).toMatchObject({ type: 'run', expanded: true })
-
-    store.dispatch(
-      appendClientCommand({
-        issuedAt: 20,
-        operations: testOperations({
-          account: [makeAccount({ id: 'cash', title: 'Box' })],
-        }),
-      })
-    )
-    const appended = selectHistoryRows(store.getState())
-    expect(appended.filter(row => row.type === 'local')).toHaveLength(2)
-    expect(appended.find(row => row.type === 'run')).toBe(expanded[3])
-  })
-
-  it('stores only paged metadata in Redux', async () => {
+  it('lists saved history without reading historical snapshots', async () => {
     const first = snapshot(100, 'Cash')
     const second = snapshot(200, 'Wallet')
     storageMock.listHistory.mockResolvedValue({
@@ -143,8 +67,7 @@ describe('paged history view', () => {
       { sequence: 2, kind: 'sync', pushed: true },
       { sequence: 1, kind: 'checkpoint', pushed: true },
     ])
-    expect(store.getState().history).not.toHaveProperty('journal')
-    expect(JSON.stringify(store.getState().history)).not.toContain('snapshot')
+    expect(storageMock.loadHistoricalState).not.toHaveBeenCalled()
   })
 
   it('waits for pending replica writes before reading a page', async () => {

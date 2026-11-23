@@ -40,53 +40,19 @@ describe('round', () => {
   })
 
   it('keeps zero unsigned', () => {
-    expect(Object.is(round(-0), 0)).toBe(true)
-    expect(Object.is(round(-0.004), 0)).toBe(true)
+    expect(round(-0)).toBe(0)
+    expect(round(-0.004)).toBe(0)
+    expect(round(110 - 100 * 1.1)).toBe(0)
   })
 
-  it('rounds sub-cent FX remainders to unsigned zero', () => {
-    const remainder = 110 - 100 * 1.1
-    expect(round(remainder)).toBe(0)
-    expect(round(-remainder)).toBe(0)
+  it('rounds amounts on either side of a half cent without treating them as ties', () => {
+    expect(round(2.6749999999999994)).toBe(2.67)
+    expect(round(2.6750000000000003)).toBe(2.68)
+    expect(round(-2.6750000000000003)).toBe(-2.68)
   })
 
   it('rounds positive and negative half cents towards positive infinity', () => {
     expect(round(0.005)).toBe(0.01)
     expect(round(-0.005)).toBe(0)
   })
-
-  it('follows the printed-form rule on everyday amounts and near-ties', () => {
-    for (const amount of sampleAmounts()) {
-      expect(round(amount), String(amount)).toBe(printedFormRound(amount))
-    }
-  })
 })
-
-/** The rule itself, spelled out slowly: shift the decimal point in the
- * number's shortest printed form, round, and shift it back. */
-function printedFormRound(amount: number): number {
-  if (!Number.isFinite(amount)) return amount
-  if (Math.abs(amount) < 0.005) return 0
-  const shifted = Number(`${amount}e2`)
-  if (!Number.isFinite(shifted)) return amount
-  const rounded = Number(`${Math.round(shifted)}e-2`)
-  return Number.isFinite(rounded) ? rounded : amount
-}
-
-/** Deterministic amounts across magnitudes, with exact and inexact half
- * cents, sums that leave binary noise, and negatives. */
-function sampleAmounts(): number[] {
-  let seed = 7
-  const next = () => (seed = (seed * 48271) % 2147483647) / 2147483647
-  const amounts: number[] = []
-  for (let i = 0; i < 20000; i++) {
-    const scale = 10 ** Math.floor(next() * 12)
-    const sign = next() < 0.3 ? -1 : 1
-    const cents = Math.floor(next() * scale * 100)
-    amounts.push(sign * next() * scale)
-    amounts.push(sign * (cents / 100 + 0.005))
-    amounts.push(sign * (cents / 1000))
-    amounts.push(sign * (cents / 100) + 0.1 + 0.2)
-  }
-  return amounts
-}

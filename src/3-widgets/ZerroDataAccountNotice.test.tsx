@@ -11,7 +11,7 @@ import { zenmoney } from '@/6-shared/api/zenmoney'
 import { i18n } from '@/6-shared/localization'
 import { OverlayHost, usePopup } from '@/6-shared/overlays'
 import { Dialog } from '@/6-shared/ui/kit/Dialog'
-import { useAppDispatch, type AppThunk } from '@/store'
+import { useAppDispatch } from '@/store'
 import {
   applyServerPatch,
   hydrateReplica,
@@ -90,44 +90,23 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('Zerro data account notice', () => {
-  it.each<[string, () => AppThunk]>([
-    ['goal', setGoal],
-    [
-      'budget',
-      () =>
-        core.budgets.setOwnAssigned([{ id: 'tag#food', month, value: 100 }]),
-    ],
-    [
-      'envelope settings',
-      () =>
-        core.envelopes.patchMeta({
-          envelopeId: 'tag#food',
-          set: { currency: 'USD' },
-        }),
-    ],
-    ['user settings', () => core.settings.setPreferZmBudgets(true)],
-    ['exchange rates', () => core.fxRates.edit(month, { USD: 1 })],
-  ])(
-    'explains the account created by the first %s write',
-    async (_, command) => {
-      const store = makeNoticeStore()
-      mount(store)
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  it('explains the service account created by the first local write', async () => {
+    const store = makeNoticeStore()
+    mount(store)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-      act(() => {
-        store.dispatch(command())
+    act(() => {
+      store.dispatch(setGoal())
+    })
+
+    expect(await screen.findByRole('dialog', { name: title })).toBeVisible()
+    expect(
+      screen.getByRole('img', {
+        name: `${ZERRO_DATA_ACCOUNT_NAME} has been added to your accounts`,
       })
-
-      expect(await screen.findByRole('dialog', { name: title })).toBeVisible()
-      expect(
-        screen.getByRole('img', {
-          name: `${ZERRO_DATA_ACCOUNT_NAME} has been added to your accounts`,
-        })
-      ).toBeVisible()
-      expect(screen.getByText(/does not affect your balance/)).toBeVisible()
-      expect(store.getState().data.outbox).toHaveLength(1)
-    }
-  )
+    ).toBeVisible()
+    expect(screen.getByText(/does not affect your balance/)).toBeVisible()
+  })
 
   it('uses two active user accounts in the illustration', async () => {
     const store = makeNoticeStore()

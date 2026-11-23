@@ -74,8 +74,17 @@ export const InFlexColumn: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    const column = within(canvasElement).getByTestId('column')
-    await expect(column.children).toHaveLength(3)
+    const canvas = within(canvasElement)
+    const above = canvas.getByText('Above').getBoundingClientRect()
+    const below = canvas.getByText('Below').getBoundingClientRect()
+    const panel = canvas
+      .getByText('A paragraph that is tall enough to measure.')
+      .parentElement!.getBoundingClientRect()
+    const gap = parseFloat(
+      getComputedStyle(canvas.getByTestId('column')).rowGap
+    )
+    expect(panel.top - above.bottom).toBeCloseTo(gap)
+    expect(below.top - panel.bottom).toBeCloseTo(gap)
   },
 }
 

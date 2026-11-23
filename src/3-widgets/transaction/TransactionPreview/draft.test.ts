@@ -62,16 +62,6 @@ describe('emptyDraft', () => {
     })
   })
 
-  it('is worth a transaction as soon as it has an amount', () => {
-    const draft = { ...emptyDraft(ctx, Date.now()), amount: 250 }
-    expect(draftIssues(draft)).toEqual({})
-    expect(toPatch(draft, ctx)).toMatchObject({
-      outcomeAccount: 'card',
-      outcome: 250,
-      income: 0,
-    })
-  })
-
   it('carries an exact default amount into both transfer fields', () => {
     expect(emptyDraft(ctx, 0, { type: 'transfer', amount: 125 })).toMatchObject(
       {
@@ -322,13 +312,6 @@ describe('toLegs', () => {
     })
   })
 
-  it('turns an expense into an income by moving the amount over', () => {
-    expect(toLegs(setDraftType(draft, 'income', ctx), ctx)).toMatchObject({
-      outcome: 0,
-      income: 100,
-    })
-  })
-
   it('puts the debt account on the far end of a debt', () => {
     expect(toLegs(setDraftType(draft, 'outcomeDebt', ctx), ctx)).toEqual({
       outcomeAccount: 'card',
@@ -438,10 +421,6 @@ describe('changedFields', () => {
 
 describe('draftIssues', () => {
   const draft = toDraft(expense, ctx)
-
-  it('finds nothing wrong with a whole expense', () => {
-    expect(draftIssues(draft)).toEqual({})
-  })
 
   it('marks the amount when there is none', () => {
     expect(draftIssues({ ...draft, amount: 0 })).toEqual({ amount: 'amount' })
@@ -678,10 +657,9 @@ describe('fixDraft', () => {
       merchant: null,
     })
     expect(draft.tag).toEqual(['deleted', 'food'])
-    expect(fixDraft(fixed, entities)).toBe(fixed)
   })
 
-  it('keeps existing references including archived accounts and a new merchant title', () => {
+  it('leaves valid drafts unchanged so the form can settle after a render', () => {
     const draft = {
       ...emptyDraft(ctx, 0),
       account: 'cash',

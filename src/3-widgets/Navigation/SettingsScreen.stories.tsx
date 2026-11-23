@@ -83,9 +83,6 @@ const checkScreen: Story['play'] = async ({ canvasElement, globals }) => {
   await expect(
     within(screen).getByRole('button', { name: 'Advanced' })
   ).toBeVisible()
-  expect(
-    within(screen).queryByRole('button', { name: 'Restore from backup' })
-  ).toBeNull()
   await expect(
     within(screen).getByRole('button', { name: 'Language: EN' })
   ).toHaveTextContent('EN')

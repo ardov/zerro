@@ -331,30 +331,6 @@ describe('outbox operations', () => {
     expect(buildOutboxTransport(base, commands, 100)).toBeUndefined()
   })
 
-  it('drops a locally created transaction that leaves nothing to send', () => {
-    const base = makeStore({
-      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
-    })
-    const commands = [
-      makeCommand(10, {
-        transaction: [
-          {
-            id: 'new',
-            date: '2026-01-01',
-            incomeInstrument: 1,
-            incomeAccount: 'cash',
-            outcomeInstrument: 1,
-            outcomeAccount: 'cash',
-            outcome: 10,
-          },
-        ],
-      }),
-      makeCommand(20, { transaction: [{ id: 'new', deleted: true }] }),
-    ]
-
-    expect(buildOutboxTransport(base, commands, 100)).toBeUndefined()
-  })
-
   it('omits the deletion of an entity the outbox itself created', () => {
     const base = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },

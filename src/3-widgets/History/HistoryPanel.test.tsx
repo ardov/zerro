@@ -1,18 +1,16 @@
 import '@testing-library/jest-dom'
 import { configureStore } from '@reduxjs/toolkit'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import * as replica from '@/zerro-core/replica'
-import { testOperations } from '@/zerro-core/support/testing/commandTestData'
+import { createCheckpointEntry } from '@/zerro-core/replica'
 import {
   makeAccount,
   makeStore,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
 import { OverlayHost } from '@/6-shared/overlays'
-import { appendClientCommand } from '@/store/data'
 import { rootReducer } from '@/store/rootReducer'
 import { makeTestRootState } from '@/store/testing'
 import { HistoryPanel, historyPanelScreen } from './HistoryPanel'
@@ -34,23 +32,15 @@ function OpenHistory() {
 }
 
 describe('history panel', () => {
-  it('reads history and builds row summaries only while open', async () => {
-    listHistory.mockResolvedValue({ entries: [] })
-    const summarize = vi.spyOn(replica, 'getMaterializedOutboxPatches')
+  it('loads and shows saved history when the drawer opens', async () => {
+    const base = makeStore({ account: { cash: makeAccount({ id: 'cash' }) } })
+    listHistory.mockResolvedValue({
+      entries: [createCheckpointEntry(7, 1, 'full-sync', base)],
+    })
     const store = configureStore({
       reducer: rootReducer,
-      preloadedState: makeTestRootState(
-        makeStore({ account: { cash: makeAccount({ id: 'cash' }) } })
-      ),
+      preloadedState: makeTestRootState(base),
     })
-    store.dispatch(
-      appendClientCommand({
-        issuedAt: 10,
-        operations: testOperations({
-          account: [makeAccount({ id: 'cash', title: 'Wallet' })],
-        }),
-      })
-    )
     render(
       <Provider store={store}>
         <MemoryRouter>
@@ -63,13 +53,11 @@ describe('history panel', () => {
     )
 
     expect(screen.queryByText('panelTitle')).not.toBeInTheDocument()
-    expect(summarize).not.toHaveBeenCalled()
     expect(listHistory).not.toHaveBeenCalled()
 
     await userEvent.click(screen.getByRole('button', { name: 'open history' }))
 
     expect(screen.getByText('panelTitle')).toBeInTheDocument()
-    expect(summarize).toHaveBeenCalled()
-    await waitFor(() => expect(listHistory).toHaveBeenCalledOnce())
+    expect(await screen.findByText('checkpoint')).toBeVisible()
   })
 })

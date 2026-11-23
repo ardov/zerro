@@ -17,8 +17,7 @@ import type {
   TUnits,
 } from '../../foundation/primitives'
 import { compileExistingEntityPatch } from './patch'
-import { getRootUserId } from './users'
-import type { TUser, TUserId } from './users'
+import type { TUserId } from './users'
 
 export type TAccountId = string
 
@@ -221,21 +220,6 @@ export function makeAccount(
     endDateOffsetInterval: draft.endDateOffsetInterval ?? null,
     payoffStep: draft.payoffStep ?? null,
     payoffInterval: draft.payoffInterval ?? null,
-  }
-}
-
-export type TAccountDraft = Omit<TAccountFactoryDraft, 'user'>
-
-export function compileCreateAccount(
-  users: ById<TUser>,
-  draft: TAccountDraft,
-  ctx: TCoreContext
-): TAccountIntent {
-  const user = getRootUserId(users)
-  if (!user) throw new Error('No user')
-
-  return {
-    account: [makeAccount({ ...draft, user }, ctx)],
   }
 }
 

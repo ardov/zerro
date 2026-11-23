@@ -1,156 +1,33 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { createZerroSession } from '../../headless'
+import { makeDemoStore } from '../../support/demo'
 
-import { createZerroSession } from './createZerroSession'
-import {
-  coreNextDemoContext,
-  coreNextDemoOptions,
-  makeCoreNextDemoRootState,
-  makeCoreNextDemoStore,
-} from '../../support/testing/demoState'
-import {
-  selectActivity,
-  selectBalances,
-  selectBalancesByDate,
-  selectBudgets,
-  selectCurrentFunds,
-  selectCurrentFxRates,
-  selectDebtors,
-  selectDomainEnvelopes,
-  selectDomainEnvelopeStructure,
-  selectEnvMetrics,
-  selectFxRates,
-  selectGoals,
-  selectGoalTotals,
-  selectHistoryStart,
-  selectKeepingEnvelopeIds,
-  selectMonthList,
-  selectMonthTotals,
-  selectRawActivity,
-  selectRawGoals,
-  selectSortedActivity,
-  selectTransactionsHistory,
-  selectUserSettings,
-} from '../../support/testing/reduxSelectors'
-import { hashJson } from '../../support/testing/stableJson'
+describe('headless session on deterministic demo data', () => {
+  it('finds the March rent and includes it in the envelope outcome', () => {
+    const now = '2026-04-15T12:00:00.000Z'
+    const store = makeDemoStore({
+      locale: 'en',
+      now,
+      until: '2026-03-31',
+      scale: 0.35,
+    })
+    const session = createZerroSession(store, {
+      now: () => Date.parse(now),
+      uuid: () => 'demo-id',
+    })
 
-describe('createZerroSession on deterministic demo data', () => {
-  it('matches the current core Redux adapter selectors', () => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date(coreNextDemoOptions.now))
-
-    try {
-      const data = makeCoreNextDemoStore()
-      const state = makeCoreNextDemoRootState(data)
-      const session = createZerroSession(data, coreNextDemoContext)
-
-      expectSameJsonHash(
-        'userSettings',
-        session.settings.get(),
-        selectUserSettings(state)
-      )
-      expectSameJsonHash(
-        'debtors',
-        session.debtors.getAll(),
-        selectDebtors(state)
-      )
-      expectSameJsonHash(
-        'transactionsHistory',
-        session.transactions.getHistory(),
-        selectTransactionsHistory(state)
-      )
-      expectSameJsonHash(
-        'envelopes',
-        session.envelopes.getAll(),
-        selectDomainEnvelopes(state)
-      )
-      expectSameJsonHash(
-        'envelopeStructure',
-        session.envelopes.getStructure(),
-        selectDomainEnvelopeStructure(state)
-      )
-      expectSameJsonHash(
-        'keepingEnvelopeIds',
-        session.envelopes.getKeepingIds(),
-        selectKeepingEnvelopeIds(state)
-      )
-      expectSameJsonHash(
-        'budgets',
-        session.budgets.getAll(),
-        selectBudgets(state)
-      )
-      expectSameJsonHash(
-        'currentFunds',
-        session.accounts.getCurrentFunds(),
-        selectCurrentFunds(state)
-      )
-      expectSameJsonHash(
-        'currentFxRates',
-        session.fx.getCurrentRates(),
-        selectCurrentFxRates(state)
-      )
-      expectSameJsonHash('fxRates', session.fx.getRates(), selectFxRates(state))
-      expectSameJsonHash(
-        'rawActivity',
-        session.activity.getRaw(),
-        selectRawActivity(state)
-      )
-      expectSameJsonHash(
-        'activity',
-        session.activity.getAll(),
-        selectActivity(state)
-      )
-      expectSameJsonHash(
-        'monthList',
-        session.months.getList(),
-        selectMonthList(state)
-      )
-      expectSameJsonHash(
-        'envMetrics',
-        session.envelopes.getMetrics(),
-        selectEnvMetrics(state)
-      )
-      expectSameJsonHash(
-        'sortedActivity',
-        session.activity.getSorted(),
-        selectSortedActivity(state)
-      )
-      expectSameJsonHash(
-        'monthTotals',
-        session.months.getTotals(),
-        selectMonthTotals(state)
-      )
-      expectSameJsonHash(
-        'rawGoals',
-        session.goals.getRaw(),
-        selectRawGoals(state)
-      )
-      expectSameJsonHash('goals', session.goals.getAll(), selectGoals(state))
-      expectSameJsonHash(
-        'goalTotals',
-        session.goals.getTotals(),
-        selectGoalTotals(state)
-      )
-      expectSameJsonHash(
-        'historyStart',
-        session.transactions.getHistoryStart(),
-        selectHistoryStart(state)
-      )
-      expectSameJsonHash(
-        'balances',
-        session.balances.getAll(),
-        selectBalances(state)
-      )
-      expectSameJsonHash(
-        'balancesByDate',
-        session.balances.getByDate(),
-        selectBalancesByDate(state)
-      )
-    } finally {
-      vi.useRealTimers()
-    }
+    const matches = session.transactions.query({
+      clauses: [
+        { kind: 'search', value: 'monthly rent' },
+        { kind: 'date', from: '2026-03-01', to: '2026-03-31' },
+      ],
+    })
+    expect(matches).toMatchObject([
+      { date: '2026-03-22', outcome: 350, tag: ['Rent'] },
+    ])
+    const march = session.activity.getSorted()['2026-03']
+    expect(march.outcomes.find(node => node.id === 'tag#Rent')).toMatchObject({
+      total: { total: { EUR: -350 }, transactionCount: 1 },
+    })
   })
 })
-
-function expectSameJsonHash(name: string, actual: unknown, expected: unknown) {
-  expect(hashJson(actual), name).toBe(hashJson(expected))
-}

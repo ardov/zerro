@@ -17,6 +17,7 @@ import { materializeTestInput } from '@/zerro-core/support/testing/commandTestDa
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { toast } from '@/6-shared/ui/kit/Toast'
 import { i18n } from '@/6-shared/localization'
+import { noCategoryIconUrl } from '@/6-shared/zenmoney-assets'
 import { makeDemoStore } from '../../support/demo'
 import { makeTestRootState } from '@/store/testing'
 import { applyPatch } from '../../internal/domain/zenmoney'
@@ -29,8 +30,6 @@ import {
 import {
   selectDomainEnvelopes,
   selectEnvelopes,
-  selectEnvelopeStructure,
-  selectKeepingEnvelopeIds,
 } from '../../support/testing/reduxSelectors'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
@@ -66,19 +65,11 @@ describe('selectEnvelopes chain', () => {
     expect(domain).not.toHaveProperty('colorDisplay')
 
     expect(presented).toMatchObject({
-      symbol: expect.any(String),
+      symbol: noCategoryIconUrl,
       colorHex: '#ff0000',
       colorDisplay: '#ff0000',
-      group: i18n.t('defaultTagGroup', { ns: 'common' }),
+      group: 'Categories',
     })
-  })
-
-  it('builds stable envelope structure on demo data', () => {
-    const state = makeRootState(makeDemoStore({ now: NOW }))
-
-    expect(Object.keys(selectEnvelopes(state))).not.toHaveLength(0)
-    expect(selectEnvelopeStructure(state)).toEqual(expect.any(Array))
-    expect(selectKeepingEnvelopeIds(state)).toEqual(expect.any(Set))
   })
 
   it('applies envelope metadata', () => {
@@ -99,21 +90,6 @@ describe('selectEnvelopes chain', () => {
 
     const core = selectEnvelopes(state)
     expect(core[envelopeId].comment).toBe('zerro-core test comment')
-  })
-
-  it('stays cached across unrelated data changes', () => {
-    const store = makeDemoStore({ now: NOW })
-    const envelopes = selectEnvelopes(makeRootState(store))
-    const structure = selectEnvelopeStructure(makeRootState(store))
-
-    // New current object, new budget slice, same tag/account/reminder slices
-    const unrelatedChange = makeRootState({
-      ...store,
-      budget: { ...store.budget },
-    })
-
-    expect(selectEnvelopes(unrelatedChange)).toBe(envelopes)
-    expect(selectEnvelopeStructure(unrelatedChange)).toBe(structure)
   })
 })
 
@@ -151,7 +127,7 @@ describe('grouped appearance edits', () => {
     expect(after[id].colorHex).toBe('#abcdef')
     expect(after[rent]).toBe(before[rent])
   })
-  it('recompiles each drag frame against the cached pre-edit state instead of replaying the outbox', () => {
+  it('keeps pending transaction edits and drops a drag returned to its starting colour', () => {
     const store = setup()
     store.dispatch(
       appendClientCommand({

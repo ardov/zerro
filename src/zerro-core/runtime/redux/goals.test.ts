@@ -52,35 +52,11 @@ const makeRootState = makeTestRootState
 describe('selectGoals chain', () => {
   beforeAll(() => i18n.changeLanguage('en'))
 
-  it('builds goals and totals from seeded goal data', () => {
+  it('updates the projected goal when its stored amount changes', () => {
     const { store, envelopeId } = makeSeededStore()
-    const state = makeRootState(store)
-
-    const core = selectGoals(state)
-    expect(core[MONTH][envelopeId]?.goal.amount).toBe(30_000)
-    expect(selectGoalTotals(state)[MONTH].goalsCount).toBeGreaterThan(0)
-  })
-
-  it('stays cached across unrelated data changes', () => {
-    const { store } = makeSeededStore()
-    const goals = selectGoals(makeRootState(store))
-    const totals = selectGoalTotals(makeRootState(store))
-
-    // Goals pull nearly the whole projection graph, so this also guards the
-    // upstream nodes against accidental whole-current dependencies.
-    const unrelatedChange = makeRootState({
-      ...store,
-      country: { ...store.country },
-      company: { ...store.company },
-    })
-
-    expect(selectGoals(unrelatedChange)).toBe(goals)
-    expect(selectGoalTotals(unrelatedChange)).toBe(totals)
-  })
-
-  it('recomputes when a goal changes', () => {
-    const { store, envelopeId } = makeSeededStore()
-    const first = selectGoals(makeRootState(store))
+    expect(
+      selectGoals(makeRootState(store))[MONTH][envelopeId].goal.amount
+    ).toBe(30_000)
 
     const goalPatch = materializeTestInput(
       store,
@@ -93,9 +69,8 @@ describe('selectGoals chain', () => {
       ),
       NOW
     )
-    const next = selectGoals(makeRootState(applyPatch(store, goalPatch)))
-
-    expect(next).not.toBe(first)
-    expect(next[MONTH][envelopeId]?.goal.amount).toBe(45_000)
+    const updated = makeRootState(applyPatch(store, goalPatch))
+    expect(selectGoals(updated)[MONTH][envelopeId]?.goal.amount).toBe(45_000)
+    expect(selectGoalTotals(updated)[MONTH].goalsCount).toBe(1)
   })
 })

@@ -407,9 +407,12 @@ export const DesktopMerchantClick: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const comment = canvas.getByText('Lunch groceries')
-    expect(comment.previousElementSibling?.tagName).toBe('BUTTON')
-    expect(getComputedStyle(comment).marginLeft).toBe('8px')
-    await userEvent.click(canvas.getAllByRole('button', { name: 'Lidl' })[0])
+    const merchant = canvas.getAllByRole('button', { name: 'Lidl' })[0]
+    expect(
+      comment.getBoundingClientRect().left -
+        merchant.getBoundingClientRect().right
+    ).toBeCloseTo(8)
+    await userEvent.click(merchant)
     await waitFor(() =>
       expect(canvas.getByLabelText('Applied query')).toHaveTextContent(
         'merchant'

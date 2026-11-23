@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { makeTransaction } from '../../../../../support/testing/zenmoneyTestData'
 import {
-  makeStore,
-  makeTransaction,
-} from '../../../../../support/testing/zenmoneyTestData'
-import {
-  getTransaction,
-  getTransactionIds,
-  getTransactionsHistory,
   getTransactionType,
   isDeletedTransaction,
   isTransactionViewed,
@@ -14,72 +8,6 @@ import {
 } from './read'
 
 describe('transaction helpers', () => {
-  it('reads transactions by id', () => {
-    const transaction = makeTransaction({ id: 'tr' })
-    const data = makeStore({
-      transaction: {
-        tr: transaction,
-      },
-    })
-
-    expect(getTransaction(data.transaction, 'tr')).toBe(transaction)
-    expect(getTransaction(data.transaction, 'missing')).toBeNull()
-  })
-
-  it('builds transaction history without deleted or zeroed transactions', () => {
-    const data = makeStore({
-      transaction: {
-        older: makeTransaction({
-          id: 'older',
-          date: '2026-01-01',
-          created: 1,
-          outcome: 1,
-        }),
-        newer: makeTransaction({
-          id: 'newer',
-          date: '2026-01-02',
-          created: 1,
-          outcome: 1,
-        }),
-        newerCreatedLater: makeTransaction({
-          id: 'newerCreatedLater',
-          date: '2026-01-02',
-          created: 2,
-          outcome: 1,
-        }),
-        deleted: makeTransaction({ id: 'deleted', deleted: true }),
-        zeroed: makeTransaction({ id: 'zeroed', income: 0, outcome: 0 }),
-      },
-    })
-
-    expect(
-      getTransactionsHistory(data.transaction).map(
-        transaction => transaction.id
-      )
-    ).toEqual(['older', 'newer', 'newerCreatedLater'])
-  })
-
-  it('keeps every transaction in list order for UI filtering', () => {
-    const data = makeStore({
-      transaction: {
-        older: makeTransaction({ id: 'older', date: '2026-01-01', created: 1 }),
-        newer: makeTransaction({ id: 'newer', date: '2026-01-02', created: 1 }),
-        deleted: makeTransaction({
-          id: 'deleted',
-          date: '2026-01-03',
-          created: 1,
-          deleted: true,
-        }),
-      },
-    })
-
-    expect(getTransactionIds(data.transaction)).toEqual([
-      'older',
-      'newer',
-      'deleted',
-    ])
-  })
-
   it('treats deleted and effectively zeroed transactions as deleted', () => {
     expect(isDeletedTransaction(makeTransaction({ deleted: true }))).toBe(true)
     expect(

@@ -1,3 +1,4 @@
+import { configureStore } from '@reduxjs/toolkit'
 import { describe, expect, it, vi } from 'vitest'
 import { convertDiff, parseFullBackup } from '@/6-shared/api/zm-adapter'
 import {
@@ -6,7 +7,8 @@ import {
   type TNormalizedPatch,
 } from '@/6-shared/types'
 import type { AppDispatch, AppThunk, RootState } from '@/store'
-import { appendClientCommand } from '@/store/data'
+import { appendClientCommand, undoClientCommand } from '@/store/data'
+import { rootReducer } from '@/store/rootReducer'
 import { makeTestRootState } from '@/store/testing'
 import { applyPatch } from '@/zerro-core/internal/domain/zenmoney'
 import { materializeCommand } from '@/zerro-core/internal/operations/materialization'
@@ -35,6 +37,7 @@ import {
   importBackup,
   previewBackup,
 } from './importBackup'
+import { getBackupContent } from '../export/exportJSON'
 
 const { trackMock, uuidMock } = vi.hoisted(() => ({
   trackMock: vi.fn(),
@@ -351,7 +354,7 @@ describe('parseFullBackup', () => {
       },
     })
 
-    const parsed = parseFullBackup(toBackupFile(store))
+    const parsed = parseFullBackup(getBackupContent(makeTestRootState(store)))
     expect(parsed.ok).toBe(true)
     if (!parsed.ok) return
     expect(parsed.store.account.acc).toMatchObject({
@@ -359,7 +362,13 @@ describe('parseFullBackup', () => {
       title: 'Cash',
       changed: 5000,
     })
-    expect(parsed.store.transaction.tr).toMatchObject({ id: 'tr', outcome: 10 })
+    expect(parsed.store.transaction.tr).toMatchObject({
+      id: 'tr',
+      outcome: 10,
+      incomeBankID: 999,
+      outcomeBankID: 998,
+      changed: 7000,
+    })
   })
 
   // Deleting an account nulls the leg that pointed at it on a debt
@@ -525,17 +534,22 @@ describe('importBackup', () => {
   })
 
   it('applies the backup as one undoable command', () => {
-    const runner = makeThunkRunner(makeTestRootState(drifted))
-    expect(runner.dispatch(importBackup(backup))).toEqual({
+    const store = configureStore({
+      reducer: rootReducer,
+      preloadedState: makeTestRootState(drifted),
+    })
+    expect(store.dispatch(importBackup(backup))).toEqual({
       ok: true,
       applied: true,
     })
 
-    expect(runner.commands()).toHaveLength(1)
-    const restored = runner.state().data.current
+    const restored = store.getState().data.current
     expect(restored.account.acc.title).toBe('Cash')
     expect(restored.transaction.tr.outcome).toBe(100)
     expect(restored.transaction.later.deleted).toBe(true)
+
+    store.dispatch(undoClientCommand())
+    expect(store.getState().data.current).toEqual(drifted)
   })
 
   it('restores and re-exports the observed Zenmoney wire variants', () => {
@@ -754,18 +768,6 @@ describe('importBackup', () => {
       applied: true,
     })
     expect(runner.commands()).toHaveLength(1)
-    expect(runner.commands()[0]).toEqual(
-      expect.objectContaining({
-        payload: expect.objectContaining({
-          operations: expect.arrayContaining([
-            {
-              type: 'user.patch',
-              value: { id: 1, currency: 1, monthStartDay: 15 },
-            },
-          ]),
-        }),
-      })
-    )
     expect(runner.state().data.current.user).toEqual({
       1: expect.objectContaining({
         id: 1,

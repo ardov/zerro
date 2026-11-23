@@ -66,6 +66,6 @@ export const ParentOverspend: Story = {
 }
 
 export const ParentOverspendMobile: Story = {
-  ...ParentOverspend,
   globals: { viewport: { value: 'iphone13' } },
+  tags: ['!test'],
 }

@@ -1,8 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import {
-  differenceInCalendarMonths as differenceInCalendarMonthsFNS,
-  parseISO,
-} from 'date-fns'
 import type { TISODate } from './primitives'
 import {
   differenceInCalendarMonths,
@@ -38,14 +34,10 @@ describe('month validation and arithmetic', () => {
   })
 })
 
-// The internal date helpers replaced date-fns. These tests pin the behaviors
-// that are easy to get wrong without it.
-describe('core date helpers vs date-fns', () => {
-  it('parses date-only ISO strings as LOCAL midnight, like parseISO', () => {
-    for (const iso of isoDates('2026-05-01', '2000-01-01', '1999-12-31')) {
-      expect(parseDate(iso).getTime()).toBe(parseISO(iso).getTime())
-      expect(parseDate(iso).getHours()).toBe(0)
-    }
+describe('local calendar dates', () => {
+  it('parses ISO dates at local midnight', () => {
+    expect(parseDate('2026-05-01')).toEqual(new Date(2026, 4, 1))
+    expect(parseDate('1999-12-31')).toEqual(new Date(1999, 11, 31))
   })
 
   it('parses ISO month strings as the first of the month, local time', () => {
@@ -62,17 +54,10 @@ describe('core date helpers vs date-fns', () => {
     }
   })
 
-  it('matches date-fns differenceInCalendarMonths', () => {
-    const cases: Array<[TISODate, TISODate]> = [
-      ['2026-05-01', '2026-05-31'],
-      ['2026-05-01', '2025-12-15'],
-      ['2025-01-01', '2026-01-01'],
-      ['2026-12-31', '2026-01-01'],
-    ]
-    for (const [a, b] of cases) {
-      expect(differenceInCalendarMonths(a, b)).toBe(
-        differenceInCalendarMonthsFNS(parseDate(a), parseDate(b))
-      )
-    }
+  it('counts calendar month boundaries in either direction', () => {
+    expect(differenceInCalendarMonths('2026-05-01', '2026-05-31')).toBe(0)
+    expect(differenceInCalendarMonths('2026-05-01', '2025-12-15')).toBe(5)
+    expect(differenceInCalendarMonths('2025-01-01', '2026-01-01')).toBe(-12)
+    expect(differenceInCalendarMonths('2026-12-31', '2026-01-01')).toBe(11)
   })
 })

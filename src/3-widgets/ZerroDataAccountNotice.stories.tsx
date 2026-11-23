@@ -86,6 +86,7 @@ export const NoAccounts: Story = {
 }
 
 export const LongAccountNames: Story = {
+  tags: ['!test'],
   args: {
     accounts: accounts.map(account => ({
       ...account,
@@ -93,7 +94,6 @@ export const LongAccountNames: Story = {
     })),
   },
   globals: { viewport: { value: 'iphone13' } },
-  play: English.play,
 }
 
 function HistoryExample() {

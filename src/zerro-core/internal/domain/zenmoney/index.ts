@@ -1,6 +1,5 @@
 export * from './model/applyPatch'
 export * from './model/fieldEquality'
-export * from './model/replay'
 export * from './primitives'
 export * from './model/color'
 export * from './model/store'

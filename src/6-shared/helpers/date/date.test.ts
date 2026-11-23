@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vitest'
-import { GroupBy, makeDateArray, nextGroup } from './makeDateArray'
+import { describe, expect, test, vi } from 'vitest'
+import { GroupBy, makeDateArray } from './makeDateArray'
 import { parseDate, toISODate, toISOMonth } from './utils'
 
 describe('Conversions', () => {
@@ -17,54 +17,40 @@ describe('Conversions', () => {
   })
 })
 
-describe('next group', () => {
-  test('Next date', () => {
-    expect(nextGroup('2022-01-01', GroupBy.Day)).toBe('2022-01-02')
-    expect(nextGroup('2022-01-31', GroupBy.Day)).toBe('2022-02-01')
-    expect(nextGroup('2022-12-31', GroupBy.Day)).toBe('2023-01-01')
-  })
-  test('Next month', () => {
-    expect(nextGroup('2022-01-01', GroupBy.Month)).toBe('2022-02-01')
-    expect(nextGroup('2022-01-31', GroupBy.Month)).toBe('2022-02-01')
-    expect(nextGroup('2022-12-31', GroupBy.Month)).toBe('2023-01-01')
-  })
-  test('Next year', () => {
-    expect(nextGroup('2022-01-01', GroupBy.Year)).toBe('2023-01-01')
-    expect(nextGroup('2022-01-31', GroupBy.Year)).toBe('2023-01-01')
-    expect(nextGroup('2022-12-31', GroupBy.Year)).toBe('2023-01-01')
-  })
-})
-
 describe('makeDateArray', () => {
-  test('Date', () => {
-    expect(makeDateArray('2022-01-01', '2022-01-02', GroupBy.Day)).toEqual([
-      '2022-01-01',
-      '2022-01-02',
-    ])
-    expect(makeDateArray('2022-01-01', '2022-01-03', GroupBy.Day)).toEqual([
-      '2022-01-01',
-      '2022-01-02',
-      '2022-01-03',
+  test('includes every day across a year boundary', () => {
+    expect(makeDateArray('2022-12-30', '2023-01-02', GroupBy.Day)).toEqual([
+      '2022-12-30',
+      '2022-12-31',
+      '2023-01-01',
+      '2023-01-02',
     ])
   })
 
-  test('Current', () => {
-    const curr = toISODate(new Date())
-    expect(makeDateArray(curr, undefined, GroupBy.Day)).toEqual([curr])
+  test('ends today when no end date is given', () => {
+    vi.setSystemTime(new Date(2023, 0, 2, 12))
+    try {
+      expect(makeDateArray('2023-01-01', undefined, GroupBy.Day)).toEqual([
+        '2023-01-01',
+        '2023-01-02',
+      ])
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
-  test('Month', () => {
+  test('includes each calendar month touched by the range', () => {
     expect(makeDateArray('2022-01-01', '2022-01-31', GroupBy.Month)).toEqual([
       '2022-01-01',
     ])
-    expect(makeDateArray('2022-01-10', '2022-03-01', GroupBy.Month)).toEqual([
-      '2022-01-01',
-      '2022-02-01',
-      '2022-03-01',
+    expect(makeDateArray('2022-11-10', '2023-01-01', GroupBy.Month)).toEqual([
+      '2022-11-01',
+      '2022-12-01',
+      '2023-01-01',
     ])
   })
 
-  test('Year', () => {
+  test('includes each calendar year touched by the range', () => {
     expect(makeDateArray('2022-01-01', '2022-12-31', GroupBy.Year)).toEqual([
       '2022-01-01',
     ])

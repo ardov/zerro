@@ -38,7 +38,6 @@ function openPage(path: string, signedIn = true) {
 
 it.each([
   [null, '/transactions', 'Transactions'],
-  ['/transactions', '/transactions', 'Transactions'],
   ['/budget', '/budget', 'Budgets'],
   ['/unknown', '/transactions', 'Transactions'],
 ])('launches the PWA with saved start page %s', async (saved, path, title) => {
@@ -51,17 +50,12 @@ it.each([
   replace.mockRestore()
 })
 
-it.each(['/', '/login'])(
-  'opens the saved start page from %s after signing in',
-  async path => {
-    setStartPage('/budget')
-    openPage(path)
-    expect(
-      await screen.findByRole('heading', { name: 'Budgets' })
-    ).toBeVisible()
-    expect(location.pathname).toBe('/budget')
-  }
-)
+it('opens the saved start page from /login after signing in', async () => {
+  setStartPage('/budget')
+  openPage('/login')
+  expect(await screen.findByRole('heading', { name: 'Budgets' })).toBeVisible()
+  expect(location.pathname).toBe('/budget')
+})
 
 it.each([
   ['/transactions?source=pwa', 'Transactions'],

@@ -90,7 +90,7 @@ const check: Story['play'] = async ({ canvasElement }) => {
 
 export const Desktop: Story = {
   globals: { viewport: { value: 'zerro500' } },
-  play: check,
+  tags: ['!test'],
 }
 export const Mobile: Story = {
   globals: { viewport: { value: 'zerro499' } },

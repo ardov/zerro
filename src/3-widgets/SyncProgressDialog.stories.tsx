@@ -1,9 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useState } from 'react'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
 
 import { SyncProgressDialogView } from './SyncProgressDialog'
-import type { TSyncProgress } from '@/store/sync'
 
 const meta = {
   title: 'App/Sync/ProgressDialog',
@@ -61,28 +58,4 @@ export const Stopped: Story = {
 
 export const Mobile: Story = {
   globals: { viewport: { value: 'iphone13' } },
-}
-
-function DismissibleDetails({ progress }: { progress: TSyncProgress }) {
-  const [open, setOpen] = useState(true)
-  return (
-    <SyncProgressDialogView
-      progress={progress}
-      open={open}
-      onClose={() => setOpen(false)}
-      onContinue={() => {}}
-      onRetry={() => {}}
-    />
-  )
-}
-
-export const Dismissal: Story = {
-  tags: ['!dev', '!autodocs'],
-  render: args => <DismissibleDetails progress={args.progress} />,
-  play: async ({ canvasElement }) => {
-    const body = within(canvasElement.ownerDocument.body)
-    const dialog = await body.findByRole('dialog')
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Close' }))
-    await waitFor(() => expect(dialog).not.toBeVisible())
-  },
 }

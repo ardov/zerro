@@ -1,18 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { bankIconById, unknownBankIconBySize } from './bankIcons'
+import { bankIconById } from './bankIcons'
+import bankLogo from './banks/ic_bank_12574_54px.svg?inline'
+import motorcycle from './categories/a3004_motorcycle.svg?inline'
+import taxi from './categories/a3004_taxi.svg?inline'
 import { categoryIconById, noCategoryIconUrl } from './index'
 
 describe('Zenmoney asset catalog', () => {
-  it('exposes every extracted category by its full tag.icon name', () => {
-    expect(Object.keys(categoryIconById)).toHaveLength(167)
-    expect(categoryIconById['3004_motorcycle']).toMatch(/^data:image\/svg\+xml/)
-    expect(categoryIconById['3004_taxi']).toMatch(/^data:image\/svg\+xml/)
+  it('resolves category icons with a shared numeric prefix by their full name', () => {
+    expect(categoryIconById['3004_motorcycle']).toBe(motorcycle)
+    expect(categoryIconById['3004_taxi']).toBe(taxi)
   })
 
-  it('exposes every numbered bank icon and the no-category fallback', () => {
-    expect(Object.keys(bankIconById)).toHaveLength(432)
-    expect(bankIconById['12574']).toMatch(/^data:image\/svg\+xml/)
-    expect(Object.keys(unknownBankIconBySize)).toEqual(['24', '36', '54'])
-    expect(noCategoryIconUrl).toBeTruthy()
+  it('resolves bank logos by company ID and provides an inline uncategorized icon', () => {
+    expect(bankIconById[12574]).toBe(bankLogo)
+    expect(noCategoryIconUrl).toMatch(/^data:image\/svg\+xml/)
   })
 })

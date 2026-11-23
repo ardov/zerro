@@ -21,7 +21,7 @@ export function toGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
   }
 }
 
-export function nextGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
+function nextGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
   const currGroup = toGroup(date, aggregation)
   switch (aggregation) {
     case GroupBy.Year:

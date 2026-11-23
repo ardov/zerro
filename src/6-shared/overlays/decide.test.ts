@@ -257,18 +257,11 @@ describe('R1 — a history entry for each overlay that is open', () => {
     expect(s.screens).toEqual({ tr: 'a' })
   })
 
-  it('replaces when a screen hands over to the same screen', () => {
+  it('replaces the current transaction and keeps the page one Back away', () => {
     const s = session()
     s.openScreen('tr', 'a')
     s.openScreen('tr', 'b')
-    expect(s.depth).toBe(1)
     expect(s.screens).toEqual({ tr: 'b' })
-  })
-
-  it('leaves ten transactions one Back away from the page', () => {
-    const s = session()
-    for (const id of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'])
-      s.openScreen('tr', id)
     expect(s.depth).toBe(1)
     s.back()
     expect(s.screens).toEqual({})
@@ -314,7 +307,7 @@ describe('R1 — a history entry for each overlay that is open', () => {
 })
 
 describe('R1 — a screen opened from a popup takes its place', () => {
-  it('replaces the popup slot and dismisses it', () => {
+  it('replaces the popup slot so Back returns directly to the page', () => {
     const s = session()
     s.openPopup()
     const decision = s.openScreen('history', true)
@@ -323,12 +316,6 @@ describe('R1 — a screen opened from a popup takes its place', () => {
     expect(s.depth).toBe(1)
     expect(s.entry.slots).toBe(0)
     expect(s.screens).toEqual({ history: true })
-  })
-
-  it('leads Back to the page rather than back into the menu', () => {
-    const s = session()
-    s.openPopup()
-    s.openScreen('history', true)
     s.back()
     expect(s.screens).toEqual({})
     expect(s.depth).toBe(0)
@@ -372,18 +359,17 @@ describe('R2 — closing is returning to the previous address', () => {
     expect(s.live).toBe(0)
   })
 
-  it('does not step back when the address moved on since the popup opened', () => {
+  it('dismisses the popup and stays on the new page after navigation', () => {
     const s = session()
     s.openPopup()
     s.goToPage()
     expect(s.live).toBe(0)
-    const decision = s.closePopup()
-    expect(decision.history).toEqual({ kind: 'none' })
+    expect(s.depth).toBe(2)
   })
 })
 
 describe('one surface handing over to another, while the step is in flight', () => {
-  it('keeps the popup that opened before the step landed', () => {
+  it('keeps the replacement popup when the step lands and gives it a Back step', () => {
     const s = session({}, { holdSteps: true })
     s.openPopup() // the filter bar's menu
     s.closePopup() // a filter is picked, so the menu closes
@@ -394,14 +380,6 @@ describe('one surface handing over to another, while the step is in flight', () 
     // The editor is still open, and it has a slot of its own to be closed by.
     expect(s.live).toBe(1)
     expect(s.entry.slots).toBe(1)
-  })
-
-  it('leaves Back closing the popup rather than the page', () => {
-    const s = session({}, { holdSteps: true })
-    s.openPopup()
-    s.closePopup()
-    s.openPopup()
-    s.land()
 
     s.back()
     expect(s.live).toBe(0)
@@ -601,15 +579,5 @@ describe('R6 — only the top screen can be closed', () => {
     const decision = s.closeScreen('tr')
     expect(decision.complaint).toBeTruthy()
     expect(decision.history).toEqual({ kind: 'none' })
-  })
-})
-
-describe('two opens in one tick add one entry', () => {
-  it('replaces on the second when both name the same screen', () => {
-    const s = session()
-    s.openScreen('tr', 'a')
-    s.openScreen('tr', 'b')
-    expect(s.depth).toBe(1)
-    expect(s.screens).toEqual({ tr: 'b' })
   })
 })

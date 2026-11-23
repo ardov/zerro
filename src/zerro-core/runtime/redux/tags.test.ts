@@ -1,8 +1,9 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { i18n } from '@/6-shared/localization'
+import { categoryIconById, noCategoryIconUrl } from '@/6-shared/zenmoney-assets'
 import { makeDemoStore } from '../../support/demo'
 import { makeTestRootState } from '@/store/testing'
-import { makeTag } from '../../support/testing/zenmoneyTestData'
+import { makeStore, makeTag } from '../../support/testing/zenmoneyTestData'
 import { selectPopulatedTags } from '../../support/testing/reduxSelectors'
 import { presentTags } from './tags'
 
@@ -13,28 +14,15 @@ const makeRootState = makeTestRootState
 describe('Core tag presentation adapter', () => {
   beforeAll(() => i18n.changeLanguage('en'))
 
-  it('adds presentation fields and the uncategorized tag', () => {
-    const state = makeRootState(makeDemoStore({ now: NOW }))
-    const tags = selectPopulatedTags(state)
-    const tag = state.data.current.tag[Object.keys(state.data.current.tag)[0]]
+  it('gives uncategorized transactions a label, icon and display colour', () => {
+    const tag = selectPopulatedTags(makeRootState(makeStore())).null
 
-    expect(tags).toHaveProperty('null')
-    expect(tags.null).toMatchObject({
+    expect(tag).toMatchObject({
       id: 'null',
-      title: expect.any(String),
-      colorDisplay: expect.any(String),
-      colorGenerated: expect.any(String),
-      symbol: expect.any(String),
+      name: 'No Category',
+      symbol: noCategoryIconUrl,
     })
-    expect(tags[tag.id]).toMatchObject({
-      id: tag.id,
-      title: tag.title,
-      parent: tag.parent,
-      colorHEX: expect.any(String),
-      colorDisplay: expect.any(String),
-      colorGenerated: expect.any(String),
-      symbol: expect.any(String),
-    })
+    expect(tag.colorDisplay).toMatch(/^#[0-9a-f]{6}$/i)
   })
 
   it.each([
@@ -57,7 +45,7 @@ describe('Core tag presentation adapter', () => {
     })
     expect(tags.plain).toMatchObject({ name: 'Food', symbol: '🍔' })
     expect(tags.iconic.name).toBe('🍔 Food')
-    expect(tags.iconic.symbol).not.toBe('🍔')
+    expect(tags.iconic.symbol).toBe(categoryIconById['1006_pizza'])
   })
 
   it('owns display names, duplicate labels, colors, and the tag tree', () => {
@@ -79,6 +67,7 @@ describe('Core tag presentation adapter', () => {
       uniqueName: 'Food',
       children: ['child'],
       colorHEX: '#ff8800',
+      colorDisplay: '#ff8800',
       symbol: '🍔',
     })
     expect(tags.child).toMatchObject({
@@ -99,6 +88,6 @@ describe('Core tag presentation adapter', () => {
     })
 
     expect(selectPopulatedTags(unrelated)).toBe(first)
-    expect(selectPopulatedTags(changed)).not.toBe(first)
+    expect(selectPopulatedTags(changed)[tagId].name).toBe('Changed')
   })
 })

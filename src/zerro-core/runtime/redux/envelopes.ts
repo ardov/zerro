@@ -19,7 +19,6 @@ import type { TEnvelopeId } from '../../internal/domain/zerro'
 import * as tags from './tags'
 
 export const selectDomain = fromGraph(graph.envelopes)
-export const selectDomainStructure = fromGraph(graph.envelopeStructure)
 // Unchanged envelopes keep their objects, so a colour drag re-renders one row.
 let lastById: Partial<Record<TEnvelopeId, TPresentedEnvelope>> = {}
 const selectPresentedProjection = createSelector(

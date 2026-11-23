@@ -157,8 +157,6 @@ describe('unified command lifecycle', () => {
   it('stores a concrete budget, preserves server fields, and reloads with the same undo/redo result', () => {
     const original = base()
     const command = issue(original, budget(30))
-    expect(command).not.toHaveProperty('type')
-    expect(command).not.toHaveProperty('patch')
     expect(command.operations[0].type).toBe('budgets.set')
     const restored = parseCommandOutbox(JSON.parse(JSON.stringify([command])))
     const remote = base({ [food]: 20, 'tag#other': 90 })

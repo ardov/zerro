@@ -1,132 +1,57 @@
-import { testOperations } from '@/zerro-core/support/testing/commandTestData'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-
-import { appendClientCommand } from '@/store/data'
-import type { RootState } from '@/store'
+import { configureStore } from '@reduxjs/toolkit'
+import { expect, it } from 'vitest'
+import { undoClientCommand } from '@/store/data'
+import { rootReducer } from '@/store/rootReducer'
+import { makeTestRootState } from '@/store/testing'
 import {
   makeAccount,
-  makeReminder,
   makeStore,
   makeUser,
 } from '../../support/testing/zenmoneyTestData'
-import { makeTestRootState } from '@/store/testing'
 import { remove, set } from './reminders'
 
-const NOW = Date.parse('2026-07-11T12:00:00Z')
-const UUID = 'reminder-new'
-
-vi.mock('uuid', () => ({ v1: () => UUID }))
-
-afterEach(() => vi.restoreAllMocks())
-
-function makeState(withReminder = false): RootState {
+it('creates, edits and removes a reminder as separate undoable changes', () => {
   const current = makeStore({
     user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
     account: {
       cash: makeAccount({ id: 'cash' }),
       card: makeAccount({ id: 'card' }),
     },
-    reminder: withReminder
-      ? { existing: makeReminder({ id: 'existing' }) }
-      : {},
   })
-  return makeTestRootState(current)
-}
+  const store = configureStore({
+    reducer: rootReducer,
+    preloadedState: makeTestRootState(current),
+  })
 
-function makeDispatch(state: RootState) {
-  const dispatch: any = vi.fn(action =>
-    typeof action === 'function'
-      ? action(dispatch, () => state, undefined)
-      : action
+  const [receipt] = store.dispatch(
+    set({ incomeAccount: 'cash', outcomeAccount: 'card', comment: 'Rent' })
   )
-  return dispatch
-}
-
-describe('reminder Redux commands', () => {
-  it('returns created reminders and appends a semantic outbox entry', () => {
-    vi.spyOn(Date, 'now').mockReturnValue(NOW)
-    const state = makeState()
-    const dispatch = makeDispatch(state)
-
-    const reminders = dispatch(
-      set({
-        incomeAccount: 'cash',
-        outcomeAccount: 'card',
-        comment: 'Rent',
-      })
-    )
-
-    expect(reminders).toHaveLength(1)
-    expect(reminders[0]).toMatchObject({ id: UUID, comment: 'Rent', user: 1 })
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: appendClientCommand.type,
-        payload: expect.objectContaining({
-          operations: testOperations({
-            reminder: [
-              {
-                id: UUID,
-                incomeAccount: 'cash',
-                outcomeAccount: 'card',
-                comment: 'Rent',
-              },
-            ],
-          }),
-        }),
-      })
-    )
+  const { id } = receipt
+  const getReminder = () => store.getState().data.current.reminder[id]
+  expect(getReminder()).toMatchObject({
+    user: 1,
+    incomeAccount: 'cash',
+    outcomeAccount: 'card',
+    comment: 'Rent',
   })
 
-  it('stores only changed fields when patching an existing reminder', () => {
-    vi.spyOn(Date, 'now').mockReturnValue(NOW)
-    const state = makeState(true)
-    const dispatch = makeDispatch(state)
-
-    const reminders = dispatch(set({ id: 'existing', comment: 'Updated' }))
-
-    expect(reminders[0]).toMatchObject({
-      id: 'existing',
-      comment: 'Updated',
-    })
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: appendClientCommand.type,
-        payload: expect.objectContaining({
-          operations: [
-            {
-              type: 'reminder.patch',
-              value: { id: 'existing', comment: 'Updated' },
-            },
-          ],
-        }),
-      })
-    )
+  store.dispatch(set({ id, comment: 'Updated' }))
+  expect(getReminder()).toMatchObject({
+    incomeAccount: 'cash',
+    outcomeAccount: 'card',
+    comment: 'Updated',
   })
 
-  it('appends semantic deletion only when the reminder exists', () => {
-    vi.spyOn(Date, 'now').mockReturnValue(NOW)
-    const state = makeState(true)
-    const dispatch = makeDispatch(state)
+  store.dispatch(remove(id))
+  expect(getReminder()).toBeUndefined()
+  const deleted = store.getState()
+  store.dispatch(remove(id))
+  expect(store.getState()).toBe(deleted)
 
-    dispatch(remove('existing'))
-
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: appendClientCommand.type,
-        payload: expect.objectContaining({
-          operations: [
-            { type: 'entity.delete', entity: 'reminder', id: 'existing' },
-          ],
-        }),
-      })
-    )
-
-    const missingDispatch = makeDispatch(state)
-    missingDispatch(remove('missing'))
-    expect(
-      missingDispatch.mock.calls.filter(
-        ([action]: [any]) => action?.type === appendClientCommand.type
-      )
-    ).toEqual([])
-  })
+  store.dispatch(undoClientCommand())
+  expect(getReminder()?.comment).toBe('Updated')
+  store.dispatch(undoClientCommand())
+  expect(getReminder()?.comment).toBe('Rent')
+  store.dispatch(undoClientCommand())
+  expect(getReminder()).toBeUndefined()
 })

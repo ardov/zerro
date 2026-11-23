@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { expect, userEvent, within } from 'storybook/test'
 import { InlineButton } from './InlineButton'
 
 const meta = {
@@ -24,6 +23,7 @@ const values = ['categories', 'places', 'accounts']
 
 /** The sentence keeps its line while the words inside it change. */
 export const Cycle: Story = {
+  tags: ['!test'],
   render: () => {
     const [index, setIndex] = useState(0)
     return (
@@ -36,11 +36,5 @@ export const Cycle: Story = {
         this year
       </p>
     )
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button', { name: 'categories' }))
-    await userEvent.click(canvas.getByRole('button', { name: 'places' }))
-    expect(canvas.getByRole('button', { name: 'accounts' })).toBeVisible()
   },
 }

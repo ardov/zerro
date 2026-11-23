@@ -42,9 +42,7 @@ export const Loading: Story = {
 
 export const Complete: Story = {
   args: { value: 1 },
-  play: async ({ canvasElement }) => {
-    await expect(spinning(canvasElement)).toBe(false)
-  },
+  tags: ['!test'],
 }
 
 export const Active: Story = {

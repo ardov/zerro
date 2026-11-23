@@ -13,7 +13,7 @@ import { applyPatch } from '../../zenmoney'
 import { materializeCommand } from '../../../operations/materialization'
 import { EnvType, envId } from '../envelope-id'
 import { HiddenDataType } from '../hidden-data'
-import { compileSetBudget, compileSetEnvBudget } from './commands'
+import { compileSetBudget } from './commands'
 import { getEnvBudgets } from './read'
 
 describe('env budget commands', () => {
@@ -168,7 +168,7 @@ describe('env budget commands', () => {
 
     const patch = materializeTestInput(
       data,
-      compileSetEnvBudget(
+      compileSetBudget(
         data,
         [
           { id: foodId, month: '2026-01', value: 200 },
@@ -202,7 +202,7 @@ describe('env budget commands', () => {
 
     const patch = materializeTestInput(
       data,
-      compileSetEnvBudget(
+      compileSetBudget(
         data,
         [
           { id: foodId, month: '2026-01', value: 100 },
@@ -257,7 +257,7 @@ describe('env budget commands', () => {
 
     const patch = materializeTestInput(
       data,
-      compileSetEnvBudget(
+      compileSetBudget(
         data,
         { id: foodId, month: '2026-01', value: 0 },
         {
@@ -276,7 +276,7 @@ describe('env budget commands', () => {
     expect(
       materializeTestInput(
         makeStore(),
-        compileSetEnvBudget(makeStore(), [], {
+        compileSetBudget(makeStore(), [], {
           now: () => 100,
           uuid: () => 'unused',
         })

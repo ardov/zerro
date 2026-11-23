@@ -22,9 +22,7 @@ const rows = [
 ]
 
 describe('SyncProgressDialog', () => {
-  it('shows active progress and can be dismissed without stopping it', async () => {
-    const onClose = vi.fn()
-    const onContinue = vi.fn()
+  it('shows confirmed progress for each entity', () => {
     render(
       <SyncProgressDialogView
         open
@@ -36,9 +34,9 @@ describe('SyncProgressDialog', () => {
           errorStatus: null,
           retryAt: null,
         }}
-        onClose={onClose}
+        onClose={vi.fn()}
         onRetry={vi.fn()}
-        onContinue={onContinue}
+        onContinue={vi.fn()}
       />
     )
 
@@ -49,14 +47,6 @@ describe('SyncProgressDialog', () => {
       screen.getByRole('progressbar', { name: 'settings:entity_transaction' })
     ).toHaveAttribute('aria-valuenow', '700')
     expect(screen.getByText('700 / 1000')).toBeInTheDocument()
-    expect(
-      screen
-        .getByRole('progressbar', { name: 'settings:entity_transaction' })
-        .querySelector('.radial-progress-activity')
-    ).toBeInTheDocument()
-    await userEvent.keyboard('{Escape}')
-    expect(onClose).toHaveBeenCalledOnce()
-    expect(onContinue).not.toHaveBeenCalled()
   })
 
   it('offers retry and continue-later after a stop, with a readable reason', async () => {

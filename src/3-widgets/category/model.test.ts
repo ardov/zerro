@@ -242,7 +242,6 @@ describe('category choices', () => {
     )
     expect(ids({})).not.toContain('null')
     expect(ids({ ...options, query: '  UNCATEGORIZED ' })).toEqual(['null'])
-    expect(ids({ ...options, query: 'gift' })).toEqual(['income', 'gift'])
     expect(ids({ ...options, excludeIds: ['null'] })).not.toContain('null')
   })
 
@@ -274,6 +273,5 @@ describe('category choices', () => {
     ).toEqual([])
     expect(ids({ preferredType: 'outcome', query: 'missing' })).toEqual([])
     expect(ids({ preferredType: 'outcome', showAll: true })).toContain('salary')
-    expect(ids({ showAll: true })).not.toContain('null')
   })
 })

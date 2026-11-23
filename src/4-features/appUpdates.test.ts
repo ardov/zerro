@@ -236,11 +236,6 @@ describe('application updates', () => {
     }
   )
 
-  it('reports an update discovered by registration itself', () => {
-    registration.find()
-    expect(titles()).toEqual(['appUpdate.downloading'])
-  })
-
   it('does not treat the first offline installation as an update', async () => {
     registration.active = null
     container.controller = null
@@ -252,8 +247,9 @@ describe('application updates', () => {
     expect(reload).not.toHaveBeenCalled()
   })
 
-  it('defers restarting a hidden app and shows the status on foreground return', async () => {
+  it('reports a service worker update and postpones restarting while hidden', async () => {
     const worker = registration.find()
+    expect(titles()).toEqual(['appUpdate.downloading'])
     visible(false)
     activate(worker)
     await vi.advanceTimersByTimeAsync(5000)

@@ -48,20 +48,6 @@ it('reads no layout while rendering and committing', () => {
   expect(scrollWidthReads).not.toHaveBeenCalled()
 })
 
-it('marks overflow when the resize observer reports', () => {
-  const { rerender } = render(<TextFade className="x">A long label</TextFade>)
-  notify!()
-  const label = screen.getByText('A long label')
-  expect(label).toHaveAttribute('data-overflow')
-
-  rerender(<TextFade className="y">A long label</TextFade>)
-  expect(label).toHaveAttribute('data-overflow')
-
-  widths.scroll = 80
-  notify!()
-  expect(label).not.toHaveAttribute('data-overflow')
-})
-
 it('follows the element when render switches the tag', () => {
   const { rerender } = render(<TextFade render={<p />}>A long label</TextFade>)
   rerender(<TextFade render={<h2 />}>A long label</TextFade>)

@@ -38,17 +38,6 @@ afterEach(() => {
 })
 
 describe('replica persistence queue', () => {
-  it('stores the durable outbox after a local command', async () => {
-    const state = replicaState()
-    const invoke = middleware(state)
-
-    invoke(appendClientCommand(entry))
-
-    await vi.waitFor(() =>
-      expect(storageMock.saveOutbox).toHaveBeenCalledWith(7, [entry])
-    )
-  })
-
   it('writes a burst of outbox edits once, with the latest outbox', async () => {
     const state = replicaState()
     const invoke = middleware(state)

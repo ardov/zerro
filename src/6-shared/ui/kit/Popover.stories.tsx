@@ -78,12 +78,20 @@ function IndependentAnchor() {
 export const SeparateAnchor: Story = {
   render: () => <IndependentAnchor />,
   play: async ({ canvasElement }) => {
-    const trigger = within(canvasElement).getByRole('button', { name: 'Edit' })
+    const canvas = within(canvasElement)
+    const anchor = canvas.getByText('Anchor')
+    const trigger = canvas.getByRole('button', { name: 'Edit' })
     await userEvent.click(trigger)
     const popup = await within(canvasElement.ownerDocument.body).findByRole(
       'dialog',
       { name: 'Anchored editor' }
     )
+    await waitFor(() => {
+      const top = popup.getBoundingClientRect().top
+      expect(
+        Math.abs(top - anchor.getBoundingClientRect().bottom)
+      ).toBeLessThan(Math.abs(top - trigger.getBoundingClientRect().bottom))
+    })
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(popup).not.toBeVisible())
     await waitFor(() => expect(trigger).toHaveFocus())
@@ -118,13 +126,17 @@ export const AdaptWithoutClosing: Story = {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
     await userEvent.click(canvas.getByRole('button', { name: 'Edit' }))
-    await userEvent.type(
-      await body.findByRole('textbox', { name: 'Draft' }),
-      'Unsaved'
+    const popup = () => body.getByRole('dialog', { name: 'Adaptive editor' })
+    await waitFor(() =>
+      expect(popup().getBoundingClientRect().width).toBeCloseTo(
+        window.innerWidth
+      )
     )
     await userEvent.click(body.getByRole('button', { name: 'Adapt' }))
     await waitFor(() =>
-      expect(body.getByRole('textbox', { name: 'Draft' })).toHaveValue('')
+      expect(popup().getBoundingClientRect().width).toBeLessThan(
+        window.innerWidth
+      )
     )
     await expect(canvas.getByLabelText('Close count')).toHaveTextContent('0')
     await userEvent.keyboard('{Escape}')

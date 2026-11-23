@@ -228,7 +228,7 @@ describe('compileTransactionQuery', () => {
     expect(generalIncomeQuery(outcome)).toBe(false)
   })
 
-  it('expands envelope trees once when compiling a clause', () => {
+  it('includes child transactions when filtering the parent envelope tree', () => {
     const matches = compileTransactionQuery(
       {
         clauses: [

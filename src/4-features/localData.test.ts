@@ -67,7 +67,8 @@ describe('loadLocalData', () => {
 
     await dispatch(loadLocalData())
 
-    expect(dataState.base).toBe(base)
+    expect(dataState.rootUserId).toBe(7)
+    expect(dataState.base.account.cash.title).toBe('Cash')
     expect(dataState.current.account.cash.title).toBe('Wallet')
     expect(dataState.outbox).toEqual(outbox)
     expect(storageMock.compactOneBatch).toHaveBeenCalledOnce()

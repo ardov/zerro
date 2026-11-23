@@ -252,8 +252,11 @@ export const SelectedServiceAccount: Story = {
       await body.findByRole('option', { name: /Zerro Data/ })
     ).toHaveAttribute('aria-selected', 'true')
     await userEvent.click(body.getByRole('option', { name: /^Cash/ }))
+    await waitFor(() => expect(trigger).toHaveFocus())
     await userEvent.click(trigger)
-    await userEvent.click(body.getByRole('button', { name: 'Show archived' }))
+    await userEvent.click(
+      await body.findByRole('button', { name: 'Show archived' })
+    )
     await expect(
       body.queryByRole('option', { name: /Zerro Data/ })
     ).not.toBeInTheDocument()

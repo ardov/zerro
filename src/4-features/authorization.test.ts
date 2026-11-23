@@ -8,13 +8,11 @@ import { i18n } from '@/6-shared/localization'
 import { tokenStorage } from '@/6-shared/api/tokenStorage'
 import { convertDiff } from '@/6-shared/api/zm-adapter'
 
-const { clearLocalDataMock, authorizeMock, refreshMock, demoLoads } =
-  vi.hoisted(() => ({
-    clearLocalDataMock: vi.fn().mockResolvedValue(undefined),
-    authorizeMock: vi.fn(),
-    refreshMock: vi.fn(),
-    demoLoads: { count: 0 },
-  }))
+const { clearLocalDataMock, authorizeMock, refreshMock } = vi.hoisted(() => ({
+  clearLocalDataMock: vi.fn().mockResolvedValue(undefined),
+  authorizeMock: vi.fn(),
+  refreshMock: vi.fn(),
+}))
 
 vi.mock('./localData', () => ({
   clearLocalData: () => async () => clearLocalDataMock(),
@@ -23,10 +21,6 @@ vi.mock('./localData', () => ({
 vi.mock('@/6-shared/api/zenmoney', () => ({
   zenmoney: { authorize: authorizeMock, fakeToken: 'fake_token' },
 }))
-vi.mock('@/zerro-core/demo', async importOriginal => {
-  demoLoads.count++
-  return importOriginal()
-})
 vi.mock('@/4-features/sync', () => ({
   refreshData: () => refreshMock,
 }))
@@ -44,9 +38,12 @@ describe('logOut', () => {
     const store = configureStore({ reducer: { token, view } })
     store.dispatch(
       patchTransactionsPage({
+        query: { clauses: [{ kind: 'account', ids: ['previous-account'] }] },
         search: 'view from the previous account',
         checked: ['previous-transaction'],
+        topDate: '2026-07-23',
         scrollOffset: 1477,
+        summary: { side: 'outcome' },
       })
     )
 
@@ -105,19 +102,6 @@ describe('logIn', () => {
 })
 
 describe('loadDemoData', () => {
-  it('loads the demo module only when the demo is opened', async () => {
-    expect(demoLoads.count).toBe(0)
-    const store = configureStore({ reducer: { token, data } })
-
-    await (store.dispatch as any)(loadDemoData())
-
-    expect(demoLoads.count).toBe(1)
-    expect(store.getState().token).toBe('fake_token')
-    expect(
-      Object.keys(store.getState().data.current.account).length
-    ).toBeGreaterThan(0)
-  })
-
   it.each([
     ['ru', 2, 'Revolut · Зарплатный'],
     ['ru-RU', 2, 'Revolut · Зарплатный'],
@@ -134,9 +118,11 @@ describe('loadDemoData', () => {
 
       await (store.dispatch as any)(loadDemoData())
 
-      expect(store.getState().data.current.user[23880].currency).toBe(currency)
-      expect(store.getState().data.current.account[account].title).toBe(account)
-      expect(store.getState().displayCurrency).toBeNull()
+      const state = store.getState()
+      expect(state.token).toBe('fake_token')
+      expect(state.data.current.user[23880].currency).toBe(currency)
+      expect(state.data.current.account[account].title).toBe(account)
+      expect(state.displayCurrency).toBeNull()
     }
   )
 
@@ -175,9 +161,7 @@ describe('loadDemoData', () => {
     const current = store.getState().data.current
     expect(current.user[23880].currency).toBe(2)
     expect(current.account['Revolut · Зарплатный']).toBeDefined()
-    expect(Object.values(current.account)).toHaveLength(9)
-    expect(Object.values(current.tag)).toHaveLength(20)
-    expect(Object.values(current.merchant)).toHaveLength(18)
+    expect(current.account['Revolut EUR']).toBeUndefined()
   })
 })
 

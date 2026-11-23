@@ -1,5 +1,4 @@
-// Test-only aggregate for cross-runtime parity assertions. Production code
-// imports selectors from their owning Redux domain model.
+// Test-only aggregate for Redux projection assertions.
 export {
   selectAll as selectActivity,
   selectEnvelopeMetrics as selectEnvMetrics,
@@ -18,27 +17,19 @@ export {
 } from '../../runtime/redux/currency'
 export { selectAll as selectDebtors } from '../../runtime/redux/debtors'
 export {
-  selectDomainStructure as selectDomainEnvelopeStructure,
   selectDomain as selectDomainEnvelopes,
-  selectStructure as selectEnvelopeStructure,
   selectAll as selectEnvelopes,
   selectKeepingIds as selectKeepingEnvelopeIds,
 } from '../../runtime/redux/envelopes'
-export {
-  selectCurrent as selectCurrentFxRates,
-  selectRates as selectFxRates,
-} from '../../runtime/redux/fxRates'
+export { selectRates as selectFxRates } from '../../runtime/redux/fxRates'
 export {
   selectTotals as selectGoalTotals,
   selectAll as selectGoals,
-  selectRawGoals,
 } from '../../runtime/redux/goals'
 export {
   selectCodeMap as selectInstCodeMap,
-  selectAll as selectInstruments,
   selectByCode as selectInstrumentsByCode,
 } from '../../runtime/redux/instruments'
-export { selectAll as selectMerchants } from '../../runtime/redux/merchants'
 export {
   selectList as selectMonthList,
   selectTotals as selectMonthTotals,
@@ -48,6 +39,5 @@ export { selectPopulated as selectPopulatedTags } from '../../runtime/redux/tags
 export {
   selectHistoryStart,
   selectIds as selectTransactionIds,
-  selectAll as selectTransactions,
   selectHistory as selectTransactionsHistory,
 } from '../../runtime/redux/transactions'

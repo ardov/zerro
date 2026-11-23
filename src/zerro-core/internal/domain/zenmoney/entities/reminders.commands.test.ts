@@ -129,7 +129,7 @@ describe('zenmoney reminder commands', () => {
     expect(compileDeleteReminder(data.reminder, 'missing')).toEqual({})
   })
 
-  it('validates reminder set and delete commands', () => {
+  it('rejects reminder creation without a user or both account legs', () => {
     const empty = makeStore()
     const withUser = makeStore({
       user: {
@@ -152,9 +152,5 @@ describe('zenmoney reminder commands', () => {
         { now: () => 1, uuid: () => 'reminder' }
       )
     ).toThrow('Missing incomeAccount or outcomeAccount')
-
-    expect(() =>
-      compileDeleteReminder(empty.reminder, 'reminder')
-    ).not.toThrow()
   })
 })

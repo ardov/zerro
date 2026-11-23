@@ -3,27 +3,10 @@ import {
   makeAccount,
   makeStore,
 } from '../../../../support/testing/zenmoneyTestData'
-import {
-  getAccountList,
-  getAccStartBalance,
-  getDebtAccountId,
-} from './accounts'
+import { getAccStartBalance, getDebtAccountId } from './accounts'
 import { AccountType } from './accounts'
 
 describe('zenmoney account reads', () => {
-  it('reads accounts as a list', () => {
-    const cash = makeAccount({ id: 'cash', title: 'Cash' })
-    const card = makeAccount({ id: 'card', title: 'Card' })
-    const data = makeStore({
-      account: {
-        cash,
-        card,
-      },
-    })
-
-    expect(getAccountList(data.account)).toEqual([cash, card])
-  })
-
   it('finds the debt account id', () => {
     const data = makeStore({
       account: {

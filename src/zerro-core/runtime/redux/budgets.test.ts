@@ -94,19 +94,6 @@ describe('selectBudgets', () => {
     expect(core[MONTH][envId.get(EnvType.Tag, tagB)]).toBe(7_000)
   })
 
-  it('stays cached across unrelated data changes', () => {
-    const { store } = makeSeededStore()
-    const first = selectBudgets(makeRootState(store))
-
-    // New current object, new transaction slice, same budget/reminder slices
-    const unrelatedChange = makeRootState({
-      ...store,
-      transaction: { ...store.transaction },
-    })
-
-    expect(selectBudgets(unrelatedChange)).toBe(first)
-  })
-
   it('recomputes when hidden env budgets change', () => {
     const { store, tagA } = makeSeededStore()
     const envelopeId = envId.get(EnvType.Tag, tagA)

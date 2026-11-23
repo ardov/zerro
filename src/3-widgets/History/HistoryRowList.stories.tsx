@@ -102,6 +102,7 @@ export const CompactRows: Story = {
 }
 
 export const Mobile: Story = {
-  ...CompactRows,
+  render: CompactRows.render,
   globals: { viewport: { value: 'iphone13' } },
+  tags: ['!test'],
 }

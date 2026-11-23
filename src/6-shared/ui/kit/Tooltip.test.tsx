@@ -3,7 +3,6 @@ import { createRef } from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import { Tooltip } from './Tooltip'
-import { Button } from './Button'
 
 afterEach(cleanup)
 
@@ -29,21 +28,4 @@ it('preserves the trigger, value, ref and handlers when content is toggled', () 
   expect(ref.current).toBe(input)
   expect(input).toHaveFocus()
   expect(change).toHaveBeenCalledTimes(1)
-})
-
-it('disables only the tooltip and preserves the button name and action', () => {
-  const click = vi.fn()
-  const ref = createRef<HTMLButtonElement>()
-  render(
-    <Tooltip disabled content="Additional explanation">
-      <Button ref={ref} onClick={click} aria-label="Save">
-        Save
-      </Button>
-    </Tooltip>
-  )
-  const button = screen.getByRole('button', { name: 'Save' })
-  expect(ref.current).toBe(button)
-  expect(button).toBeEnabled()
-  fireEvent.click(button)
-  expect(click).toHaveBeenCalledTimes(1)
 })

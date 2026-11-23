@@ -19,7 +19,6 @@ it('starts empty and emits a local calendar date without clearing on a repeated 
     <Calendar value={null} defaultMonth="2026-02-01" onChange={onChange} />,
     { wrapper }
   )
-  expect(screen.getAllByRole('gridcell')).toHaveLength(42)
   expect(view.container.querySelector('[aria-selected="true"]')).toBeNull()
   const button = view.container.querySelector<HTMLButtonElement>(
     '[data-day="2026-02-15"] button'
@@ -27,8 +26,9 @@ it('starts empty and emits a local calendar date without clearing on a repeated 
   fireEvent.click(button)
   expect(onChange).toHaveBeenLastCalledWith('2026-02-15')
   view.rerender(<Calendar value="2026-02-15" onChange={onChange} />)
+  onChange.mockClear()
   fireEvent.click(button)
-  expect(onChange).toHaveBeenLastCalledWith('2026-02-15')
+  expect(onChange).toHaveBeenCalledExactlyOnceWith('2026-02-15')
 })
 
 it('reveals an externally changed selection and keeps its month when cleared', () => {

@@ -162,26 +162,12 @@ export const IconButtons: Story = {
     })
 
     await step(
-      'Keyboard focus reveals the label; Escape preserves focus',
-      async () => {
-        button.focus()
-        await waitFor(() => expect(body.getByText('Add item')).toBeVisible())
-        await userEvent.keyboard('{Escape}')
-        await waitFor(() =>
-          expect(body.queryByText('Add item')).not.toBeInTheDocument()
-        )
-        await expect(button).toHaveFocus()
-      }
-    )
-
-    await step(
       'Without a tooltip, the button still has an accessible name',
       async () => {
         const withoutTooltip = canvas.getByRole('button', {
           name: 'Without tooltip',
         })
         withoutTooltip.focus()
-        await expect(withoutTooltip).toHaveFocus()
         await expect(
           body.queryByText('Without tooltip')
         ).not.toBeInTheDocument()

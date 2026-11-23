@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { hashJson } from '../testing/stableJson'
 import { getDemoData, makeDemoDiff, makeDemoStore } from './index'
 import { validateDataStore } from '../../internal/domain/zenmoney/model/validateStore'
 
@@ -15,9 +14,12 @@ describe('demo data', () => {
   it.each(['en', 'ru'] as const)(
     'is deterministic for pinned %s options',
     locale => {
-      expect(hashJson(makeDemoDiff({ ...demoOptions, locale }))).toBe(
-        hashJson(makeDemoDiff({ ...demoOptions, locale }))
-      )
+      const options = { ...demoOptions, locale }
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2026-09-01T12:00:00Z'))
+      const first = makeDemoDiff(options)
+      vi.setSystemTime(new Date('2026-10-01T12:00:00Z'))
+      expect(makeDemoDiff(options)).toEqual(first)
     }
   )
 
@@ -36,22 +38,15 @@ describe('demo data', () => {
   })
 
   it('honours explicitly pinned app-facing options', () => {
-    expect(hashJson(getDemoData(demoOptions))).toBe(
-      hashJson(makeDemoDiff(demoOptions))
-    )
-  })
-
-  it('can build a normalized store for zerro-core tests', () => {
-    const diff = makeDemoDiff(demoOptions)
-    const store = makeDemoStore(demoOptions)
-
-    expect(Object.keys(store.transaction)).toHaveLength(
-      diff.transaction?.length || 0
-    )
-    expect(store.user[23880]?.login).toBe('demoAccount')
-    expect(store.account['N26 EUR']?.balance).toEqual(
-      diff.account?.find(account => account.id === 'N26 EUR')?.balance
-    )
+    const diff = getDemoData({ ...demoOptions, locale: 'ru' })
+    expect(diff.serverTimestamp).toBe(Date.parse('2026-04-15T12:00:00Z'))
+    expect(diff.user?.[0]).toMatchObject({ countryCode: 'RU' })
+    expect(
+      diff.transaction
+        ?.map(transaction => transaction.date)
+        .sort()
+        .at(-1)
+    ).toBe('2026-03-31')
   })
 
   it('builds a connected Russian household with ruble prices and global brands', () => {
@@ -102,9 +97,7 @@ describe('demo data', () => {
   it('keeps the English default independent of Russian data', () => {
     const english = makeDemoDiff(demoOptions)
     makeDemoDiff({ ...demoOptions, locale: 'ru' })
-    expect(hashJson(makeDemoDiff({ ...demoOptions, locale: 'en' }))).toBe(
-      hashJson(english)
-    )
+    expect(makeDemoDiff({ ...demoOptions, locale: 'en' })).toEqual(english)
     expect(english.user?.[0].currency).toBe(3)
     expect(english.account?.find(a => a.id === 'Revolut EUR')?.instrument).toBe(
       3

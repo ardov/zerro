@@ -1,6 +1,6 @@
 import { testOperations } from '@/zerro-core/support/testing/commandTestData'
 import 'fake-indexeddb/auto'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { openDB } from 'idb'
 import { AccountType } from '@/6-shared/types'
 import {
@@ -10,13 +10,7 @@ import {
   makeUser,
 } from '@/zerro-core/support/testing/zenmoneyTestData'
 import type { TDataStore } from '@/6-shared/types'
-import { validateDataStore } from '@/zerro-core/replica'
 import { createReplicaStorage, type ReplicaStorage } from './replicaStorage'
-
-vi.mock('@/zerro-core/replica', async importOriginal => {
-  const actual = await importOriginal<typeof import('@/zerro-core/replica')>()
-  return { ...actual, validateDataStore: vi.fn(actual.validateDataStore) }
-})
 
 describe('ReplicaStorage', () => {
   it('initializes and hydrates the sole replica from a full snapshot', async () => {
@@ -34,27 +28,16 @@ describe('ReplicaStorage', () => {
     })
   })
 
-  it('validates a loaded state once when nothing waits to be sent', async () => {
-    const dbName = uniqueDatabaseName()
-    await seedReplica(createReplicaStorage(dbName), validSnapshot(100, 'Cash'))
-    const reader = createReplicaStorage(dbName)
-    vi.mocked(validateDataStore).mockClear()
-
-    await reader.loadCurrent()
-
-    expect(validateDataStore).toHaveBeenCalledTimes(1)
-  })
-
-  it('validates both the base and the replayed outbox state', async () => {
+  it('rejects a stored base with a missing account instrument', async () => {
     const dbName = uniqueDatabaseName()
     const storage = createReplicaStorage(dbName)
-    await seedReplica(storage, validSnapshot(100, 'Cash'))
-    await storage.saveOutbox(7, [command(123)])
-    vi.mocked(validateDataStore).mockClear()
+    const snapshot = validSnapshot(100, 'Cash')
+    snapshot.account.cash.instrument = 999
+    await seedReplica(storage, snapshot)
 
-    await createReplicaStorage(dbName).loadCurrent()
-
-    expect(validateDataStore).toHaveBeenCalledTimes(2)
+    await expect(createReplicaStorage(dbName).loadCurrent()).rejects.toThrow(
+      /instrument.*references a missing entity/
+    )
   })
 
   it('quarantines an old command envelope without overwriting its stored data', async () => {

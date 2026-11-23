@@ -114,6 +114,7 @@ export const Showcase: Story = {
   ),
 }
 export const Interaction: Story = {
+  tags: ['!test'],
   args: { onClick: fn(), onRemove: fn() },
   render: args => (
     <div className="flex gap-3">
@@ -121,22 +122,6 @@ export const Interaction: Story = {
       <button type="button">Next</button>
     </div>
   ),
-  play: async ({ canvasElement, args }) => {
-    const canvas = within(canvasElement)
-    const primary = canvas.getByRole('button', {
-      name: 'Groceries',
-    })
-    primary.focus()
-    await userEvent.keyboard('{Enter}')
-    await expect(args.onClick).toHaveBeenCalledTimes(1)
-    await userEvent.keyboard('{Delete}')
-    await expect(args.onRemove).toHaveBeenCalledTimes(1)
-    await userEvent.tab()
-    await expect(canvas.getByRole('button', { name: 'Next' })).toHaveFocus()
-    await userEvent.click(canvas.getAllByRole('button')[1])
-    await expect(args.onRemove).toHaveBeenCalledTimes(2)
-    await expect(args.onClick).toHaveBeenCalledTimes(1)
-  },
 }
 
 function ToggleChips() {

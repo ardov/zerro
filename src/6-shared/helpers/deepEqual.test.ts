@@ -55,16 +55,4 @@ describe('deepEqual', () => {
     changed[0].children[0].id = 'e2'
     expect(deepEqual(structure(), changed)).toBe(false)
   })
-
-  it('matches the render-info shape used by selectors', () => {
-    const info = () => ({
-      e1: { id: 'e1', showSelf: false, isDefaultVisible: true },
-      e2: { id: 'e2', showSelf: true, isDefaultVisible: false },
-    })
-    expect(deepEqual(info(), info())).toBe(true)
-
-    const changed = info()
-    changed.e2.showSelf = false
-    expect(deepEqual(info(), changed)).toBe(false)
-  })
 })

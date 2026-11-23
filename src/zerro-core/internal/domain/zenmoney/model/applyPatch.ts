@@ -33,7 +33,7 @@ function touchedEntityKeys(
   return touched
 }
 
-export function applyPatchMutable(
+function applyPatchMutable(
   store: TDataStore,
   patch: TNormalizedPatch | TIntentPatch
 ): void {

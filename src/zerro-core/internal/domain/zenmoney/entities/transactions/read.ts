@@ -41,18 +41,6 @@ export function toTransactionIds(sorted: TTransaction[]): TTransactionId[] {
   return sorted.map(transaction => transaction.id)
 }
 
-export function getTransactionIds(
-  transactions: ById<TTransaction>
-): TTransactionId[] {
-  return toTransactionIds(getSortedTransactions(transactions))
-}
-
-export function getTransactionsHistory(
-  transactions: ById<TTransaction>
-): TTransaction[] {
-  return toTransactionHistory(getSortedTransactions(transactions))
-}
-
 export function compareTransactionDates(
   transactionA: TTransaction,
   transactionB: TTransaction

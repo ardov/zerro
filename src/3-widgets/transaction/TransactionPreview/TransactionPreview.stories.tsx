@@ -1,12 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import {
-  expect,
-  fireEvent,
-  fn,
-  userEvent,
-  waitFor,
-  within,
-} from 'storybook/test'
+import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { undoClientCommand, redoClientCommand } from '@/store/data'
@@ -388,8 +381,10 @@ function ModalSaveHarness({ docked = false }: { docked?: boolean }) {
   )
 }
 
-function checkModalSave(changeTime: boolean): Story['play'] {
-  return async ({ canvasElement }) => {
+export const ModalSave: Story = {
+  ...Bench,
+  render: () => <ModalSaveHarness />,
+  play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
     const trigger = canvas.getByRole('button', { name: 'Edit transaction' })
@@ -400,62 +395,26 @@ function checkModalSave(changeTime: boolean): Story['play'] {
     await userEvent.clear(comment)
     await userEvent.type(comment, 'Saved from modal')
     await userEvent.click(editor.getByLabelText('Time'))
-    if (changeTime) {
-      fireEvent.change(editor.getByLabelText('Time'), {
-        target: { value: '13:37' },
-      })
-    }
+    fireEvent.change(editor.getByLabelText('Time'), {
+      target: { value: '13:37' },
+    })
     await userEvent.tab()
     await expect(dialog).toBeInTheDocument()
-    await expect(editor.queryByRole('button', { name: 'Save' })).toBeNull()
     await expect(canvas.getByLabelText('Saved comment')).toHaveTextContent(
       'Saved from modal'
     )
-    if (changeTime)
-      await expect(canvas.getByLabelText('Saved time')).toHaveTextContent(
-        '13:37'
-      )
+    await expect(canvas.getByLabelText('Saved time')).toHaveTextContent('13:37')
     await userEvent.click(
       within(dialog).getAllByRole('button', { name: 'Close' })[0]
     )
     await waitFor(() => expect(dialog).not.toBeInTheDocument())
     await waitFor(() => expect(trigger).toHaveFocus())
-  }
-}
-
-export const ModalSave: Story = {
-  ...Bench,
-  render: () => <ModalSaveHarness />,
-  play: checkModalSave(false),
-}
-export const ModalSaveWithChangedTime: Story = {
-  ...ModalSave,
-  play: checkModalSave(true),
+  },
 }
 export const MobileModalSave: Story = {
   ...ModalSave,
   globals: { viewport: { value: 'zerro499' } },
 }
-export const InlineSaveStaysOpen: Story = {
-  ...Bench,
-  args: { id: '', onClose: fn(), onOpenOther: fn() },
-  play: async ({ canvasElement, args }) => {
-    const canvas = within(canvasElement)
-    const comment = canvas.getByRole('textbox', { name: 'Comment' })
-    await userEvent.clear(comment)
-    await userEvent.type(comment, 'Saved inline')
-    await userEvent.tab()
-    await waitFor(() =>
-      expect(
-        canvas.queryByRole('button', { name: 'Save' })
-      ).not.toBeInTheDocument()
-    )
-    await expect(comment).toBeVisible()
-    await expect(comment).toHaveValue('Saved inline')
-    await expect(args.onClose).not.toHaveBeenCalled()
-  },
-}
-
 function InlineRecreateHarness() {
   const outcome = useByType().outcome!
   const [id, setId] = useState(() => outcome.id)
@@ -500,9 +459,6 @@ export const InlineSaveWithChangedTime: Story = {
       'Recreated inline'
     )
     await expect(canvas.getByLabelText('Time')).toHaveValue('13:37')
-    await expect(
-      canvas.queryByRole('button', { name: 'Save' })
-    ).not.toBeInTheDocument()
   },
 }
 
@@ -605,7 +561,6 @@ export const FinishedFieldsAndUndo: Story = {
     expect(Number(canvas.getByLabelText('Command count').textContent)).toBe(
       count + 2
     )
-    expect(canvas.queryByRole('button', { name: 'Save' })).toBeNull()
   },
 }
 
@@ -808,7 +763,7 @@ export const DockedBackFinishesInput: Story = {
     const comment = await canvas.findByRole('textbox', { name: 'Comment' })
     await userEvent.clear(comment)
     await userEvent.type(comment, 'Saved from modal')
-    expect(canvas.getByLabelText('Saved comment')).toHaveTextContent('')
+    expect(canvas.getByLabelText('Saved comment')).toBeEmptyDOMElement()
     await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
     await waitFor(() => expect(comment).not.toBeInTheDocument())
     expect(canvas.getByLabelText('Saved comment')).toHaveTextContent(

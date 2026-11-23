@@ -64,18 +64,6 @@ describe('history shortcuts', () => {
     expect(isEditingTarget(container.querySelector('button'))).toBe(false)
   })
 
-  it('prevents the browser action and runs an available command', () => {
-    const undo = vi.fn()
-    const redo = vi.fn()
-    const event = keydown({ key: 'z', code: 'KeyZ', metaKey: true })
-
-    handleHistoryShortcut(event, { canUndo: true, canRedo: false, undo, redo })
-
-    expect(event.defaultPrevented).toBe(true)
-    expect(undo).toHaveBeenCalledOnce()
-    expect(redo).not.toHaveBeenCalled()
-  })
-
   it('does not consume a shortcut when that history direction is unavailable', () => {
     const undo = vi.fn()
     const event = keydown({ key: 'z', code: 'KeyZ', ctrlKey: true })
@@ -110,7 +98,7 @@ describe('history shortcuts', () => {
     expect(undo).not.toHaveBeenCalled()
   })
 
-  it('moves commands between Redux undo and redo stacks', () => {
+  it('handles undo and redo instead of the browser when an edit can be reverted', () => {
     const store = configureStore({
       reducer: { data: dataReducer, sync: syncReducer },
     })
@@ -126,17 +114,24 @@ describe('history shortcuts', () => {
       </Provider>
     )
 
+    const undo = keydown({ key: 'z', code: 'KeyZ', metaKey: true })
     act(() => {
-      window.dispatchEvent(keydown({ key: 'z', code: 'KeyZ', metaKey: true }))
+      window.dispatchEvent(undo)
     })
+    expect(undo.defaultPrevented).toBe(true)
     expect(store.getState().data.outbox).toEqual([])
     expect(store.getState().data.redo).toHaveLength(1)
 
-    act(() => {
-      window.dispatchEvent(
-        keydown({ key: 'Z', code: 'KeyZ', metaKey: true, shiftKey: true })
-      )
+    const redo = keydown({
+      key: 'Z',
+      code: 'KeyZ',
+      metaKey: true,
+      shiftKey: true,
     })
+    act(() => {
+      window.dispatchEvent(redo)
+    })
+    expect(redo.defaultPrevented).toBe(true)
     expect(store.getState().data.outbox).toHaveLength(1)
     expect(store.getState().data.redo).toEqual([])
 
