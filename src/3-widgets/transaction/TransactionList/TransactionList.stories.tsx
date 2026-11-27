@@ -3,21 +3,24 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import type { core } from '@/zerro-core/redux'
 import { TransactionList } from './index'
+import { useListTransactions } from './useListTransactions'
 import {
   TransactionListDrawer,
   useTransactionDrawer,
 } from '@/3-widgets/global/TransactionListDrawer'
 
-function Example() {
+function Example({ transactionIds }: { transactionIds?: string[] }) {
   const [query, setQuery] = useState<core.transactions.TTransactionQuery>({
     clauses: [],
   })
   const [search, setSearch] = useState('')
+  const list = useListTransactions(transactionIds, { query, search })
   const [opened, setOpened] = useState('')
   const [checked, setChecked] = useState<string[]>([])
   return (
     <div className="h-[600px] w-[560px] max-w-[95vw]">
       <TransactionList
+        list={list}
         className="h-full"
         onTrOpen={setOpened}
         view={{
@@ -34,9 +37,6 @@ function Example() {
       />
       <output aria-label="Opened operation" className="sr-only">
         {opened}
-      </output>
-      <output aria-label="Applied query" className="sr-only">
-        {JSON.stringify({ query, search })}
       </output>
       <output aria-label="Selected operations" className="sr-only">
         {JSON.stringify(checked)}
@@ -55,6 +55,59 @@ const meta = {
 } satisfies Meta<typeof Example>
 export default meta
 type Story = StoryObj<typeof meta>
+
+export const NewQuickFilter: Story = {
+  render: () => <Example transactionIds={['lunch', 'dinner']} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await expect(
+      await canvas.findByRole('button', { name: 'New 2' })
+    ).toBeVisible()
+    expect(canvas.queryByRole('button', { name: /^No Category \d/ })).toBeNull()
+    fireEvent.contextMenu(canvas.getByText('Dinner groceries'))
+    await userEvent.click(
+      await body.findByRole('menuitem', { name: 'Mark as viewed' })
+    )
+    await userEvent.click(await canvas.findByRole('button', { name: 'New 1' }))
+    await waitFor(() =>
+      expect(canvas.queryByText('Dinner groceries')).toBeNull()
+    )
+    await expect(canvas.getByText('Lunch groceries')).toBeVisible()
+    fireEvent.contextMenu(canvas.getByText('Lunch groceries'))
+    await userEvent.click(
+      await body.findByRole('menuitem', { name: 'Mark as viewed' })
+    )
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove New' }))
+    await expect(await canvas.findByText('Dinner groceries')).toBeVisible()
+    await expect(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    ).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: /^New \d/ })).toBeNull()
+  },
+}
+
+export const NoCategoryQuickFilter: Story = {
+  parameters: {
+    app: { scenario: 'uncategorized-transaction', route: '/transactions' },
+  },
+  render: () => <Example transactionIds={['dinner', 'legacy']} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const quickFilter = await canvas.findByRole('button', {
+      name: 'No Category 1',
+    })
+    await userEvent.click(quickFilter)
+    const list = within(canvas.getByRole('list', { name: 'Transactions' }))
+    await waitFor(() => expect(list.queryByText('Dinner groceries')).toBeNull())
+    expect(list.getByText('Coffee')).toBeVisible()
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Remove No Category' })
+    )
+    expect(await canvas.findByText('Dinner groceries')).toBeVisible()
+    expect(canvas.getByRole('button', { name: 'No Category 1' })).toBeVisible()
+  },
+}
 
 export const RangeSelection: Story = {
   tags: ['!dev', '!autodocs'],
@@ -159,7 +212,7 @@ export const FilteredRangeSelection: Story = {
       canvas.getByRole('button', { name: 'Search transactions' })
     )
     await user.type(
-      canvas.getByRole('textbox', { name: 'Search transactions' }),
+      canvas.getByRole('combobox', { name: 'Search transactions' }),
       'lunch'
     )
     await user.keyboard('{Enter}')
@@ -245,7 +298,7 @@ export const SearchAndMerchant: Story = {
       canvas.getByRole('button', { name: 'Search transactions' })
     )
     await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Search transactions' }),
+      canvas.getByRole('combobox', { name: 'Search transactions' }),
       'lunch'
     )
     await userEvent.keyboard('{Enter}')
@@ -268,7 +321,6 @@ export const SearchAndMerchant: Story = {
     await expect(
       canvas.getByRole('combobox', { name: 'Lidl' })
     ).toBeInTheDocument()
-    await expect(canvas.queryByRole('textbox')).toBeNull()
     await userEvent.click(
       canvas
         .getAllByText('Lidl')
@@ -293,13 +345,109 @@ export const SearchAndMerchant: Story = {
     await expect(
       canvas.getAllByRole('button', { name: 'Legacy café' })[0]
     ).toBeInTheDocument()
-    await expect(canvas.queryByRole('textbox')).toBeNull()
   },
 }
 
 export const MobileContext: Story = {
   ...SearchAndMerchant,
   globals: { viewport: { value: 'zerro499' } },
+}
+
+export const PreviewDate: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    )
+    await userEvent.type(
+      canvas.getByRole('combobox', { name: 'Search transactions' }),
+      'dat'
+    )
+    await waitFor(() =>
+      expect(canvas.queryByText('Lunch elsewhere')).toBeNull()
+    )
+    const body = within(canvasElement.ownerDocument.body)
+    const date = body.getByRole('option', { name: 'Date' })
+    await userEvent.hover(date)
+    await expect(date).toHaveAttribute('aria-selected', 'true')
+    await expect(canvas.queryByText('Lunch elsewhere')).toBeNull()
+    await expect(await canvas.findByText('Lunch elsewhere')).toBeVisible()
+    await userEvent.keyboard('{ArrowUp}')
+    await expect(date).toHaveAttribute('aria-selected', 'false')
+    await expect(canvas.getByText('Lunch elsewhere')).toBeVisible()
+    await waitFor(() =>
+      expect(canvas.queryByText('Lunch elsewhere')).toBeNull()
+    )
+    await userEvent.keyboard('{ArrowDown}{Enter}')
+    await expect(
+      await within(canvasElement.ownerDocument.body).findByLabelText(
+        'Date From'
+      )
+    ).toBeVisible()
+    await userEvent.keyboard('{Escape}')
+    await expect(
+      await canvas.findByRole('button', { name: 'Search transactions' })
+    ).toBeVisible()
+    await expect(canvas.getByText('Lunch elsewhere')).toBeVisible()
+  },
+}
+
+export const PreviewScrollPosition: Story = {
+  parameters: {
+    app: { scenario: 'transaction-navigation', route: '/transactions' },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const list = await canvas.findByRole('list', { name: 'Transactions' })
+    const viewport = list.closest<HTMLElement>('.kit-scroll-viewport')!
+    await waitFor(() => expect(viewport.scrollHeight).toBeGreaterThan(4000))
+    const originalHeight = viewport.scrollHeight
+    viewport.scrollTop = 1900
+    fireEvent.scroll(viewport)
+    const open = async () => {
+      await userEvent.click(
+        canvas.getByRole('button', { name: 'Search transactions' })
+      )
+      return canvas.getByRole('combobox', { name: 'Search transactions' })
+    }
+
+    const search = await open()
+    await userEvent.type(search, 'date')
+    await waitFor(() =>
+      expect(within(list).queryAllByRole('listitem')).toHaveLength(0)
+    )
+    await userEvent.hover(
+      within(canvasElement.ownerDocument.body).getByRole('option', {
+        name: 'Date',
+      })
+    )
+    await waitFor(() => expect(viewport.scrollTop).toBe(1900))
+    viewport.scrollTop = 2100
+    fireEvent.scroll(viewport)
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(viewport.scrollTop).toBe(2100))
+
+    const narrowing = await open()
+    await userEvent.type(narrowing, 'purchase 79')
+    await waitFor(() =>
+      expect(within(list).getAllByRole('checkbox')).toHaveLength(1)
+    )
+    expect(viewport.scrollTop).toBe(0)
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(viewport.scrollTop).toBe(2100))
+
+    const next = await open()
+    await userEvent.type(next, 'purchase 7')
+    await waitFor(() => {
+      expect(viewport.scrollHeight).toBeLessThan(originalHeight)
+      expect(viewport.scrollHeight - viewport.clientHeight).toBeGreaterThan(200)
+    })
+    viewport.scrollTop = 200
+    fireEvent.scroll(viewport)
+    await userEvent.keyboard('{Enter}')
+    await canvas.findByRole('button', { name: 'purchase 7' })
+    expect(viewport.scrollTop).toBe(200)
+  },
 }
 
 export const CrossFieldSearch: Story = {
@@ -309,8 +457,8 @@ export const CrossFieldSearch: Story = {
       canvas.getByRole('button', { name: 'Search transactions' })
     )
     await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Search transactions' }),
-      'lidl food usd 12,00 lunch'
+      canvas.getByRole('combobox', { name: 'Search transactions' }),
+      'дшвд food usd 12,00 lunch'
     )
     await waitFor(() =>
       expect(canvas.queryByText('Lunch elsewhere')).toBeNull()
@@ -407,11 +555,8 @@ export const DesktopMerchantClick: Story = {
     ).toBeCloseTo(8)
     await userEvent.click(merchant)
     await waitFor(() =>
-      expect(canvas.getByLabelText('Applied query')).toHaveTextContent(
-        'merchant'
-      )
+      expect(canvas.getByRole('combobox', { name: 'Lidl' })).toBeVisible()
     )
-    expect(canvas.getByRole('combobox', { name: 'Lidl' })).toBeInTheDocument()
     expect(canvas.getByLabelText('Opened operation')).toBeEmptyDOMElement()
     expect(canvas.queryByText('Lunch elsewhere')).toBeNull()
   },
@@ -424,8 +569,8 @@ export const MobileMerchantText: Story = {
     expect(canvas.queryByRole('button', { name: 'Lidl' })).toBeNull()
     await userEvent.click(canvas.getAllByText('Lidl')[0])
     expect(canvas.getByLabelText('Opened operation')).not.toBeEmptyDOMElement()
-    expect(canvas.getByLabelText('Applied query')).not.toHaveTextContent(
-      'merchant'
-    )
+    expect(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    ).toBeVisible()
   },
 }

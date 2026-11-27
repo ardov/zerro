@@ -1,4 +1,4 @@
-import { searchQueries } from '@/6-shared/helpers/searchQueries'
+import { searchQueries } from '@/zerro-core/search'
 import { core } from '@/zerro-core/redux'
 
 type TSearchUsage = {

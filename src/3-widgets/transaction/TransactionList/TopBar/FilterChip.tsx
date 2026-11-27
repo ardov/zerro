@@ -1,8 +1,14 @@
-import { useEffect, useLayoutEffect, useRef, useState, type Ref } from 'react'
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type ReactElement,
+  type Ref,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePopup } from '@/6-shared/overlays'
 import { Chip } from '@/6-shared/ui/kit/Chip'
-import { EnvelopeIcon, TransferIcon } from '@/6-shared/ui/Icons'
+import { EnvelopeIcon, SearchIcon, TransferIcon } from '@/6-shared/ui/Icons'
 import { Popover } from '@/6-shared/ui/kit/Popover'
 import { Select } from '@/6-shared/ui/kit/Select'
 import { FilterIcon } from './FilterIcon'
@@ -18,30 +24,28 @@ import {
   getChangedPeriodLabel,
   isEmptyClause,
   type Clause,
-  type DateClause,
 } from './filterModel'
 
 export function FilterChip({
   clause,
   label,
   autoOpen,
+  draftTrigger,
+  onEditorClose,
   onChange,
   onRemove,
   ref,
 }: {
   clause: Clause
   label: string
-  autoOpen: boolean
+  autoOpen?: boolean
+  draftTrigger?: ReactElement
+  onEditorClose?: () => void
   onChange: (clause: Clause) => void
   onRemove: () => void
   ref: Ref<HTMLElement>
 }) {
   const { t } = useTranslation('filterDrawer')
-  const [dates, setDates] = useState<DateClause>(() =>
-    clause.kind === 'date'
-      ? core.transactions.normalizeDateFilter(clause)
-      : { kind: 'date' }
-  )
   const popup = usePopup()
   const wasOpen = useRef(false)
   useLayoutEffect(() => {
@@ -49,16 +53,17 @@ export function FilterChip({
     wasOpen.current = popup.open
     // Inspect the committed render so choosing a value never looks like
     // dismissing an empty draft.
-    if (closed && isEmptyClause(clause)) onRemove()
-  }, [popup.open, clause, onRemove])
+    if (closed) {
+      if (onEditorClose) onEditorClose()
+      else if (isEmptyClause(clause)) onRemove()
+    }
+  }, [popup.open, clause, onRemove, onEditorClose])
   const started = useRef(false)
   // Open after OverlayHost has synchronized the arriving history entry.
   // A child layout effect opens too early and the host can dismiss its popup.
   useEffect(() => {
-    if (autoOpen && !started.current) {
-      started.current = true
-      popup.setOpen(true)
-    }
+    if (autoOpen && !started.current) popup.setOpen(true)
+    started.current = !!autoOpen
   }, [autoOpen, popup])
   const isEnvelope =
     clause.kind === 'activity' &&
@@ -66,27 +71,24 @@ export function FilterChip({
   const isTransferDifference =
     clause.kind === 'activity' &&
     clause.mode === core.transactions.TrFilterMode.TransferFees
-  const chip = (
+  const chip = draftTrigger ?? (
     <Chip
       className="min-w-0 shrink"
       ref={ref}
       variant={isEmptyClause(clause) ? 'outline-draft' : 'filled'}
+      removeOnHover
       start={
-        isEnvelope ? (
-          <EnvelopeIcon />
-        ) : isTransferDifference ? (
+        isTransferDifference ? (
           <TransferIcon />
-        ) : clause.kind === 'date' ||
-          clause.kind === 'merchant' ||
-          clause.kind === 'debtor' ||
-          clause.kind === 'changed' ? (
+        ) : clause.kind === 'activity' ? (
+          <EnvelopeIcon />
+        ) : clause.kind === 'search' ? (
+          <SearchIcon />
+        ) : (
           <FilterIcon kind={clause.kind} />
-        ) : undefined
+        )
       }
-      onClick={() => {
-        if (clause.kind === 'date' && !popup.open)
-          setDates(core.transactions.normalizeDateFilter(clause))
-      }}
+      onClick={() => {}}
       onRemove={onRemove}
     >
       {isEnvelope ? (
@@ -178,13 +180,9 @@ export function FilterChip({
     case 'date':
       return (
         <Popover label={t('date')} popup={popup} trigger={chip}>
-          <DateFilterEditor
-            value={dates}
-            onChange={next => {
-              setDates(next)
-              onChange(core.transactions.normalizeDateFilter(next))
-            }}
-          />
+          {popup.open && (
+            <DateFilterEditor clause={clause} onChange={onChange} />
+          )}
         </Popover>
       )
     default:

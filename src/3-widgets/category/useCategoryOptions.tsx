@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
 import type { TTagId } from '@/6-shared/types'
 import { CategoryIcon } from '@/6-shared/ui/CategoryIcon'
@@ -12,7 +11,7 @@ export function useCategoryOptions(
   options: Omit<CategoryChoicesOptions, 'query'>
 ) {
   const { t } = useTranslation()
-  const tags = useAppSelector(core.tags.selectPopulated)
+  const tags = core.tags.usePopulated()
   const { categories, items, byId } = useMemo(() => {
     const categories = Object.values(tags)
     const items = categories.map((category): SelectOption<TTagId> => ({

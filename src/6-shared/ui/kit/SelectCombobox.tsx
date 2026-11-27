@@ -2,7 +2,7 @@ import { useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Combobox } from '@base-ui/react/combobox'
 import { Field } from '@base-ui/react/field'
 import { ChevronDown, Search } from 'lucide-react'
-import { searchQueries } from '@/6-shared/helpers/searchQueries'
+import { searchQueries } from '@/zerro-core/search'
 import type { SelectItem, SelectOption, SelectControlProps } from './Select'
 import {
   useSelectField,

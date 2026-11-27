@@ -81,24 +81,31 @@ export function AmountFilterEditor(props: {
 }
 
 export function DateFilterEditor({
-  value,
+  clause,
   onChange,
 }: {
-  value: DateClause
+  clause: DateClause
   onChange: (value: DateClause) => void
 }) {
   const { t } = useTranslation('filterDrawer')
+  const [value, setValue] = useState(() =>
+    core.transactions.normalizeDateFilter(clause)
+  )
+  const update = (next: DateClause) => {
+    setValue(next)
+    onChange(core.transactions.normalizeDateFilter(next))
+  }
   return (
     <div className="flex flex-col gap-2">
       <DateBoundField
         label={t('dateFrom')}
         value={value.from}
-        onChange={from => onChange({ ...value, from })}
+        onChange={from => update({ ...value, from })}
       />
       <DateBoundField
         label={t('dateTo')}
         value={value.to}
-        onChange={to => onChange({ ...value, to })}
+        onChange={to => update({ ...value, to })}
       />
     </div>
   )

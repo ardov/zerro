@@ -19,11 +19,10 @@ export type TTagPopulated = TTag & {
   group?: string | null
 }
 
-export const nullTag: TTag = {
+const nullTag: Omit<TTag, 'title'> = {
   id: 'null',
   changed: 0,
   user: 0,
-  title: t('common:tagNull'),
   icon: null,
   budgetIncome: true,
   budgetOutcome: true,
@@ -37,10 +36,16 @@ export const nullTag: TTag = {
   picture: null,
 }
 
-export function presentTags(rawTags: ById<TTag>): ById<TTagPopulated> {
+export function presentTags(
+  rawTags: ById<TTag>,
+  language?: string
+): ById<TTagPopulated> {
   const names: Record<string, number> = {}
   const populated: ById<TTagPopulated> = {}
-  const tags: ById<TTag> = { ...rawTags, null: nullTag }
+  const tags: ById<TTag> = {
+    ...rawTags,
+    null: { ...nullTag, title: t('common:tagNull', { lng: language }) },
+  }
 
   Object.values(rawTags).forEach(tag => {
     const name = getTagName(tag)

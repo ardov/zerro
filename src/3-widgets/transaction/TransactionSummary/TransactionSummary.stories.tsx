@@ -3,11 +3,23 @@ import { expect, userEvent, within } from 'storybook/test'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
-import { TransactionSummary } from '.'
+import { TransactionSummary, type TransactionSummaryProps } from '.'
+import { useListTransactions } from '../TransactionList/useListTransactions'
+import type { TTransactionId } from '@/6-shared/types'
+
+function Example({
+  transactionIds,
+  ...props
+}: Omit<TransactionSummaryProps, 'list'> & {
+  transactionIds?: TTransactionId[]
+}) {
+  const list = useListTransactions(transactionIds, props)
+  return <TransactionSummary {...props} list={list} />
+}
 
 const meta = {
   title: 'App/Transactions/TransactionSummary',
-  component: TransactionSummary,
+  component: Example,
   parameters: {
     layout: 'centered',
     app: { scenario: 'demo', route: '/transactions' },
@@ -20,7 +32,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof TransactionSummary>
+} satisfies Meta<typeof Example>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -30,7 +42,7 @@ export const Everything: Story = {}
 export const Selection: Story = {
   render: args => {
     const ids = useAppSelector(core.transactions.selectIds)
-    return <TransactionSummary {...args} checked={ids.slice(0, 2)} />
+    return <Example {...args} checked={ids.slice(0, 2)} />
   },
 }
 
@@ -50,7 +62,7 @@ export const LoneIncome: Story = {
       )
       return [...spread, ofType('income')[0]].map(tr => tr.id)
     }, [transactions])
-    return <TransactionSummary {...args} transactionIds={ids} />
+    return <Example {...args} transactionIds={ids} />
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)

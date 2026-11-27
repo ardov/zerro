@@ -1,3 +1,4 @@
+import { useListTransactions } from '@/3-widgets/transaction/TransactionList/useListTransactions'
 import { useCallback } from 'react'
 import { TransactionList } from '@/3-widgets/transaction/TransactionList'
 import {
@@ -26,6 +27,7 @@ export default function TransactionsView() {
   const docked = layout.visible.includes('detail')
   const accountsPanelFits = layout.visible.includes('accounts')
   const view = useTransactionsPageView()
+  const list = useListTransactions(undefined, view)
   const dispatch = useAppDispatch()
   const summaryChoices = useAppSelector(selectTransactionsPageView).summary
   const setSummaryChoices = useCallback(
@@ -66,6 +68,7 @@ export default function TransactionsView() {
 
         <Panel>
           <TransactionList
+            list={list}
             view={view}
             className="grow"
             onTrOpen={handleTrOpen}
@@ -79,6 +82,7 @@ export default function TransactionsView() {
           summaryByDefault={summaryByDefault}
           summary={onClose => (
             <TransactionSummary
+              list={list}
               query={view.query}
               search={view.search}
               checked={view.checked}

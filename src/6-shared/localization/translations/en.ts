@@ -830,6 +830,7 @@ export const en: typeof ru = {
 
   filterDrawer: {
     search: 'Search transactions',
+    searchFor: 'Search for “{{text}}”',
     merchant: 'Merchant',
     noMerchant: 'No merchant',
     findMerchant: 'Find merchant',

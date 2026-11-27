@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { CalendarIcon } from '@/6-shared/ui/Icons'
 import { Chip } from './Chip'
+import { breakpoints } from '../theme/breakpoints'
 import { TagIcon } from '../TagIcon'
 import { CategoryIcon } from '../CategoryIcon'
 
@@ -33,6 +34,33 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Playground: Story = {}
+export const FilterCondition: Story = {
+  args: {
+    children: 'Date',
+    start: <CalendarIcon />,
+    removeOnHover: true,
+    onClick: fn(),
+    onRemove: fn(),
+  },
+  play: ({ canvas }) => {
+    const chip = canvas.getByRole('button', { name: 'Date' })
+    const remove = canvas.getByRole('button', { name: 'Remove Date' })
+    const icon = chip.querySelector('[data-chip-icon]')!.getBoundingClientRect()
+    const button = remove.getBoundingClientRect()
+    if (
+      matchMedia(
+        `(min-width: ${breakpoints.md}px) and (hover: hover) and (pointer: fine)`
+      ).matches
+    ) {
+      expect(button.x + button.width / 2).toBeCloseTo(icon.x + icon.width / 2)
+    } else {
+      expect(button.x).toBeGreaterThanOrEqual(
+        chip.getBoundingClientRect().right
+      )
+    }
+  },
+}
+
 export const FadeLabels: Story = {
   render: () => (
     <div className="flex w-48 flex-col gap-3">

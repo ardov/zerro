@@ -9,6 +9,7 @@ import {
   within,
 } from 'storybook/test'
 import { formatDate } from '@/6-shared/helpers/date'
+import { i18n } from '@/6-shared/localization'
 import { core } from '@/zerro-core/redux'
 import Filter from './Filter'
 
@@ -57,6 +58,54 @@ function FilterHarness(props: {
 }
 
 export const Empty: Story = { render: () => <FilterHarness /> }
+
+export const MobileQuickFilters: Story = {
+  parameters: { layout: 'fullscreen' },
+  globals: { locale: 'ru', viewport: { value: 'iphone12' } },
+  render: () => (
+    <div className="px-2 pt-2">
+      <Filter
+        query={{ clauses: [] }}
+        search=""
+        quickFilters={[
+          { clause: { kind: 'viewed', value: false }, count: 12 },
+          { clause: { kind: 'tag', ids: ['null'] }, count: 48 },
+        ]}
+        summary={{ shown: false, onToggle: fn() }}
+        onQueryChange={fn()}
+        onSearchChange={fn()}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    if (!('__vitest_browser_runner__' in window)) return
+    const { page } = await import('vitest/browser')
+    const canvas = within(canvasElement)
+    const newFilter = await canvas.findByRole('button', { name: 'Новые 12' })
+    const noCategory = canvas.getByRole('button', { name: 'Без категории 48' })
+    const search = canvas.getByRole('button', { name: 'Поиск операций' })
+    const original = { width: window.innerWidth, height: window.innerHeight }
+    try {
+      for (const width of [360, 375, 388, 435, 436]) {
+        await page.viewport(width, 844)
+        await waitFor(() => {
+          for (const chip of [newFilter, noCategory]) {
+            expect(getComputedStyle(chip).paddingInlineStart).toBe('16px')
+            expect(getComputedStyle(chip).paddingInlineEnd).toBe('16px')
+            const onFirstLine =
+              chip.getBoundingClientRect().top ===
+              search.getBoundingClientRect().top
+            expect(onFirstLine).toBe(chip === newFilter || width >= 388)
+            const number = within(chip).getByText(/^(12|48)$/)
+            expect(number.getBoundingClientRect().width > 1).toBe(width >= 436)
+          }
+        })
+      }
+    } finally {
+      await page.viewport(original.width, original.height)
+    }
+  },
+}
 
 export const SearchAndFilters: Story = {
   render: () => (
@@ -125,7 +174,7 @@ export const ChipRemoval: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Remove Food' }))
     await waitFor(() => expect(second).not.toBeInTheDocument())
     await expect(
-      within(canvasElement).getByRole('button', { name: 'Add filter' })
+      within(canvasElement).getByRole('button', { name: 'Search transactions' })
     ).toHaveFocus()
   },
 }
@@ -142,9 +191,11 @@ export const DirectCategorySelection: Story = {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
     await step('Add opens the category list directly', async () => {
-      await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
       await userEvent.click(
-        await body.findByRole('menuitem', { name: 'Category' })
+        canvas.getByRole('button', { name: 'Search transactions' })
+      )
+      await userEvent.click(
+        await body.findByRole('option', { name: 'Category' })
       )
       await expect(
         await body.findByRole('combobox', { name: 'Select category' })
@@ -175,6 +226,45 @@ export const DirectCategorySelection: Story = {
         ).toHaveAttribute('aria-selected', 'true')
       }
     )
+  },
+}
+
+export const LocalizedUncategorizedFilter: Story = {
+  render: () => <FilterHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    const originalLanguage = i18n.language
+    try {
+      await userEvent.click(
+        canvas.getByRole('button', { name: 'Search transactions' })
+      )
+      await i18n.changeLanguage('ru')
+      const field = await canvas.findByRole('combobox', {
+        name: 'Поиск операций',
+      })
+      await userEvent.type(field, 'Без категории')
+      await userEvent.click(
+        await body.findByRole('option', { name: 'Без категории Категория' })
+      )
+      const chip = await canvas.findByRole('combobox', {
+        name: 'Без категории',
+      })
+      await userEvent.click(chip)
+      await expect(
+        await body.findByRole('option', { name: 'Без категории' })
+      ).toHaveAttribute('aria-selected', 'true')
+      await i18n.changeLanguage('en')
+      await expect(
+        await body.findByRole('option', { name: 'No Category' })
+      ).toHaveAttribute('aria-selected', 'true')
+      await userEvent.keyboard('{Escape}')
+      await expect(
+        await canvas.findByRole('combobox', { name: 'No Category' })
+      ).toBeVisible()
+    } finally {
+      await i18n.changeLanguage(originalLanguage)
+    }
   },
 }
 
@@ -215,38 +305,6 @@ export const CategorySearch: Story = {
   },
 }
 
-export const EmptyCategoryCleanup: Story = {
-  render: () => (
-    <FilterHarness
-      initialQuery={{ clauses: [{ kind: 'tag', ids: ['Food'] }] }}
-    />
-  ),
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-    const body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(canvas.getByRole('combobox', { name: 'Food' }))
-    await step('Empty selection retains its open popup', async () => {
-      await userEvent.click(await body.findByRole('option', { name: 'Food' }))
-      expect(readQuery(canvasElement).clauses).toEqual([
-        { kind: 'tag', ids: [] },
-      ])
-      await expect(body.getByRole('listbox')).toBeVisible()
-    })
-    await step(
-      'Closing removes the empty filter and restores focus',
-      async () => {
-        await userEvent.keyboard('{Escape}')
-        await waitFor(() =>
-          expect(readQuery(canvasElement).clauses).toEqual([])
-        )
-        await expect(
-          canvas.getByRole('button', { name: 'Add filter' })
-        ).toHaveFocus()
-      }
-    )
-  },
-}
-
 export const EmptyAccountCleanup: Story = {
   render: () => (
     <FilterHarness
@@ -265,9 +323,8 @@ export const EmptyAccountCleanup: Story = {
       await userEvent.click(
         await body.findByRole('option', { name: /^HSBC USD/ })
       )
-      expect(readQuery(canvasElement).clauses).toEqual([
-        { kind: 'account', ids: [] },
-      ])
+      await expect(body.getByRole('listbox')).toBeVisible()
+      expect(readQuery(canvasElement).clauses).toEqual([])
     })
     await step(
       'Closing the editor removes its empty chip and restores focus',
@@ -280,7 +337,7 @@ export const EmptyAccountCleanup: Story = {
           expect(readQuery(canvasElement).clauses).toEqual([])
         )
         await expect(
-          canvas.getByRole('button', { name: 'Add filter' })
+          canvas.getByRole('button', { name: 'Search transactions' })
         ).toHaveFocus()
       }
     )
@@ -292,8 +349,10 @@ export const DirectTypeSelection: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await userEvent.click(await body.findByRole('menuitem', { name: 'Type' }))
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    )
+    await userEvent.click(await body.findByRole('option', { name: 'Type' }))
     await userEvent.click(await body.findByRole('option', { name: 'Income' }))
     await userEvent.click(body.getByRole('option', { name: 'Expense' }))
     expect(readQuery(canvasElement).clauses[0].values).toHaveLength(2)
@@ -310,8 +369,10 @@ export const AmountRange: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await userEvent.click(await body.findByText('Amount', { exact: true }))
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    )
+    await userEvent.click(await body.findByRole('option', { name: 'Amount' }))
     const from = await body.findByRole('spinbutton', { name: 'Amount from' })
     await userEvent.type(from, '100')
     await userEvent.type(
@@ -337,7 +398,7 @@ export const AmountRange: Story = {
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(readQuery(canvasElement).clauses).toEqual([]))
     await expect(
-      canvas.getByRole('button', { name: 'Add filter' })
+      canvas.getByRole('button', { name: 'Search transactions' })
     ).toHaveFocus()
   },
 }
@@ -351,39 +412,22 @@ export const InlineSearch: Story = {
   render: () => <FilterHarness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvas.queryByRole('textbox')).toBeNull()
-    const add = canvas.getByRole('button', { name: 'Add filter' })
-    await expect(add).toHaveTextContent('Add filter')
     await userEvent.click(
       canvas.getByRole('button', { name: 'Search transactions' })
     )
-    let input = canvas.getByRole('textbox', { name: 'Search transactions' })
-    await expect(input).toHaveFocus()
+    const input = canvas.getByRole('combobox', { name: 'Search transactions' })
     await userEvent.type(input, 'Lidl groceries 12,00')
-    await expect(canvas.getByLabelText('Search query')).toHaveTextContent(
-      'Lidl groceries 12,00'
-    )
     fireEvent.keyDown(input, { key: 'Enter', isComposing: true })
-    await expect(input).toBeInTheDocument()
+    await expect(input).toHaveFocus()
     await userEvent.keyboard('{Enter}')
-    let chip = canvas.getByRole('button', { name: 'Lidl groceries 12,00' })
-    await waitFor(() => expect(chip).toHaveFocus())
-    await expect(
-      canvas.getByRole('button', { name: 'Add filter' })
-    ).not.toHaveTextContent('Add filter')
-    await userEvent.click(chip)
-    input = canvas.getByRole('textbox', { name: 'Search transactions' })
-    await userEvent.type(input, ' lunch')
-    await userEvent.keyboard('{Escape}')
-    chip = canvas.getByRole('button', { name: 'Lidl groceries 12,00 lunch' })
-    await waitFor(() => expect(chip).toHaveFocus())
-    await userEvent.keyboard('{Delete}')
+    const chip = await canvas.findByRole('button', {
+      name: 'Lidl groceries 12,00',
+    })
+    chip.focus()
+    await userEvent.keyboard('{Backspace}')
     await expect(
       canvas.getByRole('button', { name: 'Search transactions' })
-    ).toBeInTheDocument()
-    await expect(
-      canvas.getByRole('button', { name: 'Add filter' })
-    ).toHaveTextContent('Add filter')
+    ).toBeVisible()
   },
 }
 
@@ -392,8 +436,10 @@ export const DateRange: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await userEvent.click(await body.findByText('Date', { exact: true }))
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    )
+    await userEvent.click(await body.findByRole('option', { name: 'Date' }))
     const from = await body.findByLabelText('Date From'),
       to = body.getByLabelText('Date To')
     fireEvent.change(from, { target: { value: '2026-10-20' } })
@@ -433,7 +479,7 @@ export const DateRange: Story = {
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(readQuery(canvasElement).clauses).toEqual([]))
     await expect(
-      canvas.getByRole('button', { name: 'Add filter' })
+      canvas.getByRole('button', { name: 'Search transactions' })
     ).toHaveFocus()
   },
 }
@@ -493,9 +539,7 @@ export const MerchantSelection: Story = {
     const canvas = within(canvasElement),
       body = within(canvasElement.ownerDocument.body)
     await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await userEvent.click(
-      await body.findByRole('menuitem', { name: 'Merchant' })
-    )
+    await userEvent.click(await body.findByRole('option', { name: 'Merchant' }))
     const input = await body.findByRole('combobox', { name: 'Find merchant' })
     await expect(input).toHaveFocus()
     const merchant = body
@@ -521,8 +565,9 @@ export const MerchantSelection: Story = {
       'lunch'
     )
     await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await body.findByRole('menu')
-    await expect(body.queryByRole('menuitem', { name: 'Merchant' })).toBeNull()
+    await expect(
+      await body.findByRole('option', { name: 'Merchant' })
+    ).toBeVisible()
     await userEvent.keyboard('{Escape}')
   },
 }
@@ -562,7 +607,7 @@ export const NarrowWrapping: Story = {
       canvasElement.clientWidth
     )
     await userEvent.click(search)
-    const input = canvas.getByRole('textbox', { name: 'Search transactions' })
+    const input = canvas.getByRole('combobox', { name: 'Search transactions' })
     await expect(input).toHaveFocus()
     await userEvent.type(input, ' more words')
     await expect(canvasElement.scrollWidth).toBeLessThanOrEqual(
@@ -608,57 +653,88 @@ export const LongLastChip: Story = {
 }
 
 export const SearchToFilter: Story = {
-  render: () => <FilterHarness />,
+  render: () => <FilterHarness initialSearch="coffee" />,
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement),
-      body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'Search transactions' })
-    )
-    await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Search transactions' }),
-      'coffee'
-    )
+    const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await waitFor(() =>
-      expect(body.getByRole('menuitem', { name: 'Account' })).toBeVisible()
+    await userEvent.type(
+      canvas.getByRole('combobox', { name: 'Search transactions' }),
+      '123'
     )
-    await userEvent.keyboard('{Escape}')
-    await expect(
-      canvas.getByRole('button', { name: 'coffee' })
-    ).toBeInTheDocument()
+    await userEvent.keyboard('{ArrowDown}{Enter}')
+    await waitFor(() =>
+      expect(readQuery(canvasElement).clauses).toEqual([
+        { kind: 'amount', gte: 123, lte: 123 },
+      ])
+    )
+    await expect(canvas.getByLabelText('Search query')).toHaveTextContent(
+      /^coffee$/
+    )
   },
 }
 
-export const SearchClearAndBlur: Story = {
+export const HistoryBack: Story = {
+  parameters: { historyShortcuts: true },
   render: () => <FilterHarness />,
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement),
-      body = within(canvasElement.ownerDocument.body)
+    const canvas = within(canvasElement)
     await userEvent.click(
       canvas.getByRole('button', { name: 'Search transactions' })
     )
     await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Search transactions' }),
-      'coffee'
+      canvas.getByRole('combobox', { name: 'Search transactions' }),
+      '123'
     )
-    await userEvent.click(canvas.getByRole('button', { name: 'Clear Field' }))
+    await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}')
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('button', { name: 'Search transactions' })
+      ).toHaveFocus()
+    )
+    await expect(canvas.getByLabelText('Search query')).toHaveTextContent(/^$/)
+  },
+}
+
+export const EditSearch: Story = {
+  render: () => <FilterHarness initialSearch="coffee" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'coffee' }))
+    await userEvent.keyboard('{End}house{Tab}{Escape}')
+    await expect(canvas.getByLabelText('Search query')).toHaveTextContent(
+      /^coffee$/
+    )
+    await userEvent.click(canvas.getByRole('button', { name: 'coffee' }))
+    await userEvent.clear(
+      canvas.getByRole('combobox', { name: 'Search transactions' })
+    )
+    await userEvent.keyboard('{Enter}')
     await waitFor(() =>
       expect(canvas.getByLabelText('Search query')).toHaveTextContent(/^$/)
     )
-    await waitFor(() => expect(canvas.queryByRole('textbox')).toBeNull())
+    await expect(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    ).toBeVisible()
+  },
+}
+
+export const SearchBlur: Story = {
+  render: () => <FilterHarness />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
     await userEvent.click(
       canvas.getByRole('button', { name: 'Search transactions' })
     )
-    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await userEvent.click(await body.findByRole('menuitem', { name: 'New' }))
-    await waitFor(() =>
-      expect(canvas.getByRole('button', { name: 'New' })).toBeInTheDocument()
+    await userEvent.type(
+      canvas.getByRole('combobox', { name: 'Search transactions' }),
+      '123'
     )
-    await expect(
-      canvas.getByRole('button', { name: 'Search transactions' })
-    ).toBeInTheDocument()
-    await expect(canvas.getByLabelText('Search query')).toHaveTextContent(/^$/)
+    await userEvent.keyboard('{ArrowDown}')
+    await userEvent.click(canvasElement)
+    await waitFor(() =>
+      expect(canvas.getByLabelText('Search query')).toHaveTextContent(/^123$/)
+    )
+    expect(readQuery(canvasElement).clauses).toEqual([])
   },
 }
 
@@ -673,7 +749,7 @@ export const LastModified: Story = {
     const body = within(canvasElement.ownerDocument.body)
     await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
     await userEvent.click(
-      await body.findByText('Last modified', { exact: true })
+      await body.findByRole('option', { name: 'Last modified' })
     )
     const choice = await body.findByRole('option', { name: 'Last 7 days' })
     changedQuery.mockClear()
@@ -682,9 +758,6 @@ export const LastModified: Story = {
       expect(body.queryByRole('listbox')).not.toBeInTheDocument()
     )
     await expect(changedQuery).toHaveBeenCalledTimes(1)
-    await expect(changedQuery).toHaveBeenCalledWith({
-      clauses: [{ kind: 'changed', period: '7d' }],
-    })
     await expect(
       canvas.getByRole('combobox', { name: 'Modified in 7d' })
     ).toHaveFocus()
@@ -718,8 +791,10 @@ export const AmountCurrency: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await userEvent.click(await body.findByText('Amount', { exact: true }))
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    )
+    await userEvent.click(await body.findByRole('option', { name: 'Amount' }))
     const from = await body.findByRole('spinbutton', { name: 'Amount from' })
     await expect(from).toHaveAccessibleDescription('From')
     await expect(
@@ -776,8 +851,10 @@ export const Debtor: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),
       body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await userEvent.click(await body.findByRole('menuitem', { name: 'Debtor' }))
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    )
+    await userEvent.click(await body.findByRole('option', { name: 'Debtor' }))
     const input = await body.findByRole('combobox', { name: 'Find debtor' })
     await userEvent.type(input, 'Alex')
     await userEvent.click(await body.findByRole('option', { name: 'Alex' }))
@@ -789,5 +866,52 @@ export const Debtor: Story = {
       expect(body.queryByRole('listbox')).not.toBeInTheDocument()
     )
     await expect(canvas.getByRole('combobox', { name: 'Alex' })).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
+    await userEvent.type(
+      canvas.getByRole('combobox', { name: 'Search transactions' }),
+      'Bob'
+    )
+    await userEvent.click(
+      await body.findByRole('option', { name: 'Bob Debtor' })
+    )
+    expect(readQuery(canvasElement).clauses).toEqual([
+      { kind: 'debtor', ids: ['alex', 'bob'] },
+    ])
+  },
+}
+
+export const LongMerchantList: Story = {
+  render: () => <FilterHarness />,
+  parameters: { app: { scenario: 'many-merchants', route: '/transactions' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    )
+    const field = canvas.getByRole('combobox', { name: 'Search transactions' })
+    await userEvent.type(field, 'store')
+    const list = body.getByRole('listbox')
+    const options = within(list)
+    await expect(
+      await options.findByRole('option', { name: 'Store 000 Merchant' })
+    ).toBeVisible()
+    expect(options.getAllByRole('option').length).toBeLessThan(50)
+    list.scrollTo({ top: list.scrollHeight })
+    const last = await options.findByRole('option', {
+      name: 'Store 999 Merchant',
+    })
+    expect(
+      canvasElement.ownerDocument.getElementById(
+        field.getAttribute('aria-activedescendant')!
+      )
+    ).toHaveAttribute('aria-selected', 'true')
+    fireEvent.pointerMove(last, { pointerType: 'mouse' })
+    await waitFor(() => expect(last).toHaveAttribute('aria-selected', 'true'))
+    fireEvent.pointerLeave(last, { pointerType: 'mouse' })
+    await userEvent.keyboard('{ArrowUp}{Enter}')
+    expect(readQuery(canvasElement).clauses).toEqual([
+      { kind: 'merchant', ids: ['998'] },
+    ])
   },
 }

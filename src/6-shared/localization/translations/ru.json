@@ -796,6 +796,7 @@
 
   "filterDrawer": {
     "search": "Поиск операций",
+    "searchFor": "Поиск «{{text}}»",
     "merchant": "Мерчант",
     "noMerchant": "Без мерчанта",
     "findMerchant": "Найти мерчанта",

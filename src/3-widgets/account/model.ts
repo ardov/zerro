@@ -1,5 +1,5 @@
 import type { TAccountId } from '@/6-shared/types'
-import { searchQueries } from '@/6-shared/helpers/searchQueries'
+import { searchQueries } from '@/zerro-core/search'
 
 export type AccountChoice = {
   id: TAccountId

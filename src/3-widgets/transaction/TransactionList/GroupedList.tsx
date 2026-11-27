@@ -5,6 +5,7 @@ import { ListRowSubheader } from '@/6-shared/ui/ListRow'
 import { ScrollArea } from '@/6-shared/ui/kit/ScrollArea'
 import { ButtonBase } from '@/6-shared/ui/kit/ButtonBase'
 import { formatDate, toISODate } from '@/6-shared/helpers/date'
+import { deepEqual } from '@/6-shared/helpers/deepEqual'
 import type { TDateDraft, TISODate, TTransactionId } from '@/6-shared/types'
 import { DialogSurface } from '@/6-shared/ui/kit/Dialog'
 import { useAsk, useAsked } from '@/6-shared/overlays'
@@ -29,6 +30,8 @@ type GroupedListProps = {
   initialDate?: TDateDraft
   restoredTopDate?: TISODate | null
   restoredScrollOffset?: number | null
+  /** The applied filters, or null while a temporary preview owns the viewport. */
+  scrollKey?: object | null
   onTopDateChange?: (date: TISODate) => void
   onScrollChange?: (date: TISODate, scrollOffset: number) => void
   header?: ReactNode
@@ -41,6 +44,7 @@ export const GroupedList: FC<GroupedListProps> = ({
   initialDate,
   restoredTopDate,
   restoredScrollOffset,
+  scrollKey,
   onTopDateChange,
   onScrollChange,
   header,
@@ -123,7 +127,19 @@ export const GroupedList: FC<GroupedListProps> = ({
   const pinned = offset > 0 && Boolean(topDate)
   const reportedDate = useRef<TISODate | null>(null)
   const reportedOffset = useRef<number | null>(null)
+  const lastScrollKey = useRef(scrollKey)
+  const wasPreviewing = useRef(false)
   useLayoutEffect(() => {
+    if (scrollKey === null) {
+      wasPreviewing.current = true
+      return
+    }
+    const restorePreviewOffset =
+      wasPreviewing.current && deepEqual(lastScrollKey.current, scrollKey)
+        ? reportedOffset.current
+        : null
+    wasPreviewing.current = false
+    lastScrollKey.current = scrollKey
     // Empty results collapse the native scroll offset. When rows return,
     // restore from the current props, not a target captured before filtering.
     if (!rows.length) {
@@ -131,6 +147,11 @@ export const GroupedList: FC<GroupedListProps> = ({
       return
     }
     if (measuredFilterHeight === null) return
+    if (restorePreviewOffset !== null) {
+      if (viewportRef.current?.scrollTop !== restorePreviewOffset)
+        virtualizer.scrollToOffset(restorePreviewOffset)
+      if (viewportRef.current?.scrollTop !== offset) return
+    }
     if (!positioned.current || initialDate !== previousInitialDate.current) {
       const restoreOffset =
         !positioned.current && !initialDate && restoredScrollOffset != null
@@ -168,22 +189,25 @@ export const GroupedList: FC<GroupedListProps> = ({
     virtualizer,
     offset,
     topDate,
+    scrollKey,
     onTopDateChange,
     onScrollChange,
   ])
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current
-    if (!viewport || !onScrollChange) return
+    if (!viewport || !onScrollChange || scrollKey === null) return
     // The virtualizer may skip React updates while scrolling within the same
     // row range. Capture every native offset so an immediate exit saves it too.
     const onScroll = () => {
-      if (positioned.current && rows.length && topDate)
+      if (positioned.current && rows.length && topDate) {
+        reportedOffset.current = viewport.scrollTop
         onScrollChange(topDate, viewport.scrollTop)
+      }
     }
     viewport.addEventListener('scroll', onScroll, { passive: true })
     return () => viewport.removeEventListener('scroll', onScroll)
-  }, [onScrollChange, rows.length, topDate])
+  }, [onScrollChange, rows.length, topDate, scrollKey])
 
   useLayoutEffect(() => {
     const active = document.activeElement

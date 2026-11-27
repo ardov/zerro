@@ -8,7 +8,7 @@ import { core } from '@/zerro-core/redux'
 
 import type { FC } from 'react'
 import { cn } from '@/6-shared/ui/shadcn/utils'
-import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
+import { useMemo, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { track } from '@/6-shared/analytics'
 import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
@@ -16,7 +16,7 @@ import { useBreakpointDown } from '@/6-shared/hooks/useBreakpointDown'
 import { getEventAnchor } from '@/3-widgets/global/shared/helpers'
 
 import { GroupedList } from './GroupedList'
-import { useListTransactions } from './useListTransactions'
+import type { ListTransactions } from './useListTransactions'
 import Filter from './TopBar/Filter'
 import type { SummaryToggle } from './TopBar/SummaryButton'
 import { upsertFilter } from './TopBar/filterModel'
@@ -29,11 +29,10 @@ import { useAppDispatch, useAppSelector } from '@/store'
 export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
   opened?: TTransactionId
-  transactionIds?: TTransactionId[]
-  initialQuery?: core.transactions.TTransactionQuery
+  list: ListTransactions
   hideFilter?: boolean
   initialDate?: TDateDraft
-  view?: TTransactionListView
+  view: TTransactionListView
   summary?: SummaryToggle
   className?: string
 }
@@ -54,8 +53,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   const {
     onTrOpen,
     opened,
-    transactionIds,
-    initialQuery,
+    list,
     hideFilter = false,
     initialDate,
     view,
@@ -65,20 +63,14 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   const isMobile = useBreakpointDown('md')
   const dispatch = useAppDispatch()
-  const [localQuery, setLocalQuery] =
-    useState<core.transactions.TTransactionQuery>(() => ({
-      clauses:
-        initialQuery?.clauses.filter(clause => clause.kind !== 'search') || [],
-    }))
-  const [localSearch, setLocalSearch] = useState(
-    () =>
-      initialQuery?.clauses.find(clause => clause.kind === 'search')?.value ||
-      ''
-  )
-  const query = view?.query ?? localQuery
-  const search = view?.search ?? localSearch
-  const onQueryChange = view?.onQueryChange ?? setLocalQuery
-  const onSearchChange = view?.onSearchChange ?? setLocalSearch
+  const {
+    query,
+    search,
+    onQueryChange,
+    onSearchChange,
+    checked: checkedIds,
+    onCheckedChange: setChecked,
+  } = view
   const onFilterByMerchant = useCallback(
     (merchant: string) => {
       onQueryChange(upsertFilter(query, { kind: 'merchant', ids: [merchant] }))
@@ -86,11 +78,8 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     [onQueryChange, query]
   )
 
-  const trList = useListTransactions(transactionIds, query, search)
+  const { transactions: trList, quickFilters, setPreview, previewing } = list
 
-  const [localChecked, setLocalChecked] = useState<TTransactionId[]>([])
-  const checkedIds = view?.checked ?? localChecked
-  const setChecked = view?.onCheckedChange ?? setLocalChecked
   const allTransactions = useAppSelector(core.transactions.selectAll)
   // A saved selection can outlive transactions removed while on another page.
   const checked = useMemo(
@@ -234,9 +223,12 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     ]
   )
 
+  const scrollKey = useMemo(() => ({ query, search }), [query, search])
   const header = !hideFilter ? (
     <div className="transaction-list-width w-full px-2 pt-2">
       <Filter
+        quickFilters={quickFilters}
+        onPreviewChange={setPreview}
         query={query}
         onQueryChange={onQueryChange}
         search={search}
@@ -259,9 +251,10 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           groups={groups}
           renderTransaction={renderTransaction}
           initialDate={initialDate}
-          restoredTopDate={view?.restoredTopDate}
-          restoredScrollOffset={view?.restoredScrollOffset}
-          onScrollChange={view?.onScrollChange}
+          restoredTopDate={view.restoredTopDate}
+          restoredScrollOffset={view.restoredScrollOffset}
+          scrollKey={previewing ? null : scrollKey}
+          onScrollChange={view.onScrollChange}
           header={header}
           emptyState={<EmptyState />}
         />

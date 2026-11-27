@@ -1,0 +1,41 @@
+@import '../../../tailwind.css' reference;
+
+@layer components {
+  @media (min-width: calc(theme(--breakpoint-md))) and (hover: hover) and (pointer: fine) {
+    [data-remove-on-hover] {
+      --chip-remove-gap: 0.75rem;
+
+      [data-chip-remove] {
+        position: absolute;
+        left: 0.5rem;
+        opacity: 0;
+      }
+
+      &:hover [data-chip-icon] {
+        opacity: 0;
+      }
+
+      &:hover [data-chip-remove] {
+        opacity: 1;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        [data-chip-icon],
+        [data-chip-remove] {
+          transition:
+            opacity 140ms ease-out,
+            filter 140ms ease-out;
+        }
+
+        [data-chip-remove],
+        &:hover [data-chip-icon] {
+          filter: blur(2px);
+        }
+
+        &:hover [data-chip-remove] {
+          filter: blur(0);
+        }
+      }
+    }
+  }
+}

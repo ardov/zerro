@@ -12,6 +12,7 @@ import { getContrastText } from '@/6-shared/helpers/color'
 import { cn } from '@/6-shared/ui/shadcn/utils'
 import { TextFade } from './TextFade'
 import '../coloredSurface.css'
+import './Chip.css'
 
 const chipVariants = cva(
   [
@@ -29,13 +30,21 @@ const chipVariants = cva(
         filled: 'bg-ui-selected',
         outline: 'bg-transparent before:border before:border-ui-border',
         'outline-draft':
-          'bg-transparent before:border before:border-dashed before:border-ui-border',
+          'bg-transparent text-ui-secondary [--chip-hover:transparent] [--chip-pressed:transparent] before:border before:border-dashed before:border-ui-border',
       },
       interactive: {
         true: 'hover:before:bg-(--chip-hover) active:before:bg-(--chip-pressed) focusable',
       },
       disabled: { true: 'opacity-ui-disabled' },
     },
+    compoundVariants: [
+      {
+        variant: 'outline-draft',
+        interactive: true,
+        className:
+          'hover:text-ui-primary active:text-ui-primary hover:before:border-ui-primary/20 active:before:border-ui-primary/20',
+      },
+    ],
     defaultVariants: { variant: 'filled', size: 'md' },
   }
 )
@@ -52,6 +61,8 @@ export type ChipProps = Omit<
   size?: 'sm' | 'md'
   checked?: boolean
   start?: ReactNode
+  /** On desktop, replace the leading icon with the removal action on hover. */
+  removeOnHover?: boolean
   onClick?: MouseEventHandler<HTMLButtonElement>
   onRemove?: () => void
   disabled?: boolean
@@ -65,6 +76,7 @@ export function Chip(props: ChipProps) {
     size = 'md',
     checked,
     start,
+    removeOnHover,
     onClick,
     onRemove,
     disabled = false,
@@ -100,6 +112,9 @@ export function Chip(props: ChipProps) {
   return (
     <span
       data-slot="chip"
+      data-remove-on-hover={
+        (removeOnHover && hasSeparateRemove && start != null) || undefined
+      }
       data-surface-interactive={
         interactive && !disabled && foreground ? true : undefined
       }
@@ -161,13 +176,18 @@ export function Chip(props: ChipProps) {
         className={cn(
           'inline-flex h-full min-w-0 items-center rounded-[inherit] outline-none',
           start != null ? 'pl-1' : compact ? 'pl-2' : 'pl-4',
-          onRemove ? 'pr-1' : compact ? 'pr-2' : 'pr-4',
+          onRemove
+            ? 'pr-[var(--chip-remove-gap,0.25rem)]'
+            : compact
+              ? 'pr-2'
+              : 'pr-4',
           interactive && 'cursor-pointer disabled:cursor-default'
         )}
       >
         {start != null && (
           <span
             aria-hidden
+            data-chip-icon=""
             className={cn(
               'flex shrink-0 items-center justify-center',
               compact ? 'size-5 [&_svg]:size-4' : 'size-8 [&_svg]:size-5'
@@ -193,6 +213,7 @@ export function Chip(props: ChipProps) {
       {hasSeparateRemove && (
         <button
           type="button"
+          data-chip-remove=""
           disabled={disabled}
           tabIndex={-1}
           aria-labelledby={`${removeId} ${labelId}`}

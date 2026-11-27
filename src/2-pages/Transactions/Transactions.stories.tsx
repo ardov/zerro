@@ -73,18 +73,18 @@ export const PreservesPageOnReturn: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
-    await userEvent.click(await body.findByText('Account', { exact: true }))
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    )
+    await userEvent.click(await body.findByRole('option', { name: 'Account' }))
     await userEvent.click(
       await body.findByRole('option', { name: /^HSBC USD/ })
     )
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(body.queryByRole('listbox')).toBeNull())
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'Search transactions' })
-    )
+    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
     await userEvent.type(
-      canvas.getByRole('textbox', { name: 'Search transactions' }),
+      canvas.getByRole('combobox', { name: 'Search transactions' }),
       'purchase'
     )
     await userEvent.keyboard('{Enter}')

@@ -426,6 +426,16 @@ export const PageSummary: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Summary' }))
     const summary = await canvas.findByRole('region', { name: 'Summary' })
     await within(summary).findByText(/^4 transactions/)
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Search transactions' })
+    )
+    await userEvent.type(
+      canvas.getByRole('combobox', { name: 'Search transactions' }),
+      'Coffee'
+    )
+    await within(summary).findByText('1 transaction')
+    await userEvent.keyboard('{Escape}')
+    await within(summary).findByText('4 transactions')
     await userEvent.click(within(summary).getByText('Lidl'))
     await within(summary).findByText(/^2 transactions/)
     expect(within(summary).getByText('Expenses by category')).toBeVisible()
@@ -476,6 +486,16 @@ export const SummaryFilterOnPhone: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Summary' }))
     const summary = await body.findByRole('dialog', { name: 'Summary' })
     await within(summary).findByText('4 transactions')
+    await userEvent.click(
+      within(summary).getByRole('button', { name: 'Search transactions' })
+    )
+    await userEvent.type(
+      within(summary).getByRole('combobox', { name: 'Search transactions' }),
+      'Coffee'
+    )
+    await within(summary).findByText('1 transaction')
+    await userEvent.keyboard('{Escape}')
+    await within(summary).findByText('4 transactions')
     await userEvent.click(within(summary).getByText('Lidl'))
     await within(summary).findByText('2 transactions')
     await userEvent.click(
@@ -502,6 +522,16 @@ export const ListSummary: Story = {
       name: 'Summary',
     })
     await within(summary).findByText(/^2 transactions/)
+    await userEvent.click(
+      within(list).getByRole('button', { name: 'Add filter' })
+    )
+    await userEvent.type(
+      within(list).getByRole('combobox', { name: 'Search transactions' }),
+      'lunch'
+    )
+    await within(summary).findByText('1 transaction')
+    await userEvent.keyboard('{Escape}')
+    await within(summary).findByText('2 transactions')
     await userEvent.click(within(list).getByText('Lunch groceries'))
     await within(list).findByRole('region', { name: 'Transaction' })
     fireEvent.click(canvas.getByTestId('back'))

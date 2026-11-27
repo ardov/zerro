@@ -1,3 +1,4 @@
+import { searchQueries } from '../../foundation/searchQueries'
 import type { TTransaction } from '../../zenmoney/entities/transactions/types'
 import {
   getTransactionType,
@@ -15,7 +16,7 @@ export function compileTransactionSearch(
   context?: TTransactionSearchContext,
   debtAccountId?: string
 ): (transaction: TTransaction) => boolean {
-  const words = value.trim().toUpperCase().split(/\s+/).filter(Boolean)
+  const words = value.trim().split(/\s+/).filter(Boolean)
   const names = (entities: Readonly<Record<string, { title: string }>> = {}) =>
     new Map(
       Object.entries(entities).map(([id, entity]) => [
@@ -27,7 +28,7 @@ export function compileTransactionSearch(
   const tags = names(context?.tags)
   const merchants = names(context?.merchants)
   const tokens = words.map(word => ({
-    word,
+    variants: searchQueries(word).map(variant => variant.toUpperCase()),
     amount: /^\d+(?:[.,]\d+)?$/.test(word)
       ? Number(word.replace(',', '.'))
       : undefined,
@@ -56,8 +57,8 @@ export function compileTransactionSearch(
         amounts.push(transaction.opOutcome)
     }
     return tokens.every(
-      ({ word, amount }) =>
-        text.some(field => field?.includes(word)) ||
+      ({ variants, amount }) =>
+        variants.some(word => text.some(field => field?.includes(word))) ||
         (amount !== undefined && amounts.includes(amount))
     )
   }

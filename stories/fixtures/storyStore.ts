@@ -17,6 +17,8 @@ import {
 export type StoryScenario =
   | 'debtor-navigation'
   | 'transaction-filters'
+  | 'uncategorized-transaction'
+  | 'many-merchants'
   | 'transaction-navigation'
   | 'receipt-and-map'
   | 'demo'
@@ -110,7 +112,20 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
           ),
         })
       }
-      case 'transaction-filters': {
+      case 'many-merchants': {
+        const merchant = Object.fromEntries(
+          Array.from({ length: 1000 }, (_, index) => {
+            const id = String(index).padStart(3, '0')
+            return [id, makeMerchant({ id, title: 'Store ' + id })]
+          })
+        )
+        return makeCoreNextDemoRootState({
+          ...demoState.data.current,
+          merchant,
+        })
+      }
+      case 'transaction-filters':
+      case 'uncategorized-transaction': {
         const current = demoState.data.current
         const expense = {
           date: '2026-10-09' as const,
@@ -149,6 +164,8 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
             legacy: makeTransaction({
               ...expense,
               id: 'legacy',
+              tag:
+                scenario === 'uncategorized-transaction' ? null : expense.tag,
               payee: 'Legacy café',
               comment: 'Coffee',
             }),

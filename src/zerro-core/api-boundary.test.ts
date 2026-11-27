@@ -12,6 +12,7 @@ const productionCoreEntrypoints = new Set([
   'zerro-core/headless',
   'zerro-core/redux',
   'zerro-core/replica',
+  'zerro-core/search',
 ])
 
 describe('zerro-core API boundary', () => {

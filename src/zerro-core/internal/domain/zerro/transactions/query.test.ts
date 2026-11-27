@@ -55,7 +55,10 @@ describe('compileTransactionQuery', () => {
       compileTransactionQuery({ clauses: [{ kind: 'search', value }] }, context)
     expect(search(' LIDL grocer travel LUNCH ')(transaction)).toBe(true)
     expect(search('cyprus 42')(transaction)).toBe(true)
-    expect(search('lidl rent')(transaction)).toBe(false)
+    expect(search('дшвд lfn 15')({ ...transaction, comment: 'Самиздат' })).toBe(
+      true
+    )
+    expect(search('дшвд rent')(transaction)).toBe(false)
     expect(search('lidll')(transaction)).toBe(false)
   })
 

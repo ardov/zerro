@@ -6,7 +6,7 @@ import { CloseIcon } from '@/6-shared/ui/Icons'
 import { usePanelDocked } from '@/6-shared/ui/layout/AdaptivePanel'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
-import { useListTransactions } from '../TransactionList/useListTransactions'
+import type { ListTransactions } from '../TransactionList/useListTransactions'
 import Filter from '../TransactionList/TopBar/Filter'
 import { upsertFilter } from '../TransactionList/TopBar/filterModel'
 import { getDateFilterLabel } from '../TransactionList/TopBar/dateFilterLabel'
@@ -30,7 +30,7 @@ type Clause = core.transactions.TTransactionFilterClause
 const MIN_CHECKED_FOR_DETAILS = 3
 
 export type TransactionSummaryProps = {
-  transactionIds?: TTransactionId[]
+  list: ListTransactions
   query: Query
   search: string
   checked: TTransactionId[]
@@ -45,7 +45,7 @@ export type TransactionSummaryProps = {
 
 /** Filtered lists keep all cards as narrowing controls. Small selections show only cards with useful data. */
 export function TransactionSummary(props: TransactionSummaryProps) {
-  const { transactionIds, query, search, checked, onClose } = props
+  const { list, query, search, checked, onClose } = props
   const { onQueryChange, onSearchChange } = props
   // Lying over its list, the summary hides the list's own filter. It shows
   // the filter itself, so narrowing can be undone without leaving.
@@ -55,7 +55,7 @@ export function TransactionSummary(props: TransactionSummaryProps) {
   const choose = (choice: TSummaryChoices) =>
     (props.onChoicesChange ?? setOwnChoices)({ ...choices, ...choice })
   const { t, i18n } = useTranslation('transactionSummary')
-  const listed = useListTransactions(transactionIds, query, search)
+  const { transactions: listed, quickFilters, setPreview } = list
   const all = useAppSelector(core.transactions.selectAll)
   const selected = useMemo(
     () =>
@@ -153,6 +153,8 @@ export function TransactionSummary(props: TransactionSummaryProps) {
       {covering && onQueryChange && onSearchChange && (
         <div className="px-4">
           <Filter
+            quickFilters={quickFilters}
+            onPreviewChange={setPreview}
             bare
             query={query}
             onQueryChange={onQueryChange}

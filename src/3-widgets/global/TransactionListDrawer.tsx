@@ -1,6 +1,7 @@
+import { useListTransactions } from '../transaction/TransactionList/useListTransactions'
 import type { EnvTransactionsDrawerProps } from './EnvTransactionsDrawer'
 import type { TTransactionId } from '@/6-shared/types'
-import { useCallback, useState, type ReactNode } from 'react'
+import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCachedValue } from '@/6-shared/hooks/useCachedValue'
 import {
@@ -92,7 +93,7 @@ function TransactionListInstance({
   const active = useIsTopScreen(id, liveDetails?.id)
   const shownDetailsId = useCachedValue(liveDetails?.id, !!liveDetails)
   const saved = useCachedValue(value, !!value)
-  const shown = saved && normalizeListValue(saved)
+  const shown = useMemo(() => saved && normalizeListValue(saved), [saved])
   const setViewValue = useCallback(
     (update: (previous: TransactionListValue) => TransactionListValue) =>
       setValue(previous => update(normalizeListValue(previous))),
@@ -102,6 +103,7 @@ function TransactionListInstance({
     shown,
     setViewValue
   )
+  const list = useListTransactions(shown?.ids, view)
   const closeList = () => {
     flushScroll()
     close(id, { through: true })
@@ -141,7 +143,7 @@ function TransactionListInstance({
             id={shownDetailsId}
             summary={onClose => (
               <TransactionSummary
-                transactionIds={shown?.ids}
+                list={list}
                 query={view.query}
                 search={view.search}
                 checked={view.checked}
@@ -157,7 +159,7 @@ function TransactionListInstance({
       }}
     >
       <TransactionList
-        transactionIds={shown?.ids}
+        list={list}
         initialDate={
           view.restoredScrollOffset === null ? shown?.initialDate : undefined
         }

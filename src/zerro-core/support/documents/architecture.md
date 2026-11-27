@@ -41,6 +41,7 @@ Ordinary empty pulls advance the cursor. Full reload, recovery and retention cre
 | Entrypoint            | Consumer                                                                     |
 | --------------------- | ---------------------------------------------------------------------------- |
 | `zerro-core`          | Immutable snapshot sessions and shared types                                 |
+| `zerro-core/search`   | English/Russian keyboard-layout variants for text search                     |
 | `zerro-core/redux`    | App-facing domain reads, hooks and commands                                  |
 | `zerro-core/replica`  | Store and persistence integration                                            |
 | `zerro-core/headless` | Snapshot reads, selected compilers and pure replica operations outside Redux |

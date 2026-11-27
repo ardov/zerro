@@ -1,7 +1,6 @@
 import { convertKeyboardLayout } from './keyboardLayout'
 
-/** Original query plus both directions of the English/Russian keyboard layout.
- * Convert before lowercasing: uppercase letters can map to punctuation (Ж → :). */
+// Convert before lowercasing because uppercase letters can map to punctuation (Ж → :).
 export function searchQueries(query: string): string[] {
   const variants = [
     query,

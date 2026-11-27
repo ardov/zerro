@@ -272,10 +272,10 @@ export const FilterVisibility: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const body = within(canvasElement.ownerDocument.body)
-    await userEvent.click(canvas.getByRole('button', { name: 'Add filter' }))
     await userEvent.click(
-      await body.findByRole('menuitem', { name: 'Category' })
+      canvas.getByRole('button', { name: 'Search transactions' })
     )
+    await userEvent.click(await body.findByRole('option', { name: 'Category' }))
     await expect(
       await body.findByRole('option', { name: 'No Category' })
     ).toBeVisible()
