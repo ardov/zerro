@@ -68,8 +68,8 @@ export const MobileQuickFilters: Story = {
         query={{ clauses: [] }}
         search=""
         quickFilters={[
-          { clause: { kind: 'viewed', value: false }, count: 12 },
-          { clause: { kind: 'tag', ids: ['null'] }, count: 48 },
+          { clauses: [{ kind: 'viewed', value: false }], count: 12 },
+          { clauses: [{ kind: 'tag', ids: ['null'] }], count: 48 },
         ]}
         summary={{ shown: false, onToggle: fn() }}
         onQueryChange={fn()}
@@ -84,11 +84,18 @@ export const MobileQuickFilters: Story = {
     const newFilter = await canvas.findByRole('button', { name: 'Новые 12' })
     const noCategory = canvas.getByRole('button', { name: 'Без категории 48' })
     const search = canvas.getByRole('button', { name: 'Поиск операций' })
+    const summary = canvas.getByRole('button', { name: 'Сводка' })
     const original = { width: window.innerWidth, height: window.innerHeight }
     try {
       for (const width of [360, 375, 388, 435, 436]) {
         await page.viewport(width, 844)
         await waitFor(() => {
+          const filtersCenter =
+            (search.getBoundingClientRect().top +
+              noCategory.getBoundingClientRect().bottom) /
+            2
+          const actions = summary.getBoundingClientRect()
+          expect(filtersCenter).toBeCloseTo(actions.top + actions.height / 2)
           for (const chip of [newFilter, noCategory]) {
             expect(getComputedStyle(chip).paddingInlineStart).toBe('16px')
             expect(getComputedStyle(chip).paddingInlineEnd).toBe('16px')

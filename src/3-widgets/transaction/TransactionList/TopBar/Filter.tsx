@@ -26,13 +26,14 @@ import {
   upsertFilter,
   type Clause,
   type EditableFilterKind,
+  type QuickFilter,
 } from './filterModel'
 
 type FilterProps = FilterState & {
   onQueryChange: (query: core.transactions.TTransactionQuery) => void
   onSearchChange: (search: string) => void
   onPreviewChange?: (preview: FilterState | null) => void
-  quickFilters?: { clause: Clause; count: number }[]
+  quickFilters?: QuickFilter[]
   summary?: SummaryToggle
   bare?: boolean
 }
@@ -158,7 +159,7 @@ export default function Filter({
   const showQuickFilters = Boolean(closedEntry) && !hasApplied
   const pairedQuickFilters = showQuickFilters && quickFilters.length > 1
   return (
-    <div className="flex items-start gap-2 p-2 text-ui-primary">
+    <div className="flex items-center gap-2 p-2 text-ui-primary">
       <LayoutGroup>
         <div
           className="relative flex min-w-0 flex-1 flex-wrap items-center gap-1.5 @container/filters"
@@ -225,16 +226,16 @@ export default function Filter({
           </AnimatePresence>
           {!visible.length && !search && closedEntry}
           {showQuickFilters &&
-            quickFilters.map(({ clause, count }) => (
+            quickFilters.map(({ clauses, count }) => (
               <Chip
-                key={clause.kind}
+                key={clauses[0].kind}
                 variant="outline-draft"
                 onClick={() => {
-                  nextFocus.current = clause.kind
-                  onQueryChange(upsertFilter(query, clause))
+                  nextFocus.current = clauses[0].kind
+                  onQueryChange(clauses.reduce(upsertFilter, query))
                 }}
               >
-                {getClauseLabel(clause, labels)}{' '}
+                {getClauseLabel(clauses[0], labels)}{' '}
                 <span
                   className={
                     pairedQuickFilters

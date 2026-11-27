@@ -1,4 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
+import { addDays, subMonths } from 'date-fns'
+import { toISODate } from '@/6-shared/helpers/date'
 import { makeCoreNextDemoRootState } from '@/zerro-core/support/testing/demoState'
 import { createEmptyDataStore } from '@/zerro-core/replica'
 import { makeTestRootState } from '@/store/testing'
@@ -124,8 +126,31 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
           merchant,
         })
       }
-      case 'transaction-filters':
       case 'uncategorized-transaction': {
+        const today = new Date()
+        const start = subMonths(today, 2)
+        const expense = (id: string, date: Date, tag: string[] | null = null) =>
+          makeTransaction({
+            id,
+            date: toISODate(date),
+            incomeAccount: 'HSBC USD',
+            outcomeAccount: 'HSBC USD',
+            outcome: 12,
+            tag,
+            comment: id,
+          })
+        return makeCoreNextDemoRootState({
+          ...demoState.data.current,
+          transaction: {
+            older: expense('older', addDays(start, -1)),
+            first: expense('first', start),
+            recent: expense('recent', today),
+            future: expense('future', addDays(today, 1)),
+            categorized: expense('categorized', today, ['Food']),
+          },
+        })
+      }
+      case 'transaction-filters': {
         const current = demoState.data.current
         const expense = {
           date: '2026-10-09' as const,
@@ -164,8 +189,6 @@ export function makeStoryStore(scenario: StoryScenario = 'demo') {
             legacy: makeTransaction({
               ...expense,
               id: 'legacy',
-              tag:
-                scenario === 'uncategorized-transaction' ? null : expense.tag,
               payee: 'Legacy café',
               comment: 'Coffee',
             }),

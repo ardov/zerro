@@ -4,6 +4,7 @@ import { getDateFilterLabel } from './dateFilterLabel'
 import { core } from '@/zerro-core/redux'
 
 export type Clause = core.transactions.TTransactionFilterClause
+export type QuickFilter = { clauses: [Clause, ...Clause[]]; count: number }
 export type AddableFilterKind = Exclude<Clause['kind'], 'search' | 'activity'>
 export type SelectKind = 'tag' | 'account' | 'type' | 'merchant' | 'debtor'
 export type EditableFilterKind = SelectKind | 'amount' | 'date' | 'changed'

@@ -91,21 +91,26 @@ export const NoCategoryQuickFilter: Story = {
   parameters: {
     app: { scenario: 'uncategorized-transaction', route: '/transactions' },
   },
-  render: () => <Example transactionIds={['dinner', 'legacy']} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const quickFilter = await canvas.findByRole('button', {
-      name: 'No Category 1',
+      name: 'No Category 3',
     })
     await userEvent.click(quickFilter)
     const list = within(canvas.getByRole('list', { name: 'Transactions' }))
-    await waitFor(() => expect(list.queryByText('Dinner groceries')).toBeNull())
-    expect(list.getByText('Coffee')).toBeVisible()
+    await waitFor(() => expect(list.queryByText('categorized')).toBeNull())
+    expect(list.getByText('first')).toBeVisible()
+    expect(list.getByText('recent')).toBeVisible()
+    expect(list.queryByText('older')).toBeNull()
+    expect(list.getByText('future')).toBeVisible()
     await userEvent.click(
       canvas.getByRole('button', { name: 'Remove No Category' })
     )
-    expect(await canvas.findByText('Dinner groceries')).toBeVisible()
-    expect(canvas.getByRole('button', { name: 'No Category 1' })).toBeVisible()
+    expect(await list.findByText('categorized')).toBeVisible()
+    expect(list.queryByText('older')).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: /^Remove From / }))
+    expect(await list.findByText('older')).toBeVisible()
+    expect(canvas.getByRole('button', { name: 'No Category 3' })).toBeVisible()
   },
 }
 

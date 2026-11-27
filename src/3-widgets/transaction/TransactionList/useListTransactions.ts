@@ -1,15 +1,12 @@
 import { useMemo, useState } from 'react'
+import { subMonths } from 'date-fns'
+import { toISODate } from '@/6-shared/helpers/date'
 import type { TTransactionId } from '@/6-shared/types'
 import { useLocalDay } from '@/6-shared/hooks/useLocalDay'
 import { useAppSelector } from '@/store'
 import { core } from '@/zerro-core/redux'
-import { makeDefaultClause, type Clause } from './TopBar/filterModel'
+import { makeDefaultClause, type QuickFilter } from './TopBar/filterModel'
 import type { FilterState } from './TopBar/filterSuggestions'
-
-const quickFilterClauses: Clause[] = [
-  makeDefaultClause('viewed'),
-  { kind: 'tag', ids: ['null'] },
-]
 
 export type ListTransactions = ReturnType<typeof useListTransactions>
 
@@ -44,23 +41,29 @@ export function useListTransactions(
         .sort(core.transactions.compareTransactionDates),
     [transactionIds, allTransactionIds, transactionsById]
   )
-  const quickFilters = useMemo(
-    () =>
-      quickFilterClauses
-        .map(clause => {
-          const matches = core.transactions.compileQuery(
-            { clauses: [clause] },
-            context
-          )
-          let count = 0
-          for (const transaction of ordered) {
-            if (matches(transaction)) count++
-          }
-          return { clause, count }
-        })
-        .filter(filter => filter.count > 0),
-    [ordered, context]
-  )
+  const quickFilters = useMemo(() => {
+    const presets: QuickFilter['clauses'][] = [
+      [makeDefaultClause('viewed')],
+      [
+        { kind: 'tag', ids: ['null'] },
+        { kind: 'date', from: toISODate(subMonths(today, 2)) },
+      ],
+    ]
+    return presets
+      .map(clauses => {
+        const matches = core.transactions.compileQuery(
+          { clauses },
+          context,
+          today
+        )
+        let count = 0
+        for (const transaction of ordered) {
+          if (matches(transaction)) count++
+        }
+        return { clauses, count }
+      })
+      .filter(filter => filter.count > 0)
+  }, [ordered, context, today])
   const transactions = useMemo(() => {
     const checker = core.transactions.compileQuery(appliedQuery, context, today)
     return ordered.filter(checker)
