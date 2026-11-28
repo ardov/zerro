@@ -341,7 +341,7 @@ export const en: typeof ru = {
       'Overspending in the parent category.\nIncrease the budget by {{amount}}.',
     isSelf: '(main)',
     envelopeCurrencyTooltip:
-      'The budget of this category is set in {{currency}}. It will be automatically recalculated at the current exchange rate.',
+      'The budget of this category is set in {{currency}}. It will be automatically recalculated at the exchange rate of each month.',
     addGoal: 'Add goal',
     goal: 'Goal',
     goalValue: 'Goal: {{goal}}',
@@ -427,6 +427,7 @@ export const en: typeof ru = {
     title_current: 'Current exchange rates on {{date}}',
     reset: 'Reset',
     download: 'Download exchange rates',
+    pin: 'Pin current exchange rates',
     swap: 'Swap {{from}} and {{to}}',
   },
 

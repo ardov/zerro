@@ -9,13 +9,19 @@ import { Input } from '@/6-shared/ui/kit/Input'
 import { Button as KitButton } from '@/6-shared/ui/kit/Button'
 import { useTranslation } from 'react-i18next'
 import { keys } from '@/6-shared/helpers/keys'
+import { isZero } from '@/6-shared/helpers/money'
 import { unitsPerWhole } from '@/6-shared/helpers/money/currencyHelpers'
 import { useDebouncedCallback } from '@/6-shared/hooks/useDebouncedCallback'
 import { useToggle } from '@/6-shared/hooks/useToggle'
+import { useLocalDay } from '@/6-shared/hooks/useLocalDay'
 import { formatDate } from '@/6-shared/helpers/date'
 
 import { useAppDispatch, useAppSelector } from '@/store'
-import { canFetchFxRates, loadFxRates } from '@/4-features/fxRates'
+import {
+  canFetchFxRates,
+  canPinFxRates,
+  loadFxRates,
+} from '@/4-features/fxRates'
 
 export const FxRates: FC<{ month: TISOMonth }> = props => {
   const dispatch = useAppDispatch()
@@ -26,9 +32,12 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   const balances = useAppSelector(state =>
     core.balances.selectMonthEnd(state, month)
   )
+  const envMetrics = useAppSelector(core.activity.selectEnvelopeMetrics)[month]
   const instruments = core.instruments.useByCode()
   const ratesGetter = useAppSelector(core.fxRates.selectGetter)
   const rateData = ratesGetter(month)
+  // The save action depends on whether the month is still current.
+  useLocalDay()
 
   const currencies = new Set(keys(funds).sort((a, b) => funds[b] - funds[a]))
   if (balances) {
@@ -41,11 +50,21 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
       }
     }
   }
+  // An envelope budgeted in another currency depends on its rate as well.
+  for (const env of Object.values(envMetrics)) {
+    const { selfLeftover, selfAssigned, selfActivity } = env
+    if ([selfLeftover, selfAssigned, selfActivity].some(a => !isZero(a)))
+      currencies.add(env.currency)
+  }
   currencies.delete(displCurrency)
   if (currencies.size === 0) return null
 
   const isSaved = rateData.type === 'saved' && rateData.date === month
-  const canFetch = canFetchFxRates(month)
+  const saveAction = canFetchFxRates(month)
+    ? 'download'
+    : canPinFxRates(month)
+      ? 'pin'
+      : null
   const isCurrentRates = rateData.type === 'current'
 
   return (
@@ -88,14 +107,14 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
             {t('reset')}
           </Button>
         )}
-        {canFetch && !isSaved && (
+        {saveAction && !isSaved && (
           <Button
             variant="ghost"
             size="sm"
             className="w-full"
             onClick={() => dispatch(loadFxRates(month))}
           >
-            {t('download')}
+            {t(saveAction)}
           </Button>
         )}
       </div>

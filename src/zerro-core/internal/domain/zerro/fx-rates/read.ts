@@ -108,30 +108,31 @@ export function buildFxConverter(getter: TFxRatesGetter): TFxConverter {
   }
 }
 
+// Saved rates apply from their month on, the current month included. Live
+// rates date the calendar only until a table takes effect. Otherwise a
+// covered balance moves with every quote refresh and again at rollover.
 function mergeRates(
   saved: ByMonth<TFxRateData>,
   current: TFxRateData
 ): ByMonth<TFxRateData> {
   const result: ByMonth<TFxRateData> = {}
-  const dates = [...keys(saved), current.date]
-  const unique = [...new Set(dates)]
-
-  unique.forEach(month => {
+  const months = keys(saved)
+  months.forEach(month => {
     result[month] = combineRates(current, saved[month])
   })
-
+  if (!months.some(month => month <= current.date))
+    result[current.date] = current
   return result
 }
 
-function combineRates(current: TFxRateData, saved?: TFxRateData): TFxRateData {
-  const node = saved || current
+function combineRates(current: TFxRateData, saved: TFxRateData): TFxRateData {
   const rates: TFxRates = {}
 
   keys(current.rates).forEach(code => {
-    rates[code] = saved?.rates[code] || current.rates[code]
+    rates[code] = saved.rates[code] || current.rates[code]
   })
 
-  return { ...node, rates }
+  return { ...saved, rates }
 }
 
 function savedToRates(
