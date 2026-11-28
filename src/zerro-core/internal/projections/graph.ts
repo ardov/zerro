@@ -46,7 +46,7 @@ import {
   sameMetricEnvelopes,
   type TMetricEnvelope,
 } from '../domain/zerro'
-import { memoOn, memoOnObject, sameItems, sameSet } from './memo'
+import { memoOn, memoOnObject, sameItems, sameRecord, sameSet } from './memo'
 
 type TNode<T> = (data: TDataStore) => T
 
@@ -170,6 +170,14 @@ export function createProjectionGraph(ctx: TCoreContext) {
     getKeepingEnvelopes,
     sameSet
   )
+  const envelopeCurrencies = node(
+    d => [envelopes(d)],
+    envelopes =>
+      Object.fromEntries(
+        Object.values(envelopes).map(({ id, currency }) => [id, currency])
+      ),
+    sameRecord
+  )
   const metricEnvelopes = node(
     d => [envelopes(d)],
     (envelopes): ById<TMetricEnvelope> => envelopes,
@@ -240,6 +248,7 @@ export function createProjectionGraph(ctx: TCoreContext) {
       transactions: transactionsHistory(d),
       routing: routingContext(d),
       instruments: d.instrument,
+      envelopeCurrencies: envelopeCurrencies(d),
     }),
     buildRawActivity
   )

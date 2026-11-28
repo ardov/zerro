@@ -49,6 +49,9 @@ describe('envelope metrics', () => {
     })
     const metrics = graph.envMetrics(store)
     const keeping = graph.keepingEnvelopeIds(store)
+    const raw = graph.rawActivity(store)
+    const activity = graph.activity(store)
+    const sorted = graph.sortedActivity(store)
 
     const recoloured = {
       ...store,
@@ -64,11 +67,15 @@ describe('envelope metrics', () => {
     expect(graph.envelopes(recoloured)).not.toBe(graph.envelopes(store))
     expect(graph.envMetrics(recoloured)).toBe(metrics)
     expect(graph.keepingEnvelopeIds(recoloured)).toBe(keeping)
+    expect(graph.rawActivity(recoloured)).toBe(raw)
 
     const renamed = {
       ...store,
       tag: { food: makeTag({ id: 'food', title: 'Groceries', color: null }) },
     }
     expect(graph.envMetrics(renamed)).not.toBe(metrics)
+    expect(graph.rawActivity(renamed)).toBe(raw)
+    expect(graph.activity(renamed)).toBe(activity)
+    expect(graph.sortedActivity(renamed)).toBe(sorted)
   })
 })
